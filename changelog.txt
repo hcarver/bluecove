@@ -1,0 +1,32 @@
+2005-05-15 Denis Labaye
+
+* Version Beta 1.1
+
+* Added some docs
+
+* Added the method setDeviceServiceClasses(int service_telephony) in 
+  javax.bluetooth.ServiceRecord for compatibility with Benhui example.
+
+2006-03-01 Paul Tötterman
+
+* Migrated to Visual C++ 2005 Express Edition
+
+* Migrated to Subversion, CVS exists only for archival now
+
+* javax.bluetooth.RemoteDevice.getAddress(): Now returns _remote_ address
+
+* javax.bluetooth.RemoteDevice.getFriendlyName(): Now returns a real name
+
+* Reformatted changelog close to GNU standards
+
+2006-03-07 Paul Tötterman
+
+* javax.bluetooth.LocalDevice.getFriendlyName(): Now returns a real name
+
+2006-05-02 Paul Tötterman
+
+* Reorganized documentation. Plaintext document now used to create webpage.
+
+2006-06-05 Paul Tötterman
+
+* Fixed two bugs. New release.
