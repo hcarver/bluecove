@@ -49,6 +49,9 @@ Links
 -----
 
 - [BlueCove Google Code Hosting project page][project-page]
+- [bluecove-users mailing list][bluecove-users]
+- [bluecove-developers mailing list][bluecove-developers]
+- [bluecove-commits mailing list][bluecove-commits]
 - [BlueCove SourceForge.net project page][sourceforge-page]
 - [Microsoft Bluetooth stack Hardware Compatibility list][ms-bt-hcl]
 - [Sun Microsystems Java(tm)][sun-java]
@@ -59,6 +62,9 @@ Links
 - [MSDN Bluetooth API documentation][msdn-bt-api]
 
 [project-page]: http://code.google.com/p/bluecove/
+[bluecove-users]: http://groups.google.com/group/bluecove-users
+[bluecove-developers]: http://groups.google.com/group/bluecove-developers
+[bluecove-commits]: http://groups.google.com/group/bluecove-commits
 [sourceforge-page]: http://sourceforge.net/projects/bluecove/
 [ms-bt-hcl]: http://support.microsoft.com/default.aspx?kbid=841803
 [sun-java]: http://java.sun.com/
