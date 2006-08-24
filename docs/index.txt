@@ -48,7 +48,8 @@ Installation
 Links
 -----
 
-- [BlueCove SourceForge.net project page][project-page]
+- [BlueCove Google Code Hosting project page][project-page]
+- [BlueCove SourceForge.net project page][sourceforge-page]
 - [Microsoft Bluetooth stack Hardware Compatibility list][ms-bt-hcl]
 - [Sun Microsystems Java(tm)][sun-java]
 - [Bluetooth development using JSR-82][benhui-bt]
@@ -57,7 +58,8 @@ Links
 - [MIDP Apidoc][midp-api]
 - [MSDN Bluetooth API documentation][msdn-bt-api]
 
-[project-page]: http://sourceforge.net/projects/bluecove/
+[project-page]: http://code.google.com/p/bluecove/
+[sourceforge-page]: http://sourceforge.net/projects/bluecove/
 [ms-bt-hcl]: http://support.microsoft.com/default.aspx?kbid=841803
 [sun-java]: http://java.sun.com/
 [benhui-bt]: http://benhui.net/modules.php?name=Bluetooth
