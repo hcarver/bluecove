@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\jdk1.5.0_06\include\win32;C:\jdk1.5.0_06\include"
+				AdditionalIncludeDirectories="&quot;$(JAVA_HOME)\include&quot;;&quot;$(JAVA_HOME)\include\win32&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
