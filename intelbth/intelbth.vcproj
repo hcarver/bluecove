@@ -238,6 +238,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions=" /subsystem:windowsce,5.01"
 				AdditionalDependencies="ws2.lib bthutil.lib "
 				OutputFile="$(OutDir)/intelbth.dll"
 				LinkIncremental="2"
@@ -379,6 +380,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions=" /subsystem:windowsce,5.01"
 				AdditionalDependencies="ws2.lib bthutil.lib "
 				OutputFile="$(OutDir)/intelbth.dll"
 				LinkIncremental="2"
@@ -524,6 +526,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
 				AdditionalDependencies="ws2.lib bthutil.lib "
 				OutputFile="$(OutDir)/intelbth.dll"
 				LinkIncremental="2"
@@ -669,6 +672,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
 				AdditionalDependencies="ws2.lib bthutil.lib "
 				OutputFile="$(OutDir)/intelbth.dll"
 				LinkIncremental="2"
