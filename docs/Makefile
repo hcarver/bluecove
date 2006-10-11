@@ -5,7 +5,7 @@ FILES = index.html
 all: $(FILES)
 
 %.xhtml: %.txt
-	$(MARKDOWN) $^ > $@
+	$(MARKDOWN) < $^ > $@
 
 %.html: %.xhtml
 	mv -f $^ $@

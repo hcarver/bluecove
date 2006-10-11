@@ -13,7 +13,7 @@ Requirements
 
 - Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer)
 - A Bluetooth device supported by the Microsoft bluetooth stack
-- Java (J2SE 1.4 and newer reported working)
+- Java 1.4 or newer (for the binary, might compile on older)
 - Another Bluetooth device to communicate with
 
 Limitations
@@ -27,23 +27,60 @@ support another stack and/or operating system, it will be considered for
 inclusion.  BlueCove does also not support OBEX, but there are other projects
 that can (possibly) be used to archieve OBEX functionality with BlueCove.
 
-Download
---------
-
-- [Bluecove 1.1.2 binary release][bluecove-1.1.2-bin]
-- [Bluecove 1.1.2 source release][bluecove-1.1.2-src]
-
-[bluecove-1.1.2-bin]: http://prdownloads.sourceforge.net/bluecove/bluecove-1.1.2-bin.zip?download
-[bluecove-1.1.2-src]: http://prdownloads.sourceforge.net/bluecove/bluecove-1.1.2-src.zip?download
-
 Installation
 ------------
 
-1. Download BlueCove
-2. If you downloaded the source release, compile it
+Installation of the binary (already compiled) version of BlueCove is as follows:
+
+1. Download BlueCove binary release
+2. Unzip the archive
 3. Place `intelbth.dll` in a place where the software needing JSR-82 can find it
    (globally `C:\WINDOWS\SYSTEM32`)
-4. Add `bluecove.jar` in your classpath
+4. Add `bluecove.jar` to your classpath
+
+Compilation
+-----------
+
+You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition,
+which is available for free download from MSDN. Ant is used as the build tool,
+and the compilation is much easier using it.
+
+1. Download BlueCove source release
+2. Unzip the source
+3. Run `ant jar`
+4. Go into `intelbth`
+5. Run `makeheaders.cmd`
+6. Open `intelbth.sln`
+7. Compile the project for your platform (e.g. 'Release' for 'Win32')
+8. Place `intelbth.dll` in a place where the software needing JSR-82 can find it
+   (globally `C:\WINDOWS\SYSTEM32`)
+9. Add `bluecove.jar` to your classpath
+
+Documentation
+-------------
+
+You are reading the main documentation. The source can be used to generate
+JavaDoc. A changelog is available inside the archives and in the Subversion
+repository.
+
+Source
+------
+
+Available as downloadable packages or at the Subversion repository. Organized in:
+
+- **docs** -  Documentation
+- **intelbth** - The native windows JNI dll
+- **src** - The implementation of JSR-82 with calls the to intelbth
+- **test** - Some outdated test programs
+
+Download
+--------
+
+- [Bluecove 1.2.0 binary release][bluecove-bin]
+- [Bluecove 1.2.0 source release][bluecove-src]
+
+[bluecove-bin]: http://prdownloads.sourceforge.net/bluecove/bluecove-1.2.0-bin.zip?download
+[bluecove-src]: http://prdownloads.sourceforge.net/bluecove/bluecove-1.2.0-src.zip?download
 
 Links
 -----
@@ -52,31 +89,46 @@ Links
 - [bluecove-users mailing list][bluecove-users]
 - [bluecove-developers mailing list][bluecove-developers]
 - [bluecove-commits mailing list][bluecove-commits]
+- [Changelog][]
+- [BlueCove Subversion repository][repository]
 - [BlueCove SourceForge.net project page][sourceforge-page]
-- [Microsoft Bluetooth stack Hardware Compatibility list][ms-bt-hcl]
 - [Sun Microsystems Java(tm)][sun-java]
-- [Bluetooth development using JSR-82][benhui-bt]
-- [An OBEX implementation for JSR-82][avetanaobex]
+- [Apache Ant][ant]
+- [Subversion][]
+- [Microsoft Visual Studio Express Edition][vc]
+- [Java Specification Request 82][jsr-82]
 - [JSR-82 Apidoc][bt-api]
 - [MIDP Apidoc][midp-api]
 - [MSDN Bluetooth API documentation][msdn-bt-api]
+- [Microsoft Bluetooth stack Hardware Compatibility list][ms-bt-hcl]
+- [An OBEX implementation for JSR-82][avetanaobex]
+- [Bluetooth development using JSR-82][benhui-bt]
+- [Lesser GNU Public License][lgpl]
 
 [project-page]: http://code.google.com/p/bluecove/
 [bluecove-users]: http://groups.google.com/group/bluecove-users
 [bluecove-developers]: http://groups.google.com/group/bluecove-developers
 [bluecove-commits]: http://groups.google.com/group/bluecove-commits
+[changelog]: http://bluecove.googlecode.com/svn/trunk/changelog.txt
+[repository]: http://bluecove.googlecode.com/svn/
 [sourceforge-page]: http://sourceforge.net/projects/bluecove/
-[ms-bt-hcl]: http://support.microsoft.com/default.aspx?kbid=841803
 [sun-java]: http://java.sun.com/
-[benhui-bt]: http://benhui.net/modules.php?name=Bluetooth
-[avetanaobex]: http://sourceforge.net/projects/avetanaobex/
+[ant]: http://ant.apache.org/
+[subversion]: http://subversion.tigris.org/
+[vc]: http://msdn.microsoft.com/vstudio/express/
+[jsr-82]: http://jcp.org/en/jsr/detail?id=82
 [bt-api]: http://www.j2medev.com/api/btapi/
 [midp-api]: http://www.j2medev.com/api/midp/
 [msdn-bt-api]: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/bluetooth/bluetooth/bluetooth_start_page.asp
+[ms-bt-hcl]: http://support.microsoft.com/default.aspx?kbid=841803
+[avetanaobex]: http://sourceforge.net/projects/avetanaobex/
+[benhui-bt]: http://benhui.net/modules.php?name=Bluetooth
+[lgpl]: http://www.gnu.org/licenses/lgpl.html
 
 ---
 <a href="mailto:paul.totterman@gmail.com">Paul T&ouml;tterman
-&lt;paul.totterman@gmail.com&gt;</a>
+&lt;paul.totterman@gmail.com&gt;</a> (Do **not** contact me through this address
+unless you have to. Send mail to the mailing-lists instead)
 
 <script language="javascript" type="text/javascript">
 //<![CDATA[

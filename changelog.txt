@@ -1,11 +1,28 @@
-2005-05-15 Denis Labaye
+2006-10-11 Paul Tötterman
 
-* Version Beta 1.1
+* Reordered changelog.
+  Makes more sense this way that _everyone_ else does it.
 
-* Added some docs
+* Windows CE support. 
+  Remco Poortinga has contributed updated support for Windows CE. That has
+  been merged and now I merged some fixes by him.
 
-* Added the method setDeviceServiceClasses(int service_telephony) in 
-  javax.bluetooth.ServiceRecord for compatibility with Benhui example.
+* Updated documentation a bit.
+
+* Released 1.2.0.
+  Compiled using Java 1.4 for wider audience.
+
+2006-06-05 Paul Tötterman
+
+* Fixed two bugs. New release.
+
+2006-05-02 Paul Tötterman
+
+* Reorganized documentation. Plaintext document now used to create webpage.
+
+2006-03-07 Paul Tötterman
+
+* javax.bluetooth.LocalDevice.getFriendlyName(): Now returns a real name
 
 2006-03-01 Paul Tötterman
 
@@ -19,14 +36,11 @@
 
 * Reformatted changelog close to GNU standards
 
-2006-03-07 Paul Tötterman
+2005-05-15 Denis Labaye
 
-* javax.bluetooth.LocalDevice.getFriendlyName(): Now returns a real name
+* Version Beta 1.1
 
-2006-05-02 Paul Tötterman
+* Added some docs
 
-* Reorganized documentation. Plaintext document now used to create webpage.
-
-2006-06-05 Paul Tötterman
-
-* Fixed two bugs. New release.
+* Added the method setDeviceServiceClasses(int service_telephony) in 
+  javax.bluetooth.ServiceRecord for compatibility with Benhui example.
