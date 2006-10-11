@@ -1,7 +1,8 @@
 BlueCove
 --------
 
-For a quick start, build with ant and build dll in /intelbth/ with Visual Studio
+For a quick start with the binary release, add bluecove.jar to your
+classpath and copy intelbth.dll somewhere accessible.
 
 Otherwise, read documentation
 
