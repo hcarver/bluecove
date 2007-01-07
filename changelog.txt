@@ -1,9 +1,15 @@
+2006-12-15 Paul Tötterman
+
+* Merged WTK compatibility enhancements by Vlad Skarzhevskyy
+
+* Merged avetanaOBEX compatibility fixes by jrincayc
+
 2006-10-11 Paul Tötterman
 
 * Reordered changelog.
   Makes more sense this way that _everyone_ else does it.
 
-* Windows CE support. 
+* Windows CE support.
   Remco Poortinga has contributed updated support for Windows CE. That has
   been merged and now I merged some fixes by him.
 

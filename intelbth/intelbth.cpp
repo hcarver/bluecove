@@ -20,6 +20,21 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "stdafx.h"
 
+// Old school way of debug
+#ifdef DEBUG
+void debug(char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	{
+		vprintf(fmt, ap);
+	}
+	va_end(ap);
+	fflush(stdout);
+}  
+#else
+#define debug(x)
+#endif
+
 #define INQUIRY_COMPLETED 0
 #define INQUIRY_TERMINATED 5
 #define INQUIRY_ERROR 7
@@ -62,6 +77,25 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 		break;
 	}
 	return TRUE;
+}
+
+void throwException(JNIEnv *env, const char *name, const char *msg)
+{
+	 debug("c Throw Exception %s %s\n", name, msg);
+	 jclass cls = env->FindClass(name);
+     /* if cls is NULL, an exception has already been thrown */
+     if (cls != NULL) {
+         env->ThrowNew(cls, msg);
+	 } else {
+		 env->FatalError("illegal Exception name");	
+	 }
+     /* free the local ref */
+    env->DeleteLocalRef(cls);
+}
+
+void throwIOException(JNIEnv *env, const char *msg) 
+{
+	throwException(env, "java/io/IOException", msg);
 }
 
 /*
@@ -469,7 +503,8 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceAt
 #endif
 		free(queryservice);
 
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to begin attribute query");
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to begin attribute query");
+		throwIOException(env, "Failed to begin attribute query");
 		return NULL;
 	}
 
@@ -495,7 +530,8 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceAt
 #endif
 		WSALookupServiceEnd(hLookup);
 
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to perform attribute query");
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to perform attribute query");
+		throwIOException(env, "Failed to perform attribute query");
 		return NULL;
 	}
 
@@ -574,7 +610,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_registerService(JN
 
 	if (WSASetService(&queryset, RNRSERVICE_REGISTER, 0)) {
 		free(setservice);
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to register service");
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to register service");
+		throwIOException(env, "Failed to register service");
 		return 0;
 	}
 	free(setservice);
@@ -627,8 +664,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_unregisterService(
 
 	// perform set
 
-	if (WSASetService(&queryset, RNRSERVICE_DELETE, 0))
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to unregister service");
+	if (WSASetService(&queryset, RNRSERVICE_DELETE, 0)) {
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to unregister service");
+		throwIOException(env, "Failed to unregister service");
+	}
 }
 
 /*
@@ -644,7 +683,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *env
 	SOCKET s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
 
 	if (s == INVALID_SOCKET) {
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to create socket");
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to create socket");
+		throwIOException(env, "Failed to create socket");
 		return 0;
 	}
 
@@ -656,7 +696,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *env
 		if (setsockopt(s, SOL_RFCOMM, SO_BTH_AUTHENTICATE, (char *)&ul, sizeof(ULONG))) {
 			closesocket(s);
 
-			env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to set authentication option");
+			//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to set authentication option");
+			throwIOException(env, "Failed to set authentication option");
 			return 0;
 		}
 	}
@@ -670,7 +711,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *env
 		if (setsockopt(s, SOL_RFCOMM, SO_BTH_ENCRYPT, (char *)&ul, sizeof(ul))) {
 			closesocket(s);
 
-			env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to set encryption option");
+			//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to set encryption option");
+			throwIOException(env, "Failed to set encryption option");
 			return 0;
 		}
 	}
@@ -689,7 +731,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *env
 	if (bind(s, (sockaddr*)&addr, sizeof(SOCKADDR_BTH))) {
 		closesocket(s);
 
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to bind socket");
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to bind socket");
+		throwIOException(env, "Failed to bind socket");
 		return 0;
 	}
 	*/
@@ -712,7 +755,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockaddress(JN
 	int size = sizeof(SOCKADDR_BTH);
 
 	if (getsockname(socket, (sockaddr *)&addr, &size)) {
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to get socket name");
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to get socket name");
+		throwIOException(env, "Failed to get socket name");
 		return 0;
 	}
 	return addr.btAddr;
@@ -733,7 +777,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockchannel(JNI
 	int size = sizeof(SOCKADDR_BTH);
 
 	if (getsockname(socket, (sockaddr *)&addr, &size)) {
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to get socket name");
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to get socket name");
+		throwIOException(env, "Failed to get socket name");
 		return 0;
 	}
 	return addr.port;
@@ -757,8 +802,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_connect(JNIEnv *en
 	addr.btAddr = address;
 	addr.port = channel;
 
-	if (connect((SOCKET)socket, (sockaddr *)&addr, sizeof(SOCKADDR_BTH)))
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to connect socket");
+	if (connect((SOCKET)socket, (sockaddr *)&addr, sizeof(SOCKADDR_BTH))) {
+		// env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to connect socket");
+		throwIOException(env, "Failed to connect socket");
+	}
 }
 
 /*
@@ -783,14 +830,17 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_listen(JNIEnv *env
 		closesocket(socket);
 		char errmsg[512];
 		sprintf_s(errmsg,"Failed to bind socket; error = %d", WSAGetLastError());
-		env->ThrowNew(env->FindClass("java/io/IOException"), errmsg);
+		//env->ThrowNew(env->FindClass("java/io/IOException"), errmsg);
+		throwIOException(env, errmsg);
 		return;
 	}
 
 	// listen
 
-	if (listen((SOCKET)socket, 10))
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to listen socket");
+	if (listen((SOCKET)socket, 10)) {
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to listen socket");
+		throwIOException(env, "Failed to listen socket");
+	}
 }
 
 /*
@@ -808,7 +858,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_accept(JNIEnv *env
 	SOCKET s = accept((SOCKET)socket, (sockaddr *)&addr, &size);
 
 	if (s == INVALID_SOCKET) {
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to listen socket");
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to listen socket");
+		throwIOException(env, "Failed to listen socket");
 		return 0;
 	}
 
@@ -825,7 +876,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__I(JNIEnv *en
 	unsigned char c;
 
 	if (recv((SOCKET)socket, (char *)&c, 1, 0) != 1) {
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to read");
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to read");
+		throwIOException(env, "Failed to read");
 		return 0;
 	}
 	return (int)c;
@@ -850,7 +902,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__I_3BII(JNIEn
 			env->ReleaseByteArrayElements(b, bytes, 0);
 
 			if (done == 0) {
-				env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to write");
+				//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to write");
+				throwIOException(env, "Failed to write");
 				return 0;
 			} else
 				return done;
@@ -873,8 +926,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__II(JNIEnv *e
 {
 	char c = (char)b;
 
-	if (send((SOCKET)socket, &c, 1, 0) != 1)
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to write");
+	if (send((SOCKET)socket, &c, 1, 0) != 1) {
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to write");
+		throwIOException(env, "Failed to write");
+	}
 }
 /*
 * Class:     com_intel_bluetooth_BluetoothPeer
@@ -894,7 +949,8 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__I_3BII(JNIEn
 		if (count <= 0) {
 			env->ReleaseByteArrayElements(b, bytes, 0);
 
-			env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to write");
+			//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to write");
+			throwIOException(env, "Failed to write");
 			return;
 		}
 
@@ -911,8 +967,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__I_3BII(JNIEn
 */
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_close(JNIEnv *env, jobject peer, jint socket)
 {
-	if (closesocket((SOCKET)socket))
-		env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to close socket");
+	if (closesocket((SOCKET)socket)) {
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to close socket");
+		throwIOException(env, "Failed to close socket");
+	}
 }
 
 WCHAR *GetWSAErrorMessage(DWORD last_error)
@@ -950,6 +1008,9 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 	return env->NewStringUTF((char*)"");
 #else
 
+    debug("c getpeername\n");
+
+
 	WSAQUERYSET querySet;
 	memset(&querySet, 0, sizeof(querySet));
 	querySet.dwSize = sizeof(querySet);
@@ -961,14 +1022,17 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 
 	if (hLookup != NULL) {
 		LeaveCriticalSection(&csLookup);
-		env->ThrowNew(env->FindClass("java/IO/IOException"), "Another inquiry already running");
+		throwIOException(env, "Another inquiry already running");
+		return NULL;
+		//env->ThrowNew(env->FindClass("java/io/IOException"), "Another inquiry already running");
 	}
 
 	if (WSALookupServiceBegin(&querySet, flags, &hLookup)) {
 		hLookup = NULL;
 		LeaveCriticalSection(&csLookup);
-		env->ThrowNew(env->FindClass("java/IO/IOException"), 
-			(char*)GetWSAErrorMessage(GetLastError()));
+		throwIOException(env, (char*)GetWSAErrorMessage(GetLastError()));
+		return NULL;
+		//env->ThrowNew(env->FindClass("java/io/IOException"), (char*)GetWSAErrorMessage(GetLastError()));
 	}
 
 	LeaveCriticalSection(&csLookup);
@@ -989,8 +1053,9 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 			case WSA_E_NO_MORE:
 				break;
 			default:
-				env->ThrowNew(env->FindClass("java/io/IOException"), 
-					(char*)GetWSAErrorMessage(GetLastError()));
+				throwIOException(env, (char*)GetWSAErrorMessage(GetLastError()));
+				return NULL;
+				//env->ThrowNew(env->FindClass("java/io/IOException"), (char*)GetWSAErrorMessage(GetLastError()));
 			}
 		}
 
@@ -1002,10 +1067,12 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 			hLookup = NULL;
 			LeaveCriticalSection(&csLookup);
 			WCHAR *name = pResults->lpszServiceInstanceName;
+			debug("c return %s\n", name);
 			return env->NewString((jchar*)name, wcslen(name));
 		}
 	} // while(true)
 	//env->ThrowNew(env->FindClass("java/IO/IOException", "No name found"));
+	debug("c return empty\n");
 	return env->NewStringUTF((char*)"");
 #endif
 }
@@ -1016,7 +1083,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeeraddress(JN
 	SOCKADDR_BTH addr;
 	int size = sizeof(addr);
 	if (getpeername((SOCKET) socket, (sockaddr*)&addr, &size)) {
-		env->ThrowNew(env->FindClass("java/io/IOException"), (char*)GetWSAErrorMessage(GetLastError()));
+		//env->ThrowNew(env->FindClass("java/io/IOException"), (char*)GetWSAErrorMessage(GetLastError()));
+		throwIOException(env, (char*)GetWSAErrorMessage(GetLastError()));
 		return 0;
 	}
 	return addr.btAddr;

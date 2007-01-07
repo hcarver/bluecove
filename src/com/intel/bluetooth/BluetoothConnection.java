@@ -29,6 +29,7 @@ import javax.bluetooth.LocalDevice;
 import javax.microedition.io.StreamConnection;
 
 public class BluetoothConnection implements StreamConnection {
+	
 	int socket;
 
 	long address;
@@ -71,11 +72,12 @@ public class BluetoothConnection implements StreamConnection {
 	public long getAddress() {
 		return address;
 	}
-	
+
 	public long getRemoteAddress() throws IOException {
-		return LocalDevice.getLocalDevice().getBluetoothPeer().getpeeraddress(socket);
+		return LocalDevice.getLocalDevice().getBluetoothPeer().getpeeraddress(
+				socket);
 	}
-	
+
 	/*
 	 * Open and return an input stream for a connection. Returns: An input
 	 * stream Throws: IOException - If an I/O error occurs

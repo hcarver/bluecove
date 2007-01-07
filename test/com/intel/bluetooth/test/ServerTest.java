@@ -29,10 +29,20 @@ import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
 public class ServerTest {
-	public static final UUID uuid = new UUID(
-			"27012f0c68af4fbf8dbe6bbaf7ab651b", false);
+	
+	public static final UUID uuid = new UUID(Consts.TEST_UUID, false);
 
 	public ServerTest(String name) {
+		
+		int connectionsCount = 0;
+		while (run(name) && connectionsCount < 10) {
+			connectionsCount ++;
+		}
+		
+		System.exit(0);
+	}
+	
+	public boolean run(String name) {
 		try {
 			StreamConnectionNotifier server = (StreamConnectionNotifier) Connector
 					.open("btspp://localhost:"
@@ -41,27 +51,36 @@ public class ServerTest {
 							+ name
 							+ ";authorize=false;authenticate=false;encrypt=false");
 
+			System.out.println("Server started " + name);
+			
 			StreamConnection conn = server.acceptAndOpen();
 
+			System.out.println("Server received connection");
+			
 			DataInputStream dis = new DataInputStream(conn.openInputStream());
 
-			System.out.println(dis.readUTF());
-
+			System.out.print("Got message[");
+			System.out.print(dis.readUTF());
+			System.out.println("]");
+			
 			dis.close();
 
 			conn.close();
 
 			server.close();
+			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
+			return false;
 		}
 	}
 
 	public static void main(String[] args) {
 		if (args.length == 1)
-			new ServerTest(args[0]);
-		else
-			new ServerTest("blah");
-		System.out.println("syntax: ServerTest <service name>");
+			new ServerTest(Consts.TEST_SERVERNAME_PREFIX + args[0]);
+		else {
+			System.out.println("syntax: ServerTest <service name>");
+			new ServerTest(Consts.TEST_SERVERNAME_PREFIX + "1");
+		}
 	}
 }

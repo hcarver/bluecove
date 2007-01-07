@@ -20,6 +20,8 @@
 
 package javax.bluetooth;
 
+import com.intel.bluetooth.NotImplementedError;
+
 public class DiscoveryAgent {
 	/*
 	 * Takes the device out of discoverable mode. The value of NOT_DISCOVERABLE
@@ -193,9 +195,11 @@ public class DiscoveryAgent {
 	 * if the service search transaction is terminated, else false if the
 	 * transID does not represent an active service search transaction
 	 */
-	/*
-	 * public boolean cancelServiceSearch(int transID) { }
-	 */
+
+	public boolean cancelServiceSearch(int transID) {
+		throw new NotImplementedError();
+	}
+
 	/*
 	 * Attempts to locate a service that contains uuid in the ServiceClassIDList
 	 * of its service record. This method will return a string that may be used

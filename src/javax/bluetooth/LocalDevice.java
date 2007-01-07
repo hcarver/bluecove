@@ -27,6 +27,7 @@ import com.intel.bluetooth.BluetoothPeer;
 import com.intel.bluetooth.BluetoothStreamConnectionNotifier;
 
 public class LocalDevice {
+	
 	private static LocalDevice localDevice;
 
 	private BluetoothPeer bluetoothPeer;
@@ -34,7 +35,7 @@ public class LocalDevice {
 	private DiscoveryAgent discoveryAgent;
 
 	private String address;
-	
+
 	private long bluetoothAddress;
 
 	private LocalDevice() {
@@ -44,7 +45,7 @@ public class LocalDevice {
 
 		try {
 			int socket = bluetoothPeer.socket(false, false);
-			
+
 			bluetoothAddress = bluetoothPeer.getsockaddress(socket);
 
 			address = Long.toHexString(bluetoothAddress);
@@ -54,8 +55,7 @@ public class LocalDevice {
 			address = "";
 		}
 
-		address = "000000000000".substring(address.length())
-				+ address;
+		address = "000000000000".substring(address.length()) + address;
 	}
 
 	public BluetoothPeer getBluetoothPeer() {

@@ -34,9 +34,18 @@ Installation of the binary (already compiled) version of BlueCove is as follows:
 
 1. Download BlueCove binary release
 2. Unzip the archive
-3. Place `intelbth.dll` in a place where the software needing JSR-82 can find it
+3. Add `bluecove.jar` to your classpath
+
+Native library `intelbth.dll` required by bluecove is automatically loaded from bluecove.jar
+
+Optional installation of the dll:
+
+1. Place `intelbth.dll` in a place where the software needing JSR-82 can find it
    (globally `C:\WINDOWS\SYSTEM32`)
-4. Add `bluecove.jar` to your classpath
+2. Disable DLL load from jar
+    -Dbluecove.native.resource=false
+3. Optionaly you can provide path to the dll as System Property
+    -Dbluecove.native.path=C:\bluecove_curent\bin
 
 Compilation
 -----------
@@ -89,6 +98,7 @@ Links
 - [bluecove-users mailing list][bluecove-users]
 - [bluecove-developers mailing list][bluecove-developers]
 - [bluecove-commits mailing list][bluecove-commits]
+- [bluecove-issues mailing list][bluecove-issues]
 - [Changelog][]
 - [BlueCove Subversion repository][repository]
 - [BlueCove SourceForge.net project page][sourceforge-page]
@@ -109,6 +119,7 @@ Links
 [bluecove-users]: http://groups.google.com/group/bluecove-users
 [bluecove-developers]: http://groups.google.com/group/bluecove-developers
 [bluecove-commits]: http://groups.google.com/group/bluecove-commits
+[bluecove-issues]: http://groups.google.com/group/bluecove-issues
 [changelog]: http://bluecove.googlecode.com/svn/trunk/changelog.txt
 [repository]: http://bluecove.googlecode.com/svn/
 [sourceforge-page]: http://sourceforge.net/projects/bluecove/

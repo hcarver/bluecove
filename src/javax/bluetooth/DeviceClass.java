@@ -19,6 +19,8 @@
  */
 package javax.bluetooth;
 
+import com.intel.bluetooth.DebugLog;
+
 public class DeviceClass {
 	/*
 	 * service classes
@@ -201,6 +203,9 @@ public class DeviceClass {
 	 */
 
 	public DeviceClass(int record) {
+		
+		DebugLog.debug("new DeviceClass", record);
+		
 		this.record = record;
 
 		if ((record & 0xff000000) != 0)

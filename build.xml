@@ -2,37 +2,67 @@
     <description>
         Open source implementation of JSR-82 Java Bluetooth API.
     </description>
-  <!-- set global properties for this build -->
-  <property name="src" location="src"/>
-  <property name="build" location="build"/>
-  <property name="dist"  location="dist"/>
 
-  <target name="init">
-    <!-- Create the time stamp -->
-    <tstamp/>
-    <!-- Create the build directory structure used by compile -->
-    <mkdir dir="${build}"/>
-  </target>
+    <property name="product-version" value="1.2.1"/>
 
-  <target name="compile" depends="init"
+    <!-- set global properties for this build -->
+    <property name="src" location="src"/>
+    <property name="resources" location="resources"/>
+    <property name="build" location="build"/>
+    <property name="dist"  location="dist"/>
+
+    <target name="init">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build}"/>
+    </target>
+
+    <target name="compile" depends="init"
         description="compile the source " >
-    <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}"/>
-  </target>
+        <!-- Compile the java code from ${src} into ${build} -->
+        <javac source="1.4" target="1.4" debug="true"
+               srcdir="${src}" destdir="${build}"/>
+    </target>
 
-  <target name="jar" depends="compile"
-        description="generate the distribution" >
-    <!-- Create the distribution directory -->
-    <mkdir dir="${dist}"/>
+    <target name="jar" depends="compile"
+            description="generate the distribution" >
 
-    <!-- Put everything in ${build} into the BlueCove-${DSTAMP}.jar file -->
-    <jar jarfile="${dist}/bluecove.jar" basedir="${build}"/>
-  </target>
+        <!-- Create the distribution directory -->
+        <mkdir dir="${dist}"/>
 
-  <target name="clean"
-        description="clean up" >
-    <!-- Delete the ${build} and ${dist} directory trees -->
-    <delete dir="${build}"/>
-    <delete dir="${dist}"/>
-  </target>
+        <tstamp>
+            <format property="today" pattern="yyyy-MM-dd hh:mm:ss" />
+        </tstamp>
+
+        <!-- Put everything in ${build} into the BlueCove-${DSTAMP}.jar file -->
+        <jar jarfile="${dist}/bluecove-${product-version}.jar" basedir="${build}">
+            <manifest>
+                <attribute name="Description" value="BlueCove JSR-82 implementation"/>
+                <attribute name="License" value="GNU Library or Lesser General Public License (LGPL)"/>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Implementation-Version" value="${product-version}"/>
+                <attribute name="Build-Date" value="${today}"/>
+                <attribute name="Built-Env"   value="${os.name} ${os.version} ${os.arch}, Java ${java.version}"/>
+            </manifest>
+            <fileset dir="${build}">
+                <include name="**/*.class"/>
+            </fileset>
+            <fileset dir="${resources}">
+                <include name="*.dll"/>
+            </fileset>
+            <fileset dir=".">
+                <include name="LICENSE"/>
+            </fileset>
+        </jar>
+    </target>
+
+    <target name="clean"
+            description="clean up" >
+        <!-- Delete the ${build} and ${dist} directory trees -->
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+
+    <target name="all" depends="clean, jar"/>
 </project>

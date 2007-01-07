@@ -1,48 +1,22 @@
-/*
- Copyright 2004 Intel Corporation
-
- This file is part of Blue Cove.
-
- Blue Cove is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- Blue Cove is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with Blue Cove; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
-package javax.microedition.io;
+package com.intel.bluetooth;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.StringTokenizer;
 
-import com.intel.bluetooth.MicroeditionConnector;
+import javax.bluetooth.UUID;
+import javax.microedition.io.Connection;
+import javax.microedition.io.ConnectionNotFoundException;
 
 /**
  * 
- * This class delegated all calls to MicroeditionConnector
- * 
- * 1) Solves Bytecode comatibilty problems. Application compiled with
- * bluecove.jar should run on java me platform.
- * 
- * 2) Use standard Protocol initialization to enable integration in other
- * environments.
- * 
- * vlads changes: Move Original code to MicroeditionConnector
+ * This is renamed class javax.microedition.io.Connector
  * 
  */
-
-public class Connector {
+public class MicroeditionConnector {
 	/*
 	 * Access mode READ. The value 1 is assigned to READ.
 	 */
@@ -61,10 +35,6 @@ public class Connector {
 
 	public static final int READ_WRITE = 3;
 
-	private Connector() {
-
-	}
-
 	/*
 	 * Create and open a Connection. Parameters: name - The URL for the
 	 * connection. Returns: A new Connection object. Throws:
@@ -75,8 +45,74 @@ public class Connector {
 	 * handler is not permitted.
 	 */
 
+	private static String[] params = { "authenticate", "encrypt", "master",
+			"name" };
+
 	public static Connection open(String name) throws IOException {
-		return MicroeditionConnector.open(name);
+		/*
+		 * parse URL
+		 */
+
+		String host = null;
+		String port = null;
+
+		String[] values = new String[4];
+
+		if (name.substring(0, 8).equals("btspp://")) {
+			int colon = name.indexOf(':', 8);
+
+			if (colon > -1) {
+				host = name.substring(8, colon);
+
+				StringTokenizer tok = new StringTokenizer(name
+						.substring(colon + 1), ";");
+
+				if (tok.hasMoreTokens()) {
+					port = tok.nextToken();
+
+					while (tok.hasMoreTokens()) {
+						String t = tok.nextToken();
+
+						int equals = t.indexOf('=');
+
+						if (equals > -1) {
+							String param = t.substring(0, equals);
+							String value = t.substring(equals + 1);
+
+							for (int i = 0; i < 4; i++)
+								if (param.equals(params[i])) {
+									values[i] = value;
+
+									break;
+								}
+						}
+					}
+				}
+			}
+		} else
+			throw new ConnectionNotFoundException();
+
+		if (host == null || port == null)
+			throw new IllegalArgumentException();
+
+		/*
+		 * create connection
+		 */
+
+		try {
+			if (host.equals("localhost"))
+				return new BluetoothStreamConnectionNotifier(new UUID(port,
+						false), values[0] != null && values[0].equals("true"),
+						values[1] != null && values[1].equals("true"),
+						values[3]);
+			else
+				return new BluetoothConnection(Long.parseLong(host, 16),
+						Integer.parseInt(port), values[0] != null
+								&& values[0].equals("true"), values[1] != null
+								&& values[1].equals("true"));
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException();
+		}
 	}
 
 	/*
@@ -90,7 +126,7 @@ public class Connector {
 	 */
 
 	public static Connection open(String name, int mode) throws IOException {
-		return MicroeditionConnector.open(name, mode);
+		return open(name);
 	}
 
 	/*
@@ -106,7 +142,7 @@ public class Connector {
 
 	public static Connection open(String name, int mode, boolean timeouts)
 			throws IOException {
-		return MicroeditionConnector.open(name, mode, timeouts);
+		return open(name);
 	}
 
 	/*
@@ -120,7 +156,7 @@ public class Connector {
 
 	public static DataInputStream openDataInputStream(String name)
 			throws IOException {
-		return MicroeditionConnector.openDataInputStream(name);
+		return new DataInputStream(openInputStream(name));
 	}
 
 	/*
@@ -134,7 +170,7 @@ public class Connector {
 
 	public static DataOutputStream openDataOutputStream(String name)
 			throws IOException {
-		return MicroeditionConnector.openDataOutputStream(name);
+		return new DataOutputStream(openOutputStream(name));
 	}
 
 	/*
@@ -147,7 +183,7 @@ public class Connector {
 	 */
 
 	public static InputStream openInputStream(String name) throws IOException {
-		return MicroeditionConnector.openInputStream(name);
+		throw new NotImplementedIOException();
 	}
 
 	/*
@@ -160,6 +196,7 @@ public class Connector {
 	 */
 
 	public static OutputStream openOutputStream(String name) throws IOException {
-		return MicroeditionConnector.openOutputStream(name);
+		throw new NotImplementedIOException();
 	}
+
 }

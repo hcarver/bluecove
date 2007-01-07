@@ -55,11 +55,15 @@ public class StandaloneTest {
 	        inquiring=true;
 	        return true;
 	    }
+	    
         public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
+        	System.out.println("deviceDiscovered");
             StringBuffer name;
             try {
+            	System.out.println("call getFriendlyName");
                 name=new StringBuffer(btDevice.getFriendlyName(true));
             } catch(IOException ioe) {
+            	ioe.printStackTrace();
                 name=new StringBuffer();
             }
           	while(name.length() < 20) name.append(' ');

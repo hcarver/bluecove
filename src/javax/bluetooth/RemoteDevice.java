@@ -22,6 +22,8 @@ package javax.bluetooth;
 import java.io.IOException;
 
 import com.intel.bluetooth.BluetoothConnection;
+import com.intel.bluetooth.DebugLog;
+import com.intel.bluetooth.NotImplementedError;
 
 public class RemoteDevice {
 	private String name;
@@ -29,6 +31,7 @@ public class RemoteDevice {
 	long address;
 
 	RemoteDevice(String name, long address) {
+		DebugLog.debug("new RemoteDevice", name);
 		this.name = name;
 		this.address = address;
 	}
@@ -45,6 +48,7 @@ public class RemoteDevice {
 	 */
 
 	protected RemoteDevice(String address) {
+		DebugLog.debug("new RemoteDevice", address);
 		this.address = Long.parseLong(address, 16);
 	}
 
@@ -75,7 +79,8 @@ public class RemoteDevice {
 
 	public String getFriendlyName(boolean alwaysAsk) throws IOException {
 		if (alwaysAsk || name == null || name.equals("")) {
-			name = LocalDevice.getLocalDevice().getBluetoothPeer().getpeername(address);
+			name = LocalDevice.getLocalDevice().getBluetoothPeer().getpeername(
+					address);
 		}
 		return name;
 	}
@@ -138,7 +143,8 @@ public class RemoteDevice {
 
 		if (!(conn instanceof BluetoothConnection))
 			throw new IllegalArgumentException("Not a Bluetooth connection");
-		return new RemoteDevice("", ((BluetoothConnection)conn).getRemoteAddress());
+		return new RemoteDevice("", ((BluetoothConnection) conn)
+				.getRemoteAddress());
 	}
 
 	/*
@@ -266,8 +272,7 @@ public class RemoteDevice {
 	 */
 
 	public boolean isAuthenticated() {
-		// TODO not yet implemented
-		return false;
+		throw new NotImplementedError();
 	}
 
 	/*
