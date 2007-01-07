@@ -1,3 +1,9 @@
+2007-01-07 Paul Tötterman
+
+* Released 1.2.1
+
+* Merged dll-in-the-jar enhancements by Vlad Skarzhevskyy
+
 2006-12-15 Paul Tötterman
 
 * Merged WTK compatibility enhancements by Vlad Skarzhevskyy
