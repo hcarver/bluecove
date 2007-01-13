@@ -14,8 +14,6 @@ public class NativeLibLoader {
 
     private static boolean libraryAvailable;
 
-    private static final boolean debug = false;
-
     public static boolean isAvailable() {
         if (triedToLoadAlredy) {
             return libraryAvailable;
@@ -96,7 +94,7 @@ public class NativeLibLoader {
             throw new Error("Native Library " + libFileName + " is not a ressource !");
         }
         if (is == null) {
-            return false;
+            throw new Error("Native Library " + libFileName + " is not a ressource !");
         }
         File fd = makeTempName(libFileName);
         try {
@@ -132,10 +130,8 @@ public class NativeLibLoader {
             }
             return true;
         } catch (Throwable e) {
+            DebugLog.debug("Can't create temporary file", e);
             System.err.println("Can't create temporary file" + fd.getAbsolutePath());
-            if (debug) {
-                e.printStackTrace();
-            }
             return false;
         } finally {
             if (fos != null) {
@@ -164,18 +160,14 @@ public class NativeLibLoader {
                 continue;
             }
             if (!dir.mkdirs()) {
-                if (debug) {
-                   System.err.println("Can't create temporary dir " + dir.getAbsolutePath());
-                   continue;
-                }
+                DebugLog.debug("Can't create temporary dir ", dir.getAbsolutePath());
+                continue;
             }
             dir.deleteOnExit();
 
 //            if (!fd.canWrite()) {
-//                if (debug) {
-//                    System.err.println("Can't create file in temporary dir " + fd.getAbsolutePath());
-//                    continue;
-//                 }
+//                DebugLog.debug("Can't create file in temporary dir ", fd.getAbsolutePath());
+//                continue;
 //            }
             break;
         }
