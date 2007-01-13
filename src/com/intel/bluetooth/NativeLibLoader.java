@@ -7,20 +7,22 @@ import java.io.InputStream;
 import java.util.Locale;
 
 public class NativeLibLoader {
-	
+
     public static final String NATIVE_LIB = "intelbth";
-    
+
     private static boolean triedToLoadAlredy;
-    
+
     private static boolean libraryAvailable;
-    
+
+    private static final boolean debug = false;
+
     public static boolean isAvailable() {
         if (triedToLoadAlredy) {
             return libraryAvailable;
         }
         String libFileName = NATIVE_LIB;
         String sysName = System.getProperty("os.name");
-        
+
         if (sysName.toLowerCase(Locale.ENGLISH).indexOf("windows") != -1)  {
             libFileName = libFileName + ".dll";
 //        } else if (sysName.toLowerCase(Locale.ENGLISH).indexOf("linux") != -1) {
@@ -31,7 +33,7 @@ public class NativeLibLoader {
             libraryAvailable = false;
             return libraryAvailable;
         }
-        
+
         String path = System.getProperty("bluecove.native.path");
         if (path != null) {
         	libraryAvailable = tryloadPath(path, libFileName);
@@ -48,8 +50,8 @@ public class NativeLibLoader {
         if (!libraryAvailable) {
         	libraryAvailable = tryload(NATIVE_LIB);
         }
-        
-        
+
+
         if (!libraryAvailable) {
             System.err.println("Native Library " + NATIVE_LIB + " not avalable");
         }
@@ -80,7 +82,7 @@ public class NativeLibLoader {
         }
         return true;
     }
-    
+
     private static boolean loadAsSystemResource(String libFileName) {
         InputStream is = null;
         try {
@@ -118,7 +120,7 @@ public class NativeLibLoader {
         }
         return true;
     }
-    
+
     private static boolean copy2File(InputStream is, File fd) {
         FileOutputStream fos = null;
         try {
@@ -130,6 +132,10 @@ public class NativeLibLoader {
             }
             return true;
         } catch (Throwable e) {
+            System.err.println("Can't create temporary file" + fd.getAbsolutePath());
+            if (debug) {
+                e.printStackTrace();
+            }
             return false;
         } finally {
             if (fos != null) {
@@ -141,34 +147,52 @@ public class NativeLibLoader {
             }
         }
     }
-    
+
     private static File makeTempName(String libFileName) {
         String tmppath = System.getProperty("java.io.tmpdir");
+        String uname = System.getProperty("user.name");
         int count = 0;
         File fd = null;
+        File dir = null;
         while (true) {
-            File dir = new File(tmppath, "bluecove_" + (count ++));
+            if (count > 10) {
+                throw new Error("Can't create temporary dir " + dir.getAbsolutePath());
+            }
+            dir = new File(tmppath, "bluecove_" + uname + "_"+ (count ++));
             fd = new File(dir, libFileName);
             if ((fd.exists()) && (!fd.delete())) {
-                    continue;
+                continue;
             }
-            dir.mkdirs();
+            if (!dir.mkdirs()) {
+                if (debug) {
+                   System.err.println("Can't create temporary dir " + dir.getAbsolutePath());
+                   continue;
+                }
+            }
+            dir.deleteOnExit();
+
+//            if (!fd.canWrite()) {
+//                if (debug) {
+//                    System.err.println("Can't create file in temporary dir " + fd.getAbsolutePath());
+//                    continue;
+//                 }
+//            }
             break;
         }
         return fd;
     }
-    
+
 //    private static void deleteOnExit(final File fd) {
 //        Runnable r = new Runnable() {
 //            public void run() {
 //                if (!fd.delete()) {
-//                    System.err.println("Can't remove Native Library " + fd);  
+//                    System.err.println("Can't remove Native Library " + fd);
 //                }
 //            }
 //        };
 //        Runtime.getRuntime().addShutdownHook(new Thread(r));
 //    }
-    
+
     static {
         isAvailable();
     }
