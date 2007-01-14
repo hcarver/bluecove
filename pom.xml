@@ -7,10 +7,10 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.intel</groupId>
+    <groupId>net.sf</groupId>
     <artifactId>bluecove</artifactId>
     <version>1.2.1</version>
-    <url>http://bluecove.sourceforge.net/</url>
+    <url>http://sourceforge.net/projects/bluecove/</url>
 
     <name>bluecove</name>
 
@@ -18,13 +18,14 @@
 
     <organization>
         <name>BlueCove Team</name>
-        <url>http://bluecove.sourceforge.net/</url>
+        <url>http://code.google.com/p/bluecove/</url>
     </organization>
     <inceptionYear>2004</inceptionYear>
 
     <licenses>
         <license>
             <name>GNU Library or Lesser General Public License (LGPL)</name>
+            <url>http://www.gnu.org/licenses/lgpl.html</url>
         </license>
     </licenses>
 
@@ -41,7 +42,6 @@
             <email>paul.totterman@gmail.com</email>
             <roles>
                 <role>admin</role>
-                <role>architect</role>
                 <role>developer</role>
             </roles>
             <timezone>+2</timezone>
@@ -56,6 +56,7 @@
             <organizationUrl>http://www.pyx4me.com</organizationUrl>
             <roles>
                 <role>Build master</role>
+                <role>developer</role>
             </roles>
             <timezone>-5</timezone>
         </contributor>
