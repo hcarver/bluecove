@@ -24,13 +24,13 @@ currently limited to Windows XP SP2 and newer, because the Microsoft Bluetooth
 stack is not available on other operating systems. If someone writes code to
 support another stack and/or operating system, it will be considered for
 inclusion.  BlueCove does also not support OBEX, but there are other projects
-that can (possibly) be used to archieve OBEX functionality with BlueCove.
+that can (possibly) be used to achieve OBEX functionality with BlueCove.
 
 == Installation ==
 
 Installation of the binary (already compiled) version of BlueCove is as follows:
 
-  # Download BlueCove binary release
+  # [http://code.google.com/p/bluecove/downloads/list Download BlueCove] binary release
   # Unzip the archive
   # Add `bluecove.jar` to your classpath
 
@@ -40,7 +40,7 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition,
 which is available for free download from MSDN. Ant is used as the build tool,
 and the compilation is much easier using it.
 
-  # Download BlueCove source release
+  # [http://code.google.com/p/bluecove/downloads/list Download BlueCove]source release
   # Unzip the source
   # Run `ant`
   # Go into `intelbth`
