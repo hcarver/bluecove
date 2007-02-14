@@ -1,3 +1,23 @@
+/**
+ *  BlueCove - Java library for Bluetooth
+ *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *  @version $Id$
+ */
 package com.intel.bluetooth;
 
 import java.io.File;
@@ -21,9 +41,20 @@ public class NativeLibLoader {
         String libFileName = NATIVE_LIB;
         String sysName = System.getProperty("os.name");
 
-        if (sysName.toLowerCase(Locale.ENGLISH).indexOf("windows") != -1)  {
+        if (sysName == null) {
+        	System.err.println("Native Library " + NATIVE_LIB + " not avalable on unknown platform");
+        }
+        
+        sysName = sysName.toLowerCase(Locale.ENGLISH);
+        
+        if (sysName.indexOf("windows") != -1)  {
+        	if (sysName.indexOf("ce") != -1) {
+        		libFileName = libFileName + "_ce";
+        	}
             libFileName = libFileName + ".dll";
-//        } else if (sysName.toLowerCase(Locale.ENGLISH).indexOf("linux") != -1) {
+        } else if (sysName.indexOf("mac os x") != -1) {
+        	libFileName = libFileName + ".jnilib";
+//        } else if (.indexOf("linux") != -1) {
 //            libFileName = "lib" + libFileName + ".so";
         } else {
         	System.err.println("Native Library " + NATIVE_LIB + " not avalable on platform " + sysName);
