@@ -272,7 +272,10 @@ public class RemoteDevice {
 	 */
 
 	public boolean isAuthenticated() {
-		throw new NotImplementedError();
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		}
+		return false;
 	}
 
 	/*

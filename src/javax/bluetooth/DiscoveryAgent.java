@@ -197,7 +197,11 @@ public class DiscoveryAgent {
 	 */
 
 	public boolean cancelServiceSearch(int transID) {
-		throw new NotImplementedError();
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		} else {
+			return false;
+		}
 	}
 
 	/*
