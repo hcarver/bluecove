@@ -53,7 +53,7 @@ public class NativeLibLoader {
         	}
             libFileName = libFileName + ".dll";
         } else if (sysName.indexOf("mac os x") != -1) {
-        	libFileName = libFileName + ".jnilib";
+        	libFileName = "lib" +libFileName + ".jnilib";
 //        } else if (.indexOf("linux") != -1) {
 //            libFileName = "lib" + libFileName + ".so";
         } else {
