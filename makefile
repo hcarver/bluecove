@@ -1,6 +1,3 @@
-# $Revision: 252 $
-# $Date: 2006-03-23 18:07:04 -0500 (Thu, 23 Mar 2006) $
-# $Author: vlads $
 # $Id: makefile 252 2006-03-23 23:07:04Z vlads $
 #
 # Makefile for intelbth.dll
@@ -21,9 +18,9 @@ CC=cl.exe
 # /MT  Multithreaded
 # /O2  Maximize Speed
 
-CFLAGS=-nologo -I. -I $(JAVA_HOME)\include -I $(JAVA_HOME)\include\win32 /Yu \
+CFLAGS=-nologo -I. -I $(JAVA_HOME)\include -I $(JAVA_HOME)\include\win32 \
        /O1 -W3 -DWIN32 -D_WINDOWS -DNDEBUG -D_USRDLL -D_WINDLL -D_UNICODE \
-       -DUNICODE
+       -DUNICODE $(DEBUG_CFLAGS)
 
 RSC=rc.exe
 RSC_PROJ=/l 0x1009 /d "NDEBUG"
@@ -48,6 +45,8 @@ clean:
 	-@erase /Q "$(OBJDIR)\*.obj"
 	-@erase /Q "$(OUTDIR)\$(DLL_TARGET)"
 	-@erase /Q "*.res"
+
+debug:
 
 default: outdir clean dll
 

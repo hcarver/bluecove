@@ -1,10 +1,7 @@
-@rem $Revision$
-@rem $Date$
-@rem $Author$
 @rem $Id$
 
 @rem @echo off
-SETLOCAL
+@SETLOCAL
 
 @echo Starting build at %TIME%, %DATE%
 
@@ -34,13 +31,13 @@ SETLOCAL
 
 @echo [%p%\VCVARS32.BAT]
 call %p%\VCVARS32.BAT
-gmake.exe -fmakefile %1 default
+gmake.exe -fmakefile %* default
 @if errorlevel 1 goto errormark
 @echo [Build OK]
 @goto endmark
 :errormark
-	ENDLOCAL
+	@ENDLOCAL
 	echo Error in build
 	pause
 :endmark
-ENDLOCAL
+@ENDLOCAL
