@@ -29,7 +29,7 @@ package com.intel.bluetooth;
  */
 public class DebugLog {
 
-	private static final boolean debugCompiledOut = true;
+	private static final boolean debugCompiledOut = false;
 	
 	private static boolean debugEnabled = false;
 
@@ -37,9 +37,10 @@ public class DebugLog {
 	
 	private static void initialize() {
 		initialized = true;
-		if (!debugCompiledOut) {
-			String d = System.getProperty("bluecove.debug");
-			debugEnabled = ((d != null) && (d.equalsIgnoreCase("true") || d.equalsIgnoreCase("1")));
+		String d = System.getProperty("bluecove.debug");
+		debugEnabled = ((d != null) && (d.equalsIgnoreCase("true") || d.equalsIgnoreCase("1")));
+		if (debugCompiledOut) {
+			System.err.println("BlueCove debug functions have been Compiled Out");
 		}
 	}
 	
