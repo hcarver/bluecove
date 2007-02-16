@@ -1,5 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
+ *  Copyright (C) 2004 Intel Corporation
  *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
  * 
  *  This library is free software; you can redistribute it and/or
@@ -30,6 +31,8 @@ import java.util.StringTokenizer;
 import javax.bluetooth.UUID;
 import javax.microedition.io.Connection;
 import javax.microedition.io.ConnectionNotFoundException;
+import javax.microedition.io.InputConnection;
+import javax.microedition.io.OutputConnection;
 
 /**
  * 
@@ -65,10 +68,13 @@ public class MicroeditionConnector {
 	 * handler is not permitted.
 	 */
 
-	private static String[] params = { "authenticate", "encrypt", "master",
-			"name" };
+	private static String[] params = { "authenticate", "encrypt", "master", "name" };
 
 	public static Connection open(String name) throws IOException {
+		return openImpl(name, true);
+	}
+	
+	private static Connection openImpl(String name, boolean allowServer) throws IOException {
 		/*
 		 * parse URL
 		 */
@@ -84,8 +90,7 @@ public class MicroeditionConnector {
 			if (colon > -1) {
 				host = name.substring(8, colon);
 
-				StringTokenizer tok = new StringTokenizer(name
-						.substring(colon + 1), ";");
+				StringTokenizer tok = new StringTokenizer(name.substring(colon + 1), ";");
 
 				if (tok.hasMoreTokens()) {
 					port = tok.nextToken();
@@ -102,34 +107,39 @@ public class MicroeditionConnector {
 							for (int i = 0; i < 4; i++)
 								if (param.equals(params[i])) {
 									values[i] = value;
-
 									break;
 								}
 						}
 					}
 				}
 			}
-		} else
+		} else {
 			throw new ConnectionNotFoundException();
+		}
 
-		if (host == null || port == null)
+		if (host == null || port == null) {
 			throw new IllegalArgumentException();
+		}
 
 		/*
 		 * create connection
 		 */
 
 		try {
-			if (host.equals("localhost"))
+			if (host.equals("localhost")) {
+				if (!allowServer) {
+					throw new IllegalArgumentException();
+				}
 				return new BluetoothStreamConnectionNotifier(new UUID(port,
 						false), values[0] != null && values[0].equals("true"),
 						values[1] != null && values[1].equals("true"),
 						values[3]);
-			else
+			} else {
 				return new BluetoothConnection(Long.parseLong(host, 16),
 						Integer.parseInt(port), values[0] != null
 								&& values[0].equals("true"), values[1] != null
 								&& values[1].equals("true"));
+			}	
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException();
 		}
@@ -203,7 +213,7 @@ public class MicroeditionConnector {
 	 */
 
 	public static InputStream openInputStream(String name) throws IOException {
-		throw new NotImplementedIOException();
+		return ((InputConnection)openImpl(name, false)).openInputStream();
 	}
 
 	/*
@@ -216,7 +226,7 @@ public class MicroeditionConnector {
 	 */
 
 	public static OutputStream openOutputStream(String name) throws IOException {
-		throw new NotImplementedIOException();
+		return ((OutputConnection)openImpl(name, false)).openOutputStream();
 	}
 
 }
