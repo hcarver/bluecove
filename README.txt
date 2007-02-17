@@ -34,6 +34,16 @@ Installation of the binary (already compiled) version of BlueCove is as follows:
   # Unzip the archive
   # Add `bluecove.jar` to your classpath
 
+For maven2 users see [maven2 Using maven2 to build application or MIDlet]
+
+== Runtime configuration ==
+
+Native Library location
+
+  # By default Native Library is extracted from from jar to temporary directory `${java.io.tmpdir}/bluecove_${user.name}_N` and loaded from this location.
+  # If you wish to load library (.dll) from another location add this system property `-Dbluecove.native.path=/your/path`.
+  # If you wish to load library from default location in path e.g. `%SystemRoot%\system32` or any other location in %PATH% use `-Dbluecove.native.resource=false`
+
 == Compilation ==
 
 You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition,
