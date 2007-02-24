@@ -25,6 +25,7 @@ import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.BluetoothPeer;
 import com.intel.bluetooth.BluetoothStreamConnectionNotifier;
+import com.intel.bluetooth.NotImplementedError;
 
 public class LocalDevice {
 	
@@ -304,8 +305,10 @@ public class LocalDevice {
 	 * if the local SDDB could not be updated successfully due to insufficient
 	 * disk space, database locks, etc.
 	 */
-	/*
-	 * public void updateRecord(ServiceRecord srvRecord) throws
-	 * ServiceRegistrationException { }
-	 */
+	public void updateRecord(ServiceRecord srvRecord) throws ServiceRegistrationException { 
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		}
+	}
+	
 }
