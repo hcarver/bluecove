@@ -47,16 +47,25 @@
             </roles>
             <timezone>+2</timezone>
         </developer>
-    </developers>
-
-    <contributors>
-        <contributor>
+        <developer>
             <name>Vlad Skarzhevskyy</name>
+            <id>skarzhevskyy</id>
             <email>skarzhevskyy@gmail.com</email>
             <organization>pyx4me.com</organization>
             <organizationUrl>http://www.pyx4me.com</organizationUrl>
             <roles>
+                <role>developer</role>
                 <role>Build master</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
+
+    <contributors>
+        <contributor>
+            <name>Eric Wagner</name>
+            <email>gnuloki@gmail.com</email>
+            <roles>
                 <role>developer</role>
             </roles>
             <timezone>-5</timezone>
