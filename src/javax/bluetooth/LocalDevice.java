@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import javax.microedition.io.Connection;
 
+import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothPeer;
 import com.intel.bluetooth.BluetoothStreamConnectionNotifier;
 import com.intel.bluetooth.NotImplementedError;
@@ -31,8 +32,6 @@ public class LocalDevice {
 	
 	private static LocalDevice localDevice;
 
-	private BluetoothPeer bluetoothPeer;
-
 	private DiscoveryAgent discoveryAgent;
 
 	private String address;
@@ -40,7 +39,8 @@ public class LocalDevice {
 	private long bluetoothAddress;
 
 	private LocalDevice() {
-		bluetoothPeer = new BluetoothPeer();
+		
+		BluetoothPeer bluetoothPeer = BlueCoveImpl.instance().getBluetoothPeer();
 
 		discoveryAgent = new DiscoveryAgent();
 
@@ -59,8 +59,11 @@ public class LocalDevice {
 		address = "000000000000".substring(address.length()) + address;
 	}
 
+	/**
+	 * @deprecated use BlueCoveImpl.instance().getBluetoothPeer() 
+	 */
 	public BluetoothPeer getBluetoothPeer() {
-		return bluetoothPeer;
+		return BlueCoveImpl.instance().getBluetoothPeer();
 	}
 
 	/*
@@ -96,7 +99,7 @@ public class LocalDevice {
 	 */
 
 	public String getFriendlyName() {
-		return bluetoothPeer.getradioname(bluetoothAddress);
+		return BlueCoveImpl.instance().getBluetoothPeer().getradioname(bluetoothAddress);
 	}
 
 	/*
