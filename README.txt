@@ -46,9 +46,16 @@ Native Library location
 
 == Compilation ==
 
-You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition,
-which is available for free download from MSDN. Ant is used as the build tool,
-and the compilation is much easier using it.
+You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 and SDK for Windows Vista or Windows Server 2003 R2 Platform SDK.
+ VC++ and Windows SDK are available for free download from microsoft.com.
+ We are using for Windows Vista SDK for binary distribution:
+    Make sure you have
+     Tools ->  Options -> VC++ Directories ->
+        "Include files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\Include
+        "Library files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\lib
+
+ Ant or maven2 are used as the build tool for java.
+
 
   # [http://code.google.com/p/bluecove/downloads/list Download BlueCove]source release
   # Unzip the source

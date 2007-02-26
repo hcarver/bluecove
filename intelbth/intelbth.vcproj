@@ -77,7 +77,7 @@
 				AdditionalDependencies="ws2_32.lib irprops.lib"
 				OutputFile="$(OutDir)/intelbth.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft SDK\Lib&quot;"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/intelbth.pdb"
 				SubSystem="2"
@@ -156,7 +156,7 @@
 				AdditionalDependencies="ws2_32.lib irprops.lib"
 				OutputFile="$(OutDir)/intelbth.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft SDK\Lib&quot;"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -885,7 +885,7 @@
 					Name="Debug|Pocket PC 2003 (ARMV4)"
 					>
 					<Tool
-						Name="VCCLCompilerTool"
+					Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
@@ -918,6 +918,10 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\intelbth.rc"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"
