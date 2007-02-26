@@ -3,7 +3,7 @@
         Open source implementation of JSR-82 Java Bluetooth API.
     </description>
 
-    <property name="product-version" value="1.2.1"/>
+    <property name="product-version" value="1.2.2"/>
 
     <!-- set global properties for this build -->
     <property name="src" location="src"/>
@@ -36,7 +36,7 @@
         </tstamp>
 
         <!-- Put everything in ${build} into the BlueCove-${DSTAMP}.jar file -->
-        <jar jarfile="${dist}/bluecove-${product-version}.jar" basedir="${build}">
+        <jar jarfile="${dist}/bluecove-${product-version}.jar">
             <manifest>
                 <attribute name="Description" value="BlueCove JSR-82 implementation"/>
                 <attribute name="License" value="GNU Library or Lesser General Public License (LGPL)"/>
