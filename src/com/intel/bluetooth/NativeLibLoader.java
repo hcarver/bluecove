@@ -93,6 +93,7 @@ public class NativeLibLoader {
             System.loadLibrary(name);
             DebugLog.debug("Library loaded", name);
         } catch (Throwable e) {
+        	DebugLog.debug("Library " + name + " not loaded " + e.toString());
             return false;
         }
         return true;
@@ -161,8 +162,8 @@ public class NativeLibLoader {
             }
             return true;
         } catch (Throwable e) {
-            DebugLog.debug("Can't create temporary file", e);
-            System.err.println("Can't create temporary file" + fd.getAbsolutePath());
+            DebugLog.debug("Can't create temporary file ", e);
+            System.err.println("Can't create temporary file " + fd.getAbsolutePath());
             return false;
         } finally {
             if (fos != null) {
@@ -176,30 +177,35 @@ public class NativeLibLoader {
     }
 
     private static File makeTempName(String libFileName) {
-        String tmppath = System.getProperty("java.io.tmpdir");
+        String tmpDir = System.getProperty("java.io.tmpdir");
         String uname = System.getProperty("user.name");
         int count = 0;
         File fd = null;
         File dir = null;
         while (true) {
             if (count > 10) {
-                throw new Error("Can't create temporary dir " + dir.getAbsolutePath());
+            	DebugLog.debug("Can't create temporary dir " + dir.getAbsolutePath());
+            	return new File(tmpDir, libFileName);
             }
-            dir = new File(tmppath, "bluecove_" + uname + "_"+ (count ++));
+            dir = new File(tmpDir, "bluecove_" + uname + "_"+ (count ++));
             fd = new File(dir, libFileName);
             if ((fd.exists()) && (!fd.delete())) {
                 continue;
             }
-            if (!dir.mkdirs()) {
+            if ((!dir.exists()) && (!dir.mkdirs())) {
                 DebugLog.debug("Can't create temporary dir ", dir.getAbsolutePath());
                 continue;
             }
             dir.deleteOnExit();
-
-//            if (!fd.canWrite()) {
-//                DebugLog.debug("Can't create file in temporary dir ", fd.getAbsolutePath());
-//                continue;
-//            }
+            try {
+				if (!fd.createNewFile()) {
+				    DebugLog.debug("Can't create file in temporary dir ", fd.getAbsolutePath());
+				    continue;
+				}
+			} catch (IOException e) {
+				DebugLog.debug("Can't create file in temporary dir ", fd.getAbsolutePath());
+				continue;
+			}
             break;
         }
         return fd;
