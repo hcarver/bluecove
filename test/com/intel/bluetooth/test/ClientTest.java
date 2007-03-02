@@ -35,10 +35,16 @@ import javax.microedition.io.StreamConnection;
 import java.util.Enumeration;
 import java.util.Vector;
 
-public class ClientTest implements DiscoveryListener
+public class ClientTest implements DiscoveryListener  {
 
-{
+	public static final UUID uuid = new UUID(Consts.TEST_UUID, false);
+
+	Vector devices;
+
+	Vector records;
+	
 	class Cancel extends Thread {
+		
 		ClientTest client;
 
 		Cancel(ClientTest client) {
@@ -64,15 +70,10 @@ public class ClientTest implements DiscoveryListener
 		}
 	}
 
-	public static final UUID uuid = new UUID(Consts.TEST_UUID, false);
-
-	Vector devices;
-
-	Vector records;
-
 	public ClientTest(String message) {
-		devices = new Vector();
 		
+		devices = new Vector();
+
 		(new Cancel(this)).start();
 
 		synchronized (this) {
@@ -114,30 +115,24 @@ public class ClientTest implements DiscoveryListener
 				} catch (BluetoothStateException e) {
 					e.printStackTrace();
 				}
-
 			}
 
 			/*
 			 * 
 			 * BUGBUG: need to give the system time to sort itself out after
 			 * doing a service attribute request
-			 *  
+			 * 
 			 */
 
 			try {
-
 				Thread.sleep(100);
-
 			} catch (InterruptedException e) {
-
 				e.printStackTrace();
-
 			}
 
 			for (Enumeration enum_r = records.elements(); enum_r.hasMoreElements();) {
-
 				ServiceRecord r = (ServiceRecord) enum_r.nextElement();
-				
+
 				String name = r.getAttributeValue(0x0100).getValue().toString();
 				System.out.println("Name attribute: " + name);
 

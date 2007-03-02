@@ -29,6 +29,8 @@ import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 
+import com.intel.bluetooth.DebugLog;
+
 /**
  * This class provides a stand-alone test for Blue Cove
  * 
@@ -36,22 +38,28 @@ import javax.bluetooth.ServiceRecord;
 public class StandaloneTest {
     
 	public static void main(String[] args) {
+		
+		//System.setProperty("bluecove.debug", "true");
+		//System.setProperty("bluecove.native.path", ".");
+		
 	    LocalDevice l;
-	    try {
-	        l = LocalDevice.getLocalDevice();
-	    } catch(BluetoothStateException e) {
-	        System.err.println("Cannot get local device: " + e);
-	        return;
-	    }
-	    
-	    System.out.println("Local btaddr is " + l.getBluetoothAddress());
-	    System.out.println("Local name is " + l.getFriendlyName());
-	    
-	    BluetoothInquirer bi = new BluetoothInquirer();
-	    while(true) {
-	        System.out.println("Starting inquiry");
-            if(!bi.startInquiry()) break;
+		try {
+			l = LocalDevice.getLocalDevice();
+		} catch (BluetoothStateException e) {
+			System.err.println("Cannot get local device: " + e);
+			return;
+		}
 
+    	System.out.println("Local btaddr is " + l.getBluetoothAddress());
+ 	    System.out.println("Local name is " + l.getFriendlyName());
+ 	    
+	    BluetoothInquirer bi = new BluetoothInquirer();
+	    
+	    while(true) {
+	    	
+	        System.out.println("Starting inquiry");
+
+	        if(!bi.startInquiry()) break;
 	        while(bi.inquiring) {
 		        try {
 		            Thread.sleep(1000);
@@ -76,18 +84,17 @@ public class StandaloneTest {
 	    }
 	    
         public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
-        	System.out.println("deviceDiscovered");
+        	DebugLog.debug("deviceDiscovered");
             StringBuffer name;
             try {
-            	System.out.println("call getFriendlyName");
-                name=new StringBuffer(btDevice.getFriendlyName(true));
+            	DebugLog.debug("call getFriendlyName");
+                name= new StringBuffer(btDevice.getFriendlyName(false));
             } catch(IOException ioe) {
             	ioe.printStackTrace();
                 name=new StringBuffer();
             }
           	while(name.length() < 20) name.append(' ');
             System.out.println("Found " + btDevice.getBluetoothAddress() + " : " + name + " : " + cod);
-            
         }
 
         public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
