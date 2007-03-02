@@ -16,6 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with Blue Cove; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+@version $Id: NativeLibLoader.java 105 2007-02-26 00:20:23Z skarzhevskyy $
+
 */
 
 #include "stdafx.h"
@@ -96,6 +99,35 @@ void throwException(JNIEnv *env, const char *name, const char *msg)
 void throwIOException(JNIEnv *env, const char *msg)
 {
 	throwException(env, "java/io/IOException", msg);
+}
+
+WCHAR *GetWSAErrorMessage(DWORD last_error)
+{
+	static WCHAR errmsg[512];
+	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+		0,
+		last_error,
+		0,
+		errmsg,
+		511,
+		NULL))
+	{
+		// if we fail, call ourself to find out why and return that error
+		return (GetWSAErrorMessage(GetLastError()));
+	}
+	size_t last = wcslen(errmsg) - 1;
+	while ((errmsg[last] == '\n') || (errmsg[last] == '\r')) {
+		errmsg[last] = 0;
+		last --;
+	}
+	return errmsg;
+}
+
+void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg)
+{
+	char errmsg[1064];
+	sprintf_s(errmsg, 1064, "%s [%S]", msg, GetWSAErrorMessage(WSAGetLastError()));
+    throwIOException(env, errmsg);
 }
 
 /*
@@ -774,7 +806,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *env
 #ifndef _WIN32_WINCE
 	// bind socket
 	// This will not work for WIN32_WCE. Ideally bind should be before listen
-	/*
+
 	SOCKADDR_BTH addr;
 
 	memset(&addr, 0, sizeof(SOCKADDR_BTH));
@@ -786,10 +818,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *env
 		closesocket(s);
 
 		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to bind socket");
-		throwIOException(env, "Failed to bind socket");
+		throwIOExceptionWSAGetLastError(env, "Failed to bind socket");
 		return 0;
 	}
-	*/
 #endif
 	return (jint)s;
 }
@@ -810,8 +841,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockaddress(JN
 	int size = sizeof(SOCKADDR_BTH);
 
 	if (getsockname(socket, (sockaddr *)&addr, &size)) {
-		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to get socket name");
-		throwIOException(env, "Failed to get socket name");
+		throwIOExceptionWSAGetLastError(env, "Failed to get socket name");
 		return 0;
 	}
 	return addr.btAddr;
@@ -1035,25 +1065,6 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_close(JNIEnv *env,
 		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to close socket");
 		throwIOException(env, "Failed to close socket");
 	}
-}
-
-WCHAR *GetWSAErrorMessage(DWORD last_error)
-{
-	static WCHAR errmsg[512];
-
-	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
-		0,
-		last_error,
-		0,
-		errmsg,
-		511,
-		NULL))
-	{
-		// if we fail, call ourself to find out why and return that error
-		return (GetWSAErrorMessage(GetLastError()));
-	}
-
-	return errmsg;
 }
 
 /*
