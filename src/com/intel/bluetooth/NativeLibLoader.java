@@ -103,11 +103,13 @@ public class NativeLibLoader {
         try {
         	File f = new File(path, name);
         	if (!f.canRead()) {
+        		System.err.println("Native Library " + f.getAbsolutePath() + " not found");
         		return false;
         	}
             System.load(f.getAbsolutePath());
             DebugLog.debug("Library loaded", f.getAbsolutePath());
         } catch (Throwable e) {
+        	 DebugLog.error("cant load library from path " + path, e);
             return false;
         }
         return true;

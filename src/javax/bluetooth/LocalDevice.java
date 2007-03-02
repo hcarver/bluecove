@@ -26,6 +26,7 @@ import javax.microedition.io.Connection;
 import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothPeer;
 import com.intel.bluetooth.BluetoothStreamConnectionNotifier;
+import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
 
 public class LocalDevice {
@@ -46,13 +47,15 @@ public class LocalDevice {
 
 		try {
 			int socket = bluetoothPeer.socket(false, false);
-
+			DebugLog.debug("bluetoothPeer socket", socket);
+			
 			bluetoothAddress = bluetoothPeer.getsockaddress(socket);
 
 			address = Long.toHexString(bluetoothAddress);
 
 			bluetoothPeer.close(socket);
 		} catch (IOException e) {
+			DebugLog.error("get local bluetoothAddress", e);
 			address = "";
 		}
 
@@ -75,9 +78,9 @@ public class LocalDevice {
 	 */
 
 	public static LocalDevice getLocalDevice() throws BluetoothStateException {
-		if (localDevice == null)
+		if (localDevice == null) {
 			localDevice = new LocalDevice();
-
+		}
 		return localDevice;
 	}
 
