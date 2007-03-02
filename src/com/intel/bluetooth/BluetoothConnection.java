@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.bluetooth.LocalDevice;
 import javax.microedition.io.StreamConnection;
 
 public class BluetoothConnection implements StreamConnection {
@@ -45,15 +44,15 @@ public class BluetoothConnection implements StreamConnection {
 
 	synchronized void closeSocket() throws IOException {
 		if (in == null && out == null && closing && !closed) {
-			(LocalDevice.getLocalDevice()).getBluetoothPeer().close(socket);
+			BlueCoveImpl.instance().getBluetoothPeer().close(socket);
 			closed = true;
 		}
 	}
 
-	public BluetoothConnection(long address, int channel, boolean authenticate,
-			boolean encrypt) throws IOException {
+	public BluetoothConnection(long address, int channel, boolean authenticate,	boolean encrypt) throws IOException {
 		this.address = address;
-		BluetoothPeer peer = (LocalDevice.getLocalDevice()).getBluetoothPeer();
+		
+		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
 
 		socket = peer.socket(authenticate, encrypt);
 
@@ -64,8 +63,7 @@ public class BluetoothConnection implements StreamConnection {
 	protected BluetoothConnection(int socket) {
 		this.socket = socket;
 		try {
-			this.address = LocalDevice.getLocalDevice().getBluetoothPeer()
-					.getsockaddress(socket);
+			this.address = BlueCoveImpl.instance().getBluetoothPeer().getsockaddress(socket);
 		} catch (IOException e) {
 		}
 	}
@@ -75,7 +73,7 @@ public class BluetoothConnection implements StreamConnection {
 	}
 
 	public long getRemoteAddress() throws IOException {
-		return LocalDevice.getLocalDevice().getBluetoothPeer().getpeeraddress(
+		return BlueCoveImpl.instance().getBluetoothPeer().getpeeraddress(
 				socket);
 	}
 
@@ -84,12 +82,12 @@ public class BluetoothConnection implements StreamConnection {
 	 * stream Throws: IOException - If an I/O error occurs
 	 */
 	public InputStream openInputStream() throws IOException {
-		if (closing)
+		if (closing) {
 			throw new IOException();
-		else {
-			if (in == null)
+		} else {
+			if (in == null) {
 				in = new BluetoothInputStream(this);
-
+			}
 			return in;
 		}
 	}
@@ -109,12 +107,12 @@ public class BluetoothConnection implements StreamConnection {
 	 */
 
 	public OutputStream openOutputStream() throws IOException {
-		if (closing)
+		if (closing) {
 			throw new IOException();
-		else {
-			if (out == null)
+		} else {
+			if (out == null) {
 				out = new BluetoothOutputStream(this);
-
+			}
 			return out;
 		}
 	}
@@ -148,11 +146,12 @@ public class BluetoothConnection implements StreamConnection {
 
 	protected void finalize() {
 		try {
-			if (in != null)
+			if (in != null) {
 				in.close();
-			if (out != null)
+			}
+			if (out != null) {
 				out.close();
-
+			}
 			close();
 		} catch (IOException e) {
 		}

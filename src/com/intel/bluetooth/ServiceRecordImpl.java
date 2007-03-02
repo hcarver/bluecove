@@ -202,27 +202,25 @@ public class ServiceRecordImpl implements ServiceRecord {
 		 * retrieve SDP blob
 		 */
 
-		byte[] blob = (LocalDevice.getLocalDevice()).getBluetoothPeer()
-				.getServiceAttributes(sortIDs,
+		byte[] blob = BlueCoveImpl.instance().getBluetoothPeer().getServiceAttributes(sortIDs,
 						Long.parseLong(device.getBluetoothAddress(), 16),
 						handle);
 
-		if (blob.length > 0)
+		if (blob.length > 0) {
 			try {
 				DataElement element = (new SDPInputStream(
 						new ByteArrayInputStream(blob))).readElement();
 
-				for (Enumeration e = (Enumeration) element.getValue(); e
-						.hasMoreElements();)
-					attributes.put(new Integer((int) ((DataElement) e
-							.nextElement()).getLong()), e.nextElement());
-
+				for (Enumeration e = (Enumeration) element.getValue(); e.hasMoreElements();) {
+					attributes.put(new Integer((int) ((DataElement) e.nextElement()).getLong()), e.nextElement());
+				}
 				return true;
 			} catch (Exception e) {
 				throw new IOException();
 			}
-		else
+		} else {
 			return false;
+		}
 	}
 
 	/*
@@ -303,14 +301,15 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 		StringBuffer buf = new StringBuffer("btspp://");
 
-		if (device == null)
+		if (device == null) {
 			try {
 				buf.append(LocalDevice.getLocalDevice().getBluetoothAddress());
 			} catch (BluetoothStateException bse) {
 				buf.append("localhost");
 			}
-		else
+		} else {
 			buf.append(getHostDevice().getBluetoothAddress());
+		}
 
 		buf.append(":");
 		buf.append(port);

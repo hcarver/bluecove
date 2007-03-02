@@ -23,15 +23,21 @@ package com.intel.bluetooth;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.bluetooth.LocalDevice;
-
 class BluetoothInputStream extends InputStream {
+	
 	private BluetoothConnection conn;
 
 	public BluetoothInputStream(BluetoothConnection conn) {
 		this.conn = conn;
 	}
 
+	/**
+	 * TODO use WSAEventSelect
+	 */
+	public synchronized int available() throws IOException {
+		return super.available();
+	}
+	
 	/*
 	 * Reads the next byte of data from the input stream. The value byte is
 	 * returned as an int in the range 0 to 255. If no byte is available because
@@ -45,11 +51,11 @@ class BluetoothInputStream extends InputStream {
 	 */
 
 	public int read() throws IOException {
-		if (conn == null)
+		if (conn == null) {
 			throw new IOException();
-		else
-			return (LocalDevice.getLocalDevice()).getBluetoothPeer().recv(
-					conn.socket);
+		} else {
+			return BlueCoveImpl.instance().getBluetoothPeer().recv(conn.socket);
+		}
 	}
 
 	/*
@@ -100,22 +106,21 @@ class BluetoothInputStream extends InputStream {
 	 */
 
 	public int read(byte[] b, int off, int len) throws IOException {
-		if (off < 0 || len < 0 || off + len > b.length)
+		if (off < 0 || len < 0 || off + len > b.length) {
 			throw new IndexOutOfBoundsException();
-
-		if (conn == null)
+		}
+		
+		if (conn == null) {
 			throw new IOException();
-		else
-			return (LocalDevice.getLocalDevice()).getBluetoothPeer().recv(
-					conn.socket, b, off, len);
+		} else {
+			return BlueCoveImpl.instance().getBluetoothPeer().recv(conn.socket, b, off, len);
+		}
 	}
 
 	public void close() throws IOException {
 		if (conn != null) {
 			conn.in = null;
-
 			conn.closeSocket();
-
 			conn = null;
 		}
 	}

@@ -23,9 +23,8 @@ package com.intel.bluetooth;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import javax.bluetooth.LocalDevice;
-
 class BluetoothOutputStream extends OutputStream {
+	
 	private BluetoothConnection conn;
 
 	public BluetoothOutputStream(BluetoothConnection conn) {
@@ -45,11 +44,11 @@ class BluetoothOutputStream extends OutputStream {
 	 */
 
 	public void write(int b) throws IOException {
-		if (conn == null)
+		if (conn == null) {
 			throw new IOException();
-		else
-			(LocalDevice.getLocalDevice()).getBluetoothPeer().send(conn.socket,
-					b);
+		} else {
+			BlueCoveImpl.instance().getBluetoothPeer().send(conn.socket, b);
+		}
 	}
 
 	/*
@@ -79,17 +78,14 @@ class BluetoothOutputStream extends OutputStream {
 		if (conn == null) {
 			throw new IOException();
 		} else {
-			(LocalDevice.getLocalDevice()).getBluetoothPeer().send(conn.socket,
-					b, off, len);
+			BlueCoveImpl.instance().getBluetoothPeer().send(conn.socket, b, off, len);
 		}
 	}
 
 	public void close() throws IOException {
 		if (conn != null) {
 			conn.out = null;
-
 			conn.closeSocket();
-
 			conn = null;
 		}
 	}

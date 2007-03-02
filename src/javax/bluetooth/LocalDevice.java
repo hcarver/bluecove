@@ -50,6 +50,8 @@ public class LocalDevice {
 			int socket = bluetoothPeer.socket(false, false);
 			DebugLog.debug("bluetoothPeer socket", socket);
 			
+			bluetoothPeer.bind(socket);
+			
 			bluetoothAddress = bluetoothPeer.getsockaddress(socket);
 
 			address = Long.toHexString(bluetoothAddress);
@@ -61,13 +63,6 @@ public class LocalDevice {
 		}
 
 		address = "000000000000".substring(address.length()) + address;
-	}
-
-	/**
-	 * @deprecated use BlueCoveImpl.instance().getBluetoothPeer() 
-	 */
-	public BluetoothPeer getBluetoothPeer() {
-		return BlueCoveImpl.instance().getBluetoothPeer();
 	}
 
 	/*

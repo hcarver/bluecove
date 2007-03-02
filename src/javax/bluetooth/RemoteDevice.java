@@ -22,6 +22,7 @@ package javax.bluetooth;
 
 import java.io.IOException;
 
+import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothConnection;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
@@ -80,8 +81,7 @@ public class RemoteDevice {
 
 	public String getFriendlyName(boolean alwaysAsk) throws IOException {
 		if (alwaysAsk || name == null || name.equals("")) {
-			name = LocalDevice.getLocalDevice().getBluetoothPeer().getpeername(
-					address);
+			name = BlueCoveImpl.instance().getBluetoothPeer().getpeername(address);
 		}
 		return name;
 	}

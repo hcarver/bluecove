@@ -103,7 +103,7 @@ void throwIOException(JNIEnv *env, const char *msg)
 
 WCHAR *GetWSAErrorMessage(DWORD last_error)
 {
-	static WCHAR errmsg[512];
+	static WCHAR errmsg[1024];
 	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
 		0,
 		last_error,
@@ -112,8 +112,10 @@ WCHAR *GetWSAErrorMessage(DWORD last_error)
 		511,
 		NULL))
 	{
+		swprintf_s(errmsg, 1024, _T("No error message for code %d"), last_error);
+		return errmsg;
 		// if we fail, call ourself to find out why and return that error
-		return (GetWSAErrorMessage(GetLastError()));
+		//return (GetWSAErrorMessage(GetLastError()));
 	}
 	size_t last = wcslen(errmsg) - 1;
 	while ((errmsg[last] == '\n') || (errmsg[last] == '\r')) {
@@ -126,7 +128,8 @@ WCHAR *GetWSAErrorMessage(DWORD last_error)
 void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg)
 {
 	char errmsg[1064];
-	sprintf_s(errmsg, 1064, "%s [%S]", msg, GetWSAErrorMessage(WSAGetLastError()));
+	DWORD last_error = WSAGetLastError();
+	sprintf_s(errmsg, 1064, "%s [%d] %S", msg, last_error, GetWSAErrorMessage(last_error));
     throwIOException(env, errmsg);
 }
 
@@ -802,26 +805,6 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *env
 			return 0;
 		}
 	}
-
-#ifndef _WIN32_WINCE
-	// bind socket
-	// This will not work for WIN32_WCE. Ideally bind should be before listen
-
-	SOCKADDR_BTH addr;
-
-	memset(&addr, 0, sizeof(SOCKADDR_BTH));
-
-	addr.addressFamily = AF_BTH;
-	addr.port = BT_PORT_ANY;
-
-	if (bind(s, (sockaddr*)&addr, sizeof(SOCKADDR_BTH))) {
-		closesocket(s);
-
-		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to bind socket");
-		throwIOExceptionWSAGetLastError(env, "Failed to bind socket");
-		return 0;
-	}
-#endif
 	return (jint)s;
 }
 
@@ -864,7 +847,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockchannel(JNI
 
 	if (getsockname(socket, (sockaddr *)&addr, &size)) {
 		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to get socket name");
-		throwIOException(env, "Failed to get socket name");
+		throwIOExceptionWSAGetLastError(env, "Failed to get socket name");
 		return 0;
 	}
 	return addr.port;
@@ -891,20 +874,14 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_connect(JNIEnv *en
 
 	if (connect((SOCKET)socket, (sockaddr *)&addr, sizeof(SOCKADDR_BTH))) {
 		// env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to connect socket");
-		throwIOException(env, "Failed to connect socket");
+		throwIOExceptionWSAGetLastError(env, "Failed to connect socket");
 	}
 }
 
-/*
-* Class:     com_intel_bluetooth_BluetoothPeer
-* Method:    listen
-* Signature: (I)V
-*/
-
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_listen(JNIEnv *env, jobject peer, jint socket)
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_bind(JNIEnv *env, jobject peer, jint socket)
 {
-    debug("c ->listen\n");
 	// bind socket
+	debug("c ->bind\n");
 
 	SOCKADDR_BTH addr;
 	memset(&addr, 0, sizeof(addr));
@@ -916,18 +893,17 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_listen(JNIEnv *env
 #endif
 	if (bind(socket, (SOCKADDR *)&addr, sizeof(addr))) {
 		closesocket(socket);
-		char errmsg[512];
-		sprintf_s(errmsg,"Failed to bind socket; error = %d", WSAGetLastError());
-		//env->ThrowNew(env->FindClass("java/io/IOException"), errmsg);
-		throwIOException(env, errmsg);
+		throwIOExceptionWSAGetLastError(env, "Failed to bind socket");
 		return;
 	}
+}
 
-	// listen
-
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_listen(JNIEnv *env, jobject peer, jint socket)
+{
+    debug("c ->listen\n");
 	if (listen((SOCKET)socket, 10)) {
 		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to listen socket");
-		throwIOException(env, "Failed to listen socket");
+		throwIOExceptionWSAGetLastError(env, "Failed to listen socket");
 	}
 }
 
@@ -1063,7 +1039,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_close(JNIEnv *env,
 	debug("c ->close\n");
 	if (closesocket((SOCKET)socket)) {
 		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to close socket");
-		throwIOException(env, "Failed to close socket");
+		throwIOExceptionWSAGetLastError(env, "Failed to close socket");
 	}
 }
 

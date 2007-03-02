@@ -23,14 +23,13 @@ package com.intel.bluetooth;
 import java.io.IOException;
 
 import javax.bluetooth.DataElement;
-import javax.bluetooth.LocalDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
-public class BluetoothStreamConnectionNotifier implements
-		StreamConnectionNotifier {
+public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier {
+	
 	private int socket;
 
 	private int handle;
@@ -39,17 +38,17 @@ public class BluetoothStreamConnectionNotifier implements
 
 	private boolean closed;
 
-	public BluetoothStreamConnectionNotifier(UUID uuid, boolean authenticate,
-			boolean encrypt, String name) throws IOException {
+	public BluetoothStreamConnectionNotifier(UUID uuid, boolean authenticate, boolean encrypt, String name) throws IOException {
 		/*
 		 * open socket
 		 */
 
-		BluetoothPeer peer = ((LocalDevice) LocalDevice.getLocalDevice())
-				.getBluetoothPeer();
+		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
 
 		socket = peer.socket(authenticate, encrypt);
 
+		peer.bind(socket);
+		
 		peer.listen(socket);
 
 		/*
@@ -63,9 +62,9 @@ public class BluetoothStreamConnectionNotifier implements
 		 * setAttributeValue)
 		 */
 
-		((ServiceRecordImpl) serviceRecord).attributes.put(new Integer(
-				ServiceRecord.ServiceRecordHandle), new DataElement(
-				DataElement.U_INT_4, 0x00010020));
+		((ServiceRecordImpl) serviceRecord).attributes.put(
+				new Integer(ServiceRecord.ServiceRecordHandle), 
+				new DataElement(DataElement.U_INT_4, 0x00010020));
 
 		/*
 		 * service class ID list
@@ -74,8 +73,7 @@ public class BluetoothStreamConnectionNotifier implements
 		DataElement serviceClassIDList = new DataElement(DataElement.DATSEQ);
 		serviceClassIDList.addElement(new DataElement(DataElement.UUID, uuid));
 
-		serviceRecord.setAttributeValue(ServiceRecord.ServiceClassIDList,
-				serviceClassIDList);
+		serviceRecord.setAttributeValue(ServiceRecord.ServiceClassIDList, serviceClassIDList);
 
 		/*
 		 * protocol descriptor list
@@ -84,34 +82,29 @@ public class BluetoothStreamConnectionNotifier implements
 		DataElement protocolDescriptorList = new DataElement(DataElement.DATSEQ);
 
 		DataElement L2CAPDescriptor = new DataElement(DataElement.DATSEQ);
-		L2CAPDescriptor.addElement(new DataElement(DataElement.UUID,
-				UUID.L2CAP_PROTOCOL_UUID));
+		L2CAPDescriptor.addElement(new DataElement(DataElement.UUID, UUID.L2CAP_PROTOCOL_UUID));
 		protocolDescriptorList.addElement(L2CAPDescriptor);
 
 		DataElement RFCOMMDescriptor = new DataElement(DataElement.DATSEQ);
-		RFCOMMDescriptor.addElement(new DataElement(DataElement.UUID,
-				UUID.RFCOMM_PROTOCOL_UUID));
-		RFCOMMDescriptor.addElement(new DataElement(DataElement.U_INT_1, peer
-				.getsockchannel(socket)));
+		RFCOMMDescriptor.addElement(new DataElement(DataElement.UUID, UUID.RFCOMM_PROTOCOL_UUID));
+		RFCOMMDescriptor.addElement(new DataElement(DataElement.U_INT_1, peer.getsockchannel(socket)));
 		protocolDescriptorList.addElement(RFCOMMDescriptor);
 
-		serviceRecord.setAttributeValue(ServiceRecord.ProtocolDescriptorList,
-				protocolDescriptorList);
+		serviceRecord.setAttributeValue(ServiceRecord.ProtocolDescriptorList, protocolDescriptorList);
 
 		/*
 		 * name
 		 */
 
-		if (name != null)
-			serviceRecord.setAttributeValue(0x0100, new DataElement(
-					DataElement.STRING, name));
+		if (name != null) {
+			serviceRecord.setAttributeValue(0x0100, new DataElement(DataElement.STRING, name));
+		}
 
 		/*
 		 * register service
 		 */
 
-		handle = peer.registerService(((ServiceRecordImpl) serviceRecord)
-				.toByteArray());
+		handle = peer.registerService(((ServiceRecordImpl) serviceRecord).toByteArray());
 	}
 
 	/*
@@ -128,8 +121,7 @@ public class BluetoothStreamConnectionNotifier implements
 
 	public void close() throws IOException {
 		if (!closed) {
-			BluetoothPeer peer = ((LocalDevice) LocalDevice.getLocalDevice())
-					.getBluetoothPeer();
+			BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
 
 			/*
 			 * close socket
@@ -154,8 +146,7 @@ public class BluetoothStreamConnectionNotifier implements
 	 */
 
 	public StreamConnection acceptAndOpen() throws IOException {
-		return new BluetoothConnection(((LocalDevice) LocalDevice
-				.getLocalDevice()).getBluetoothPeer().accept(socket));
+		return new BluetoothConnection(BlueCoveImpl.instance().getBluetoothPeer().accept(socket));
 	}
 
 	public ServiceRecord getServiceRecord() {

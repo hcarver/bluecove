@@ -20,6 +20,7 @@
  */ 
 package javax.bluetooth;
 
+import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.NotImplementedError;
 
 public class DiscoveryAgent {
@@ -112,8 +113,7 @@ public class DiscoveryAgent {
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException {
-		LocalDevice.getLocalDevice().getBluetoothPeer().startInquiry(
-				accessCode, listener);
+		BlueCoveImpl.instance().getBluetoothPeer().startInquiry(accessCode, listener);
 
 		return true;
 	}
@@ -137,15 +137,10 @@ public class DiscoveryAgent {
 	 */
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
-		LocalDevice ld;
-		if (listener == null)
+		if (listener == null) {
 			throw new NullPointerException();
-		try {
-			ld = LocalDevice.getLocalDevice();
-		} catch (BluetoothStateException bse) {
-			return false;
 		}
-		return ld.getBluetoothPeer().cancelInquiry();
+		return BlueCoveImpl.instance().getBluetoothPeer().cancelInquiry();
 	}
 
 	/*
@@ -175,12 +170,8 @@ public class DiscoveryAgent {
 	 * null; if an element in uuidSet array is null See Also: DiscoveryListener
 	 */
 
-	public int searchServices(int[] attrSet, UUID[] uuidSet,
-			RemoteDevice device, DiscoveryListener listener)
-			throws BluetoothStateException {
-		LocalDevice.getLocalDevice().getBluetoothPeer().startSearchServices(
-				attrSet, uuidSet, device, listener);
-
+	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		BlueCoveImpl.instance().getBluetoothPeer().startSearchServices(attrSet, uuidSet, device, listener);
 		return 0;
 	}
 

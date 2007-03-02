@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth;
 
 import java.io.IOException;
@@ -28,7 +28,7 @@ import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
 public class BluetoothPeer {
-	
+
 	static {
 		NativeLibLoader.isAvailable();
 	}
@@ -57,8 +57,7 @@ public class BluetoothPeer {
 
 		private DiscoveryListener listener;
 
-		public SearchServicesThread(int[] attrSet, UUID[] uuidSet,
-				RemoteDevice device, DiscoveryListener listener) {
+		public SearchServicesThread(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
 			this.attrSet = attrSet;
 			this.uuidSet = uuidSet;
 			this.device = device;
@@ -66,34 +65,31 @@ public class BluetoothPeer {
 		}
 
 		public void run() {
-			int[] handles = getServiceHandles(uuidSet, Long.parseLong(device
-					.getBluetoothAddress(), 16));
+			int[] handles = getServiceHandles(uuidSet, Long.parseLong(device.getBluetoothAddress(), 16));
 
-			if (handles == null)
-				listener.serviceSearchCompleted(0,
-						DiscoveryListener.SERVICE_SEARCH_ERROR);
-			else if (handles.length > 0) {
+			if (handles == null) {
+				listener.serviceSearchCompleted(0, DiscoveryListener.SERVICE_SEARCH_ERROR);
+			} else if (handles.length > 0) {
 				ServiceRecord[] records = new ServiceRecordImpl[handles.length];
 
 				for (int i = 0; i < handles.length; i++) {
 					records[i] = new ServiceRecordImpl(device, handles[i]);
 
 					try {
-						records[i].populateRecord(new int[] { 0x0000, 0x0001,
-								0x0002, 0x0003, 0x0004 });
+						records[i].populateRecord(new int[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004 });
 
-						if (attrSet != null)
+						if (attrSet != null) {
 							records[i].populateRecord(attrSet);
+						}
 					} catch (Exception e) {
 					}
 				}
 
 				listener.servicesDiscovered(0, records);
-				listener.serviceSearchCompleted(0,
-						DiscoveryListener.SERVICE_SEARCH_COMPLETED);
-			} else
-				listener.serviceSearchCompleted(0,
-						DiscoveryListener.SERVICE_SEARCH_NO_RECORDS);
+				listener.serviceSearchCompleted(0, DiscoveryListener.SERVICE_SEARCH_COMPLETED);
+			} else {
+				listener.serviceSearchCompleted(0, DiscoveryListener.SERVICE_SEARCH_NO_RECORDS);
+			}
 		}
 	}
 
@@ -101,8 +97,7 @@ public class BluetoothPeer {
 		(new InquiryThread(accessCode, listener)).start();
 	}
 
-	public void startSearchServices(int[] attrSet, UUID[] uuidSet,
-			RemoteDevice device, DiscoveryListener listener) {
+	public void startSearchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
 		(new SearchServicesThread(attrSet, uuidSet, device, listener)).start();
 	}
 
@@ -128,8 +123,7 @@ public class BluetoothPeer {
 	 * get service attributes
 	 */
 
-	public native byte[] getServiceAttributes(int[] attrIDs, long address,
-			int handle) throws IOException;
+	public native byte[] getServiceAttributes(int[] attrIDs, long address, int handle) throws IOException;
 
 	/*
 	 * register service
@@ -147,29 +141,27 @@ public class BluetoothPeer {
 	 * socket operations
 	 */
 
-	public native int socket(boolean authenticate, boolean encrypt)
-			throws IOException;
+	public native int socket(boolean authenticate, boolean encrypt) throws IOException;
 
 	public native long getsockaddress(int socket) throws IOException;
 
 	public native int getsockchannel(int socket) throws IOException;
 
-	public native void connect(int socket, long address, int channel)
-			throws IOException;
+	public native void connect(int socket, long address, int channel) throws IOException;
 
+	public native void bind(int socket) throws IOException;
+	
 	public native void listen(int socket) throws IOException;
 
 	public native int accept(int socket) throws IOException;
 
 	public native int recv(int socket) throws IOException;
 
-	public native int recv(int socket, byte[] b, int off, int len)
-			throws IOException;
+	public native int recv(int socket, byte[] b, int off, int len) throws IOException;
 
 	public native void send(int socket, int b) throws IOException;
 
-	public native void send(int socket, byte[] b, int off, int len)
-			throws IOException;
+	public native void send(int socket, byte[] b, int off, int len) throws IOException;
 
 	public native void close(int socket) throws IOException;
 
