@@ -185,6 +185,11 @@ public class LocalDevice {
 		return null;
 	}
 
+	
+	public static boolean isPowerOn(){
+		return true;
+	}
+	
 	/*
 	 * Retrieves the local device's discoverable mode. The return value will be
 	 * DiscoveryAgent.GIAC, DiscoveryAgent.LIAC,

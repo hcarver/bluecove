@@ -95,14 +95,6 @@
             </dependency>
 
             <dependency>
-                <groupId>classworlds</groupId>
-                <artifactId>classworlds</artifactId>
-                <version>1.1</version>
-                <scope>test</scope>
-                <optional>true</optional>
-            </dependency>
-
-            <dependency>
                 <groupId>jboss</groupId>
                 <artifactId>javassist</artifactId>
                 <version>3.3.ga</version>
@@ -139,7 +131,19 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <skip>flase</skip>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <includes>
+                        <include>**/*Test.*</include>
+                        <include>**/*Tests.*</include>
+                    </includes>
+                    <systemProperties>
+                        <!-- Used for APIDeclarations Tests -->
+                        <property>
+                            <name>WTK_HOME</name>
+                            <value>${env.WTK_HOME}</value>
+                        </property>
+                    </systemProperties>
                 </configuration>
             </plugin>
 

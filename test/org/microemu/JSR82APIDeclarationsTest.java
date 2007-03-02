@@ -27,49 +27,40 @@ import java.util.Vector;
 
 import javassist.ClassPool;
 
-public class TestJSR82APIDeclarations extends APIDeclarationsTester {
+public class JSR82APIDeclarationsTest extends APIDeclarationsTestCase {
 
-	String wtkHome;
+	File wtkLibDir;
+	
+	public JSR82APIDeclarationsTest() {
 
-	 public TestJSR82APIDeclarations() {
-			
-	 }
-		
-	 public TestJSR82APIDeclarations(String name) {
-		 super(name);
-	 }
+	}
 
-	ClassLoader wtkLoader;
-
-	ClassPool wtkClassPool;
-
-	ClassLoader ourLoader;
+	public JSR82APIDeclarationsTest(String name) {
+		super(name);
+	}
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		// TODO read Environment variable
-		wtkHome = "/D:/di/tools/WTK22/";
+		String wtkHome = System.getProperty("WTK_HOME");
+		if (wtkHome == null) {
+			throw new Error("System  property WTK_HOME not found");
+		}
+		wtkLibDir = new File(wtkHome, "lib");
+		if (!wtkLibDir.exists() || (!wtkLibDir.isDirectory())) {
+			throw new Error("Invalid system  property WTK_HOME = [" + wtkHome + "]");
+		}
 
-		reportOnly = true;
+		reportExtra = false;
+		reportOnly = false;
 		reportConstructors = false;
-		
-		List l = getWtkJarURLList(new String[] { "midpapi20.jar", "cldcapi11.jar" });
-		wtkLoader = getClassLoader(l);
-		wtkClassPool = getClassPool(l);
-		ourLoader = this.getClass().getClassLoader();
 	}
 
 	private List getWtkJarURLList(String[] jarNames) throws Exception {
 		List files = new Vector();
-		File lib = new File(wtkHome, "lib");
-		File lib2 = new File(wtkHome, "wtklib");
 		for (int i = 0; i < jarNames.length; i++) {
-			File jar = new File(lib, jarNames[i]);
+			File jar = new File(wtkLibDir, jarNames[i]);
 			if (!jar.exists()) {
-				jar = new File(lib2, jarNames[i]);
-			}
-			if (!jar.exists()) {
-				throw new FileNotFoundException(jarNames[i]);
+				throw new FileNotFoundException(jar.getAbsolutePath());
 			}
 			files.add(jar.getCanonicalFile().toURI().toURL());
 		}
@@ -77,6 +68,9 @@ public class TestJSR82APIDeclarations extends APIDeclarationsTester {
 	}
 
 	public void testGenericConnectionFrameworkAPI() throws Exception {
+
+		ClassPool wtkClassPool = createClassPool(getWtkJarURLList(new String[] { "midpapi20.jar", "cldcapi11.jar" }));
+		ClassPool ourClassPool = createClassPool("javax.microedition.io.Connection");
 
 		List names = new Vector();
 
@@ -106,14 +100,14 @@ public class TestJSR82APIDeclarations extends APIDeclarationsTester {
 		// Exception
 		names.add(aPackage + "ConnectionNotFoundException");
 
-		verifyClassList(names, wtkLoader, ourLoader, wtkClassPool);
+		verifyClassList(names, ourClassPool, wtkClassPool);
 	}
 
 	public void testJsr082API() throws Exception {
 
-		List l = getWtkJarURLList(new String[] { "midpapi20.jar", "cldcapi11.jar", "jsr082.jar" });
-		wtkLoader = getClassLoader(l);
-		wtkClassPool = getClassPool(l);
+		ClassPool wtkClassPool = createClassPool(getWtkJarURLList(new String[] { "midpapi20.jar", "cldcapi11.jar",
+				"jsr082.jar" }));
+		ClassPool ourClassPool = createClassPool("javax.bluetooth.ServiceRecord");
 
 		List names = new Vector();
 
@@ -137,8 +131,7 @@ public class TestJSR82APIDeclarations extends APIDeclarationsTester {
 		names.add(aPackage + "BluetoothStateException");
 		names.add(aPackage + "ServiceRegistrationException");
 
-		verifyClassList(names, wtkLoader, ourLoader, wtkClassPool);
+		verifyClassList(names, ourClassPool, wtkClassPool);
 	}
-
 
 }

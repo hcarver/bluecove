@@ -219,8 +219,13 @@ public class DiscoveryAgent {
 	 * ServiceRecord.NOAUTHENTICATE_NOENCRYPT,
 	 * ServiceRecord.AUTHENTICATE_NOENCRYPT, ServiceRecord.AUTHENTICATE_ENCRYPT
 	 */
-	/*
-	 * public String selectService(UUID uuid, int security, boolean master)
-	 * throws BluetoothStateException { }
-	 */
+	
+	public String selectService(UUID uuid, int security, boolean master) throws BluetoothStateException {
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		} else {
+			return null;
+		}
+	}
+
 }

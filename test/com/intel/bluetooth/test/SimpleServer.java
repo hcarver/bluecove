@@ -32,11 +32,11 @@ import javax.microedition.io.StreamConnectionNotifier;
 
 import com.intel.bluetooth.DebugLog;
 
-public class ServerTest {
+public class SimpleServer {
 	
 	public static final UUID uuid = new UUID(Consts.TEST_UUID, false);
 
-	public ServerTest(String name) throws BluetoothStateException {
+	public SimpleServer(String name) throws BluetoothStateException {
 		
 		//System.setProperty("bluecove.debug", "true");
 		//System.setProperty("bluecove.native.path", ".");
@@ -92,10 +92,10 @@ public class ServerTest {
 	public static void main(String[] args) {
 		try {
 			if (args.length == 1)
-				new ServerTest(Consts.TEST_SERVERNAME_PREFIX + args[0]);
+				new SimpleServer(Consts.TEST_SERVERNAME_PREFIX + args[0]);
 			else {
-				System.out.println("syntax: ServerTest <service name>");
-				new ServerTest(Consts.TEST_SERVERNAME_PREFIX + "1");
+				System.out.println("syntax: SimpleServer <service name>");
+				new SimpleServer(Consts.TEST_SERVERNAME_PREFIX + "1");
 			}
 		} catch (Throwable e) {
 			DebugLog.fatal("initialization error", e);

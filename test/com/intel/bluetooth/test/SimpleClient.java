@@ -35,7 +35,7 @@ import javax.microedition.io.StreamConnection;
 import java.util.Enumeration;
 import java.util.Vector;
 
-public class ClientTest implements DiscoveryListener  {
+public class SimpleClient implements DiscoveryListener  {
 
 	public static final UUID uuid = new UUID(Consts.TEST_UUID, false);
 
@@ -45,9 +45,9 @@ public class ClientTest implements DiscoveryListener  {
 	
 	class Cancel extends Thread {
 		
-		ClientTest client;
+		SimpleClient client;
 
-		Cancel(ClientTest client) {
+		Cancel(SimpleClient client) {
 			this.client = client;
 		}
 
@@ -70,7 +70,7 @@ public class ClientTest implements DiscoveryListener  {
 		}
 	}
 
-	public ClientTest(String message) {
+	public SimpleClient(String message) {
 		
 		devices = new Vector();
 
@@ -159,10 +159,10 @@ public class ClientTest implements DiscoveryListener  {
 
 	public static void main(String[] args) {
 		if (args.length == 1) {
-			new ClientTest(args[0]);
+			new SimpleClient(args[0]);
 		} else {
-			System.out.println("syntax: ClientTest <message>");
-			new ClientTest("bluecove test message");
+			System.out.println("syntax: SimpleClient <message>");
+			new SimpleClient("bluecove test message");
 		}
 	}
 

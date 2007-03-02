@@ -22,12 +22,15 @@ package javax.bluetooth;
 
 import java.io.IOException;
 
+import javax.microedition.io.Connection;
+
 import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothConnection;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
 
 public class RemoteDevice {
+	
 	private String name;
 
 	long address;
@@ -60,8 +63,11 @@ public class RemoteDevice {
 	 */
 
 	public boolean isTrustedDevice() {
-		// TODO not yet implemented
-		return false;
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		} else {
+			return false;
+		}
 	}
 
 	/*
@@ -137,15 +143,12 @@ public class RemoteDevice {
 	 * if conn is null
 	 */
 
-	public static RemoteDevice getRemoteDevice(
-			javax.microedition.io.Connection conn) throws IOException {
-		// BluetoothPeer peer =
-		// (LocalDevice.getLocalDevice()).getBluetoothPeer();
+	public static RemoteDevice getRemoteDevice(Connection conn) throws IOException {
 
-		if (!(conn instanceof BluetoothConnection))
+		if (!(conn instanceof BluetoothConnection)) {
 			throw new IllegalArgumentException("Not a Bluetooth connection");
-		return new RemoteDevice("", ((BluetoothConnection) conn)
-				.getRemoteAddress());
+		}
+		return new RemoteDevice("", ((BluetoothConnection) conn).getRemoteAddress());
 	}
 
 	/*
@@ -166,9 +169,14 @@ public class RemoteDevice {
 	 * java.io.IOException - if there are no open connections between the local
 	 * device and this RemoteDevice
 	 */
-	/*
-	 * public boolean authenticate() throws IOException { }
-	 */
+	public boolean authenticate() throws IOException { 
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		} else {
+			return false;
+		}
+	}
+	 
 	/*
 	 * Determines if this RemoteDevice should be allowed to continue to access
 	 * the local service provided by the Connection. In Bluetooth, authorization
@@ -199,10 +207,15 @@ public class RemoteDevice {
 	 * since the notifier is not a connection to this RemoteDevice.
 	 * java.io.IOException - if conn is closed See Also: isTrustedDevice()
 	 */
-	/*
-	 * public boolean authorize(javax.microedition.io.Connection conn) throws
-	 * IOException { }
-	 */
+
+	 public boolean authorize(javax.microedition.io.Connection conn) throws IOException {
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		} else {
+			return false;
+		}
+	}
+
 	/*
 	 * Attempts to turn encryption on or off for an existing connection. In the
 	 * case where the parameter on is true, this method will first authenticate
@@ -254,10 +267,15 @@ public class RemoteDevice {
 	 * schemes.); if conn is a notifier used by a server to wait for a client
 	 * connection, since the notifier is not a connection to this RemoteDevice
 	 */
-	/*
-	 * public boolean encrypt(javax.microedition.io.Connection conn, boolean on)
-	 * throws IOException { }
-	 */
+  
+	public boolean encrypt(javax.microedition.io.Connection conn, boolean on) throws IOException {
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		} else {
+			return false;
+		}
+	}
+
 	/*
 	 * Determines if this RemoteDevice has been authenticated. A device may have
 	 * been authenticated by this application or another application.

@@ -35,7 +35,7 @@ import com.intel.bluetooth.DebugLog;
  * This class provides a stand-alone test for Blue Cove
  * 
  */
-public class StandaloneTest {
+public class SimpleDiscovery {
     
 	public static void main(String[] args) {
 		

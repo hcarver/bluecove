@@ -20,11 +20,7 @@
  */
 package org.microemu;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -34,14 +30,16 @@ import java.util.Vector;
 
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.CtConstructor;
 import javassist.CtField;
+import javassist.CtMember;
+import javassist.CtMethod;
+import javassist.Modifier;
+import javassist.NotFoundException;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import org.codehaus.classworlds.ClassRealm;
-import org.codehaus.classworlds.ClassWorld;
-
-public class APIDeclarationsTester extends TestCase {
+public class APIDeclarationsTestCase extends TestCase {
 
 	protected boolean verbose = false;
 
@@ -53,69 +51,71 @@ public class APIDeclarationsTester extends TestCase {
 	
 	private int classDiffCount = 0;
 	
-	public APIDeclarationsTester() {
+	public APIDeclarationsTestCase() {
 
 	}
 
-	public APIDeclarationsTester(String name) {
+	public APIDeclarationsTestCase(String name) {
 		super(name);
 	}
 
 	
-	protected ClassLoader getClassLoader(List jarURLList) throws Exception {
-		ClassWorld world = new ClassWorld();
-		ClassRealm containerRealm = world.newRealm("container");
+	protected ClassPool createClassPool(List jarURLList) throws Exception {
+		ClassPool classPool = new ClassPool();
 		for (Iterator i = jarURLList.iterator(); i.hasNext();) {
-			containerRealm.addConstituent((URL) i.next());
+			classPool.appendClassPath(((URL) i.next()).getFile());
 		}
-		return containerRealm.getClassLoader();
+		return classPool;
 	}
-
-	protected ClassPool getClassPool(List jarURLList) throws Exception {
-		ClassPool refClassPool = new ClassPool();
-		for (Iterator i = jarURLList.iterator(); i.hasNext();) {
-			refClassPool.appendClassPath(((URL) i.next()).getFile());
+	
+	protected ClassPool createClassPool(String className) throws Exception {
+		ClassPool classPool = new ClassPool(true);
+		String resource = getClassResourceName(className);
+		URL url = this.getClass().getClassLoader().getResource(resource);
+		if (url == null) {
+			throw new MalformedURLException("Unable to find class " + className + " URL");
 		}
-		return refClassPool;
+		String path = url.toExternalForm();
+		path = path.substring(0, path.length() - resource.length() - 1);
+		if (path.startsWith("file:")) {
+			path = path.substring(5);
+		}
+		classPool.appendClassPath(path);
+		return classPool;
 	}
-
-	protected void verifyClassList(List names, ClassLoader refLoader, ClassLoader implLoader, ClassPool refClassPool)
-			throws Exception {
+	
+	protected void verifyClassList(List names, ClassPool implClassPool, ClassPool refClassPool) throws Exception {
 		for (Iterator i = names.iterator(); i.hasNext();) {
-			verifyClass(refLoader, implLoader, (String) i.next(), refClassPool);
+			verifyClass((String) i.next(), implClassPool, refClassPool);
 		}
 	}
 
-	protected void verifyClass(ClassLoader refLoader, ClassLoader implLoader, String className, ClassPool refClassPool)
-			throws Exception {
+	public static String getClassResourceName(String className) {
+		return className.replace('.', '/').concat(".class");
+	}
+	
+	protected void verifyClass(String className, ClassPool implClassPool, ClassPool refClassPool) throws Exception {
 		classDiffCount = 0;
 		if (verbose) {
 			System.out.println("Testing class " + className);
 		}
 
-		Class refClass = refLoader.loadClass(className);
-		Class implClass;
+		CtClass refClass = null;
+		CtClass implClass; 
+		
 		try {
-			implClass = implLoader.loadClass(className);
-		} catch (ClassNotFoundException e) {
+			refClass = refClassPool.get(className);
+		} catch (NotFoundException e) {
+			fail("Reference class not found " + className);
+		}
+		try {
+			implClass = implClassPool.get(className);
+		} catch (NotFoundException e) {
 			reportFail(className + " not implemented");
 			return;
 		}
 
-		String classResourceName = className.replace('.', '/') + ".class";
-		URL implURL = implLoader.getResource(classResourceName);
-		URL refURL = refLoader.getResource(classResourceName);
-
-		if (verbose) {
-			System.out.println("Found ref class " + refURL);
-			System.out.println("Found impl class " + implURL);
-		}
-
-		reportTrue(className + " Reference class not in jar", refURL.toExternalForm().startsWith("jar"));
-
-		reportFalse(className + " Implementation and Reference classes are mixed-up", refURL.sameFile(implURL));
-
-		compareClasses(refClass, implClass, className, refClassPool);
+		compareClasses(refClass, implClass, className);
 //		if ((classDiffCount > 0) && (!verbose)) {
 //			System.out.println("Found impl class " + implURL);
 //		}
@@ -229,14 +229,14 @@ public class APIDeclarationsTester extends TestCase {
         return simpleName.substring(simpleName.lastIndexOf(".") + 1);
     }
 
-	private void compareClasses(Class refClass, Class implClass, String className, ClassPool refClassPool)
+	private void compareClasses(CtClass refClass, CtClass implClass, String className)
 			throws Exception {
 
 		reportEquals(className + " isInterface", refClass.isInterface(), implClass.isInterface());
 		reportEquals(className + " getModifiers", refClass.getModifiers(), implClass.getModifiers());
 
-		Class[] refInterfaces = refClass.getInterfaces();
-		Class[] implInterfaces = implClass.getInterfaces();
+		CtClass[] refInterfaces = refClass.getInterfaces();
+		CtClass[] implInterfaces = implClass.getInterfaces();
 
 		if (verbose) {
 			System.out.println("interfaces implemented " + implInterfaces.length);
@@ -253,22 +253,22 @@ public class APIDeclarationsTester extends TestCase {
 		}
 
 		// Constructors
-		Constructor[] refConstructors = refClass.getDeclaredConstructors();
-		Constructor[] implConstructors = implClass.getDeclaredConstructors();
+		CtConstructor[] refConstructors = refClass.getDeclaredConstructors();
+		CtConstructor[] implConstructors = implClass.getDeclaredConstructors();
 		compareConstructors(refConstructors, implConstructors, className);
 
 		// Methods
-		Method[] refMethods = refClass.getDeclaredMethods();
-		Method[] implMethods = implClass.getDeclaredMethods();
+		CtMethod[] refMethods = refClass.getDeclaredMethods();
+		CtMethod[] implMethods = implClass.getDeclaredMethods();
 		compareMethods(refMethods, implMethods, className);
 
 		// all accessible public fields
-		Field[] refFields = refClass.getFields();
-		Field[] implFields = implClass.getFields();
-		compareFields(refFields, implFields, className, refClass, implClass, refClassPool);
+		CtField[] refFields = refClass.getFields();
+		CtField[] implFields = implClass.getFields();
+		compareFields(refFields, implFields, className, refClass, implClass);
 	}
 
-	private void compareInterfaces(Class[] refInterfaces, Class[] implInterfacess, String className) throws Exception {
+	private void compareInterfaces(CtClass[] refInterfaces, CtClass[] implInterfacess, String className) throws Exception {
 		List implNames = new Vector();
 		for (int i = 0; i < implInterfacess.length; i++) {
 			implNames.add(implInterfacess[i].getName());
@@ -279,7 +279,7 @@ public class APIDeclarationsTester extends TestCase {
 		}
 	}
 
-	private Map buildNameMap(Member[] members, String className) throws Exception {
+	private Map buildNameMap(CtMember[] members, String className) throws Exception {
 		Map namesMap = new Hashtable();
 		for (int i = 0; i < members.length; i++) {
 			if (ignoreMember(members[i])) {
@@ -288,7 +288,7 @@ public class APIDeclarationsTester extends TestCase {
 			}
 			String name = getName4Map(members[i]);
 			if (namesMap.containsKey(name)) {
-				Member exists = (Member)namesMap.get(name);
+				CtMember exists = (CtMember)namesMap.get(name);
 				if (exists.getDeclaringClass().getName().equals(className)) {
 					continue;
 				}
@@ -299,7 +299,7 @@ public class APIDeclarationsTester extends TestCase {
 		return namesMap;
 	}
 
-	private boolean ignoreMember(Member member) {
+	private boolean ignoreMember(CtMember member) {
 		if (Modifier.isPublic(member.getModifiers())) {
 			return false;
 		} else if (Modifier.isProtected(member.getModifiers())) {
@@ -309,15 +309,18 @@ public class APIDeclarationsTester extends TestCase {
 		}
 	}
 
-	private int getModifiers(Member member) {
+	private int getModifiers(CtMember member) {
 		int mod = member.getModifiers();
 		if (Modifier.isNative(mod)) {
 			mod = mod - Modifier.NATIVE;
 		}
+		if (Modifier.isSynchronized(mod)) {
+			mod = mod - Modifier.SYNCHRONIZED;
+		}
 		return mod;
 	}
 
-	private void compareConstructors(Constructor[] refConstructors, Constructor[] implConstructors, String className)
+	private void compareConstructors(CtConstructor[] refConstructors, CtConstructor[] implConstructors, String className)
 			throws Exception {
 		Map implNames = buildNameMap(implConstructors, className);
 		int compared = 0;
@@ -325,7 +328,7 @@ public class APIDeclarationsTester extends TestCase {
 			if (ignoreMember(refConstructors[i])) {
 				continue;
 			}
-			compareConstructor(refConstructors[i], (Constructor) implNames.get(getName4Map(refConstructors[i])),
+			compareConstructor(refConstructors[i], (CtConstructor) implNames.get(getName4Map(refConstructors[i])),
 					className);
 			compared++;
 			implNames.remove(getName4Map(refConstructors[i]));
@@ -340,7 +343,7 @@ public class APIDeclarationsTester extends TestCase {
 
 	}
 
-	private void compareConstructor(Constructor refConstructor, Constructor implConstructor, String className)
+	private void compareConstructor(CtConstructor refConstructor, CtConstructor implConstructor, String className)
 			throws Exception {
 		String name = refConstructor.getName();
 		reportNotNull(className + " Constructor " + name + " is Missing", implConstructor);
@@ -351,7 +354,7 @@ public class APIDeclarationsTester extends TestCase {
 				.toString(getModifiers(refConstructor)), Modifier.toString(getModifiers(implConstructor)));
 	}
 
-	private void compareMember(Member refMember, Member implMember, String className) throws Exception {
+	private void compareMember(CtMember refMember, CtMember implMember, String className) throws Exception {
 		String name = refMember.getName();
 		reportNotNull(className + "." + name + " is Missing", implMember);
 		if (implMember == null) {
@@ -361,16 +364,16 @@ public class APIDeclarationsTester extends TestCase {
 				.toString(getModifiers(implMember)));
 	}
 
-	private String getName4Map(Member member) {
+	private String getName4Map(CtMember member) throws NotFoundException {
 		StringBuffer name = new StringBuffer();
 		name.append(member.getName());
-		if ((member instanceof Method) || (member instanceof Constructor)) {
+		if ((member instanceof CtMethod) || (member instanceof CtConstructor)) {
 			// Overloaded Methods should have different names
-			Class[] param;
-			if (member instanceof Method) {
-				param = ((Method) member).getParameterTypes();
-			} else if (member instanceof Constructor) {
-				param = ((Constructor) member).getParameterTypes();
+			CtClass[] param;
+			if (member instanceof CtMethod) {
+				param = ((CtMethod) member).getParameterTypes();
+			} else if (member instanceof CtConstructor) {
+				param = ((CtConstructor) member).getParameterTypes();
 			} else {
 				throw new Error("intenal test error");
 			}
@@ -386,14 +389,14 @@ public class APIDeclarationsTester extends TestCase {
 		return name.toString();
 	}
 
-	private void compareMethods(Method[] refMethods, Method[] implMethods, String className) throws Exception {
+	private void compareMethods(CtMethod[] refMethods, CtMethod[] implMethods, String className) throws Exception {
 		Map implNames = buildNameMap(implMethods, className);
 		int compared = 0;
 		for (int i = 0; i < refMethods.length; i++) {
 			if (ignoreMember(refMethods[i])) {
 				continue;
 			}
-			compareMethod(refMethods[i], (Method) implNames.get(getName4Map(refMethods[i])), className);
+			compareMethod(refMethods[i], (CtMethod) implNames.get(getName4Map(refMethods[i])), className);
 			compared++;
 			implNames.remove(getName4Map(refMethods[i]));
 		}
@@ -406,7 +409,7 @@ public class APIDeclarationsTester extends TestCase {
 		}
 	}
 
-	private void compareMethod(Method refMethod, Method implMethod, String className) throws Exception {
+	private void compareMethod(CtMethod refMethod, CtMethod implMethod, String className) throws Exception {
 		compareMember(refMethod, implMethod, className);
 		if (implMethod == null) {
 			return;
@@ -416,8 +419,7 @@ public class APIDeclarationsTester extends TestCase {
 				.getReturnType().getName());
 	}
 
-	private void compareFields(Field[] refFields, Field[] implFields, String className, Class refClass,
-			Class implClass, ClassPool refClassPool) throws Exception {
+	private void compareFields(CtField[] refFields, CtField[] implFields, String className, CtClass refClass, CtClass implClass) throws Exception {
 		Map implNames = buildNameMap(implFields, className);
 		Map implNamesTested = new Hashtable();
 		int compared = 0;
@@ -429,11 +431,11 @@ public class APIDeclarationsTester extends TestCase {
 			if (verbose) {
 				System.out.println("compareField " + className + "." + refFields[i].getName());
 			}
-			Field impl = (Field) implNames.get(name);
+			CtField impl = (CtField) implNames.get(name);
 			if ((impl == null) && (implNamesTested.containsKey(name))) {
 				continue;
 			}
-			compareField(refFields[i], impl, className, refClass, implClass, refClassPool);
+			compareField(refFields[i], impl, className, refClass, implClass);
 			compared++;
 			implNamesTested.put(name, impl);
 			implNames.remove(name);
@@ -447,8 +449,7 @@ public class APIDeclarationsTester extends TestCase {
 		}
 	}
 	
-	private void compareField(Field refField, Field implField, String className, Class refClass, Class implClass,
-			ClassPool refClassPool) throws Exception {
+	private void compareField(CtField refField, CtField implField, String className, CtClass refClass, CtClass implClass) throws Exception {
 		String name = refField.getName();
 		compareMember(refField, implField, className);
 		if (implField == null) {
@@ -457,10 +458,8 @@ public class APIDeclarationsTester extends TestCase {
 		reportEquals(className + "." + name + " getType", refField.getType().getName(), implField.getType().getName());
 		if ((Modifier.isFinal(refField.getModifiers())) && (Modifier.isStatic(refField.getModifiers()))) {
 			// Compare value
-			CtClass klass = refClassPool.get(className);
-			CtField field = klass.getField(name);
-			Object refConstValue = field.getConstantValue();
-			Object implConstValue = implField.get(implClass);
+			Object refConstValue = refField.getConstantValue();
+			Object implConstValue = implField.getConstantValue();
 			if (refConstValue == null) {
 				if (implConstValue != null) {
 					if (verbose) {
@@ -472,33 +471,20 @@ public class APIDeclarationsTester extends TestCase {
 			}
 
 			String value = refConstValue.toString();
-			String implValue = null;
-			if (refField.getType().getName().equals("int")) {
-				implValue = String.valueOf(implField.getInt(implClass));
-			} else if (refField.getType().getName().equals("byte")) {
-				implValue = String.valueOf(implField.getByte(implClass));
-			} else if (refField.getType().getName().equals("long")) {
-				implValue = String.valueOf(implField.getLong(implClass));
-			} else if (refField.getType().getName().equals("java.lang.String")) {
-				implValue = implField.get(implClass).toString();
-			} else {
-				System.out.println("Not implemented comparison for " + refField.getType().getName() + " of "
-						+ className + "." + name);
-			}
+			String implValue = implConstValue.toString();
+//			if (refField.getType().getName().equals("int")) {
+//				implValue = String.valueOf(implField.getInt(implClass));
+//			} else if (refField.getType().getName().equals("byte")) {
+//				implValue = String.valueOf(implField.getByte(implClass));
+//			} else if (refField.getType().getName().equals("long")) {
+//				implValue = String.valueOf(implField.getLong(implClass));
+//			} else if (refField.getType().getName().equals("java.lang.String")) {
+//				implValue = implField.get(implClass).toString();
+//			} else {
+//				System.out.println("Not implemented comparison for " + refField.getType().getName() + " of "
+//						+ className + "." + name + " = " + value);
+//			}
 			reportEquals(className + "." + name + " value ", value, implValue);
-
-			// //java.lang.UnsatisfiedLinkError: isNetworkMonitorActive
-			// //at
-            // javax.microedition.io.Connector.isNetworkMonitorActive(Native
-            // Method)
-			// if (refField.getType().getName().equals("int")) {
-			// reportEquals(className + "." + name + " value ",
-			// refField.getInt(refClass),
-			// implField.getInt(implClass));
-			// } else {
-			// System.out.println("Not implemented comparison for " +
-            // refField.getType().getName() + " of " + className + "." + name);
-			// }
 		} else {
 			System.out.println("ignore comparison for " + className + "." + name);
 		}
