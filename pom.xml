@@ -9,7 +9,7 @@
 
     <groupId>net.sf.bluecove</groupId>
     <artifactId>bluecove</artifactId>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.2</version>
     <packaging>jar</packaging>
     <url>http://sourceforge.net/projects/bluecove/</url>
 
