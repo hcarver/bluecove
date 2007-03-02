@@ -15,7 +15,7 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  @version $Id: Connection.java 877 2007-02-13 02:24:09Z vlads $
+ *  @version $Id$
  */
 package com.intel.bluetooth.test;
 

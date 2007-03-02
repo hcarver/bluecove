@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with Blue Cove; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-@version $Id: NativeLibLoader.java 105 2007-02-26 00:20:23Z skarzhevskyy $
+@version $Id$
 
 */
 
