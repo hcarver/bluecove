@@ -177,8 +177,9 @@ public class SimpleClient implements DiscoveryListener  {
 	}
 
 	public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
-		for (int i = 0; i < servRecord.length; i++)
+		for (int i = 0; i < servRecord.length; i++) {
 			records.addElement(servRecord[i]);
+		}
 	}
 
 	public synchronized void serviceSearchCompleted(int transID, int respCode) {

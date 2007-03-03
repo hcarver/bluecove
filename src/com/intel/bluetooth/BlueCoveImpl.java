@@ -53,6 +53,7 @@ public class BlueCoveImpl {
 	private BlueCoveImpl() {
 		//acc = AccessController.getContext();
 		bluetoothPeer = new BluetoothPeer();
+		System.out.println("BlueCove version 1.2.2");
 	}
 	
     public static BlueCoveImpl instance() {
