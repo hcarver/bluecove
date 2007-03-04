@@ -49,6 +49,7 @@ void debug(char *fmt, ...) {
 #define SERVICE_SEARCH_DEVICE_NOT_REACHABLE 6
 
 static BOOL started;
+static DWORD dllWSAStartupError = 0;
 static HANDLE hLookup;
 static CRITICAL_SECTION csLookup;
 
@@ -58,26 +59,29 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	case DLL_PROCESS_ATTACH:
 		{
 			WSADATA data;
-			if (WSAStartup(MAKEWORD(2, 2), &data)) {
+			if (WSAStartup(MAKEWORD(2, 2), &data) != 0) {
+				dllWSAStartupError = WSAGetLastError();
 				started = FALSE;
-				return FALSE;
-			} else
+			} else {
 				started = TRUE;
-
+            }
 			hLookup = NULL;
-
+            debug("c InitializeCriticalSection\n");
 			InitializeCriticalSection(&csLookup);
-			break;
+			return started;
 		}
 	case DLL_THREAD_ATTACH:
 		break;
 	case DLL_THREAD_DETACH:
 		break;
 	case DLL_PROCESS_DETACH:
-		if (started)
+		if (started) {
 			WSACleanup();
+		}
 		DeleteCriticalSection(&csLookup);
 		break;
+	default:
+	    debug("c DllMain default %d\n", ul_reason_for_call);
 	}
 	return TRUE;
 }
@@ -131,6 +135,18 @@ void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg)
 	DWORD last_error = WSAGetLastError();
 	sprintf_s(errmsg, 1064, "%s [%d] %S", msg, last_error, GetWSAErrorMessage(last_error));
     throwIOException(env, errmsg);
+}
+
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStatus(JNIEnv *env, jobject peer) {
+    if (started) {
+        return 1;
+    } else {
+        char errmsg[1064];
+	    sprintf_s(errmsg, 1064, "Initialization error [%d] %S", dllWSAStartupError, GetWSAErrorMessage(dllWSAStartupError));
+        throwIOException(env, errmsg);
+        return 0;
+    }
 }
 
 /*

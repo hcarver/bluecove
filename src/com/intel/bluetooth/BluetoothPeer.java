@@ -92,6 +92,18 @@ public class BluetoothPeer {
 			}
 		}
 	}
+	
+	/**
+	 * This is implementation specific class, only BlueCoveImpl can create this class
+	 *
+	 */
+	BluetoothPeer() {
+		try {
+			DebugLog.debug("initializationStatus", initializationStatus());
+		} catch (IOException e) {
+			DebugLog.fatal("initialization", e);
+		}
+	}
 
 	public void startInquiry(int accessCode, DiscoveryListener listener) {
 		(new InquiryThread(accessCode, listener)).start();
@@ -101,6 +113,8 @@ public class BluetoothPeer {
 		(new SearchServicesThread(attrSet, uuidSet, device, listener)).start();
 	}
 
+	public native int initializationStatus() throws IOException;
+	
 	/*
 	 * perform synchronous inquiry
 	 */
