@@ -5,7 +5,7 @@
 
 == About ==
 
-BlueCove is a LGPL licensed JSR-82 implementation that currently interfaces with
+BlueCove is a LGPL licensed JSR-82 implementation on Java Standard Edition (J2SE) that currently interfaces with
 the Microsoft Bluetooth stack. Originally developed by Intel Research and
 currently maintained by volunteers.
 
