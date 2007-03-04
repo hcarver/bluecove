@@ -15,7 +15,7 @@
 
     <name>bluecove</name>
 
-    <description>BlueCove is a LGPL licensed JSR-82 implementation that currently interfaces with the Microsoft Bluetooth stack</description>
+    <description>BlueCove is a LGPL licensed JSR-82 J2SE implementation that currently interfaces with the Microsoft Bluetooth stack</description>
 
     <organization>
         <name>BlueCove Team</name>
