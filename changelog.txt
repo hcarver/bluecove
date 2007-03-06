@@ -1,6 +1,6 @@
 @version $Id$
 
-2007-03-02 Vlad Skarzhevskyy
+2007-03-06 Vlad Skarzhevskyy
 
 * Released 1.2.2
 

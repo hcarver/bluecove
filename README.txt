@@ -26,6 +26,14 @@ support another stack and/or operating system, it will be considered for
 inclusion.  BlueCove does also not support OBEX, but there are other projects
 that can (possibly) be used to achieve OBEX functionality with BlueCove.
 
+== Not Implemented functionality ===
+
+  * `InputStream.available()`  returns 0 all the time.
+  * `LocalDevice.updateRecord(ServiceRecord srvRecord)`  Not implemented
+  * `DiscoveryAgent.cancelServiceSearch(..)`  Not implemented
+  * `DiscoveryAgent.selectService(..)`  Not implemented
+  * `RemoteDevice` authenticate, authorize and encrypt Not implemented
+
 == Installation ==
 
 Installation of the binary (already compiled) version of BlueCove is as follows:
@@ -52,7 +60,7 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
     Make sure you have
      Tools ->  Options -> VC++ Directories ->
         "Include files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\Include
-        "Library files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\lib
+       "Library files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\lib
 
  Ant or maven2 are used as the build tool for java.
 
