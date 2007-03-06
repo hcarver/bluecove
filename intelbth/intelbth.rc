@@ -1,6 +1,6 @@
 1 VERSIONINFO
- FILEVERSION 1,2,2,1
- PRODUCTVERSION 1,2,2,1
+ FILEVERSION 1,2,3,0
+ PRODUCTVERSION 1,2,3,0
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
@@ -9,14 +9,14 @@ BEGIN
             VALUE "Comments", "Open Source\0"
             VALUE "CompanyName", "None\0"
             VALUE "FileDescription", "BlueCove JSR-82\0"
-            VALUE "FileVersion", "1, 2, 2, 1\0"
+            VALUE "FileVersion", "1, 2, 3, 0\0"
             VALUE "InternalName", "intelbth.dll\0"
             VALUE "LegalCopyright", "GNU Library or Lesser General Public License (LGPL)\0"
             VALUE "LegalTrademarks", "BlueCove\0"
             VALUE "OriginalFilename", "intelbth.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "BlueCove\0"
-            VALUE "ProductVersion", "1, 2, 2, 1\0"
+            VALUE "ProductVersion", "1, 2, 3, 0\0"
             VALUE "URL", "http://code.google.com/p/bluecove/\0"
         END
     END

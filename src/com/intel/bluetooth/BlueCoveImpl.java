@@ -2,7 +2,7 @@
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2004 Intel Corporation
  *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
- * 
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -18,20 +18,20 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth;
 
 //import java.security.AccessControlContext;
 //import java.security.AccessController;
 
 /**
- * 
+ *
  * Singleton class used as holder for BluetoothPeer instead of LocalDevice
- * 
+ *
  * All you need to do is initialize BlueCoveImpl inside Privileged context.
  *
  * n/a: Also this class hold Secirity Context to enable work in webstart applications.
- * 
+ *
  * @author vlads
  *
  */
@@ -39,29 +39,29 @@ public class BlueCoveImpl {
 
 	/* The context to be used when acessing resources */
     //private AccessControlContext acc;
-    
+
 	private BluetoothPeer bluetoothPeer;
 
     /**
      * Allow default initialization.
-     * In Secure environment instance() should be called initialy from secure contex.  
+     * In Secure environment instance() should be called initialy from secure contex.
      */
     private static class SingletonHolder {
         private static BlueCoveImpl instance = new BlueCoveImpl();
-    } 
-    
+    }
+
 	private BlueCoveImpl() {
 		//acc = AccessController.getContext();
 		bluetoothPeer = new BluetoothPeer();
-		System.out.println("BlueCove version 1.2.2");
+		System.out.println("BlueCove version 1.2.3");
 	}
-	
+
     public static BlueCoveImpl instance() {
 		return SingletonHolder.instance;
     }
-    
+
     public BluetoothPeer getBluetoothPeer() {
 		return bluetoothPeer;
 	}
-	
+
 }
