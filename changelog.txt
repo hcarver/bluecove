@@ -8,7 +8,7 @@
 
 * Fixed LocalDevice.getLocalDevice().getBluetoothAddress();
 * dll build for Vista and XP
-* Removed use of unimplmented exception that prevented multiple apps from running.
+* Removed use of unimplemented exception that prevented multiple apps from running.
 * Implement openOutputStream  and openInputStream in Connector
 * Fixes for native Code to avoid JVM Errors
 
