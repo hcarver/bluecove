@@ -26,7 +26,7 @@ import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothPeer;
-import com.intel.bluetooth.BluetoothStreamConnectionNotifier;
+import com.intel.bluetooth.BluetoothStreamServiceRecordAccess;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
 
@@ -253,11 +253,11 @@ public class LocalDevice {
 		if (notifier == null)
 			throw new NullPointerException();
 
-		if (!(notifier instanceof BluetoothStreamConnectionNotifier))
+		if (!(notifier instanceof BluetoothStreamServiceRecordAccess)) {
 			throw new IllegalArgumentException();
+		}
 
-		return ((BluetoothStreamConnectionNotifier) notifier)
-				.getServiceRecord();
+		return ((BluetoothStreamServiceRecordAccess) notifier).getServiceRecord();
 	}
 
 	/*

@@ -28,7 +28,7 @@ import javax.bluetooth.UUID;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
-public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier {
+public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, BluetoothStreamServiceRecordAccess {
 	
 	private int socket;
 
