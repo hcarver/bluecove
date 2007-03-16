@@ -36,6 +36,11 @@
         <url>http://bluecove.googlecode.com/svn/trunk</url>
     </scm>
 
+	<issueManagement>
+		<system>Google Code Issue Tracking</system>
+		<url>http://code.google.com/p/bluecove/issues/list</url>
+	</issueManagement>
+
     <developers>
         <developer>
             <name>Paul Totterman</name>
