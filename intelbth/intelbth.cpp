@@ -949,6 +949,24 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_accept(JNIEnv *env
 
 /*
 * Class:     com_intel_bluetooth_BluetoothPeer
+* Method:    recv_available
+*
+* Use to determine the amount of data pending in the network's input buffer that can be read from socket.
+* returns the amount of data that can be read in a single call to the recv function, which may not be the same as 
+* the total amount of data queued on the socket. 
+*/
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_recvAvailable(JNIEnv *env, jobject peer, jint socket)
+{
+	unsigned long arg = 0;
+	if (ioctlsocket(socket, FIONREAD, &arg) != 0) {
+		throwIOExceptionWSAGetLastError(env, "Failed to read available");
+		return 0;
+	}
+	return arg;
+}
+
+/*
+* Class:     com_intel_bluetooth_BluetoothPeer
 * Method:    recv
 * Signature: (I)I
 */
@@ -958,8 +976,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__I(JNIEnv *en
 	unsigned char c;
 
 	if (recv((SOCKET)socket, (char *)&c, 1, 0) != 1) {
-		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to read");
-		throwIOException(env, "Failed to read");
+		throwIOExceptionWSAGetLastError(env, "Failed to read");
 		return 0;
 	}
 	return (int)c;
@@ -985,8 +1002,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__I_3BII(JNIEn
 			env->ReleaseByteArrayElements(b, bytes, 0);
 
 			if (done == 0) {
-				//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to write");
-				throwIOException(env, "Failed to write");
+				throwIOExceptionWSAGetLastError(env, "Failed to read");
 				return 0;
 			} else
 				return done;
@@ -1011,8 +1027,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__II(JNIEnv *e
 	char c = (char)b;
 
 	if (send((SOCKET)socket, &c, 1, 0) != 1) {
-		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to write");
-		throwIOException(env, "Failed to write");
+		throwIOExceptionWSAGetLastError(env, "Failed to write");
 	}
 }
 /*
@@ -1033,9 +1048,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__I_3BII(JNIEn
 
 		if (count <= 0) {
 			env->ReleaseByteArrayElements(b, bytes, 0);
-
-			//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to write");
-			throwIOException(env, "Failed to write");
+			throwIOExceptionWSAGetLastError(env, "Failed to write");
 			return;
 		}
 
@@ -1054,7 +1067,6 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_close(JNIEnv *env,
 {
 	debug("c ->close\n");
 	if (closesocket((SOCKET)socket)) {
-		//env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to close socket");
 		throwIOExceptionWSAGetLastError(env, "Failed to close socket");
 	}
 }

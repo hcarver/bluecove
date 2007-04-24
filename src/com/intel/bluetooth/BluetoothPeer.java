@@ -169,6 +169,8 @@ public class BluetoothPeer {
 
 	public native int accept(int socket) throws IOException;
 
+	public native long recvAvailable(int socket) throws IOException;
+	
 	public native int recv(int socket) throws IOException;
 
 	public native int recv(int socket, byte[] b, int off, int len) throws IOException;

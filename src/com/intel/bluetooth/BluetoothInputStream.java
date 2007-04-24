@@ -31,11 +31,17 @@ class BluetoothInputStream extends InputStream {
 		this.conn = conn;
 	}
 
-	/**
-	 * TODO use WSAEventSelect
+	/*
+	 * returns the amount of data that can be read in a single call to the read function, 
+	 * which may not be the same as the total amount of data queued on the socket. 
+	 * 
 	 */
 	public synchronized int available() throws IOException {
-		return super.available();
+		if (conn == null) {
+			throw new IOException();
+		} else {
+			return (int)BlueCoveImpl.instance().getBluetoothPeer().recvAvailable(conn.socket);
+		}
 	}
 	
 	/*
