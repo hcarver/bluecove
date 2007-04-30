@@ -19,17 +19,21 @@ CC=cl.exe
 # /O2  Maximize Speed
 
 CFLAGS=-nologo -I. -I $(JAVA_HOME)\include -I $(JAVA_HOME)\include\win32 \
-       /O1 -W3 -DWIN32 -D_WINDOWS -DNDEBUG -D_USRDLL -D_WINDLL -D_UNICODE \
-       -DUNICODE $(DEBUG_CFLAGS)
+       /D WIN32 /D _WINDOWS /D NDEBUG /D _USRDLL /D _WINDLL -D _UNICODE  /D UNICODE /D INTELBTH_EXPORTS \
+       /O2 /FD /EHsc /MT /W3 /c /Wp64 /Zi /TP \
+       $(DEBUG_CFLAGS)
+
+#      /O1 /W3 \
+
 
 RSC=rc.exe
 RSC_PROJ=/l 0x1009 /d "NDEBUG"
 
 LINK=link.exe
 
-LINK_FLAGS=/DEFAULTLIB:user32.lib ws2_32.lib irprops.lib kernel32.lib -nologo -machine:I386 -incremental:no /SUBSYSTEM:WINDOWS /OPT:NOREF \
-           -dll  /RELEASE /def:"${SRCDIR}\intelbth.def" \
-           -LIBPATH:$(OBJDIR)
+LINK_FLAGS=-nologo /MACHINE:X86 /INCREMENTAL:NO /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF \
+           /DLL /RELEASE /def:"${SRCDIR}\intelbth.def" \
+           -LIBPATH:$(OBJDIR) ws2_32.lib irprops.lib kernel32.lib
 
 
 SRCS_RC=${SRCDIR}\intelbth.rc
@@ -48,7 +52,10 @@ clean:
 
 debug:
 
-default: outdir clean dll
+install:
+	@copy "$(OUTDIR)\$(DLL_TARGET)" "resources\$(DLL_TARGET)"
+
+default: outdir clean dll install
 
 %.obj:
 	$(CC) $(CFLAGS) -Fo$(OBJDIR)\$*.obj -c $(SRCDIR)\$*.cpp
