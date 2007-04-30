@@ -120,7 +120,7 @@ public class BluetoothPeer {
 	
 	public native void enableNativeDebug(boolean on);
 	
-	public static void nativeDebugCallback(int lineN, String message) {
+	public void nativeDebugCallback(int lineN, String message) {
 		DebugLog.debug("intelbth.cpp:" + lineN, message);
 	}
 	

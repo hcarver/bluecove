@@ -46,13 +46,12 @@ static HANDLE hLookup;
 static CRITICAL_SECTION csLookup;
 
 static BOOL nativeDebugCallback= false;
-static jclass nativeDebugListenerClass = NULL;
 static jmethodID nativeDebugMethod = NULL;
 
-void callDebugListener(JNIEnv *env, int lineN, const char *fmt, ...);
-#define debug(fmt) callDebugListener(env, __LINE__, fmt);
-#define debugs(fmt, message) callDebugListener(env, __LINE__, fmt, message);
-#define debugss(fmt, message1, message2) callDebugListener(env, __LINE__, fmt, message1, message2);
+void callDebugListener(JNIEnv *env, jobject peer, int lineN, const char *fmt, ...);
+#define debug(fmt) callDebugListener(env, peer, __LINE__, fmt);
+#define debugs(fmt, message) callDebugListener(env, peer, __LINE__, fmt, message);
+#define debugss(fmt, message1, message2) callDebugListener(env, peer, __LINE__, fmt, message1, message2);
 
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
@@ -89,7 +88,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 
 void throwException(JNIEnv *env, const char *name, const char *msg)
 {
-	 debugss("Throw Exception %s %s", name, msg);
+	 //debugss("Throw Exception %s %s", name, msg);
 	 jclass cls = env->FindClass(name);
      /* if cls is NULL, an exception has already been thrown */
      if (cls != NULL) {
@@ -150,9 +149,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStat
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug(JNIEnv *env, jobject peer, jboolean on) {
 	if (on) {
-		nativeDebugListenerClass = env->FindClass("com/intel/bluetooth/BluetoothPeer");
+		jclass nativeDebugListenerClass = env->GetObjectClass(peer);
 		if (nativeDebugListenerClass != NULL) {
-			nativeDebugMethod = env->GetStaticMethodID(nativeDebugListenerClass, "nativeDebugCallback", "(ILjava/lang/String;)V");
+			nativeDebugMethod = env->GetMethodID(nativeDebugListenerClass, "nativeDebugCallback", "(ILjava/lang/String;)V");
 			if (nativeDebugMethod != NULL) {
 				nativeDebugCallback = true;
 				debug("nativeDebugCallback ON");
@@ -163,14 +162,14 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug(
 	}
 }
 
-void callDebugListener(JNIEnv *env, int lineN, const char *fmt, ...) {
+void callDebugListener(JNIEnv *env, jobject peer, int lineN, const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
 	{
 		if (nativeDebugCallback) {
 			char msg[1064];
 			_vsnprintf_s(msg, 1064, fmt, ap);
-			env->CallVoidMethod(nativeDebugListenerClass, nativeDebugMethod, lineN, env->NewStringUTF(msg));
+			env->CallVoidMethod(peer, nativeDebugMethod, lineN, env->NewStringUTF(msg));
 		}
 	}
 	va_end(ap);
