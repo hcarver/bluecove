@@ -38,7 +38,9 @@ public class NativeLibLoader {
         if (triedToLoadAlredy) {
             return libraryAvailable;
         }
-        String libFileName = NATIVE_LIB;
+        String libName = NATIVE_LIB;
+        String libFileName = libName;
+
         String sysName = System.getProperty("os.name");
 
         if (sysName == null) {
@@ -49,7 +51,8 @@ public class NativeLibLoader {
         
         if (sysName.indexOf("windows") != -1)  {
         	if (sysName.indexOf("ce") != -1) {
-        		libFileName = libFileName + "_ce";
+        		libName += "_ce";
+        		libFileName = libName;
         	}
             libFileName = libFileName + ".dll";
         } else if (sysName.indexOf("mac os x") != -1) {
@@ -77,12 +80,12 @@ public class NativeLibLoader {
             libraryAvailable = loadAsSystemResource(libFileName);
         }
         if (!libraryAvailable) {
-        	libraryAvailable = tryload(NATIVE_LIB);
+        	libraryAvailable = tryload(libName);
         }
 
-
         if (!libraryAvailable) {
-            System.err.println("Native Library " + NATIVE_LIB + " not avalable");
+            System.err.println("Native Library " + libName + " not avalable");
+            DebugLog.debug("java.library.path", System.getProperty("java.library.path"));
         }
         triedToLoadAlredy = true;
         return libraryAvailable;
@@ -125,10 +128,12 @@ public class NativeLibLoader {
                 is = clo.getResourceAsStream(libFileName);
             }
         } catch (Throwable e) {
-            throw new Error("Native Library " + libFileName + " is not a ressource !");
+        	DebugLog.error("Native Library " + libFileName + " is not a ressource !");
+            return false;
         }
         if (is == null) {
-            throw new Error("Native Library " + libFileName + " is not a ressource !");
+        	DebugLog.error("Native Library " + libFileName + " is not a ressource !");
+            return false;
         }
         File fd = makeTempName(libFileName);
         try {
