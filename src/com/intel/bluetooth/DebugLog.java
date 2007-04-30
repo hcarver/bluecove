@@ -21,8 +21,6 @@
 package com.intel.bluetooth;
 
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -46,7 +44,8 @@ public class DebugLog {
 	
 	private static final String FQCN = DebugLog.class.getName();
 	
-	private static final Set fqcnSet = new HashSet();
+	//private static final Set fqcnSet = new HashSet();
+	private static final Vector fqcnSet = new Vector(); 
 	
 	private static boolean java13 = false;
 
@@ -57,7 +56,7 @@ public class DebugLog {
 	}
 
 	static {
-		fqcnSet.add(FQCN);
+		fqcnSet.addElement(FQCN);
 	}
 	
 	private static void initialize() {

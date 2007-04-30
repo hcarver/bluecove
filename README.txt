@@ -13,7 +13,7 @@ currently maintained by volunteers.
 
   * Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer)
   * A Bluetooth device supported by the Microsoft bluetooth stack
-  * Java 1.4 or newer (for the binary, might compile on older)
+  * Java 1.1 or newer for the binary execution, Java 1.4 or older for compile.
   * Another Bluetooth device to communicate with
 
 == Limitations ==

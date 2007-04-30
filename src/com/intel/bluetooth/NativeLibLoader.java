@@ -147,7 +147,11 @@ public class NativeLibLoader {
                 is = null;
             }
         }
-        fd.deleteOnExit();
+        try {
+			fd.deleteOnExit();
+		} catch (NoSuchMethodError e) {
+			// Java 1.1
+		}
 //        deleteOnExit(fd);
         try {
             System.load(fd.getAbsolutePath());
@@ -203,12 +207,18 @@ public class NativeLibLoader {
                 DebugLog.debug("Can't create temporary dir ", dir.getAbsolutePath());
                 continue;
             }
-            dir.deleteOnExit();
+            try {
+            	dir.deleteOnExit();
+    		} catch (NoSuchMethodError e) {
+    			// Java 1.1
+    		}
             try {
 				if (!fd.createNewFile()) {
 				    DebugLog.debug("Can't create file in temporary dir ", fd.getAbsolutePath());
 				    continue;
 				}
+            } catch (NoSuchMethodError e) {
+            	// Java 1.1
 			} catch (IOException e) {
 				DebugLog.debug("Can't create file in temporary dir ", fd.getAbsolutePath());
 				continue;
