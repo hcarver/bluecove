@@ -32,7 +32,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	
 	private int socket;
 
-	private int handle;
+	private long handle;
 
 	ServiceRecord serviceRecord;
 

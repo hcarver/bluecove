@@ -100,6 +100,9 @@ public class BluetoothPeer {
 	BluetoothPeer() {
 		try {
 			DebugLog.debug("initializationStatus", initializationStatus());
+			if (DebugLog.isDebugEnabled()) {
+				enableNativeDebug(true);
+			}
 		} catch (IOException e) {
 			DebugLog.fatal("initialization", e);
 		}
@@ -114,6 +117,12 @@ public class BluetoothPeer {
 	}
 
 	public native int initializationStatus() throws IOException;
+	
+	public native void enableNativeDebug(boolean on);
+	
+	public static void nativeDebugCallback(int lineN, String message) {
+		DebugLog.debug("intelbth.cpp:" + lineN, message);
+	}
 	
 	/*
 	 * perform synchronous inquiry
@@ -143,13 +152,13 @@ public class BluetoothPeer {
 	 * register service
 	 */
 
-	public native int registerService(byte[] record) throws IOException;
+	public native long registerService(byte[] record) throws IOException;
 
 	/*
 	 * unregister service
 	 */
 
-	public native void unregisterService(int handle) throws IOException;
+	public native void unregisterService(long handle) throws IOException;
 
 	/*
 	 * socket operations

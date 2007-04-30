@@ -73,9 +73,7 @@
 #endif // #else // _WIN32_WCE
 
 // TODO: reference additional headers your program requires here
-#include <stdio.h>
 #include <stdlib.h>
-#include <tchar.h>
 
 #include "com_intel_bluetooth_BluetoothPeer.h"
 

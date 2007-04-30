@@ -39,7 +39,7 @@ public class SimpleDiscovery {
     
 	public static void main(String[] args) {
 		
-		//System.setProperty("bluecove.debug", "true");
+		System.setProperty("bluecove.debug", "true");
 		//System.setProperty("bluecove.native.path", ".");
 		
 	    LocalDevice l;
