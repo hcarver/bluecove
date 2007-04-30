@@ -38,9 +38,9 @@ public class SimpleServer {
 
 	public SimpleServer(String name) throws BluetoothStateException {
 		
-		//System.setProperty("bluecove.debug", "true");
-		//System.setProperty("bluecove.native.path", ".");
-		//System.setProperty("bluecove.native.path", "../rel/1.2.1");
+		//System.getProperties().put("bluecove.debug", "true");
+		//System.getProperties().put("bluecove.native.path", ".");
+		//System.getProperties().put("bluecove.native.path", "../rel/1.2.1");
 		
 		
 		LocalDevice localDevice = LocalDevice.getLocalDevice();
