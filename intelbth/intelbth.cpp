@@ -135,6 +135,13 @@ void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg)
     throwIOException(env, errmsg);
 }
 
+BOOL ExceptionCheckCompatible(JNIEnv *env) {
+	if (env->GetVersion() > JNI_VERSION_1_1) {
+		return env->ExceptionCheck();
+	} else {
+		return (env->ExceptionOccurred() != NULL);
+	}
+}
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStatus(JNIEnv *env, jobject peer) {
     if (started) {
@@ -336,7 +343,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_doInquiry(JNIEnv *
 		// notify listener
         debug("doInquiry, notify listener");
 		env->CallVoidMethod(listener, env->GetMethodID(env->GetObjectClass(listener), "deviceDiscovered", "(Ljavax/bluetooth/RemoteDevice;Ljavax/bluetooth/DeviceClass;)V"), dev, cod);
-		if (env->ExceptionCheck()) {
+		if (ExceptionCheckCompatible(env)) {
 		    result = INQUIRY_ERROR;
 		    break;
 		}
