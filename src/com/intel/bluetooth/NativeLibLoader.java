@@ -44,7 +44,10 @@ public class NativeLibLoader {
         String sysName = System.getProperty("os.name");
 
         if (sysName == null) {
-        	System.err.println("Native Library " + NATIVE_LIB + " not avalable on unknown platform");
+        	DebugLog.fatal("Native Library " + NATIVE_LIB + " not avalable on unknown platform");
+        	triedToLoadAlredy = true;
+            libraryAvailable = false;
+            return libraryAvailable;
         }
         
         sysName = sysName.toLowerCase(Locale.ENGLISH);
@@ -60,7 +63,7 @@ public class NativeLibLoader {
 //        } else if (.indexOf("linux") != -1) {
 //            libFileName = "lib" + libFileName + ".so";
         } else {
-        	System.err.println("Native Library " + NATIVE_LIB + " not avalable on platform " + sysName);
+        	DebugLog.fatal("Native Library " + NATIVE_LIB + " not avalable on platform " + sysName);
         	triedToLoadAlredy = true;
             libraryAvailable = false;
             return libraryAvailable;
@@ -96,7 +99,7 @@ public class NativeLibLoader {
             System.loadLibrary(name);
             DebugLog.debug("Library loaded", name);
         } catch (Throwable e) {
-        	DebugLog.debug("Library " + name + " not loaded " + e.toString());
+        	DebugLog.error("Library " + name + " not loaded ", e);
             return false;
         }
         return true;
@@ -106,13 +109,13 @@ public class NativeLibLoader {
         try {
         	File f = new File(path, name);
         	if (!f.canRead()) {
-        		System.err.println("Native Library " + f.getAbsolutePath() + " not found");
+        		DebugLog.fatal("Native Library " + f.getAbsolutePath() + " not found");
         		return false;
         	}
             System.load(f.getAbsolutePath());
             DebugLog.debug("Library loaded", f.getAbsolutePath());
         } catch (Throwable e) {
-        	 DebugLog.error("cant load library from path " + path, e);
+        	 DebugLog.error("Can't load library from path " + path, e);
             return false;
         }
         return true;
@@ -128,11 +131,11 @@ public class NativeLibLoader {
                 is = clo.getResourceAsStream(libFileName);
             }
         } catch (Throwable e) {
-        	DebugLog.error("Native Library " + libFileName + " is not a ressource !");
+        	DebugLog.error("Native Library " + libFileName + " is not a Resource !");
             return false;
         }
         if (is == null) {
-        	DebugLog.error("Native Library " + libFileName + " is not a ressource !");
+        	DebugLog.error("Native Library " + libFileName + " is not a Resource !");
             return false;
         }
         File fd = makeTempName(libFileName);

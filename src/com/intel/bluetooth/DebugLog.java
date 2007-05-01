@@ -157,6 +157,12 @@ public class DebugLog {
 		}
 	}
 
+	public static void fatal(String message) {
+		System.out.println("error " + message);
+		printLocation();
+		callAppenders(ERROR, message, null);
+	}
+	
 	public static void fatal(String message, Throwable t) {
 		System.out.println("error " + message + " " + t);
 		printLocation();
