@@ -10,6 +10,8 @@
 // NOTE - this value is not strongly correlated to the Windows CE OS version being targeted
 #define WINVER _WIN32_WCE
 
+#define STRSAFE_NO_DEPRECATE
+
 #include <ceconfig.h>
 #if defined(WIN32_PLATFORM_PSPC) || defined(WIN32_PLATFORM_WFSP)
 #define SHELL_AYGSHELL
@@ -53,11 +55,16 @@
 #include <altcecrt.h>
 
 #include <winsock2.h>
-#include <ws2bth.h>
 #include <bthapi.h>
 #include <bt_api.h>
 #include <bthutil.h>
 #include <bt_sdp.h>
+
+#include <stdlib.h>
+//swprintf_s on XP  _snwprintf on CE
+#define swprintf_s _snwprintf
+#define sprintf_s _snprintf
+#define _vsnprintf_s _vsnprintf
 
 #else // _WIN32_WCE
 

@@ -1,0 +1,37 @@
+
+== Windows Mobile 2003™ Phone Edition with Microsoft Bluetooth Stack ==
+
+   * Motorola MPx220
+
+   * E-Plus PDA 2
+
+   * O2 XDA II (T-Mobile MDA-II)
+
+   * Qtek 2020
+
+   * Samsung SGH-i1300
+
+   * T-Mobile SDA
+
+   * Vodafone VPA II
+
+   * I-mate JAM
+
+
+== Windows Mobile 5 Phone with Microsoft Bluetooth Stack  ==
+
+   * T-Mobile MDA
+
+   * QTek 9100
+
+
+== Windows Mobile 5 with Microsoft Bluetooth Stack  ==
+
+   * Dell Axim X51v
+
+
+== Links to Java on PDA sites ==
+
+   * [http://users.comp.lancs.ac.uk/computing/users/fittond/ppcjava.html List of Java Support on Pocket PC]
+
+   * [http://www.berka.name/stan/jvm-ppc/java_for_pda.html JAVA for PocketPC PDA's]

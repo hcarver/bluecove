@@ -23,13 +23,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "stdafx.h"
 
-#ifdef _WIN32_WCE
-//swprintf_s on XP  _snwprintf on CE
-#define swprintf_s _snwprintf
-#define sprintf_s _snprintf
-#define _vsnprintf_s _vsnprintf
-#endif // #else // _WIN32_WCE
-
 #define INQUIRY_COMPLETED 0
 #define INQUIRY_TERMINATED 5
 #define INQUIRY_ERROR 7
@@ -220,7 +213,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_doInquiry(JNIEnv *
 	memset(&queryset, 0, sizeof(WSAQUERYSET));
 	queryset.dwSize = sizeof(WSAQUERYSET);
 	queryset.dwNameSpace = NS_BTH;
-	queryset.lpBlob = &blob;
+	
+	// TODO Test this.
+	//queryset.lpBlob = &blob;
 
 #ifndef _WIN32_WCE
 	queryset.lpBlob = &blob;
@@ -274,21 +269,20 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_doInquiry(JNIEnv *
 		}
         debug("doInquiry, WSALookupServiceNext");
 		if (WSALookupServiceNext(hLookup, LUP_RETURN_NAME|LUP_RETURN_ADDR|LUP_RETURN_BLOB, &size, (WSAQUERYSET *)buf)) {
-			WSALookupServiceEnd(hLookup);
-
-			hLookup = NULL;
-
-			LeaveCriticalSection(&csLookup);
-
-            debug("doInquiry, exits");
-
-			switch(WSAGetLastError()) {
-			    case WSAENOMORE:
+			DWORD last_error = WSAGetLastError();
+			switch(last_error) {
+				case WSAENOMORE:
 			    case WSA_E_NO_MORE:
 				    result = INQUIRY_COMPLETED;
+					break;
 			    default:
+					debugss("WSALookup error [%d] %S", last_error, GetWSAErrorMessage(last_error));
 				    result = INQUIRY_ERROR;
 			}
+			WSALookupServiceEnd(hLookup);
+			hLookup = NULL;
+			LeaveCriticalSection(&csLookup);
+			debug("doInquiry, exits");
 			break;
 		}
 
