@@ -52,6 +52,10 @@ Native Library location
   # If you wish to load library (.dll) from another location add this system property `-Dbluecove.native.path=/your/path`.
   # If you wish to load library from default location in path e.g. `%SystemRoot%\system32` or any other location in %PATH% use `-Dbluecove.native.resource=false`
 
+IBM J9
+
+    To run BlueCove with [http://www.ibm.com/software/wireless/weme/ IBMs J9] Java VM on Win32 or PocketPC add this system property `-Dmicroedition.connection.pkgs=com.intel.bluetooth`.
+
 == Compilation ==
 
 You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 and SDK for Windows Vista or Windows Server 2003 R2 Platform SDK.
@@ -60,7 +64,7 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
     Make sure you have
      Tools ->  Options -> VC++ Directories ->
         "Include files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\Include
-       "Library files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\lib
+        "Library files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\lib
 
  Ant or maven2 are used as the build tool for java.
 

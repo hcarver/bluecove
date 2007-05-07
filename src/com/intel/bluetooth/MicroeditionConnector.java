@@ -31,6 +31,7 @@ import java.util.StringTokenizer;
 import javax.bluetooth.UUID;
 import javax.microedition.io.Connection;
 import javax.microedition.io.ConnectionNotFoundException;
+import javax.microedition.io.Connector;
 import javax.microedition.io.InputConnection;
 import javax.microedition.io.OutputConnection;
 
@@ -44,19 +45,19 @@ public class MicroeditionConnector {
 	 * Access mode READ. The value 1 is assigned to READ.
 	 */
 
-	public static final int READ = 1;
+	public static final int READ = Connector.READ;
 
 	/*
 	 * Access mode WRITE. The value 2 is assigned to WRITE.
 	 */
 
-	public static final int WRITE = 2;
+	public static final int WRITE = Connector.WRITE;
 
 	/*
 	 * Access mode READ_WRITE. The value 3 is assigned to READ_WRITE.
 	 */
 
-	public static final int READ_WRITE = 3;
+	public static final int READ_WRITE = Connector.READ_WRITE;
 
 	/*
 	 * Create and open a Connection. Parameters: name - The URL for the
@@ -85,6 +86,7 @@ public class MicroeditionConnector {
 		String[] values = new String[4];
 
 		if (name.substring(0, 8).equals("btspp://")) {
+			
 			int colon = name.indexOf(':', 8);
 
 			if (colon > -1) {
@@ -114,7 +116,7 @@ public class MicroeditionConnector {
 				}
 			}
 		} else {
-			throw new ConnectionNotFoundException();
+			throw new ConnectionNotFoundException(name);
 		}
 
 		if (host == null || port == null) {
