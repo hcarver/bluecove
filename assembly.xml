@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<assembly>
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <id>jar-filtered</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>${basedir}/build</directory>
+            <useDefaultExcludes>true</useDefaultExcludes>
+            <outputDirectory></outputDirectory>
+            <excludes>
+                <exclude>**/*.log</exclude>
+                <exclude>**/.*</exclude>
+                <exclude>com/ibm/**</exclude>
+                <exclude>com/sun/cdc/io/ConnectionBaseInterface.class</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+</assembly>
