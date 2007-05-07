@@ -182,6 +182,9 @@ public class LocalDevice {
 	 */
 
 	public static String getProperty(String property) {
+		if ("bluetooth.api.version".equals(property)) {
+			return "1.0";
+		}
 		return null;
 	}
 
