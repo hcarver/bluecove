@@ -76,6 +76,14 @@ public class DebugLog {
 		return debugEnabled;
 	}
 	
+	public static void setDebugEnabled(boolean debugEnabled) {
+		if (debugEnabled && debugCompiledOut) {
+			debugEnabled = false;
+			System.err.println("BlueCove debug functions have been Compiled Out");
+		}
+		DebugLog.debugEnabled = debugEnabled;
+	}
+	
 	public static void debug(String message) {
 		if (!debugCompiledOut && isDebugEnabled()) {
 			System.out.println(message);
