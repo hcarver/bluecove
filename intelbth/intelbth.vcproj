@@ -550,7 +550,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2.lib"
+				AdditionalDependencies="ws2.lib bthutil.lib"
 				OutputFile="..\resources\$(ProjectName)_ce.dll"
 				AdditionalLibraryDirectories=""
 				SubSystem="9"
@@ -620,7 +620,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2.lib"
+				AdditionalDependencies="ws2.lib bthutil.lib"
+				OutputFile="..\resources\$(ProjectName)_ce.dll"
+				ImportLibrary="$(OutDir)\$(TargetName).lib"
 				TargetMachine="3"
 			/>
 			<Tool

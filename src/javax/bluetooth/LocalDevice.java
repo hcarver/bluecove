@@ -112,7 +112,7 @@ public class LocalDevice {
 	 */
 
 	public DeviceClass getDeviceClass() {
-		return null;
+		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass());
 	}
 
 	/*
@@ -148,9 +148,44 @@ public class LocalDevice {
 	 */
 
 	public boolean setDiscoverable(int mode) throws BluetoothStateException {
-		return false;
+		switch (mode) {
+		case DiscoveryAgent.NOT_DISCOVERABLE:
+			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(false);
+			break;
+		case DiscoveryAgent.GIAC:
+			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(true);
+			break;
+		case DiscoveryAgent.LIAC:
+			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(true);
+			// TODO Timer to turn it off
+			break;
+		}
+		return true;
 	}
 
+	public static boolean isPowerOn() {
+		int mode = BlueCoveImpl.instance().getBluetoothPeer().getBluetoothRadioMode();
+		return ((mode == BluetoothPeer.BTH_MODE_CONNECTABLE) || (mode == BluetoothPeer.BTH_MODE_DISCOVERABLE));
+	}
+	
+	/*
+	 * Retrieves the local device's discoverable mode. The return value will be
+	 * DiscoveryAgent.GIAC, DiscoveryAgent.LIAC,
+	 * DiscoveryAgent.NOT_DISCOVERABLE, or a value in the range 0x9E8B00 to
+	 * 0x9E8B3F. Returns: the discoverable mode the device is presently in See
+	 * Also: DiscoveryAgent.GIAC, DiscoveryAgent.LIAC,
+	 * DiscoveryAgent.NOT_DISCOVERABLE
+	 */
+
+	public int getDiscoverable() {
+		int mode = BlueCoveImpl.instance().getBluetoothPeer().getBluetoothRadioMode();
+		if (mode == BluetoothPeer.BTH_MODE_DISCOVERABLE) {
+			return DiscoveryAgent.GIAC;
+		} else {
+			return DiscoveryAgent.NOT_DISCOVERABLE;
+		}
+	}
+	
 	/*
 	 * Retrieves Bluetooth system properties. The following properties must be
 	 * supported, but additional values are allowed: Property Name Description
@@ -189,23 +224,6 @@ public class LocalDevice {
 	}
 
 	
-	public static boolean isPowerOn(){
-		return true;
-	}
-	
-	/*
-	 * Retrieves the local device's discoverable mode. The return value will be
-	 * DiscoveryAgent.GIAC, DiscoveryAgent.LIAC,
-	 * DiscoveryAgent.NOT_DISCOVERABLE, or a value in the range 0x9E8B00 to
-	 * 0x9E8B3F. Returns: the discoverable mode the device is presently in See
-	 * Also: DiscoveryAgent.GIAC, DiscoveryAgent.LIAC,
-	 * DiscoveryAgent.NOT_DISCOVERABLE
-	 */
-
-	public int getDiscoverable() {
-		return DiscoveryAgent.NOT_DISCOVERABLE;
-	}
-
 	/*
 	 * Retrieves the Bluetooth address of the local device. The Bluetooth
 	 * address will never be null. The Bluetooth address will be 12 characters

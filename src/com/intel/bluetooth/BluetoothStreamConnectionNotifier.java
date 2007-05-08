@@ -45,6 +45,8 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 
 		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
 
+		peer.initialized();
+		
 		socket = peer.socket(authenticate, encrypt);
 
 		peer.bind(socket);

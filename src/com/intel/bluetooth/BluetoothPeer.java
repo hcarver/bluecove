@@ -22,6 +22,7 @@ package com.intel.bluetooth;
 
 import java.io.IOException;
 
+import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
@@ -29,6 +30,14 @@ import javax.bluetooth.UUID;
 
 public class BluetoothPeer {
 
+	public static int BTH_MODE_POWER_OFF = 1;
+	
+	public static int BTH_MODE_CONNECTABLE = 2;
+	
+	public static int BTH_MODE_DISCOVERABLE = 3;
+	
+	public static boolean peerInitialized;
+	
 	static {
 		NativeLibLoader.isAvailable();
 	}
@@ -99,20 +108,32 @@ public class BluetoothPeer {
 	 */
 	BluetoothPeer() {
 		try {
-			DebugLog.debug("initializationStatus", initializationStatus());
+			int status = initializationStatus();
+			DebugLog.debug("initializationStatus", status);
 			if (DebugLog.isDebugEnabled()) {
 				enableNativeDebug(true);
+			}
+			if (status == 1) {
+				peerInitialized = true;
 			}
 		} catch (IOException e) {
 			DebugLog.fatal("initialization", e);
 		}
 	}
 
-	public void startInquiry(int accessCode, DiscoveryListener listener) {
+	public void initialized() throws BluetoothStateException {
+		if (!peerInitialized) {
+			throw new BluetoothStateException("Bluetooth system is unavailable");
+		}
+	}
+	
+	public void startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
+		initialized();
 		(new InquiryThread(accessCode, listener)).start();
 	}
 
-	public void startSearchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
+	public void startSearchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		initialized();
 		(new SearchServicesThread(attrSet, uuidSet, device, listener)).start();
 	}
 
@@ -123,6 +144,12 @@ public class BluetoothPeer {
 	public void nativeDebugCallback(int lineN, String message) {
 		DebugLog.debug("intelbth.cpp:" + lineN, message);
 	}
+	
+	public native int getDeviceClass();
+	
+	public native void setDiscoverable(boolean on) throws BluetoothStateException;
+	
+	public native int getBluetoothRadioMode();
 	
 	/*
 	 * perform synchronous inquiry

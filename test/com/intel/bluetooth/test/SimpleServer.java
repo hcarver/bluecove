@@ -24,6 +24,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import javax.bluetooth.BluetoothStateException;
+import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.UUID;
 import javax.microedition.io.Connector;
@@ -47,6 +48,8 @@ public class SimpleServer {
 		System.out.println("Local bt address " + localDevice.getBluetoothAddress());
  	    System.out.println("Local bt name    " + localDevice.getFriendlyName());
  	    
+ 	    localDevice.setDiscoverable(DiscoveryAgent.GIAC);
+ 	   
 		int connectionsCount = 0;
 		
 		while (run(name) && connectionsCount < 10) {

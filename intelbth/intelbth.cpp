@@ -38,6 +38,13 @@ static DWORD dllWSAStartupError = 0;
 static HANDLE hLookup;
 static CRITICAL_SECTION csLookup;
 
+static BOOL restoreBtMode = false;
+#ifdef _WIN32_WCE
+static DWORD initialBtMode;
+#else
+static BOOL initialBtIsDiscoverable;
+#endif
+
 static BOOL nativeDebugCallback= false;
 static jmethodID nativeDebugMethod = NULL;
 
@@ -45,6 +52,8 @@ void callDebugListener(JNIEnv *env, jobject peer, int lineN, const char *fmt, ..
 #define debug(fmt) callDebugListener(env, peer, __LINE__, fmt);
 #define debugs(fmt, message) callDebugListener(env, peer, __LINE__, fmt, message);
 #define debugss(fmt, message1, message2) callDebugListener(env, peer, __LINE__, fmt, message1, message2);
+
+void dllCleanup();
 
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
@@ -68,10 +77,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	case DLL_THREAD_DETACH:
 		break;
 	case DLL_PROCESS_DETACH:
-		if (started) {
-			WSACleanup();
-		}
-		DeleteCriticalSection(&csLookup);
+		dllCleanup();
 		break;
 //	default:
 	    //debug("DllMain default %d", ul_reason_for_call);
@@ -120,12 +126,21 @@ WCHAR *GetWSAErrorMessage(DWORD last_error)
 	return errmsg;
 }
 
-void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg)
+void throwExceptionWSAErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error)
 {
 	char errmsg[1064];
-	DWORD last_error = WSAGetLastError();
 	sprintf_s(errmsg, 1064, "%s [%d] %S", msg, last_error, GetWSAErrorMessage(last_error));
-    throwIOException(env, errmsg);
+	throwException(env, name, errmsg);
+}
+
+void throwIOExceptionWSAErrorMessage(JNIEnv *env, const char *msg, DWORD last_error)
+{
+	throwExceptionWSAErrorMessage(env, "java/io/IOException", msg, last_error);
+}
+
+void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg)
+{
+	throwIOExceptionWSAErrorMessage(env, msg, WSAGetLastError());
 }
 
 BOOL ExceptionCheckCompatible(JNIEnv *env) {
@@ -136,15 +151,52 @@ BOOL ExceptionCheckCompatible(JNIEnv *env) {
 	}
 }
 
+void dllCleanup() {
+	if (started) {
+		if (restoreBtMode) {
+#ifdef _WIN32_WCE
+			BthSetMode(initialBtMode);
+#else
+			BluetoothEnableDiscovery(NULL, initialBtIsDiscoverable);
+#endif
+		}
+		WSACleanup();
+	}
+	DeleteCriticalSection(&csLookup);
+}
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStatus(JNIEnv *env, jobject peer) {
-    if (started) {
-        return 1;
-    } else {
-        char errmsg[1064];
-	    sprintf_s(errmsg, 1064, "Initialization error [%d] %S", dllWSAStartupError, GetWSAErrorMessage(dllWSAStartupError));
-        throwIOException(env, errmsg);
-        return 0;
+	if (started) {
+#ifdef _WIN32_WCE
+		// Use the BthGetMode function to retrieve the current mode of operation of the Bluetooth radio.
+		int rc = BthGetMode(&initialBtMode);
+		if (rc == ERROR_SUCCESS) {
+			if (initialBtMode == BTH_POWER_OFF) {
+				rc = BthSetMode(BTH_CONNECTABLE);
+				if (rc == ERROR_SUCCESS) {
+					restoreBtMode = true;
+					return 1;
+				} else {
+					throwIOExceptionWSAErrorMessage(env, "set Bluetooth mode error ", rc);
+				}
+			} else {
+				return 1;
+			}
+		} else {
+			throwIOExceptionWSAErrorMessage(env, "Bluetooth radio error ", rc);
+		}
+		started = false;
+		dllWSAStartupError = rc;
+		return 0;
+#else
+		if (BluetoothIsDiscoverable(NULL)) {
+			initialBtIsDiscoverable = true;
+		}
+		return 1;
+#endif
     }
+	throwIOExceptionWSAErrorMessage(env, "Initialization error ", dllWSAStartupError);
+    return 0;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug(JNIEnv *env, jobject peer, jboolean on) {
@@ -213,7 +265,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_doInquiry(JNIEnv *
 	memset(&queryset, 0, sizeof(WSAQUERYSET));
 	queryset.dwSize = sizeof(WSAQUERYSET);
 	queryset.dwNameSpace = NS_BTH;
-	
+
 	// TODO Test this.
 	//queryset.lpBlob = &blob;
 
@@ -967,8 +1019,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_accept(JNIEnv *env
 * Method:    recv_available
 *
 * Use to determine the amount of data pending in the network's input buffer that can be read from socket.
-* returns the amount of data that can be read in a single call to the recv function, which may not be the same as 
-* the total amount of data queued on the socket. 
+* returns the amount of data that can be read in a single call to the recv function, which may not be the same as
+* the total amount of data queued on the socket.
 */
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_recvAvailable(JNIEnv *env, jobject peer, jint socket)
 {
@@ -1123,7 +1175,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 	if (WSALookupServiceBegin(&querySet, flags, &hLookup)) {
 		hLookup = NULL;
 		LeaveCriticalSection(&csLookup);
-		throwIOException(env, (char*)GetWSAErrorMessage(GetLastError()));
+		throwIOExceptionWSAGetLastError(env, "Service Lookup error");
 		return NULL;
 	}
 
@@ -1145,7 +1197,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 			case WSA_E_NO_MORE:
 				break;
 			default:
-				throwIOException(env, (char*)GetWSAErrorMessage(GetLastError()));
+				throwIOExceptionWSAGetLastError(env, "Service Lookup error");
 				return NULL;
 			}
 		}
@@ -1175,8 +1227,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeeraddress(JN
 	SOCKADDR_BTH addr;
 	int size = sizeof(addr);
 	if (getpeername((SOCKET) socket, (sockaddr*)&addr, &size)) {
-		//env->ThrowNew(env->FindClass("java/io/IOException"), (char*)GetWSAErrorMessage(GetLastError()));
-		throwIOException(env, (char*)GetWSAErrorMessage(GetLastError()));
+		throwIOExceptionWSAGetLastError(env, "peername error");
 		return 0;
 	}
 	return addr.btAddr;
@@ -1211,4 +1262,103 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getradioname(JN
 	}
 #endif
 	return NULL;
+}
+
+#define MAJOR_COMPUTER 0x0100
+#define MAJOR_PHONE 0x0200
+#define COMPUTER_MINOR_HANDHELD 0x10
+#define PHONE_MINOR_SMARTPHONE 0x0c
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceClass(JNIEnv *env, jobject peer)
+{
+#ifndef _WIN32_WCE
+	return MAJOR_COMPUTER;
+#else
+	OSVERSIONINFO osvi;
+	TCHAR szPlatform[MAX_PATH];
+
+	BOOL rb;
+
+	osvi.dwOSVersionInfoSize = sizeof(osvi);
+	rb = GetVersionEx(&osvi);
+	if (rb == FALSE) {
+		return MAJOR_COMPUTER;
+	}
+	switch (osvi.dwPlatformId)
+	{
+    // A Windows CE platform.
+    case VER_PLATFORM_WIN32_CE:
+        // Get platform string.
+        rb = SystemParametersInfo(SPI_GETPLATFORMTYPE, MAX_PATH, szPlatform, 0);
+        if (rb == FALSE)  // SystemParametersInfo failed.
+        {
+			return MAJOR_COMPUTER & COMPUTER_MINOR_HANDHELD;
+		}
+		debugs("PLATFORMTYPE %S", szPlatform);
+		if (0 == lstrcmpi(szPlatform, TEXT("Smartphone")))  {
+			return MAJOR_PHONE | PHONE_MINOR_SMARTPHONE;
+		}
+		if (0 == lstrcmpi(szPlatform, TEXT("PocketPC"))) {
+			return MAJOR_COMPUTER | COMPUTER_MINOR_HANDHELD;
+		}
+	}
+	return MAJOR_COMPUTER;
+#endif
+}
+
+#define BTH_MODE_POWER_OFF 1
+#define BTH_MODE_CONNECTABLE  2
+#define BTH_MODE_DISCOVERABLE 3
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getBluetoothRadioMode(JNIEnv *env, jobject peer) 
+{
+#ifndef _WIN32_WCE
+	if (BluetoothIsDiscoverable(NULL)) {
+		return BTH_MODE_DISCOVERABLE;
+	}
+	if (BluetoothIsConnectable(NULL)) {
+		return BTH_MODE_CONNECTABLE;
+	}
+#else
+	DWORD dwMode;
+	int rc = BthGetMode(&dwMode);
+	if (rc == ERROR_SUCCESS) {
+		switch(dwMode) {
+		case BTH_DISCOVERABLE:
+			return BTH_MODE_DISCOVERABLE;
+		case BTH_CONNECTABLE:
+			return BTH_MODE_CONNECTABLE;
+		case BTH_POWER_OFF:		
+			return BTH_MODE_POWER_OFF;
+		}
+	} else {
+		throwExceptionWSAErrorMessage(env, "javax/bluetooth/BluetoothStateException", "Bluetooth mode error ", rc);
+	}
+#endif
+	return 0;
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_setDiscoverable(JNIEnv *env, jobject peer, jboolean on)
+{
+#ifndef _WIN32_WCE
+	BOOL enabled = FALSE;
+	if (on) {
+		BluetoothEnableIncomingConnections(NULL, TRUE);
+		enabled = TRUE;
+	}
+	if (BluetoothEnableDiscovery(NULL, enabled)) {
+		restoreBtMode = (initialBtIsDiscoverable != enabled);
+	}
+#else
+	DWORD dwMode = BTH_CONNECTABLE;
+	if (on) {
+		dwMode = BTH_DISCOVERABLE;
+	}
+	int rc = BthSetMode(dwMode);
+	if (rc == ERROR_SUCCESS) {
+		restoreBtMode = (initialBtMode != dwMode);
+	} else {
+		throwExceptionWSAErrorMessage(env, "javax/bluetooth/BluetoothStateException", "Set Bluetooth mode error ", rc);
+	}
+#endif
 }
