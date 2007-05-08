@@ -44,6 +44,8 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 	Hashtable attributes;
 
+	protected boolean attributeUpdated;
+	
 	ServiceRecordImpl(RemoteDevice device, int handle) {
 		this.device = device;
 
@@ -116,8 +118,9 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 		int i = 0;
 
-		for (Enumeration e = attributes.keys(); e.hasMoreElements();)
+		for (Enumeration e = attributes.keys(); e.hasMoreElements();) {
 			attrIDs[i++] = ((Integer) e.nextElement()).intValue();
+		}
 
 		return attrIDs;
 	}
@@ -159,23 +162,27 @@ public class ServiceRecordImpl implements ServiceRecord {
 		 * check this is not a local service record
 		 */
 
-		if (device == null)
+		if (device == null) {
 			throw new RuntimeException();
+		}
 
 		/*
 		 * check attrIDs is non-null and has length > 0
 		 */
 
-		if (attrIDs.length == 0)
+		if (attrIDs.length == 0) {
 			throw new IllegalArgumentException();
+		}
 
 		/*
 		 * check attrIDs are in range
 		 */
 
-		for (int i = 0; i < attrIDs.length; i++)
-			if (attrIDs[i] < 0x0000 || attrIDs[i] > 0xffff)
+		for (int i = 0; i < attrIDs.length; i++) {
+			if (attrIDs[i] < 0x0000 || attrIDs[i] > 0xffff) {
 				throw new IllegalArgumentException();
+			}
+		}
 
 		/*
 		 * copy and sort attrIDs (required by MS Bluetooth)
@@ -185,21 +192,25 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 		System.arraycopy(attrIDs, 0, sortIDs, 0, attrIDs.length);
 
-		for (int i = 0; i < sortIDs.length; i++)
-			for (int j = 0; j < sortIDs.length - i - 1; j++)
+		for (int i = 0; i < sortIDs.length; i++) {
+			for (int j = 0; j < sortIDs.length - i - 1; j++) {
 				if (sortIDs[j] > sortIDs[j + 1]) {
 					int temp = sortIDs[j];
 					sortIDs[j] = sortIDs[j + 1];
 					sortIDs[j + 1] = temp;
 				}
+			}
+		}
 
 		/*
 		 * check for duplicates
 		 */
 
-		for (int i = 0; i < sortIDs.length - 1; i++)
-			if (sortIDs[i] == sortIDs[i + 1])
+		for (int i = 0; i < sortIDs.length - 1; i++) {
+			if (sortIDs[i] == sortIDs[i + 1]) {
 				throw new IllegalArgumentException();
+			}
+		}
 
 		/*
 		 * retrieve SDP blob
@@ -435,6 +446,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 		 * remove, add or modify attribute
 		 */
 
+		attributeUpdated = true;
 		if (attrValue == null) {
 			return attributes.remove(new Integer(attrID)) != null;
 		} else {
