@@ -21,14 +21,18 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
+import java.util.Hashtable;
 
 import javax.bluetooth.DataElement;
 import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
 public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, BluetoothStreamServiceRecordAccess {
+	
+	private static Hashtable serviceRecordsMap = new Hashtable/*<ServiceRecord, BluetoothStreamConnectionNotifier>*/();
 	
 	private int socket;
 
@@ -65,7 +69,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		 */
 
 		((ServiceRecordImpl) serviceRecord).attributes.put(
-				new Integer(ServiceRecord.ServiceRecordHandle), 
+				new Integer(BluetoothConsts.ServiceRecordHandle), 
 				new DataElement(DataElement.U_INT_4, 0x00010020));
 
 		/*
@@ -75,7 +79,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		DataElement serviceClassIDList = new DataElement(DataElement.DATSEQ);
 		serviceClassIDList.addElement(new DataElement(DataElement.UUID, uuid));
 
-		serviceRecord.setAttributeValue(ServiceRecord.ServiceClassIDList, serviceClassIDList);
+		serviceRecord.setAttributeValue(BluetoothConsts.ServiceClassIDList, serviceClassIDList);
 
 		/*
 		 * protocol descriptor list
@@ -84,15 +88,15 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		DataElement protocolDescriptorList = new DataElement(DataElement.DATSEQ);
 
 		DataElement L2CAPDescriptor = new DataElement(DataElement.DATSEQ);
-		L2CAPDescriptor.addElement(new DataElement(DataElement.UUID, UUID.L2CAP_PROTOCOL_UUID));
+		L2CAPDescriptor.addElement(new DataElement(DataElement.UUID, BluetoothConsts.L2CAP_PROTOCOL_UUID));
 		protocolDescriptorList.addElement(L2CAPDescriptor);
 
 		DataElement RFCOMMDescriptor = new DataElement(DataElement.DATSEQ);
-		RFCOMMDescriptor.addElement(new DataElement(DataElement.UUID, UUID.RFCOMM_PROTOCOL_UUID));
+		RFCOMMDescriptor.addElement(new DataElement(DataElement.UUID, BluetoothConsts.RFCOMM_PROTOCOL_UUID));
 		RFCOMMDescriptor.addElement(new DataElement(DataElement.U_INT_1, peer.getsockchannel(socket)));
 		protocolDescriptorList.addElement(RFCOMMDescriptor);
 
-		serviceRecord.setAttributeValue(ServiceRecord.ProtocolDescriptorList, protocolDescriptorList);
+		serviceRecord.setAttributeValue(BluetoothConsts.ProtocolDescriptorList, protocolDescriptorList);
 
 		/*
 		 * name
@@ -123,6 +127,9 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 
 	public void close() throws IOException {
 		if (!closed) {
+			
+			serviceRecordsMap.remove(serviceRecord);
+			
 			BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
 
 			/*
@@ -152,6 +159,25 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	}
 
 	public ServiceRecord getServiceRecord() {
+		serviceRecordsMap.put(serviceRecord, this);
 		return serviceRecord;
+	}
+	
+	private void updateService(ServiceRecord srvRecord) throws ServiceRegistrationException {
+		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
+		try {
+			peer.unregisterService(handle);
+			handle = peer.registerService(((ServiceRecordImpl) serviceRecord).toByteArray());
+			DebugLog.debug("new serviceRecord", serviceRecord);
+		} catch (IOException e) {
+			throw new ServiceRegistrationException(e.getMessage());
+		}
+	}
+	public static void updateServiceRecord(ServiceRecord srvRecord) throws ServiceRegistrationException {
+		BluetoothStreamConnectionNotifier owner = (BluetoothStreamConnectionNotifier)serviceRecordsMap.get(srvRecord);
+		if (owner == null) {
+			throw new IllegalArgumentException("Service record is not registered");
+		}
+		owner.updateService(srvRecord);
 	}
 }

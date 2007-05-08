@@ -21,22 +21,8 @@
 package javax.bluetooth;
 
 public class UUID {
-	public static final UUID RFCOMM_PROTOCOL_UUID = new UUID(0x0003);
-
-	public static final UUID L2CAP_PROTOCOL_UUID = new UUID(0x0100);
-
-	public static final UUID OBEXFileTransferServiceClass_UUID = new UUID(
-			0x1106);
-
-	byte[] uuidValue;
-
-	private void init(String stringValue) throws NumberFormatException {
-		uuidValue = new byte[16];
-
-		for (int i = 0; i < 16; i++)
-			uuidValue[i] = (byte) Integer.parseInt(stringValue.substring(i * 2,
-					i * 2 + 2), 16);
-	}
+	
+	private byte[] uuidValue;
 
 	UUID(byte[] uuidValue) {
 		this.uuidValue = uuidValue;
@@ -89,20 +75,28 @@ public class UUID {
 		int length = stringValue.length();
 
 		if (shortUUID) {
-			if (length < 1 || length > 8)
+			if (length < 1 || length > 8) {
 				throw new IllegalArgumentException();
+			}
 
-			init("00000000".substring(length) + stringValue
-					+ "00001000800000805F9B34FB");
+			init("00000000".substring(length) + stringValue + "00001000800000805F9B34FB");
 		} else {
-			if (length < 1 || length > 32)
+			if (length < 1 || length > 32) {
 				throw new IllegalArgumentException();
+			}
 
-			init("00000000000000000000000000000000".substring(length)
-					+ stringValue);
+			init("00000000000000000000000000000000".substring(length) + stringValue);
 		}
 	}
 
+	private void init(String stringValue) throws NumberFormatException {
+		uuidValue = new byte[16];
+
+		for (int i = 0; i < 16; i++) {
+			uuidValue[i] = (byte) Integer.parseInt(stringValue.substring(i * 2, i * 2 + 2), 16);
+		}
+	}
+	
 	/*
 	 * Returns the string representation of the 128-bit UUID object. The string
 	 * being returned represents a UUID that contains characters from the
@@ -132,12 +126,15 @@ public class UUID {
 	 */
 
 	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof UUID))
+		if (obj == null || !(obj instanceof UUID)) {
 			return false;
+		}
 
-		for (int i = 0; i < 16; i++)
-			if (uuidValue[i] != ((UUID) obj).uuidValue[i])
+		for (int i = 0; i < 16; i++) {
+			if (uuidValue[i] != ((UUID) obj).uuidValue[i]) {
 				return false;
+			}
+		}
 
 		return true;
 	}

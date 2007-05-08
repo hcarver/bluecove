@@ -23,42 +23,7 @@ package javax.bluetooth;
 import java.io.IOException;
 
 public interface ServiceRecord {
-	public static final int ServiceRecordHandle = 0x0000;
-
-	public static final int ServiceClassIDList = 0x0001;
-
-	public static final int ServiceRecordState = 0x0002;
-
-	public static final int ServiceID = 0x0003;
-
-	public static final int ProtocolDescriptorList = 0x0004;
-
-	public static final int BrowseGroupList = 0x0005;
-
-	public static final int LanguageBasedAttributeIDList = 0x0006;
-
-	public static final int ServiceInfoTimeToLive = 0x0007;
-
-	public static final int ServiceAvailability = 0x0008;
-
-	public static final int BluetoothProfileDescriptorList = 0x0009;
-
-	public static final int DocumentationURL = 0x000A;
-
-	public static final int ClientExecutableURL = 0x000B;
-
-	public static final int IconURL = 0x000C;
-
-	public static final int VersionNumberList = 0x0200;
-
-	public static final int ServiceDatabaseState = 0x0201;
-
-	public static final int ServiceName = 0x0000;
-
-	public static final int ServiceDescription = 0x0001;
-
-	public static final int ProviderName = 0x0002;
-
+	
 	/*
 	 * Authentication and encryption are not needed on a connection to this
 	 * service. Used with getConnectionURL() method. NOAUTHENTICATE_NOENCRYPT is
@@ -77,7 +42,7 @@ public interface ServiceRecord {
 	 * 
 	 * See Also: getConnectionURL(int, boolean)
 	 */
-
+	
 	public static final int AUTHENTICATE_NOENCRYPT = 1;
 
 	/*

@@ -31,10 +31,13 @@ import javax.bluetooth.DataElement;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
-import javax.bluetooth.UUID;
 
 public class ServiceRecordImpl implements ServiceRecord {
 
+    //public static final UUID L2CAP = new UUID(0x0100);
+
+    //public static final UUID RFCOMM = new UUID(0x0003);
+    
 	private RemoteDevice device;
 
 	private int handle;
@@ -257,7 +260,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 		int port = -1;
 
-		DataElement d1 = getAttributeValue(ProtocolDescriptorList);
+		DataElement d1 = getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
 
 		if (d1.getDataType() == DataElement.DATSEQ)
 			for (Enumeration e1 = (Enumeration) d1.getValue(); e1
@@ -272,8 +275,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 						if (e2.hasMoreElements()
 								&& d3.getDataType() == DataElement.UUID
-								&& d3.getValue().equals(
-										UUID.RFCOMM_PROTOCOL_UUID)) {
+								&& d3.getValue().equals(BluetoothConsts.RFCOMM_PROTOCOL_UUID)) {
 							DataElement d4 = (DataElement) e2.nextElement();
 
 							switch (d4.getDataType()) {
@@ -417,29 +419,32 @@ public class ServiceRecordImpl implements ServiceRecord {
 		 * check this is a local service record
 		 */
 
-		if (device != null)
-			throw new RuntimeException();
-
-		if (attrID < 0x0000 || attrID > 0xffff)
+		if (device != null) {
 			throw new IllegalArgumentException();
+		}
 
-		if (attrID == ServiceRecordHandle)
+		if (attrID < 0x0000 || attrID > 0xffff) {
 			throw new IllegalArgumentException();
+		}
+
+		if (attrID == BluetoothConsts.ServiceRecordHandle) {
+			throw new IllegalArgumentException();
+		}
 
 		/*
 		 * remove, add or modify attribute
 		 */
 
-		if (attrValue == null)
+		if (attrValue == null) {
 			return attributes.remove(new Integer(attrID)) != null;
-		else {
+		} else {
 			attributes.put(new Integer(attrID), attrValue);
-
 			return true;
 		}
 	}
 
 	public String toString() {
+		
 		StringBuffer buf = new StringBuffer("{\n");
 
 		for (Enumeration e = attributes.keys(); e.hasMoreElements();) {

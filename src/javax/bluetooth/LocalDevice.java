@@ -26,9 +26,9 @@ import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothPeer;
+import com.intel.bluetooth.BluetoothStreamConnectionNotifier;
 import com.intel.bluetooth.BluetoothStreamServiceRecordAccess;
 import com.intel.bluetooth.DebugLog;
-import com.intel.bluetooth.NotImplementedError;
 
 public class LocalDevice {
 	
@@ -273,9 +273,10 @@ public class LocalDevice {
 	 */
 
 	public ServiceRecord getRecord(Connection notifier) {
-		if (notifier == null)
+		if (notifier == null) {
 			throw new NullPointerException();
-
+		}
+		
 		if (!(notifier instanceof BluetoothStreamServiceRecordAccess)) {
 			throw new IllegalArgumentException();
 		}
@@ -335,10 +336,11 @@ public class LocalDevice {
 	 * if the local SDDB could not be updated successfully due to insufficient
 	 * disk space, database locks, etc.
 	 */
-	public void updateRecord(ServiceRecord srvRecord) throws ServiceRegistrationException { 
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedError();
+	public void updateRecord(ServiceRecord srvRecord) throws ServiceRegistrationException {
+		if(srvRecord == null) {
+            throw new NullPointerException("Service Record is null");
 		}
+		BluetoothStreamConnectionNotifier.updateServiceRecord(srvRecord);
 	}
 	
 }

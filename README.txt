@@ -28,11 +28,13 @@ that can (possibly) be used to achieve OBEX functionality with BlueCove.
 
 == Not Implemented functionality ===
 
-  * `InputStream.available()`  returns 0 all the time.
-  * `LocalDevice.updateRecord(ServiceRecord srvRecord)`  Not implemented
   * `DiscoveryAgent.cancelServiceSearch(..)`  Not implemented
   * `DiscoveryAgent.selectService(..)`  Not implemented
   * `RemoteDevice` authenticate, authorize and encrypt Not implemented
+
+== Implemented functionality ===
+  * version 1.2.3 `InputStream.available()`  returns 0 all the time.
+  * version 1.2.3 `LocalDevice.updateRecord(ServiceRecord srvRecord)`
 
 == Installation ==
 
