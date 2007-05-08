@@ -443,10 +443,11 @@ static void convertBytesToUUID(jbyte *bytes, GUID *uuid)
 JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceHandles(JNIEnv *env, jobject peer, jobjectArray uuidSet, jlong address)
 {
 	debug("->getServiceHandles");
-	// 	check if we can handle the number of UUIDs supplied
 
-	if (env->GetArrayLength(uuidSet) > MAX_UUIDS_IN_QUERY)
+	// 	check if we can handle the number of UUIDs supplied
+	if ((uuidSet != NULL) && (env->GetArrayLength(uuidSet) > MAX_UUIDS_IN_QUERY)) {
 		return NULL;
+	}
 
 #ifndef _WIN32_WCE
 	// 	generate a Bluetooth address string (WSAAddressToString doesn't work on WinCE)
@@ -471,7 +472,7 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceHan
 
     jclass clsUUID = NULL;
 
-	for(int i = 0; i < env->GetArrayLength(uuidSet); i++) {
+	for(int i = 0; (uuidSet != NULL) && (i < env->GetArrayLength(uuidSet)); i++) {
 	    if (clsUUID == NULL) {
 	        clsUUID = env->FindClass("javax/bluetooth/UUID");
             if (clsUUID == NULL) {
@@ -543,11 +544,17 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceHan
 	// begin query
 
 #ifdef _WIN32_WCE
-	if (WSALookupServiceBegin(&queryset, 0, &hLookup))
-	return NULL;
-#else
-	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookup))
+	if (WSALookupServiceBegin(&queryset, 0, &hLookup)) {
+		DWORD last_error = WSAGetLastError();
+		debugss("WSALookupServiceBegin error [%d] %S", last_error, GetWSAErrorMessage(last_error));
 		return NULL;
+	}
+#else
+	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookup)) {
+		DWORD last_error = WSAGetLastError();
+		debugss("WSALookupServiceBegin error [%d] %S", last_error, GetWSAErrorMessage(last_error));
+		return NULL;
+	}
 #endif
 	// fetch results
 
@@ -566,13 +573,14 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceHan
 #else
 	if (WSALookupServiceNext(hLookup, LUP_RETURN_BLOB, &size, pwsaResults)) {
 #endif
-		switch(WSAGetLastError()) {
-		case WSANO_DATA:
-			return env->NewIntArray(0);
-
-		default:
-			WSALookupServiceEnd(hLookup);
-			return NULL;
+		DWORD last_error = WSAGetLastError();
+		switch(last_error) {
+			case WSANO_DATA:
+				return env->NewIntArray(0);
+			default:
+				debugss("WSALookupServiceBegin error [%d] %S", last_error, GetWSAErrorMessage(last_error));
+				WSALookupServiceEnd(hLookup);
+				return NULL;
 		}
 	}
 
