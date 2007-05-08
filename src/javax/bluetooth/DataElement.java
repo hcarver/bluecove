@@ -471,6 +471,9 @@ public class DataElement {
 		}
 	}
 
+	/**
+	 * @depreacted Use ((Object)dataElement).toString() if you want your application to run in MDIP profile
+	 */
 	public String toString() {
 		switch (valueType) {
 		case U_INT_1:
