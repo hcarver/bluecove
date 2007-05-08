@@ -37,6 +37,8 @@ package com.intel.bluetooth;
  */
 public class BlueCoveImpl {
 
+	public static final String version = "1.2.3";
+	
 	/* The context to be used when acessing resources */
     //private AccessControlContext acc;
 
@@ -53,7 +55,7 @@ public class BlueCoveImpl {
 	private BlueCoveImpl() {
 		//acc = AccessController.getContext();
 		bluetoothPeer = new BluetoothPeer();
-		System.out.println("BlueCove version 1.2.3");
+		System.out.println("BlueCove version " + version);
 	}
 
     public static BlueCoveImpl instance() {
