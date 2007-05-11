@@ -36,25 +36,32 @@ void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr) {
 jlong BcAddrToLong(BD_ADDR bd_addr) {
 	jlong l = 0;
 	for (int i = 0; i < BD_ADDR_LEN; i++) {
-		l = (l << 4) + bd_addr[i];
+		l = (l << 8) + bd_addr[i];
 	}
 	return l;
 }
 
 jint DeviceClassToInt(DEV_CLASS devClass) {
-	return (devClass[1] & MAJOR_DEV_CLASS_MASK) + ((devClass[2] & MINOR_DEV_CLASS_MASK) << 6) + (devClass[0] << 13);
+	return (((devClass[0] << 8) + devClass[1]) << 8) + devClass[2];
 }
+
+struct deviceFound {
+	jlong deviceAddr;
+	jint deviceClass;
+	BD_NAME bdName;
+};
+
+#define deviceRespondedMax 20
 
 class WIDCOMMStack : public CBtIf {
 public:
-	JNIEnv *env;
-	jobject peer;
+	deviceFound deviceResponded[deviceRespondedMax];
+	int deviceRespondedIdx;
+	BOOL deviceInquiryTerminated;
 	BOOL deviceInquiryComplete;
 	BOOL deviceInquirySuccess;
-	jobject deviceDiscoveredListener;
-	jmethodID deviceDiscoveredCallbackMethod;
 
-	WIDCOMMStack(JNIEnv *env, jobject peer);
+	WIDCOMMStack();
 
     // methods to replace virtual methods in base class CBtIf
     virtual void OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected);
@@ -63,17 +70,12 @@ public:
 
 static WIDCOMMStack* stack;
 
-WIDCOMMStack::WIDCOMMStack(JNIEnv *env, jobject peer) {
-	this->env = env;
-	this->peer = env->NewGlobalRef(peer);
+WIDCOMMStack::WIDCOMMStack() {
 }
 
-void WIDCOMMStackInit(JNIEnv *env, jobject peer) {
+void WIDCOMMStackInit() {
 	if (stack == NULL) {
-		debug("WIDCOMMStackInit");
-		stack = new WIDCOMMStack(env, peer);
-	} else {
-		stack->env = env;
+		stack = new WIDCOMMStack();
 	}
 }
 
@@ -84,7 +86,7 @@ void BroadcomDebugError(CBtIf* stack) {
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLocalDeviceBluetoothAddress
 (JNIEnv *env, jobject peer) {
-	WIDCOMMStackInit(env, peer);
+	WIDCOMMStackInit();
 	struct CBtIf::DEV_VER_INFO info;
 	if (!stack->GetLocalDeviceVersionInfo(&info)) {
 		BroadcomDebugError(stack);
@@ -96,7 +98,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLocalDeviceName
 (JNIEnv *env, jobject peer) {
-	WIDCOMMStackInit(env, peer);
+	WIDCOMMStackInit();
 	BD_NAME name;
 	if (!stack->GetLocalDeviceName(&name)) {
 		BroadcomDebugError(stack);
@@ -107,44 +109,39 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 
 
 void WIDCOMMStack::OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected) {
-	//debugs("->OnDeviceResponded [%s]", bdName);
-	//debug("->OnDeviceResponded");
-	if (peer == NULL) {
-		return;
+	int nextDevice = deviceRespondedIdx + 1;
+	if (nextDevice >= deviceRespondedMax) {
+		nextDevice = 0;
 	}
-	if (deviceDiscoveredCallbackMethod != NULL) {
-		//wchar_t addressString[14];
-		//BcAddrToString(addressString, bda);
-		//debugs("OnDeviceResponded %S", addressString);
-		//debug("call deviceDiscoveredCallback 1");
-		jlong deviceAddr = BcAddrToLong(bda);
-		//debug("call deviceDiscoveredCallback 2");
-		jint deviceClass = DeviceClassToInt(devClass);
-		//debug("call deviceDiscoveredCallback 3");
-		//env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, deviceDiscoveredListener, deviceAddr, deviceClass, env->NewStringUTF((char*)bdName));
-	}
+	deviceResponded[nextDevice].deviceAddr = BcAddrToLong(bda);
+    deviceResponded[nextDevice].deviceClass = DeviceClassToInt(devClass);
+	memcpy(deviceResponded[nextDevice].bdName, bdName, sizeof(BD_NAME));
+
+	deviceRespondedIdx = nextDevice;
 }
 
 void WIDCOMMStack::OnInquiryComplete(BOOL success, short num_responses) {
-	//debug("->OnInquiryComplete");
 	deviceInquirySuccess = success;
 	deviceInquiryComplete = TRUE;
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceInquiryImpl
 (JNIEnv * env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
-	WIDCOMMStackInit(env, peer);
+	WIDCOMMStackInit();
 	debug("StartInquiry");
 	stack->deviceInquiryComplete = false;
+	stack->deviceInquiryTerminated = false;
 
-	jclass peerClass = env->GetObjectClass(stack->peer);
+    memset(stack->deviceResponded, 0, sizeof(stack->deviceResponded));
+ 	stack->deviceRespondedIdx = -1;
+
+	jclass peerClass = env->GetObjectClass(peer);
 	if (peerClass == NULL) {
 		//fatalerror
 	}
-	
-	stack->deviceDiscoveredListener = listener;
-	stack->deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;)V");
-	if (stack->deviceDiscoveredCallbackMethod == NULL) {
+
+	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;)V");
+	if (deviceDiscoveredCallbackMethod == NULL) {
 		//fatalerror
 		debug("fatalerror");
 		return INQUIRY_ERROR;
@@ -168,18 +165,34 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 	}
 	env->CallVoidMethod(startedNotify, notifyMethod);
 
+	int reportedIdx = -1;
 
-	while (!stack->deviceInquiryComplete) {
+	while ((!stack->deviceInquiryComplete) || (reportedIdx != stack->deviceRespondedIdx)) {
+		// No Wait on Windows CE, TODO
 		Sleep(100);
+		if (reportedIdx != stack->deviceRespondedIdx) {
+			reportedIdx ++;
+			if (reportedIdx >= deviceRespondedMax) {
+				reportedIdx = 0;
+			}
+			deviceFound dev = stack->deviceResponded[reportedIdx];
+			env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, dev.deviceAddr, dev.deviceClass, env->NewStringUTF((char*)(dev.bdName)));
+		}
 	}
 
-	return stack->deviceInquirySuccess;
-
+	if (stack->deviceInquiryTerminated) {
+		return INQUIRY_TERMINATED;
+	} else if (stack->deviceInquirySuccess) {
+		return INQUIRY_COMPLETED;
+	} else {
+		return INQUIRY_ERROR;
+	}
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_deviceInquiryCancelImpl
 (JNIEnv *env, jobject peer, jobject nativeClass) {
-	WIDCOMMStackInit(env, peer);
+	WIDCOMMStackInit();
+	stack->deviceInquiryTerminated = TRUE;
 	stack->StopInquiry();
 	return TRUE;
 }

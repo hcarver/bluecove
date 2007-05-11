@@ -666,7 +666,7 @@
 						Name="VCCustomBuildTool"
 						Description="Generating JNI Header File"
 						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothPeer&#x0D;&#x0A;"
-						Outputs="com_intel_bluetooth_BluetoothPeer.h"
+						Outputs=".\com_intel_bluetooth_BluetoothPeer.h"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -676,7 +676,7 @@
 						Name="VCCustomBuildTool"
 						Description="Generating JNI Header File"
 						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothPeer&#x0D;&#x0A;"
-						Outputs="com_intel_bluetooth_BluetoothPeer.h"
+						Outputs=".\com_intel_bluetooth_BluetoothPeer.h"
 					/>
 				</FileConfiguration>
 			</File>
@@ -690,7 +690,7 @@
 						Name="VCCustomBuildTool"
 						Description="Generating JNI Header File"
 						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothStackWIDCOMM&#x0D;&#x0A;"
-						Outputs="com_intel_bluetooth_BluetoothStackWIDCOMM.h"
+						Outputs=".\com_intel_bluetooth_BluetoothStackWIDCOMM.h"
 					/>
 				</FileConfiguration>
 			</File>

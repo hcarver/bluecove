@@ -20,7 +20,6 @@
  */
 package com.intel.bluetooth;
 
-import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
@@ -56,8 +55,8 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	public native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
-		//DebugLog.debug("deviceDiscoveredCallback");
-		//listener.deviceDiscovered(new RemoteDeviceImpl(deviceAddr, deviceName), new DeviceClass(deviceClass));			
+		DebugLog.debug("deviceDiscoveredCallback", deviceName);
+		listener.deviceDiscovered(new RemoteDeviceImpl(deviceAddr, deviceName), new DeviceClass(deviceClass));			
 	}
 
 	private native boolean deviceInquiryCancelImpl();

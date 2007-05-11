@@ -33,7 +33,7 @@ public class RemoteDeviceImpl extends RemoteDevice {
 	private String name;
 	
 	protected RemoteDeviceImpl(long address, String name) {
-		super(String.valueOf(address));
+		super(Long.toHexString(address));
 		this.name = name;
 	}
 	
