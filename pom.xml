@@ -109,14 +109,12 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>src</sourceDirectory>
-        <testSourceDirectory>test</testSourceDirectory>
-        <outputDirectory>build</outputDirectory>
-        <!--testOutputDirectory></testOutputDirectory-->
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
 
         <resources>
             <resource>
-                <directory>resources</directory>
+                <directory>src/main/resources</directory>
             </resource>
         </resources>
 

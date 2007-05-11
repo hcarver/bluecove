@@ -14,7 +14,7 @@
 @echo JAVA_HOME Not Found
 :java_found
 
-%JAVA_HOME%\bin\javah -d intelbth -classpath build com.intel.bluetooth.BluetoothPeer
+%JAVA_HOME%\bin\javah -d intelbth -classpath target\classes com.intel.bluetooth.BluetoothPeer
 @if errorlevel 1 goto errormark
 
 @set p=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin

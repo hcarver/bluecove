@@ -4,7 +4,7 @@
 #
 
 
-SRCDIR=intelbth
+SRCDIR=src\main\c\intelbth
 OBJDIR=target\obj
 OUTDIR=target\obj
 

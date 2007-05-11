@@ -6,10 +6,10 @@
     <property name="product-version" value="2.0.0-SNAPSHOT"/>
 
     <!-- set global properties for this build -->
-    <property name="src" location="src"/>
-    <property name="resources" location="resources"/>
-    <property name="build" location="build"/>
-    <property name="dist"  location="dist"/>
+    <property name="src" location="src/main/java"/>
+    <property name="resources" location="src/main/resources"/>
+    <property name="build" location="target/classes"/>
+    <property name="dist"  location="target"/>
 
     <target name="init">
         <!-- Create the time stamp -->
