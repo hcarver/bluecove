@@ -23,16 +23,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "stdafx.h"
 
-#define INQUIRY_COMPLETED 0
-#define INQUIRY_TERMINATED 5
-#define INQUIRY_ERROR 7
-
-#define SERVICE_SEARCH_COMPLETED 1
-#define SERVICE_SEARCH_TERMINATED 2
-#define SERVICE_SEARCH_ERROR 3
-#define SERVICE_SEARCH_NO_RECORDS 4
-#define SERVICE_SEARCH_DEVICE_NOT_REACHABLE 6
-
 static BOOL started;
 static DWORD dllWSAStartupError = 0;
 static HANDLE hLookup;
@@ -44,14 +34,6 @@ static DWORD initialBtMode;
 #else
 static BOOL initialBtIsDiscoverable;
 #endif
-
-static BOOL nativeDebugCallback= false;
-static jmethodID nativeDebugMethod = NULL;
-
-void callDebugListener(JNIEnv *env, jobject peer, int lineN, const char *fmt, ...);
-#define debug(fmt) callDebugListener(env, peer, __LINE__, fmt);
-#define debugs(fmt, message) callDebugListener(env, peer, __LINE__, fmt, message);
-#define debugss(fmt, message1, message2) callDebugListener(env, peer, __LINE__, fmt, message1, message2);
 
 void dllCleanup();
 
@@ -83,72 +65,6 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	    //debug("DllMain default %d", ul_reason_for_call);
 	}
 	return TRUE;
-}
-
-void throwException(JNIEnv *env, const char *name, const char *msg)
-{
-	 //debugss("Throw Exception %s %s", name, msg);
-	 jclass cls = env->FindClass(name);
-     /* if cls is NULL, an exception has already been thrown */
-     if (cls != NULL) {
-         env->ThrowNew(cls, msg);
-	 } else {
-		 env->FatalError("Illegal Exception name");
-	 }
-     /* free the local ref */
-    env->DeleteLocalRef(cls);
-}
-
-void throwIOException(JNIEnv *env, const char *msg)
-{
-	throwException(env, "java/io/IOException", msg);
-}
-
-WCHAR *GetWSAErrorMessage(DWORD last_error)
-{
-	static WCHAR errmsg[1024];
-	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
-		0,
-		last_error,
-		0,
-		errmsg,
-		511,
-		NULL))
-	{
-		swprintf_s(errmsg, 1024, _T("No error message for code %d"), last_error);
-		return errmsg;
-	}
-	size_t last = wcslen(errmsg) - 1;
-	while ((errmsg[last] == '\n') || (errmsg[last] == '\r')) {
-		errmsg[last] = 0;
-		last --;
-	}
-	return errmsg;
-}
-
-void throwExceptionWSAErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error)
-{
-	char errmsg[1064];
-	sprintf_s(errmsg, 1064, "%s [%d] %S", msg, last_error, GetWSAErrorMessage(last_error));
-	throwException(env, name, errmsg);
-}
-
-void throwIOExceptionWSAErrorMessage(JNIEnv *env, const char *msg, DWORD last_error)
-{
-	throwExceptionWSAErrorMessage(env, "java/io/IOException", msg, last_error);
-}
-
-void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg)
-{
-	throwIOExceptionWSAErrorMessage(env, msg, WSAGetLastError());
-}
-
-BOOL ExceptionCheckCompatible(JNIEnv *env) {
-	if (env->GetVersion() > JNI_VERSION_1_1) {
-		return env->ExceptionCheck();
-	} else {
-		return (env->ExceptionOccurred() != NULL);
-	}
 }
 
 void dllCleanup() {
@@ -199,33 +115,6 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStat
     return 0;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug(JNIEnv *env, jobject peer, jboolean on) {
-	if (on) {
-		jclass nativeDebugListenerClass = env->GetObjectClass(peer);
-		if (nativeDebugListenerClass != NULL) {
-			nativeDebugMethod = env->GetMethodID(nativeDebugListenerClass, "nativeDebugCallback", "(ILjava/lang/String;)V");
-			if (nativeDebugMethod != NULL) {
-				nativeDebugCallback = true;
-				debug("nativeDebugCallback ON");
-			}
-		}
-	} else {
-		nativeDebugCallback = false;
-	}
-}
-
-void callDebugListener(JNIEnv *env, jobject peer, int lineN, const char *fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	{
-		if (nativeDebugCallback) {
-			char msg[1064];
-			_vsnprintf_s(msg, 1064, fmt, ap);
-			env->CallVoidMethod(peer, nativeDebugMethod, lineN, env->NewStringUTF(msg));
-		}
-	}
-	va_end(ap);
-}
 
 /*
 * Class:     com_intel_bluetooth_BluetoothPeer

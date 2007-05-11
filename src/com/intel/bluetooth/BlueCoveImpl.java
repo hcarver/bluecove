@@ -21,9 +21,6 @@
  */
 package com.intel.bluetooth;
 
-//import java.security.AccessControlContext;
-//import java.security.AccessController;
-
 /**
  *
  * Singleton class used as holder for BluetoothPeer instead of LocalDevice
@@ -37,13 +34,12 @@ package com.intel.bluetooth;
  */
 public class BlueCoveImpl {
 
-	public static final String version = "1.2.3";
+	public static final String version = "2.0.0-SNAPSHOT";
 	
-	/* The context to be used when acessing resources */
-    //private AccessControlContext acc;
-
 	private BluetoothPeer bluetoothPeer;
 
+	private BluetoothStack bluetoothStack;
+	
     /**
      * Allow default initialization.
      * In Secure environment instance() should be called initialy from secure contex.
@@ -53,8 +49,15 @@ public class BlueCoveImpl {
     }
 
 	private BlueCoveImpl() {
-		//acc = AccessController.getContext();
 		bluetoothPeer = new BluetoothPeer();
+		
+		String stack = System.getProperty("bluecove.stack");
+		stack = "WIDCOMM";
+		if ("WIDCOMM".equalsIgnoreCase(stack)) {
+			bluetoothStack = new BluetoothStackWIDCOMM();
+		} else {
+			bluetoothStack = new BluetoothStackMicrosoft();
+		}
 		System.out.println("BlueCove version " + version);
 	}
 
@@ -64,6 +67,10 @@ public class BlueCoveImpl {
 
     public BluetoothPeer getBluetoothPeer() {
 		return bluetoothPeer;
+	}
+
+	public BluetoothStack getBluetoothStack() {
+		return bluetoothStack;
 	}
 
 }

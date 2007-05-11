@@ -20,15 +20,12 @@
  */ 
 package javax.bluetooth;
 
-import java.io.IOException;
-
 import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothPeer;
 import com.intel.bluetooth.BluetoothStreamConnectionNotifier;
 import com.intel.bluetooth.BluetoothStreamServiceRecordAccess;
-import com.intel.bluetooth.DebugLog;
 
 public class LocalDevice {
 	
@@ -38,31 +35,9 @@ public class LocalDevice {
 
 	private String address;
 
-	private long bluetoothAddress;
-
 	private LocalDevice() {
-		
-		BluetoothPeer bluetoothPeer = BlueCoveImpl.instance().getBluetoothPeer();
-
 		discoveryAgent = new DiscoveryAgent();
-
-		try {
-			int socket = bluetoothPeer.socket(false, false);
-			DebugLog.debug("bluetoothPeer socket", socket);
-			
-			bluetoothPeer.bind(socket);
-			
-			bluetoothAddress = bluetoothPeer.getsockaddress(socket);
-
-			address = Long.toHexString(bluetoothAddress);
-
-			bluetoothPeer.close(socket);
-		} catch (IOException e) {
-			DebugLog.error("get local bluetoothAddress", e);
-			address = "";
-		}
-
-		address = "000000000000".substring(address.length()) + address;
+		address =  BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceBluetoothAddress();
 	}
 
 	/*
@@ -98,7 +73,7 @@ public class LocalDevice {
 	 */
 
 	public String getFriendlyName() {
-		return BlueCoveImpl.instance().getBluetoothPeer().getradioname(bluetoothAddress);
+		return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceName();
 	}
 
 	/*

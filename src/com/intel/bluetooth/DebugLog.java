@@ -133,6 +133,14 @@ public class DebugLog {
 		}
 	}
 	
+	public static void debugNative(String location, String message) {
+		if (!debugCompiledOut && isDebugEnabled()) {
+			System.out.println(message);
+			System.out.println("\t  "+ location);
+			callAppenders(DEBUG, message, null);
+		}
+	}
+	
 	public static void error(String message) {
 		if (!debugCompiledOut && isDebugEnabled()) {
 			System.out.println("error " + message);

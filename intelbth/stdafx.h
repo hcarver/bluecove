@@ -77,10 +77,18 @@
 #include <tchar.h>
 #include <strsafe.h>
 
+#ifdef _BTWLIB
+#pragma comment(lib, "BtWdSdkLib.lib")
+//#include "btwlib.h"
+#include "BtIfDefinitions.h"
+#include "BtIfClasses.h"
+#include "com_intel_bluetooth_BluetoothStackWIDCOMM.h"
+#endif
+
 #endif // #else // _WIN32_WCE
 
 // TODO: reference additional headers your program requires here
 #include <stdlib.h>
 
 #include "com_intel_bluetooth_BluetoothPeer.h"
-
+#include "common.h"

@@ -39,8 +39,9 @@ public class SimpleDiscovery {
     
 	public static void main(String[] args) {
 		
-		//System.getProperties().put("bluecove.debug", "true");
+		System.getProperties().put("bluecove.debug", "true");
 		//System.getProperties().put("bluecove.native.path", ".");
+		System.getProperties().put("bluecove.native.path", "./resources");
 		
 	    LocalDevice l;
 		try {
@@ -65,6 +66,10 @@ public class SimpleDiscovery {
 		            Thread.sleep(1000);
 		        } catch(Exception e) {
 		        }
+	        }
+	        try {
+	            Thread.sleep(1000);
+	        } catch(Exception e) {
 	        }
 	    }
 	}

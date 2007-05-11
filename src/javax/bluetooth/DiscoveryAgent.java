@@ -111,11 +111,11 @@ public class DiscoveryAgent {
 	 * GIAC, LIAC
 	 */
 
-	public boolean startInquiry(int accessCode, DiscoveryListener listener)
-			throws BluetoothStateException {
-		BlueCoveImpl.instance().getBluetoothPeer().startInquiry(accessCode, listener);
-
-		return true;
+	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
+		if (listener == null) {
+			throw new NullPointerException("DiscoveryListener is null");
+		}
+		return BlueCoveImpl.instance().getBluetoothStack().startInquiry(accessCode, listener);
 	}
 
 	/*
@@ -138,7 +138,7 @@ public class DiscoveryAgent {
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
 		if (listener == null) {
-			throw new NullPointerException();
+			throw new NullPointerException("DiscoveryListener is null");
 		}
 		return BlueCoveImpl.instance().getBluetoothPeer().cancelInquiry();
 	}
