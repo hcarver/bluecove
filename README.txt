@@ -11,9 +11,9 @@ currently maintained by volunteers.
 
 == Requirements ==
 
-  * Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer)
+  * Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer and Windows Mobile 2003 or newer)
   * A Bluetooth device supported by the Microsoft bluetooth stack
-  * Java 1.1 or newer for the binary execution, Java 1.4 or older for compile.
+  * Java 1.1 or newer for the binary execution, Java 1.4 or newer to compile.
   * Another Bluetooth device to communicate with
 
 == Limitations ==
@@ -31,10 +31,6 @@ that can (possibly) be used to achieve OBEX functionality with BlueCove.
   * `DiscoveryAgent.cancelServiceSearch(..)`  Not implemented
   * `DiscoveryAgent.selectService(..)`  Not implemented
   * `RemoteDevice` authenticate, authorize and encrypt Not implemented
-
-== Implemented functionality ===
-  * version 1.2.3 `InputStream.available()`  returns 0 all the time.
-  * version 1.2.3 `LocalDevice.updateRecord(ServiceRecord srvRecord)`
 
 == Installation ==
 
@@ -73,19 +69,16 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
 
   # [http://code.google.com/p/bluecove/downloads/list Download BlueCove]source release
   # Unzip the source
-  # Run `ant`
-  # Go into `intelbth`
-  # Run `makeheaders.cmd`
+  # Run `ant` or `mvn`
+  # Go into `src\main\c\intelbth`
   # Open `intelbth.sln`
-  # Compile the project for your platform (e.g. 'Release' for 'Win32')
-  # Place `intelbth.dll` in `resources`
-  # Run `ant jar`
+  # Compile the project for your platform (e.g. 'Winsock' for 'Win32')
+  # Run `ant jar` or `mvn`
 
 == Source ==
 
 Available as downloadable packages or at the Subversion repository. Organized in:
 
-  * *docs* -  Documentation
-  * *intelbth* - The native windows JNI dll
-  * *src* - The implementation of JSR-82 with calls to intelbth
-  * *test* - Some test programs
+  * *`src\main\c\intelbth`* - The native windows JNI dll
+  * *`src\main\java`* - The implementation of JSR-82 with calls to intelbth
+  * *`src\test\java`* - Some test programs

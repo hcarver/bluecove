@@ -14,9 +14,13 @@
             <excludes>
                 <exclude>target/**</exclude>
                 <exclude>build/**</exclude>
-                <exclude>resources/**</exclude>
+                <exclude>src/main/resources/**</exclude>
+                <exclude>src/main/c/intelbth/Win32/**</exclude>
                 <exclude>.settings/**</exclude>
                 <exclude>**/*.log</exclude>
+                <exclude>**/*.ncb</exclude>
+                <exclude>**/*.user</exclude>
+                <exclude>**/*.suar</exclude>
                 <exclude>**/.*</exclude>
                 <exclude>vc80.*</exclude>
             </excludes>

@@ -14,8 +14,8 @@
 @echo JAVA_HOME Not Found
 :java_found
 
-%JAVA_HOME%\bin\javah -d intelbth -classpath target\classes com.intel.bluetooth.BluetoothPeer
-@if errorlevel 1 goto errormark
+@rem %JAVA_HOME%\bin\javah -d src\main\c\intelbth -classpath target\classes com.intel.bluetooth.BluetoothPeer
+@rem @if errorlevel 1 goto errormark
 
 @set p=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin
 @if exist "%p%\VCVARS32.BAT" goto vs_found
@@ -41,7 +41,9 @@ call "%p%\VCVARS32.BAT"
 @set INCLUDE=%sdk%\Include;%INCLUDE%
 @set LIB=%sdk%\Lib;%LIB%
 
-gmake.exe -fmakefile %* default
+@rem gmake.exe -fmakefile %* default
+
+vcbuild /rebuild src\main\c\intelbth\intelbth.sln "Winsock|Win32"
 @if errorlevel 1 goto errormark
 @echo [Build OK]
 @goto endmark
