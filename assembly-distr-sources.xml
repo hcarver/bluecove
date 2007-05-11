@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<assembly>
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <id>sources</id>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>${basedir}/</directory>
+            <outputDirectory>${artifactId}-${version}</outputDirectory>
+            <useDefaultExcludes>true</useDefaultExcludes>
+            <excludes>
+                <exclude>target/**</exclude>
+                <exclude>build/**</exclude>
+                <exclude>resources/**</exclude>
+                <exclude>.settings/**</exclude>
+                <exclude>**/*.log</exclude>
+                <exclude>**/.*</exclude>
+                <exclude>vc80.*</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+</assembly>

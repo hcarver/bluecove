@@ -9,7 +9,7 @@
 
     <groupId>net.sf.bluecove</groupId>
     <artifactId>bluecove</artifactId>
-    <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.3</version>
     <packaging>jar</packaging>
     <url>http://sourceforge.net/projects/bluecove/</url>
 
@@ -170,24 +170,36 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                    <execution>
+                       <id>main-jar</id>
                        <phase>package</phase>
                        <goals><goal>single</goal></goals>
+                       <configuration>
+                           <attach>false</attach>
+                           <appendAssemblyId>false</appendAssemblyId>
+                           <descriptors>
+                               <descriptor>assembly.xml</descriptor>
+                           </descriptors>
+                           <archive>
+                               <manifestEntries>
+                                   <Description>BlueCove JSR-82 implementation</Description>
+                                   <License>GNU Library or Lesser General Public License (LGPL)</License>
+                                   <Implementation-Version>${pom.version}</Implementation-Version>
+                               </manifestEntries>
+                           </archive>
+                       </configuration>
+                   </execution>
+                   <execution>
+                       <id>all-sources-gz</id>
+                       <phase>install</phase>
+                       <goals><goal>single</goal></goals>
+                       <configuration>
+                           <attach>false</attach>
+                           <descriptors>
+                               <descriptor>assembly-distr-sources.xml</descriptor>
+                           </descriptors>
+                       </configuration>
                    </execution>
                 </executions>
-                <configuration>
-                    <attach>false</attach>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <descriptors>
-                        <descriptor>assembly.xml</descriptor>
-                    </descriptors>
-                    <archive>
-                        <manifestEntries>
-                            <Description>BlueCove JSR-82 implementation</Description>
-                            <License>GNU Library or Lesser General Public License (LGPL)</License>
-                            <Implementation-Version>${pom.version}</Implementation-Version>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
             </plugin>
 
         </plugins>
