@@ -22,6 +22,8 @@ package com.intel.bluetooth;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryListener;
+import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.UUID;
 
 public interface BluetoothStack {
 
@@ -36,19 +38,34 @@ public interface BluetoothStack {
 	public String getLocalDeviceName();
 
 	/**
-	 * called by JSR-82 code 
+	 * called by JSR-82 code Device Inquiry
 	 */
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 	
 	/**
-	 * called by JSR-82 code 
+	 * called by JSR-82 code Device Inquiry
 	 */
 	public boolean cancelInquiry(DiscoveryListener listener);
 	
 	/**
-	 * Common method called by DeviceInquiryThread. 
+	 * Common synchronous method called by DeviceInquiryThread. 
 	 * Should throw BluetoothStateException only if it can't start Inquiry
 	 */
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
+	/**
+	 * called by JSR-82 code Service search
+	 */
+	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException;
+
+	/**
+	 * called by JSR-82 code Service search
+	 */
+	public boolean cancelServiceSearch(int transID);
+	
+	/**
+	 * Common synchronous method called by SearchServicesThread. 
+	 * Should throw BluetoothStateException only if it can't start Search
+	 */
+	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException;
 }

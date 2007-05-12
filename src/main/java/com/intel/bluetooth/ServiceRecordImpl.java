@@ -40,13 +40,13 @@ public class ServiceRecordImpl implements ServiceRecord {
     
 	private RemoteDevice device;
 
-	private int handle;
+	private long handle;
 
 	Hashtable attributes;
 
 	protected boolean attributeUpdated;
 	
-	ServiceRecordImpl(RemoteDevice device, int handle) {
+	ServiceRecordImpl(RemoteDevice device, long handle) {
 		this.device = device;
 
 		this.handle = handle;
@@ -60,8 +60,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 		for (Enumeration e = attributes.keys(); e.hasMoreElements();) {
 			Integer key = (Integer) e.nextElement();
 
-			element.addElement(new DataElement(DataElement.U_INT_2, key
-					.intValue()));
+			element.addElement(new DataElement(DataElement.U_INT_2, key.intValue()));
 			element.addElement((DataElement) attributes.get(key));
 		}
 
@@ -85,8 +84,9 @@ public class ServiceRecordImpl implements ServiceRecord {
 	 */
 
 	public DataElement getAttributeValue(int attrID) {
-		if (attrID < 0x0000 || attrID > 0xffff)
+		if (attrID < 0x0000 || attrID > 0xffff) {
 			throw new IllegalArgumentException();
+		}
 
 		return (DataElement) attributes.get(new Integer(attrID));
 	}
@@ -217,13 +217,12 @@ public class ServiceRecordImpl implements ServiceRecord {
 		 */
 
 		byte[] blob = BlueCoveImpl.instance().getBluetoothPeer().getServiceAttributes(sortIDs,
-						Long.parseLong(device.getBluetoothAddress(), 16),
-						handle);
+				 		Long.parseLong(device.getBluetoothAddress(), 16),
+						(int)handle);
 
 		if (blob.length > 0) {
 			try {
-				DataElement element = (new SDPInputStream(
-						new ByteArrayInputStream(blob))).readElement();
+				DataElement element = (new SDPInputStream(new ByteArrayInputStream(blob))).readElement();
 
 				for (Enumeration e = (Enumeration) element.getValue(); e.hasMoreElements();) {
 					attributes.put(new Integer((int) ((DataElement) e.nextElement()).getLong()), e.nextElement());
@@ -274,8 +273,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 		DataElement d1 = getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
 
 		if (d1.getDataType() == DataElement.DATSEQ)
-			for (Enumeration e1 = (Enumeration) d1.getValue(); e1
-					.hasMoreElements();) {
+			for (Enumeration e1 = (Enumeration) d1.getValue(); e1.hasMoreElements();) {
 				DataElement d2 = (DataElement) e1.nextElement();
 
 				if (d2.getDataType() == DataElement.DATSEQ) {
@@ -305,8 +303,9 @@ public class ServiceRecordImpl implements ServiceRecord {
 				}
 			}
 
-		if (port == -1)
+		if (port == -1) {
 			return null;
+		}
 
 		/*
 		 * build URL
@@ -341,8 +340,9 @@ public class ServiceRecordImpl implements ServiceRecord {
 			throw new IllegalArgumentException();
 		}
 
-		if (mustBeMaster)
+		if (mustBeMaster) {
 			buf.append(";master=true");
+		}
 
 		return buf.toString();
 	}

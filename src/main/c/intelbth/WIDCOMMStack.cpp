@@ -41,6 +41,13 @@ jlong BcAddrToLong(BD_ADDR bd_addr) {
 	return l;
 }
 
+void LongToBcAddr(jlong addr, BD_ADDR bd_addr) {
+	for (int i = 0; i < BD_ADDR_LEN; i++) {
+		bd_addr[i] = (UINT8)(addr & 0xFF);
+		addr >>= 8;
+	}
+}
+
 jint DeviceClassToInt(DEV_CLASS devClass) {
 	return (((devClass[0] << 8) + devClass[1]) << 8) + devClass[2];
 }
@@ -61,11 +68,17 @@ public:
 	BOOL deviceInquiryComplete;
 	BOOL deviceInquirySuccess;
 
+	BOOL searchServicesComplete;
+	UINT16 searchServicesRecords;
+	long searchServicesResultCode;
+
 	WIDCOMMStack();
 
     // methods to replace virtual methods in base class CBtIf
     virtual void OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected);
     virtual void OnInquiryComplete(BOOL success, short num_responses);
+
+	virtual void OnDiscoveryComplete(UINT16 nRecs, long lResultCode);
 };
 
 static WIDCOMMStack* stack;
@@ -107,6 +120,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 	return env->NewStringUTF((char*)name);
 }
 
+// --- Device Inquiry
 
 void WIDCOMMStack::OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected) {
 	int nextDevice = deviceRespondedIdx + 1;
@@ -128,7 +142,7 @@ void WIDCOMMStack::OnInquiryComplete(BOOL success, short num_responses) {
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceInquiryImpl
 (JNIEnv * env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
 	WIDCOMMStackInit();
-	debug("StartInquiry");
+	debug("StartDeviceInquiry");
 	stack->deviceInquiryComplete = false;
 	stack->deviceInquiryTerminated = false;
 
@@ -195,6 +209,96 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_device
 	stack->deviceInquiryTerminated = TRUE;
 	stack->StopInquiry();
 	return TRUE;
+}
+
+// --- Service search
+
+JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runSearchServicesImpl
+(JNIEnv * env, jobject peer, jobject startedNotify, jobject uuid, jlong address) {
+	WIDCOMMStackInit();
+	debug("StartSearchServices");
+
+	BD_ADDR bda; 
+	LongToBcAddr(address, bda);
+	GUID service_guid;
+
+	if (uuid != NULL) {
+		jclass clsUUID = env->FindClass("javax/bluetooth/UUID");
+        if (clsUUID == NULL) {
+			env->FatalError("Can't create UUID Class");
+		    return NULL;
+        }
+
+		jbyteArray uuidValue = (jbyteArray)env->GetObjectField(uuid, env->GetFieldID(clsUUID, "uuidValue", "[B"));
+
+		// pin array
+
+		jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
+
+		// build UUID
+		convertBytesToUUID(bytes, &service_guid);
+
+		// unpin array
+
+		env->ReleaseByteArrayElements(uuidValue, bytes, 0);
+		env->DeleteLocalRef(clsUUID);
+	}
+
+	stack->searchServicesComplete = FALSE;
+	stack->searchServicesRecords = -1;
+	stack->searchServicesResultCode = SERVICE_SEARCH_ERROR;
+
+	if (!stack->StartDiscovery(bda, &service_guid)) {
+		debug("StartSearchServices error");
+		// TODO read error
+		throwException(env, "javax/bluetooth/BluetoothStateException", "todo");
+		return NULL;
+	}
+
+	jclass notifyClass = env->GetObjectClass(startedNotify);
+	if (notifyClass == NULL) {
+		//fatalerror
+	}
+	jmethodID notifyMethod = env->GetMethodID(notifyClass, "searchServicesStartedCallback", "()V");
+	if (notifyMethod == NULL) {
+		//fatalerror
+	}
+	env->CallVoidMethod(startedNotify, notifyMethod);
+
+	while (!stack->searchServicesComplete) {
+		// No Wait on Windows CE, TODO
+		Sleep(100);
+	}
+
+	//todo SERVICE_SEARCH_TERMINATED 
+
+	if (stack->searchServicesResultCode != WBT_SUCCESS) {
+		debugs("searchServicesResultCode %i", stack->searchServicesResultCode);
+		return NULL;
+	}
+	if (stack->searchServicesRecords <= 0) {
+		return env->NewLongArray(0);
+	}
+
+
+	CSdpDiscoveryRec* records = new CSdpDiscoveryRec[stack->searchServicesRecords];
+
+	int recSize = stack->ReadDiscoveryRecords(bda, stack->searchServicesRecords, records, NULL);
+
+	jlongArray result = env->NewLongArray(recSize);
+
+	jlong *longs = env->GetLongArrayElements(result, 0);
+
+	for (int r = 0; r < recSize; r ++) {
+		longs[r] = (jlong)&(records[r]);
+	}
+	env->ReleaseLongArrayElements(result, longs, 0);
+
+	return result;
+}
+
+void WIDCOMMStack::OnDiscoveryComplete(UINT16 nRecs, long lResultCode) {
+	searchServicesComplete = TRUE;
 }
 
 #endif

@@ -24,6 +24,9 @@ import java.io.IOException;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryListener;
+import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.UUID;
 
 public class BluetoothStackMicrosoft implements BluetoothStack {
 
@@ -56,19 +59,56 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		return BlueCoveImpl.instance().getBluetoothPeer().getradioname(bluetoothAddress);
 	}
 
+	//	 --- Device Inquiry
+	
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
-		BlueCoveImpl.instance().getBluetoothPeer().startInquiry(accessCode, listener);;
-		return true;
+		BlueCoveImpl.instance().getBluetoothPeer().initialized();
+		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
 	}
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
 		return BlueCoveImpl.instance().getBluetoothPeer().cancelInquiry();
 	}
 
-	/**
-	 * Not used now.
-	 */
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
-		return 0;
+		return BlueCoveImpl.instance().getBluetoothPeer().runDeviceInquiry(startedNotify, accessCode, listener);
 	}
+
+	//	 --- Service search 
+	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
+	}
+
+	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		int[] handles = BlueCoveImpl.instance().getBluetoothPeer().runSearchServices(startedNotify, uuidSet, Long.parseLong(device.getBluetoothAddress(), 16));
+		if (handles == null) {
+			return DiscoveryListener.SERVICE_SEARCH_ERROR;
+		} else if (handles.length > 0) {
+			ServiceRecord[] records = new ServiceRecordImpl[handles.length];
+
+			for (int i = 0; i < handles.length; i++) {
+				records[i] = new ServiceRecordImpl(device, handles[i]);
+				try {
+					records[i].populateRecord(new int[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004 });
+					if (attrSet != null) {
+						records[i].populateRecord(attrSet);
+					}
+				} catch (Exception e) {
+				}
+			}
+			listener.servicesDiscovered(0, records);
+			return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
+		} else {
+			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
+		}
+	}
+	
+	public boolean cancelServiceSearch(int transID) {
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		} else {
+			return false;
+		}
+	}
+
 }

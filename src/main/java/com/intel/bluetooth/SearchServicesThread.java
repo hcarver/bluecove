@@ -22,16 +22,18 @@ package com.intel.bluetooth;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryListener;
+import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.UUID;
 
-/**
- * This is Common class to solve JNI call backs problem
- *
- */
-public class DeviceInquiryThread extends Thread {
+public class SearchServicesThread extends Thread {
 	
 	private BluetoothStack stack;
 	
-	private int accessCode;
+	private int[] attrSet; 
+	
+	UUID[] uuidSet; 
+	
+	RemoteDevice device;
 
 	private DiscoveryListener listener;
 
@@ -41,38 +43,44 @@ public class DeviceInquiryThread extends Thread {
 	
 	private boolean terminated = false;
 	
-	private DeviceInquiryThread(BluetoothStack stack, int accessCode, DiscoveryListener listener) {
-		super("DeviceInquiryThread");
+	private SearchServicesThread(BluetoothStack stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
+		super("SearchServicesThread");
 		this.stack = stack;
-		this.accessCode = accessCode;
+		this.attrSet = attrSet;
 		this.listener = listener;
+		this.uuidSet = uuidSet;
+		this.device = device;
 	}
 
 	/**
 	 * Start DeviceInquiry and wait for startException or deviceInquiryStartedCallback
 	 */
-	public static boolean startInquiry(BluetoothStack stack, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
-		DeviceInquiryThread t = (new DeviceInquiryThread(stack, accessCode, listener));
+	public static int startSearchServices(BluetoothStack stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		SearchServicesThread t = (new SearchServicesThread(stack, attrSet, uuidSet, device, listener));
 		synchronized (t) {
 			t.start();
 			while (!t.started && !t.terminated) {
 				try {
 					t.wait();
 				} catch (InterruptedException e) {
-					return false;
+					return 0;
 				}
 				if (t.startException != null) {
 					throw t.startException;
 				}
 			}
 		}
-		return t.started;
+		if (t.started) {
+			return 1;
+		} else {
+			return 0;
+		}
 	}
 	
 	public void run() {
-		int discType = DiscoveryListener.INQUIRY_ERROR;
+		int respCode = DiscoveryListener.SERVICE_SEARCH_ERROR;
 		try {
-			discType = stack.runDeviceInquiry(this, accessCode, listener);
+			respCode = stack.runSearchServices(this, attrSet, uuidSet, device, listener);
 		} catch (BluetoothStateException e) {
 			startException = e;
 			return;
@@ -81,19 +89,19 @@ public class DeviceInquiryThread extends Thread {
 			synchronized (this) {
 				notifyAll();
 			}
-			DebugLog.debug("runDeviceInquiry ends");
+			DebugLog.debug("runSearchServices ends");
 		}
 		if (started) {
-			listener.inquiryCompleted(discType);
+			listener.serviceSearchCompleted(1, respCode);
 		}
 	}
 	
-	public void deviceInquiryStartedCallback() {
-		DebugLog.debug("deviceInquiryStartedCallback");
+	public void searchServicesStartedCallback() {
+		DebugLog.debug("searchServicesStartedCallback");
 		started = true;
 		synchronized (this) {
 			notifyAll();
 		}
 	}
-	
+
 }

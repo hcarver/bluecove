@@ -140,7 +140,7 @@ public class DiscoveryAgent {
 		if (listener == null) {
 			throw new NullPointerException("DiscoveryListener is null");
 		}
-		return BlueCoveImpl.instance().getBluetoothPeer().cancelInquiry();
+		return BlueCoveImpl.instance().getBluetoothStack().cancelInquiry(listener);
 	}
 
 	/*
@@ -171,8 +171,7 @@ public class DiscoveryAgent {
 	 */
 
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
-		BlueCoveImpl.instance().getBluetoothPeer().startSearchServices(attrSet, uuidSet, device, listener);
-		return 0;
+		return BlueCoveImpl.instance().getBluetoothStack().searchServices(attrSet, uuidSet, device, listener);
 	}
 
 	/*
@@ -188,11 +187,7 @@ public class DiscoveryAgent {
 	 */
 
 	public boolean cancelServiceSearch(int transID) {
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedError();
-		} else {
-			return false;
-		}
+		return BlueCoveImpl.instance().getBluetoothStack().cancelServiceSearch(transID);
 	}
 
 	/*

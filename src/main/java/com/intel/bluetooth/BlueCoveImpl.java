@@ -52,7 +52,7 @@ public class BlueCoveImpl {
 		bluetoothPeer = new BluetoothPeer();
 		
 		String stack = System.getProperty("bluecove.stack");
-		stack = "WIDCOMM";
+		//stack = "WIDCOMM";
 		if ("WIDCOMM".equalsIgnoreCase(stack)) {
 			bluetoothStack = new BluetoothStackWIDCOMM();
 		} else {

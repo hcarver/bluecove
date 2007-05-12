@@ -118,3 +118,13 @@ BOOL ExceptionCheckCompatible(JNIEnv *env) {
 		return (env->ExceptionOccurred() != NULL);
 	}
 }
+
+void convertBytesToUUID(jbyte *bytes, GUID *uuid) {
+	uuid->Data1 = bytes[0]<<24&0xff000000|bytes[1]<<16&0x00ff0000|bytes[2]<<8&0x0000ff00|bytes[3]&0x000000ff;
+	uuid->Data2 = bytes[4]<<8&0xff00|bytes[5]&0x00ff;
+	uuid->Data3 = bytes[6]<<8&0xff00|bytes[7]&0x00ff;
+
+	for(int i = 0; i < 8; i++) {
+		uuid->Data4[i] = bytes[i+8];
+	}
+}

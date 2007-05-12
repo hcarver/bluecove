@@ -24,8 +24,6 @@ import java.io.IOException;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryListener;
-import javax.bluetooth.RemoteDevice;
-import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
 public class BluetoothPeer {
@@ -42,66 +40,6 @@ public class BluetoothPeer {
 		NativeLibLoader.isAvailable();
 	}
 
-	class InquiryThread extends Thread {
-		private int accessCode;
-
-		private DiscoveryListener listener;
-
-		public InquiryThread(int accessCode, DiscoveryListener listener) {
-			this.accessCode = accessCode;
-			this.listener = listener;
-		}
-
-		public void run() {
-			listener.inquiryCompleted(doInquiry(accessCode, listener));
-		}
-	}
-
-	class SearchServicesThread extends Thread {
-		private int[] attrSet;
-
-		private UUID[] uuidSet;
-
-		private RemoteDevice device;
-
-		private DiscoveryListener listener;
-
-		public SearchServicesThread(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
-			this.attrSet = attrSet;
-			this.uuidSet = uuidSet;
-			this.device = device;
-			this.listener = listener;
-		}
-
-		public void run() {
-			int[] handles = getServiceHandles(uuidSet, Long.parseLong(device.getBluetoothAddress(), 16));
-
-			if (handles == null) {
-				listener.serviceSearchCompleted(0, DiscoveryListener.SERVICE_SEARCH_ERROR);
-			} else if (handles.length > 0) {
-				ServiceRecord[] records = new ServiceRecordImpl[handles.length];
-
-				for (int i = 0; i < handles.length; i++) {
-					records[i] = new ServiceRecordImpl(device, handles[i]);
-
-					try {
-						records[i].populateRecord(new int[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004 });
-
-						if (attrSet != null) {
-							records[i].populateRecord(attrSet);
-						}
-					} catch (Exception e) {
-					}
-				}
-
-				listener.servicesDiscovered(0, records);
-				listener.serviceSearchCompleted(0, DiscoveryListener.SERVICE_SEARCH_COMPLETED);
-			} else {
-				listener.serviceSearchCompleted(0, DiscoveryListener.SERVICE_SEARCH_NO_RECORDS);
-			}
-		}
-	}
-	
 	/**
 	 * This is implementation specific class, only BlueCoveImpl can create this class
 	 *
@@ -127,16 +65,6 @@ public class BluetoothPeer {
 		}
 	}
 	
-	public void startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
-		initialized();
-		(new InquiryThread(accessCode, listener)).start();
-	}
-
-	public void startSearchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
-		initialized();
-		(new SearchServicesThread(attrSet, uuidSet, device, listener)).start();
-	}
-
 	public native int initializationStatus() throws IOException;
 	
 	public native void enableNativeDebug(boolean on);
@@ -155,7 +83,7 @@ public class BluetoothPeer {
 	 * perform synchronous inquiry
 	 */
 
-	public native int doInquiry(int accessCode, DiscoveryListener listener);
+	public native int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener);
 
 	/*
 	 * cancel current inquiry (if any)
@@ -167,7 +95,7 @@ public class BluetoothPeer {
 	 * perform synchronous service discovery
 	 */
 
-	public native int[] getServiceHandles(UUID[] uuidSet, long address);
+	public native int[] runSearchServices(SearchServicesThread startedNotify, UUID[] uuidSet, long address);
 
 	/*
 	 * get service attributes

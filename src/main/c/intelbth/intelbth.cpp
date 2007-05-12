@@ -122,12 +122,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStat
 * Signature: (ILjavax/bluetooth/DiscoveryListener;)I
 */
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_doInquiry(JNIEnv *env, jobject peer, jint accessCode, jobject listener)
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
+(JNIEnv *env, jobject peer, jobject startedNotify, jint accessCode, jobject listener)
 {
     jclass clsRemoteDevice = NULL;
     jclass clsDeviceClass = NULL;
 
-    debug("->doInquiry");
+    debug("->runDeviceInquiry");
 	// build device query
 
 #ifndef _WIN32_WCE
@@ -183,6 +184,16 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_doInquiry(JNIEnv *
 	}
 
 	LeaveCriticalSection(&csLookup);
+
+	jclass notifyClass = env->GetObjectClass(startedNotify);
+	if (notifyClass == NULL) {
+		//fatalerror
+	}
+	jmethodID notifyMethod = env->GetMethodID(notifyClass, "deviceInquiryStartedCallback", "()V");
+	if (notifyMethod == NULL) {
+		//fatalerror
+	}
+	env->CallVoidMethod(startedNotify, notifyMethod);
 
 	// fetch results
     jint result;
@@ -319,19 +330,11 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothPeer_cancelInquiry(
 	return JNI_TRUE;
 }
 
-static void convertBytesToUUID(jbyte *bytes, GUID *uuid)
-{
-	uuid->Data1 = bytes[0]<<24&0xff000000|bytes[1]<<16&0x00ff0000|bytes[2]<<8&0x0000ff00|bytes[3]&0x000000ff;
-	uuid->Data2 = bytes[4]<<8&0xff00|bytes[5]&0x00ff;
-	uuid->Data3 = bytes[6]<<8&0xff00|bytes[7]&0x00ff;
 
-	for(int i = 0; i < 8; i++)
-		uuid->Data4[i] = bytes[i+8];
-}
-
-JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceHandles(JNIEnv *env, jobject peer, jobjectArray uuidSet, jlong address)
+JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServices
+(JNIEnv *env, jobject peer, jobject startedNotify, jobjectArray uuidSet, jlong address)
 {
-	debug("->getServiceHandles");
+	debug("->runSearchServices");
 
 	// 	check if we can handle the number of UUIDs supplied
 	if ((uuidSet != NULL) && (env->GetArrayLength(uuidSet) > MAX_UUIDS_IN_QUERY)) {
@@ -441,10 +444,21 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceHan
 #else
 	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookup)) {
 		DWORD last_error = WSAGetLastError();
-		debugss("WSALookupServiceBegin error [%d] %S", last_error, GetWSAErrorMessage(last_error));
+		throwExceptionWSAErrorMessage(env, "javax/bluetooth/BluetoothStateException", "LookupServiceBegin error", WSAGetLastError());
 		return NULL;
 	}
 #endif
+
+	jclass notifyClass = env->GetObjectClass(startedNotify);
+	if (notifyClass == NULL) {
+		//fatalerror
+	}
+	jmethodID notifyMethod = env->GetMethodID(notifyClass, "searchServicesStartedCallback", "()V");
+	if (notifyMethod == NULL) {
+		//fatalerror
+	}
+	env->CallVoidMethod(startedNotify, notifyMethod);
+
 	// fetch results
 
 	char buf[4096];

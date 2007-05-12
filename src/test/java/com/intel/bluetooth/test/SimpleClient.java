@@ -43,12 +43,17 @@ public class SimpleClient implements DiscoveryListener  {
 
 	Vector records;
 	
-	class Cancel extends Thread {
+	CancelThread cancelThread;
+	
+	class CancelThread extends Thread {
 		
 		SimpleClient client;
 
-		Cancel(SimpleClient client) {
+		boolean inquiryCompleted;
+		
+		CancelThread(SimpleClient client) {
 			this.client = client;
+			this.inquiryCompleted = false;
 		}
 
 		public void run() {
@@ -58,15 +63,17 @@ public class SimpleClient implements DiscoveryListener  {
 				e.printStackTrace();
 			}
 
-			System.out.println("cancelling inquiry on timeout");
+			if (!this.inquiryCompleted) {
+				System.out.println("cancelling inquiry on timeout");
 
-			try {
-				LocalDevice.getLocalDevice().getDiscoveryAgent().cancelInquiry(client);
-			} catch (BluetoothStateException bse) {
-				System.out.println("Got BluetoothStateException: " + bse);
+				try {
+					if (LocalDevice.getLocalDevice().getDiscoveryAgent().cancelInquiry(client)) {
+						System.out.println("inquiry cancelled");		
+					}
+				} catch (BluetoothStateException bse) {
+					System.out.println("Got BluetoothStateException: " + bse);
+				}
 			}
-
-			System.out.println("inquiry cancelled");
 		}
 	}
 
@@ -74,7 +81,8 @@ public class SimpleClient implements DiscoveryListener  {
 		
 		devices = new Vector();
 
-		(new Cancel(this)).start();
+		cancelThread = new CancelThread(this); 
+		cancelThread.start();
 
 		synchronized (this) {
 			try {
@@ -157,22 +165,14 @@ public class SimpleClient implements DiscoveryListener  {
 		}
 	}
 
-	public static void main(String[] args) {
-		if (args.length == 1) {
-			new SimpleClient(args[0]);
-		} else {
-			System.out.println("syntax: SimpleClient <message>");
-			new SimpleClient("bluecove test message");
-		}
-	}
-
 	public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
 		devices.addElement(btDevice);
-		System.out.println("deviceDiscovered DeviceClass: " + cod.toString());
+		System.out.println("deviceDiscovered DeviceClass: " + ((Object)cod).toString());
 	}
 
 	public synchronized void inquiryCompleted(int discType) {
 		System.out.println("inquiry completed: discType = " + discType);
+		cancelThread.inquiryCompleted = true;
 		notifyAll();
 	}
 
@@ -185,6 +185,18 @@ public class SimpleClient implements DiscoveryListener  {
 	public synchronized void serviceSearchCompleted(int transID, int respCode) {
 		System.out.println("service search completed: respCode = " + respCode);
 		notifyAll();
+	}
+	
+	public static void main(String[] args) {
+		//System.getProperties().put("bluecove.debug", "true");
+		System.getProperties().put("bluecove.native.path", "./src/main/resources");
+		
+		if (args.length == 1) {
+			new SimpleClient(args[0]);
+		} else {
+			System.out.println("syntax: SimpleClient <message>");
+			new SimpleClient("bluecove test message");
+		}
 	}
 
 }

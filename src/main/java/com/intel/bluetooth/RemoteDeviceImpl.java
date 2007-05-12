@@ -32,9 +32,12 @@ public class RemoteDeviceImpl extends RemoteDevice {
 	
 	private String name;
 	
+	private long address;
+	
 	protected RemoteDeviceImpl(long address, String name) {
 		super(Long.toHexString(address));
 		this.name = name;
+		this.address = address;
 	}
 	
 	public String getFriendlyName(boolean alwaysAsk) throws IOException {
@@ -44,5 +47,9 @@ public class RemoteDeviceImpl extends RemoteDevice {
 			throw new IOException();
 		}
 		return name;
+	}
+
+	public long getAddress() {
+		return address;
 	}
 }

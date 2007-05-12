@@ -25,6 +25,9 @@ import java.util.Vector;
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryListener;
+import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.UUID;
 
 public class BluetoothStackWIDCOMM implements BluetoothStack {
 
@@ -37,7 +40,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public native String getLocalDeviceName();
 
-	// ---------- Device Inquiry
+	// --- Device Inquiry
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		deviceDiscoveryListeners.addElement(listener);
@@ -67,5 +70,45 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		}
 		return deviceInquiryCancelImpl();
 	}
+	
+	// --- Service search 
+	
+	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
+	}
+
+	public boolean cancelServiceSearch(int transID) {
+		return false;
+	}
+
+	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, UUID uuid, long address) throws BluetoothStateException;
+	
+	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		UUID uuid = null;
+		if ((uuidSet != null) && (uuidSet.length > 0)) {
+			uuid = uuidSet[uuidSet.length -1];
+		}
+		long[] handles = runSearchServicesImpl(startedNotify, uuid, ((RemoteDeviceImpl)device).getAddress());
+		if (handles == null) {
+			return DiscoveryListener.SERVICE_SEARCH_ERROR;
+		} else if (handles.length > 0) {
+			ServiceRecord[] records = new ServiceRecordImpl[handles.length];
+			for (int i = 0; i < handles.length; i++) {
+				records[i] = new ServiceRecordImpl(device, handles[i]);
+				try {
+					records[i].populateRecord(new int[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004 });
+					if (attrSet != null) {
+						records[i].populateRecord(attrSet);
+					}
+				} catch (Exception e) {
+				}
+			}
+			listener.servicesDiscovered(0, records);
+			return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
+		} else {
+			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
+		}
+	}
+
 
 }

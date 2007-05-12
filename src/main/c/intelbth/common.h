@@ -47,3 +47,5 @@ void throwIOExceptionWSAErrorMessage(JNIEnv *env, const char *msg, DWORD last_er
 void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg);
 
 BOOL ExceptionCheckCompatible(JNIEnv *env);
+
+void convertBytesToUUID(jbyte *bytes, GUID *uuid);
