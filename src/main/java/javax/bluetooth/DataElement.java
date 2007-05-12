@@ -471,8 +471,49 @@ public class DataElement {
 		}
 	}
 
+    private static String typeToString(int type) {
+		if (type == DataElement.DATALT) {
+			return "DATATL";
+		} else if (type == DataElement.DATSEQ) {
+			return "DATSEQ";
+		} else if (type == DataElement.U_INT_4) {
+			return "U_INT_4";
+		} else if (type == DataElement.U_INT_1) {
+			return "U_INT_1";
+		} else if (type == DataElement.U_INT_2) {
+			return "U_INT_2";
+		} else if (type == DataElement.INT_1) {
+			return "INT_1";
+		} else if (type == DataElement.INT_2) {
+			return "INT_2";
+		} else if (type == DataElement.INT_4) {
+			return "INT_4";
+		} else if (type == DataElement.INT_8) {
+			return "INT_8";
+		} else if (type == DataElement.UUID) {
+			return "UUID";
+		} else if (type == DataElement.U_INT_8) {
+			return "U_INT_8";
+		} else if (type == DataElement.U_INT_16) {
+			return "U_INT_16";
+		} else if (type == DataElement.INT_16) {
+			return "INT_16";
+		} else if (type == DataElement.STRING) {
+			return "STRING";
+		} else if (type == DataElement.URL) {
+			return "URL";
+		} else if (type == DataElement.BOOL) {
+			return "BOOL";
+		} else if (type == DataElement.NULL) {
+			return "NULL";
+		} else {
+			return "UNKNOWN_TYPE";
+		}
+	}
+
 	/**
-	 * @deprecated Use ((Object)dataElement).toString() if you want your application to run in MDIP profile
+	 * @deprecated Use ((Object)dataElement).toString() if you want your
+	 *             application to run in MDIP profile
 	 */
 	public String toString() {
 		switch (valueType) {
@@ -483,19 +524,20 @@ public class DataElement {
 		case INT_2:
 		case INT_4:
 		case INT_8:
-			return "0x" + Long.toHexString(((Long) value).longValue());
+			return typeToString(valueType) + " 0x" + Long.toHexString(((Long) value).longValue());
 		case BOOL:
 		case URL:
 		case STRING:
 		case UUID:
-			return value.toString();
+			return typeToString(valueType) + " " + value.toString();
 		case U_INT_8:
 		case U_INT_16:
 		case INT_16: {
 			byte[] b = (byte[]) value;
 
 			StringBuffer buf = new StringBuffer();
-
+			buf.append(typeToString(valueType)).append(" ");
+			
 			for (int i = 0; i < b.length; i++) {
 				buf.append(Integer.toHexString(b[i] >> 4 & 0xf));
 				buf.append(Integer.toHexString(b[i] & 0xf));

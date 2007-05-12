@@ -42,7 +42,7 @@ jlong BcAddrToLong(BD_ADDR bd_addr) {
 }
 
 void LongToBcAddr(jlong addr, BD_ADDR bd_addr) {
-	for (int i = 0; i < BD_ADDR_LEN; i++) {
+	for (int i = BD_ADDR_LEN - 1; i >= 0; i--) {
 		bd_addr[i] = (UINT8)(addr & 0xFF);
 		addr >>= 8;
 	}
@@ -69,8 +69,6 @@ public:
 	BOOL deviceInquirySuccess;
 
 	BOOL searchServicesComplete;
-	UINT16 searchServicesRecords;
-	long searchServicesResultCode;
 
 	WIDCOMMStack();
 
@@ -78,7 +76,7 @@ public:
     virtual void OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected);
     virtual void OnInquiryComplete(BOOL success, short num_responses);
 
-	virtual void OnDiscoveryComplete(UINT16 nRecs, long lResultCode);
+	virtual void OnDiscoveryComplete();
 };
 
 static WIDCOMMStack* stack;
@@ -220,6 +218,10 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 
 	BD_ADDR bda; 
 	LongToBcAddr(address, bda);
+	wchar_t addressString[14];
+	BcAddrToString(addressString, bda);
+	debugs("StartSearchServices on [%S]", addressString);
+
 	GUID service_guid;
 
 	if (uuid != NULL) {
@@ -245,8 +247,6 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	}
 
 	stack->searchServicesComplete = FALSE;
-	stack->searchServicesRecords = -1;
-	stack->searchServicesResultCode = SERVICE_SEARCH_ERROR;
 
 	if (!stack->StartDiscovery(bda, &service_guid)) {
 		debug("StartSearchServices error");
@@ -270,20 +270,23 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		Sleep(100);
 	}
 
+	UINT16 obtainedServicesRecords;
+	CBtIf::DISCOVERY_RESULT searchServicesResultCode = stack->GetLastDiscoveryResult(bda, &obtainedServicesRecords);
+
 	//todo SERVICE_SEARCH_TERMINATED 
 
-	if (stack->searchServicesResultCode != WBT_SUCCESS) {
-		debugs("searchServicesResultCode %i", stack->searchServicesResultCode);
+	if (searchServicesResultCode != CBtIf::DISCOVERY_RESULT_SUCCESS) {
+		debugs("searchServicesResultCode %i", searchServicesResultCode);
 		return NULL;
 	}
-	if (stack->searchServicesRecords <= 0) {
+	if (obtainedServicesRecords <= 0) {
 		return env->NewLongArray(0);
 	}
 
 
-	CSdpDiscoveryRec* records = new CSdpDiscoveryRec[stack->searchServicesRecords];
+	CSdpDiscoveryRec* records = new CSdpDiscoveryRec[obtainedServicesRecords];
 
-	int recSize = stack->ReadDiscoveryRecords(bda, stack->searchServicesRecords, records, NULL);
+	int recSize = stack->ReadDiscoveryRecords(bda, obtainedServicesRecords, records, NULL);
 
 	jlongArray result = env->NewLongArray(recSize);
 
@@ -297,8 +300,30 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	return result;
 }
 
-void WIDCOMMStack::OnDiscoveryComplete(UINT16 nRecs, long lResultCode) {
+void WIDCOMMStack::OnDiscoveryComplete() {
 	searchServicesComplete = TRUE;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getServiceAttributes
+(JNIEnv * env, jobject peer, jint attrID, jlong handle) {
+
+	CSdpDiscoveryRec* record = (CSdpDiscoveryRec*)handle;
+
+	SDP_DISC_ATTTR_VAL* p_val = new SDP_DISC_ATTTR_VAL();
+
+	if (!record->FindAttribute((UINT16)attrID, p_val)) {
+		// attr not found
+		return NULL;
+	}
+	//debugs("num_elem %i", p_val->num_elem);
+	//debugs("first type %i", p_val->elem[0].type);
+	//debugs("first len %i", p_val->elem[0].len);
+
+	jbyteArray result = env->NewByteArray(sizeof(SDP_DISC_ATTTR_VAL));
+	jbyte *bytes = env->GetByteArrayElements(result, 0);
+	memcpy(bytes, p_val, sizeof(SDP_DISC_ATTTR_VAL));
+	env->ReleaseByteArrayElements(result, bytes, 0);
+	return result;
 }
 
 #endif

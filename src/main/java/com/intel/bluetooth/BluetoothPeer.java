@@ -69,8 +69,11 @@ public class BluetoothPeer {
 	
 	public native void enableNativeDebug(boolean on);
 	
-	public static void nativeDebugCallback(int lineN, String message) {
-		DebugLog.debugNative("intelbth.cpp:" + lineN, message);
+	public static void nativeDebugCallback(String fileName, int lineN, String message) {
+		if (fileName.startsWith(".\\")) {
+			fileName = fileName.substring(2);
+		}
+		DebugLog.debugNative(fileName + ":" + lineN, message);
 	}
 	
 	public native int getDeviceClass();

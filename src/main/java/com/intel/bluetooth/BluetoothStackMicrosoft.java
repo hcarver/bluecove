@@ -20,9 +20,12 @@
  */
 package com.intel.bluetooth;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Enumeration;
 
 import javax.bluetooth.BluetoothStateException;
+import javax.bluetooth.DataElement;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
@@ -111,4 +114,55 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		}
 	}
 
+	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
+		/*
+		 * copy and sort attrIDs (required by MS Bluetooth)
+		 */
+
+		int[] sortIDs = new int[attrIDs.length];
+
+		System.arraycopy(attrIDs, 0, sortIDs, 0, attrIDs.length);
+
+		for (int i = 0; i < sortIDs.length; i++) {
+			for (int j = 0; j < sortIDs.length - i - 1; j++) {
+				if (sortIDs[j] > sortIDs[j + 1]) {
+					int temp = sortIDs[j];
+					sortIDs[j] = sortIDs[j + 1];
+					sortIDs[j + 1] = temp;
+				}
+			}
+		}
+
+		/*
+		 * check for duplicates
+		 */
+
+		for (int i = 0; i < sortIDs.length - 1; i++) {
+			if (sortIDs[i] == sortIDs[i + 1]) {
+				throw new IllegalArgumentException();
+			}
+		}
+
+		/*
+		 * retrieve SDP blob
+		 */
+
+		byte[] blob = BlueCoveImpl.instance().getBluetoothPeer().getServiceAttributes(sortIDs,
+				 		Long.parseLong(serviceRecord.getHostDevice().getBluetoothAddress(), 16),
+						(int)serviceRecord.getHandle());
+
+		if (blob.length > 0) {
+			try {
+				DataElement element = (new SDPInputStream(new ByteArrayInputStream(blob))).readElement();
+				for (Enumeration e = (Enumeration) element.getValue(); e.hasMoreElements();) {
+					serviceRecord.populateAttributeValue((int) ((DataElement) e.nextElement()).getLong(), (DataElement)e.nextElement());
+				}
+				return true;
+			} catch (Exception e) {
+				throw new IOException();
+			}
+		} else {
+			return false;
+		}
+	}
 }

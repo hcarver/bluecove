@@ -101,6 +101,15 @@ public class DebugLog {
 		}
 	}
 
+	public static void debug(String message, Throwable t) {
+		if (!debugCompiledOut && isDebugEnabled()) {
+			System.out.println(message + " " + t);
+			printLocation();
+			t.printStackTrace(System.out);
+			callAppenders(DEBUG, message, t);
+		}
+	}
+	
 	public static void debug(String message, Object obj) {
 		if (!debugCompiledOut && isDebugEnabled()) {
 			System.out.println(message + " " + obj.toString());

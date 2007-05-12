@@ -20,7 +20,6 @@
  */ 
 package com.intel.bluetooth;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -184,56 +183,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 			}
 		}
 
-		/*
-		 * copy and sort attrIDs (required by MS Bluetooth)
-		 */
-
-		int[] sortIDs = new int[attrIDs.length];
-
-		System.arraycopy(attrIDs, 0, sortIDs, 0, attrIDs.length);
-
-		for (int i = 0; i < sortIDs.length; i++) {
-			for (int j = 0; j < sortIDs.length - i - 1; j++) {
-				if (sortIDs[j] > sortIDs[j + 1]) {
-					int temp = sortIDs[j];
-					sortIDs[j] = sortIDs[j + 1];
-					sortIDs[j + 1] = temp;
-				}
-			}
-		}
-
-		/*
-		 * check for duplicates
-		 */
-
-		for (int i = 0; i < sortIDs.length - 1; i++) {
-			if (sortIDs[i] == sortIDs[i + 1]) {
-				throw new IllegalArgumentException();
-			}
-		}
-
-		/*
-		 * retrieve SDP blob
-		 */
-
-		byte[] blob = BlueCoveImpl.instance().getBluetoothPeer().getServiceAttributes(sortIDs,
-				 		Long.parseLong(device.getBluetoothAddress(), 16),
-						(int)handle);
-
-		if (blob.length > 0) {
-			try {
-				DataElement element = (new SDPInputStream(new ByteArrayInputStream(blob))).readElement();
-
-				for (Enumeration e = (Enumeration) element.getValue(); e.hasMoreElements();) {
-					attributes.put(new Integer((int) ((DataElement) e.nextElement()).getLong()), e.nextElement());
-				}
-				return true;
-			} catch (Exception e) {
-				throw new IOException();
-			}
-		} else {
-			return false;
-		}
+		return BlueCoveImpl.instance().getBluetoothStack().populateServicesRecordAttributeValues(this, attrIDs);
 	}
 
 	/*
@@ -454,6 +404,13 @@ public class ServiceRecordImpl implements ServiceRecord {
 			return true;
 		}
 	}
+	
+	void populateAttributeValue(int attrID, DataElement attrValue) {
+		if (attrID < 0x0000 || attrID > 0xffff) {
+			throw new IllegalArgumentException();
+		}
+		attributes.put(new Integer(attrID), attrValue);
+	}
 
 	public String toString() {
 		
@@ -464,7 +421,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 			buf.append("0x");
 			buf.append(Integer.toHexString(i.intValue()));
-			buf.append(":\n");
+			buf.append(":\n\t");
 
 			DataElement d = (DataElement) attributes.get(i);
 
@@ -475,5 +432,9 @@ public class ServiceRecordImpl implements ServiceRecord {
 		buf.append("}");
 
 		return buf.toString();
+	}
+
+	long getHandle() {
+		return this.handle;
 	}
 }

@@ -29,7 +29,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug(
 	if (on) {
 		nativeDebugListenerClass = (jclass)env->NewGlobalRef(env->GetObjectClass(peer));
 		if (nativeDebugListenerClass != NULL) {
-			nativeDebugMethod = env->GetStaticMethodID(nativeDebugListenerClass, "nativeDebugCallback", "(ILjava/lang/String;)V");
+			nativeDebugMethod = env->GetStaticMethodID(nativeDebugListenerClass, "nativeDebugCallback", "(Ljava/lang/String;ILjava/lang/String;)V");
 			if (nativeDebugMethod != NULL) {
 				nativeDebugCallback = true;
 				debug("nativeDebugCallback ON");
@@ -40,14 +40,14 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug(
 	}
 }
 
-void callDebugListener(JNIEnv *env, int lineN, const char *fmt, ...) {
+void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
 	{
 		if (nativeDebugCallback) {
 			char msg[1064];
 			_vsnprintf_s(msg, 1064, fmt, ap);
-			env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, lineN, env->NewStringUTF(msg));
+			env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, env->NewStringUTF(fileName), lineN, env->NewStringUTF(msg));
 		}
 	}
 	va_end(ap);

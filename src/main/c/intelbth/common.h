@@ -29,10 +29,10 @@
 #define SERVICE_SEARCH_NO_RECORDS 4
 #define SERVICE_SEARCH_DEVICE_NOT_REACHABLE 6
 
-void callDebugListener(JNIEnv *env, int lineN, const char *fmt, ...);
-#define debug(fmt) callDebugListener(env, __LINE__, fmt);
-#define debugs(fmt, message) callDebugListener(env, __LINE__, fmt, message);
-#define debugss(fmt, message1, message2) callDebugListener(env, __LINE__, fmt, message1, message2);
+void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...);
+#define debug(fmt) callDebugListener(env, __FILE__, __LINE__, fmt);
+#define debugs(fmt, message) callDebugListener(env, __FILE__, __LINE__, fmt, message);
+#define debugss(fmt, message1, message2) callDebugListener(env, __FILE__, __LINE__, fmt, message1, message2);
 
 void throwException(JNIEnv *env, const char *name, const char *msg);
 

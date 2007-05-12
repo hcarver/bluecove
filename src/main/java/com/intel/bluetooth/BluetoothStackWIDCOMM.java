@@ -20,9 +20,12 @@
  */
 package com.intel.bluetooth;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
+import javax.bluetooth.DataElement;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
@@ -101,6 +104,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 						records[i].populateRecord(attrSet);
 					}
 				} catch (Exception e) {
+					DebugLog.debug("populateRecord error", e);
 				}
 			}
 			listener.servicesDiscovered(0, records);
@@ -110,5 +114,25 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		}
 	}
 
+	private native byte[] getServiceAttributes(int attrID, long handle) throws IOException;
+	
+	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
+		for (int i = 0; i < attrIDs.length; i++) {
+			try {
+				byte[] sdpStruct = getServiceAttributes(attrIDs[i], serviceRecord.getHandle());
+				if (sdpStruct != null) {
+					//DebugLog.debug("decode attribute", attrIDs[i]);
+					DataElement element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(sdpStruct)))
+							.readElement();
+					serviceRecord.populateAttributeValue(attrIDs[i], element);
+				} else {
+					//DebugLog.debug("no data for attribute", attrIDs[i]);
+				}
+			} catch (Throwable e) {
+				DebugLog.debug("populateServicesRecord attribute " + attrIDs[i] + " error", e);
+			}
+		}
+		return true;
+	}
 
 }

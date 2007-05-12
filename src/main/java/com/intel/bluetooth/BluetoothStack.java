@@ -20,6 +20,8 @@
  */
 package com.intel.bluetooth;
 
+import java.io.IOException;
+
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
@@ -68,4 +70,6 @@ public interface BluetoothStack {
 	 * Should throw BluetoothStateException only if it can't start Search
 	 */
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException;
+	
+	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException;
 }
