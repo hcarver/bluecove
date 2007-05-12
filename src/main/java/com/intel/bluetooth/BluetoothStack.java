@@ -23,6 +23,7 @@ package com.intel.bluetooth;
 import java.io.IOException;
 
 import javax.bluetooth.BluetoothStateException;
+import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.UUID;
@@ -39,6 +40,16 @@ public interface BluetoothStack {
 	 */
 	public String getLocalDeviceName();
 
+	public DeviceClass getLocalDeviceClass();
+	
+	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException;
+
+	public int getLocalDeviceDiscoverable();
+	
+	public boolean isLocalDevicePowerOn();
+	
+	public String getLocalDeviceProperty(String property);
+	
 	/**
 	 * called by JSR-82 code Device Inquiry
 	 */
@@ -71,5 +82,8 @@ public interface BluetoothStack {
 	 */
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException;
 	
+	/**
+	 * Called by ServiceRecord.populateRecord(int[] attrIDs) during Service search
+	 */
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException;
 }

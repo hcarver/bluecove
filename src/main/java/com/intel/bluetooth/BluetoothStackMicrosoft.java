@@ -26,6 +26,8 @@ import java.util.Enumeration;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DataElement;
+import javax.bluetooth.DeviceClass;
+import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
@@ -62,6 +64,44 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		return BlueCoveImpl.instance().getBluetoothPeer().getradioname(bluetoothAddress);
 	}
 
+	public DeviceClass getLocalDeviceClass() {
+		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass());
+	}
+	
+	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
+		switch (mode) {
+		case DiscoveryAgent.NOT_DISCOVERABLE:
+			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(false);
+			break;
+		case DiscoveryAgent.GIAC:
+			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(true);
+			break;
+		case DiscoveryAgent.LIAC:
+			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(true);
+			// TODO Timer to turn it off
+			break;
+		}
+		return true;
+	}
+
+	public boolean isLocalDevicePowerOn() {
+		int mode = BlueCoveImpl.instance().getBluetoothPeer().getBluetoothRadioMode();
+		return ((mode == BluetoothPeer.BTH_MODE_CONNECTABLE) || (mode == BluetoothPeer.BTH_MODE_DISCOVERABLE));
+	}
+	
+	public int getLocalDeviceDiscoverable() {
+		int mode = BlueCoveImpl.instance().getBluetoothPeer().getBluetoothRadioMode();
+		if (mode == BluetoothPeer.BTH_MODE_DISCOVERABLE) {
+			return DiscoveryAgent.GIAC;
+		} else {
+			return DiscoveryAgent.NOT_DISCOVERABLE;
+		}
+	}
+	
+	public String getLocalDeviceProperty(String property) {
+		return null;
+	}
+	
 	//	 --- Device Inquiry
 	
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {

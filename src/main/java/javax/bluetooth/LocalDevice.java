@@ -23,7 +23,6 @@ package javax.bluetooth;
 import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.BlueCoveImpl;
-import com.intel.bluetooth.BluetoothPeer;
 import com.intel.bluetooth.BluetoothStreamConnectionNotifier;
 import com.intel.bluetooth.BluetoothStreamServiceRecordAccess;
 
@@ -87,7 +86,7 @@ public class LocalDevice {
 	 */
 
 	public DeviceClass getDeviceClass() {
-		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass());
+		return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceClass();
 	}
 
 	/*
@@ -123,24 +122,11 @@ public class LocalDevice {
 	 */
 
 	public boolean setDiscoverable(int mode) throws BluetoothStateException {
-		switch (mode) {
-		case DiscoveryAgent.NOT_DISCOVERABLE:
-			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(false);
-			break;
-		case DiscoveryAgent.GIAC:
-			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(true);
-			break;
-		case DiscoveryAgent.LIAC:
-			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(true);
-			// TODO Timer to turn it off
-			break;
-		}
-		return true;
+		return BlueCoveImpl.instance().getBluetoothStack().setLocalDeviceDiscoverable(mode);
 	}
 
 	public static boolean isPowerOn() {
-		int mode = BlueCoveImpl.instance().getBluetoothPeer().getBluetoothRadioMode();
-		return ((mode == BluetoothPeer.BTH_MODE_CONNECTABLE) || (mode == BluetoothPeer.BTH_MODE_DISCOVERABLE));
+		return BlueCoveImpl.instance().getBluetoothStack().isLocalDevicePowerOn();
 	}
 	
 	/*
@@ -153,12 +139,7 @@ public class LocalDevice {
 	 */
 
 	public int getDiscoverable() {
-		int mode = BlueCoveImpl.instance().getBluetoothPeer().getBluetoothRadioMode();
-		if (mode == BluetoothPeer.BTH_MODE_DISCOVERABLE) {
-			return DiscoveryAgent.GIAC;
-		} else {
-			return DiscoveryAgent.NOT_DISCOVERABLE;
-		}
+		return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceDiscoverable();
 	}
 	
 	/*
@@ -197,7 +178,7 @@ public class LocalDevice {
 		} else if ("bluecove".equals(property)) {
 			return BlueCoveImpl.version;
 		}
-		return null;
+		return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceProperty(property);
 	}
 
 	

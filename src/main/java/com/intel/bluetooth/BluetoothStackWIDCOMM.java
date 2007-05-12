@@ -43,6 +43,38 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public native String getLocalDeviceName();
 
+	/**
+	 * @todo
+	 */
+	public DeviceClass getLocalDeviceClass() {
+		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass());
+	}
+
+	/**
+	 * @todo
+	 */
+	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
+		return true;
+	}
+
+	/**
+	 * @todo
+	 */
+	public boolean isLocalDevicePowerOn() {
+		return true;
+	}
+
+	/**
+	 * @todo
+	 */
+	public int getLocalDeviceDiscoverable() {
+		return 0;
+	}
+	
+	public String getLocalDeviceProperty(String property) {
+		return null;
+	}
+	
 	// --- Device Inquiry
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
