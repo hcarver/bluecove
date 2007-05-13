@@ -123,7 +123,17 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
-		int[] handles = BlueCoveImpl.instance().getBluetoothPeer().runSearchServices(startedNotify, uuidSet, Long.parseLong(device.getBluetoothAddress(), 16));
+		startedNotify.searchServicesStartedCallback();
+		int[] handles;
+		try {
+			handles = BlueCoveImpl.instance().getBluetoothPeer().runSearchServices(uuidSet, Long.parseLong(device.getBluetoothAddress(), 16));
+		} catch (SearchServicesDeviceNotReachableException e) {
+			return DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
+		} catch (SearchServicesTerminatedException e) {
+			return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
+		} catch (SearchServicesException e) {
+			return DiscoveryListener.SERVICE_SEARCH_ERROR;
+		}
 		if (handles == null) {
 			return DiscoveryListener.SERVICE_SEARCH_ERROR;
 		} else if (handles.length > 0) {

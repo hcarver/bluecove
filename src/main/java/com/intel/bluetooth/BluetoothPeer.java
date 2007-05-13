@@ -98,7 +98,7 @@ public class BluetoothPeer {
 	 * perform synchronous service discovery
 	 */
 
-	public native int[] runSearchServices(SearchServicesThread startedNotify, UUID[] uuidSet, long address);
+	public native int[] runSearchServices(UUID[] uuidSet, long address) throws SearchServicesException;
 
 	/*
 	 * get service attributes

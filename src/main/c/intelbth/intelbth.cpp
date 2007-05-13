@@ -332,7 +332,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothPeer_cancelInquiry(
 
 
 JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServices
-(JNIEnv *env, jobject peer, jobject startedNotify, jobjectArray uuidSet, jlong address)
+(JNIEnv *env, jobject peer, jobjectArray uuidSet, jlong address)
 {
 	debug("->runSearchServices");
 
@@ -444,20 +444,14 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 #else
 	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookup)) {
 		DWORD last_error = WSAGetLastError();
-		throwExceptionWSAErrorMessage(env, "javax/bluetooth/BluetoothStateException", "LookupServiceBegin error", WSAGetLastError());
+		debugss("WSALookupServiceBegin error [%d] %S", last_error, GetWSAErrorMessage(last_error));
+		// [10108] No such service is known. The service cannot be found in the specified name space. -> SERVICE_SEARCH_DEVICE_NOT_REACHABLE 
+		if (10108 == last_error) {
+			throwException(env, "com/intel/bluetooth/SearchServicesDeviceNotReachableException", "");
+		}
 		return NULL;
 	}
 #endif
-
-	jclass notifyClass = env->GetObjectClass(startedNotify);
-	if (notifyClass == NULL) {
-		//fatalerror
-	}
-	jmethodID notifyMethod = env->GetMethodID(notifyClass, "searchServicesStartedCallback", "()V");
-	if (notifyMethod == NULL) {
-		//fatalerror
-	}
-	env->CallVoidMethod(startedNotify, notifyMethod);
 
 	// fetch results
 
@@ -479,9 +473,10 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 		DWORD last_error = WSAGetLastError();
 		switch(last_error) {
 			case WSANO_DATA:
+				WSALookupServiceEnd(hLookup);
 				return env->NewIntArray(0);
 			default:
-				debugss("WSALookupServiceBegin error [%d] %S", last_error, GetWSAErrorMessage(last_error));
+				debugss("WSALookupServiceNext error [%d] %S", last_error, GetWSAErrorMessage(last_error));
 				WSALookupServiceEnd(hLookup);
 				return NULL;
 		}

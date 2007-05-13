@@ -26,6 +26,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Hashtable;
 import java.util.StringTokenizer;
 
 import javax.bluetooth.UUID;
@@ -59,6 +60,20 @@ public class MicroeditionConnector {
 
 	public static final int READ_WRITE = Connector.READ_WRITE;
 
+	private static Hashtable/*<String, any>*/ params = new Hashtable();
+	
+	private static final String  AUTHENTICATE = "authenticate";
+	private static final String  ENCRYPT = "encrypt";
+	private static final String  MASTER = "master";
+	private static final String  NAME = "name";
+	
+	static {
+		params.put(AUTHENTICATE, AUTHENTICATE);
+		params.put(ENCRYPT, ENCRYPT);
+		params.put(MASTER, MASTER);
+		params.put(NAME, NAME);
+	}
+
 	/*
 	 * Create and open a Connection. Parameters: name - The URL for the
 	 * connection. Returns: A new Connection object. Throws:
@@ -68,8 +83,6 @@ public class MicroeditionConnector {
 	 * kind of I/O error occurs. SecurityException - If a requested protocol
 	 * handler is not permitted.
 	 */
-
-	private static String[] params = { "authenticate", "encrypt", "master", "name" };
 
 	public static Connection open(String name) throws IOException {
 		return openImpl(name, true);
@@ -83,8 +96,8 @@ public class MicroeditionConnector {
 		String host = null;
 		String port = null;
 
-		String[] values = new String[4];
-
+		Hashtable values = new Hashtable();
+		
 		if (name.substring(0, 8).equals("btspp://")) {
 			
 			int colon = name.indexOf(':', 8);
@@ -99,18 +112,13 @@ public class MicroeditionConnector {
 
 					while (tok.hasMoreTokens()) {
 						String t = tok.nextToken();
-
 						int equals = t.indexOf('=');
-
 						if (equals > -1) {
 							String param = t.substring(0, equals);
 							String value = t.substring(equals + 1);
-
-							for (int i = 0; i < 4; i++)
-								if (param.equals(params[i])) {
-									values[i] = value;
-									break;
-								}
+							if (params.contains(param)) {
+								values.put(param, value);
+							}
 						}
 					}
 				}
@@ -132,19 +140,19 @@ public class MicroeditionConnector {
 				if (!allowServer) {
 					throw new IllegalArgumentException();
 				}
-				return new BluetoothStreamConnectionNotifier(new UUID(port,
-						false), values[0] != null && values[0].equals("true"),
-						values[1] != null && values[1].equals("true"),
-						values[3]);
+				return new BluetoothStreamConnectionNotifier(new UUID(port, false), paramBoolean(values, AUTHENTICATE),
+						paramBoolean(values, ENCRYPT), (String) values.get(NAME)); 
 			} else {
-				return new BluetoothConnection(Long.parseLong(host, 16),
-						Integer.parseInt(port), values[0] != null
-								&& values[0].equals("true"), values[1] != null
-								&& values[1].equals("true"));
+				return new BluetoothConnection(Long.parseLong(host, 16), Integer.parseInt(port), 
+						paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
 			}	
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException();
 		}
+	}
+	
+	private static boolean paramBoolean(Hashtable values, String name) {
+		return "true".equals(values.get(name));
 	}
 
 	/*
