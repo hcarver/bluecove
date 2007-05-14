@@ -40,7 +40,7 @@ class BluetoothInputStream extends InputStream {
 		if (conn == null) {
 			throw new IOException();
 		} else {
-			return (int)BlueCoveImpl.instance().getBluetoothPeer().recvAvailable(conn.socket);
+			return BlueCoveImpl.instance().getBluetoothStack().connectionRfReadAvailable(conn.handle);
 		}
 	}
 	
@@ -60,7 +60,7 @@ class BluetoothInputStream extends InputStream {
 		if (conn == null) {
 			throw new IOException();
 		} else {
-			return BlueCoveImpl.instance().getBluetoothPeer().recv(conn.socket);
+			return BlueCoveImpl.instance().getBluetoothStack().connectionRfRead(conn.handle);
 		}
 	}
 
@@ -119,7 +119,7 @@ class BluetoothInputStream extends InputStream {
 		if (conn == null) {
 			throw new IOException();
 		} else {
-			return BlueCoveImpl.instance().getBluetoothPeer().recv(conn.socket, b, off, len);
+			return BlueCoveImpl.instance().getBluetoothStack().connectionRfRead(conn.handle, b, off, len);
 		}
 	}
 

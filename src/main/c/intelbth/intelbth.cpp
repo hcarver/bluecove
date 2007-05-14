@@ -1017,8 +1017,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__I_3BII(JNIEn
 	int done = 0;
 
 	while(done < len) {
-		int count = send((SOCKET)socket, (char *)(bytes+off+done), len-done, 0);
-
+		int count = send((SOCKET)socket, (char *)(bytes + off + done), len - done, 0);
 		if (count <= 0) {
 			env->ReleaseByteArrayElements(b, bytes, 0);
 			throwIOExceptionWSAGetLastError(env, "Failed to write");

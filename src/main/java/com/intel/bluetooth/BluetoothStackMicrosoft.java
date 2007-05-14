@@ -118,6 +118,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 
 	//	 --- Service search 
+	
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
 	}
@@ -214,5 +215,42 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		} else {
 			return false;
 		}
+	}
+
+//	 --- Client RFCOMM connections
+	
+	public long connectionRfOpen(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
+		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
+		int socket = peer.socket(authenticate, encrypt);
+		peer.connect(socket, address, channel);
+		return socket;
+	}
+	
+	public void connectionRfClose(long handle) throws IOException {
+		BlueCoveImpl.instance().getBluetoothPeer().close((int)handle);
+	}
+
+	public long getConnectionRfRemoteAddress(long handle) throws IOException {
+		return BlueCoveImpl.instance().getBluetoothPeer().getpeeraddress((int)handle);
+	}
+	
+	public int connectionRfRead(long handle) throws IOException {
+		return BlueCoveImpl.instance().getBluetoothPeer().recv((int)handle);
+	}
+
+	public int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException {
+		return BlueCoveImpl.instance().getBluetoothPeer().recv((int)handle, b, off, len);
+	}
+
+	public int connectionRfReadAvailable(long handle) throws IOException {
+		return (int)BlueCoveImpl.instance().getBluetoothPeer().recvAvailable((int)handle);
+	}
+
+	public void connectionRfWrite(long handle, int b) throws IOException {
+		BlueCoveImpl.instance().getBluetoothPeer().send((int)handle, b);
+	}
+
+	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException {
+		BlueCoveImpl.instance().getBluetoothPeer().send((int)handle, b, off, len);
 	}
 }

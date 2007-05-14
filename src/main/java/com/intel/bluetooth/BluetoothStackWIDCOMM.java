@@ -166,5 +166,23 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		}
 		return true;
 	}
+	
+//	 --- Client RFCOMM connections
+	
+	public native long connectionRfOpen(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
+	
+	public native void connectionRfClose(long handle) throws IOException;
+
+	public native long getConnectionRfRemoteAddress(long handle) throws IOException;
+	
+	public native int connectionRfRead(long handle) throws IOException;
+
+	public native int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException;
+
+	public native int connectionRfReadAvailable(long handle) throws IOException;
+
+	public native void connectionRfWrite(long handle, int b) throws IOException;
+
+	public native void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
 
 }

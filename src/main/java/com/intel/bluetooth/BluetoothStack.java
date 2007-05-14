@@ -50,6 +50,8 @@ public interface BluetoothStack {
 	
 	public String getLocalDeviceProperty(String property);
 	
+//	 --- Device Inquiry
+	
 	/**
 	 * called by JSR-82 code Device Inquiry
 	 */
@@ -66,6 +68,8 @@ public interface BluetoothStack {
 	 */
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
+//	 --- Service search 
+	
 	/**
 	 * called by JSR-82 code Service search
 	 */
@@ -86,4 +90,23 @@ public interface BluetoothStack {
 	 * Called by ServiceRecord.populateRecord(int[] attrIDs) during Service search
 	 */
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException;
+	
+//	 --- Client RFCOMM connections
+	
+	public long connectionRfOpen(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
+	
+	public void connectionRfClose(long handle) throws IOException;
+	
+	public long getConnectionRfRemoteAddress(long handle) throws IOException;
+
+	public int connectionRfRead(long handle) throws IOException;
+	
+	public int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException;
+	
+	public int connectionRfReadAvailable(long handle) throws IOException;
+	
+	public void connectionRfWrite(long handle, int b) throws IOException;
+	
+	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
+
 }

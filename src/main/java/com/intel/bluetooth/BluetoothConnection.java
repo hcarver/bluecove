@@ -30,9 +30,9 @@ import javax.microedition.io.StreamConnection;
 
 public class BluetoothConnection implements StreamConnection {
 	
-	int socket;
+	long handle;
 
-	long address;
+	private long address;
 
 	BluetoothInputStream in;
 
@@ -42,39 +42,34 @@ public class BluetoothConnection implements StreamConnection {
 
 	private boolean closed;
 
-	synchronized void closeSocket() throws IOException {
-		if (in == null && out == null && closing && !closed) {
-			BlueCoveImpl.instance().getBluetoothPeer().close(socket);
-			closed = true;
-		}
-	}
-
 	public BluetoothConnection(long address, int channel, boolean authenticate,	boolean encrypt) throws IOException {
+		this.handle = BlueCoveImpl.instance().getBluetoothStack().connectionRfOpen(address, channel, authenticate, encrypt);
 		this.address = address;
-		
-		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
-
-		socket = peer.socket(authenticate, encrypt);
-
-		peer.connect(socket, address, channel);
 	}
 
 	/** Construct BluetoothConnection with pre-existing socket */
 	protected BluetoothConnection(int socket) {
-		this.socket = socket;
+		this.handle = socket;
 		try {
 			this.address = BlueCoveImpl.instance().getBluetoothPeer().getsockaddress(socket);
 		} catch (IOException e) {
 		}
 	}
 
+	synchronized void closeSocket() throws IOException {
+		if (in == null && out == null && closing && !closed) {
+			BlueCoveImpl.instance().getBluetoothStack().connectionRfClose(handle);
+			handle = 0;
+			closed = true;
+		}
+	}
+	
 	public long getAddress() {
 		return address;
 	}
 
 	public long getRemoteAddress() throws IOException {
-		return BlueCoveImpl.instance().getBluetoothPeer().getpeeraddress(
-				socket);
+		return BlueCoveImpl.instance().getBluetoothStack().getConnectionRfRemoteAddress(handle);
 	}
 
 	/*
@@ -140,7 +135,6 @@ public class BluetoothConnection implements StreamConnection {
 
 	public void close() throws IOException {
 		closing = true;
-
 		closeSocket();
 	}
 

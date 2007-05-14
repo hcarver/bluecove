@@ -47,7 +47,7 @@ class BluetoothOutputStream extends OutputStream {
 		if (conn == null) {
 			throw new IOException();
 		} else {
-			BlueCoveImpl.instance().getBluetoothPeer().send(conn.socket, b);
+			BlueCoveImpl.instance().getBluetoothStack().connectionRfWrite(conn.handle, b);
 		}
 	}
 
@@ -78,7 +78,7 @@ class BluetoothOutputStream extends OutputStream {
 		if (conn == null) {
 			throw new IOException();
 		} else {
-			BlueCoveImpl.instance().getBluetoothPeer().send(conn.socket, b, off, len);
+			BlueCoveImpl.instance().getBluetoothStack().connectionRfWrite(conn.handle, b, off, len);
 		}
 	}
 
