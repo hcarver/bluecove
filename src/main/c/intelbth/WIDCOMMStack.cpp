@@ -118,6 +118,48 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 	return env->NewStringUTF((char*)name);
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isLocalDevicePowerOn
+(JNIEnv *env, jobject peer) {
+	WIDCOMMStackInit();
+	return stack->IsDeviceReady();
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isStackServerUp
+(JNIEnv *env, jobject peer) {
+	WIDCOMMStackInit();
+	return stack->IsStackServerUp();
+}
+
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getBTWVersionInfo
+(JNIEnv *env, jobject peer) {
+	WIDCOMMStackInit();
+	BT_CHAR p_version[256];
+	if (!stack->GetBTWVersionInfo(p_version, 256)) {
+		return NULL;
+	}
+	return env->NewStringUTF((char*)p_version);
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceVersion
+(JNIEnv *, jobject) {
+	WIDCOMMStackInit();
+	CBtIf::DEV_VER_INFO dev_Ver_Info;
+	if (!stack->GetLocalDeviceVersionInfo(&dev_Ver_Info)) {
+		return -1;
+	}
+	return dev_Ver_Info.lmp_sub_version;
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceManufacturer
+(JNIEnv *, jobject) {
+	WIDCOMMStackInit();
+	CBtIf::DEV_VER_INFO dev_Ver_Info;
+	if (!stack->GetLocalDeviceVersionInfo(&dev_Ver_Info)) {
+		return -1;
+	}
+	return dev_Ver_Info.manufacturer;
+}
+
 // --- Device Inquiry
 
 void WIDCOMMStack::OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected) {

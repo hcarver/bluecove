@@ -30,6 +30,8 @@ import javax.bluetooth.UUID;
 
 public interface BluetoothStack {
 
+	public String getStackID();
+	
 	/**
 	 * Retrieves the Bluetooth address of the local device.
 	 */

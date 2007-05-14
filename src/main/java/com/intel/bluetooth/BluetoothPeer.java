@@ -76,7 +76,7 @@ public class BluetoothPeer {
 		DebugLog.debugNative(fileName + ":" + lineN, message);
 	}
 	
-	public native int getDeviceClass();
+	public native int getDeviceClass(long address);
 	
 	public native void setDiscoverable(boolean on) throws BluetoothStateException;
 	
@@ -125,6 +125,8 @@ public class BluetoothPeer {
 	public native int socket(boolean authenticate, boolean encrypt) throws IOException;
 
 	public native long getsockaddress(int socket) throws IOException;
+	
+	public native void storesockopt(int socket);
 
 	public native int getsockchannel(int socket) throws IOException;
 
@@ -153,4 +155,8 @@ public class BluetoothPeer {
 	public native long getpeeraddress(int socket) throws IOException;
 
 	public native String getradioname(long address);
+	
+	public native int getDeviceVersion(long address);
+	
+	public native int getDeviceManufacturer(long address);
 }

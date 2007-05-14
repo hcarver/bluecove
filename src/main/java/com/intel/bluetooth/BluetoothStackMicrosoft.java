@@ -41,6 +41,10 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		
 	}
 	
+	public String getStackID() {
+		return BlueCoveImpl.STACK_WINSOCK;
+	}
+	
 	public String getLocalDeviceBluetoothAddress() {
 		BluetoothPeer bluetoothPeer = BlueCoveImpl.instance().getBluetoothPeer();
 		String address;
@@ -49,6 +53,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 			bluetoothPeer.bind(socket);
 			bluetoothAddress = bluetoothPeer.getsockaddress(socket);
 			address = Long.toHexString(bluetoothAddress);
+			bluetoothPeer.storesockopt(socket);
 			bluetoothPeer.close(socket);
 		} catch (IOException e) {
 			DebugLog.error("get local bluetoothAddress", e);
@@ -65,7 +70,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 
 	public DeviceClass getLocalDeviceClass() {
-		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass());
+		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass(bluetoothAddress));
 	}
 	
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
@@ -99,6 +104,29 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 	
 	public String getLocalDeviceProperty(String property) {
+		final String TRUE = "true";
+		if ("bluetooth.connected.devices.max".equals(property)) {
+			return "7";
+		}
+		if ("bluetooth.sd.trans.max".equals(property)) {
+			return "1";
+		}
+		if ("bluetooth.connected.inquiry.scan".equals(property)) {
+			return TRUE;
+		}
+		if ("bluetooth.connected.page.scan".equals(property)) {
+			return TRUE;
+		}
+		if ("bluetooth.connected.inquiry".equals(property)) {
+			return TRUE;
+		}
+		
+		if ("bluecove.radio.version".equals(property)) {
+			return String.valueOf(BlueCoveImpl.instance().getBluetoothPeer().getDeviceVersion(bluetoothAddress));
+		}
+		if ("bluecove.radio.manufacturer".equals(property)) {
+			return String.valueOf(BlueCoveImpl.instance().getBluetoothPeer().getDeviceManufacturer(bluetoothAddress));
+		}
 		return null;
 	}
 	

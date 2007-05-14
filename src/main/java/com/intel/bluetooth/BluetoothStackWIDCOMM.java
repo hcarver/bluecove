@@ -27,6 +27,7 @@ import java.util.Vector;
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DataElement;
 import javax.bluetooth.DeviceClass;
+import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
@@ -39,6 +40,10 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	BluetoothStackWIDCOMM() {
 	}
 	
+	public String getStackID() {
+		return BlueCoveImpl.STACK_WIDCOMM;
+	}
+	
 	public native String getLocalDeviceBluetoothAddress();
 
 	public native String getLocalDeviceName();
@@ -47,31 +52,67 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	 * @todo
 	 */
 	public DeviceClass getLocalDeviceClass() {
-		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass());
+		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass(0));
 	}
 
 	/**
 	 * @todo
+	 * There are no functions to set WIDCOMM stack discoverable status.
 	 */
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
 		return true;
 	}
 
+	private native boolean isStackServerUp();
+	
 	/**
 	 * @todo
-	 */
-	public boolean isLocalDevicePowerOn() {
-		return true;
-	}
-
-	/**
-	 * @todo
+	 * There are no functions to find WIDCOMM discoverable status.
 	 */
 	public int getLocalDeviceDiscoverable() {
-		return 0;
+		if (isStackServerUp()) {
+			return DiscoveryAgent.GIAC;
+		} else {
+			return DiscoveryAgent.NOT_DISCOVERABLE;
+		}
 	}
+
+	public native boolean isLocalDevicePowerOn();
+	
+	private native String getBTWVersionInfo();
+	
+	private native int getDeviceVersion();
+	
+	private native int getDeviceManufacturer();
 	
 	public String getLocalDeviceProperty(String property) {
+		final String TRUE = "true";
+		if ("bluetooth.connected.devices.max".equals(property)) {
+			return "7";
+		}
+		if ("bluetooth.sd.trans.max".equals(property)) {
+			return "1";
+		}
+		if ("bluetooth.connected.inquiry.scan".equals(property)) {
+			return TRUE;
+		}
+		if ("bluetooth.connected.page.scan".equals(property)) {
+			return TRUE;
+		}
+		if ("bluetooth.connected.inquiry".equals(property)) {
+			return TRUE;
+		}
+		
+		if ("bluecove.radio.version".equals(property)) {
+			return String.valueOf(getDeviceVersion());
+		}
+		if ("bluecove.radio.manufacturer".equals(property)) {
+			return String.valueOf(getDeviceManufacturer());
+		}
+		if ("bluecove.stack.version".equals(property)) {
+			return getBTWVersionInfo();
+		}
+		
 		return null;
 	}
 	

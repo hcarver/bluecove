@@ -31,6 +31,7 @@ static CRITICAL_SECTION csLookup;
 static BOOL restoreBtMode = false;
 #ifdef _WIN32_WCE
 static DWORD initialBtMode;
+static BTH_LOCAL_VERSION localBluetoothDeviceInfo;
 #else
 static BOOL initialBtIsDiscoverable;
 #endif
@@ -1138,35 +1139,95 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeeraddress(JN
 	return addr.btAddr;
 }
 
-JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getradioname(JNIEnv *env, jobject peer, jlong address)
-{
-    debug("->getradioname");
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_storesockopt
+(JNIEnv * env, jobject peer, jint socket) {
+#ifndef _WIN32_WCE	
+	int optVal;
+	int optLen = sizeof(int);
+	if (getsockopt(socket, SOL_SOCKET,  SO_RCVBUF,  (char*)&optVal,  &optLen) != SOCKET_ERROR) {
+		debugs("receive buffer %i", optVal);
+	}
+	if (getsockopt(socket, SOL_SOCKET,  SO_SNDBUF,  (char*)&optVal,  &optLen) != SOCKET_ERROR) {
+		debugs("send buffer %i", optVal);
+	}
+#else
+	int optVal;
+	int optLen = sizeof(int);
+	if (getsockopt(socket, SOL_RFCOMM,  SO_BTH_GET_RECV_BUFFER,  (char*)&optVal,  &optLen) != SOCKET_ERROR) {
+		debugs("receive buffer %i", optVal);
+	}
+	if (getsockopt(socket, SOL_RFCOMM,  SO_BTH_GET_SEND_BUFFER,  (char*)&optVal,  &optLen) != SOCKET_ERROR) {
+		debugs("send buffer %i", optVal);
+	}
+	optLen = sizeof(BTH_LOCAL_VERSION);
+	if (getsockopt(socket, SOL_RFCOMM,  SO_BTH_GET_SEND_BUFFER,  (char*)&localBluetoothDeviceInfo,  &optLen) != SOCKET_ERROR) {
+		//
+	}
+#endif
+}
+
 // Unsupported for _WIN32_WCE for the moment...
 #ifndef _WIN32_WCE
+BOOL getBluetoothGetRadioInfo(jlong address, BLUETOOTH_RADIO_INFO* info)
+{
 	HANDLE hRadio;
 	BLUETOOTH_FIND_RADIO_PARAMS btfrp = { sizeof(btfrp) };
 	HBLUETOOTH_RADIO_FIND hFind = BluetoothFindFirstRadio( &btfrp, &hRadio );
-
-	if ( NULL != hFind )
-	{
-		do
-		{
+	if ( NULL != hFind ) {
+		do {
 			BLUETOOTH_RADIO_INFO radioInfo;
-
 			radioInfo.dwSize = sizeof(radioInfo);
-
-			if (ERROR_SUCCESS == BluetoothGetRadioInfo(hRadio, &radioInfo))
-			{
+			if (ERROR_SUCCESS == BluetoothGetRadioInfo(hRadio, &radioInfo)) {
 				if (radioInfo.address.ullLong == address) {
 					BluetoothFindRadioClose(hFind);
-					return env->NewString((jchar*)radioInfo.szName, (jsize) wcslen(radioInfo.szName));
+					memcpy(info, &radioInfo, sizeof(BLUETOOTH_RADIO_INFO));
+					return TRUE;
 				}
 			}
 		} while( BluetoothFindNextRadio( hFind, &hRadio ) );
 		BluetoothFindRadioClose( hFind );
 	}
+	return FALSE;
+}
+#endif
+
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getradioname(JNIEnv *env, jobject peer, jlong address)
+{
+    debug("->getradioname");
+// Unsupported for _WIN32_WCE for the moment...
+#ifndef _WIN32_WCE
+	BLUETOOTH_RADIO_INFO radioInfo;
+	if (getBluetoothGetRadioInfo(address, &radioInfo)) {
+		return env->NewString((jchar*)radioInfo.szName, (jsize) wcslen(radioInfo.szName));
+	}
 #endif
 	return NULL;
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceVersion(JNIEnv *env, jobject peer, jlong address)
+{
+#ifndef _WIN32_WCE
+	BLUETOOTH_RADIO_INFO radioInfo;
+	if (getBluetoothGetRadioInfo(address, &radioInfo)) {
+		return radioInfo.lmpSubversion;
+	}
+	return -1;
+#else
+	return localBluetoothDeviceInfo.lmp_subversion;
+#endif
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceManufacturer(JNIEnv *env, jobject peer, jlong address)
+{
+#ifndef _WIN32_WCE
+	BLUETOOTH_RADIO_INFO radioInfo;
+	if (getBluetoothGetRadioInfo(address, &radioInfo)) {
+		return radioInfo.manufacturer;
+	}
+	return -1;
+#else
+	return localBluetoothDeviceInfo.manufacturer;
+#endif
 }
 
 #define MAJOR_COMPUTER 0x0100
@@ -1174,9 +1235,16 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getradioname(JN
 #define COMPUTER_MINOR_HANDHELD 0x10
 #define PHONE_MINOR_SMARTPHONE 0x0c
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceClass(JNIEnv *env, jobject peer)
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceClass(JNIEnv *env, jobject peer, jlong address)
 {
 #ifndef _WIN32_WCE
+	if (address == 0) {
+		return MAJOR_COMPUTER;
+	}
+	BLUETOOTH_RADIO_INFO radioInfo;
+	if (getBluetoothGetRadioInfo(address, &radioInfo)) {
+		return radioInfo.ulClassofDevice;
+	}
 	return MAJOR_COMPUTER;
 #else
 	OSVERSIONINFO osvi;
@@ -1189,8 +1257,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceClass(JNI
 	if (rb == FALSE) {
 		return MAJOR_COMPUTER;
 	}
-	switch (osvi.dwPlatformId)
-	{
+	switch (osvi.dwPlatformId) {
     // A Windows CE platform.
     case VER_PLATFORM_WIN32_CE:
         // Get platform string.

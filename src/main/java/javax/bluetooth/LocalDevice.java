@@ -177,6 +177,8 @@ public class LocalDevice {
 			return "1.0";
 		} else if ("bluecove".equals(property)) {
 			return BlueCoveImpl.version;
+		} else if ("bluecove.stack".equals(property)) {
+			BlueCoveImpl.instance().getBluetoothStack().getStackID();
 		}
 		return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceProperty(property);
 	}

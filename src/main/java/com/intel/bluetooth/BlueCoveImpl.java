@@ -36,6 +36,10 @@ public class BlueCoveImpl {
 
 	public static final String version = "2.0.0-SNAPSHOT";
 	
+	public static final String STACK_WIDCOMM = "widcomm";
+	
+	public static final String STACK_WINSOCK = "winsock";
+	
 	private BluetoothPeer bluetoothPeer;
 
 	private BluetoothStack bluetoothStack;
@@ -53,13 +57,14 @@ public class BlueCoveImpl {
 		
 		String stack = System.getProperty("bluecove.stack");
 		if (stack == null) {
-			stack = "WIDCOMM";
+			//stack = "WIDCOMM";
 		}
-		if ("WIDCOMM".equalsIgnoreCase(stack)) {
+		if (STACK_WIDCOMM.equalsIgnoreCase(stack)) {
 			bluetoothStack = new BluetoothStackWIDCOMM();
+			stack = STACK_WIDCOMM;
 		} else {
 			bluetoothStack = new BluetoothStackMicrosoft();
-			stack = "Winsock";
+			stack = STACK_WINSOCK;
 		}
 		System.out.println("BlueCove version " + version + " on " + stack);
 	}
