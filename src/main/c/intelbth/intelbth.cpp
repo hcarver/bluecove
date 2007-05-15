@@ -949,9 +949,14 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__I(JNIEnv *en
 	debug("->recv(int)");
 	unsigned char c;
 
-	if (recv((SOCKET)socket, (char *)&c, 1, 0) != 1) {
-		throwIOExceptionWSAGetLastError(env, "Failed to read");
+	int rc = recv((SOCKET)socket, (char *)&c, 1, 0);
+	if (rc == SOCKET_ERROR) {
+		throwIOExceptionWSAGetLastError(env, "Failed to read(int)");
 		return 0;
+	} else if (rc == 0) {
+		debug("Connection closed");
+		// See InputStream.read();
+		return -1;
 	}
 	return (int)c;
 }
@@ -971,17 +976,19 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__I_3BII(JNIEn
 
 	while(done < len) {
 		int count = recv((SOCKET)socket, (char *)(bytes+off+done), len-done, 0);
-
-		if (count <= 0) {
+		if (count == SOCKET_ERROR) {
 			env->ReleaseByteArrayElements(b, bytes, 0);
-
+			throwIOExceptionWSAGetLastError(env, "Failed to read(byte[])");
+			return 0;
+		} else if (count == 0) {
+			debug("Connection closed");
 			if (done == 0) {
-				throwIOExceptionWSAGetLastError(env, "Failed to read");
-				return 0;
-			} else
-				return done;
+				// See InputStream.read();
+				return -1;
+			} else {
+				break;
+			}
 		}
-
 		done += count;
 	}
 
