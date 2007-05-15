@@ -373,6 +373,8 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getS
 
 class WIDCOMMStackRfCommPort : public CRfCommPort {
 public:
+	CRfCommIf rfCommIf;
+
 	BOOL isConnected;
 	BOOL isConnectionError;
 
@@ -405,22 +407,61 @@ void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {
 	}
 	if (PORT_EV_CONNECT_ERR & event_code) {
 		isConnectionError = TRUE;
+		isConnected = FALSE;
 	}
 }
 
 void WIDCOMMStackRfCommPort::OnDataReceived (void *p_data, UINT16 len) {
-	memcpy((todo_buf + todo_buf_rcv_idx), p_data, len);
-	todo_buf_rcv_idx += len;
+	if (isConnected) {
+		memcpy((todo_buf + todo_buf_rcv_idx), p_data, len);
+		todo_buf_rcv_idx += len;
+	}
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfOpen
 (JNIEnv * env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt) {
-	WIDCOMMStackRfCommPort* rf = new WIDCOMMStackRfCommPort();
-
 	BD_ADDR bda; 
 	LongToBcAddr(address, bda);
 
-	rf->OpenClient((UINT8)channel, bda); 
+	CSdpDiscoveryRec* sdpRecord = NULL;
+	CSdpDiscoveryRec* sdpRecords = new CSdpDiscoveryRec[30];
+	int recSize = stack->ReadDiscoveryRecords(bda, 30, sdpRecords, NULL);
+	for (int r = 0; r < recSize; r ++) {
+		UINT8 scn;
+		if (sdpRecords[r].FindRFCommScn(&scn)) {
+			if (channel == scn) {
+				debugs("found RFCommScn %i", scn);
+				sdpRecord = &(sdpRecords[r]);
+				break;
+			}
+		 }
+	}
+	if (sdpRecord == NULL) {
+		throwIOException(env, "Failed to find SDP Record");
+		return 0;
+	}
+
+	WIDCOMMStackRfCommPort* rf = new WIDCOMMStackRfCommPort();
+	if (!rf->rfCommIf.AssignScnValue(&(sdpRecord->m_service_guid), (UINT8)channel, sdpRecord->m_service_name)) {
+		throwIOException(env, "failed to assign GUID SCN");
+		delete(rf);
+		return 0;
+	}
+	
+	UINT8 sec_level = BTM_SEC_NONE;
+	if (!rf->rfCommIf.SetSecurityLevel(sdpRecord->m_service_name, sec_level , FALSE)) {
+        throwIOException(env, "Error setting security level");
+        delete(rf);
+		return 0;
+    }
+
+	debugs("use Scn %i", rf->rfCommIf.GetScn());
+	CRfCommPort::PORT_RETURN_CODE rc = rf->OpenClient(rf->rfCommIf.GetScn(), bda); 
+	if (rc != CRfCommPort::SUCCESS) {
+		throwIOException(env, "Failed to OpenClient");
+		delete(rf);
+		return 0;
+	}
 	while (!rf->isConnected && !rf->isConnectionError) {
 		// No Wait on Windows CE, TODO
 		Sleep(100);
@@ -430,13 +471,20 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 		delete(rf);
 		return 0;
 	}
-
+	debug("connected");
 	return (jlong)rf;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfClose
 (JNIEnv * env, jobject peer, jlong handle) {
+	if (handle == 0) {
+		return;
+	}
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
+	CRfCommPort::PORT_RETURN_CODE rc = rf->Close(); 
+	if (rc != CRfCommPort::SUCCESS && rc != CRfCommPort::NOT_OPENED) {
+		throwIOException(env, "Failed to Close");
+	}
 	delete(rf);
 }
 
@@ -449,11 +497,12 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getConnec
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfRead__J
 (JNIEnv * env, jobject peer, jlong handle) {
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
-	while (rf->todo_buf_read_idx == rf->todo_buf_rcv_idx) {
+	debug("->read()");
+	while (rf->isConnected && rf->todo_buf_read_idx == rf->todo_buf_rcv_idx) {
 		// No Wait on Windows CE, TODO
 		Sleep(100);
 	}
-	jint result = rf->todo_buf[rf->todo_buf_read_idx];
+	jint result = (unsigned char)rf->todo_buf[rf->todo_buf_read_idx];
 	rf->todo_buf_read_idx ++;
 	return result;
 }
@@ -461,12 +510,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfRead__J_3BII
 (JNIEnv * env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
+	debug("->read(byte[])");
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
 	int done = 0;
 
-	while (done < len) {
-		while (rf->todo_buf_read_idx == rf->todo_buf_rcv_idx) {
+	while (rf->isConnected && done < len) {
+		while (rf->isConnected && rf->todo_buf_read_idx == rf->todo_buf_rcv_idx) {
 			// No Wait on Windows CE, TODO
 			Sleep(100);
 		}
@@ -493,6 +543,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfWrite__JI
 (JNIEnv * env, jobject peer, jlong handle, jint b) {
+	debug("->write(int)");
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
 	char c = (char)b;
 	UINT16 written = 0;
@@ -505,6 +556,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfWrite__J_3BII
 (JNIEnv * env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
+	debug("->write(byte[])");
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
 	
 	jbyte *bytes = env->GetByteArrayElements(b, 0);

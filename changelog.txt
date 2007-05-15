@@ -1,6 +1,15 @@
 @version $Id$
 
-* To be Released 1.2.3  2007-05-xx
+* 2.0.0 to be Released 2007-07-xx
+
+    2007-05-15 Vlad Skarzhevskyy
+    * InputStream.read() return -1 on gracefully closed Connection
+    * Interface com.intel.bluetooth.BluetoothStack to support Stacks other than Microsoft winsock
+    * Initial WIDCOMM Stack RFCOMM Client implementation
+    * LocalDevice.getProperty() additional properties: bluecove, bluecove.stack, bluecove.radio.manufacturer, bluecove.radio.version
+    * System property "bluecove.stack" to force Stack, values widcomm or winsock
+
+* 1.2.3 released 2007-05-11
 
     2007-05-05 Vlad Skarzhevskyy
     * acceptAndOpen will update ServiceRecord in SDDB
@@ -13,7 +22,7 @@
     * InputStream.available() implemented
 
 
-* Released 1.2.2
+* 1.2.2
 
     2007-03-02 Vlad Skarzhevskyy
     * Fixed LocalDevice.getLocalDevice().getBluetoothAddress();
@@ -23,8 +32,7 @@
     * Fixes for native Code to avoid JVM Errors
 
 
-2007-01-07 Paul Tötterman
-
+    2007-01-07 Paul Tötterman
     * Released 1.2.1
     * Merged dll-in-the-jar enhancements by Vlad Skarzhevskyy
 
@@ -44,7 +52,7 @@
 
     * Updated documentation a bit.
 
-* Released 1.2.0.
+* 1.2.0.
 
     * Compiled using Java 1.4 for wider audience.
 
@@ -65,7 +73,7 @@
     * Reformatted changelog close to GNU standards
 
 
-* Version Beta 1.1
+* Beta 1.1
 
     2005-05-15 Denis Labaye
     * Added some docs
