@@ -984,6 +984,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__I_3BII(JNIEn
 			debug("Connection closed");
 			if (done == 0) {
 				// See InputStream.read();
+				env->ReleaseByteArrayElements(b, bytes, 0);
 				return -1;
 			} else {
 				break;

@@ -502,6 +502,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		// No Wait on Windows CE, TODO
 		Sleep(100);
 	}
+	if (!rf->isConnected && rf->todo_buf_read_idx == rf->todo_buf_rcv_idx) {
+		// See InputStream.read();
+		return -1;
+	}
 	jint result = (unsigned char)rf->todo_buf[rf->todo_buf_read_idx];
 	rf->todo_buf_read_idx ++;
 	return result;
@@ -530,7 +534,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 
 		done += count;
 	}
-
+	if (!rf->isConnected && done == 0) {
+		// See InputStream.read();
+		done = -1;
+	}
 	env->ReleaseByteArrayElements(b, bytes, 0);
 	return done;
 }
