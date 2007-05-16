@@ -39,7 +39,7 @@ public class SimpleDiscovery {
     
 	public static void main(String[] args) {
 		
-		//System.getProperties().put("bluecove.debug", "true");
+		System.getProperties().put("bluecove.debug", "true");
 		System.getProperties().put("bluecove.native.path", "./src/main/resources");
 		
 	    LocalDevice l;
@@ -53,13 +53,28 @@ public class SimpleDiscovery {
     	System.out.println("Local btaddr is " + l.getBluetoothAddress());
  	    System.out.println("Local name is " + l.getFriendlyName());
  	    
+ 	    String bluecoveVersion = LocalDevice.getProperty("bluecove");
+		if (bluecoveVersion != null) {
+			System.out.println("bluecove:" + bluecoveVersion);
+			System.out.println("stack:" + LocalDevice.getProperty("bluecove.stack"));
+			System.out.println("radio manufacturer:" + LocalDevice.getProperty("bluecove.radio.manufacturer"));
+			System.out.println("radio version:" + LocalDevice.getProperty("bluecove.radio.version"));
+		}
+		
+ 	    if (true) {
+ 	    	return;
+ 	    }
+ 	    
 	    BluetoothInquirer bi = new BluetoothInquirer();
 	    
 	    while(true) {
 	    	
 	        System.out.println("Starting inquiry");
 
-	        if(!bi.startInquiry()) break;
+	        if (!bi.startInquiry()) {
+	        	System.out.println("Cannot start inquiry, Exit ...");
+	        	break;
+	        }
 	        while(bi.inquiring) {
 		        try {
 		            Thread.sleep(1000);
@@ -74,17 +89,18 @@ public class SimpleDiscovery {
 	}
 	
 	public static class BluetoothInquirer implements DiscoveryListener {
-	    boolean inquiring;
+	    
+		boolean inquiring;
 
 	    public boolean startInquiry() {
+	    	inquiring = false;
 	        try {
-	            LocalDevice.getLocalDevice().getDiscoveryAgent().startInquiry(DiscoveryAgent.GIAC,this);
-	        } catch(BluetoothStateException e) {
+	        	inquiring = LocalDevice.getLocalDevice().getDiscoveryAgent().startInquiry(DiscoveryAgent.GIAC,this);
+	        } catch (BluetoothStateException e) {
 		        System.err.println("Cannot start inquiry: " + e);
 		        return false;
 		    }
-	        inquiring=true;
-	        return true;
+	        return inquiring;
 	    }
 	    
         public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {

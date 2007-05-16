@@ -35,10 +35,12 @@ package com.intel.bluetooth;
 public class BlueCoveImpl {
 
 	public static final String version = "2.0.0-SNAPSHOT";
+
+	public static final String STACK_WINSOCK = "winsock";
 	
 	public static final String STACK_WIDCOMM = "widcomm";
 	
-	public static final String STACK_WINSOCK = "winsock";
+	public static final String STACK_BLUESOLEIL = "bluesoleil";
 	
 	private BluetoothPeer bluetoothPeer;
 
@@ -62,6 +64,9 @@ public class BlueCoveImpl {
 		if (STACK_WIDCOMM.equalsIgnoreCase(stack)) {
 			bluetoothStack = new BluetoothStackWIDCOMM();
 			stack = STACK_WIDCOMM;
+		} else if (STACK_BLUESOLEIL.equalsIgnoreCase(stack)) {
+			bluetoothStack = new BluetoothStackBlueSoleil();
+			stack = STACK_BLUESOLEIL;
 		} else {
 			bluetoothStack = new BluetoothStackMicrosoft();
 			stack = STACK_WINSOCK;

@@ -16,6 +16,7 @@
                 <exclude>build/**</exclude>
                 <exclude>src/main/resources/**</exclude>
                 <exclude>src/main/c/intelbth/Win32/**</exclude>
+                <exclude>src/main/c/intelbth/com*.h</exclude>
                 <exclude>.settings/**</exclude>
                 <exclude>**/*.log</exclude>
                 <exclude>**/*.ncb</exclude>

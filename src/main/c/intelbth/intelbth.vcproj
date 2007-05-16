@@ -33,6 +33,7 @@
 			IntermediateDirectory="$(SolutionDir)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
 			CharacterSet="1"
 			>
 			<Tool
@@ -54,8 +55,8 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS"
-				RuntimeLibrary="0"
-				UsePrecompiledHeader="2"
+				RuntimeLibrary="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
@@ -113,7 +114,7 @@
 			IntermediateDirectory="$(SolutionDir)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			UseOfMFC="2"
+			UseOfMFC="0"
 			CharacterSet="1"
 			>
 			<Tool
@@ -138,7 +139,7 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS;_BTWLIB"
 				StringPooling="false"
 				RuntimeLibrary="2"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				BrowseInformation="1"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -162,6 +163,180 @@
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				DelayLoadDLLs="btwapi.dll"
+				GenerateDebugInformation="false"
+				SubSystem="2"
+				OptimizeReferences="0"
+				EnableCOMDATFolding="0"
+				ImportLibrary="$(OutDir)\$(TargetName).lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="BlueSoleil|Win32"
+			OutputDirectory="$(SolutionDir)\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)\$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				InlineFunctionExpansion="0"
+				AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;$(ProgramFiles)\IVT Corporation\BlueSoleil\api"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS;_BLUESOLEIL"
+				StringPooling="false"
+				RuntimeLibrary="2"
+				UsePrecompiledHeader="0"
+				BrowseInformation="1"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib irprops.lib version.lib advapi32.lib user32.lib winspool.lib ole32.lib"
+				OutputFile="..\..\resources\$(ProjectName).dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(ProgramFiles)\IVT Corporation\BlueSoleil\api"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
+				DelayLoadDLLs="btfunc.dll"
+				GenerateDebugInformation="false"
+				SubSystem="2"
+				OptimizeReferences="0"
+				EnableCOMDATFolding="0"
+				ImportLibrary="$(OutDir)\$(TargetName).lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)\$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				InlineFunctionExpansion="0"
+				AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;$(ProgramFiles)\Widcomm\BTW DK\SDK\Inc;$(ProgramFiles)\IVT Corporation\BlueSoleil\api"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS;_BTWLIB;_BLUESOLEIL"
+				StringPooling="false"
+				RuntimeLibrary="2"
+				UsePrecompiledHeader="0"
+				BrowseInformation="1"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib irprops.lib version.lib advapi32.lib user32.lib winspool.lib ole32.lib"
+				OutputFile="..\..\resources\$(ProjectName).dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(ProgramFiles)\Widcomm\BTW DK\SDK\Release;$(ProgramFiles)\IVT Corporation\BlueSoleil\api"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
+				DelayLoadDLLs="btwapi.dll;btfunc.dll"
 				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="0"
@@ -657,6 +832,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\BlueSoleilStack.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\target\classes\com\intel\bluetooth\BluetoothPeer.class"
 				>
 				<FileConfiguration
@@ -679,12 +858,66 @@
 						Outputs=".\com_intel_bluetooth_BluetoothPeer.h"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="BlueSoleil|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating Winsock JNI Header File"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothPeer&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_BluetoothPeer.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating Winsock JNI Header File"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothPeer&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_BluetoothPeer.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\..\target\classes\com\intel\bluetooth\BluetoothStackBlueSoleil.class"
+				>
+				<FileConfiguration
+					Name="BlueSoleil|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating BlueSoleil JNI Header File"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothStackBlueSoleil&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_BluetoothStackBlueSoleil.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating BlueSoleil JNI Header File"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothStackBlueSoleil&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_BluetoothStackBlueSoleil.h"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\..\target\classes\com\intel\bluetooth\BluetoothStackWIDCOMM.class"
 				>
 				<FileConfiguration
 					Name="WIDCOMM|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating WIDCOMM JNI Header File"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothStackWIDCOMM&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_BluetoothStackWIDCOMM.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
@@ -703,26 +936,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\stdafx.cpp"
-				>
-				<FileConfiguration
-					Name="Winsock|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="WIDCOMM|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\WIDCOMMStack.cpp"
 				>
 			</File>
@@ -737,15 +950,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\com_intel_bluetooth_BluetoothStackBlueSoleil.h"
+				>
+			</File>
+			<File
 				RelativePath=".\com_intel_bluetooth_BluetoothStackWIDCOMM.h"
 				>
 			</File>
 			<File
 				RelativePath=".\common.h"
-				>
-			</File>
-			<File
-				RelativePath=".\stdafx.h"
 				>
 			</File>
 		</Filter>

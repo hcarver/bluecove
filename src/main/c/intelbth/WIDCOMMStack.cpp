@@ -19,9 +19,15 @@
  *  @version $Id$
  */
 
-#include "stdafx.h"
+#include "common.h"
 
 #ifdef _BTWLIB
+
+#pragma comment(lib, "BtWdSdkLib.lib")
+//#include "btwlib.h"
+#include "BtIfDefinitions.h"
+#include "BtIfClasses.h"
+#include "com_intel_bluetooth_BluetoothStackWIDCOMM.h"
 
 void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr) {
 	swprintf_s(addressString, 14, _T("%02x%02x%02x%02x%02x%02x"),
@@ -84,7 +90,8 @@ static WIDCOMMStack* stack;
 WIDCOMMStack::WIDCOMMStack() {
 }
 
-void WIDCOMMStackInit() {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_initialize
+(JNIEnv *, jobject) {
 	if (stack == NULL) {
 		stack = new WIDCOMMStack();
 	}
@@ -97,7 +104,6 @@ void BroadcomDebugError(CBtIf* stack) {
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLocalDeviceBluetoothAddress
 (JNIEnv *env, jobject peer) {
-	WIDCOMMStackInit();
 	struct CBtIf::DEV_VER_INFO info;
 	if (!stack->GetLocalDeviceVersionInfo(&info)) {
 		BroadcomDebugError(stack);
@@ -109,7 +115,6 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLocalDeviceName
 (JNIEnv *env, jobject peer) {
-	WIDCOMMStackInit();
 	BD_NAME name;
 	if (!stack->GetLocalDeviceName(&name)) {
 		BroadcomDebugError(stack);
@@ -120,19 +125,16 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isLocalDevicePowerOn
 (JNIEnv *env, jobject peer) {
-	WIDCOMMStackInit();
 	return stack->IsDeviceReady();
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isStackServerUp
 (JNIEnv *env, jobject peer) {
-	WIDCOMMStackInit();
 	return stack->IsStackServerUp();
 }
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getBTWVersionInfo
 (JNIEnv *env, jobject peer) {
-	WIDCOMMStackInit();
 	BT_CHAR p_version[256];
 	if (!stack->GetBTWVersionInfo(p_version, 256)) {
 		return NULL;
@@ -142,7 +144,6 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getBTWV
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceVersion
 (JNIEnv *, jobject) {
-	WIDCOMMStackInit();
 	CBtIf::DEV_VER_INFO dev_Ver_Info;
 	if (!stack->GetLocalDeviceVersionInfo(&dev_Ver_Info)) {
 		return -1;
@@ -152,7 +153,6 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceV
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceManufacturer
 (JNIEnv *, jobject) {
-	WIDCOMMStackInit();
 	CBtIf::DEV_VER_INFO dev_Ver_Info;
 	if (!stack->GetLocalDeviceVersionInfo(&dev_Ver_Info)) {
 		return -1;
@@ -181,7 +181,6 @@ void WIDCOMMStack::OnInquiryComplete(BOOL success, short num_responses) {
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceInquiryImpl
 (JNIEnv * env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
-	WIDCOMMStackInit();
 	debug("StartDeviceInquiry");
 	stack->deviceInquiryComplete = false;
 	stack->deviceInquiryTerminated = false;
@@ -245,7 +244,6 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_deviceInquiryCancelImpl
 (JNIEnv *env, jobject peer, jobject nativeClass) {
-	WIDCOMMStackInit();
 	stack->deviceInquiryTerminated = TRUE;
 	stack->StopInquiry();
 	return TRUE;
@@ -255,7 +253,6 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_device
 
 JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runSearchServicesImpl
 (JNIEnv * env, jobject peer, jobject startedNotify, jobject uuid, jlong address) {
-	WIDCOMMStackInit();
 	debug("StartSearchServices");
 
 	BD_ADDR bda; 
@@ -411,7 +408,7 @@ void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {
 	}
 }
 
-void WIDCOMMStackRfCommPort::OnDataReceived (void *p_data, UINT16 len) {
+void WIDCOMMStackRfCommPort::OnDataReceived(void *p_data, UINT16 len) {
 	if (isConnected) {
 		memcpy((todo_buf + todo_buf_rcv_idx), p_data, len);
 		todo_buf_rcv_idx += len;

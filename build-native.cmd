@@ -43,7 +43,27 @@ call "%p%\VCVARS32.BAT"
 
 @rem gmake.exe -fmakefile %* default
 
-vcbuild /rebuild src\main\c\intelbth\intelbth.sln "Winsock|Win32"
+@set CONFIGURATION=Winsock
+
+@rem configuration:  Winsock, WIDCOMM, BlueSoleil or Release
+
+@set sdk_widcomm=%ProgramFiles%\Widcomm\BTW DK\SDK
+@if NOT exist "%sdk_widcomm%" goto sdk_other_not_found
+@echo Widcomm SDKs Found [%sdk_widcomm%]
+@set CONFIGURATION=WIDCOMM
+
+@set sdk_BlueSoleil=%ProgramFiles%\IVT Corporation\BlueSoleil\api
+@if NOT exist "%sdk_BlueSoleil%" goto sdk_other_not_found
+@echo BlueSoleil SDKs Found [%sdk_BlueSoleil%]
+@set CONFIGURATION=Release
+@echo All Supported SDK not found. Will use Release configuration
+@goto DO_BUILD
+
+:sdk_other_not_found
+@echo WARNING: Some Supported SDK not found!
+
+:DO_BUILD
+vcbuild /rebuild src\main\c\intelbth\intelbth.sln "%CONFIGURATION%|Win32"
 @if errorlevel 1 goto errormark
 @echo [Build OK]
 @goto endmark

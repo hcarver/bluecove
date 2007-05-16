@@ -38,7 +38,10 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	private Vector deviceDiscoveryListeners = new Vector/*<DiscoveryListener>*/();
 	
 	BluetoothStackWIDCOMM() {
+		initialize();
 	}
+	
+	public native void initialize();
 	
 	public String getStackID() {
 		return BlueCoveImpl.STACK_WIDCOMM;

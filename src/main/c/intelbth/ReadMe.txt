@@ -2,34 +2,42 @@
     DYNAMIC LINK LIBRARY : intelbth Project Overview
 ========================================================================
 
-AppWizard has created this intelbth DLL for you.  
-This file contains a summary of what you will find in each of the files that
-make up your intelbth application.
-
 
 intelbth.vcproj
-    This is the main project file for VC++ projects generated using an Application Wizard. 
-    It contains information about the version of Visual C++ that generated the file, and 
-    information about the platforms, configurations, and project features selected with the
-    Application Wizard.
+    This is the main project file for VC++ project.
 
-intelbth.cpp
+    There are four Configurations:  Winsock, WIDCOMM, BlueSoleil and Release
+
+    Release on Win32 will incorporated  Winsock, WIDCOMM and BlueSoleil Configurations
+
+    Release on Windows Mobile will incorporated  Winsock and WIDCOMM Configurations
+
+    A precompiled header (StdAfx.h, StdAfx.cpp) can't be used because BlueSoleil redefine some Microsoft definitions from BluetoothAPIs.h
+
+WIDCOMM:
+    Get Broadcom development kits from:  http://www.broadcom.com/products/bluetooth_sdk.php
+    You have to register at the Broadcom site to gain access to the downloads.
+    Install it to default directory. e.g. "$(ProgramFiles)\Widcomm\BTW DK" for Win32
+
+BlueSoleil:
+    Get BlueSoleil™ PC Platform Software Development Kit (SDK), 0.83 free version from this location:
+    http://www.bluesoleil.com/download/index.asp?topic=bluesoleil_sdk
+
+    The BlueSoleil API should be installed in directory: $(ProgramFiles)\IVT Corporation\BlueSoleil\api
+
+    Four files should be there: a DLL file btfunc.dll, a library file btfunc.lib and two header file bt_ui.h, bt_def.h.
+
+common.cpp
     This is the main DLL source file.
 
-	When created, this DLL does not export any symbols. As a result, it  
-	will not produce a .lib file when it is built. If you wish this project 
-	to be a project dependency of some other project, you will either need to 
-	add code to export some symbols from the DLL so that an export library 
-	will be produced, or you can set the Ignore Input Library property to Yes 
-	on the General propert page of the Linker folder in the project's Property 
-	Pages dialog box.
+intelbth.cpp
+    This is the source file for Winsock Stack.
 
-/////////////////////////////////////////////////////////////////////////////
-Other standard files:
+WIDCOMMStack.cpp
+    This is the source file for WIDCOMM Stack.
 
-StdAfx.h, StdAfx.cpp
-    These files are used to build a precompiled header (PCH) file
-    named intelbth.pch and a precompiled types file named StdAfx.obj.
+BlueSoleilStack.cpp
+    This is the source file for BlueSoleil Stack.
 
 /////////////////////////////////////////////////////////////////////////////
 Other notes:

@@ -72,8 +72,11 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
   # Run `ant` or `mvn`
   # Go into `src\main\c\intelbth`
   # Open `intelbth.sln`
-  # Compile the project for your platform (e.g. 'Winsock' for 'Win32')
+  # Compile the project for your platform (e.g. 'Winsock' for 'Win32') See src\main\c\intelbth\ReadMe.txt for more details
   # Run `ant jar` or `mvn`
+
+ There are command line build for native library build-native.cmd
+ It will automatically select configuration:  Winsock, WIDCOMM, BlueSoleil or Release base on SDK installed on your PC
 
 == Source ==
 

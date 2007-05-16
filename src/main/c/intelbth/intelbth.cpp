@@ -21,7 +21,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-#include "stdafx.h"
+#include "common.h"
+
+#ifdef _WIN32_WCE
+#include <winsock2.h>
+#include <bthapi.h>
+#include <bt_api.h>
+#include <bthutil.h>
+#include <bt_sdp.h>
+#else // _WIN32_WCE
+#include <winsock2.h>
+#include <ws2bth.h>
+#include <BluetoothAPIs.h>
+#endif // #else // _WIN32_WCE
+
 
 static BOOL started;
 static DWORD dllWSAStartupError = 0;
@@ -37,6 +50,11 @@ static BOOL initialBtIsDiscoverable;
 #endif
 
 void dllCleanup();
+WCHAR *GetWSAErrorMessage(DWORD last_error);
+void throwExceptionWSAErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error);
+void throwIOExceptionWSAErrorMessage(JNIEnv *env, const char *msg, DWORD last_error);
+void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg);
+
 
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
@@ -80,6 +98,45 @@ void dllCleanup() {
 		WSACleanup();
 	}
 	DeleteCriticalSection(&csLookup);
+}
+
+WCHAR *GetWSAErrorMessage(DWORD last_error)
+{
+	static WCHAR errmsg[1024];
+	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+		0,
+		last_error,
+		0,
+		errmsg,
+		511,
+		NULL))
+	{
+		swprintf_s(errmsg, 1024, _T("No error message for code %d"), last_error);
+		return errmsg;
+	}
+	size_t last = wcslen(errmsg) - 1;
+	while ((errmsg[last] == '\n') || (errmsg[last] == '\r')) {
+		errmsg[last] = 0;
+		last --;
+	}
+	return errmsg;
+}
+
+void throwExceptionWSAErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error)
+{
+	char errmsg[1064];
+	sprintf_s(errmsg, 1064, "%s [%d] %S", msg, last_error, GetWSAErrorMessage(last_error));
+	throwException(env, name, errmsg);
+}
+
+void throwIOExceptionWSAErrorMessage(JNIEnv *env, const char *msg, DWORD last_error)
+{
+	throwExceptionWSAErrorMessage(env, "java/io/IOException", msg, last_error);
+}
+
+void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg)
+{
+	throwIOExceptionWSAErrorMessage(env, msg, WSAGetLastError());
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStatus(JNIEnv *env, jobject peer) {
