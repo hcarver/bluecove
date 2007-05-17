@@ -64,7 +64,7 @@ struct deviceFound {
 	BD_NAME bdName;
 };
 
-#define deviceRespondedMax 20
+#define deviceRespondedMax 50
 
 class WIDCOMMStack : public CBtIf {
 public:
@@ -252,7 +252,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_device
 // --- Service search
 
 JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runSearchServicesImpl
-(JNIEnv * env, jobject peer, jobject startedNotify, jobject uuid, jlong address) {
+(JNIEnv *env, jobject peer, jobject startedNotify, jobject uuid, jlong address) {
 	debug("StartSearchServices");
 
 	BD_ADDR bda; 
@@ -344,7 +344,7 @@ void WIDCOMMStack::OnDiscoveryComplete() {
 }
 
 JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getServiceAttributes
-(JNIEnv * env, jobject peer, jint attrID, jlong handle) {
+(JNIEnv *env, jobject peer, jint attrID, jlong handle) {
 
 	CSdpDiscoveryRec* record = (CSdpDiscoveryRec*)handle;
 
@@ -416,7 +416,7 @@ void WIDCOMMStackRfCommPort::OnDataReceived(void *p_data, UINT16 len) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfOpen
-(JNIEnv * env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt) {
+(JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt) {
 	BD_ADDR bda; 
 	LongToBcAddr(address, bda);
 
@@ -473,7 +473,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfClose
-(JNIEnv * env, jobject peer, jlong handle) {
+(JNIEnv *env, jobject peer, jlong handle) {
 	if (handle == 0) {
 		return;
 	}
@@ -486,13 +486,13 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getConnectionRfRemoteAddress
-(JNIEnv * env, jobject peer, jlong handle) {
+(JNIEnv *env, jobject peer, jlong handle) {
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
 	return 0;
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfRead__J
-(JNIEnv * env, jobject peer, jlong handle) {
+(JNIEnv *env, jobject peer, jlong handle) {
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
 	debug("->read()");
 	while (rf->isConnected && rf->todo_buf_read_idx == rf->todo_buf_rcv_idx) {
@@ -509,7 +509,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfRead__J_3BII
-(JNIEnv * env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
+(JNIEnv *env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
 	debug("->read(byte[])");
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
@@ -540,13 +540,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfReadAvailable
-(JNIEnv * env, jobject peer, jlong handle) {
+(JNIEnv *env, jobject peer, jlong handle) {
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
 	return (rf->todo_buf_rcv_idx - rf->todo_buf_read_idx);
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfWrite__JI
-(JNIEnv * env, jobject peer, jlong handle, jint b) {
+(JNIEnv *env, jobject peer, jlong handle, jint b) {
 	debug("->write(int)");
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
 	char c = (char)b;
@@ -559,7 +559,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfWrite__J_3BII
-(JNIEnv * env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
+(JNIEnv *env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
 	debug("->write(byte[])");
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
 	

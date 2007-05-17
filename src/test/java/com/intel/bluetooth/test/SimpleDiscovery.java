@@ -39,8 +39,8 @@ public class SimpleDiscovery {
     
 	public static void main(String[] args) {
 		
-		System.getProperties().put("bluecove.debug", "true");
-		System.getProperties().put("bluecove.native.path", "./src/main/resources");
+		//System.getProperties().put("bluecove.debug", "true");
+		//System.getProperties().put("bluecove.native.path", "./src/main/resources");
 		
 	    LocalDevice l;
 		try {
@@ -57,14 +57,11 @@ public class SimpleDiscovery {
 		if (bluecoveVersion != null) {
 			System.out.println("bluecove:" + bluecoveVersion);
 			System.out.println("stack:" + LocalDevice.getProperty("bluecove.stack"));
+			System.out.println("stack version:" + LocalDevice.getProperty("bluecove.stack.version"));
 			System.out.println("radio manufacturer:" + LocalDevice.getProperty("bluecove.radio.manufacturer"));
 			System.out.println("radio version:" + LocalDevice.getProperty("bluecove.radio.version"));
 		}
 		
- 	    if (true) {
- 	    	return;
- 	    }
- 	    
 	    BluetoothInquirer bi = new BluetoothInquirer();
 	    
 	    while(true) {

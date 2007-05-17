@@ -102,6 +102,9 @@
 #define SERVICE_SEARCH_NO_RECORDS 4
 #define SERVICE_SEARCH_DEVICE_NOT_REACHABLE 6
 
+#define GIAC 0x9E8B33
+#define LIAC 0x9E8B00
+
 void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...);
 #define debug(fmt) callDebugListener(env, __FILE__, __LINE__, fmt);
 #define debugs(fmt, message) callDebugListener(env, __FILE__, __LINE__, fmt, message);

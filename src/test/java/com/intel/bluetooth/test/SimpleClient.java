@@ -169,7 +169,7 @@ public class SimpleClient implements DiscoveryListener  {
 
 	public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
 		devices.addElement(btDevice);
-		System.out.println("deviceDiscovered DeviceClass: " + ((Object)cod).toString());
+		System.out.println("deviceDiscovered " + btDevice.getBluetoothAddress() + " DeviceClass: " + ((Object)cod).toString());
 	}
 
 	public synchronized void inquiryCompleted(int discType) {

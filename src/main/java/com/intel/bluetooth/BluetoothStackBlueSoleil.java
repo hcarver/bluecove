@@ -60,23 +60,27 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		return true;
 	}
 
-	private native boolean isStackServerUp();
+	native boolean isBlueSoleilStarted(int seconds);
+	
+	private native boolean isBluetoothReady(int seconds);
 	
 	/**
 	 * @todo
 	 * There are no functions to find BlueSoleil discoverable status.
 	 */
 	public int getLocalDeviceDiscoverable() {
-		if (isStackServerUp()) {
+		if (isBluetoothReady(2)) {
 			return DiscoveryAgent.GIAC;
 		} else {
 			return DiscoveryAgent.NOT_DISCOVERABLE;
 		}
 	}
 
-	public native boolean isLocalDevicePowerOn();
+	public boolean isLocalDevicePowerOn() {
+		return isBluetoothReady(15);
+	}
 	
-	private native String getStackVersionInfo();
+	private native int getStackVersionInfo();
 	
 	private native int getDeviceVersion();
 	
@@ -107,7 +111,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 			return String.valueOf(getDeviceManufacturer());
 		}
 		if ("bluecove.stack.version".equals(property)) {
-			return getStackVersionInfo();
+			return String.valueOf(getStackVersionInfo());
 		}
 		
 		return null;
@@ -120,6 +124,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	}
 	
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
+		startedNotify.deviceInquiryStartedCallback();
 		return runDeviceInquiryImpl(startedNotify, accessCode, listener);
 	}
 
@@ -144,7 +149,15 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		return false;
 	}
 	
+	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, UUID uuid, long address) throws BluetoothStateException;
+	
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		startedNotify.searchServicesStartedCallback();
+		UUID uuid = null;
+		if ((uuidSet != null) && (uuidSet.length > 0)) {
+			uuid = uuidSet[uuidSet.length -1];
+		}
+		long[] handles = runSearchServicesImpl(startedNotify, uuid, ((RemoteDeviceImpl)device).getAddress());
 		return DiscoveryListener.SERVICE_SEARCH_ERROR;
 	}
 
