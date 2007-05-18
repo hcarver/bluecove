@@ -1,5 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
+ *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -17,14 +18,30 @@
  *
  *  @version $Id$
  */
-package com.intel.bluetooth.test;
+package com.intel.bluetooth;
 
-public interface Consts {
+import javax.bluetooth.UUID;
 
-	// Share the same UUID with bluecove-tester
-	public static final String TEST_UUID = "B1011111111111111111111111110001";
-	//public static final String TEST_UUID = "27012f0c68af4fbf8dbe6bbaf7ab651b";
+public abstract class Utils {
 
-	public static final String TEST_SERVERNAME_PREFIX = "bluecoveSrv";
+	public static byte[] UUIDToByteArray(String uuidStringValue) {
+		byte[] uuidValue = new byte[16];
+		for (int i = 0; i < 16; i++) {
+			uuidValue[i] = (byte) Integer.parseInt(uuidStringValue.substring(i * 2, i * 2 + 2), 16);
+		}
+		return uuidValue;
+	}
 	
+	public static byte[] UUIDToByteArray(UUID uuid) {
+		return UUIDToByteArray(uuid.toString());
+	}
+	
+	public static String UUIDByteArrayToString(byte[] uuidValue) {
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < uuidValue.length; i++) {
+			buf.append(Integer.toHexString(uuidValue[i] >> 4 & 0xf));
+			buf.append(Integer.toHexString(uuidValue[i] & 0xf));
+		}
+		return buf.toString();
+	}
 }

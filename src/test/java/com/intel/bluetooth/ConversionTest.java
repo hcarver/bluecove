@@ -20,36 +20,28 @@
  */
 package com.intel.bluetooth;
 
-import java.io.IOException;
+import javax.bluetooth.UUID;
 
-import javax.bluetooth.RemoteDevice;
+import junit.framework.TestCase;
 
-/**
- * @author vlads
- *
- */
-public class RemoteDeviceImpl extends RemoteDevice {
-	
-	private String name;
-	
-	private long address;
-	
-	protected RemoteDeviceImpl(long address, String name) {
-		super(Long.toHexString(address));
-		this.name = name;
-		this.address = address;
+public class ConversionTest extends TestCase {
+
+	protected void setUp() throws Exception {
+		super.setUp();
+		
+		//System.getProperties().put("bluecove.debug", "true");
+		System.getProperties().put("bluecove.native.path", "./src/main/resources");
 	}
 	
-	public String getFriendlyName(boolean alwaysAsk) throws IOException {
-		if (alwaysAsk || name == null || name.equals("")) {
-			// TODO
-			//name = BlueCoveImpl.instance().getBluetoothPeer().getpeername(address);
-			throw new IOException("TODO");
-		}
-		return name;
+	private void verifyUUID(final String uuidString) {
+		UUID uuid = new UUID(uuidString, false);
+		byte[] uuidValue = BluetoothPeer.testUUIDConversion(Utils.UUIDToByteArray(uuid));
+		UUID uuid2 = new UUID(Utils.UUIDByteArrayToString(uuidValue), false);
+		assertEquals("UUID converted by native code", uuid, uuid2);
 	}
-
-	public long getAddress() {
-		return address;
+	
+	public void testNativeUUID() {
+		verifyUUID("B1011114111115111111117111110001");
+		verifyUUID("27012f0c68af4fbf8dbe6bbaf7ab651b");
 	}
 }

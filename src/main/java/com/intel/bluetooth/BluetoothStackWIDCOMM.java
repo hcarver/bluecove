@@ -160,14 +160,14 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		return false;
 	}
 
-	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, UUID uuid, long address) throws BluetoothStateException;
+	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, byte[] uuidValue, long address) throws BluetoothStateException;
 	
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		UUID uuid = null;
 		if ((uuidSet != null) && (uuidSet.length > 0)) {
 			uuid = uuidSet[uuidSet.length -1];
 		}
-		long[] handles = runSearchServicesImpl(startedNotify, uuid, ((RemoteDeviceImpl)device).getAddress());
+		long[] handles = runSearchServicesImpl(startedNotify, Utils.UUIDToByteArray(uuid), ((RemoteDeviceImpl)device).getAddress());
 		if (handles == null) {
 			return DiscoveryListener.SERVICE_SEARCH_ERROR;
 		} else if (handles.length > 0) {

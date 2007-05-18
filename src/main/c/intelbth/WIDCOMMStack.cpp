@@ -252,7 +252,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_device
 // --- Service search
 
 JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runSearchServicesImpl
-(JNIEnv *env, jobject peer, jobject startedNotify, jobject uuid, jlong address) {
+(JNIEnv *env, jobject peer, jobject startedNotify, jbyteArray uuidValue, jlong address) {
 	debug("StartSearchServices");
 
 	BD_ADDR bda; 
@@ -263,27 +263,14 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 
 	GUID service_guid;
 
-	if (uuid != NULL) {
-		jclass clsUUID = env->FindClass("javax/bluetooth/UUID");
-        if (clsUUID == NULL) {
-			env->FatalError("Can't create UUID Class");
-		    return NULL;
-        }
+	// pin array
+	jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
 
-		jbyteArray uuidValue = (jbyteArray)env->GetObjectField(uuid, env->GetFieldID(clsUUID, "uuidValue", "[B"));
+	// build UUID
+	convertUUIDBytesToGUID(bytes, &service_guid);
 
-		// pin array
-
-		jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
-
-		// build UUID
-		convertBytesToUUID(bytes, &service_guid);
-
-		// unpin array
-
-		env->ReleaseByteArrayElements(uuidValue, bytes, 0);
-		env->DeleteLocalRef(clsUUID);
-	}
+	// unpin array
+	env->ReleaseByteArrayElements(uuidValue, bytes, 0);
 
 	stack->searchServicesComplete = FALSE;
 

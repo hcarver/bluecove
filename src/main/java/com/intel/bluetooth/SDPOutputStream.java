@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth;
 
 import java.io.FilterOutputStream;
@@ -29,6 +29,7 @@ import javax.bluetooth.DataElement;
 import javax.bluetooth.UUID;
 
 public class SDPOutputStream extends FilterOutputStream {
+	
 	public SDPOutputStream(OutputStream out) {
 		super(out);
 	}
@@ -41,8 +42,9 @@ public class SDPOutputStream extends FilterOutputStream {
 	}
 
 	private void writeBytes(byte[] b) throws IOException {
-		for (int i = 0; i < b.length; i++)
+		for (int i = 0; i < b.length; i++) {
 			write(b[i]);
+		}
 	}
 
 	private int getLength(DataElement d) {
@@ -94,9 +96,9 @@ public class SDPOutputStream extends FilterOutputStream {
 		case DataElement.DATALT: {
 			int result = 5;
 
-			for (Enumeration e = (Enumeration) d.getValue(); e
-					.hasMoreElements();)
+			for (Enumeration e = (Enumeration) d.getValue(); e.hasMoreElements();) {
 				result += getLength((DataElement) e.nextElement());
+			}
 
 			return result;
 		}
@@ -156,14 +158,7 @@ public class SDPOutputStream extends FilterOutputStream {
 
 		case DataElement.UUID:
 			write(24 | 4);
-			String stringValue = ((UUID) d.getValue()).toString();
-			byte[] uuidValue = new byte[16];
-
-			for (int i = 0; i < 16; i++)
-				uuidValue[i] = (byte) Integer.parseInt(stringValue.substring(
-						i * 2, i * 2 + 2), 16);
-
-			writeBytes(uuidValue);
+			writeBytes(Utils.UUIDToByteArray((UUID)d.getValue()));
 			break;
 
 		case DataElement.STRING: {
@@ -193,18 +188,18 @@ public class SDPOutputStream extends FilterOutputStream {
 			write(48 | 7);
 			writeLong(getLength(d) - 5, 4);
 
-			for (Enumeration e = (Enumeration) d.getValue(); e
-					.hasMoreElements();)
+			for (Enumeration e = (Enumeration) d.getValue(); e.hasMoreElements();) {
 				writeElement((DataElement) e.nextElement());
+			}
 
 			break;
 		case DataElement.DATALT:
 			write(56 | 7);
 			writeLong(getLength(d) - 5, 4);
 
-			for (Enumeration e = (Enumeration) d.getValue(); e
-					.hasMoreElements();)
+			for (Enumeration e = (Enumeration) d.getValue(); e.hasMoreElements();) {
 				writeElement((DataElement) e.nextElement());
+			}
 
 			break;
 

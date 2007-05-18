@@ -20,6 +20,8 @@
  */ 
 package javax.bluetooth;
 
+import com.intel.bluetooth.Utils;
+
 public class UUID {
 	
 	private byte[] uuidValue;
@@ -73,30 +75,19 @@ public class UUID {
 
 	public UUID(String stringValue, boolean shortUUID) {
 		int length = stringValue.length();
-
 		if (shortUUID) {
 			if (length < 1 || length > 8) {
 				throw new IllegalArgumentException();
 			}
-
-			init("00000000".substring(length) + stringValue + "00001000800000805F9B34FB");
+			uuidValue = Utils.UUIDToByteArray("00000000".substring(length) + stringValue + "00001000800000805F9B34FB");
 		} else {
 			if (length < 1 || length > 32) {
 				throw new IllegalArgumentException();
 			}
-
-			init("00000000000000000000000000000000".substring(length) + stringValue);
+			uuidValue = Utils.UUIDToByteArray("00000000000000000000000000000000".substring(length) + stringValue);
 		}
 	}
 
-	private void init(String stringValue) throws NumberFormatException {
-		uuidValue = new byte[16];
-
-		for (int i = 0; i < 16; i++) {
-			uuidValue[i] = (byte) Integer.parseInt(stringValue.substring(i * 2, i * 2 + 2), 16);
-		}
-	}
-	
 	/*
 	 * Returns the string representation of the 128-bit UUID object. The string
 	 * being returned represents a UUID that contains characters from the
@@ -107,14 +98,7 @@ public class UUID {
 	 */
 
 	public String toString() {
-		StringBuffer buf = new StringBuffer();
-
-		for (int i = 0; i < uuidValue.length; i++) {
-			buf.append(Integer.toHexString(uuidValue[i] >> 4 & 0xf));
-			buf.append(Integer.toHexString(uuidValue[i] & 0xf));
-		}
-
-		return buf.toString();
+		return Utils.UUIDByteArrayToString(uuidValue);
 	}
 
 	/*

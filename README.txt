@@ -11,20 +11,17 @@ currently maintained by volunteers.
 
 == Requirements ==
 
-  * Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer and Windows Mobile 2003 or newer)
-  * A Bluetooth device supported by the Microsoft bluetooth stack
   * Java 1.1 or newer for the binary execution, Java 1.4 or newer to compile.
   * Another Bluetooth device to communicate with
+  * Supported Bluetooth stack on Windows WIDCOMM, Microsoft (winsock), and BlueSoleil. see [stacks Supported stacks]
 
 == Limitations ==
 
-Due to the Microsoft Bluetooth stack only supporting RFCOMM connections,
-BlueCove also only supports RFCOMM connections. The operating system support is
-currently limited to Windows XP SP2 and newer, because the Microsoft Bluetooth
-stack is not available on other operating systems. If someone writes code to
-support another stack and/or operating system, it will be considered for
-inclusion.  BlueCove does also not support OBEX, but there are other projects
-that can (possibly) be used to achieve OBEX functionality with BlueCove.
+   * BlueCove also only supports RFCOMM connections
+   * Encryption and Authentication are not supported
+   * The operating system support is currently limited to Windows XP SP2 and newer
+   * BlueCove does not support OBEX, but there are other projects
+     that can be used to achieve OBEX functionality with BlueCove. see [http://sourceforge.net/projects/avetanaobex/ avetanaOBEX]
 
 == Not Implemented functionality ===
 

@@ -1,0 +1,35 @@
+#summary BlueCove supported stacks.
+
+= BlueCove supported stacks =
+
+   Automatic Bluetooth Stack detection is not implemented.
+   Java System property "bluecove.stack" used to force Stack Initialization. Values "widcomm", "bluesoleil" or "winsock".
+   By defaut winsock is selected.
+
+== Microsoft (winsock) ==
+
+=== Requirements ===
+
+    * Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer and Windows Mobile 2003 or newer)
+
+    * A Bluetooth device supported by the Microsoft bluetooth stack
+
+=== Limitations ===
+
+    * Microsoft Bluetooth stack only supporting RFCOMM connections
+
+== WIDCOMM (Broadcom)) ==
+
+=== JSR-82 Limitations ===
+
+    * ServiceRecord attributes of DataElement types URL are discoved as STRING
+    * ServiceRecord attributes of DataElement type BOOL are not supported
+    * DiscoveryAgent.searchServices(.. UUID[] uuidSet, ..)  only ONE UUID is used during search, the last one in array.
+
+== BlueSoleil (IVT Corporation) ==
+
+=== JSR-82 Limitations ===
+
+    * DiscoveryAgent.searchServices() can only find 128bits-GUID service with specific UUID. You can't list all service on remote device.
+    * DiscoveryAgent.searchServices(.. UUID[] uuidSet, ..)  only ONE UUID is used during search, the last one in array.
+    * You need to run DiscoveryAgent.searchServices() with UUID of your service before you can make connection to it using Connector.open("btspp://");

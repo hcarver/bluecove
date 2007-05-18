@@ -22,6 +22,8 @@ package com.intel.bluetooth.test;
 
 import javax.microedition.io.Connector;
 import java.io.DataOutputStream;
+
+import javax.bluetooth.DataElement;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 import javax.bluetooth.DeviceClass;
@@ -37,7 +39,9 @@ import java.util.Vector;
 
 public class SimpleClient implements DiscoveryListener  {
 
-	public static final UUID uuid = new UUID(Consts.TEST_UUID, false);
+	static final UUID uuid = new UUID(Consts.TEST_UUID, false);
+	//static final UUID uuid = com.intel.bluetooth.BluetoothConsts.RFCOMM_PROTOCOL_UUID;
+	//static final UUID uuid = com.intel.bluetooth.BluetoothConsts.L2CAP_PROTOCOL_UUID;
 
 	Vector devices;
 
@@ -99,7 +103,9 @@ public class SimpleClient implements DiscoveryListener  {
 
 		for (Enumeration enum_d = devices.elements(); enum_d.hasMoreElements();) {
 			RemoteDevice d = (RemoteDevice) enum_d.nextElement();
-
+			if (!EnvSettings.isTestAddress(d.getBluetoothAddress())) {
+				continue;
+			}
 			try {
 				System.out.println("discovered name: " + d.getFriendlyName(false));
 			} catch (IOException e) {
@@ -140,15 +146,18 @@ public class SimpleClient implements DiscoveryListener  {
 
 			for (Enumeration enum_r = records.elements(); enum_r.hasMoreElements();) {
 				ServiceRecord r = (ServiceRecord) enum_r.nextElement();
-				//System.out.println("ServiceRecord " + r);
 				
-				String name = r.getAttributeValue(0x0100).getValue().toString();
+				String name = null;
+				DataElement nameDataElement = r.getAttributeValue(0x0100);
+				if (nameDataElement != null) {
+					name = nameDataElement.getValue().toString();
+				}
 				System.out.println("Name attribute: " + name);
 
 				String url = r.getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
 				System.out.println("url: " + url);
 				
-				if (name.startsWith(Consts.TEST_SERVERNAME_PREFIX)) {
+				if ((name != null) && name.startsWith(Consts.TEST_SERVERNAME_PREFIX)) {
 					try {
 						StreamConnection conn = (StreamConnection) Connector.open(url);
 						DataOutputStream dos = new DataOutputStream(conn.openOutputStream());
@@ -162,6 +171,8 @@ public class SimpleClient implements DiscoveryListener  {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+				} else {
+					System.out.println("Not a BlueCove ServiceRecord " + r);					
 				}
 			}
 		}
@@ -207,8 +218,8 @@ public class SimpleClient implements DiscoveryListener  {
 	}
 	
 	public static void main(String[] args) {
-		//System.getProperties().put("bluecove.debug", "true");
-		//System.getProperties().put("bluecove.native.path", "./src/main/resources");
+		
+		EnvSettings.setSystemProperties();
 		
 		if (args.length == 1) {
 			new SimpleClient(args[0]);

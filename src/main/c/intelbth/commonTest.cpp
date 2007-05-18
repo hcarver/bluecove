@@ -1,5 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
+ *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -17,14 +18,25 @@
  *
  *  @version $Id$
  */
-package com.intel.bluetooth.test;
 
-public interface Consts {
+#include "common.h"
 
-	// Share the same UUID with bluecove-tester
-	public static final String TEST_UUID = "B1011111111111111111111111110001";
-	//public static final String TEST_UUID = "27012f0c68af4fbf8dbe6bbaf7ab651b";
+JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_testUUIDConversion
+(JNIEnv *env, jclass, jbyteArray uuidValue) {
+	GUID service_guid;
+	// pin array
+	jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
+	// build UUID
+	convertUUIDBytesToGUID(bytes, &service_guid);
+	// unpin array
+	env->ReleaseByteArrayElements(uuidValue, bytes, 0);
 
-	public static final String TEST_SERVERNAME_PREFIX = "bluecoveSrv";
-	
+	jbyteArray uuidValueConverted = env->NewByteArray(16);
+	jbyte *bytesConverted = env->GetByteArrayElements(uuidValueConverted, 0);
+
+	convertGUIDToUUIDBytes(&service_guid, bytesConverted);
+
+	env->ReleaseByteArrayElements(uuidValueConverted, bytesConverted, 0);
+
+	return uuidValueConverted;
 }

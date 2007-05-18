@@ -439,7 +439,7 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 
 		// build UUID
 
-		convertBytesToUUID(bytes, &guid);
+		convertUUIDBytesToGUID(bytes, &guid);
 
 		//UUID is full 128 bits
 

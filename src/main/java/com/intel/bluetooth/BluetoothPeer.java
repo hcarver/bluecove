@@ -159,4 +159,8 @@ public class BluetoothPeer {
 	public native int getDeviceVersion(long address);
 	
 	public native int getDeviceManufacturer(long address);
+	
+	// internal test function
+	
+	public static native byte[] testUUIDConversion(byte[] uuidValue);
 }

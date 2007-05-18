@@ -1,5 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
+ *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -17,14 +18,24 @@
  *
  *  @version $Id$
  */
+
 package com.intel.bluetooth.test;
 
-public interface Consts {
+public abstract class EnvSettings {
 
-	// Share the same UUID with bluecove-tester
-	public static final String TEST_UUID = "B1011111111111111111111111110001";
-	//public static final String TEST_UUID = "27012f0c68af4fbf8dbe6bbaf7ab651b";
-
-	public static final String TEST_SERVERNAME_PREFIX = "bluecoveSrv";
+	public static void setSystemProperties() {
+		
+		System.getProperties().put("bluecove.debug", "true");
+		
+		// Used to avoid refresh in Eclipse during development
+		System.getProperties().put("bluecove.native.path", "./src/main/resources");
+	}
 	
+	public static boolean isTestAddress(String bluetoothAddress) {
+		// Only one device during development tests
+		if (true) {
+			return bluetoothAddress.equalsIgnoreCase("0019639c4007");
+		}
+		return true;
+	}
 }

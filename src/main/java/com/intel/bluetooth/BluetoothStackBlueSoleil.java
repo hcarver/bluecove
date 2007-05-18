@@ -150,7 +150,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		return false;
 	}
 	
-	private native int runSearchServicesImpl(SearchServicesThread startedNotify, DiscoveryListener listener, UUID uuid, long address, RemoteDevice device) throws BluetoothStateException;
+	private native int runSearchServicesImpl(SearchServicesThread startedNotify, DiscoveryListener listener, byte[] uuidValue, long address, RemoteDevice device) throws BluetoothStateException;
 	
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		startedNotify.searchServicesStartedCallback();
@@ -158,7 +158,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		if ((uuidSet != null) && (uuidSet.length > 0)) {
 			uuid = uuidSet[uuidSet.length -1];
 		}
-		return runSearchServicesImpl(startedNotify, listener, uuid, ((RemoteDeviceImpl)device).getAddress(), device);
+		return runSearchServicesImpl(startedNotify, listener, Utils.UUIDToByteArray(uuid), ((RemoteDeviceImpl)device).getAddress(), device);
 	}
 
 	/*
@@ -171,18 +171,12 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		UCHAR ucServiceChannel;
 	}
 	 */
-	void servicesFoundCallback(DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel) {
+	void servicesFoundCallback(DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel, int recordHanlde) {
 		ServiceRecordImpl record = new ServiceRecordImpl(device, 0);
+
+		UUID uuid = new UUID(Utils.UUIDByteArrayToString(uuidValue), false);
 		
-		StringBuffer buf = new StringBuffer();
-		for (int i = 0; i < uuidValue.length; i++) {
-			buf.append(Integer.toHexString(uuidValue[i] >> 4 & 0xf));
-			buf.append(Integer.toHexString(uuidValue[i] & 0xf));
-		}
-		UUID uuid = new UUID(buf.toString(), false);
-		System.out.println("found UUID: " + uuid);
-		System.out.println("found serviceName: " + serviceName);
-		record.populateRFCOMMAttributes(0x00010020, channel, uuid, serviceName);
+		record.populateRFCOMMAttributes(recordHanlde, channel, uuid, serviceName);
 		
 		ServiceRecord[] records = new ServiceRecordImpl[1];
 		records[0] = record;

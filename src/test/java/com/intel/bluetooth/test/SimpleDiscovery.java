@@ -39,8 +39,7 @@ public class SimpleDiscovery {
     
 	public static void main(String[] args) {
 		
-		//System.getProperties().put("bluecove.debug", "true");
-		//System.getProperties().put("bluecove.native.path", "./src/main/resources");
+		EnvSettings.setSystemProperties();
 		
 	    LocalDevice l;
 		try {
