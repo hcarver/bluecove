@@ -38,7 +38,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 
 	private long handle;
 
-	ServiceRecord serviceRecord;
+	ServiceRecordImpl serviceRecord;
 
 	private boolean closed;
 
@@ -63,54 +63,14 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 
 		serviceRecord = new ServiceRecordImpl(null, 0);
 
-		/*
-		 * service handle (direct insert to avoid IllegalArgumentException from
-		 * setAttributeValue)
-		 */
 
-		((ServiceRecordImpl) serviceRecord).attributes.put(
-				new Integer(BluetoothConsts.ServiceRecordHandle), 
-				new DataElement(DataElement.U_INT_4, 0x00010020));
-
-		/*
-		 * service class ID list
-		 */
-
-		DataElement serviceClassIDList = new DataElement(DataElement.DATSEQ);
-		serviceClassIDList.addElement(new DataElement(DataElement.UUID, uuid));
-
-		serviceRecord.setAttributeValue(BluetoothConsts.ServiceClassIDList, serviceClassIDList);
-
-		/*
-		 * protocol descriptor list
-		 */
-
-		DataElement protocolDescriptorList = new DataElement(DataElement.DATSEQ);
-
-		DataElement L2CAPDescriptor = new DataElement(DataElement.DATSEQ);
-		L2CAPDescriptor.addElement(new DataElement(DataElement.UUID, BluetoothConsts.L2CAP_PROTOCOL_UUID));
-		protocolDescriptorList.addElement(L2CAPDescriptor);
-
-		DataElement RFCOMMDescriptor = new DataElement(DataElement.DATSEQ);
-		RFCOMMDescriptor.addElement(new DataElement(DataElement.UUID, BluetoothConsts.RFCOMM_PROTOCOL_UUID));
-		RFCOMMDescriptor.addElement(new DataElement(DataElement.U_INT_1, peer.getsockchannel(socket)));
-		protocolDescriptorList.addElement(RFCOMMDescriptor);
-
-		serviceRecord.setAttributeValue(BluetoothConsts.ProtocolDescriptorList, protocolDescriptorList);
-
-		/*
-		 * name
-		 */
-
-		if (name != null) {
-			serviceRecord.setAttributeValue(0x0100, new DataElement(DataElement.STRING, name));
-		}
+		serviceRecord.populateRFCOMMAttributes(0x00010020, peer.getsockchannel(socket), uuid, name);
 
 		/*
 		 * register service
 		 */
 
-		handle = peer.registerService(((ServiceRecordImpl) serviceRecord).toByteArray());
+		handle = peer.registerService(serviceRecord.toByteArray());
 		
 		((ServiceRecordImpl) serviceRecord).attributeUpdated = false;
 	}

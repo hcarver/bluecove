@@ -27,6 +27,7 @@ import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
 public class BluetoothStackBlueSoleil implements BluetoothStack {
@@ -149,7 +150,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		return false;
 	}
 	
-	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, UUID uuid, long address) throws BluetoothStateException;
+	private native int runSearchServicesImpl(SearchServicesThread startedNotify, DiscoveryListener listener, UUID uuid, long address, RemoteDevice device) throws BluetoothStateException;
 	
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		startedNotify.searchServicesStartedCallback();
@@ -157,10 +158,37 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		if ((uuidSet != null) && (uuidSet.length > 0)) {
 			uuid = uuidSet[uuidSet.length -1];
 		}
-		long[] handles = runSearchServicesImpl(startedNotify, uuid, ((RemoteDeviceImpl)device).getAddress());
-		return DiscoveryListener.SERVICE_SEARCH_ERROR;
+		return runSearchServicesImpl(startedNotify, listener, uuid, ((RemoteDeviceImpl)device).getAddress(), device);
 	}
 
+	/*
+	This is all we have under the Blue Sun.
+	struct SPPEX_SERVICE_INFO {
+		DWORD dwSize;
+		DWORD dwSDAPRecordHanlde;
+		UUID serviceClassUuid128;  
+		CHAR szServiceName[MAX_SERVICE_NAME_LENGTH];
+		UCHAR ucServiceChannel;
+	}
+	 */
+	void servicesFoundCallback(DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel) {
+		ServiceRecordImpl record = new ServiceRecordImpl(device, 0);
+		
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < uuidValue.length; i++) {
+			buf.append(Integer.toHexString(uuidValue[i] >> 4 & 0xf));
+			buf.append(Integer.toHexString(uuidValue[i] & 0xf));
+		}
+		UUID uuid = new UUID(buf.toString(), false);
+		System.out.println("found UUID: " + uuid);
+		System.out.println("found serviceName: " + serviceName);
+		record.populateRFCOMMAttributes(0x00010020, channel, uuid, serviceName);
+		
+		ServiceRecord[] records = new ServiceRecordImpl[1];
+		records[0] = record;
+		listener.servicesDiscovered(1, records);
+	}
+	
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
 		return true;
 	}

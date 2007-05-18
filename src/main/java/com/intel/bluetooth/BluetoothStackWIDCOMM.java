@@ -183,7 +183,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 					DebugLog.debug("populateRecord error", e);
 				}
 			}
-			listener.servicesDiscovered(0, records);
+			listener.servicesDiscovered(1, records);
 			return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
 		} else {
 			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;

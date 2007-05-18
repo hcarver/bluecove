@@ -30,6 +30,7 @@ import javax.bluetooth.DataElement;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.UUID;
 
 public class ServiceRecordImpl implements ServiceRecord {
 
@@ -436,5 +437,40 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 	long getHandle() {
 		return this.handle;
+	}
+	
+	void populateRFCOMMAttributes(int handle, int channel, UUID uuid, String name) {
+		
+		this.populateAttributeValue(BluetoothConsts.ServiceRecordHandle, new DataElement(DataElement.U_INT_4, handle));
+
+		/*
+		 * service class ID list
+		 */
+
+		DataElement serviceClassIDList = new DataElement(DataElement.DATSEQ);
+		serviceClassIDList.addElement(new DataElement(DataElement.UUID, uuid));
+
+		this.populateAttributeValue(BluetoothConsts.ServiceClassIDList, serviceClassIDList);
+
+		/*
+		 * protocol descriptor list
+		 */
+
+		DataElement protocolDescriptorList = new DataElement(DataElement.DATSEQ);
+
+		DataElement L2CAPDescriptor = new DataElement(DataElement.DATSEQ);
+		L2CAPDescriptor.addElement(new DataElement(DataElement.UUID, BluetoothConsts.L2CAP_PROTOCOL_UUID));
+		protocolDescriptorList.addElement(L2CAPDescriptor);
+
+		DataElement RFCOMMDescriptor = new DataElement(DataElement.DATSEQ);
+		RFCOMMDescriptor.addElement(new DataElement(DataElement.UUID, BluetoothConsts.RFCOMM_PROTOCOL_UUID));
+		RFCOMMDescriptor.addElement(new DataElement(DataElement.U_INT_1, channel));
+		protocolDescriptorList.addElement(RFCOMMDescriptor);
+
+		this.populateAttributeValue(BluetoothConsts.ProtocolDescriptorList, protocolDescriptorList);
+
+		if (name != null) {
+			this.populateAttributeValue(0x0100, new DataElement(DataElement.STRING, name));
+		}
 	}
 }

@@ -195,8 +195,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 
 // --- Service search
 
-JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSearchServicesImpl
-(JNIEnv *env, jobject peer, jobject startedNotify, jobject uuid, jlong address)  {
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSearchServicesImpl
+(JNIEnv *env, jobject peer, jobject startedNotify, jobject listener, jobject uuid, jlong address, jobject device)  {
 
 	BLUETOOTH_DEVICE_INFO devInfo={0};
 	devInfo.dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
@@ -212,7 +212,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_r
 	jclass clsUUID = env->FindClass("javax/bluetooth/UUID");
     if (clsUUID == NULL) {
 		env->FatalError("Can't create UUID Class");
-	    return NULL;
+	    return SERVICE_SEARCH_ERROR;
     }
 	jbyteArray uuidValue = (jbyteArray)env->GetObjectField(uuid, env->GetFieldID(clsUUID, "uuidValue", "[B"));
 
@@ -231,13 +231,42 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_r
 	DWORD dwReusult;
 	dwReusult = BT_SearchSPPExServices(&devInfo, &dwLength, sppex_svc_info);
 	if (dwReusult == BTSTATUS_SUCCESS)	{
+
+		jclass peerClass = env->GetObjectClass(peer);
+		if (peerClass == NULL) {
+			debug("fatalerror");
+			return SERVICE_SEARCH_ERROR;
+		}
+
+		jmethodID servicesFoundCallbackMethod = env->GetMethodID(peerClass, "servicesFoundCallback", "(Ljavax/bluetooth/DiscoveryListener;Ljavax/bluetooth/RemoteDevice;Ljava/lang/String;[BI)V");
+		if (servicesFoundCallbackMethod == NULL) {
+			debug("fatalerror");
+			return SERVICE_SEARCH_ERROR;
+		}
 		for(DWORD i = 0; i < dwLength / sizeof(SPPEX_SERVICE_INFO); i++) {
 			//printf("SDAP Record Handle:	%d\n", sppex_svc_info[i].dwSDAPRecordHanlde);
 			//printf("Service Name:	%s\n", sppex_svc_info[i].szServiceName);
 			//printf("Service Channel:	%02X\n", sppex_svc_info[i].ucServiceChannel);
+			
+			jbyteArray uuidValueJ = env->NewByteArray(16);
+			jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
+
+			GUID found_service_guid;
+			memcpy(&found_service_guid, &(sppex_svc_info[i].serviceClassUuid128), sizeof(UUID));
+			convertUUIDToBytes(&service_guid, bytes);
+
+			env->ReleaseByteArrayElements(uuidValueJ, bytes, 0);
+
+
+			//DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel
+			env->CallVoidMethod(peer, servicesFoundCallbackMethod, 
+				listener, device, env->NewStringUTF((char*)(sppex_svc_info[i].szServiceName)), uuidValueJ, sppex_svc_info[i].ucServiceChannel);
+			if (ExceptionCheckCompatible(env)) {
+			   return SERVICE_SEARCH_ERROR;
+			}
 		}
 	}
-
+	return SERVICE_SEARCH_COMPLETED;
 }
 
 //	 --- Client RFCOMM connections

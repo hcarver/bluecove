@@ -89,3 +89,7 @@ void convertBytesToUUID(jbyte *bytes, GUID *uuid) {
 		uuid->Data4[i] = bytes[i+8];
 	}
 }
+
+void convertUUIDToBytes(GUID *uuid, jbyte *bytes) {
+	memcpy(bytes, uuid, sizeof(GUID));
+}
