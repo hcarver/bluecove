@@ -25,10 +25,10 @@ public abstract class EnvSettings {
 
 	public static void setSystemProperties() {
 		
-		System.getProperties().put("bluecove.debug", "true");
+		//System.getProperties().put("bluecove.debug", "true");
 		
 		// Used to avoid refresh in Eclipse during development
-		System.getProperties().put("bluecove.native.path", "./src/main/resources");
+		//System.getProperties().put("bluecove.native.path", "./src/main/resources");
 	}
 	
 	public static boolean isTestAddress(String bluetoothAddress) {

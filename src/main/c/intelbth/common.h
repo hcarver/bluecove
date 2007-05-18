@@ -114,6 +114,8 @@ void throwException(JNIEnv *env, const char *name, const char *msg);
 
 void throwIOException(JNIEnv *env, const char *msg);
 
+void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...);
+
 BOOL ExceptionCheckCompatible(JNIEnv *env);
 
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid);

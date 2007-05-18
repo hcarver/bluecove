@@ -21,6 +21,7 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
+import java.util.Hashtable;
 
 import javax.bluetooth.RemoteDevice;
 
@@ -33,6 +34,8 @@ public class RemoteDeviceImpl extends RemoteDevice {
 	private String name;
 	
 	private long address;
+	
+	private Hashtable stackAttributes;
 	
 	protected RemoteDeviceImpl(long address, String name) {
 		super(Long.toHexString(address));
@@ -51,5 +54,23 @@ public class RemoteDeviceImpl extends RemoteDevice {
 
 	public long getAddress() {
 		return address;
+	}
+	
+	void setStackAttributes(Object key, Object value) {
+		if (stackAttributes == null) {
+			stackAttributes = new Hashtable();
+		}
+		if (value == null) {
+			stackAttributes.remove(key);
+		} else {
+			stackAttributes.put(key, value);
+		}
+	}
+	
+	Object getStackAttributes(Object key) {
+		if (stackAttributes == null) {
+			return null;
+		}
+		return stackAttributes.get(key);
 	}
 }

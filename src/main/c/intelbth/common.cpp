@@ -53,8 +53,7 @@ void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char 
 	va_end(ap);
 }
 
-void throwException(JNIEnv *env, const char *name, const char *msg)
-{
+void throwException(JNIEnv *env, const char *name, const char *msg) {
 	 //debugss("Throw Exception %s %s", name, msg);
 	 jclass cls = env->FindClass(name);
      /* if cls is NULL, an exception has already been thrown */
@@ -67,9 +66,19 @@ void throwException(JNIEnv *env, const char *name, const char *msg)
     env->DeleteLocalRef(cls);
 }
 
-void throwIOException(JNIEnv *env, const char *msg)
-{
+void throwIOException(JNIEnv *env, const char *msg) {
 	throwException(env, "java/io/IOException", msg);
+}
+
+void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	{
+		char msg[1064];
+		_vsnprintf_s(msg, 1064, fmt, ap);
+		throwIOException(env, msg);
+	}
+	va_end(ap);
 }
 
 BOOL ExceptionCheckCompatible(JNIEnv *env) {

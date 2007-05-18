@@ -21,6 +21,7 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
+import java.util.Hashtable;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
@@ -32,6 +33,10 @@ import javax.bluetooth.UUID;
 
 public class BluetoothStackBlueSoleil implements BluetoothStack {
 
+	private Hashtable devices = new Hashtable();
+	
+	private Hashtable connectionHandles = new Hashtable();
+	
 	BluetoothStackBlueSoleil() {
 		initialize();
 	}
@@ -81,11 +86,11 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		return isBluetoothReady(15);
 	}
 	
-	private native int getStackVersionInfo();
+	native int getStackVersionInfo();
 	
-	private native int getDeviceVersion();
+	native int getDeviceVersion();
 	
-	private native int getDeviceManufacturer();
+	native int getDeviceManufacturer();
 	
 	public String getLocalDeviceProperty(String property) {
 		final String TRUE = "true";
@@ -105,12 +110,17 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 			return TRUE;
 		}
 		
-		if ("bluecove.radio.version".equals(property)) {
-			return String.valueOf(getDeviceVersion());
+		// service attributes are not supported.
+		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
+			return "0";
 		}
-		if ("bluecove.radio.manufacturer".equals(property)) {
-			return String.valueOf(getDeviceManufacturer());
-		}
+		
+//		if ("bluecove.radio.version".equals(property)) {
+//			return String.valueOf(getDeviceVersion());
+//		}
+//		if ("bluecove.radio.manufacturer".equals(property)) {
+//			return String.valueOf(getDeviceManufacturer());
+//		}
 		if ("bluecove.stack.version".equals(property)) {
 			return String.valueOf(getStackVersionInfo());
 		}
@@ -178,20 +188,50 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		
 		record.populateRFCOMMAttributes(recordHanlde, channel, uuid, serviceName);
 		
+		Long address = new Long(((RemoteDeviceImpl)device).getAddress());
+		RemoteDeviceImpl listedDevice = (RemoteDeviceImpl)devices.get(address);
+		if (listedDevice == null) {
+			devices.put(address, device);
+			listedDevice = (RemoteDeviceImpl)device;
+		}
+		listedDevice.setStackAttributes("RFCOMM_channel" + channel, uuidValue);
+		
 		ServiceRecord[] records = new ServiceRecordImpl[1];
 		records[0] = record;
 		listener.servicesDiscovered(1, records);
 	}
 	
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
-		return true;
+		return false;
 	}
 	
 //	 --- Client RFCOMM connections
 	
-	public native long connectionRfOpen(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
+	private native long[] connectionRfOpenImpl(long address, byte[] uuidValue) throws IOException;
 	
-	public native void connectionRfClose(long handle) throws IOException;
+	public long connectionRfOpen(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
+		Long addressLong = new Long(address);
+		RemoteDeviceImpl listedDevice = (RemoteDeviceImpl)devices.get(addressLong);
+		if (listedDevice == null) {
+			throw new IOException("Device not discovered");
+		}
+		byte[] uuidValue = (byte[])listedDevice.getStackAttributes("RFCOMM_channel" + channel);
+		if (uuidValue == null) {
+			throw new IOException("Device service not discovered");
+		}
+		
+		long[] handles = connectionRfOpenImpl(address, uuidValue);
+		connectionHandles.put(String.valueOf(handles[0]), handles);
+		
+		return handles[0];
+	}
+	
+	private native void connectionRfCloseImpl(long comHandle, long connectionHandle) throws IOException;
+	
+	public void connectionRfClose(long handle) throws IOException {
+		long[] handles =(long[])connectionHandles.get(String.valueOf(handle));
+		connectionRfCloseImpl(handles[0], handles[1]);
+	}
 
 	public native long getConnectionRfRemoteAddress(long handle) throws IOException;
 	

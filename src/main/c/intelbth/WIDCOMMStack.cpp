@@ -255,7 +255,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 (JNIEnv *env, jobject peer, jobject startedNotify, jbyteArray uuidValue, jlong address) {
 	debug("StartSearchServices");
 
-	BD_ADDR bda; 
+	BD_ADDR bda;
 	LongToBcAddr(address, bda);
 	wchar_t addressString[14];
 	BcAddrToString(addressString, bda);
@@ -299,7 +299,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	UINT16 obtainedServicesRecords;
 	CBtIf::DISCOVERY_RESULT searchServicesResultCode = stack->GetLastDiscoveryResult(bda, &obtainedServicesRecords);
 
-	//todo SERVICE_SEARCH_TERMINATED 
+	//todo SERVICE_SEARCH_TERMINATED
 
 	if (searchServicesResultCode != CBtIf::DISCOVERY_RESULT_SUCCESS) {
 		debugs("searchServicesResultCode %i", searchServicesResultCode);
@@ -404,7 +404,7 @@ void WIDCOMMStackRfCommPort::OnDataReceived(void *p_data, UINT16 len) {
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfOpen
 (JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt) {
-	BD_ADDR bda; 
+	BD_ADDR bda;
 	LongToBcAddr(address, bda);
 
 	CSdpDiscoveryRec* sdpRecord = NULL;
@@ -431,7 +431,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 		delete(rf);
 		return 0;
 	}
-	
+
 	UINT8 sec_level = BTM_SEC_NONE;
 	if (!rf->rfCommIf.SetSecurityLevel(sdpRecord->m_service_name, sec_level , FALSE)) {
         throwIOException(env, "Error setting security level");
@@ -440,7 +440,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
     }
 
 	debugs("use Scn %i", rf->rfCommIf.GetScn());
-	CRfCommPort::PORT_RETURN_CODE rc = rf->OpenClient(rf->rfCommIf.GetScn(), bda); 
+	CRfCommPort::PORT_RETURN_CODE rc = rf->OpenClient(rf->rfCommIf.GetScn(), bda);
 	if (rc != CRfCommPort::SUCCESS) {
 		throwIOException(env, "Failed to OpenClient");
 		delete(rf);
@@ -465,7 +465,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		return;
 	}
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
-	CRfCommPort::PORT_RETURN_CODE rc = rf->Close(); 
+	CRfCommPort::PORT_RETURN_CODE rc = rf->Close();
 	if (rc != CRfCommPort::SUCCESS && rc != CRfCommPort::NOT_OPENED) {
 		throwIOException(env, "Failed to Close");
 	}
@@ -512,7 +512,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		if (count > len - done) {
 			count = len - done;
 		}
-			
+
 		memcpy(bytes + off + done , (rf->todo_buf + rf->todo_buf_read_idx), count);
 		rf->todo_buf_read_idx += count;
 
@@ -549,7 +549,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 (JNIEnv *env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
 	debug("->write(byte[])");
 	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
-	
+
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
 	UINT16 done = 0;

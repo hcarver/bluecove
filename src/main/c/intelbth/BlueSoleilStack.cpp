@@ -188,6 +188,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 		BT_GetRemoteDeviceInfo(MASK_DEVICE_NAME, &devInfo);
 
 		env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, env->NewStringUTF((char*)(devInfo.szName)));
+		if (ExceptionCheckCompatible(env)) {
+		   return INQUIRY_ERROR;
+		}
 	}
 
 	return INQUIRY_COMPLETED;
@@ -273,5 +276,137 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
 
 //	 --- Client RFCOMM connections
 
-#endif
+JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfOpenImpl
+(JNIEnv *env, jobject, jlong address, jbyteArray uuidValue) {
 
+	BLUETOOTH_DEVICE_INFO devInfo={0};
+	devInfo.dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
+	LongToBsAddr(address, devInfo.address);
+
+	SPPEX_SERVICE_INFO svcInfo;
+	svcInfo.dwSize = sizeof(SPPEX_SERVICE_INFO);
+
+	GUID service_guid;
+
+	// pin array
+	jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
+
+	// build UUID
+	convertUUIDBytesToGUID(bytes, &service_guid);
+
+	// unpin array
+	env->ReleaseByteArrayElements(uuidValue, bytes, 0);
+
+	memcpy(&(svcInfo.serviceClassUuid128), &service_guid, sizeof(UUID));
+
+	DWORD dwHandle;
+	DWORD dwResult = BT_ConnectSPPExService(&devInfo, &svcInfo, &dwHandle);
+	if (dwResult != BTSTATUS_SUCCESS)	{
+		debugs("BT_SearchSPPExServices return  [%i]", dwResult);
+		throwIOException(env, "Can't connect SPP");
+		return NULL;
+	}
+	debugs("open COM port [%i]", (int)svcInfo.ucComIndex);
+	char portString[20];
+	_snprintf_s(portString, 20, "\\\\.\\COM%i", (int)svcInfo.ucComIndex);
+	HANDLE hComPort;
+	hComPort = CreateFileA(portString, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	if (hComPort == INVALID_HANDLE_VALUE) {
+		BT_DisconnectSPPExService(dwHandle);
+		throwIOExceptionExt(env, "Can't open COM port [%s]", portString);
+		return NULL;
+	}
+
+	jlongArray result = env->NewLongArray(2);
+	jlong *longs = env->GetLongArrayElements(result, 0);
+	longs[0] = (jlong)hComPort;
+	longs[1] = dwHandle;
+	env->ReleaseLongArrayElements(result, longs, 0);
+
+	return result;
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfCloseImpl
+(JNIEnv *env, jobject, jlong comHandle, jlong connectionHandle) {
+	CloseHandle((HANDLE)comHandle);
+	BT_DisconnectSPPExService((DWORD)connectionHandle);
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfRead__J
+(JNIEnv *env, jobject peer, jlong handle) {
+	HANDLE hComPort = (HANDLE)handle;
+
+	unsigned char c;
+	DWORD numberOfBytesRead;
+	if (!ReadFile(hComPort, (char *)&c, 1, &numberOfBytesRead, NULL)) {
+		throwIOException(env, "Failed to read");
+	}
+	if (numberOfBytesRead == 0) {
+		return -1;
+	}
+	return (int)c;
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfRead__J_3BII
+(JNIEnv *env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
+	HANDLE hComPort = (HANDLE)handle;
+	jbyte *bytes = env->GetByteArrayElements(b, 0);
+	DWORD numberOfBytesRead;
+
+	if (!ReadFile(hComPort, (void*)(bytes + off), len, &numberOfBytesRead, NULL)) {
+		env->ReleaseByteArrayElements(b, bytes, 0);
+		throwIOException(env, "Failed to read");
+		return -1;
+	}
+
+	env->ReleaseByteArrayElements(b, bytes, 0);
+
+	if (numberOfBytesRead == 0) {
+		return -1;
+	}
+
+	return numberOfBytesRead;
+
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfReadAvailable
+(JNIEnv *env, jobject peer, jlong handle) {
+	return 0;
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfWrite__JI
+(JNIEnv *env, jobject peer, jlong handle, jint b) {
+	HANDLE hComPort = (HANDLE)handle;
+	char c = (char)b;
+	DWORD numberOfBytesWritten;
+	if (!WriteFile(hComPort, &c, 1, &numberOfBytesWritten, NULL)) {
+		throwIOException(env, "Failed to write");
+	}
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfWrite__J_3BII
+(JNIEnv *env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
+	HANDLE hComPort = (HANDLE)handle;
+
+	jbyte *bytes = env->GetByteArrayElements(b, 0);
+
+	int done = 0;
+
+	while(done < len) {
+		DWORD numberOfBytesWritten = 0;
+		if (!WriteFile(hComPort, (char *)(bytes + off + done), len - done, &numberOfBytesWritten, NULL)) {
+			throwIOException(env, "Failed to write");
+		}
+		if (numberOfBytesWritten <= 0) {
+			env->ReleaseByteArrayElements(b, bytes, 0);
+			throwIOException(env, "Failed to write");
+			return;
+		}
+
+		done += numberOfBytesWritten;
+	}
+
+	env->ReleaseByteArrayElements(b, bytes, 0);
+}
+
+#endif
