@@ -21,6 +21,7 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import javax.bluetooth.BluetoothStateException;
@@ -33,19 +34,44 @@ import javax.bluetooth.UUID;
 
 public class BluetoothStackBlueSoleil implements BluetoothStack {
 
+	private boolean initialized = false;
+	
 	private Hashtable devices = new Hashtable();
 	
 	private Hashtable connectionHandles = new Hashtable();
 	
 	BluetoothStackBlueSoleil() {
 		initialize();
+		initialized = true;
 	}
 	
 	public String getStackID() {
 		return BlueCoveImpl.STACK_BLUESOLEIL;
 	}
 	
-	public native void initialize();
+	private native void initialize();
+	
+	private native void uninitialize();
+	
+	public void destroy() {
+		if (initialized) {
+			for(Enumeration en = connectionHandles.keys(); en.hasMoreElements(); ) {
+				Long handle = (Long)en.nextElement();
+				try {
+					long[] handles =(long[])connectionHandles.get(handle);
+					connectionRfCloseImpl(handles[0], handles[1]);
+				} catch (Throwable e) {
+				} 
+			}
+			uninitialize();
+			initialized = false;
+			DebugLog.debug("BlueSoleil destroyed");
+		}
+	}
+	
+	protected void finalize() {
+		destroy();
+	}
 	
 	public native String getLocalDeviceBluetoothAddress();
 
@@ -146,8 +172,10 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		listener.deviceDiscovered(new RemoteDeviceImpl(deviceAddr, deviceName), new DeviceClass(deviceClass));			
 	}
 
+	public native boolean cancelInquirympl();
+	
 	public boolean cancelInquiry(DiscoveryListener listener) {
-		return false;
+		return cancelInquirympl();
 	}
 	
 // --- Service search 
@@ -187,6 +215,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		UUID uuid = new UUID(Utils.UUIDByteArrayToString(uuidValue), false);
 		
 		record.populateRFCOMMAttributes(recordHanlde, channel, uuid, serviceName);
+		DebugLog.debug("servicesFoundCallback", record);
 		
 		Long address = new Long(((RemoteDeviceImpl)device).getAddress());
 		RemoteDeviceImpl listedDevice = (RemoteDeviceImpl)devices.get(address);
@@ -221,7 +250,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		}
 		
 		long[] handles = connectionRfOpenImpl(address, uuidValue);
-		connectionHandles.put(String.valueOf(handles[0]), handles);
+		connectionHandles.put(new Long(handles[0]), handles);
 		
 		return handles[0];
 	}
@@ -229,7 +258,10 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	private native void connectionRfCloseImpl(long comHandle, long connectionHandle) throws IOException;
 	
 	public void connectionRfClose(long handle) throws IOException {
-		long[] handles =(long[])connectionHandles.get(String.valueOf(handle));
+		long[] handles =(long[])connectionHandles.remove(new Long(handle));
+		if (handles == null) {
+			throw new IOException("handle not found");
+		}
 		connectionRfCloseImpl(handles[0], handles[1]);
 	}
 

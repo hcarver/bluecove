@@ -33,8 +33,9 @@ public abstract class EnvSettings {
 	
 	public static boolean isTestAddress(String bluetoothAddress) {
 		// Only one device during development tests
-		if (true) {
-			return bluetoothAddress.equalsIgnoreCase("0019639c4007");
+		if (false) {
+			//return bluetoothAddress.equalsIgnoreCase("0019639c4007");
+			//return bluetoothAddress.equalsIgnoreCase("00123755ae71");
 		}
 		return true;
 	}

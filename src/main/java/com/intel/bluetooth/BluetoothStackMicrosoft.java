@@ -41,6 +41,10 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		
 	}
 	
+	public void destroy() {
+		
+	}
+	
 	public String getStackID() {
 		return BlueCoveImpl.STACK_WINSOCK;
 	}

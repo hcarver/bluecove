@@ -97,6 +97,15 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_initialize
 	}
 }
 
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_uninitialize
+(JNIEnv *, jobject) {
+	if (stack != NULL) {
+		WIDCOMMStack* stackTmp = stack;
+		stack = NULL;
+		delete(stackTmp);
+	}
+}
+
 // TODO
 void BroadcomDebugError(CBtIf* stack) {
 }
@@ -163,6 +172,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceM
 // --- Device Inquiry
 
 void WIDCOMMStack::OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected) {
+	if (stack == NULL) {
+		return;
+	}
 	int nextDevice = deviceRespondedIdx + 1;
 	if (nextDevice >= deviceRespondedMax) {
 		nextDevice = 0;
@@ -175,6 +187,9 @@ void WIDCOMMStack::OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bd
 }
 
 void WIDCOMMStack::OnInquiryComplete(BOOL success, short num_responses) {
+	if (stack == NULL) {
+		return;
+	}
 	deviceInquirySuccess = success;
 	deviceInquiryComplete = TRUE;
 }
@@ -220,10 +235,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 
 	int reportedIdx = -1;
 
-	while ((!stack->deviceInquiryComplete) || (reportedIdx != stack->deviceRespondedIdx)) {
+	while ((stack != NULL) && ((!stack->deviceInquiryComplete) || (reportedIdx != stack->deviceRespondedIdx))) {
 		// No Wait on Windows CE, TODO
 		Sleep(100);
-		if (reportedIdx != stack->deviceRespondedIdx) {
+		if ((stack != NULL) && (reportedIdx != stack->deviceRespondedIdx)) {
 			reportedIdx ++;
 			if (reportedIdx >= deviceRespondedMax) {
 				reportedIdx = 0;
@@ -233,7 +248,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 		}
 	}
 
-	if (stack->deviceInquiryTerminated) {
+	if (stack == NULL) {
+		return INQUIRY_TERMINATED;
+	} else if (stack->deviceInquiryTerminated) {
 		return INQUIRY_TERMINATED;
 	} else if (stack->deviceInquirySuccess) {
 		return INQUIRY_COMPLETED;

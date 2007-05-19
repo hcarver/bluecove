@@ -35,18 +35,34 @@ import javax.bluetooth.UUID;
 
 public class BluetoothStackWIDCOMM implements BluetoothStack {
 
+	private boolean initialized = false;
+	
 	private Vector deviceDiscoveryListeners = new Vector/*<DiscoveryListener>*/();
 	
 	BluetoothStackWIDCOMM() {
 		initialize();
+		initialized = true;
 	}
-	
-	public native void initialize();
-	
+
 	public String getStackID() {
 		return BlueCoveImpl.STACK_WIDCOMM;
 	}
+	public native void initialize();
 	
+	private native void uninitialize();
+	
+	public void destroy() {
+		if (initialized) {
+			uninitialize();
+			initialized = false;
+			DebugLog.debug("WIDCOMM destroyed");
+		}
+	}
+	
+	protected void finalize() {
+		destroy();
+	}
+
 	public native String getLocalDeviceBluetoothAddress();
 
 	public native String getLocalDeviceName();

@@ -71,6 +71,20 @@ public class BlueCoveImpl {
 			bluetoothStack = new BluetoothStackMicrosoft();
 			stack = STACK_WINSOCK;
 		}
+		
+		Runnable r = new Runnable() {
+			public void run() {
+				bluetoothStack.destroy();
+				System.out.println("BlueCove stack shutdown completed");
+			}
+		};
+		
+		try {
+			// since Java 1.3
+			Runtime.getRuntime().addShutdownHook(new Thread(r));
+		} catch (Throwable java12) {
+		}
+		
 		System.out.println("BlueCove version " + version + " on " + stack);
 	}
 

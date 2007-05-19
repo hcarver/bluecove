@@ -23,6 +23,7 @@
 
 #ifdef _BLUESOLEIL
 
+// Should be installed to %ProgramFiles%\IVT Corporation\BlueSoleil\api
 #pragma comment(lib, "btfunc.lib")
 #include "bt_ui.h"
 #include "com_intel_bluetooth_BluetoothStackBlueSoleil.h"
@@ -62,11 +63,19 @@ jint BsDeviceClassToInt(BYTE* devClass) {
 static BOOL BlueSoleilStarted = FALSE;
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_initialize
-(JNIEnv * env, jobject) {
+(JNIEnv *env, jobject) {
 	if (BT_InitializeLibrary()) {
 		BlueSoleilStarted = TRUE;
 	} else {
 		debug("Error in BlueSoleil InitializeLibrary");
+	}
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_uninitialize
+(JNIEnv *env, jobject) {
+	if (BlueSoleilStarted) {
+		BlueSoleilStarted = FALSE;
+		BT_UninitializeLibrary();
 	}
 }
 
@@ -196,6 +205,17 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 	return INQUIRY_COMPLETED;
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_cancelInquirympl
+(JNIEnv *env, jobject){
+	DWORD dwResult = BT_CancelInquiry();
+	if (dwResult != BTSTATUS_SUCCESS) {
+		debugs("BT_CancelInquiry return  [%i]", dwResult);
+		return FALSE;
+	} else {
+		return TRUE;
+	}
+}
+
 // --- Service search
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSearchServicesImpl
@@ -205,9 +225,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
 	devInfo.dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
 	LongToBsAddr(address, devInfo.address);
 
-	SPPEX_SERVICE_INFO	sppex_svc_info[5];
+	SPPEX_SERVICE_INFO sppex_svc_info[5];
 	memset(&sppex_svc_info, 0, 5 * sizeof(SPPEX_SERVICE_INFO));
-	DWORD dwLength = 5*sizeof(SPPEX_SERVICE_INFO);
+	DWORD dwLength = 5 * sizeof(SPPEX_SERVICE_INFO);
 	sppex_svc_info[0].dwSize = sizeof(SPPEX_SERVICE_INFO);
 
 	GUID service_guid;
@@ -247,6 +267,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
 	}
 	for(DWORD i = 0; i < dwLength / sizeof(SPPEX_SERVICE_INFO); i++) {
 		SPPEX_SERVICE_INFO* sr = &(sppex_svc_info[i]);
+		if (sr->dwSDAPRecordHanlde == 0) {
+			continue;
+		}
 
 		//printf("SDAP Record Handle:	%d\n", sppex_svc_info[i].dwSDAPRecordHanlde);
 		//printf("Service Name:	%s\n", sppex_svc_info[i].szServiceName);

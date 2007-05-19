@@ -8,7 +8,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>${basedir}/build</directory>
+            <directory>${basedir}/target/classes</directory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <outputDirectory></outputDirectory>
             <excludes>

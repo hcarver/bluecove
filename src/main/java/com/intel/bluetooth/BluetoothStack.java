@@ -30,6 +30,8 @@ import javax.bluetooth.UUID;
 
 public interface BluetoothStack {
 
+	public void destroy();
+	
 	public String getStackID();
 	
 	/**
