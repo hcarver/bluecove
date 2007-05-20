@@ -59,18 +59,10 @@ public class BlueCoveImpl {
 		
 		String stack = System.getProperty("bluecove.stack");
 		if (stack == null) {
-			//stack = "WIDCOMM";
+			//TODO auto detect
 		}
-		if (STACK_WIDCOMM.equalsIgnoreCase(stack)) {
-			bluetoothStack = new BluetoothStackWIDCOMM();
-			stack = STACK_WIDCOMM;
-		} else if (STACK_BLUESOLEIL.equalsIgnoreCase(stack)) {
-			bluetoothStack = new BluetoothStackBlueSoleil();
-			stack = STACK_BLUESOLEIL;
-		} else {
-			bluetoothStack = new BluetoothStackMicrosoft();
-			stack = STACK_WINSOCK;
-		}
+		
+		stack = setBluetoothStack(stack);
 		
 		Runnable r = new Runnable() {
 			public void run() {
@@ -92,6 +84,24 @@ public class BlueCoveImpl {
 		return SingletonHolder.instance;
     }
 
+    public String setBluetoothStack(String stack) {
+    	if (bluetoothStack != null) {
+    		bluetoothStack.destroy();
+    		bluetoothStack = null;
+    	}
+    	if (STACK_WIDCOMM.equalsIgnoreCase(stack)) {
+			bluetoothStack = new BluetoothStackWIDCOMM();
+			stack = STACK_WIDCOMM;
+		} else if (STACK_BLUESOLEIL.equalsIgnoreCase(stack)) {
+			bluetoothStack = new BluetoothStackBlueSoleil();
+			stack = STACK_BLUESOLEIL;
+		} else {
+			bluetoothStack = new BluetoothStackMicrosoft();
+			stack = STACK_WINSOCK;
+		}
+    	return stack;
+    }
+    
     public BluetoothPeer getBluetoothPeer() {
 		return bluetoothPeer;
 	}
