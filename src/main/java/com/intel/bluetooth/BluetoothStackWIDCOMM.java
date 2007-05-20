@@ -22,6 +22,7 @@ package com.intel.bluetooth;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
@@ -38,6 +39,8 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	private boolean initialized = false;
 	
 	private Vector deviceDiscoveryListeners = new Vector/*<DiscoveryListener>*/();
+	
+	private Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
 	
 	BluetoothStackWIDCOMM() {
 		initialize();
@@ -139,6 +142,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		deviceDiscoveryListeners.addElement(listener);
+		deviceDiscoveryListenerReportedDevices.put(listener, new Vector());
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
 	}
 	
@@ -147,14 +151,24 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 			return runDeviceInquiryImpl(startedNotify, accessCode, listener);
 		} finally {
 			deviceDiscoveryListeners.removeElement(listener);
+			deviceDiscoveryListenerReportedDevices.remove(listener);
 		}
 	}
 
 	public native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
-		DebugLog.debug("deviceDiscoveredCallback", deviceName);
-		listener.deviceDiscovered(new RemoteDeviceImpl(deviceAddr, deviceName), new DeviceClass(deviceClass));			
+		DebugLog.debug("deviceDiscoveredCallback deviceName", deviceName);
+		RemoteDeviceImpl remoteDevice = new RemoteDeviceImpl(deviceAddr, deviceName);
+		Vector reported = (Vector)deviceDiscoveryListenerReportedDevices.get(listener);
+		if ((reported == null) || (reported.contains(remoteDevice))) {
+			return;
+		}
+		reported.addElement(remoteDevice);
+		DeviceClass cod = new DeviceClass(deviceClass);
+		DebugLog.debug("deviceDiscoveredCallback addtress", remoteDevice.getBluetoothAddress());
+		DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
+		listener.deviceDiscovered(remoteDevice, cod);			
 	}
 
 	private native boolean deviceInquiryCancelImpl();
@@ -199,7 +213,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 					DebugLog.debug("populateRecord error", e);
 				}
 			}
-			listener.servicesDiscovered(1, records);
+			listener.servicesDiscovered(startedNotify.getTransID(), records);
 			return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
 		} else {
 			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;

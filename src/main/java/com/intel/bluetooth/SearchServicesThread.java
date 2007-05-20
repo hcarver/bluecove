@@ -27,7 +27,11 @@ import javax.bluetooth.UUID;
 
 public class SearchServicesThread extends Thread {
 	
+	private static int transIDGenerator = 0;
+	
 	private BluetoothStack stack;
+	
+	private int transID;
 	
 	private int[] attrSet; 
 	
@@ -46,6 +50,7 @@ public class SearchServicesThread extends Thread {
 	private SearchServicesThread(BluetoothStack stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
 		super("SearchServicesThread");
 		this.stack = stack;
+		this.transID = (++transIDGenerator);
 		this.attrSet = attrSet;
 		this.listener = listener;
 		this.uuidSet = uuidSet;
@@ -71,7 +76,7 @@ public class SearchServicesThread extends Thread {
 			}
 		}
 		if (t.started) {
-			return 1;
+			return t.getTransID();
 		} else {
 			return 0;
 		}
@@ -92,7 +97,7 @@ public class SearchServicesThread extends Thread {
 			DebugLog.debug("runSearchServices ends");
 		}
 		if (started) {
-			listener.serviceSearchCompleted(1, respCode);
+			listener.serviceSearchCompleted(getTransID(), respCode);
 		}
 	}
 	
@@ -102,6 +107,10 @@ public class SearchServicesThread extends Thread {
 		synchronized (this) {
 			notifyAll();
 		}
+	}
+
+	public int getTransID() {
+		return this.transID;
 	}
 
 }

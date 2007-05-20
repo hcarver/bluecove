@@ -260,7 +260,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
 		return SERVICE_SEARCH_ERROR;
 	}
 
-	jmethodID servicesFoundCallbackMethod = env->GetMethodID(peerClass, "servicesFoundCallback", "(Ljavax/bluetooth/DiscoveryListener;Ljavax/bluetooth/RemoteDevice;Ljava/lang/String;[BII)V");
+	jmethodID servicesFoundCallbackMethod = env->GetMethodID(peerClass, "servicesFoundCallback", "(Lcom/intel/bluetooth/SearchServicesThread;Ljavax/bluetooth/DiscoveryListener;Ljavax/bluetooth/RemoteDevice;Ljava/lang/String;[BII)V");
 	if (servicesFoundCallbackMethod == NULL) {
 		debug("fatalerror");
 		return SERVICE_SEARCH_ERROR;
@@ -287,7 +287,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
 
 		//DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel
 		env->CallVoidMethod(peer, servicesFoundCallbackMethod,
-			listener, device, env->NewStringUTF((char*)(sr->szServiceName)), uuidValueFound, sr->ucServiceChannel, sr->dwSDAPRecordHanlde);
+			startedNotify, listener, device, env->NewStringUTF((char*)(sr->szServiceName)), uuidValueFound, sr->ucServiceChannel, sr->dwSDAPRecordHanlde);
 
 		if (ExceptionCheckCompatible(env)) {
 		   return SERVICE_SEARCH_ERROR;

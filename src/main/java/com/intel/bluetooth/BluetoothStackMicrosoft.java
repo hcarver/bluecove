@@ -40,15 +40,15 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	BluetoothStackMicrosoft() {
 		
 	}
-	
-	public void destroy() {
-		
-	}
-	
+
 	public String getStackID() {
 		return BlueCoveImpl.STACK_WINSOCK;
 	}
 	
+	public void destroy() {
+		
+	}
+
 	public String getLocalDeviceBluetoothAddress() {
 		BluetoothPeer bluetoothPeer = BlueCoveImpl.instance().getBluetoothPeer();
 		String address;
@@ -182,7 +182,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 				} catch (Exception e) {
 				}
 			}
-			listener.servicesDiscovered(0, records);
+			listener.servicesDiscovered(startedNotify.getTransID(), records);
 			return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
 		} else {
 			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;

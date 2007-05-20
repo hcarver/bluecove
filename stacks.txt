@@ -5,9 +5,11 @@
    If automatic Bluetooth Stack detection is not enough Java System property "bluecove.stack" can be used to force desired Stack Initialization. Values "widcomm", "bluesoleil" or "winsock".
    By defaut winsock is selected if avalable.
 
-   WIDCOMM and BlueSoleil are added in BlueCove version 2.0.0. Your help is required to test and fix whatever is missing or not working.
+   WIDCOMM and BlueSoleil are added in BlueCove version 2.0.0. Your help is required to test and fix functionality.
 
-== Microsoft (winsock) ==
+   [http://code.google.com/p/bluecove/wiki/WindowsMobile Windows Mobile]
+
+== Winsock (Microsoft) ==
 
 === Requirements ===
 
@@ -18,7 +20,7 @@
 
     * Microsoft Bluetooth stack only supporting RFCOMM connections
 
-== WIDCOMM (Broadcom)) ==
+== WIDCOMM (Broadcom) ==
 
 === JSR-82 Limitations ===
 

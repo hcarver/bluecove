@@ -209,7 +209,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		UCHAR ucServiceChannel;
 	}
 	 */
-	void servicesFoundCallback(DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel, int recordHanlde) {
+	void servicesFoundCallback(SearchServicesThread startedNotify, DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel, int recordHanlde) {
 		ServiceRecordImpl record = new ServiceRecordImpl(device, 0);
 
 		UUID uuid = new UUID(Utils.UUIDByteArrayToString(uuidValue), false);
@@ -227,7 +227,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		
 		ServiceRecord[] records = new ServiceRecordImpl[1];
 		records[0] = record;
-		listener.servicesDiscovered(1, records);
+		listener.servicesDiscovered(startedNotify.getTransID(), records);
 	}
 	
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
