@@ -4,6 +4,10 @@ import java.io.IOException;
 
 import javax.microedition.io.Connection;
 
+/*
+ * This class is not distributed with BlueCove binary distrubution: bluecove.jar
+ */
+
 public interface ConnectionBaseInterface {
 	public Connection openPrim(String name, int mode, boolean timeouts)
 			throws IOException;

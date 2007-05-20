@@ -26,6 +26,11 @@ import javax.microedition.io.Connection;
 import com.intel.bluetooth.MicroeditionConnector;
 import com.sun.cdc.io.ConnectionBaseInterface;
 
+/**
+ * This class is Proxy for btspp Connection implementations used in WTK and MicroEmulator
+ * 
+ * @author vlads
+ */
 public class Protocol implements ConnectionBaseInterface {
 
 	public Connection openPrim(String name, int mode, boolean timeouts) throws IOException {

@@ -3,6 +3,8 @@ package com.ibm.oti.connection;
 /*
  * Licensed Materials - Property of IBM,
  * (c) Copyright IBM Corp. 2000, 2002  All Rights Reserved
+ * 
+ * This class is not distributed with BlueCove binary distrubution: bluecove.jar
  */
 
 import java.io.IOException;
