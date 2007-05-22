@@ -122,3 +122,7 @@ BOOL ExceptionCheckCompatible(JNIEnv *env);
 
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid);
 void convertGUIDToUUIDBytes(GUID *uuid, jbyte *bytes);
+
+BOOL isMicrosoftBluetoothStackPresent();
+BOOL isWIDCOMMBluetoothStackPresent();
+BOOL isBlueSoleilBluetoothStackPresent();

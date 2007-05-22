@@ -59,7 +59,19 @@ public class BlueCoveImpl {
 		
 		String stack = System.getProperty("bluecove.stack");
 		if (stack == null) {
-			//TODO auto detect
+			//auto detect
+			int aval = BluetoothPeer.detectBluetoothStack();
+			DebugLog.debug("BluetoothStack detected", aval);
+			if ((aval & 1) != 0) {
+				stack = STACK_WINSOCK;
+			} else if ((aval & 2) != 0) {
+				stack = STACK_WIDCOMM;
+			} else if ((aval & 4) != 0) {
+				stack = STACK_BLUESOLEIL;
+			} else {
+				DebugLog.fatal("BluetoothStack not detected");
+				throw new RuntimeException("BluetoothStack not detected");
+			}
 		}
 		
 		stack = setBluetoothStack(stack);

@@ -93,6 +93,21 @@ BOOL ExceptionCheckCompatible(JNIEnv *env) {
 	}
 }
 
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_detectBluetoothStack
+(JNIEnv *env, jclass) {
+	jint rc = 0;
+	if (isMicrosoftBluetoothStackPresent()) {
+		rc += 1;
+	}
+	if (isWIDCOMMBluetoothStackPresent()) {
+		rc += 2;
+	}
+	if (isBlueSoleilBluetoothStackPresent()) {
+		rc += 4;
+	}
+	return rc;
+}
+
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid) {
 	uuid->Data1 = bytes[0]<<24&0xff000000|bytes[1]<<16&0x00ff0000|bytes[2]<<8&0x0000ff00|bytes[3]&0x000000ff;
 	uuid->Data2 = bytes[4]<<8&0xff00|bytes[5]&0x00ff;

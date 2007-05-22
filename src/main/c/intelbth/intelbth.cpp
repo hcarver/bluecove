@@ -139,7 +139,28 @@ void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg)
 	throwIOExceptionWSAErrorMessage(env, msg, WSAGetLastError());
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStatus(JNIEnv *env, jobject peer) {
+BOOL isMicrosoftBluetoothStackPresent() {
+	SOCKET soc = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
+	if (soc == INVALID_SOCKET) {
+		return FALSE;
+	}
+	SOCKADDR_BTH addr;
+	memset(&addr, 0, sizeof(addr));
+	addr.addressFamily = AF_BTH;
+#ifdef _WIN32_WCE
+	addr.port = 0;
+#else
+	addr.port = BT_PORT_ANY;
+#endif
+	if (bind(soc, (SOCKADDR *)&addr, sizeof(addr))) {
+		closesocket(soc);
+		return FALSE;
+	}
+	closesocket(soc);
+	return TRUE;
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStatus(JNIEnv *env, jclass peerClass) {
 	if (started) {
 #ifdef _WIN32_WCE
 		// Use the BthGetMode function to retrieve the current mode of operation of the Bluetooth radio.

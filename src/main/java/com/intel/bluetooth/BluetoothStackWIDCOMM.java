@@ -43,14 +43,16 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	private Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
 	
 	BluetoothStackWIDCOMM() {
-		initialize();
+		if (!initialize()) {
+			throw new RuntimeException("WIDCOMM BluetoothStack not found");
+		}
 		initialized = true;
 	}
 
 	public String getStackID() {
 		return BlueCoveImpl.STACK_WIDCOMM;
 	}
-	public native void initialize();
+	public native boolean initialize();
 	
 	private native void uninitialize();
 	

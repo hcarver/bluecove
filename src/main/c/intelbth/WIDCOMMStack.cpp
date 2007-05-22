@@ -21,6 +21,12 @@
 
 #include "common.h"
 
+#ifndef _BTWLIB
+BOOL isWIDCOMMBluetoothStackPresent() {
+	return FALSE;
+}
+#endif
+
 #ifdef _BTWLIB
 
 #pragma comment(lib, "BtWdSdkLib.lib")
@@ -90,15 +96,34 @@ public:
 
 static WIDCOMMStack* stack;
 
+BOOL isWIDCOMMBluetoothStackPresent() {
+	HMODULE h = LoadLibrary(_T("btwapi.dll"));
+	if (h == NULL) {
+		return FALSE;
+	}
+	return TRUE;
+}
+
 WIDCOMMStack::WIDCOMMStack() {
 	sdpDiscoveryRecordsUsed = 0;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_initialize
+
+WIDCOMMStack* createWIDCOMMStack() {
+	return new WIDCOMMStack();
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_initialize
 (JNIEnv *, jobject) {
+	jboolean rc = TRUE;
 	if (stack == NULL) {
-		stack = new WIDCOMMStack();
+		__try  {
+			stack = createWIDCOMMStack();
+		} __except(GetExceptionCode() == 0xC06D007E) {
+			rc = FALSE;
+		}
 	}
+	return rc;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_uninitialize
@@ -314,9 +339,12 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	}
 	env->CallVoidMethod(startedNotify, notifyMethod);
 
-	while (!stack->searchServicesComplete) {
+	while ((stack != NULL) && (!stack->searchServicesComplete)) {
 		// No Wait on Windows CE, TODO
 		Sleep(100);
+	}
+	if (stack == NULL) {
+		return NULL;
 	}
 
 	UINT16 obtainedServicesRecords;

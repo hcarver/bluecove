@@ -35,18 +35,38 @@ import javax.bluetooth.UUID;
 
 public class BluetoothStackMicrosoft implements BluetoothStack {
 
+	boolean peerInitialized = false;
+	
 	long bluetoothAddress = 0;
 	
 	BluetoothStackMicrosoft() {
-		
+		initialize();
 	}
 
 	public String getStackID() {
 		return BlueCoveImpl.STACK_WINSOCK;
 	}
 	
+	private void initialize() {
+		try {
+			int status = BluetoothPeer.initializationStatus();
+			DebugLog.debug("initializationStatus", status);
+			if (status == 1) {
+				peerInitialized = true;
+			}
+		} catch (IOException e) {
+			DebugLog.fatal("initialization", e);
+		}
+	}
+	
 	public void destroy() {
 		
+	}
+	
+	public void initialized() throws BluetoothStateException {
+		if (!peerInitialized) {
+			throw new BluetoothStateException("Bluetooth system is unavailable");
+		}
 	}
 
 	public String getLocalDeviceBluetoothAddress() {
@@ -137,7 +157,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	//	 --- Device Inquiry
 	
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
-		BlueCoveImpl.instance().getBluetoothPeer().initialized();
+		initialized();
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
 	}
 

@@ -21,6 +21,12 @@
 
 #include "common.h"
 
+#ifndef _BLUESOLEIL
+BOOL isBlueSoleilBluetoothStackPresent() {
+	return FALSE;
+}
+#endif
+
 #ifdef _BLUESOLEIL
 
 // Should be installed to %ProgramFiles%\IVT Corporation\BlueSoleil\api
@@ -61,6 +67,14 @@ jint BsDeviceClassToInt(BYTE* devClass) {
 }
 
 static BOOL BlueSoleilStarted = FALSE;
+
+BOOL isBlueSoleilBluetoothStackPresent() {
+	HMODULE h = LoadLibrary(_T("btfunc.dll"));
+	if (h == NULL) {
+		return FALSE;
+	}
+	return TRUE;
+}
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_initialize
 (JNIEnv *env, jobject) {
@@ -161,13 +175,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 
 	jclass peerClass = env->GetObjectClass(peer);
 	if (peerClass == NULL) {
-		debug("fatalerror");
+		throwRuntimeException(env, "Fail to get Object Class");
 		return INQUIRY_ERROR;
 	}
 
 	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;)V");
 	if (deviceDiscoveredCallbackMethod == NULL) {
-		debug("fatalerror");
+		throwRuntimeException(env, "Fail to get MethodID deviceInquiryStartedCallback");
 		return INQUIRY_ERROR;
 	}
 
@@ -256,13 +270,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
 
 	jclass peerClass = env->GetObjectClass(peer);
 	if (peerClass == NULL) {
-		debug("fatalerror");
+		throwRuntimeException(env, "Fail to get Object Class");
 		return SERVICE_SEARCH_ERROR;
 	}
 
 	jmethodID servicesFoundCallbackMethod = env->GetMethodID(peerClass, "servicesFoundCallback", "(Lcom/intel/bluetooth/SearchServicesThread;Ljavax/bluetooth/DiscoveryListener;Ljavax/bluetooth/RemoteDevice;Ljava/lang/String;[BII)V");
 	if (servicesFoundCallbackMethod == NULL) {
-		debug("fatalerror");
+		throwRuntimeException(env, "Fail to get MethodID servicesFoundCallback");
 		return SERVICE_SEARCH_ERROR;
 	}
 	for(DWORD i = 0; i < dwLength / sizeof(SPPEX_SERVICE_INFO); i++) {

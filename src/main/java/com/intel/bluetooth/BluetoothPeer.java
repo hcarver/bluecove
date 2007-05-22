@@ -46,28 +46,19 @@ public class BluetoothPeer {
 	 */
 	BluetoothPeer() {
 		try {
-			int status = initializationStatus();
-			DebugLog.debug("initializationStatus", status);
 			if (DebugLog.isDebugEnabled()) {
 				enableNativeDebug(true);
 			}
-			if (status == 1) {
-				peerInitialized = true;
-			}
-		} catch (IOException e) {
-			DebugLog.fatal("initialization", e);
-		}
-	}
-
-	public void initialized() throws BluetoothStateException {
-		if (!peerInitialized) {
-			throw new BluetoothStateException("Bluetooth system is unavailable");
+		} catch (Throwable e) {
+			DebugLog.fatal("enableNativeDebug", e);
 		}
 	}
 	
-	public native int initializationStatus() throws IOException;
+	static native int detectBluetoothStack();
 	
 	public native void enableNativeDebug(boolean on);
+	
+	static native int initializationStatus() throws IOException;
 	
 	public static void nativeDebugCallback(String fileName, int lineN, String message) {
 		if (fileName.startsWith(".\\")) {
