@@ -81,6 +81,10 @@ void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...) {
 	va_end(ap);
 }
 
+void throwRuntimeException(JNIEnv *env, const char *msg) {
+	throwException(env, "java/lang/RuntimeException", msg);
+}
+
 BOOL ExceptionCheckCompatible(JNIEnv *env) {
 	if (env->GetVersion() > JNI_VERSION_1_1) {
 		return env->ExceptionCheck();

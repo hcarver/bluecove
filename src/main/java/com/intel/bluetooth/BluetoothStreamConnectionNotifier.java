@@ -23,7 +23,6 @@ package com.intel.bluetooth;
 import java.io.IOException;
 import java.util.Hashtable;
 
-import javax.bluetooth.DataElement;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
@@ -32,6 +31,9 @@ import javax.microedition.io.StreamConnectionNotifier;
 
 public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, BluetoothStreamServiceRecordAccess {
 	
+	/**
+	 * Used to find BluetoothStreamConnectionNotifier by ServiceRecord returned by LocalDevice.getRecord()
+	 */
 	private static Hashtable serviceRecordsMap = new Hashtable/*<ServiceRecord, BluetoothStreamConnectionNotifier>*/();
 	
 	private int socket;
@@ -120,7 +122,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		if (((ServiceRecordImpl) serviceRecord).attributeUpdated) {
 			updateServiceRecord();
 		}
-		return new BluetoothConnection(BlueCoveImpl.instance().getBluetoothPeer().accept(socket));
+		return new BluetoothRFCommServerConnection(BlueCoveImpl.instance().getBluetoothPeer().accept(socket));
 	}
 
 	public ServiceRecord getServiceRecord() {
@@ -139,6 +141,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 			throw new ServiceRegistrationException(e.getMessage());
 		}
 	}
+	
 	public static void updateServiceRecord(ServiceRecord srvRecord) throws ServiceRegistrationException {
 		BluetoothStreamConnectionNotifier owner = (BluetoothStreamConnectionNotifier)serviceRecordsMap.get(srvRecord);
 		if (owner == null) {

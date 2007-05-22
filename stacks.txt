@@ -26,7 +26,6 @@
 
     * ServiceRecord attributes of DataElement types URL are discoved as STRING
     * ServiceRecord attributes of DataElement types INT_16 are truncated in discovery (May be you can help fixing this)
-    * ServiceRecord attributes of DataElement type BOOL are not supported
     * DiscoveryAgent.searchServices(.. UUID[] uuidSet, ..) only ONE UUID is used during search, the last one in array.
     * Client Connector.open() use GUID and Name of the discovered service. Only one would be selected
 

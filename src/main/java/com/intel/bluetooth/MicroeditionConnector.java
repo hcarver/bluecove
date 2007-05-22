@@ -143,7 +143,7 @@ public class MicroeditionConnector {
 				return new BluetoothStreamConnectionNotifier(new UUID(port, false), paramBoolean(values, AUTHENTICATE),
 						paramBoolean(values, ENCRYPT), (String) values.get(NAME)); 
 			} else {
-				return new BluetoothConnection(Long.parseLong(host, 16), Integer.parseInt(port), 
+				return new BluetoothRFCommClientConnection(Long.parseLong(host, 16), Integer.parseInt(port), 
 						paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
 			}	
 		} catch (NumberFormatException e) {

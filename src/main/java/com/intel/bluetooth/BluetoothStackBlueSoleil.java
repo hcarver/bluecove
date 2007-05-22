@@ -238,7 +238,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	
 	private native long[] connectionRfOpenImpl(long address, byte[] uuidValue) throws IOException;
 	
-	public long connectionRfOpen(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
+	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
 		Long addressLong = new Long(address);
 		RemoteDeviceImpl listedDevice = (RemoteDeviceImpl)devices.get(addressLong);
 		if (listedDevice == null) {
@@ -257,7 +257,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	
 	private native void connectionRfCloseImpl(long comHandle, long connectionHandle) throws IOException;
 	
-	public void connectionRfClose(long handle) throws IOException {
+	public void connectionRfCloseClientConnection(long handle) throws IOException {
 		long[] handles =(long[])connectionHandles.remove(new Long(handle));
 		if (handles == null) {
 			throw new IOException("handle not found");
@@ -265,6 +265,10 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		connectionRfCloseImpl(handles[0], handles[1]);
 	}
 
+	public void connectionRfCloseServerConnection(long handle) throws IOException {
+		// TODO
+	}
+	
 	public native long getConnectionRfRemoteAddress(long handle) throws IOException;
 	
 	public native int connectionRfRead(long handle) throws IOException;

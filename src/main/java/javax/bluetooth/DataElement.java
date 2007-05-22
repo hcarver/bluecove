@@ -548,8 +548,7 @@ public class DataElement {
 		case DATSEQ: {
 			StringBuffer buf = new StringBuffer("DATSEQ {\n");
 
-			for (Enumeration e = ((Vector) value).elements(); e
-					.hasMoreElements();) {
+			for (Enumeration e = ((Vector) value).elements(); e.hasMoreElements();) {
 				buf.append(e.nextElement());
 				buf.append("\n");
 			}
@@ -561,8 +560,7 @@ public class DataElement {
 		case DATALT: {
 			StringBuffer buf = new StringBuffer("DATALT {\n");
 
-			for (Enumeration e = ((Vector) value).elements(); e
-					.hasMoreElements();) {
+			for (Enumeration e = ((Vector) value).elements(); e.hasMoreElements();) {
 				buf.append(e.nextElement());
 				buf.append("\n");
 			}

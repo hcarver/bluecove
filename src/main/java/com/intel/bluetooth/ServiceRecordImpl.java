@@ -215,46 +215,50 @@ public class ServiceRecordImpl implements ServiceRecord {
 	 */
 
 	public String getConnectionURL(int requiredSecurity, boolean mustBeMaster) {
+
+		int rfcommChannel = -1;
+
+		DataElement protocolDescriptor = getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
+		if ((protocolDescriptor == null) || (protocolDescriptor.getDataType() != DataElement.DATSEQ)) {
+			return null;
+		}
+
 		/*
-		 * get RFCOMM port
+		 * get RFCOMM Channel
+		 * ProtocolDescriptorList is DATSEQ of DATSEQ of UUID and optional parameters
 		 */
+		
+		for (Enumeration firstSeqEnum = (Enumeration) protocolDescriptor.getValue(); firstSeqEnum.hasMoreElements();) {
+			DataElement mainSeq = (DataElement) firstSeqEnum.nextElement();
 
-		int port = -1;
+			if (mainSeq.getDataType() == DataElement.DATSEQ) {
+				Enumeration mainSeqEnum = (Enumeration) mainSeq.getValue();
 
-		DataElement d1 = getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
+				if (mainSeqEnum.hasMoreElements()) {
+					DataElement protocolElement = (DataElement) mainSeqEnum.nextElement();
 
-		if (d1.getDataType() == DataElement.DATSEQ)
-			for (Enumeration e1 = (Enumeration) d1.getValue(); e1.hasMoreElements();) {
-				DataElement d2 = (DataElement) e1.nextElement();
+					if (mainSeqEnum.hasMoreElements() && protocolElement.getDataType() == DataElement.UUID
+							&& (BluetoothConsts.RFCOMM_PROTOCOL_UUID.equals(protocolElement.getValue()))) {
 
-				if (d2.getDataType() == DataElement.DATSEQ) {
-					Enumeration e2 = (Enumeration) d2.getValue();
+						DataElement protocolPSMElement = (DataElement) mainSeqEnum.nextElement();
 
-					if (e2.hasMoreElements()) {
-						DataElement d3 = (DataElement) e2.nextElement();
-
-						if (e2.hasMoreElements()
-								&& d3.getDataType() == DataElement.UUID
-								&& d3.getValue().equals(BluetoothConsts.RFCOMM_PROTOCOL_UUID)) {
-							DataElement d4 = (DataElement) e2.nextElement();
-
-							switch (d4.getDataType()) {
-							case DataElement.U_INT_1:
-							case DataElement.U_INT_2:
-							case DataElement.U_INT_4:
-							case DataElement.INT_1:
-							case DataElement.INT_2:
-							case DataElement.INT_4:
-							case DataElement.INT_8:
-								port = (int) d4.getLong();
-								break;
-							}
+						switch (protocolPSMElement.getDataType()) {
+						case DataElement.U_INT_1:
+						case DataElement.U_INT_2:
+						case DataElement.U_INT_4:
+						case DataElement.INT_1:
+						case DataElement.INT_2:
+						case DataElement.INT_4:
+						case DataElement.INT_8:
+							rfcommChannel = (int) protocolPSMElement.getLong();
+							break;
 						}
 					}
 				}
 			}
-
-		if (port == -1) {
+		}
+		
+		if (rfcommChannel == -1) {
 			return null;
 		}
 
@@ -275,7 +279,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 		}
 
 		buf.append(":");
-		buf.append(port);
+		buf.append(rfcommChannel);
 
 		switch (requiredSecurity) {
 		case NOAUTHENTICATE_NOENCRYPT:
@@ -399,7 +403,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 		attributeUpdated = true;
 		if (attrValue == null) {
-			return attributes.remove(new Integer(attrID)) != null;
+			return (attributes.remove(new Integer(attrID)) != null);
 		} else {
 			attributes.put(new Integer(attrID), attrValue);
 			return true;

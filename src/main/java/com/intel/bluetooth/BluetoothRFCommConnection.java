@@ -28,46 +28,32 @@ import java.io.OutputStream;
 
 import javax.microedition.io.StreamConnection;
 
-public class BluetoothConnection implements StreamConnection {
+public abstract class BluetoothRFCommConnection implements StreamConnection {
 	
-	long handle;
+	protected long handle;
 
-	private long address;
+	protected BluetoothInputStream in;
 
-	BluetoothInputStream in;
+	protected BluetoothOutputStream out;
 
-	BluetoothOutputStream out;
+	protected boolean closing;
 
-	private boolean closing;
-
-	private boolean closed;
-
-	public BluetoothConnection(long address, int channel, boolean authenticate,	boolean encrypt) throws IOException {
-		this.handle = BlueCoveImpl.instance().getBluetoothStack().connectionRfOpen(address, channel, authenticate, encrypt);
-		this.address = address;
+	protected boolean closed;
+	
+	protected BluetoothRFCommConnection(long handle) {
+		this.handle = handle;
 	}
 
-	/** Construct BluetoothConnection with pre-existing socket */
-	protected BluetoothConnection(int socket) {
-		this.handle = socket;
-		try {
-			this.address = BlueCoveImpl.instance().getBluetoothPeer().getsockaddress(socket);
-		} catch (IOException e) {
-		}
-	}
-
-	synchronized void closeSocket() throws IOException {
-		if (in == null && out == null && closing && !closed) {
-			BlueCoveImpl.instance().getBluetoothStack().connectionRfClose(handle);
+	abstract void closeConnectionHandle(long handle) throws IOException;
+	
+	synchronized void closeConnection() throws IOException {
+		if (handle != 0 && in == null && out == null && closing && !closed) {
+			closeConnectionHandle(handle);
 			handle = 0;
 			closed = true;
 		}
 	}
 	
-	public long getAddress() {
-		return address;
-	}
-
 	public long getRemoteAddress() throws IOException {
 		return BlueCoveImpl.instance().getBluetoothStack().getConnectionRfRemoteAddress(handle);
 	}
@@ -135,7 +121,7 @@ public class BluetoothConnection implements StreamConnection {
 
 	public void close() throws IOException {
 		closing = true;
-		closeSocket();
+		closeConnection();
 	}
 
 	protected void finalize() {

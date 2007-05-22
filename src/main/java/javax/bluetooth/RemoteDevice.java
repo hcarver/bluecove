@@ -25,7 +25,7 @@ import java.io.IOException;
 import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.BlueCoveImpl;
-import com.intel.bluetooth.BluetoothConnection;
+import com.intel.bluetooth.BluetoothRFCommConnection;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
 
@@ -145,10 +145,10 @@ public class RemoteDevice {
 
 	public static RemoteDevice getRemoteDevice(Connection conn) throws IOException {
 
-		if (!(conn instanceof BluetoothConnection)) {
+		if (!(conn instanceof BluetoothRFCommConnection)) {
 			throw new IllegalArgumentException("Not a Bluetooth connection");
 		}
-		return new RemoteDevice("", ((BluetoothConnection) conn).getRemoteAddress());
+		return new RemoteDevice("", ((BluetoothRFCommConnection) conn).getRemoteAddress());
 	}
 
 	/*

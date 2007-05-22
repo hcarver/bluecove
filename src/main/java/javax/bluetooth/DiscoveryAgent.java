@@ -171,6 +171,24 @@ public class DiscoveryAgent {
 	 */
 
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		if (uuidSet == null) {
+			throw new NullPointerException("uuidSet is null");
+		}
+		if (uuidSet.length == 0) {
+			// The same as on Motorola, Nokia and SE Phones
+			throw new IllegalArgumentException("uuidSet is empty");
+		}
+		if (device == null) {
+			throw new NullPointerException("RemoteDevice is null");
+		}
+		if (listener == null) {
+			throw new NullPointerException("DiscoveryListener is null");
+		}
+		for (int i = 0; attrSet != null && i < attrSet.length; i++) {
+			if (attrSet[i] < 0x0000 || attrSet[i] > 0xffff) {
+				throw new IllegalArgumentException("attrSet[" + i + "] not in range");
+			}
+		}
 		return BlueCoveImpl.instance().getBluetoothStack().searchServices(attrSet, uuidSet, device, listener);
 	}
 

@@ -192,15 +192,25 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, byte[] uuidValue, long address) throws BluetoothStateException;
 	
-	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
-		UUID uuid = null;
-		if ((uuidSet != null) && (uuidSet.length > 0)) {
-			uuid = uuidSet[uuidSet.length -1];
+	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
+			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		byte[] uuidValue = null;
+		// If Search for sepcific service, select its UUID
+		for (int u = 0; u < uuidSet.length; u++) {
+			if (uuidSet[u].equals(BluetoothConsts.L2CAP_PROTOCOL_UUID))  {
+				continue;
+			}
+			if (uuidSet[u].equals(BluetoothConsts.RFCOMM_PROTOCOL_UUID))  {
+				continue;
+			}
+			uuidValue = Utils.UUIDToByteArray(uuidSet[u]);
+			break;
 		}
-		long[] handles = runSearchServicesImpl(startedNotify, Utils.UUIDToByteArray(uuid), ((RemoteDeviceImpl)device).getAddress());
+		long[] handles = runSearchServicesImpl(startedNotify, uuidValue, ((RemoteDeviceImpl) device).getAddress());
 		if (handles == null) {
 			return DiscoveryListener.SERVICE_SEARCH_ERROR;
 		} else if (handles.length > 0) {
+
 			ServiceRecord[] records = new ServiceRecordImpl[handles.length];
 			for (int i = 0; i < handles.length; i++) {
 				records[i] = new ServiceRecordImpl(device, handles[i]);
@@ -219,7 +229,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
 		}
 	}
-
+	
 	private native byte[] getServiceAttributes(int attrID, long handle) throws IOException;
 	
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
@@ -243,9 +253,9 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	
 //	 --- Client RFCOMM connections
 	
-	public native long connectionRfOpen(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
+	public native long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
 	
-	public native void connectionRfClose(long handle) throws IOException;
+	public native void connectionRfCloseClientConnection(long handle) throws IOException;
 
 	public native long getConnectionRfRemoteAddress(long handle) throws IOException;
 	
@@ -259,4 +269,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public native void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
 
+	public void connectionRfCloseServerConnection(long handle) throws IOException {
+		// TODO
+	}
 }

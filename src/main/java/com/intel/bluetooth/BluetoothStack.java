@@ -97,9 +97,15 @@ public interface BluetoothStack {
 	
 //	 --- Client RFCOMM connections
 	
-	public long connectionRfOpen(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
+	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
 	
-	public void connectionRfClose(long handle) throws IOException;
+	//public long connectionRfOpenServer(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException;
+	
+	//public StreamConnection acceptAndOpenRfConnection(long handle) throws IOException;
+	
+	public void connectionRfCloseClientConnection(long handle) throws IOException;
+	
+	public void connectionRfCloseServerConnection(long handle) throws IOException;
 	
 	public long getConnectionRfRemoteAddress(long handle) throws IOException;
 

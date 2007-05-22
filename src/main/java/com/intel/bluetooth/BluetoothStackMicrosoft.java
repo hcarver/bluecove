@@ -251,15 +251,19 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 
 //	 --- Client RFCOMM connections
 	
-	public long connectionRfOpen(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
+	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
 		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
 		int socket = peer.socket(authenticate, encrypt);
 		peer.connect(socket, address, channel);
 		return socket;
 	}
 	
-	public void connectionRfClose(long handle) throws IOException {
+	public void connectionRfCloseClientConnection(long handle) throws IOException {
 		BlueCoveImpl.instance().getBluetoothPeer().close((int)handle);
+	}
+	
+	public void connectionRfCloseServerConnection(long handle) throws IOException {
+		connectionRfCloseClientConnection(handle);
 	}
 
 	public long getConnectionRfRemoteAddress(long handle) throws IOException {
