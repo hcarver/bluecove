@@ -87,6 +87,10 @@ public:
 	int sdpDiscoveryRecordsUsed;
 	CSdpDiscoveryRec sdpDiscoveryRecords[sdpDiscoveryRecordsUsedMax];
 
+	// One CRfCommIf shared by application, lock it when connection is made
+	CRITICAL_SECTION csCRfCommIf;
+	CRfCommIf rfCommIf;
+
 	WIDCOMMStack();
 	 virtual ~WIDCOMMStack();
 
@@ -114,6 +118,7 @@ WIDCOMMStack::WIDCOMMStack() {
             FALSE,    // auto-reset event
             FALSE,    // initial state is NOT signaled
             NULL);    // object not named
+	InitializeCriticalSection(&csCRfCommIf);
 }
 
 WIDCOMMStack* createWIDCOMMStack() {
@@ -139,6 +144,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_initia
 WIDCOMMStack::~WIDCOMMStack() {
 	SetEvent(hEvent);
 	CloseHandle(hEvent);
+	DeleteCriticalSection(&csCRfCommIf);
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_uninitialize
@@ -456,8 +462,6 @@ public:
 	long magic1;
 	long magic2;
 
-	CRfCommIf rfCommIf;
-
 	GUID service_guid;
 	BT_CHAR service_name[BT_MAX_SERVICE_NAME_LEN + 1];
 
@@ -566,34 +570,40 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 	// What GUID do we need in call to CRfCommIf.AssignScnValue()? WE generate one now.
 	client_service_guid.Data1 += 1;
 	memcpy(&(rf->service_guid), &client_service_guid, sizeof(GUID));
-	if (!rf->rfCommIf.AssignScnValue(&(rf->service_guid), (UINT8)channel)) {
+	EnterCriticalSection(&stack->csCRfCommIf);
+	if (!stack->rfCommIf.AssignScnValue(&(rf->service_guid), (UINT8)channel)) {
+		LeaveCriticalSection(&stack->csCRfCommIf);
 		delete rf;
 		throwIOException(env, "failed to assign SCN");
 		return 0;
 	}
 	//debug("SetSecurityLevel");
 	UINT8 sec_level = BTM_SEC_NONE;
-	if (!rf->rfCommIf.SetSecurityLevel(rf->service_name, sec_level, FALSE)) {
-        throwIOException(env, "Error setting security level");
+	if (!stack->rfCommIf.SetSecurityLevel(rf->service_name, sec_level, FALSE)) {
+        LeaveCriticalSection(&stack->csCRfCommIf);
+		throwIOException(env, "Error setting security level");
         delete rf;
 		return 0;
     }
 	//debug("OpenClient");
-	CRfCommPort::PORT_RETURN_CODE rc = rf->OpenClient(rf->rfCommIf.GetScn(), bda);
+	CRfCommPort::PORT_RETURN_CODE rc = rf->OpenClient((UINT8)channel, bda);
 	if (rc != CRfCommPort::SUCCESS) {
+		LeaveCriticalSection(&stack->csCRfCommIf);
 		throwIOException(env, "Failed to OpenClient");
 		delete rf;
 		return 0;
 	}
-	while (!rf->isConnected && !rf->isConnectionError) {
-		DWORD  rc = WaitForSingleObject(rf->hEvents[0], INFINITE);
+	LeaveCriticalSection(&stack->csCRfCommIf);
+
+	while ((stack != NULL) && !rf->isConnected && !rf->isConnectionError) {
+		DWORD  rc = WaitForSingleObject(rf->hEvents[0], 500);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForSingleObject");
 			delete(rf);
 			return 0;
 		}
 	}
-	if (rf->isConnectionError) {
+	if ((stack == NULL) || rf->isConnectionError) {
 		throwIOException(env, "Failed to connect");
 		delete rf;
 		return 0;
