@@ -35,6 +35,9 @@ BOOL isWIDCOMMBluetoothStackPresent() {
 #include "BtIfClasses.h"
 #include "com_intel_bluetooth_BluetoothStackWIDCOMM.h"
 
+static int openConnections = 0;
+static GUID test_client_service_guid = { 0x5fc2a42e, 0x144e, 0x4bb5, { 0xb4, 0x3f, 0x4e, 0x61, 0x71, 0x1d, 0x1c, 0x32 } };
+
 void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr) {
 	swprintf_s(addressString, 14, _T("%02x%02x%02x%02x%02x%02x"),
 			 bd_addr[0],
@@ -347,6 +350,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		convertUUIDBytesToGUID(bytes, &service_guid);
 		env->ReleaseByteArrayElements(uuidValue, bytes, 0);
 		p_service_guid = &service_guid;
+		memcpy(&test_client_service_guid, &service_guid, sizeof(GUID));
 	}
 
 	stack->searchServicesComplete = FALSE;
@@ -500,6 +504,7 @@ WIDCOMMStackRfCommPort::WIDCOMMStackRfCommPort() {
 
 	magic1 = MAGIC_1;
 	magic2 = MAGIC_2;
+	openConnections ++;
 }
 
 WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
@@ -508,6 +513,7 @@ WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
 	isConnected = FALSE;
 	CloseHandle(hEvents[0]);
 	CloseHandle(hEvents[1]);
+	openConnections --;
 }
 
 WIDCOMMStackRfCommPort* validRfCommHandle(JNIEnv *env, jlong handle) {
@@ -553,8 +559,6 @@ void WIDCOMMStackRfCommPort::OnDataReceived(void *p_data, UINT16 len) {
 	}
 }
 
-static GUID client_service_guid = { 0x5fc2a42e, 0x144e, 0x4bb5, { 0xb4, 0x3f, 0x4e, 0x61, 0x71, 0x1d, 0x1c, 0x32 } };
-
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfOpenClientConnection
 (JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt) {
 	BD_ADDR bda;
@@ -567,9 +571,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 		return 0;
 	}
 	//debug("AssignScnValue");
-	// What GUID do we need in call to CRfCommIf.AssignScnValue()? WE generate one now.
-	client_service_guid.Data1 += 1;
-	memcpy(&(rf->service_guid), &client_service_guid, sizeof(GUID));
+	// What GUID do we need in call to CRfCommIf.AssignScnValue() if we don't have any?
+	memcpy(&(rf->service_guid), &test_client_service_guid, sizeof(GUID));
 	EnterCriticalSection(&stack->csCRfCommIf);
 	if (!stack->rfCommIf.AssignScnValue(&(rf->service_guid), (UINT8)channel)) {
 		LeaveCriticalSection(&stack->csCRfCommIf);
@@ -579,7 +582,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 	}
 	//debug("SetSecurityLevel");
 	UINT8 sec_level = BTM_SEC_NONE;
-	if (!stack->rfCommIf.SetSecurityLevel(rf->service_name, sec_level, FALSE)) {
+	if (!stack->rfCommIf.SetSecurityLevel("bluecovesrv"/*rf->service_name*/, sec_level, FALSE)) {
         LeaveCriticalSection(&stack->csCRfCommIf);
 		throwIOException(env, "Error setting security level");
         delete rf;
@@ -624,6 +627,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		throwIOException(env, "Failed to Close");
 	}
 	delete rf;
+	debugs("openConnections %i", openConnections);
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getConnectionRfRemoteAddress

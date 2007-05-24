@@ -2,12 +2,15 @@
 
 * 2.0.0 to be Released 2007-07-xx
 
+    2007-05-18 Vlad Skarzhevskyy
+    * Initial BlueSoleil Stack RFCOMM Client implementation
+
     2007-05-15 Vlad Skarzhevskyy
     * InputStream.read() return -1 on gracefully closed Connection
     * Interface com.intel.bluetooth.BluetoothStack to support Stacks other than Microsoft winsock
     * Initial WIDCOMM Stack RFCOMM Client implementation
     * LocalDevice.getProperty() additional properties: bluecove, bluecove.stack, bluecove.radio.manufacturer, bluecove.radio.version
-    * System property "bluecove.stack" to force Stack, values widcomm or winsock
+    * System property "bluecove.stack" to force Stack, values widcomm, bluesoleil or winsock
 
 * 1.2.3 released 2007-05-11
 

@@ -27,18 +27,17 @@
 
 === JSR-82 Limitations ===
 
-    * ServiceRecord attributes of DataElement types URL are discoved as STRING
-    * ServiceRecord attributes of DataElement types INT_16 are truncated in discovery (May be you can help fixing this)
-    * DiscoveryAgent.searchServices(.. UUID[] uuidSet, ..) only ONE UUID is used during search, the last one in array.
-    * Client Connector.open() use GUID and Name of the discovered service. Only one would be selected
+    * `ServiceRecord` attributes of `DataElement` types URL are discoved as STRING
+    * `ServiceRecord` attributes of `DataElement` types INT_16 are truncated in discovery (May be you can help fixing this)
+    * `DiscoveryAgent.searchServices(.. UUID[] uuidSet, ..)` only ONE UUID is used during search, the last one in array.
 
 == BlueSoleil (IVT Corporation) ==
 
 === JSR-82 Limitations ===
 
-    * Service attributes are not supported, LocalDevice.getProperty("bluetooth.sd.attr.retrievable.max") == "0"
-    * DiscoveryAgent.searchServices() can only find 128bits-GUID service with specific UUID. You can't list all service on remote device.
-    * DiscoveryAgent.searchServices(.. UUID[] uuidSet, ..)  only ONE UUID is used during search, the last one in array.
-    * You need to run DiscoveryAgent.searchServices() with UUID of your service before you can make connection to it using Connector.open("btspp://");
-    * Client Connector.open() use GUID of the discovered service. Only one would be selected
+    * Service attributes are not supported, `LocalDevice.getProperty("bluetooth.sd.attr.retrievable.max") == "0"`
+    * `DiscoveryAgent.searchServices()` can only find 128bits-GUID service with specific UUID. You can't list all service on remote device.
+    * `DiscoveryAgent.searchServices(.. UUID[] uuidSet, ..)`  only ONE UUID is used during search, the last one in array.
+    * You need to run `DiscoveryAgent.searchServices()` with UUID of your service before you can make connection to it using `Connector.open("btspp://...");`
+    * Client `Connector.open()` use GUID of the discovered service. Only one would be selected
     * In our test lab we can only make 180 connections in sequence. After this Windows needs to be rebooted (May be you can help fixing this)
