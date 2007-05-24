@@ -22,6 +22,7 @@ package com.intel.bluetooth;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -161,11 +162,15 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
 		DebugLog.debug("deviceDiscoveredCallback deviceName", deviceName);
-		RemoteDeviceImpl remoteDevice = new RemoteDeviceImpl(deviceAddr, deviceName);
 		Vector reported = (Vector)deviceDiscoveryListenerReportedDevices.get(listener);
-		if ((reported == null) || (reported.contains(remoteDevice))) {
-			return;
+		for (Enumeration iter = reported.elements(); iter.hasMoreElements();) {
+			RemoteDeviceImpl device = (RemoteDeviceImpl) iter.nextElement();
+			if (device.getAddress() == deviceAddr) {
+				return;
+			}
+			
 		}
+		RemoteDeviceImpl remoteDevice = new RemoteDeviceImpl(deviceAddr, deviceName);
 		reported.addElement(remoteDevice);
 		DeviceClass cod = new DeviceClass(deviceClass);
 		DebugLog.debug("deviceDiscoveredCallback addtress", remoteDevice.getBluetoothAddress());
