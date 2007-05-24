@@ -29,11 +29,21 @@ BOOL isWIDCOMMBluetoothStackPresent() {
 
 #ifdef _BTWLIB
 
-#pragma comment(lib, "BtWdSdkLib.lib")
+// BTW-5_1_0_3101
+// #pragma comment(lib, "BtWdSdkLib.lib")
+// BTW-5_0_1_902-SDK
+#pragma comment(lib, "WidcommSdklib.lib")
+
 //#include "btwlib.h"
 #include "BtIfDefinitions.h"
 #include "BtIfClasses.h"
 #include "com_intel_bluetooth_BluetoothStackWIDCOMM.h"
+
+#define WIDCOMM_DLL "wbtapi.dll"
+// DLL wbtapi.dll  -> WIDCOMM version 3.x and 4.x and SDK BTW-5_0_1_902-SDK
+// DLL btwapi.dll  -> WIDCOMM 5.1.x and SDK BTW-5_1_0_3101
+// We specify which DLLs to delay load with the /delayload:btwapi.dll linker option
+// This is how it is now: wbtapi.dll;btfunc.dll;irprops.cpl
 
 static int openConnections = 0;
 static GUID test_client_service_guid = { 0x5fc2a42e, 0x144e, 0x4bb5, { 0xb4, 0x3f, 0x4e, 0x61, 0x71, 0x1d, 0x1c, 0x32 } };
@@ -95,7 +105,9 @@ public:
 	CRfCommIf rfCommIf;
 
 	WIDCOMMStack();
-	 virtual ~WIDCOMMStack();
+	virtual ~WIDCOMMStack();
+
+	void throwExtendedErrorException(JNIEnv * env, const char *name);
 
     // methods to replace virtual methods in base class CBtIf
     virtual void OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected);
@@ -107,7 +119,7 @@ public:
 static WIDCOMMStack* stack;
 
 BOOL isWIDCOMMBluetoothStackPresent() {
-	HMODULE h = LoadLibrary(_T("btwapi.dll"));
+	HMODULE h = LoadLibrary(_T(WIDCOMM_DLL));
 	if (h == NULL) {
 		return FALSE;
 	}
@@ -150,6 +162,26 @@ WIDCOMMStack::~WIDCOMMStack() {
 	DeleteCriticalSection(&csCRfCommIf);
 }
 
+void WIDCOMMStack::throwExtendedErrorException(JNIEnv * env, const char *name) {
+	WBtRc er = GetExtendedError();
+	LPCTSTR msg = WBtRcToString(er);
+	if (msg != NULL) {
+		throwExceptionExt(env, name, "WIDCOMM error[%s]", msg);
+	} else {
+		throwException(env, name, "No error code");
+	}
+}
+
+void BroadcomDebugError(JNIEnv *env, CBtIf* stack) {
+	WBtRc er = stack->GetExtendedError();
+	LPCTSTR msg = WBtRcToString(er);
+	if (msg != NULL) {
+		debugs("WIDCOMM error[%s]", msg);
+	} else {
+		debug("No error code");
+	}
+}
+
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_uninitialize
 (JNIEnv *, jobject) {
 	if (stack != NULL) {
@@ -159,17 +191,15 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_uninitiali
 	}
 }
 
-// TODO
-void BroadcomDebugError(CBtIf* stack) {
-}
-
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLocalDeviceBluetoothAddress
 (JNIEnv *env, jobject peer) {
 	struct CBtIf::DEV_VER_INFO info;
 	if (!stack->GetLocalDeviceVersionInfo(&info)) {
-		BroadcomDebugError(stack);
+		stack->throwExtendedErrorException(env, "javax/bluetooth/BluetoothStateException");
+		return NULL;
 	}
+
 	wchar_t addressString[14];
 	BcAddrToString(addressString, info.bd_addr);
 	return env->NewString((jchar*)addressString, (jsize)wcslen(addressString));
@@ -179,7 +209,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 (JNIEnv *env, jobject peer) {
 	BD_NAME name;
 	if (!stack->GetLocalDeviceName(&name)) {
-		BroadcomDebugError(stack);
+		BroadcomDebugError(env, stack);
 		return NULL;
 	}
 	return env->NewStringUTF((char*)name);
@@ -269,14 +299,6 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 		return INQUIRY_ERROR;
 	}
 
-	if (!stack->StartInquiry()) {
-		debug("deviceInquiryStart error");
-		// TODO read error
-		throwException(env, "javax/bluetooth/BluetoothStateException", "todo");
-		return INQUIRY_ERROR;
-	}
-	debug("deviceInquiryStarted");
-
 	jclass notifyClass = env->GetObjectClass(startedNotify);
 	if (notifyClass == NULL) {
 		throwRuntimeException(env, "Fail to get Object Class");
@@ -287,8 +309,17 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 		throwRuntimeException(env, "Fail to get MethodID deviceInquiryStartedCallback");
 		return INQUIRY_ERROR;
 	}
+
+	if (!stack->StartInquiry()) {
+		debug("deviceInquiryStart error");
+		stack->throwExtendedErrorException(env, "javax/bluetooth/BluetoothStateException");
+		return INQUIRY_ERROR;
+	}
+	debug("deviceInquiryStarted");
+
 	env->CallVoidMethod(startedNotify, notifyMethod);
 	if (ExceptionCheckCompatible(env)) {
+		stack->StopInquiry();
 		return INQUIRY_ERROR;
 	}
 
@@ -308,9 +339,14 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 			deviceFound dev = stack->deviceResponded[reportedIdx];
 			env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, dev.deviceAddr, dev.deviceClass, env->NewStringUTF((char*)(dev.bdName)));
 			if (ExceptionCheckCompatible(env)) {
+				stack->StopInquiry();
 				return INQUIRY_ERROR;
 			}
 		}
+	}
+
+	if (stack != NULL) {
+		stack->StopInquiry();
 	}
 
 	if (stack == NULL) {
@@ -357,8 +393,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 
 	if (!stack->StartDiscovery(bda, p_service_guid)) {
 		debug("StartSearchServices error");
-		// TODO read error
-		throwException(env, "javax/bluetooth/BluetoothStateException", "todo");
+		stack->throwExtendedErrorException(env, "javax/bluetooth/BluetoothStateException");
 		return NULL;
 	}
 

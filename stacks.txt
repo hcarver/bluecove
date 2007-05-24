@@ -22,8 +22,8 @@
 
 == WIDCOMM (Broadcom) ==
 
-    Broadcom btwapi.dll required.
-    If you have WIDCOMM version older than 5 you need to [http://bluecove.sourceforge.net/download/btwapi.dll download] and install this dll to %systemroot%\system32
+    Broadcom wbtapi.dll required. It is installed with WIDCOMM drivers.
+    ~~ Broadcom btwapi.dll required. If you have WIDCOMM version older than 5.1 you need to [http://bluecove.sourceforge.net/download/btwapi.dll download] and install this dll to %systemroot%\system32
 
 === JSR-82 Limitations ===
 

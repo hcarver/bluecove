@@ -37,7 +37,7 @@ public interface BluetoothStack {
 	/**
 	 * Retrieves the Bluetooth address of the local device.
 	 */
-	public String getLocalDeviceBluetoothAddress();
+	public String getLocalDeviceBluetoothAddress() throws BluetoothStateException;
 
 	/**
 	 *  Retrieves the name of the local device. 

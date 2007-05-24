@@ -17,7 +17,11 @@ intelbth.vcproj
 WIDCOMM:
     Get Broadcom development kits from:  http://www.broadcom.com/products/bluetooth_sdk.php
     You have to register at the Broadcom site to gain access to the downloads.
+    We are using BTW-5_0_1_902-SDK!
     Install it to default directory. e.g. "$(ProgramFiles)\Widcomm\BTW DK" for Win32
+    Since wbtapi.dll does not come with BTW-5_0_1_902-SDK you need to copy this DLL from "%systemroot%\system32" to "$(ProgramFiles)\Widcomm\BTW DK\SDK\Release"
+
+    We tested BTW DK - BTW-5_1_0_3101 and we can't make it run properly with Broadcom drivers BTW 4.0.x and 5.0.x
 
 BlueSoleil:
     Get BlueSoleil™ PC Platform Software Development Kit (SDK), 0.83 free version from this location:

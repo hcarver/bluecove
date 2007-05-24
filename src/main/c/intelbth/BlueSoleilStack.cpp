@@ -34,6 +34,9 @@ BOOL isBlueSoleilBluetoothStackPresent() {
 #include "bt_ui.h"
 #include "com_intel_bluetooth_BluetoothStackBlueSoleil.h"
 
+#define BLUESOLEIL_DLL "btfunc.dll"
+// We specify which DLLs to delay load with the /delayload:btfunc.dll linker option
+
 #define deviceRespondedMax 50
 #define MAX_SERVICE_COUNT	100
 
@@ -69,7 +72,7 @@ jint BsDeviceClassToInt(BYTE* devClass) {
 static BOOL BlueSoleilStarted = FALSE;
 
 BOOL isBlueSoleilBluetoothStackPresent() {
-	HMODULE h = LoadLibrary(_T("btfunc.dll"));
+	HMODULE h = LoadLibrary(_T(BLUESOLEIL_DLL));
 	if (h == NULL) {
 		return FALSE;
 	}
@@ -340,7 +343,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_c
 	DWORD dwResult = BT_ConnectSPPExService(&devInfo, &svcInfo, &dwHandle);
 	if (dwResult != BTSTATUS_SUCCESS)	{
 		debugs("BT_SearchSPPExServices return  [%i]", dwResult);
-		throwIOException(env, "Can't connect SPP");
+		throwIOExceptionExt(env, "Can't connect SPP [%i]", dwResult);
 		return NULL;
 	}
 	debugs("open COM port [%i]", (int)svcInfo.ucComIndex);

@@ -66,6 +66,17 @@ void throwException(JNIEnv *env, const char *name, const char *msg) {
     env->DeleteLocalRef(cls);
 }
 
+void throwExceptionExt(JNIEnv *env, const char *name, const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	{
+		char msg[1064];
+		_vsnprintf_s(msg, 1064, fmt, ap);
+		throwException(env, name, msg);
+	}
+	va_end(ap);
+}
+
 void throwIOException(JNIEnv *env, const char *msg) {
 	throwException(env, "java/io/IOException", msg);
 }

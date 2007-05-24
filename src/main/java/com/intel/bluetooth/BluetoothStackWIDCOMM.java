@@ -69,7 +69,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		destroy();
 	}
 
-	public native String getLocalDeviceBluetoothAddress();
+	public native String getLocalDeviceBluetoothAddress() throws BluetoothStateException;
 
 	public native String getLocalDeviceName();
 
@@ -202,16 +202,27 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
 			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		byte[] uuidValue = null;
+		boolean reqRFCOMM = false;
+		boolean reqL2CAP = false;
 		// If Search for sepcific service, select its UUID
 		for (int u = 0; u < uuidSet.length; u++) {
 			if (uuidSet[u].equals(BluetoothConsts.L2CAP_PROTOCOL_UUID))  {
+				reqL2CAP = true;
 				continue;
 			}
 			if (uuidSet[u].equals(BluetoothConsts.RFCOMM_PROTOCOL_UUID))  {
+				reqRFCOMM = true;
 				continue;
 			}
 			uuidValue = Utils.UUIDToByteArray(uuidSet[u]);
 			break;
+		}
+		if (uuidValue == null) {
+			if (reqRFCOMM) {
+				uuidValue = Utils.UUIDToByteArray(BluetoothConsts.RFCOMM_PROTOCOL_UUID);
+			} else if (reqL2CAP) {
+				uuidValue = Utils.UUIDToByteArray(BluetoothConsts.L2CAP_PROTOCOL_UUID);
+			}
 		}
 		long[] handles = runSearchServicesImpl(startedNotify, uuidValue, ((RemoteDeviceImpl) device).getAddress());
 		if (handles == null) {

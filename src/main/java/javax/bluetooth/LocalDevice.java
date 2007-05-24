@@ -34,7 +34,7 @@ public class LocalDevice {
 
 	private String address;
 
-	private LocalDevice() {
+	private LocalDevice() throws BluetoothStateException {
 		discoveryAgent = new DiscoveryAgent();
 		address =  BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceBluetoothAddress();
 	}

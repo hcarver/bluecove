@@ -112,6 +112,8 @@ void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char 
 
 void throwException(JNIEnv *env, const char *name, const char *msg);
 
+void throwExceptionExt(JNIEnv *env, const char *name, const char *fmt, ...);
+
 void throwIOException(JNIEnv *env, const char *msg);
 
 void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...);
