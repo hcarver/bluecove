@@ -123,6 +123,7 @@ BOOL isWIDCOMMBluetoothStackPresent() {
 	if (h == NULL) {
 		return FALSE;
 	}
+	FreeLibrary(h);
 	return TRUE;
 }
 

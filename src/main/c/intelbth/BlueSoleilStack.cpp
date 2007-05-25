@@ -96,6 +96,7 @@ BOOL isBlueSoleilBluetoothStackPresent() {
 	if (h == NULL) {
 		return FALSE;
 	}
+	FreeLibrary(h);
 	return TRUE;
 }
 
