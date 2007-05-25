@@ -504,6 +504,7 @@ public:
 	GUID service_guid;
 	BT_CHAR service_name[BT_MAX_SERVICE_NAME_LEN + 1];
 
+	BOOL isClosing;
 	BOOL isConnected;
 	BOOL isConnectionError;
 
@@ -525,6 +526,7 @@ WIDCOMMStackRfCommPort::WIDCOMMStackRfCommPort() {
 	todo_buf_read_idx = 0;
 	isConnected = FALSE;
 	isConnectionError = FALSE;
+	isClosing = FALSE;
 	service_name[0] = '\0';
     hEvents[0] = CreateEvent( 
             NULL,     // no security attributes
@@ -565,7 +567,7 @@ WIDCOMMStackRfCommPort* validRfCommHandle(JNIEnv *env, jlong handle) {
 }
 
 void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {
-	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2)) {
+	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || isClosing) {
 		return;
 	}
 	if (PORT_EV_CONNECTED & event_code) {
@@ -580,7 +582,7 @@ void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {
 }
 
 void WIDCOMMStackRfCommPort::OnDataReceived(void *p_data, UINT16 len) {
-	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2)) {
+	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || isClosing) {
 		return;
 	}
 	if (isConnected) {
@@ -657,6 +659,8 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		return;
 	}
 	//debug("CloseClientConnection");
+	rf->isClosing = TRUE;
+	SetEvent(rf->hEvents[0]);
 	CRfCommPort::PORT_RETURN_CODE rc = rf->Close();
 	if (rc != CRfCommPort::SUCCESS && rc != CRfCommPort::NOT_OPENED) {
 		throwIOException(env, "Failed to Close");
@@ -671,7 +675,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getConnec
 	if (rf == NULL) {
 		return 0;
 	}
-	if (!rf->isConnected) {
+	if (!rf->isConnected || rf->isClosing) {
 		throwIOException(env, "Connection is closed");
 		return 0;
 	}
@@ -691,6 +695,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		return -1;
 	}
 	debug("->read()");
+	if (rf->isClosing) {
+		return -1;
+	}
 	while (rf->isConnected && (rf->todo_buf_read_idx == rf->todo_buf_rcv_idx)) {
 		if (todo_buf_max == rf->todo_buf_rcv_idx) {
 			throwIOException(env, "rcv buffer overflown, Fix me");
@@ -718,6 +725,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		return -1;
 	}
 	debug("->read(byte[])");
+	if (rf->isClosing) {
+		return -1;
+	}
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
 	int done = 0;
@@ -755,7 +765,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfReadAvailable
 (JNIEnv *env, jobject peer, jlong handle) {
 	WIDCOMMStackRfCommPort* rf = validRfCommHandle(env, handle);
-	if (rf == NULL) {
+	if (rf == NULL || rf->isClosing) {
 		return 0;
 	}
 	return (rf->todo_buf_rcv_idx - rf->todo_buf_read_idx);
@@ -768,7 +778,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	if (rf == NULL) {
 		return;
 	}
-	if (!rf->isConnected) {
+	if (!rf->isConnected || rf->isClosing) {
 		throwIOException(env, "Failed to write to closed connection");
 		return;
 	}
@@ -790,7 +800,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	if (rf == NULL) {
 		return;
 	}
-	if (!rf->isConnected) {
+	if (!rf->isConnected || rf->isClosing) {
 		throwIOException(env, "Failed to write to closed connection");
 		return;
 	}
