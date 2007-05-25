@@ -69,6 +69,26 @@ jint BsDeviceClassToInt(BYTE* devClass) {
 	return (((devClass[0] << 8) + devClass[1]) << 8) + devClass[2];
 }
 
+//API calling status code to String
+char * getBsAPIStatusString(DWORD dwResult) {
+	switch (dwResult) {
+		case BTSTATUS_FAIL: return "General fail";
+		case BTSTATUS_SUCCESS: return "Success";
+		case BTSTATUS_SYSTEM_ERROR: return "System error";
+		case BTSTATUS_BT_NOT_READY: return "BT_NOT_READY";
+		case BTSTATUS_ALREADY_PAIRED: return "BlueSoleil is already paired with the device";
+		case BTSTATUS_AUTHENTICATE_FAILED: return "Authentication fails";
+		case BTSTATUS_BT_BUSY: return "Bluetooth is busy with browsing services or connecting to a device";
+		case BTSTATUS_CONNECTION_EXIST: return "The connection to the service is already established";
+		case BTSTATUS_CONNECTION_NOT_EXIST: return "The connection does not exist or is released";
+		case BTSTATUS_PARAMETER_ERROR: return "PARAMETER_ERROR";
+		case BTSTATUS_SERVICE_NOT_EXIST: return "SERVICE_NOT_EXIST";
+		case BTSTATUS_DEVICE_NOT_EXIST: return "DEVICE_NOT_EXIST";
+		default:
+			return "Unknown BlueSoleil error";
+	}
+}
+
 static BOOL BlueSoleilStarted = FALSE;
 
 BOOL isBlueSoleilBluetoothStackPresent() {
@@ -96,12 +116,12 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_uniniti
 	}
 }
 
-BOOL BsGetLocalDeviceInfo (JNIEnv *env, DWORD dwMask, PBLUETOOTH_DEVICE_INFO_EX pDevInfo) {
+BOOL BsGetLocalDeviceInfo(JNIEnv *env, DWORD dwMask, PBLUETOOTH_DEVICE_INFO_EX pDevInfo) {
 	memset(pDevInfo, 0, sizeof(BLUETOOTH_DEVICE_INFO_EX));
 	pDevInfo->dwSize = sizeof(BLUETOOTH_DEVICE_INFO_EX);
 	DWORD dwResult = BT_GetLocalDeviceInfo(dwMask, pDevInfo);
 	if (dwResult != BTSTATUS_SUCCESS) {
-		debugs("BT_GetLocalDeviceInfo return  [%i]", dwResult);
+		debugs("BT_GetLocalDeviceInfo return  [%s]", getBsAPIStatusString(dwResult));
 		return FALSE;
 	} else {
 		return TRUE;
@@ -192,7 +212,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 	if (accessCode == LIAC) {
 		ucInqMode = INQUIRY_LIMITED_MODE;
 	}
-	UCHAR ucInqLen = 0x08; //~~ 15 sec
+	UCHAR ucInqLen = 0x0F; //~~ 15 sec
 	BLUETOOTH_DEVICE_INFO	lpDevsList[deviceRespondedMax] = {0};
 	DWORD devsListLen = sizeof(BLUETOOTH_DEVICE_INFO) * deviceRespondedMax;
 
@@ -226,7 +246,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_can
 (JNIEnv *env, jobject){
 	DWORD dwResult = BT_CancelInquiry();
 	if (dwResult != BTSTATUS_SUCCESS) {
-		debugs("BT_CancelInquiry return  [%i]", dwResult);
+		debugs("BT_CancelInquiry return  [%s]", getBsAPIStatusString(dwResult));
 		return FALSE;
 	} else {
 		return TRUE;
@@ -263,7 +283,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
 	DWORD dwResult;
 	dwResult = BT_SearchSPPExServices(&devInfo, &dwLength, sppex_svc_info);
 	if (dwResult != BTSTATUS_SUCCESS)	{
-		debugs("BT_SearchSPPExServices return  [%i]", dwResult);
+		debugs("BT_SearchSPPExServices return  [%s]", getBsAPIStatusString(dwResult));
 		if (dwResult == BTSTATUS_SERVICE_NOT_EXIST) {
 			return SERVICE_SEARCH_NO_RECORDS;
 		} else {
@@ -327,23 +347,16 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_c
 	svcInfo.dwSize = sizeof(SPPEX_SERVICE_INFO);
 
 	GUID service_guid;
-
-	// pin array
 	jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
-
-	// build UUID
 	convertUUIDBytesToGUID(bytes, &service_guid);
-
-	// unpin array
 	env->ReleaseByteArrayElements(uuidValue, bytes, 0);
-
 	memcpy(&(svcInfo.serviceClassUuid128), &service_guid, sizeof(UUID));
 
 	DWORD dwHandle;
 	DWORD dwResult = BT_ConnectSPPExService(&devInfo, &svcInfo, &dwHandle);
 	if (dwResult != BTSTATUS_SUCCESS)	{
-		debugs("BT_SearchSPPExServices return  [%i]", dwResult);
-		throwIOExceptionExt(env, "Can't connect SPP [%i]", dwResult);
+		debugs("BT_ConnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));
+		throwIOExceptionExt(env, "Can't connect SPP [%s]", getBsAPIStatusString(dwResult));
 		return NULL;
 	}
 	debugs("open COM port [%i]", (int)svcInfo.ucComIndex);
@@ -353,14 +366,16 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_c
 	hComPort = CreateFileA(portString, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if (hComPort == INVALID_HANDLE_VALUE) {
 		BT_DisconnectSPPExService(dwHandle);
-		throwIOExceptionExt(env, "Can't open COM port [%s]", portString);
+		char message[20];
+		_snprintf_s(message, 20, "Can't open COM port [%s]", portString);
+		throwIOExceptionWinGetLastError(env, message);
 		return NULL;
 	}
-
+	debugs("Connected [%i]", dwHandle);
 	jlongArray result = env->NewLongArray(2);
 	jlong *longs = env->GetLongArrayElements(result, 0);
 	longs[0] = (jlong)hComPort;
-	longs[1] = dwHandle;
+	longs[1] = (jlong)dwHandle;
 	env->ReleaseLongArrayElements(result, longs, 0);
 
 	return result;
@@ -368,6 +383,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_c
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfCloseImpl
 (JNIEnv *env, jobject, jlong comHandle, jlong connectionHandle) {
+	debugs("close connection [%i]", (DWORD)connectionHandle);
 	CloseHandle((HANDLE)comHandle);
 	BT_DisconnectSPPExService((DWORD)connectionHandle);
 }
@@ -379,7 +395,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	unsigned char c;
 	DWORD numberOfBytesRead;
 	if (!ReadFile(hComPort, (char *)&c, 1, &numberOfBytesRead, NULL)) {
-		throwIOException(env, "Failed to read");
+		throwIOExceptionWinGetLastError(env, "Failed to read");
 	}
 	if (numberOfBytesRead == 0) {
 		return -1;
@@ -395,7 +411,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 
 	if (!ReadFile(hComPort, (void*)(bytes + off), len, &numberOfBytesRead, NULL)) {
 		env->ReleaseByteArrayElements(b, bytes, 0);
-		throwIOException(env, "Failed to read");
+		throwIOExceptionWinGetLastError(env, "Failed to read");
 		return -1;
 	}
 
@@ -420,7 +436,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	char c = (char)b;
 	DWORD numberOfBytesWritten;
 	if (!WriteFile(hComPort, &c, 1, &numberOfBytesWritten, NULL)) {
-		throwIOException(env, "Failed to write");
+		throwIOExceptionWinGetLastError(env, "Failed to write");
 	}
 }
 
@@ -435,7 +451,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	while(done < len) {
 		DWORD numberOfBytesWritten = 0;
 		if (!WriteFile(hComPort, (char *)(bytes + off + done), len - done, &numberOfBytesWritten, NULL)) {
-			throwIOException(env, "Failed to write");
+			throwIOExceptionWinGetLastError(env, "Failed to write");
 		}
 		if (numberOfBytesWritten <= 0) {
 			env->ReleaseByteArrayElements(b, bytes, 0);

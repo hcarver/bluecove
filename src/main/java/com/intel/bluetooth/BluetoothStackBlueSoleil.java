@@ -223,7 +223,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 			devices.put(address, device);
 			listedDevice = (RemoteDeviceImpl)device;
 		}
-		listedDevice.setStackAttributes("RFCOMM_channel" + channel, uuidValue);
+		listedDevice.setStackAttributes("RFCOMM_channel" + channel, uuid);
 		
 		ServiceRecord[] records = new ServiceRecordImpl[1];
 		records[0] = record;
@@ -244,12 +244,12 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		if (listedDevice == null) {
 			throw new IOException("Device not discovered");
 		}
-		byte[] uuidValue = (byte[])listedDevice.getStackAttributes("RFCOMM_channel" + channel);
-		if (uuidValue == null) {
+		UUID uuid = (UUID)listedDevice.getStackAttributes("RFCOMM_channel" + channel);
+		if (uuid == null) {
 			throw new IOException("Device service not discovered");
 		}
-		
-		long[] handles = connectionRfOpenImpl(address, uuidValue);
+		DebugLog.debug("Connect to service UUID", uuid);
+		long[] handles = connectionRfOpenImpl(address, Utils.UUIDToByteArray(uuid));
 		connectionHandles.put(new Long(handles[0]), handles);
 		
 		return handles[0];

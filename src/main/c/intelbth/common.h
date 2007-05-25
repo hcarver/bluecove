@@ -120,6 +120,14 @@ void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...);
 
 void throwRuntimeException(JNIEnv *env, const char *msg);
 
+void throwExceptionWinErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error);
+
+void throwIOExceptionWinErrorMessage(JNIEnv *env, const char *msg, DWORD last_error);
+
+void throwIOExceptionWinGetLastError(JNIEnv *env, const char *msg);
+
+WCHAR *getWinErrorMessage(DWORD last_error);
+
 BOOL ExceptionCheckCompatible(JNIEnv *env);
 
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid);

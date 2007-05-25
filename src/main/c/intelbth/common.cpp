@@ -96,6 +96,42 @@ void throwRuntimeException(JNIEnv *env, const char *msg) {
 	throwException(env, "java/lang/RuntimeException", msg);
 }
 
+WCHAR *getWinErrorMessage(DWORD last_error) {
+	static WCHAR errmsg[1024];
+	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+		0,
+		last_error,
+		0,
+		errmsg,
+		511,
+		NULL))
+	{
+		swprintf_s(errmsg, 1024, _T("No error message for code %d"), last_error);
+		return errmsg;
+	}
+	size_t last = wcslen(errmsg) - 1;
+	while ((errmsg[last] == '\n') || (errmsg[last] == '\r')) {
+		errmsg[last] = 0;
+		last --;
+	}
+	return errmsg;
+}
+
+void throwExceptionWinErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error) {
+	char errmsg[1064];
+	sprintf_s(errmsg, 1064, "%s [%d] %S", msg, last_error, getWinErrorMessage(last_error));
+	throwException(env, name, errmsg);
+}
+
+void throwIOExceptionWinErrorMessage(JNIEnv *env, const char *msg, DWORD last_error) {
+	throwExceptionWinErrorMessage(env, "java/io/IOException", msg, last_error);
+}
+
+void throwIOExceptionWinGetLastError(JNIEnv *env, const char *msg) {
+	throwIOExceptionWinErrorMessage(env, msg, GetLastError());
+}
+
+
 BOOL ExceptionCheckCompatible(JNIEnv *env) {
 	if (env->GetVersion() > JNI_VERSION_1_1) {
 		return env->ExceptionCheck();

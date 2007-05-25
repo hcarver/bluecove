@@ -50,11 +50,8 @@ static BOOL initialBtIsDiscoverable;
 #endif
 
 void dllCleanup();
-WCHAR *GetWSAErrorMessage(DWORD last_error);
-void throwExceptionWSAErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error);
-void throwIOExceptionWSAErrorMessage(JNIEnv *env, const char *msg, DWORD last_error);
-void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg);
 
+void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg);
 
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
@@ -100,43 +97,8 @@ void dllCleanup() {
 	DeleteCriticalSection(&csLookup);
 }
 
-WCHAR *GetWSAErrorMessage(DWORD last_error)
-{
-	static WCHAR errmsg[1024];
-	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
-		0,
-		last_error,
-		0,
-		errmsg,
-		511,
-		NULL))
-	{
-		swprintf_s(errmsg, 1024, _T("No error message for code %d"), last_error);
-		return errmsg;
-	}
-	size_t last = wcslen(errmsg) - 1;
-	while ((errmsg[last] == '\n') || (errmsg[last] == '\r')) {
-		errmsg[last] = 0;
-		last --;
-	}
-	return errmsg;
-}
-
-void throwExceptionWSAErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error)
-{
-	char errmsg[1064];
-	sprintf_s(errmsg, 1064, "%s [%d] %S", msg, last_error, GetWSAErrorMessage(last_error));
-	throwException(env, name, errmsg);
-}
-
-void throwIOExceptionWSAErrorMessage(JNIEnv *env, const char *msg, DWORD last_error)
-{
-	throwExceptionWSAErrorMessage(env, "java/io/IOException", msg, last_error);
-}
-
-void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg)
-{
-	throwIOExceptionWSAErrorMessage(env, msg, WSAGetLastError());
+void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg) {
+	throwIOExceptionWinErrorMessage(env, msg, WSAGetLastError());
 }
 
 BOOL isMicrosoftBluetoothStackPresent() {
@@ -190,7 +152,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStat
 		return 1;
 #endif
     }
-	throwIOExceptionWSAErrorMessage(env, "Initialization error ", dllWSAStartupError);
+	throwIOExceptionWinErrorMessage(env, "Initialization error ", dllWSAStartupError);
     return 0;
 }
 
@@ -307,7 +269,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 				    result = INQUIRY_COMPLETED;
 					break;
 			    default:
-					debugss("WSALookup error [%d] %S", last_error, GetWSAErrorMessage(last_error));
+					debugss("WSALookup error [%d] %S", last_error, getWinErrorMessage(last_error));
 				    result = INQUIRY_ERROR;
 			}
 			WSALookupServiceEnd(hLookup);
@@ -523,7 +485,7 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 #else
 	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookup)) {
 		DWORD last_error = WSAGetLastError();
-		debugss("WSALookupServiceBegin error [%d] %S", last_error, GetWSAErrorMessage(last_error));
+		debugss("WSALookupServiceBegin error [%d] %S", last_error, getWinErrorMessage(last_error));
 		// [10108] No such service is known. The service cannot be found in the specified name space. -> SERVICE_SEARCH_DEVICE_NOT_REACHABLE 
 		if (10108 == last_error) {
 			throwException(env, "com/intel/bluetooth/SearchServicesDeviceNotReachableException", "");
@@ -555,7 +517,7 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 				WSALookupServiceEnd(hLookup);
 				return env->NewIntArray(0);
 			default:
-				debugss("WSALookupServiceNext error [%d] %S", last_error, GetWSAErrorMessage(last_error));
+				debugss("WSALookupServiceNext error [%d] %S", last_error, getWinErrorMessage(last_error));
 				WSALookupServiceEnd(hLookup);
 				return NULL;
 		}
