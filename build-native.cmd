@@ -56,7 +56,7 @@ call "%p%\VCVARS32.BAT"
 @if NOT exist "%sdk_BlueSoleil%" goto sdk_other_not_found
 @echo BlueSoleil SDKs Found [%sdk_BlueSoleil%]
 @set CONFIGURATION=Release
-@echo All Supported SDK not found. Will use Release configuration
+@echo All Supported SDK found. Will use Release configuration
 @goto DO_BUILD
 
 :sdk_other_not_found
