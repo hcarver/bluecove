@@ -38,7 +38,7 @@ class BluetoothInputStream extends InputStream {
 	 */
 	public synchronized int available() throws IOException {
 		if (conn == null) {
-			throw new IOException();
+			throw new IOException("Stream closed");
 		} else {
 			return BlueCoveImpl.instance().getBluetoothStack().connectionRfReadAvailable(conn.handle);
 		}
@@ -58,7 +58,7 @@ class BluetoothInputStream extends InputStream {
 
 	public int read() throws IOException {
 		if (conn == null) {
-			throw new IOException();
+			throw new IOException("Stream closed");
 		} else {
 			return BlueCoveImpl.instance().getBluetoothStack().connectionRfRead(conn.handle);
 		}
@@ -117,7 +117,7 @@ class BluetoothInputStream extends InputStream {
 		}
 		
 		if (conn == null) {
-			throw new IOException();
+			throw new IOException("Stream closed");
 		} else {
 			return BlueCoveImpl.instance().getBluetoothStack().connectionRfRead(conn.handle, b, off, len);
 		}
