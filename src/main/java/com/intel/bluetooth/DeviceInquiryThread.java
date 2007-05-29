@@ -53,6 +53,8 @@ public class DeviceInquiryThread extends Thread {
 	 */
 	public static boolean startInquiry(BluetoothStack stack, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		DeviceInquiryThread t = (new DeviceInquiryThread(stack, accessCode, listener));
+		// In case the BTStack hangs, exit JVM anyway
+		t.setDaemon(true);
 		synchronized (t) {
 			t.start();
 			while (!t.started && !t.terminated) {
