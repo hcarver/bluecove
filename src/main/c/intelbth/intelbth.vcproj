@@ -965,6 +965,10 @@
 				RelativePath=".\common.h"
 				>
 			</File>
+			<File
+				RelativePath=".\WIDCOMMStack.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
