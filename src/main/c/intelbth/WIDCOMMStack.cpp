@@ -349,6 +349,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	}
 
 	stack->searchServicesComplete = FALSE;
+	stack->searchServicesTerminated = FALSE;
 
 	if (!stack->StartDiscovery(bda, p_service_guid)) {
 		debug("StartSearchServices error");
@@ -371,14 +372,19 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		return NULL;
 	}
 
-	while ((stack != NULL) && (!stack->searchServicesComplete)) {
-		DWORD  rc = WaitForSingleObject(stack->hEvent, INFINITE);
+	while ((stack != NULL) && (!stack->searchServicesComplete) && (!stack->searchServicesTerminated)) {
+		DWORD  rc = WaitForSingleObject(stack->hEvent, 500);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForSingleObject");
 			return NULL;
 		}
 	}
 	if (stack == NULL) {
+		return NULL;
+	}
+
+	if (stack->searchServicesTerminated) {
+		throwException(env, "com/intel/bluetooth/SearchServicesTerminatedException", "");
 		return NULL;
 	}
 
@@ -395,34 +401,32 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		return env->NewLongArray(0);
 	}
 
-	if (obtainedServicesRecords > SDP_DISCOVERY_RECORDS_USED_MAX) {
-		debugs("too many ServicesRecords %i", obtainedServicesRecords);
-		obtainedServicesRecords = SDP_DISCOVERY_RECORDS_USED_MAX;
-	}
+	if (obtainedServicesRecords > SDP_DISCOVERY_RECORDS_DEVICE_MAX) {
+		debugs("WARN too many ServicesRecords %i", obtainedServicesRecords);
+		//obtainedServicesRecords = SDP_DISCOVERY_RECORDS_USED_MAX;
+	} 
+	debugs("obtainedServicesRecords %i", obtainedServicesRecords);
+	// Retrive all Records and filter in Java
+	int retriveRecords = SDP_DISCOVERY_RECORDS_USED_MAX;
 	int useIdx = stack->sdpDiscoveryRecordsUsed;
-	//if (useIdx + obtainedServicesRecords > SDP_DISCOVERY_RECORDS_USED_MAX) {
+	if (useIdx + retriveRecords > SDP_DISCOVERY_RECORDS_USED_MAX) {
 		useIdx = 0;
-	//}
-		debugs("obtainedServicesRecords %i", obtainedServicesRecords);
-		obtainedServicesRecords = SDP_DISCOVERY_RECORDS_USED_MAX;
+	}
 
 	CSdpDiscoveryRec *sdpDiscoveryRecordsList = stack->sdpDiscoveryRecords + useIdx;
 
 	//guid_filter does not work as Expected with SE Phones!
-	int recSize = stack->ReadDiscoveryRecords(bda, obtainedServicesRecords, sdpDiscoveryRecordsList, NULL);
+	int recSize = stack->ReadDiscoveryRecords(bda, retriveRecords, sdpDiscoveryRecordsList, NULL);
 	if (recSize == 0) {
-		debugs("ReadDiscoveryRecords returns empty, While expected %i", obtainedServicesRecords);
+		debugs("ReadDiscoveryRecords returns empty, While expected min %i", obtainedServicesRecords);
 		return NULL;
-	}
-	if (obtainedServicesRecords != recSize) {
-		debugss("obtained %i, but returns recSize %i", obtainedServicesRecords, recSize);
 	}
 	stack->sdpDiscoveryRecordsUsed += recSize;
 
 	jlongArray result = env->NewLongArray(recSize);
 	jlong *longs = env->GetLongArrayElements(result, 0);
 	for (int r = 0; r < recSize; r ++) {
-		longs[r] = useIdx + r;
+		longs[r] = SDP_DISCOVERY_RECORDS_HANDLE_OFFSET + useIdx + r;
 	}
 	env->ReleaseLongArrayElements(result, longs, 0);
 
@@ -434,14 +438,28 @@ void WIDCOMMStack::OnDiscoveryComplete() {
 	SetEvent(hEvent);
 }
 
-/*
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getServiceAttributeRFCommScn
-(JNIEnv *env, jobject, jlong handle) {
-	if ((handle > SDP_DISCOVERY_RECORDS_USED_MAX) || (handle < 0)) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_cancelServiceSearchImpl
+(JNIEnv *env, jobject) {
+	if (stack != NULL)  {
+		stack->searchServicesTerminated = TRUE;
+		SetEvent(stack->hEvent);
+	}
+}
+
+CSdpDiscoveryRec* validDiscoveryRec(JNIEnv *env, jlong handle) {
+	if ((stack == NULL) 
+		|| (handle < SDP_DISCOVERY_RECORDS_HANDLE_OFFSET)
+		|| (handle > SDP_DISCOVERY_RECORDS_USED_MAX + SDP_DISCOVERY_RECORDS_HANDLE_OFFSET)) {
 		throwIOException(env, "Invalid handle");
 		return NULL;
 	}
-	CSdpDiscoveryRec* record = stack->sdpDiscoveryRecords + handle;
+	return stack->sdpDiscoveryRecords + handle - (handle < SDP_DISCOVERY_RECORDS_HANDLE_OFFSET);
+}
+
+/*
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getServiceAttributeRFCommScn
+(JNIEnv *env, jobject, jlong handle) {
+	CSdpDiscoveryRec* record = validDiscoveryRec(env, handle);
 	UINT8 scn = -1;
 	if (record->FindRFCommScn(&scn)) {
 		return scn;
@@ -453,11 +471,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getService
 
 JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getServiceAttribute
 (JNIEnv *env, jobject peer, jint attrID, jlong handle) {
-	if ((handle > SDP_DISCOVERY_RECORDS_USED_MAX) || (handle < 0)) {
-		throwIOException(env, "Invalid handle");
-		return NULL;
-	}
-	CSdpDiscoveryRec* record = stack->sdpDiscoveryRecords + handle;
+	CSdpDiscoveryRec* record = validDiscoveryRec(env, handle);
 
 	SDP_DISC_ATTTR_VAL* pval = new SDP_DISC_ATTTR_VAL;
 

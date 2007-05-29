@@ -193,57 +193,79 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
 	}
 
+	private native void cancelServiceSearchImpl();
+	
 	public boolean cancelServiceSearch(int transID) {
-		return false;
+		SearchServicesThread sst = SearchServicesThread.getServiceSearchThread(transID);
+		if (sst != null) {
+			sst.setTerminated();
+			cancelServiceSearchImpl();
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, byte[] uuidValue, long address) throws BluetoothStateException;
+	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, byte[] uuidValue, long address) throws BluetoothStateException, SearchServicesTerminatedException;
 	
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
 			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
-		byte[] uuidValue = null;
-		boolean reqRFCOMM = false;
-		boolean reqL2CAP = false;
-		// If Search for sepcific service, select its UUID
-		for (int u = 0; u < uuidSet.length; u++) {
-			if (uuidSet[u].equals(BluetoothConsts.L2CAP_PROTOCOL_UUID))  {
-				reqL2CAP = true;
-				continue;
-			}
-			if (uuidSet[u].equals(BluetoothConsts.RFCOMM_PROTOCOL_UUID))  {
-				reqRFCOMM = true;
-				continue;
-			}
-			uuidValue = Utils.UUIDToByteArray(uuidSet[u]);
-			break;
+		// Retrive all Records, Filter here in Java
+		byte[] uuidValue = Utils.UUIDToByteArray(BluetoothConsts.L2CAP_PROTOCOL_UUID);
+		long[] handles;
+		try {
+			handles = runSearchServicesImpl(startedNotify, uuidValue, ((RemoteDeviceImpl) device).getAddress());
+		} catch (SearchServicesTerminatedException e) {
+			return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
 		}
-		if (uuidValue == null) {
-			if (reqRFCOMM) {
-				uuidValue = Utils.UUIDToByteArray(BluetoothConsts.RFCOMM_PROTOCOL_UUID);
-			} else if (reqL2CAP) {
-				uuidValue = Utils.UUIDToByteArray(BluetoothConsts.L2CAP_PROTOCOL_UUID);
-			}
-		}
-		long[] handles = runSearchServicesImpl(startedNotify, uuidValue, ((RemoteDeviceImpl) device).getAddress());
 		if (handles == null) {
 			return DiscoveryListener.SERVICE_SEARCH_ERROR;
 		} else if (handles.length > 0) {
 
-			ServiceRecord[] records = new ServiceRecordImpl[handles.length];
+			boolean reqRFCOMM = false;
+			//boolean reqL2CAP = false;
+			UUID uuidFiler = null;
+			// If Search for sepcific service, select its UUID
+			for (int u = 0; u < uuidSet.length; u++) {
+				if (uuidSet[u].equals(BluetoothConsts.L2CAP_PROTOCOL_UUID))  {
+					//reqL2CAP = true;
+					continue;
+				}
+				if (uuidSet[u].equals(BluetoothConsts.RFCOMM_PROTOCOL_UUID))  {
+					reqRFCOMM = true;
+					continue;
+				}
+				uuidFiler = uuidSet[u];
+				break;
+			}
+			if ((uuidFiler == null) && (reqRFCOMM)) {
+				uuidFiler = BluetoothConsts.RFCOMM_PROTOCOL_UUID;
+			}
+			
+			Vector records = new Vector();
 			for (int i = 0; i < handles.length; i++) {
-				records[i] = new ServiceRecordImpl(device, handles[i]);
+				ServiceRecordImpl sr = new ServiceRecordImpl(device, handles[i]);
 				try {
-					records[i].populateRecord(new int[] { BluetoothConsts.ServiceRecordHandle,
-							BluetoothConsts.ServiceClassIDList, BluetoothConsts.ServiceRecordState,
-							BluetoothConsts.ServiceID, BluetoothConsts.ProtocolDescriptorList });
+					sr.populateRecord(new int[] {BluetoothConsts.ServiceClassIDList});
+					if ((uuidFiler != null) && !sr.hasServiceClassUUID(uuidFiler)) {
+						continue;
+					}
+					records.addElement(sr);
+					sr.populateRecord(new int[] { BluetoothConsts.ServiceRecordHandle,
+							BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID,
+							BluetoothConsts.ProtocolDescriptorList });
 					if (attrSet != null) {
-						records[i].populateRecord(attrSet);
+						sr.populateRecord(attrSet);
 					}
 				} catch (Exception e) {
 					DebugLog.debug("populateRecord error", e);
 				}
+				if (startedNotify.isTerminated()) {
+					return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
+				}
 			}
-			listener.servicesDiscovered(startedNotify.getTransID(), records);
+			ServiceRecord[] fileteredRecords = (ServiceRecord[])records.toArray(new ServiceRecord[records.size()]);  
+			listener.servicesDiscovered(startedNotify.getTransID(), fileteredRecords);
 			return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
 		} else {
 			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;

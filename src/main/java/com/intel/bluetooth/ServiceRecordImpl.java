@@ -443,6 +443,36 @@ public class ServiceRecordImpl implements ServiceRecord {
 		return this.handle;
 	}
 	
+	public boolean hasServiceClassUUID(UUID uuid) {
+		DataElement attrDataElement = getAttributeValue(BluetoothConsts.ServiceClassIDList);
+		if ((attrDataElement == null) || (attrDataElement.getDataType() != DataElement.DATSEQ) || attrDataElement.getSize() == 0) {
+			DebugLog.debug("Bogus ServiceClassIDList");
+			return false;
+		}
+		
+		Object value = attrDataElement.getValue();
+		if ((value == null) || (!(value instanceof Enumeration))) {
+			DebugLog.debug("Bogus Value in DATSEQ");
+			if (value != null) {
+				DebugLog.error("DATSEQ class " + value.getClass().getName());				
+			}
+			return false;
+		}
+		for (Enumeration e = (Enumeration)value; e.hasMoreElements();) {
+			Object element = e.nextElement();
+			if (!(element instanceof DataElement)) {
+				DebugLog.debug("Bogus element in DATSEQ, " + value.getClass().getName());
+				continue;
+			}
+			DataElement dataElement = (DataElement) element;
+			if ((dataElement.getDataType() == DataElement.UUID) && (uuid.equals(dataElement.getValue()))) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	void populateRFCOMMAttributes(int handle, int channel, UUID uuid, String name) {
 		
 		this.populateAttributeValue(BluetoothConsts.ServiceRecordHandle, new DataElement(DataElement.U_INT_4, handle));

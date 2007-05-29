@@ -20,6 +20,8 @@
  */
 package com.intel.bluetooth;
 
+import java.util.Hashtable;
+
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
@@ -28,6 +30,8 @@ import javax.bluetooth.UUID;
 public class SearchServicesThread extends Thread {
 	
 	private static int transIDGenerator = 0;
+	
+	private static Hashtable threads = new Hashtable();
 	
 	private BluetoothStack stack;
 	
@@ -44,6 +48,8 @@ public class SearchServicesThread extends Thread {
 	private BluetoothStateException startException;
 	
 	private boolean started = false;
+	
+	private boolean finished = false;
 	
 	private boolean terminated = false;
 	
@@ -66,7 +72,7 @@ public class SearchServicesThread extends Thread {
 		t.setDaemon(true);
 		synchronized (t) {
 			t.start();
-			while (!t.started && !t.terminated) {
+			while (!t.started && !t.finished) {
 				try {
 					t.wait();
 				} catch (InterruptedException e) {
@@ -78,10 +84,15 @@ public class SearchServicesThread extends Thread {
 			}
 		}
 		if (t.started) {
+			threads.put(new Integer(t.getTransID()), t);
 			return t.getTransID();
 		} else {
 			return 0;
 		}
+	}
+	
+	public static SearchServicesThread getServiceSearchThread(int transID) {
+		return (SearchServicesThread)threads.get(new Integer(transID));
 	}
 	
 	public void run() {
@@ -92,7 +103,8 @@ public class SearchServicesThread extends Thread {
 			startException = e;
 			return;
 		} finally {
-			terminated = true;
+			finished = true;
+			threads.remove(new Integer(getTransID()));
 			synchronized (this) {
 				notifyAll();
 			}
@@ -110,9 +122,17 @@ public class SearchServicesThread extends Thread {
 			notifyAll();
 		}
 	}
-
+	
 	public int getTransID() {
 		return this.transID;
+	}
+	
+	public void setTerminated() {
+		terminated = true;
+	}
+
+	public boolean isTerminated() {
+		return terminated;
 	}
 
 }

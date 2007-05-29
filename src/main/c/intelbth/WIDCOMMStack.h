@@ -54,7 +54,9 @@ typedef struct {
 } DeviceFound;
 
 #define DEVICE_FOUND_MAX 50
-#define SDP_DISCOVERY_RECORDS_USED_MAX 100
+#define SDP_DISCOVERY_RECORDS_USED_MAX 300
+#define SDP_DISCOVERY_RECORDS_DEVICE_MAX 50
+#define SDP_DISCOVERY_RECORDS_HANDLE_OFFSET 1
 // 7 for Server and 7 for Client, Bluetooth Can't have more
 #define COMMPORTS_POOL_MAX 14
 
@@ -73,6 +75,7 @@ public:
 	BOOL deviceInquirySuccess;
 
 	BOOL searchServicesComplete;
+	BOOL searchServicesTerminated;
 	int sdpDiscoveryRecordsUsed;
 	CSdpDiscoveryRec sdpDiscoveryRecords[SDP_DISCOVERY_RECORDS_USED_MAX];
 
