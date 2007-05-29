@@ -483,6 +483,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 		DataElement serviceClassIDList = new DataElement(DataElement.DATSEQ);
 		serviceClassIDList.addElement(new DataElement(DataElement.UUID, uuid));
+		serviceClassIDList.addElement(new DataElement(DataElement.UUID, BluetoothConsts.RFCOMM_PROTOCOL_UUID));
 
 		this.populateAttributeValue(BluetoothConsts.ServiceClassIDList, serviceClassIDList);
 
