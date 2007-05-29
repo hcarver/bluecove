@@ -37,8 +37,8 @@ BOOL isBlueSoleilBluetoothStackPresent() {
 #define BLUESOLEIL_DLL "btfunc.dll"
 // We specify which DLLs to delay load with the /delayload:btfunc.dll linker option
 
-#define deviceRespondedMax 50
-#define MAX_SERVICE_COUNT	100
+#define DEVICE_RESPONDED_MAX 50
+#define SERVICE_COUNT_MAX	100
 
 void BsAddrToString(wchar_t* addressString, BYTE* address) {
 	swprintf_s(addressString, 14, _T("%02x%02x%02x%02x%02x%02x"),
@@ -214,8 +214,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 		ucInqMode = INQUIRY_LIMITED_MODE;
 	}
 	UCHAR ucInqLen = 0x0F; //~~ 15 sec
-	BLUETOOTH_DEVICE_INFO	lpDevsList[deviceRespondedMax] = {0};
-	DWORD devsListLen = sizeof(BLUETOOTH_DEVICE_INFO) * deviceRespondedMax;
+	BLUETOOTH_DEVICE_INFO	lpDevsList[DEVICE_RESPONDED_MAX] = {0};
+	DWORD devsListLen = sizeof(BLUETOOTH_DEVICE_INFO) * DEVICE_RESPONDED_MAX;
 
 	DWORD dwResult = BT_InquireDevices(ucInqMode, ucInqLen, &devsListLen, lpDevsList);
 	if (dwResult != BTSTATUS_SUCCESS) {
