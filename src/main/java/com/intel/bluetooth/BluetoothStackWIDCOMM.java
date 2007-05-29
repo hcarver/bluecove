@@ -233,7 +233,9 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 			for (int i = 0; i < handles.length; i++) {
 				records[i] = new ServiceRecordImpl(device, handles[i]);
 				try {
-					records[i].populateRecord(new int[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004 });
+					records[i].populateRecord(new int[] { BluetoothConsts.ServiceRecordHandle,
+							BluetoothConsts.ServiceClassIDList, BluetoothConsts.ServiceRecordState,
+							BluetoothConsts.ServiceID, BluetoothConsts.ProtocolDescriptorList });
 					if (attrSet != null) {
 						records[i].populateRecord(attrSet);
 					}
@@ -248,12 +250,22 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		}
 	}
 	
-	private native byte[] getServiceAttributes(int attrID, long handle) throws IOException;
+	private native byte[] getServiceAttribute(int attrID, long handle) throws IOException;
+	
+
+	// Simple test
+//	private native int getServiceAttributeRFCommScn(long handle) throws IOException;
+//	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
+//		UUID uuid = new UUID("B1011111111111111111111111110001", false);
+//		int channel = getServiceAttributeRFCommScn(serviceRecord.getHandle());
+//		serviceRecord.populateRFCOMMAttributes(0, channel, uuid, "");
+//		return true;
+//	}
 	
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
 		for (int i = 0; i < attrIDs.length; i++) {
 			try {
-				byte[] sdpStruct = getServiceAttributes(attrIDs[i], serviceRecord.getHandle());
+				byte[] sdpStruct = getServiceAttribute(attrIDs[i], serviceRecord.getHandle());
 				if (sdpStruct != null) {
 					//DebugLog.debug("decode attribute", attrIDs[i]);
 					DataElement element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(sdpStruct)))

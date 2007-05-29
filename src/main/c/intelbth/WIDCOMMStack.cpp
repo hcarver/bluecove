@@ -19,7 +19,7 @@
  *  @version $Id$
  */
 
-#include "common.h"
+#include "WIDCOMMStack.h"
 
 #ifndef _BTWLIB
 BOOL isWIDCOMMBluetoothStackPresent() {
@@ -29,22 +29,7 @@ BOOL isWIDCOMMBluetoothStackPresent() {
 
 #ifdef _BTWLIB
 
-// BTW-5_1_0_3101
-// #pragma comment(lib, "BtWdSdkLib.lib")
-// BTW-5_0_1_902-SDK
-#pragma comment(lib, "WidcommSdklib.lib")
-
-//#include "btwlib.h"
-#include "BtIfDefinitions.h"
-#include "BtIfClasses.h"
-#include "com_intel_bluetooth_BluetoothStackWIDCOMM.h"
-
-#define WIDCOMM_DLL "wbtapi.dll"
-// DLL wbtapi.dll  -> WIDCOMM version 3.x and 4.x and SDK BTW-5_0_1_902-SDK
-// DLL btwapi.dll  -> WIDCOMM 5.1.x and SDK BTW-5_1_0_3101
-// We specify which DLLs to delay load with the /delayload:btwapi.dll linker option
-// This is how it is now: wbtapi.dll;btfunc.dll;irprops.cpl
-
+static WIDCOMMStack* stack;
 static int openConnections = 0;
 static GUID test_client_service_guid = { 0x5fc2a42e, 0x144e, 0x4bb5, { 0xb4, 0x3f, 0x4e, 0x61, 0x71, 0x1d, 0x1c, 0x32 } };
 
@@ -77,47 +62,6 @@ jint DeviceClassToInt(DEV_CLASS devClass) {
 	return (((devClass[0] << 8) + devClass[1]) << 8) + devClass[2];
 }
 
-struct deviceFound {
-	jlong deviceAddr;
-	jint deviceClass;
-	BD_NAME bdName;
-};
-
-#define deviceRespondedMax 50
-#define sdpDiscoveryRecordsUsedMax 100
-
-class WIDCOMMStack : public CBtIf {
-public:
-	HANDLE hEvent;
-
-	deviceFound deviceResponded[deviceRespondedMax];
-	int deviceRespondedIdx;
-	BOOL deviceInquiryTerminated;
-	BOOL deviceInquiryComplete;
-	BOOL deviceInquirySuccess;
-
-	BOOL searchServicesComplete;
-	int sdpDiscoveryRecordsUsed;
-	CSdpDiscoveryRec sdpDiscoveryRecords[sdpDiscoveryRecordsUsedMax];
-
-	// One CRfCommIf shared by application, lock it when connection is made
-	CRITICAL_SECTION csCRfCommIf;
-	CRfCommIf rfCommIf;
-
-	WIDCOMMStack();
-	virtual ~WIDCOMMStack();
-
-	void throwExtendedErrorException(JNIEnv * env, const char *name);
-
-    // methods to replace virtual methods in base class CBtIf
-    virtual void OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected);
-    virtual void OnInquiryComplete(BOOL success, short num_responses);
-
-	virtual void OnDiscoveryComplete();
-};
-
-static WIDCOMMStack* stack;
-
 BOOL isWIDCOMMBluetoothStackPresent() {
 	HMODULE h = LoadLibrary(_T(WIDCOMM_DLL));
 	if (h == NULL) {
@@ -129,12 +73,18 @@ BOOL isWIDCOMMBluetoothStackPresent() {
 
 WIDCOMMStack::WIDCOMMStack() {
 	sdpDiscoveryRecordsUsed = 0;
-	hEvent = CreateEvent( 
+	hEvent = CreateEvent(
             NULL,     // no security attributes
             FALSE,    // auto-reset event
             FALSE,    // initial state is NOT signaled
             NULL);    // object not named
 	InitializeCriticalSection(&csCRfCommIf);
+
+	commPortsPoolDeletionCount = 0;
+	commPortsPoolAllocationHandleOffset = 1;
+	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
+		commPortsPool[i] = NULL;
+	}
 }
 
 WIDCOMMStack* createWIDCOMMStack() {
@@ -159,6 +109,11 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_initia
 
 WIDCOMMStack::~WIDCOMMStack() {
 	SetEvent(hEvent);
+	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
+		if (commPortsPool[i] != NULL) {
+			delete commPortsPool[i];
+		}
+	}
 	CloseHandle(hEvent);
 	DeleteCriticalSection(&csCRfCommIf);
 }
@@ -260,7 +215,7 @@ void WIDCOMMStack::OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bd
 		return;
 	}
 	int nextDevice = deviceRespondedIdx + 1;
-	if (nextDevice >= deviceRespondedMax) {
+	if (nextDevice >= DEVICE_FOUND_MAX) {
 		nextDevice = 0;
 	}
 	deviceResponded[nextDevice].deviceAddr = BcAddrToLong(bda);
@@ -334,10 +289,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 		}
 		if ((stack != NULL) && (reportedIdx != stack->deviceRespondedIdx)) {
 			reportedIdx ++;
-			if (reportedIdx >= deviceRespondedMax) {
+			if (reportedIdx >= DEVICE_FOUND_MAX) {
 				reportedIdx = 0;
 			}
-			deviceFound dev = stack->deviceResponded[reportedIdx];
+			DeviceFound dev = stack->deviceResponded[reportedIdx];
 			env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, dev.deviceAddr, dev.deviceClass, env->NewStringUTF((char*)(dev.bdName)));
 			if (ExceptionCheckCompatible(env)) {
 				stack->StopInquiry();
@@ -389,6 +344,9 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		p_service_guid = &service_guid;
 		memcpy(&test_client_service_guid, &service_guid, sizeof(GUID));
 	}
+	if (p_service_guid == NULL) {
+		debug("p_service_guid is NULL");
+	}
 
 	stack->searchServicesComplete = FALSE;
 
@@ -437,22 +395,29 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		return env->NewLongArray(0);
 	}
 
-	if (obtainedServicesRecords > sdpDiscoveryRecordsUsedMax) {
+	if (obtainedServicesRecords > SDP_DISCOVERY_RECORDS_USED_MAX) {
 		debugs("too many ServicesRecords %i", obtainedServicesRecords);
-		obtainedServicesRecords = sdpDiscoveryRecordsUsedMax;
+		obtainedServicesRecords = SDP_DISCOVERY_RECORDS_USED_MAX;
 	}
 	int useIdx = stack->sdpDiscoveryRecordsUsed;
-	if (useIdx + obtainedServicesRecords > sdpDiscoveryRecordsUsedMax) {
+	//if (useIdx + obtainedServicesRecords > SDP_DISCOVERY_RECORDS_USED_MAX) {
 		useIdx = 0;
-	}
+	//}
+		debugs("obtainedServicesRecords %i", obtainedServicesRecords);
+		obtainedServicesRecords = SDP_DISCOVERY_RECORDS_USED_MAX;
+
 	CSdpDiscoveryRec *sdpDiscoveryRecordsList = stack->sdpDiscoveryRecords + useIdx;
 
-	int recSize = stack->ReadDiscoveryRecords(bda, obtainedServicesRecords, sdpDiscoveryRecordsList, p_service_guid);
+	//guid_filter does not work as Expected with SE Phones!
+	int recSize = stack->ReadDiscoveryRecords(bda, obtainedServicesRecords, sdpDiscoveryRecordsList, NULL);
 	if (recSize == 0) {
 		debugs("ReadDiscoveryRecords returns empty, While expected %i", obtainedServicesRecords);
 		return NULL;
 	}
-	stack->sdpDiscoveryRecordsUsed += recSize; 
+	if (obtainedServicesRecords != recSize) {
+		debugss("obtained %i, but returns recSize %i", obtainedServicesRecords, recSize);
+	}
+	stack->sdpDiscoveryRecordsUsed += recSize;
 
 	jlongArray result = env->NewLongArray(recSize);
 	jlong *longs = env->GetLongArrayElements(result, 0);
@@ -460,7 +425,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		longs[r] = useIdx + r;
 	}
 	env->ReleaseLongArrayElements(result, longs, 0);
-	
+
 	return result;
 }
 
@@ -469,72 +434,109 @@ void WIDCOMMStack::OnDiscoveryComplete() {
 	SetEvent(hEvent);
 }
 
-JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getServiceAttributes
+/*
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getServiceAttributeRFCommScn
+(JNIEnv *env, jobject, jlong handle) {
+	if ((handle > SDP_DISCOVERY_RECORDS_USED_MAX) || (handle < 0)) {
+		throwIOException(env, "Invalid handle");
+		return NULL;
+	}
+	CSdpDiscoveryRec* record = stack->sdpDiscoveryRecords + handle;
+	UINT8 scn = -1;
+	if (record->FindRFCommScn(&scn)) {
+		return scn;
+	} else {
+		return -1;
+	}
+}
+*/
+
+JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getServiceAttribute
 (JNIEnv *env, jobject peer, jint attrID, jlong handle) {
-	if ((handle > sdpDiscoveryRecordsUsedMax) || (handle < 0)) {
+	if ((handle > SDP_DISCOVERY_RECORDS_USED_MAX) || (handle < 0)) {
 		throwIOException(env, "Invalid handle");
 		return NULL;
 	}
 	CSdpDiscoveryRec* record = stack->sdpDiscoveryRecords + handle;
 
-	SDP_DISC_ATTTR_VAL val;
+	SDP_DISC_ATTTR_VAL* pval = new SDP_DISC_ATTTR_VAL;
 
-	if (!record->FindAttribute((UINT16)attrID, &val)) {
+	if (!record->FindAttribute((UINT16)attrID, pval)) {
 		// attr not found
+		delete pval;
 		return NULL;
 	}
 
 	jbyteArray result = env->NewByteArray(sizeof(SDP_DISC_ATTTR_VAL));
 	jbyte *bytes = env->GetByteArrayElements(result, 0);
-	memcpy(bytes, &val, sizeof(SDP_DISC_ATTTR_VAL));
+	memcpy(bytes, pval, sizeof(SDP_DISC_ATTTR_VAL));
 	env->ReleaseByteArrayElements(result, bytes, 0);
+	delete pval;
 	return result;
 }
 
 //	 --- Client RFCOMM connections
-#define todo_buf_max 0x10000
 
-#define MAGIC_1 0xBC1AA01
-#define MAGIC_2 0xBC2BB02
+// Guarded by CriticalSection csCRfCommIf
+int WIDCOMMStack::getCommPortFreeIndex() {
+	int freeIndex = -1;
+	int minDeletionIndex = INT_MAX;
+	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
+		if (commPortsPool[i] == NULL) {
+			return i;
+		}
+		if (!commPortsPool[i]->readyToFree) {
+			continue;
+		}
+		if (minDeletionIndex > commPortsPool[i]->commPortsPoolDeletionIndex) {
+			minDeletionIndex = commPortsPool[i]->commPortsPoolDeletionIndex;
+			freeIndex = i;
+		}
+	}
+	if ((!COMMPORTS_REUSE_OBJECTS) && (freeIndex != -1))  {
+		delete commPortsPool[freeIndex];
+		commPortsPool[freeIndex] = NULL;
+	}
 
-class WIDCOMMStackRfCommPort : public CRfCommPort {
-public:
-	long magic1;
-	long magic2;
+	// TODO Inc commPortsPoolAllocationHandleOffset to avoid Handle reuse
 
-	GUID service_guid;
-	BT_CHAR service_name[BT_MAX_SERVICE_NAME_LEN + 1];
+	return freeIndex;
+}
 
-	BOOL isClosing;
-	BOOL isConnected;
-	BOOL isConnectionError;
+WIDCOMMStackRfCommPort* WIDCOMMStack::createCommPort() {
 
-	HANDLE hEvents[2];
+	int freeIndex = getCommPortFreeIndex();
+	if (freeIndex == -1) {
+		return NULL;
+	}
+	if (commPortsPool[freeIndex] == NULL) {
+		commPortsPool[freeIndex] = new WIDCOMMStackRfCommPort();
+	}
 
-	jbyte todo_buf[todo_buf_max];
-	int todo_buf_rcv_idx;
-	int todo_buf_read_idx;
+	int internalHandle = commPortsPoolAllocationHandleOffset + freeIndex;
+	WIDCOMMStackRfCommPort* rf = commPortsPool[freeIndex];
+	rf->readyForReuse();
+	rf->internalHandle = internalHandle;
+	rf->commPortsPoolDeletionIndex = 0;
 
-	WIDCOMMStackRfCommPort();
-	virtual ~WIDCOMMStackRfCommPort();
+	return rf;
+}
 
-	virtual void OnEventReceived (UINT32 event_code);
-	virtual void OnDataReceived (void *p_data, UINT16 len);
-};
+void WIDCOMMStack::deleteCommPort(WIDCOMMStackRfCommPort* commPort) {
+	commPort->commPortsPoolDeletionIndex = (++commPortsPoolDeletionCount);
+	commPort->readyToFree = TRUE;
+}
 
 WIDCOMMStackRfCommPort::WIDCOMMStackRfCommPort() {
-	todo_buf_rcv_idx = 0;
-	todo_buf_read_idx = 0;
-	isConnected = FALSE;
-	isConnectionError = FALSE;
-	isClosing = FALSE;
-	service_name[0] = '\0';
-    hEvents[0] = CreateEvent( 
+
+	readyForReuse();
+
+    hEvents[0] = CreateEvent(
             NULL,     // no security attributes
             FALSE,     // auto-reset event
             FALSE,    // initial state is NOT signaled
             NULL);    // object not named
-    hEvents[1] = CreateEvent( 
+    hEvents[1] = CreateEvent(
             NULL,     // no security attributes
             FALSE,     // auto-reset event
             FALSE,     // initial state is NOT signaled
@@ -545,9 +547,24 @@ WIDCOMMStackRfCommPort::WIDCOMMStackRfCommPort() {
 	openConnections ++;
 }
 
+void WIDCOMMStackRfCommPort::readyForReuse() {
+	todo_buf_rcv_idx = 0;
+	todo_buf_read_idx = 0;
+	isConnected = FALSE;
+	isConnectionError = FALSE;
+	isClosing = FALSE;
+	readyToFree = FALSE;
+	service_name[0] = '\0';
+}
+
 WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
 	magic1 = 0;
 	magic2 = 0;
+	if (isConnected) {
+		isClosing = TRUE;
+		SetEvent(hEvents[0]);
+		Close();
+	}
 	isConnected = FALSE;
 	CloseHandle(hEvents[0]);
 	CloseHandle(hEvents[1]);
@@ -555,11 +572,17 @@ WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
 }
 
 WIDCOMMStackRfCommPort* validRfCommHandle(JNIEnv *env, jlong handle) {
-	if (handle == 0) {
+	if ((handle <= 0) || (stack == NULL)) {
 		throwIOException(env, "Invalid handle");
 		return NULL;
 	}
-	WIDCOMMStackRfCommPort* rf = (WIDCOMMStackRfCommPort*)handle;
+	if ((handle < stack->commPortsPoolAllocationHandleOffset) || (handle >= stack->commPortsPoolAllocationHandleOffset + COMMPORTS_POOL_MAX))  {
+		throwIOException(env, "Obsolete handle");
+		return NULL;
+	}
+	int idx = (int)(handle - stack->commPortsPoolAllocationHandleOffset);
+
+	WIDCOMMStackRfCommPort* rf = stack->commPortsPool[idx];
 	if ((rf->magic1 != MAGIC_1) || (rf->magic2 != MAGIC_2)) {
 		throwIOException(env, "Invalid or destroyed handle");
 		return NULL;
@@ -587,7 +610,7 @@ void WIDCOMMStackRfCommPort::OnDataReceived(void *p_data, UINT16 len) {
 		return;
 	}
 	if (isConnected) {
-		int accept = todo_buf_max - todo_buf_rcv_idx;
+		int accept = TODO_BUF_MAX - todo_buf_rcv_idx;
 		if (len > accept) {
 			len = accept;
 		}
@@ -602,55 +625,71 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 	BD_ADDR bda;
 	LongToBcAddr(address, bda);
 
-	WIDCOMMStackRfCommPort* rf = new WIDCOMMStackRfCommPort();
-	if ((rf->hEvents[0] == NULL) || (rf->hEvents[1] == NULL)) {
-		throwRuntimeException(env, "fails to CreateEvent");
-		delete rf;
-		return 0;
-	}
-	//debug("AssignScnValue");
-	// What GUID do we need in call to CRfCommIf.AssignScnValue() if we don't have any?
-	memcpy(&(rf->service_guid), &test_client_service_guid, sizeof(GUID));
 	EnterCriticalSection(&stack->csCRfCommIf);
-	if (!stack->rfCommIf.AssignScnValue(&(rf->service_guid), (UINT8)channel)) {
-		LeaveCriticalSection(&stack->csCRfCommIf);
-		delete rf;
-		throwIOException(env, "failed to assign SCN");
-		return 0;
-	}
-	//debug("SetSecurityLevel");
-	UINT8 sec_level = BTM_SEC_NONE;
-	if (!stack->rfCommIf.SetSecurityLevel("bluecovesrv"/*rf->service_name*/, sec_level, FALSE)) {
-        LeaveCriticalSection(&stack->csCRfCommIf);
-		throwIOException(env, "Error setting security level");
-        delete rf;
-		return 0;
-    }
-	//debug("OpenClient");
-	CRfCommPort::PORT_RETURN_CODE rc = rf->OpenClient((UINT8)channel, bda);
-	if (rc != CRfCommPort::SUCCESS) {
-		LeaveCriticalSection(&stack->csCRfCommIf);
-		throwIOException(env, "Failed to OpenClient");
-		delete rf;
-		return 0;
-	}
-	LeaveCriticalSection(&stack->csCRfCommIf);
-
-	while ((stack != NULL) && !rf->isConnected && !rf->isConnectionError) {
-		DWORD  rc = WaitForSingleObject(rf->hEvents[0], 500);
-		if (rc == WAIT_FAILED) {
-			throwRuntimeException(env, "WaitForSingleObject");
-			delete(rf);
+	__try {
+		WIDCOMMStackRfCommPort* rf = stack->createCommPort();
+		if (rf == NULL) {
+			throwIOException(env, "No free connections Objects in Pool");
 			return 0;
 		}
+        debugs("RfCommPort handle %i", rf->internalHandle);
+		if ((rf->hEvents[0] == NULL) || (rf->hEvents[1] == NULL)) {
+			throwRuntimeException(env, "fails to CreateEvent");
+			stack->deleteCommPort(rf);
+			return 0;
+		}
+		//debug("AssignScnValue");
+		// What GUID do we need in call to CRfCommIf.AssignScnValue() if we don't have any?
+		memcpy(&(rf->service_guid), &test_client_service_guid, sizeof(GUID));
+		if (!stack->rfCommIf.AssignScnValue(&(rf->service_guid), (UINT8)channel)) {
+			stack->deleteCommPort(rf);
+			throwIOException(env, "failed to assign SCN");
+			return 0;
+		}
+		//debug("SetSecurityLevel");
+		UINT8 sec_level = BTM_SEC_NONE;
+		if (!stack->rfCommIf.SetSecurityLevel("bluecovesrv"/*rf->service_name*/, sec_level, FALSE)) {
+			throwIOException(env, "Error setting security level");
+            stack->deleteCommPort(rf);
+			return 0;
+        }
+		//debug("OpenClient");
+		CRfCommPort::PORT_RETURN_CODE rc = rf->OpenClient((UINT8)channel, bda);
+		if (rc != CRfCommPort::SUCCESS) {
+			// Just in case Close
+			rf->Close();
+			throwIOException(env, "Failed to OpenClient");
+			if (stack != NULL) {
+				stack->deleteCommPort(rf);
+			}
+			return 0;
+		}
+
+		//debug("waitFor Connection signal");
+		while ((stack != NULL) && !rf->isConnected && !rf->isConnectionError) {
+			DWORD  rc = WaitForSingleObject(rf->hEvents[0], 500);
+			if (rc == WAIT_FAILED) {
+				throwRuntimeException(env, "WaitForSingleObject");
+				// Just in case Close
+				rf->Close();
+				stack->deleteCommPort(rf);
+				return 0;
+			}
+		}
+		if ((stack == NULL) || rf->isConnectionError) {
+			throwIOException(env, "Failed to connect");
+			if (stack != NULL) {
+				// Just in case Close
+				rf->Close();
+				stack->deleteCommPort(rf);
+			}
+			return 0;
+		}
+		debug("connected");
+		return rf->internalHandle;
+	} __finally {
+		LeaveCriticalSection(&stack->csCRfCommIf);
 	}
-	if ((stack == NULL) || rf->isConnectionError) {
-		throwIOException(env, "Failed to connect");
-		delete rf;
-		return 0;
-	}
-	debug("connected");
-	return (jlong)rf;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfCloseClientConnection
@@ -666,8 +705,11 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	if (rc != CRfCommPort::SUCCESS && rc != CRfCommPort::NOT_OPENED) {
 		throwIOException(env, "Failed to Close");
 	}
-	delete rf;
-	debugs("openConnections %i", openConnections);
+	// Some worker thread is still trying to access this object, delete later
+	if (stack != NULL) {
+		stack->deleteCommPort(rf);
+	}
+	//debugs("connection handles %i", openConnections);
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getConnectionRfRemoteAddress
@@ -699,8 +741,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	if (rf->isClosing) {
 		return -1;
 	}
-	while (rf->isConnected && (rf->todo_buf_read_idx == rf->todo_buf_rcv_idx)) {
-		if (todo_buf_max == rf->todo_buf_rcv_idx) {
+	while (rf->isConnected && (!rf->isClosing) && (rf->todo_buf_read_idx == rf->todo_buf_rcv_idx)) {
+		if (TODO_BUF_MAX == rf->todo_buf_rcv_idx) {
 			throwIOException(env, "rcv buffer overflown, Fix me");
 			return 0;
 		}
@@ -710,7 +752,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			return 0;
 		}
 	}
-	if (!rf->isConnected && (rf->todo_buf_read_idx == rf->todo_buf_rcv_idx)) {
+	if ((rf->isClosing) || (!rf->isConnected && (rf->todo_buf_read_idx == rf->todo_buf_rcv_idx))) {
 		// See InputStream.read();
 		return -1;
 	}
@@ -733,9 +775,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 
 	int done = 0;
 
-	while (rf->isConnected && done < len) {
+	while (rf->isConnected && (!rf->isClosing) && (done < len)) {
 		while (rf->isConnected && rf->todo_buf_read_idx == rf->todo_buf_rcv_idx) {
-			if (todo_buf_max == rf->todo_buf_rcv_idx) {
+			if (TODO_BUF_MAX == rf->todo_buf_rcv_idx) {
 				throwIOException(env, "rcv buffer overflown, Fix me");
 				return 0;
 			}
@@ -755,7 +797,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 
 		done += count;
 	}
-	if (!rf->isConnected && done == 0) {
+	if ((rf->isClosing) || (!rf->isConnected && done == 0)) {
 		// See InputStream.read();
 		done = -1;
 	}
@@ -810,7 +852,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 
 	UINT16 done = 0;
 
-	while ((done < len) && rf->isConnected) {
+	while ((done < len) && rf->isConnected && (!rf->isClosing)) {
 		UINT16 written = 0;
 		CRfCommPort::PORT_RETURN_CODE rc = rf->Write((void*)(bytes + off + done), (UINT16)(len - done), &written);
 		if (rc != CRfCommPort::SUCCESS) {
