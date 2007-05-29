@@ -76,10 +76,19 @@ public class BlueCoveImpl {
 		
 		stack = setBluetoothStack(stack);
 		
+		// bluetoothStack.destroy(); May stuck in WIDCOMM forever. Exit JVM anyway.
+		final ShutdownHookThread shutdownHookThread = new ShutdownHookThread();
+		shutdownHookThread.start();
+		
 		Runnable r = new Runnable() {
 			public void run() {
-				bluetoothStack.destroy();
-				System.out.println("BlueCove stack shutdown completed");
+				synchronized (shutdownHookThread) {
+					shutdownHookThread.notifyAll();
+					try {
+						shutdownHookThread.wait(7000);
+					} catch (InterruptedException e) {
+					}
+				}
 			}
 		};
 		
@@ -90,6 +99,30 @@ public class BlueCoveImpl {
 		}
 		
 		System.out.println("BlueCove version " + version + " on " + stack);
+	}
+	
+	private class ShutdownHookThread extends Thread {
+		
+		ShutdownHookThread() {
+			super("BluecoveShutdownHookThread");
+			this.setDaemon(true);
+		}
+		
+		public void run() {
+			synchronized (this) {
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+					return;
+				}
+			}
+			bluetoothStack.destroy();
+			System.out.println("BlueCove stack shutdown completed");
+			synchronized (this) {
+				this.notifyAll();
+			}
+		}
+		
 	}
 
     public static BlueCoveImpl instance() {
