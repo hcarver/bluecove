@@ -66,7 +66,10 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		serviceRecord = new ServiceRecordImpl(null, 0);
 
 
-		serviceRecord.populateRFCOMMAttributes(0x00010020, peer.getsockchannel(socket), uuid, name);
+		int channel = peer.getsockchannel(socket);
+		DebugLog.debug("service channel ", channel);
+		
+		serviceRecord.populateRFCOMMAttributes(0x00010020, channel, uuid, name);
 
 		/*
 		 * register service

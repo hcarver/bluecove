@@ -257,6 +257,8 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 					if (attrSet != null) {
 						sr.populateRecord(attrSet);
 					}
+					DebugLog.debug("ServiceRecord (" + i +") handle", handles[i]);
+					DebugLog.debug("ServiceRecord (" + i +")", sr);
 				} catch (Exception e) {
 					DebugLog.debug("populateRecord error", e);
 				}

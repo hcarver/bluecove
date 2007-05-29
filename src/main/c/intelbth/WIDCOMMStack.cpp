@@ -72,7 +72,6 @@ BOOL isWIDCOMMBluetoothStackPresent() {
 }
 
 WIDCOMMStack::WIDCOMMStack() {
-	sdpDiscoveryRecordsUsed = 0;
 	hEvent = CreateEvent(
             NULL,     // no security attributes
             FALSE,    // auto-reset event
@@ -85,6 +84,12 @@ WIDCOMMStack::WIDCOMMStack() {
 	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
 		commPortsPool[i] = NULL;
 	}
+	discoveryRecHolderCurrent = NULL;
+	discoveryRecHolderHold = NULL;
+}
+
+DiscoveryRecHolder::DiscoveryRecHolder() {
+	sdpDiscoveryRecordsUsed = 0;
 }
 
 WIDCOMMStack* createWIDCOMMStack() {
@@ -113,6 +118,12 @@ WIDCOMMStack::~WIDCOMMStack() {
 		if (commPortsPool[i] != NULL) {
 			delete commPortsPool[i];
 		}
+	}
+	if (discoveryRecHolderHold != NULL) {
+		delete discoveryRecHolderHold;
+	}
+	if (discoveryRecHolderCurrent != NULL) {
+		delete discoveryRecHolderCurrent;
 	}
 	CloseHandle(hEvent);
 	DeleteCriticalSection(&csCRfCommIf);
@@ -407,13 +418,27 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	} 
 	debugs("obtainedServicesRecords %i", obtainedServicesRecords);
 	// Retrive all Records and filter in Java
-	int retriveRecords = SDP_DISCOVERY_RECORDS_USED_MAX;
-	int useIdx = stack->sdpDiscoveryRecordsUsed;
-	if (useIdx + retriveRecords > SDP_DISCOVERY_RECORDS_USED_MAX) {
-		useIdx = 0;
+	int retriveRecords = SDP_DISCOVERY_RECORDS_DEVICE_MAX;
+
+	// Select RecHolder
+	if (stack->discoveryRecHolderCurrent == NULL) {
+		stack->discoveryRecHolderCurrent = new DiscoveryRecHolder();
+		stack->discoveryRecHolderCurrent->oddHolder = TRUE;
 	}
 
-	CSdpDiscoveryRec *sdpDiscoveryRecordsList = stack->sdpDiscoveryRecords + useIdx;
+	int useIdx = stack->discoveryRecHolderCurrent->sdpDiscoveryRecordsUsed;
+	if (useIdx + retriveRecords > SDP_DISCOVERY_RECORDS_USED_MAX) {
+		useIdx = 0;
+		// Select next RecHolder
+		if (stack->discoveryRecHolderHold != NULL) {
+			delete stack->discoveryRecHolderHold;
+		}
+		stack->discoveryRecHolderHold = stack->discoveryRecHolderCurrent;
+		stack->discoveryRecHolderCurrent = new DiscoveryRecHolder();
+		stack->discoveryRecHolderCurrent->oddHolder = !(stack->discoveryRecHolderHold->oddHolder);
+	}
+
+	CSdpDiscoveryRec *sdpDiscoveryRecordsList = stack->discoveryRecHolderCurrent->sdpDiscoveryRecords + useIdx;
 
 	//guid_filter does not work as Expected with SE Phones!
 	int recSize = stack->ReadDiscoveryRecords(bda, retriveRecords, sdpDiscoveryRecordsList, NULL);
@@ -421,12 +446,17 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		debugs("ReadDiscoveryRecords returns empty, While expected min %i", obtainedServicesRecords);
 		return NULL;
 	}
-	stack->sdpDiscoveryRecordsUsed += recSize;
+	stack->discoveryRecHolderCurrent->sdpDiscoveryRecordsUsed += recSize;
+
+	int oddOffset = 0;
+	if (stack->discoveryRecHolderCurrent->oddHolder) {
+		oddOffset = SDP_DISCOVERY_RECORDS_HOLDER_MASK;
+	}
 
 	jlongArray result = env->NewLongArray(recSize);
 	jlong *longs = env->GetLongArrayElements(result, 0);
 	for (int r = 0; r < recSize; r ++) {
-		longs[r] = SDP_DISCOVERY_RECORDS_HANDLE_OFFSET + useIdx + r;
+		longs[r] = oddOffset + SDP_DISCOVERY_RECORDS_HANDLE_OFFSET + useIdx + r;
 	}
 	env->ReleaseLongArrayElements(result, longs, 0);
 
@@ -447,13 +477,29 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_cancelServ
 }
 
 CSdpDiscoveryRec* validDiscoveryRec(JNIEnv *env, jlong handle) {
-	if ((stack == NULL) 
-		|| (handle < SDP_DISCOVERY_RECORDS_HANDLE_OFFSET)
-		|| (handle > SDP_DISCOVERY_RECORDS_USED_MAX + SDP_DISCOVERY_RECORDS_HANDLE_OFFSET)) {
-		throwIOException(env, "Invalid handle");
+	if (stack == NULL) {
+		throwIOException(env, "Invalid DiscoveryRec handle");
 		return NULL;
 	}
-	return stack->sdpDiscoveryRecords + handle - (handle < SDP_DISCOVERY_RECORDS_HANDLE_OFFSET);
+	int offset = (int)handle;
+	DiscoveryRecHolder* discoveryRecHolder;
+	BOOL heedOdd = ((handle | SDP_DISCOVERY_RECORDS_HOLDER_MASK) != 0);
+	if (stack->discoveryRecHolderCurrent->oddHolder == heedOdd) {
+		discoveryRecHolder = stack->discoveryRecHolderCurrent;
+		offset -= SDP_DISCOVERY_RECORDS_HOLDER_MASK;
+	} else {
+		discoveryRecHolder = stack->discoveryRecHolderHold;
+	}
+	if (discoveryRecHolder == NULL) {
+		throwIOException(env, "Invalid DiscoveryRec holder");
+		return NULL;
+	}
+	if ((offset < SDP_DISCOVERY_RECORDS_HANDLE_OFFSET)
+		|| (offset > SDP_DISCOVERY_RECORDS_USED_MAX + SDP_DISCOVERY_RECORDS_HANDLE_OFFSET)) {
+		throwIOExceptionExt(env, "Invalid DiscoveryRec handle [%i]", offset);
+		return NULL;
+	}
+	return discoveryRecHolder->sdpDiscoveryRecords + offset - SDP_DISCOVERY_RECORDS_HANDLE_OFFSET;
 }
 
 /*
@@ -472,6 +518,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getService
 JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getServiceAttribute
 (JNIEnv *env, jobject peer, jint attrID, jlong handle) {
 	CSdpDiscoveryRec* record = validDiscoveryRec(env, handle);
+	if (record == NULL) {
+		return NULL;
+	}
 
 	SDP_DISC_ATTTR_VAL* pval = new SDP_DISC_ATTTR_VAL;
 
@@ -680,10 +729,18 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 		}
 
 		//debug("waitFor Connection signal");
+		DWORD waitStart = GetTickCount();
 		while ((stack != NULL) && !rf->isConnected && !rf->isConnectionError) {
 			DWORD  rc = WaitForSingleObject(rf->hEvents[0], 500);
 			if (rc == WAIT_FAILED) {
 				throwRuntimeException(env, "WaitForSingleObject");
+				// Just in case Close
+				rf->Close();
+				stack->deleteCommPort(rf);
+				return 0;
+			}
+			if ((GetTickCount() - waitStart)  > COMMPORTS_CONNECT_TIMEOUT) {
+				throwIOException(env, "Connection timeout");
 				// Just in case Close
 				rf->Close();
 				stack->deleteCommPort(rf);

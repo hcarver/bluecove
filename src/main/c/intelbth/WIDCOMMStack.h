@@ -56,13 +56,24 @@ typedef struct {
 #define DEVICE_FOUND_MAX 50
 #define SDP_DISCOVERY_RECORDS_USED_MAX 300
 #define SDP_DISCOVERY_RECORDS_DEVICE_MAX 50
+#define SDP_DISCOVERY_RECORDS_HOLDER_MASK 0x1000
 #define SDP_DISCOVERY_RECORDS_HANDLE_OFFSET 1
 // 7 for Server and 7 for Client, Bluetooth Can't have more
 #define COMMPORTS_POOL_MAX 14
 
 #define COMMPORTS_REUSE_OBJECTS FALSE
+#define COMMPORTS_CONNECT_TIMEOUT 60000
 
 class WIDCOMMStackRfCommPort;
+
+class DiscoveryRecHolder {
+public:
+	BOOL oddHolder;
+	int sdpDiscoveryRecordsUsed;
+	CSdpDiscoveryRec sdpDiscoveryRecords[SDP_DISCOVERY_RECORDS_USED_MAX];
+
+	DiscoveryRecHolder();
+};
 
 class WIDCOMMStack : public CBtIf {
 public:
@@ -76,8 +87,10 @@ public:
 
 	BOOL searchServicesComplete;
 	BOOL searchServicesTerminated;
-	int sdpDiscoveryRecordsUsed;
-	CSdpDiscoveryRec sdpDiscoveryRecords[SDP_DISCOVERY_RECORDS_USED_MAX];
+
+	// Switch this buffers sequencialy when current if full
+	DiscoveryRecHolder* discoveryRecHolderCurrent;
+	DiscoveryRecHolder* discoveryRecHolderHold;
 
 	int commPortsPoolDeletionCount;
 	int commPortsPoolAllocationHandleOffset;
