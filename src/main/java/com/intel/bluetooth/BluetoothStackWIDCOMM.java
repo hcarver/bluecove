@@ -214,7 +214,9 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		byte[] uuidValue = Utils.UUIDToByteArray(BluetoothConsts.L2CAP_PROTOCOL_UUID);
 		long[] handles;
 		try {
-			handles = runSearchServicesImpl(startedNotify, uuidValue, ((RemoteDeviceImpl) device).getAddress());
+			synchronized (BluetoothStackWIDCOMM.class) {
+				handles = runSearchServicesImpl(startedNotify, uuidValue, ((RemoteDeviceImpl) device).getAddress());
+			}
 		} catch (SearchServicesTerminatedException e) {
 			return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
 		}
@@ -257,7 +259,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 					if (attrSet != null) {
 						sr.populateRecord(attrSet);
 					}
-					DebugLog.debug("ServiceRecord (" + i +") handle", handles[i]);
+					DebugLog.debug("ServiceRecord (" + i +") sr.handle", handles[i]);
 					DebugLog.debug("ServiceRecord (" + i +")", sr);
 				} catch (Exception e) {
 					DebugLog.debug("populateRecord error", e);
@@ -266,12 +268,13 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 					return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
 				}
 			}
-			ServiceRecord[] fileteredRecords = (ServiceRecord[])records.toArray(new ServiceRecord[records.size()]);  
-			listener.servicesDiscovered(startedNotify.getTransID(), fileteredRecords);
-			return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
-		} else {
-			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
-		}
+			if (records.size() != 0) {
+				ServiceRecord[] fileteredRecords = (ServiceRecord[])records.toArray(new ServiceRecord[records.size()]);  
+				listener.servicesDiscovered(startedNotify.getTransID(), fileteredRecords);
+				return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
+			}
+		} 
+		return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
 	}
 	
 	private native byte[] getServiceAttribute(int attrID, long handle) throws IOException;

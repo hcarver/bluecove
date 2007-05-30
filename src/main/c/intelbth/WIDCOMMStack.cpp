@@ -344,6 +344,10 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	BD_ADDR bda;
 	LongToBcAddr(address, bda);
 
+	wchar_t addressString[14];
+	BcAddrToString(addressString, bda);
+	debugs("StartSearchServices on %S", addressString);
+
 	GUID *p_service_guid = NULL;
 	GUID service_guid;
 	//If uuidValue parameter is NULL, all public browseable services for the device will be reported
@@ -424,11 +428,13 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	if (stack->discoveryRecHolderCurrent == NULL) {
 		stack->discoveryRecHolderCurrent = new DiscoveryRecHolder();
 		stack->discoveryRecHolderCurrent->oddHolder = TRUE;
+		debug("DiscoveryRecHolder created");
 	}
 
 	int useIdx = stack->discoveryRecHolderCurrent->sdpDiscoveryRecordsUsed;
 	if (useIdx + retriveRecords > SDP_DISCOVERY_RECORDS_USED_MAX) {
 		useIdx = 0;
+		debug("DiscoveryRecHolder switch");
 		// Select next RecHolder
 		if (stack->discoveryRecHolderHold != NULL) {
 			delete stack->discoveryRecHolderHold;
@@ -436,7 +442,13 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		stack->discoveryRecHolderHold = stack->discoveryRecHolderCurrent;
 		stack->discoveryRecHolderCurrent = new DiscoveryRecHolder();
 		stack->discoveryRecHolderCurrent->oddHolder = !(stack->discoveryRecHolderHold->oddHolder);
+	} else {
+		debugs("DiscoveryRecHolder useIdx %i", useIdx);
 	}
+
+	wchar_t addressString2[14];
+	BcAddrToString(addressString2, bda);
+	debugs("ReadDiscoveryRecords on %S", addressString2);
 
 	CSdpDiscoveryRec *sdpDiscoveryRecordsList = stack->discoveryRecHolderCurrent->sdpDiscoveryRecords + useIdx;
 
@@ -446,6 +458,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		debugs("ReadDiscoveryRecords returns empty, While expected min %i", obtainedServicesRecords);
 		return NULL;
 	}
+	debugs("DiscoveryRecHolder +=recSize %i", recSize);
 	stack->discoveryRecHolderCurrent->sdpDiscoveryRecordsUsed += recSize;
 
 	int oddOffset = 0;
