@@ -31,7 +31,6 @@ BOOL isWIDCOMMBluetoothStackPresent() {
 
 static WIDCOMMStack* stack;
 static int openConnections = 0;
-static GUID test_client_service_guid = { 0x5fc2a42e, 0x144e, 0x4bb5, { 0xb4, 0x3f, 0x4e, 0x61, 0x71, 0x1d, 0x1c, 0x32 } };
 
 void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr) {
 	swprintf_s(addressString, 14, _T("%02x%02x%02x%02x%02x%02x"),
@@ -360,7 +359,6 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		convertUUIDBytesToGUID(bytes, &service_guid);
 		env->ReleaseByteArrayElements(uuidValue, bytes, 0);
 		p_service_guid = &service_guid;
-		memcpy(&test_client_service_guid, &service_guid, sizeof(GUID));
 	}
 	if (p_service_guid == NULL) {
 		debug("p_service_guid is NULL");
@@ -773,7 +771,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 		}
 		//debug("AssignScnValue");
 		// What GUID do we need in call to CRfCommIf.AssignScnValue() if we don't have any?
-		memcpy(&(rf->service_guid), &test_client_service_guid, sizeof(GUID));
+		//memcpy(&(rf->service_guid), &test_client_service_guid, sizeof(GUID));
 		if (!stack->rfCommIf.AssignScnValue(&(rf->service_guid), (UINT8)channel)) {
 			stack->deleteCommPort(rf);
 			throwIOException(env, "failed to assign SCN");
