@@ -207,88 +207,86 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	}
 
 	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, byte[] uuidValue, long address) throws BluetoothStateException, SearchServicesTerminatedException;
+
+	private native byte[] getServiceAttribute(int attrID, long handle) throws IOException;
+	
+	private native boolean isServiceRecordDiscoverable(long address, long handle) throws IOException;
 	
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
 			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		// Retrive all Records, Filter here in Java
-		byte[] uuidValue = Utils.UUIDToByteArray(BluetoothConsts.L2CAP_PROTOCOL_UUID);
-		long[] handles;
-		try {
-			synchronized (BluetoothStackWIDCOMM.class) {
+		synchronized (BluetoothStackWIDCOMM.class) {
+			byte[] uuidValue = Utils.UUIDToByteArray(BluetoothConsts.L2CAP_PROTOCOL_UUID);
+			long[] handles;
+			try {
 				handles = runSearchServicesImpl(startedNotify, uuidValue, ((RemoteDeviceImpl) device).getAddress());
+			} catch (SearchServicesTerminatedException e) {
+				return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
 			}
-		} catch (SearchServicesTerminatedException e) {
-			return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
-		}
-		if (handles == null) {
-			return DiscoveryListener.SERVICE_SEARCH_ERROR;
-		} else if (handles.length > 0) {
+			if (handles == null) {
+				return DiscoveryListener.SERVICE_SEARCH_ERROR;
+			} else if (handles.length > 0) {
 
-			boolean reqRFCOMM = false;
-			//boolean reqL2CAP = false;
-			UUID uuidFiler = null;
-			// If Search for sepcific service, select its UUID
-			for (int u = 0; u < uuidSet.length; u++) {
-				if (uuidSet[u].equals(BluetoothConsts.L2CAP_PROTOCOL_UUID))  {
-					//reqL2CAP = true;
-					continue;
-				}
-				if (uuidSet[u].equals(BluetoothConsts.RFCOMM_PROTOCOL_UUID))  {
-					reqRFCOMM = true;
-					continue;
-				}
-				uuidFiler = uuidSet[u];
-				break;
-			}
-			if ((uuidFiler == null) && (reqRFCOMM)) {
-				uuidFiler = BluetoothConsts.RFCOMM_PROTOCOL_UUID;
-			}
-			
-			Vector records = new Vector();
-			for (int i = 0; i < handles.length; i++) {
-				ServiceRecordImpl sr = new ServiceRecordImpl(device, handles[i]);
-				try {
-					sr.populateRecord(new int[] {BluetoothConsts.ServiceClassIDList});
-					if ((uuidFiler != null) && !sr.hasServiceClassUUID(uuidFiler)) {
+				boolean reqRFCOMM = false;
+				// boolean reqL2CAP = false;
+				UUID uuidFiler = null;
+				// If Search for sepcific service, select its UUID
+				for (int u = 0; u < uuidSet.length; u++) {
+					if (uuidSet[u].equals(BluetoothConsts.L2CAP_PROTOCOL_UUID)) {
+						// reqL2CAP = true;
 						continue;
 					}
-					records.addElement(sr);
-					sr.populateRecord(new int[] { BluetoothConsts.ServiceRecordHandle,
-							BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID,
-							BluetoothConsts.ProtocolDescriptorList });
-					if (attrSet != null) {
-						sr.populateRecord(attrSet);
+					if (uuidSet[u].equals(BluetoothConsts.RFCOMM_PROTOCOL_UUID)) {
+						reqRFCOMM = true;
+						continue;
 					}
-					DebugLog.debug("ServiceRecord (" + i +") sr.handle", handles[i]);
-					DebugLog.debug("ServiceRecord (" + i +")", sr);
-				} catch (Exception e) {
-					DebugLog.debug("populateRecord error", e);
+					uuidFiler = uuidSet[u];
+					break;
 				}
-				if (startedNotify.isTerminated()) {
-					return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
+				if ((uuidFiler == null) && (reqRFCOMM)) {
+					uuidFiler = BluetoothConsts.RFCOMM_PROTOCOL_UUID;
+				}
+
+				Vector records = new Vector();
+				for (int i = 0; i < handles.length; i++) {
+					ServiceRecordImpl sr = new ServiceRecordImpl(device, handles[i]);
+					try {
+						sr.populateRecord(new int[] { BluetoothConsts.ServiceClassIDList });
+						if ((uuidFiler != null) && !sr.hasServiceClassUUID(uuidFiler)) {
+							continue;
+						}
+						if (!isServiceRecordDiscoverable(((RemoteDeviceImpl) device).getAddress(), sr.getHandle())) {
+							continue;
+						}
+
+						records.addElement(sr);
+						sr.populateRecord(new int[] { BluetoothConsts.ServiceRecordHandle,
+								BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID,
+								BluetoothConsts.ProtocolDescriptorList });
+						if (attrSet != null) {
+							sr.populateRecord(attrSet);
+						}
+						DebugLog.debug("ServiceRecord (" + i + ") sr.handle", handles[i]);
+						DebugLog.debug("ServiceRecord (" + i + ")", sr);
+					} catch (Exception e) {
+						DebugLog.debug("populateRecord error", e);
+					}
+					if (startedNotify.isTerminated()) {
+						return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
+					}
+				}
+				if (records.size() != 0) {
+					ServiceRecord[] fileteredRecords = (ServiceRecord[]) records.toArray(new ServiceRecord[records
+							.size()]);
+					listener.servicesDiscovered(startedNotify.getTransID(), fileteredRecords);
+					return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
 				}
 			}
-			if (records.size() != 0) {
-				ServiceRecord[] fileteredRecords = (ServiceRecord[])records.toArray(new ServiceRecord[records.size()]);  
-				listener.servicesDiscovered(startedNotify.getTransID(), fileteredRecords);
-				return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
-			}
-		} 
-		return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
+			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
+		}
 	}
 	
-	private native byte[] getServiceAttribute(int attrID, long handle) throws IOException;
-	
 
-	// Simple test
-//	private native int getServiceAttributeRFCommScn(long handle) throws IOException;
-//	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
-//		UUID uuid = new UUID("B1011111111111111111111111110001", false);
-//		int channel = getServiceAttributeRFCommScn(serviceRecord.getHandle());
-//		serviceRecord.populateRFCOMMAttributes(0, channel, uuid, "");
-//		return true;
-//	}
-	
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
 		for (int i = 0; i < attrIDs.length; i++) {
 			try {

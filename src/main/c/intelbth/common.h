@@ -105,10 +105,21 @@
 #define GIAC 0x9E8B33
 #define LIAC 0x9E8B00
 
+//#define EXT_DEBUG
 void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...);
 #define debug(fmt) callDebugListener(env, __FILE__, __LINE__, fmt);
 #define debugs(fmt, message) callDebugListener(env, __FILE__, __LINE__, fmt, message);
 #define debugss(fmt, message1, message2) callDebugListener(env, __FILE__, __LINE__, fmt, message1, message2);
+
+#ifdef EXT_DEBUG
+#define Edebug(fmt)  debug(fmt) 
+#define Edebugs(fmt, message) debugs(fmt, message)
+#define Edebugss(fmt, message1, message2) debugss(fmt, message1, message2)
+#else
+#define Edebug(fmt) 
+#define Edebugs(fmt, message)
+#define Edebugss(fmt, message1, message2)
+#endif
 
 void throwException(JNIEnv *env, const char *name, const char *msg);
 

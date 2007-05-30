@@ -56,7 +56,7 @@ typedef struct {
 #define DEVICE_FOUND_MAX 50
 #define SDP_DISCOVERY_RECORDS_USED_MAX 300
 #define SDP_DISCOVERY_RECORDS_DEVICE_MAX 50
-#define SDP_DISCOVERY_RECORDS_HOLDER_MASK 0x1000
+#define SDP_DISCOVERY_RECORDS_HOLDER_MARK 70000
 #define SDP_DISCOVERY_RECORDS_HANDLE_OFFSET 1
 // 7 for Server and 7 for Client, Bluetooth Can't have more
 #define COMMPORTS_POOL_MAX 14
@@ -103,6 +103,7 @@ public:
 	virtual ~WIDCOMMStack();
 
 	void throwExtendedErrorException(JNIEnv * env, const char *name);
+	char* getExtendedError();
 
     // methods to replace virtual methods in base class CBtIf
     virtual void OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected);
