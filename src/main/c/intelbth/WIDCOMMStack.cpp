@@ -346,7 +346,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_deviceInquiryCancelImpl
-(JNIEnv *env, jobject peer, jobject nativeClass) {
+(JNIEnv *env, jobject peer) {
 	stack->deviceInquiryTerminated = TRUE;
 	stack->StopInquiry();
 	SetEvent(stack->hEvent);
@@ -438,7 +438,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	if (obtainedServicesRecords > SDP_DISCOVERY_RECORDS_DEVICE_MAX) {
 		debugs("WARN too many ServicesRecords %i", obtainedServicesRecords);
 		//obtainedServicesRecords = SDP_DISCOVERY_RECORDS_USED_MAX;
-	} 
+	}
 	debugs("obtainedServicesRecords %i", obtainedServicesRecords);
 	// Retrive all Records and filter in Java
 	int retriveRecords = SDP_DISCOVERY_RECORDS_DEVICE_MAX;
@@ -500,7 +500,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	if (discoveryRecHolder->oddHolder) {
 		offset += SDP_DISCOVERY_RECORDS_HOLDER_MARK;
 	}
-	
+
 	Edebugs("DiscoveryRecHolder first.h %i", offset);
 
 	jlongArray result = env->NewLongArray(recSize);
@@ -576,7 +576,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isServ
 		debugs("StartDiscovery WIDCOMM error[%s]", stack->getExtendedError());
 		return FALSE;
 	}
-	
+
 	while ((stack != NULL) && (!stack->searchServicesComplete) && (!stack->searchServicesTerminated)) {
 		DWORD  rc = WaitForSingleObject(stack->hEvent, 500);
 		if (rc == WAIT_FAILED) {
