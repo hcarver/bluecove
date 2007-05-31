@@ -11,17 +11,20 @@ currently maintained by volunteers.
 
 == Requirements ==
 
+  * Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer and Windows Mobile 2003 or newer)
+  * A Bluetooth device supported by the Microsoft bluetooth stack
   * Java 1.1 or newer for the binary execution, Java 1.4 or newer to compile.
   * Another Bluetooth device to communicate with
-  * Supported Bluetooth stack on Windows WIDCOMM, Microsoft (winsock), and BlueSoleil. see [stacks Supported stacks]
 
 == Limitations ==
 
-   * BlueCove also only supports RFCOMM connections
-   * Encryption and Authentication are not supported
-   * The operating system support is currently limited to Windows XP SP2 and newer
-   * BlueCove does not support OBEX, but there are other projects
-     that can be used to achieve OBEX functionality with BlueCove. see [http://sourceforge.net/projects/avetanaobex/ avetanaOBEX]
+Due to the Microsoft Bluetooth stack only supporting RFCOMM connections,
+BlueCove also only supports RFCOMM connections. The operating system support is
+currently limited to Windows XP SP2 and newer, because the Microsoft Bluetooth
+stack is not available on other operating systems. If someone writes code to
+support another stack and/or operating system, it will be considered for
+inclusion.  BlueCove does also not support OBEX, but there are other projects
+that can (possibly) be used to achieve OBEX functionality with BlueCove.
 
 == Not Implemented functionality ===
 
@@ -51,6 +54,10 @@ IBM J9
 
     To run BlueCove with [http://www.ibm.com/software/wireless/weme/ IBMs J9] Java VM on Win32 or PocketPC add this system property `-Dmicroedition.connection.pkgs=com.intel.bluetooth`.
 
+Debug
+
+    If something goes wrong system property `-Dbluecove.debug=true` will enable debug prints in BlueCove code
+
 == Compilation ==
 
 You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 and SDK for Windows Vista or Windows Server 2003 R2 Platform SDK.
@@ -69,11 +76,8 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
   # Run `ant` or `mvn`
   # Go into `src\main\c\intelbth`
   # Open `intelbth.sln`
-  # Compile the project for your platform (e.g. 'Winsock' for 'Win32') See src\main\c\intelbth\ReadMe.txt for more details
+  # Compile the project for your platform (e.g. 'Winsock' for 'Win32')
   # Run `ant jar` or `mvn`
-
- There are command line build for native library build-native.cmd
- It will automatically select configuration:  Winsock, WIDCOMM, BlueSoleil or Release base on SDK installed on your PC
 
 == Source ==
 
