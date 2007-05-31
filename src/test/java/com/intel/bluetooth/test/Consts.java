@@ -22,7 +22,7 @@ package com.intel.bluetooth.test;
 public interface Consts {
 
 	// Share the same UUID with bluecove-tester
-	public static final String TEST_UUID = "B10C0FE1111111111111111111110001";
+	public static final String TEST_UUID = "B10C0BE1111111111111111111110001";
 	//public static final String TEST_UUID = "27012f0c68af4fbf8dbe6bbaf7ab651b";
 
 	public static final String TEST_SERVERNAME_PREFIX = "bluecoveSrv";
