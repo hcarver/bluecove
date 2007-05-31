@@ -300,7 +300,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		int channel = peer.getsockchannel(socket);
 		DebugLog.debug("service channel ", channel);
 		
-		serviceRecord.populateRFCOMMAttributes(0x00010020, channel, uuid, name);
+		serviceRecord.populateRFCOMMAttributes(0x0, channel, uuid, name);
 
 		/*
 		 * register service
@@ -308,6 +308,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		long serviceHandle = peer.registerService(serviceRecord.toByteArray());
 		
 		serviceRecord.setHandle(serviceHandle);
+		serviceRecord.populateAttributeValue(BluetoothConsts.ServiceRecordHandle, new DataElement(DataElement.U_INT_4, serviceHandle));
 		
 		return socket;
 	}
