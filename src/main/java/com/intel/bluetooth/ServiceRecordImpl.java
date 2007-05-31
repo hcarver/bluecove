@@ -34,10 +34,6 @@ import javax.bluetooth.UUID;
 
 public class ServiceRecordImpl implements ServiceRecord {
 
-    //public static final UUID L2CAP = new UUID(0x0100);
-
-    //public static final UUID RFCOMM = new UUID(0x0003);
-    
 	private RemoteDevice device;
 
 	private long handle;
@@ -487,7 +483,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 		DataElement serviceClassIDList = new DataElement(DataElement.DATSEQ);
 		serviceClassIDList.addElement(new DataElement(DataElement.UUID, uuid));
-		serviceClassIDList.addElement(new DataElement(DataElement.UUID, BluetoothConsts.RFCOMM_PROTOCOL_UUID));
+		serviceClassIDList.addElement(new DataElement(DataElement.UUID, BluetoothConsts.SERIAL_PORT_UUID));
 
 		this.populateAttributeValue(BluetoothConsts.ServiceClassIDList, serviceClassIDList);
 

@@ -26,10 +26,6 @@ public class UUID {
 	
 	private byte[] uuidValue;
 
-	UUID(byte[] uuidValue) {
-		this.uuidValue = uuidValue;
-	}
-
 	/*
 	 * Creates a UUID object from long value uuidValue. A UUID is defined as an
 	 * unsigned integer whose value can range from [0 to 2128-1]. However, this

@@ -472,42 +472,23 @@ public class DataElement {
 	}
 
     private static String typeToString(int type) {
-		if (type == DataElement.DATALT) {
-			return "DATATL";
-		} else if (type == DataElement.DATSEQ) {
-			return "DATSEQ";
-		} else if (type == DataElement.U_INT_4) {
-			return "U_INT_4";
-		} else if (type == DataElement.U_INT_1) {
-			return "U_INT_1";
-		} else if (type == DataElement.U_INT_2) {
-			return "U_INT_2";
-		} else if (type == DataElement.INT_1) {
-			return "INT_1";
-		} else if (type == DataElement.INT_2) {
-			return "INT_2";
-		} else if (type == DataElement.INT_4) {
-			return "INT_4";
-		} else if (type == DataElement.INT_8) {
-			return "INT_8";
-		} else if (type == DataElement.UUID) {
-			return "UUID";
-		} else if (type == DataElement.U_INT_8) {
-			return "U_INT_8";
-		} else if (type == DataElement.U_INT_16) {
-			return "U_INT_16";
-		} else if (type == DataElement.INT_16) {
-			return "INT_16";
-		} else if (type == DataElement.STRING) {
-			return "STRING";
-		} else if (type == DataElement.URL) {
-			return "URL";
-		} else if (type == DataElement.BOOL) {
-			return "BOOL";
-		} else if (type == DataElement.NULL) {
-			return "NULL";
-		} else {
-			return "UNKNOWN_TYPE";
+		switch (type) {
+		case DataElement.NULL: return "NULL";
+		case DataElement.U_INT_1: return "U_INT_1";
+		case DataElement.U_INT_2: return "U_INT_2";
+		case DataElement.U_INT_4: return "U_INT_4";
+		case DataElement.INT_1: return "INT_1";
+		case DataElement.INT_2: return "INT_2";
+		case DataElement.INT_4: return "INT_4";
+		case DataElement.INT_8: return "INT_8";
+		case DataElement.INT_16: return "INT_16";
+		case DataElement.URL: return "URL";
+		case DataElement.STRING: return "STRING";
+		case DataElement.UUID: return "UUID";
+		case DataElement.DATSEQ: return "DATSEQ";
+		case DataElement.BOOL: return "BOOL";
+		case DataElement.DATALT: return "DATALT";
+		default: return "Unknown" + type;
 		}
 	}
 

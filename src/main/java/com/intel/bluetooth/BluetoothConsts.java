@@ -31,6 +31,8 @@ public class BluetoothConsts {
 
 	public static final UUID OBEXFileTransferServiceClass_UUID = new UUID(0x1106);
 
+	public static final UUID SERIAL_PORT_UUID = new UUID(0x1101);
+	
 	public static final int BluetoothProfileDescriptorList = 0x0009;
 
 	public static final int BrowseGroupList = 0x0005;
