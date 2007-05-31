@@ -36,48 +36,24 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	 */
 	private static Hashtable serviceRecordsMap = new Hashtable/*<ServiceRecord, BluetoothStreamConnectionNotifier>*/();
 	
-	private int socket;
-
 	private long handle;
 
-	ServiceRecordImpl serviceRecord;
+	private ServiceRecordImpl serviceRecord;
 
 	private boolean closed;
 
 	public BluetoothStreamConnectionNotifier(UUID uuid, boolean authenticate, boolean encrypt, String name) throws IOException {
+		
+		this.closed = false;
+		
 		/*
-		 * open socket
+		 * create service record to be later updated by BluetoothStack
 		 */
-
-		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
-
-		//BlueCoveImpl.instance().getBluetoothStack().initialized();
+		this.serviceRecord = new ServiceRecordImpl(null, 0);
 		
-		socket = peer.socket(authenticate, encrypt);
-
-		peer.bind(socket);
+		this.handle = BlueCoveImpl.instance().getBluetoothStack().rfServerOpen(uuid, authenticate, encrypt, name, serviceRecord);
 		
-		peer.listen(socket);
-
-		/*
-		 * create service record
-		 */
-
-		serviceRecord = new ServiceRecordImpl(null, 0);
-
-
-		int channel = peer.getsockchannel(socket);
-		DebugLog.debug("service channel ", channel);
-		
-		serviceRecord.populateRFCOMMAttributes(0x00010020, channel, uuid, name);
-
-		/*
-		 * register service
-		 */
-
-		handle = peer.registerService(serviceRecord.toByteArray());
-		
-		((ServiceRecordImpl) serviceRecord).attributeUpdated = false;
+		this.serviceRecord.attributeUpdated = false;
 	}
 
 	/*
@@ -94,23 +70,8 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 
 	public void close() throws IOException {
 		if (!closed) {
-			
 			serviceRecordsMap.remove(serviceRecord);
-			
-			BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
-
-			/*
-			 * close socket
-			 */
-
-			peer.close(socket);
-
-			/*
-			 * unregister service
-			 */
-
-			peer.unregisterService(handle);
-
+			BlueCoveImpl.instance().getBluetoothStack().rfServerClose(handle, serviceRecord);
 			closed = true;
 		}
 	}
@@ -125,7 +86,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		if (((ServiceRecordImpl) serviceRecord).attributeUpdated) {
 			updateServiceRecord();
 		}
-		return new BluetoothRFCommServerConnection(BlueCoveImpl.instance().getBluetoothPeer().accept(socket));
+		return new BluetoothRFCommServerConnection(BlueCoveImpl.instance().getBluetoothStack().rfServerAcceptAndOpenRfServerConnection(handle));
 	}
 
 	public ServiceRecord getServiceRecord() {
@@ -134,15 +95,8 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	}
 	
 	private void updateServiceRecord() throws ServiceRegistrationException {
-		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
-		try {
-			peer.unregisterService(handle);
-			handle = peer.registerService(((ServiceRecordImpl) serviceRecord).toByteArray());
-			((ServiceRecordImpl) serviceRecord).attributeUpdated = false;
-			DebugLog.debug("new serviceRecord", serviceRecord);
-		} catch (IOException e) {
-			throw new ServiceRegistrationException(e.getMessage());
-		}
+		BlueCoveImpl.instance().getBluetoothStack().rfServerUpdateServiceRecord(handle, serviceRecord);
+		serviceRecord.attributeUpdated = false;
 	}
 	
 	public static void updateServiceRecord(ServiceRecord srvRecord) throws ServiceRegistrationException {

@@ -23,7 +23,9 @@ package com.intel.bluetooth;
 import java.io.IOException;
 
 import javax.bluetooth.BluetoothStateException;
+import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryListener;
+import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
 public class BluetoothPeer {
@@ -79,6 +81,13 @@ public class BluetoothPeer {
 
 	public native int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener);
 
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
+		RemoteDeviceImpl remoteDevice = new RemoteDeviceImpl(deviceAddr, deviceName);
+		DeviceClass cod = new DeviceClass(deviceClass);
+		DebugLog.debug("deviceDiscoveredCallback addtress", remoteDevice.getBluetoothAddress());
+		DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
+		listener.deviceDiscovered(remoteDevice, cod);
+	}
 	/*
 	 * cancel current inquiry (if any)
 	 */
@@ -101,13 +110,13 @@ public class BluetoothPeer {
 	 * register service
 	 */
 
-	public native long registerService(byte[] record) throws IOException;
+	public native long registerService(byte[] record) throws ServiceRegistrationException;
 
 	/*
 	 * unregister service
 	 */
 
-	public native void unregisterService(long handle) throws IOException;
+	public native void unregisterService(long handle) throws ServiceRegistrationException;
 
 	/*
 	 * socket operations

@@ -26,6 +26,7 @@ import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
 public interface BluetoothStack {
@@ -44,6 +45,8 @@ public interface BluetoothStack {
 	 */
 	public String getLocalDeviceName();
 
+	public String getRemoteDeviceFriendlyName(long address) throws IOException;
+	
 	public DeviceClass getLocalDeviceClass();
 	
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException;
@@ -95,17 +98,21 @@ public interface BluetoothStack {
 	 */
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException;
 	
-//	 --- Client RFCOMM connections
+//	 --- Client and Server RFCOMM connections
 	
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
-	
-	//public long connectionRfOpenServer(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException;
-	
-	//public StreamConnection acceptAndOpenRfConnection(long handle) throws IOException;
 	
 	public void connectionRfCloseClientConnection(long handle) throws IOException;
 	
 	public void connectionRfCloseServerConnection(long handle) throws IOException;
+	
+	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException;
+	
+	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException;
+	
+	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
+	
+	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
 	
 	public long getConnectionRfRemoteAddress(long handle) throws IOException;
 

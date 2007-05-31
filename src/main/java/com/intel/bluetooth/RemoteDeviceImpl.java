@@ -24,14 +24,16 @@ import java.io.IOException;
 import java.util.Hashtable;
 
 import javax.bluetooth.RemoteDevice;
+import javax.microedition.io.Connection;
 
 /**
  * @author vlads
  *
+ * BlueCove only creates this class. Instance of RemoteDevice should not be created
  */
 public class RemoteDeviceImpl extends RemoteDevice {
 	
-	private String name;
+	String name;
 	
 	private long address;
 	
@@ -45,11 +47,16 @@ public class RemoteDeviceImpl extends RemoteDevice {
 	
 	public String getFriendlyName(boolean alwaysAsk) throws IOException {
 		if (alwaysAsk || name == null || name.equals("")) {
-			// TODO
-			//name = BlueCoveImpl.instance().getBluetoothPeer().getpeername(address);
-			throw new IOException("TODO");
+			name = BlueCoveImpl.instance().getBluetoothStack().getRemoteDeviceFriendlyName(address);
 		}
 		return name;
+	}
+	
+	public static RemoteDevice getRemoteDevice(Connection conn) throws IOException {
+		if (!(conn instanceof BluetoothRFCommConnection)) {
+			throw new IllegalArgumentException("Not a Bluetooth connection");
+		}
+		return new RemoteDeviceImpl(((BluetoothRFCommConnection)conn).getRemoteAddress(), null);
 	}
 
 	public long getAddress() {

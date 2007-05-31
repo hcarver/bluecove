@@ -442,6 +442,10 @@ public class ServiceRecordImpl implements ServiceRecord {
 	long getHandle() {
 		return this.handle;
 	}
+
+	void setHandle(long handle) {
+		this.handle = handle;
+	}
 	
 	public boolean hasServiceClassUUID(UUID uuid) {
 		DataElement attrDataElement = getAttributeValue(BluetoothConsts.ServiceClassIDList);

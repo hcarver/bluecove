@@ -219,6 +219,24 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceM
 	return dev_Ver_Info.manufacturer;
 }
 
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteDeviceFriendlyName
+(JNIEnv *env, jobject, jlong address) {
+	if (stack == NULL) {
+		return NULL;
+	}
+	DEV_CLASS filter_dev_class;
+	CBtIf::REM_DEV_INFO dev_info;
+	CBtIf::REM_DEV_INFO_RETURN_CODE rc = stack->GetRemoteDeviceInfo(filter_dev_class, &dev_info);
+	while (rc == CBtIf::REM_DEV_INFO_SUCCESS) {
+		jlong a = BcAddrToLong(dev_info.bda);
+		if (a == address) {
+			return env->NewStringUTF((char*)dev_info.bd_name);
+		}
+		rc = stack->GetNextRemoteDeviceInfo(&dev_info);
+	}
+	return NULL;
+}
+
 // --- Device Inquiry
 
 void WIDCOMMStack::OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected) {

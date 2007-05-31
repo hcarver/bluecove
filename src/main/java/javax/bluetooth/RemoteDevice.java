@@ -24,22 +24,12 @@ import java.io.IOException;
 
 import javax.microedition.io.Connection;
 
-import com.intel.bluetooth.BlueCoveImpl;
-import com.intel.bluetooth.BluetoothRFCommConnection;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
 
 public class RemoteDevice {
 	
-	private String name;
-
-	long address;
-
-	RemoteDevice(String name, long address) {
-		DebugLog.debug("new RemoteDevice", name);
-		this.name = name;
-		this.address = address;
-	}
+	private long address;
 
 	/*
 	 * Creates a Bluetooth device based upon its address. The Bluetooth address
@@ -86,10 +76,7 @@ public class RemoteDevice {
 	 */
 
 	public String getFriendlyName(boolean alwaysAsk) throws IOException {
-		if (alwaysAsk || name == null || name.equals("")) {
-			name = BlueCoveImpl.instance().getBluetoothPeer().getpeername(address);
-		}
-		return name;
+		throw new RuntimeException("Wrong use of class, see RemoteDeviceImpl");
 	}
 
 	/*
@@ -101,7 +88,6 @@ public class RemoteDevice {
 
 	public final String getBluetoothAddress() {
 		String s = Long.toHexString(address);
-
 		return "000000000000".substring(s.length()) + s;
 	}
 
@@ -144,11 +130,7 @@ public class RemoteDevice {
 	 */
 
 	public static RemoteDevice getRemoteDevice(Connection conn) throws IOException {
-
-		if (!(conn instanceof BluetoothRFCommConnection)) {
-			throw new IllegalArgumentException("Not a Bluetooth connection");
-		}
-		return new RemoteDevice("", ((BluetoothRFCommConnection) conn).getRemoteAddress());
+		throw new RuntimeException("Wrong use of class, see RemoteDeviceImpl");
 	}
 
 	/*
@@ -314,8 +296,7 @@ public class RemoteDevice {
 	 * closed
 	 */
 
-	public boolean isAuthorized(javax.microedition.io.Connection conn)
-			throws IOException {
+	public boolean isAuthorized(javax.microedition.io.Connection conn) throws IOException {
 		// TODO not yet implemented
 		return false;
 	}

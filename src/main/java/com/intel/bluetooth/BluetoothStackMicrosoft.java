@@ -31,6 +31,7 @@ import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
 public class BluetoothStackMicrosoft implements BluetoothStack {
@@ -93,6 +94,10 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		return BlueCoveImpl.instance().getBluetoothPeer().getradioname(bluetoothAddress);
 	}
 
+	public String getRemoteDeviceFriendlyName(long address) throws IOException {
+		return BlueCoveImpl.instance().getBluetoothPeer().getpeername(address);
+	}
+	
 	public DeviceClass getLocalDeviceClass() {
 		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass(bluetoothAddress));
 	}
@@ -280,6 +285,54 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	
 	public void connectionRfCloseClientConnection(long handle) throws IOException {
 		BlueCoveImpl.instance().getBluetoothPeer().close((int)handle);
+	}
+	
+	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
+		/*
+		 * open socket
+		 */
+		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
+
+		int socket = peer.socket(authenticate, encrypt);
+		peer.bind(socket);
+		peer.listen(socket);
+
+		int channel = peer.getsockchannel(socket);
+		DebugLog.debug("service channel ", channel);
+		
+		serviceRecord.populateRFCOMMAttributes(0x00010020, channel, uuid, name);
+
+		/*
+		 * register service
+		 */
+		long serviceHandle = peer.registerService(serviceRecord.toByteArray());
+		
+		serviceRecord.setHandle(serviceHandle);
+		
+		return socket;
+	}
+	
+	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
+		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
+		/*
+		 * close socket
+		 */
+		peer.close((int)handle);
+		/*
+		 * unregister service
+		 */
+		peer.unregisterService(serviceRecord.getHandle());
+	}
+	
+	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException {
+		return BlueCoveImpl.instance().getBluetoothPeer().accept((int)handle);
+	}
+	
+	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
+		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
+		peer.unregisterService(serviceRecord.getHandle());
+		serviceRecord.setHandle(peer.registerService(((ServiceRecordImpl) serviceRecord).toByteArray()));
+		DebugLog.debug("new serviceRecord", serviceRecord);
 	}
 	
 	public void connectionRfCloseServerConnection(long handle) throws IOException {

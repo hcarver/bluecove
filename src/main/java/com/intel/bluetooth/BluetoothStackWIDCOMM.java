@@ -33,6 +33,7 @@ import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
 public class BluetoothStackWIDCOMM implements BluetoothStack {
@@ -187,6 +188,8 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		return deviceInquiryCancelImpl();
 	}
 	
+	public native String getRemoteDeviceFriendlyName(long address) throws IOException;
+	
 	// --- Service search 
 	
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
@@ -324,7 +327,24 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public native void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
 
+	//TODO
+	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
+		throw new NotImplementedError();
+	}
+	
+	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
+		throw new NotImplementedError();
+	}
+	
+	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException {
+		throw new NotImplementedError();
+	}
+	
 	public void connectionRfCloseServerConnection(long handle) throws IOException {
-		// TODO
+		throw new NotImplementedError();
+	}
+	
+	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
+		throw new NotImplementedError();
 	}
 }
