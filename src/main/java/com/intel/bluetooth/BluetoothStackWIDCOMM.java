@@ -327,9 +327,19 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public native void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
 
-	//TODO
+	private native long rfServerOpenImpl(byte[] uuidValue, String name, boolean authenticate, boolean encrypt) throws IOException;
+	
+	private native int rfServerSCN(long handle) throws IOException;
+	
 	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
-		throw new NotImplementedError();
+		byte[] uuidValue = Utils.UUIDToByteArray(BluetoothConsts.L2CAP_PROTOCOL_UUID);
+		long handle = rfServerOpenImpl(uuidValue, name, authenticate, encrypt);
+		int channel = rfServerSCN(handle);
+			
+		int serviceRecordHandle = (int)handle;
+		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name);
+		
+		return handle;
 	}
 	
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
@@ -345,6 +355,6 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	}
 	
 	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
-		throw new NotImplementedError();
+		connectionRfCloseClientConnection(handle);
 	}
 }

@@ -112,7 +112,7 @@ public:
 	virtual void OnDiscoveryComplete();
 
 	int getCommPortFreeIndex();
-	WIDCOMMStackRfCommPort* createCommPort();
+	WIDCOMMStackRfCommPort* createCommPort(BOOL server);
 	void deleteCommPort(WIDCOMMStackRfCommPort* commPort);
 };
 
@@ -151,6 +151,17 @@ public:
 
 	virtual void OnEventReceived (UINT32 event_code);
 	virtual void OnDataReceived (void *p_data, UINT16 len);
+};
+
+class WIDCOMMStackRfCommPortServer : public WIDCOMMStackRfCommPort {
+public:
+	UINT8 scn;
+
+	CRfCommIf rfCommIf;
+	CSdpService sdpService;
+
+	WIDCOMMStackRfCommPortServer();
+	virtual ~WIDCOMMStackRfCommPortServer();
 };
 
 #endif
