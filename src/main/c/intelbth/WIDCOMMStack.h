@@ -101,6 +101,7 @@ public:
 
 	WIDCOMMStack();
 	virtual ~WIDCOMMStack();
+	void destroy(JNIEnv * env);
 
 	void throwExtendedErrorException(JNIEnv * env, const char *name);
 	char* getExtendedError();
@@ -157,7 +158,7 @@ class WIDCOMMStackRfCommPortServer : public WIDCOMMStackRfCommPort {
 public:
 	UINT8 scn;
 
-	CRfCommIf rfCommIf;
+	//CRfCommIf rfCommIf;
 	CSdpService sdpService;
 
 	WIDCOMMStackRfCommPortServer();

@@ -406,6 +406,9 @@ public class ServiceRecordImpl implements ServiceRecord {
 		}
 	}
 	
+	/**
+	 * Internal implemenation function
+	 */
 	void populateAttributeValue(int attrID, DataElement attrValue) {
 		if (attrID < 0x0000 || attrID > 0xffff) {
 			throw new IllegalArgumentException();
@@ -435,14 +438,23 @@ public class ServiceRecordImpl implements ServiceRecord {
 		return buf.toString();
 	}
 
+	/**
+	 * Internal implemenation function
+	 */
 	long getHandle() {
 		return this.handle;
 	}
 
+	/**
+	 * Internal implemenation function
+	 */
 	void setHandle(long handle) {
 		this.handle = handle;
 	}
-	
+
+	/**
+	 * Internal implemenation function
+	 */
 	public boolean hasServiceClassUUID(UUID uuid) {
 		DataElement attrDataElement = getAttributeValue(BluetoothConsts.ServiceClassIDList);
 		if ((attrDataElement == null) || (attrDataElement.getDataType() != DataElement.DATSEQ) || attrDataElement.getSize() == 0) {
@@ -473,6 +485,9 @@ public class ServiceRecordImpl implements ServiceRecord {
 		return false;
 	}
 	
+	/**
+	 * Internal implemenation function
+	 */
 	void populateRFCOMMAttributes(int handle, int channel, UUID uuid, String name) {
 		
 		this.populateAttributeValue(BluetoothConsts.ServiceRecordHandle, new DataElement(DataElement.U_INT_4, handle));
@@ -505,7 +520,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 		this.populateAttributeValue(BluetoothConsts.ProtocolDescriptorList, protocolDescriptorList);
 
 		if (name != null) {
-			this.populateAttributeValue(0x0100, new DataElement(DataElement.STRING, name));
+			this.populateAttributeValue(BluetoothConsts.AttributeIDServiceName, new DataElement(DataElement.STRING, name));
 		}
 	}
 }

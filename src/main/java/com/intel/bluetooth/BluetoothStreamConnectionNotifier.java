@@ -84,7 +84,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 
 	public StreamConnection acceptAndOpen() throws IOException {
 		if (((ServiceRecordImpl) serviceRecord).attributeUpdated) {
-			updateServiceRecord();
+			updateServiceRecord(false);
 		}
 		return new BluetoothRFCommServerConnection(BlueCoveImpl.instance().getBluetoothStack().rfServerAcceptAndOpenRfServerConnection(handle));
 	}
@@ -94,8 +94,16 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		return serviceRecord;
 	}
 	
-	private void updateServiceRecord() throws ServiceRegistrationException {
-		BlueCoveImpl.instance().getBluetoothStack().rfServerUpdateServiceRecord(handle, serviceRecord);
+	private void updateServiceRecord(boolean canFail) throws ServiceRegistrationException {
+		if (canFail) {
+			BlueCoveImpl.instance().getBluetoothStack().rfServerUpdateServiceRecord(handle, serviceRecord);
+		} else {
+			try {
+				BlueCoveImpl.instance().getBluetoothStack().rfServerUpdateServiceRecord(handle, serviceRecord);
+			} catch (Throwable ignore) {
+				DebugLog.debug("warn updateServiceRecord", ignore);
+			}
+		}
 		serviceRecord.attributeUpdated = false;
 	}
 	
@@ -104,6 +112,6 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		if (owner == null) {
 			throw new IllegalArgumentException("Service record is not registered");
 		}
-		owner.updateServiceRecord();
+		owner.updateServiceRecord(true);
 	}
 }

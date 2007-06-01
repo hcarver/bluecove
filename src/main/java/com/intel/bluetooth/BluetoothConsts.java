@@ -61,6 +61,8 @@ public class BluetoothConsts {
 
 	public static final int ServiceInfoTimeToLive = 0x0007;
 
+	public static final int AttributeIDServiceName = 0x0100;
+	
 	public static final int ServiceName = 0x0000;
 
 	public static final int ServiceRecordHandle = 0x0000;

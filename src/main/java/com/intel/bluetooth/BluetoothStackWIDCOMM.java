@@ -313,7 +313,11 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	
 	public native long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
 	
-	public native void connectionRfCloseClientConnection(long handle) throws IOException;
+	public native void closeRfCommPort(long handle) throws IOException;
+	
+	public void connectionRfCloseClientConnection(long handle) throws IOException {
+		closeRfCommPort(handle);
+	}
 
 	public native long getConnectionRfRemoteAddress(long handle) throws IOException;
 	
@@ -332,29 +336,89 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	private native int rfServerSCN(long handle) throws IOException;
 	
 	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
-		byte[] uuidValue = Utils.UUIDToByteArray(BluetoothConsts.L2CAP_PROTOCOL_UUID);
+		byte[] uuidValue = Utils.UUIDToByteArray(uuid);
 		long handle = rfServerOpenImpl(uuidValue, name, authenticate, encrypt);
 		int channel = rfServerSCN(handle);
-			
+		DebugLog.debug("serverSCN", channel);
 		int serviceRecordHandle = (int)handle;
 		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name);
 		
 		return handle;
 	}
 	
+	private native void rfServerAddAttribute(long handle, int attrID, short attrType, char[] value) throws ServiceRegistrationException;
+	
+	private void rfServerAddAttribute(long handle, int attrID, short attrType, String value) throws ServiceRegistrationException {
+		rfServerAddAttribute(handle, attrID, attrType, value.toCharArray());
+	}
+	
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
-		throw new NotImplementedError();
+		int[] ids = serviceRecord.getAttributeIDs();
+		if ((ids == null) || (ids.length == 0)) {
+			return;
+		}
+		// from WIDCOMM BtIfDefinitions.h
+		final short NULL_DESC_TYPE = 0;
+		final short UINT_DESC_TYPE = 1;
+		final short TWO_COMP_INT_DESC_TYPE = 2;
+		final short UUID_DESC_TYPE = 3;
+		final short TEXT_STR_DESC_TYPE = 4;
+		final short BOOLEAN_DESC_TYPE = 5;
+		final short DATA_ELE_SEQ_DESC_TYPE = 6;
+		final short DATA_ELE_ALT_DESC_TYPE = 7;
+		final short URL_DESC_TYPE = 8;
+		
+		for (int i = 0; i < ids.length; i++) {
+			int id = ids[i];
+			switch (id) {
+			case BluetoothConsts.ServiceRecordHandle:
+			case BluetoothConsts.ServiceClassIDList:
+			case BluetoothConsts.ProtocolDescriptorList:
+			case BluetoothConsts.AttributeIDServiceName:
+				continue;
+			}
+			
+			DataElement d = serviceRecord.getAttributeValue(id);
+			switch (d.getDataType()) {
+			case DataElement.U_INT_1:
+			case DataElement.U_INT_2:
+			case DataElement.U_INT_4:
+				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, "0x" + Long.toHexString(d.getLong()));
+				break;
+			case DataElement.INT_1:
+			case DataElement.INT_2:
+			case DataElement.INT_4:
+			case DataElement.INT_8:
+				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, "0x" + Long.toHexString(d.getLong()));
+				break;
+			case DataElement.URL:
+				rfServerAddAttribute(handle, id, URL_DESC_TYPE, d.getValue().toString());
+				break;
+			case DataElement.STRING:
+				rfServerAddAttribute(handle, id, TEXT_STR_DESC_TYPE, d.getValue().toString());
+				break;
+			case DataElement.NULL:
+				rfServerAddAttribute(handle, id, NULL_DESC_TYPE, "");
+				break;
+			case DataElement.BOOL:
+				rfServerAddAttribute(handle, id, BOOLEAN_DESC_TYPE, d.getBoolean()?"TRUE":"FALSE");
+				break;
+			case DataElement.UUID:
+				rfServerAddAttribute(handle, id, UUID_DESC_TYPE, ((UUID)d.getValue()).toString());
+				break;
+			case DataElement.INT_16:
+			case DataElement.DATSEQ:
+			case DataElement.DATALT:
+				// TODO
+			}
+		}
 	}
 	
-	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException {
-		throw new NotImplementedError();
-	}
+	public native long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
 	
-	public void connectionRfCloseServerConnection(long handle) throws IOException {
-		throw new NotImplementedError();
-	}
+	public native void connectionRfCloseServerConnection(long handle) throws IOException;
 	
 	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
-		connectionRfCloseClientConnection(handle);
+		closeRfCommPort(handle);
 	}
 }

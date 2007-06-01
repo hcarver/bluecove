@@ -77,12 +77,15 @@ public class DebugLog {
 	}
 	
 	public static void setDebugEnabled(boolean debugEnabled) {
+		//boolean initialized = DebugLog.initialized;
 		initialize();
 		if (debugEnabled && debugCompiledOut) {
 			debugEnabled = false;
 			System.err.println("BlueCove debug functions have been Compiled Out");
+		} else {
+			BlueCoveImpl.instance().getBluetoothPeer().enableNativeDebug(debugEnabled);
+			DebugLog.debugEnabled = debugEnabled;
 		}
-		DebugLog.debugEnabled = debugEnabled;
 	}
 	
 	public static void debug(String message) {
