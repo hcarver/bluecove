@@ -881,6 +881,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_accept(JNIEnv *env
 		return 0;
 	}
 
+	debug("connection accepted");
+
 	return (jint)s;
 }
 

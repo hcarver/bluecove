@@ -26,6 +26,7 @@ import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
+import com.intel.bluetooth.RemoteDeviceImpl;
 
 public class RemoteDevice {
 	
@@ -130,7 +131,7 @@ public class RemoteDevice {
 	 */
 
 	public static RemoteDevice getRemoteDevice(Connection conn) throws IOException {
-		throw new RuntimeException("Wrong use of class, see RemoteDeviceImpl");
+		return RemoteDeviceImpl.getRemoteDevice(conn);
 	}
 
 	/*
