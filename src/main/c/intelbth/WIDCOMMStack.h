@@ -150,6 +150,8 @@ public:
 
 	void readyForReuse();
 
+	virtual void closeRfCommPort(JNIEnv *env);
+
 	virtual void OnEventReceived (UINT32 event_code);
 	virtual void OnDataReceived (void *p_data, UINT16 len);
 };
@@ -157,12 +159,15 @@ public:
 class WIDCOMMStackRfCommPortServer : public WIDCOMMStackRfCommPort {
 public:
 	UINT8 scn;
+	BOOL isClientOpen;
 
 	//CRfCommIf rfCommIf;
-	CSdpService sdpService;
+	CSdpService* sdpService;
 
 	WIDCOMMStackRfCommPortServer();
 	virtual ~WIDCOMMStackRfCommPortServer();
+
+	virtual void closeRfCommPort(JNIEnv *env);
 };
 
 #endif

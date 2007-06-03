@@ -331,16 +331,17 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public native void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
 
-	private native long rfServerOpenImpl(byte[] uuidValue, String name, boolean authenticate, boolean encrypt) throws IOException;
+	private native long rfServerOpenImpl(byte[] uuidValue, byte[] uuidValue2, String name, boolean authenticate, boolean encrypt) throws IOException;
 	
 	private native int rfServerSCN(long handle) throws IOException;
 	
 	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
 		byte[] uuidValue = Utils.UUIDToByteArray(uuid);
-		long handle = rfServerOpenImpl(uuidValue, name, authenticate, encrypt);
+		long handle = rfServerOpenImpl(uuidValue, Utils.UUIDToByteArray(BluetoothConsts.SERIAL_PORT_UUID), name, authenticate, encrypt);
 		int channel = rfServerSCN(handle);
 		DebugLog.debug("serverSCN", channel);
 		int serviceRecordHandle = (int)handle;
+		
 		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name);
 		
 		return handle;
@@ -349,7 +350,18 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	private native void rfServerAddAttribute(long handle, int attrID, short attrType, char[] value) throws ServiceRegistrationException;
 	
 	private void rfServerAddAttribute(long handle, int attrID, short attrType, String value) throws ServiceRegistrationException {
-		rfServerAddAttribute(handle, attrID, attrType, value.toCharArray());
+		char[] cvalue = value.toCharArray();
+		rfServerAddAttribute(handle, attrID, attrType, cvalue);
+	}
+	
+	private char[] long2char(long value, int len) {
+		char[] cvalue = new char[len];
+		long l = value;
+		for (int i = len -1; i >= 0; i --) {
+			cvalue[i] = (char)(l & 0xFF);
+			l <<= 8;
+		}
+		return cvalue;
 	}
 	
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
@@ -381,15 +393,25 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 			DataElement d = serviceRecord.getAttributeValue(id);
 			switch (d.getDataType()) {
 			case DataElement.U_INT_1:
+				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, long2char(d.getLong(), 1));
+				break;
 			case DataElement.U_INT_2:
+				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, long2char(d.getLong(), 2));
+				break;
 			case DataElement.U_INT_4:
-				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, "0x" + Long.toHexString(d.getLong()));
+				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, long2char(d.getLong(), 4));
 				break;
 			case DataElement.INT_1:
+				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 1));
+				break;
 			case DataElement.INT_2:
+				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 2));
+				break;
 			case DataElement.INT_4:
+				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 4));
+				break;
 			case DataElement.INT_8:
-				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, "0x" + Long.toHexString(d.getLong()));
+				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 8));
 				break;
 			case DataElement.URL:
 				rfServerAddAttribute(handle, id, URL_DESC_TYPE, d.getValue().toString());
@@ -407,6 +429,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 				rfServerAddAttribute(handle, id, UUID_DESC_TYPE, ((UUID)d.getValue()).toString());
 				break;
 			case DataElement.INT_16:
+			case DataElement.U_INT_16:
 			case DataElement.DATSEQ:
 			case DataElement.DATALT:
 				// TODO

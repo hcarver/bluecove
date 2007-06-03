@@ -485,6 +485,45 @@ public class ServiceRecordImpl implements ServiceRecord {
 		return false;
 	}
 	
+	
+	DataElement clone(DataElement de) {
+		DataElement c = null;
+		
+		switch (de.getDataType()) {
+		case DataElement.U_INT_1:
+		case DataElement.U_INT_2:
+		case DataElement.U_INT_4:
+		case DataElement.INT_1:
+		case DataElement.INT_2:
+		case DataElement.INT_4:
+			c = new DataElement(de.getDataType(), de.getLong());
+			break;
+		case DataElement.URL:
+		case DataElement.STRING:
+		case DataElement.UUID:
+		case DataElement.INT_16:
+		case DataElement.INT_8:
+		case DataElement.U_INT_16:
+			c = new DataElement(de.getDataType(), de.getValue());
+			break;
+		case DataElement.NULL:
+			c = new DataElement(de.getDataType());
+			break;
+		case DataElement.BOOL:
+			c = new DataElement(de.getBoolean());
+			break;
+		case DataElement.DATSEQ:
+		case DataElement.DATALT:
+			c = new DataElement(de.getDataType());
+			for (Enumeration en = (Enumeration)de.getValue(); en.hasMoreElements();) {
+				DataElement dataElement = (DataElement) en.nextElement();
+				c.addElement(clone(dataElement));
+			}
+		}
+		
+		return c;
+	}
+	
 	/**
 	 * Internal implemenation function
 	 */
