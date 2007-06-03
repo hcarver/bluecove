@@ -1147,7 +1147,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 		return 0;
 	}
 	if (rf->sdpService == NULL) {
-		throwIOException(env, "Connection is closed");
+		throwIOException(env, "Connection closed");
 		return 0;
 	}
 
@@ -1161,14 +1161,15 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 			}
 		}
 		if ((stack == NULL) || (rf->sdpService == NULL)) {
-			throwIOException(env, "Failed to connect");
+			throwIOException(env, "Connection closed");
 			return 0;
 		}
-		Sleep(3000);
+		//Sleep(200);
 	}
 
 	rf->isConnected = FALSE;
 	rf->isConnectionError = FALSE;
+	rf->isClosing = FALSE;
 
 	CRfCommPort::PORT_RETURN_CODE rc = rf->OpenServer(rf->scn);
 	if (rc != CRfCommPort::SUCCESS) {
@@ -1187,8 +1188,11 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 	if ((stack == NULL) || rf->isClosing || rf->isConnectionError || (rf->sdpService == NULL)) {
 		if ((stack == NULL) || rf->isClosing || (rf->sdpService == NULL)) {
 			throwIOException(env, "Connection closed");
+		} else if (rf->isConnectionError) {
+			throwIOException(env, "Connection error");
+		} else {
+			throwIOException(env, "Failed to connect");
 		}
-		throwIOException(env, "Failed to connect");
 		return 0;
 	}
 	debug("server connection made");
