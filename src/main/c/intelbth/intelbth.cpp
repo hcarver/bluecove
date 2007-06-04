@@ -134,13 +134,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStat
 					restoreBtMode = true;
 					return 1;
 				} else {
-					throwIOExceptionWSAErrorMessage(env, "set Bluetooth mode error ", rc);
+					throwIOExceptionWinErrorMessage(env, "set Bluetooth mode error ", rc);
 				}
 			} else {
 				return 1;
 			}
 		} else {
-			throwIOExceptionWSAErrorMessage(env, "Bluetooth radio error ", rc);
+			throwIOExceptionWinErrorMessage(env, "Bluetooth radio error ", rc);
 		}
 		started = false;
 		dllWSAStartupError = rc;
@@ -306,13 +306,14 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
         debugs("ServiceInstanceName [%S]", name);
 		jstring deviceName = env->NewString((jchar*)name, (jsize)wcslen(name));
 
-		BTH_ADDR deviceAddr = ((SOCKADDR_BTH *)pwsaResults->lpcsaBuffer->RemoteAddr.lpSockaddr)->btAddr;
-
 #ifdef _WIN32_WCE
 		int classOfDev = p_inqRes->cod;
+		bt_addr deviceAddr;
 #else
 		int classOfDev = p_inqRes->classOfDevice;
+		BTH_ADDR deviceAddr;
 #endif
+		deviceAddr = ((SOCKADDR_BTH *)pwsaResults->lpcsaBuffer->RemoteAddr.lpSockaddr)->btAddr;
 
 		// notify listener
         debug("doInquiry, notify listener");
@@ -453,7 +454,7 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 #ifdef _WIN32_WCE
 	if (WSALookupServiceBegin(&queryset, 0, &hLookup)) {
 		DWORD last_error = WSAGetLastError();
-		debugss("WSALookupServiceBegin error [%d] %S", last_error, GetWSAErrorMessage(last_error));
+		debugss("WSALookupServiceBegin error [%d] %S", last_error, getWinErrorMessage(last_error));
 		return NULL;
 	}
 #else
@@ -1240,7 +1241,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getBluetoothRadioM
 			return BTH_MODE_POWER_OFF;
 		}
 	} else {
-		throwExceptionWSAErrorMessage(env, "javax/bluetooth/BluetoothStateException", "Bluetooth mode error ", rc);
+		throwExceptionWinErrorMessage(env, "javax/bluetooth/BluetoothStateException", "Bluetooth mode error ", rc);
 	}
 #endif
 	return 0;
@@ -1266,7 +1267,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_setDiscoverable(JN
 	if (rc == ERROR_SUCCESS) {
 		restoreBtMode = (initialBtMode != dwMode);
 	} else {
-		throwExceptionWSAErrorMessage(env, "javax/bluetooth/BluetoothStateException", "Set Bluetooth mode error ", rc);
+		throwExceptionWinErrorMessage(env, "javax/bluetooth/BluetoothStateException", "Set Bluetooth mode error ", rc);
 	}
 #endif
 }

@@ -14,6 +14,11 @@ intelbth.vcproj
 
     A precompiled header (StdAfx.h, StdAfx.cpp) can't be used because BlueSoleil redefine some Microsoft definitions from BluetoothAPIs.h
 
+
+    "Pocket PC 2003 (ARMV4)" is Platform we use to build DLL for WindowsCE
+
+    There are three working Configurations:  Winsock, WIDCOMM and Release
+
 WIDCOMM:
     Get Broadcom development kits from:  http://www.broadcom.com/products/bluetooth_sdk.php
     You have to register at the Broadcom site to gain access to the downloads.
