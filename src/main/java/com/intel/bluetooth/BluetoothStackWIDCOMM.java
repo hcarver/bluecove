@@ -292,18 +292,25 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
 		for (int i = 0; i < attrIDs.length; i++) {
+			int id = attrIDs[i];
 			try {
-				byte[] sdpStruct = getServiceAttribute(attrIDs[i], serviceRecord.getHandle());
+				byte[] sdpStruct = getServiceAttribute(id, serviceRecord.getHandle());
 				if (sdpStruct != null) {
-					//DebugLog.debug("decode attribute", attrIDs[i]);
+					if (BluetoothStackWIDCOMMSDPInputStream.debug) {
+						DebugLog.debug("decode attribute " + id + " Ox" + Integer.toHexString(id));
+					}
 					DataElement element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(sdpStruct)))
 							.readElement();
-					serviceRecord.populateAttributeValue(attrIDs[i], element);
+					serviceRecord.populateAttributeValue(id, element);
 				} else {
-					//DebugLog.debug("no data for attribute", attrIDs[i]);
+					if (BluetoothStackWIDCOMMSDPInputStream.debug) {
+						DebugLog.debug("no data for attribute " + id + " Ox" + Integer.toHexString(id));
+					}
 				}
 			} catch (Throwable e) {
-				DebugLog.debug("populateServicesRecord attribute " + attrIDs[i] + " error", e);
+				if (BluetoothStackWIDCOMMSDPInputStream.debug) {
+					DebugLog.error("error populate attribute " + id + " Ox" + Integer.toHexString(id), e);
+				}
 			}
 		}
 		return true;
@@ -359,7 +366,15 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		long l = value;
 		for (int i = len -1; i >= 0; i --) {
 			cvalue[i] = (char)(l & 0xFF);
-			l <<= 8;
+			l >>= 8;
+		}
+		return cvalue;
+	}
+	
+	private char[] bytes2char(byte[] value, int len) {
+		char[] cvalue = new char[len];
+		for (int i = 0; i < len;  i ++) {
+			cvalue[i] = (char)value[i];
 		}
 		return cvalue;
 	}
@@ -401,6 +416,12 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 			case DataElement.U_INT_4:
 				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, long2char(d.getLong(), 4));
 				break;
+			case DataElement.U_INT_8:
+				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, bytes2char((byte[])d.getValue(), 8));
+				break;
+			case DataElement.U_INT_16:
+				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, bytes2char((byte[])d.getValue(), 16));
+				break;
 			case DataElement.INT_1:
 				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 1));
 				break;
@@ -412,6 +433,9 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 				break;
 			case DataElement.INT_8:
 				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 8));
+				break;
+			case DataElement.INT_16:
+				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, bytes2char((byte[])d.getValue(), 16));
 				break;
 			case DataElement.URL:
 				rfServerAddAttribute(handle, id, URL_DESC_TYPE, d.getValue().toString());
@@ -428,8 +452,6 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 			case DataElement.UUID:
 				rfServerAddAttribute(handle, id, UUID_DESC_TYPE, ((UUID)d.getValue()).toString());
 				break;
-			case DataElement.INT_16:
-			case DataElement.U_INT_16:
 			case DataElement.DATSEQ:
 			case DataElement.DATALT:
 				// TODO

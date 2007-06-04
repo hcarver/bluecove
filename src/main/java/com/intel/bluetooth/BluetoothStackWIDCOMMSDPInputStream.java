@@ -34,7 +34,7 @@ import javax.bluetooth.UUID;
  */
 public class BluetoothStackWIDCOMMSDPInputStream extends FilterInputStream {
 
-	private static final boolean debug = false;
+	public static final boolean debug = false;
 	
 	protected BluetoothStackWIDCOMMSDPInputStream(InputStream in) {
 		super(in);
@@ -43,7 +43,19 @@ public class BluetoothStackWIDCOMMSDPInputStream extends FilterInputStream {
 	private long readLong(int size) throws IOException {
 		long result = 0;
 		for (int i = 0; i < size; i++) {
-			result += read() << (8 * i);
+			result += ((long)read()) << (8 * i);
+		}
+		return result;
+	}
+
+	private long readLongDebug(int size) throws IOException {
+		long result = 0;
+		for (int i = 0; i < size; i++) {
+			int data = read();
+			if (debug) {
+				DebugLog.debug("readLong data[" + i + "]", data);
+			}
+			result += ((long)data) << (8 * i);
 		}
 		return result;
 	}
@@ -151,16 +163,16 @@ typedef struct {
 			case ATTR_TYPE_TWO_COMP:
 				switch (length) {
 				case 1:
-					dataElement =  new DataElement(DataElement.INT_1, readLong(1));
+					dataElement =  new DataElement(DataElement.INT_1, (byte) readLong(1));
 					break;
 				case 2:
-					dataElement =  new DataElement(DataElement.INT_2, readLong(2));
+					dataElement =  new DataElement(DataElement.INT_2, (short) readLong(2));
 					break;
 				case 4:
-					dataElement =  new DataElement(DataElement.INT_4, readLong(4));
+					dataElement =  new DataElement(DataElement.INT_4, (int) readLong(4));
 					break;
 				case 8:
-					dataElement =  new DataElement(DataElement.INT_8, readLong(8));
+					dataElement =  new DataElement(DataElement.INT_8, readLongDebug(8));
 					break;
 				case 16:
 					dataElement =  new DataElement(DataElement.INT_16, readBytes(16));
@@ -194,6 +206,10 @@ typedef struct {
 				break;
 			default:
 				throw new IOException("Unknown data type " + type);
+			}
+			
+			if (debug) {
+				DebugLog.debug("dataElement " + dataElement);
 			}
 			
 			if (start_of_seq) {

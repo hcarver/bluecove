@@ -196,19 +196,29 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 			return DiscoveryListener.SERVICE_SEARCH_ERROR;
 		} else if (handles.length > 0) {
 			ServiceRecord[] records = new ServiceRecordImpl[handles.length];
-
+			boolean hasError = false;
 			for (int i = 0; i < handles.length; i++) {
 				records[i] = new ServiceRecordImpl(device, handles[i]);
 				try {
-					records[i].populateRecord(new int[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004 });
+					if (!records[i].populateRecord(new int[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004 })) {
+						hasError = true;
+					}
 					if (attrSet != null) {
-						records[i].populateRecord(attrSet);
+						if (!records[i].populateRecord(attrSet)) {
+							hasError = true;
+						}
 					}
 				} catch (Exception e) {
+					DebugLog.debug("populateRecord error", e);
+					hasError = true;
 				}
 			}
 			listener.servicesDiscovered(startedNotify.getTransID(), records);
-			return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
+			if (hasError) {
+				return DiscoveryListener.SERVICE_SEARCH_ERROR;
+			} else {
+				return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
+			}
 		} else {
 			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
 		}
@@ -249,7 +259,9 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 			if (sortIDs[i] == sortIDs[i + 1]) {
 				throw new IllegalArgumentException();
 			}
+			DebugLog.debug("query for ", sortIDs[i]);
 		}
+		DebugLog.debug("query for ", sortIDs[sortIDs.length - 1]);
 
 		/*
 		 * retrieve SDP blob

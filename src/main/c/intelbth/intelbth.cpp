@@ -320,7 +320,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 		env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, classOfDev, deviceName);
 		if (ExceptionCheckCompatible(env)) {
 			result = INQUIRY_ERROR;
-		    break;	
+		    break;
 		}
 		debug("doInquiry, listener returns");
 	}
@@ -605,8 +605,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceAt
 	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookup)) {
 #endif
 		free(queryservice);
-
-		throwIOException(env, "Failed to begin attribute query");
+		throwIOExceptionWSAGetLastError(env, "Failed to begin attribute query");
 		return NULL;
 	}
 
@@ -632,7 +631,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceAt
 #endif
 		WSALookupServiceEnd(hLookup);
 
-		throwIOException(env, "Failed to perform attribute query");
+		throwIOExceptionWSAGetLastError(env, "Failed to perform attribute query");
 		return NULL;
 	}
 
