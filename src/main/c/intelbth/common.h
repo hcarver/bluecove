@@ -90,8 +90,6 @@
 // TODO: reference additional headers your program requires here
 #include <stdlib.h>
 
-#include "com_intel_bluetooth_BluetoothPeer.h"
-
 #define INQUIRY_COMPLETED 0
 #define INQUIRY_TERMINATED 5
 #define INQUIRY_ERROR 7
@@ -105,6 +103,7 @@
 #define GIAC 0x9E8B33
 #define LIAC 0x9E8B00
 
+#include <jni.h>
 //#define EXT_DEBUG
 void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...);
 #define debug(fmt) callDebugListener(env, __FILE__, __LINE__, fmt);

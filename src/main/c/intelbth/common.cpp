@@ -21,13 +21,29 @@
 
 #include "common.h"
 
+#include "com_intel_bluetooth_BlueCoveNativeCommon.h"
+
 static BOOL nativeDebugCallback= false;
 static jclass nativeDebugListenerClass;
 static jmethodID nativeDebugMethod = NULL;
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug(JNIEnv *env, jobject peer, jboolean on) {
+__declspec(dllexport) jint blueCoveVersion() {
+	return 02 * 10000 + 0 * 100 + 0;
+}
+
+__declspec(dllexport) jint blueCoveVersion_2_0_0() {
+	return blueCoveVersion();
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BlueCoveNativeCommon_getLibraryVersion
+(JNIEnv *, jobject) {
+	return blueCoveVersion();
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BlueCoveNativeCommon_enableNativeDebug
+(JNIEnv * env, jobject common, jboolean on) {
 	if (on) {
-		nativeDebugListenerClass = (jclass)env->NewGlobalRef(env->GetObjectClass(peer));
+		nativeDebugListenerClass = (jclass)env->NewGlobalRef(env->GetObjectClass(common));
 		if (nativeDebugListenerClass != NULL) {
 			nativeDebugMethod = env->GetStaticMethodID(nativeDebugListenerClass, "nativeDebugCallback", "(Ljava/lang/String;ILjava/lang/String;)V");
 			if (nativeDebugMethod != NULL) {
@@ -140,8 +156,8 @@ BOOL ExceptionCheckCompatible(JNIEnv *env) {
 	}
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_detectBluetoothStack
-(JNIEnv *env, jclass) {
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BlueCoveNativeCommon_detectBluetoothStack
+(JNIEnv *env, jobject) {
 	jint rc = 0;
 	if (isMicrosoftBluetoothStackPresent()) {
 		rc += 1;

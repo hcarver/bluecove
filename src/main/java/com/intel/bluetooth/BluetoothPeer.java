@@ -38,36 +38,14 @@ public class BluetoothPeer {
 	
 	public static boolean peerInitialized;
 	
-	static {
-		NativeLibLoader.isAvailable();
-	}
-
 	/**
 	 * This is implementation specific class, only BlueCoveImpl can create this class
 	 *
 	 */
 	BluetoothPeer() {
-		try {
-			if (DebugLog.isDebugEnabled()) {
-				enableNativeDebug(true);
-			}
-		} catch (Throwable e) {
-			DebugLog.fatal("enableNativeDebug", e);
-		}
 	}
-	
-	static native int detectBluetoothStack();
-	
-	public native void enableNativeDebug(boolean on);
 	
 	static native int initializationStatus() throws IOException;
-	
-	public static void nativeDebugCallback(String fileName, int lineN, String message) {
-		if (fileName.startsWith(".\\")) {
-			fileName = fileName.substring(2);
-		}
-		DebugLog.debugNative(fileName + ":" + lineN, message);
-	}
 	
 	public native int getDeviceClass(long address);
 	

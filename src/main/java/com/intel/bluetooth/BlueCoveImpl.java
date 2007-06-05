@@ -34,13 +34,21 @@ package com.intel.bluetooth;
  */
 public class BlueCoveImpl {
 
-	public static final String version = "2.0.0-SNAPSHOT";
+	public static final int versionMajor = 2;
+	
+	public static final int versionMinor = 0;
+	
+	public static final int versionBuild = 0;
+	
+	public static final String version = String.valueOf(versionMajor) + "." + String.valueOf(versionMinor) + "." + String.valueOf(versionBuild) + "-SNAPSHOT";
 
 	public static final String STACK_WINSOCK = "winsock";
 	
 	public static final String STACK_WIDCOMM = "widcomm";
 	
 	public static final String STACK_BLUESOLEIL = "bluesoleil";
+	
+	private BlueCoveNativeCommon common;
 	
 	private BluetoothPeer bluetoothPeer;
 
@@ -55,12 +63,32 @@ public class BlueCoveImpl {
     }
 
 	private BlueCoveImpl() {
+		
+		if (!NativeLibLoader.isAvailable()) {
+			return;
+		}
+		common = new BlueCoveNativeCommon();
+		try {
+			if (DebugLog.isDebugEnabled()) {
+				common.enableNativeDebug(true);
+			}
+		} catch (Throwable e) {
+			DebugLog.fatal("enableNativeDebug", e);
+		}
+		
+		int libraryVersion = common.getLibraryVersion();
+		int libraryVersionExpected = versionMajor * 10000 + versionMinor * 100 + versionBuild;
+		if (libraryVersionExpected != libraryVersion) {
+			DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected " + libraryVersionExpected);
+			return;
+		}
+		
 		bluetoothPeer = new BluetoothPeer();
 		
 		String stack = System.getProperty("bluecove.stack");
 		if (stack == null) {
 			//auto detect
-			int aval = BluetoothPeer.detectBluetoothStack();
+			int aval = common.detectBluetoothStack();
 			DebugLog.debug("BluetoothStack detected", aval);
 			if ((aval & 1) != 0) {
 				stack = STACK_WINSOCK;
@@ -147,11 +175,23 @@ public class BlueCoveImpl {
     	return stack;
     }
     
+    public void enableNativeDebug(boolean on) {
+    	if (common != null) {
+    		common.enableNativeDebug(on);
+    	}
+    }
+    
     public BluetoothPeer getBluetoothPeer() {
-		return bluetoothPeer;
+    	if (bluetoothPeer == null) {
+			throw new Error("BlueCove not avalable");
+		}
+    	return bluetoothPeer;
 	}
 
 	public BluetoothStack getBluetoothStack() {
+		if (bluetoothStack == null) {
+			throw new Error("BlueCove not avalable");
+		}
 		return bluetoothStack;
 	}
 

@@ -83,7 +83,7 @@ public class DebugLog {
 			debugEnabled = false;
 			System.err.println("BlueCove debug functions have been Compiled Out");
 		} else {
-			BlueCoveImpl.instance().getBluetoothPeer().enableNativeDebug(debugEnabled);
+			BlueCoveImpl.instance().enableNativeDebug(debugEnabled);
 			DebugLog.debugEnabled = debugEnabled;
 		}
 	}
