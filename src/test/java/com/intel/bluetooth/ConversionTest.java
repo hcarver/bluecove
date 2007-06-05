@@ -35,7 +35,7 @@ public class ConversionTest extends TestCase {
 	
 	private void verifyUUID(final String uuidString) {
 		UUID uuid = new UUID(uuidString, false);
-		byte[] uuidValue = BluetoothPeer.testUUIDConversion(Utils.UUIDToByteArray(uuid));
+		byte[] uuidValue = BlueCoveNativeCommon.testUUIDConversion(Utils.UUIDToByteArray(uuid));
 		UUID uuid2 = new UUID(Utils.UUIDByteArrayToString(uuidValue), false);
 		assertEquals("UUID converted by native code", uuid, uuid2);
 	}

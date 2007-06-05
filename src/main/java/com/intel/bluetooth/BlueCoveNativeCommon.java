@@ -26,6 +26,10 @@ package com.intel.bluetooth;
  */
 public class BlueCoveNativeCommon {
 
+	static {
+		NativeLibLoader.isAvailable();
+	}
+	
 	native int getLibraryVersion();
 	
 	native int detectBluetoothStack();
@@ -38,4 +42,7 @@ public class BlueCoveNativeCommon {
 		}
 		DebugLog.debugNative(fileName + ":" + lineN, message);
 	}
+	
+	// internal test function
+	public static native byte[] testUUIDConversion(byte[] uuidValue);
 }
