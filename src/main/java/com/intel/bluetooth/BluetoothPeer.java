@@ -47,6 +47,8 @@ public class BluetoothPeer {
 	
 	static native int initializationStatus() throws IOException;
 	
+	native void uninitialize();
+	
 	public native int getDeviceClass(long address);
 	
 	public native void setDiscoverable(boolean on) throws BluetoothStateException;

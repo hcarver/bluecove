@@ -27,13 +27,15 @@ static BOOL nativeDebugCallback= false;
 static jclass nativeDebugListenerClass;
 static jmethodID nativeDebugMethod = NULL;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 __declspec(dllexport) jint blueCoveVersion() {
-	return 02 * 10000 + 0 * 100 + 0;
+	return BLUECOVE_VERSION;
 }
-
-__declspec(dllexport) jint blueCoveVersion_2_0_0() {
-	return blueCoveVersion();
+#ifdef __cplusplus
 }
+#endif
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BlueCoveNativeCommon_getLibraryVersion
 (JNIEnv *, jobject) {

@@ -61,7 +61,10 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 	
 	public void destroy() {
-		
+		if (peerInitialized) {
+			peerInitialized = false;
+			BlueCoveImpl.instance().getBluetoothPeer().uninitialize();
+		}
 	}
 	
 	public void initialized() throws BluetoothStateException {

@@ -21,6 +21,10 @@
 
 #pragma once
 
+#ifndef BLUECOVE_VERSION
+#define BLUECOVE_VERSION 20000
+#endif
+
 #ifdef _WIN32_WCE
 #pragma comment(linker, "/nodefaultlib:libc.lib")
 #pragma comment(linker, "/nodefaultlib:libcd.lib")

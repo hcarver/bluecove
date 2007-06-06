@@ -79,8 +79,6 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	case DLL_PROCESS_DETACH:
 		dllCleanup();
 		break;
-//	default:
-	    //debug("DllMain default %d", ul_reason_for_call);
 	}
 	return TRUE;
 }
@@ -158,6 +156,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStat
     return 0;
 }
 
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_uninitialize
+(JNIEnv *, jobject) {
+
+}
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 (JNIEnv *env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {

@@ -46,7 +46,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -63,10 +63,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib irprops.lib"
+				AdditionalDependencies="ws2_32.lib irprops.lib libcmt.lib"
 				OutputFile="..\..\resources\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
+				IgnoreAllDefaultLibraries="true"
+				DelayLoadDLLs="irprops.cpl"
 				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -629,10 +631,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\BlueSoleilStack.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\target\classes\com\intel\bluetooth\BlueCoveNativeCommon.class"
 				>
 				<FileConfiguration
@@ -675,6 +673,10 @@
 						Outputs=".\com_intel_bluetooth_BlueCoveNativeCommon.h"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\BlueSoleilStack.cpp"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\..\target\classes\com\intel\bluetooth\BluetoothPeer.class"
