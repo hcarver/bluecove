@@ -42,16 +42,20 @@ public class BlueCoveImpl {
 	
 	public static final String version = String.valueOf(versionMajor) + "." + String.valueOf(versionMinor) + "." + String.valueOf(versionBuild) + "-SNAPSHOT";
 
+	public static final int nativeLibraryVersionExpected = versionMajor * 10000 + versionMinor * 100 + versionBuild;
+	
 	public static final String STACK_WINSOCK = "winsock";
 	
 	public static final String STACK_WIDCOMM = "widcomm";
 	
 	public static final String STACK_BLUESOLEIL = "bluesoleil";
 	
-	private BlueCoveNativeCommon common;
+	// We can't use the same DLL on windows for all implemenations.
 	
-	private BluetoothPeer bluetoothPeer;
-
+	public static final String NATIVE_LIB_MS = "intelbth";
+	
+	public static final String NATIVE_LIB_WC_BS = "bluecove";
+	
 	private BluetoothStack bluetoothStack;
 	
     /**
@@ -64,31 +68,25 @@ public class BlueCoveImpl {
 
 	private BlueCoveImpl() {
 		
-		if (!NativeLibLoader.isAvailable()) {
-			return;
-		}
-		common = new BlueCoveNativeCommon();
-		try {
-			if (DebugLog.isDebugEnabled()) {
-				common.enableNativeDebug(true);
-			}
-		} catch (Throwable e) {
-			DebugLog.fatal("enableNativeDebug", e);
-		}
-		
-		int libraryVersion = common.getLibraryVersion();
-		int libraryVersionExpected = versionMajor * 10000 + versionMinor * 100 + versionBuild;
-		if (libraryVersionExpected != libraryVersion) {
-			DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected " + libraryVersionExpected);
+		BluetoothStack detectorStack;
+		if (NativeLibLoader.isAvailable(NATIVE_LIB_MS)) {
+			detectorStack = new BluetoothStackMicrosoft();
+		} else if (NativeLibLoader.isAvailable(NATIVE_LIB_WC_BS)) {
+			detectorStack = new BluetoothStackWIDCOMM();
+		} else {
 			return;
 		}
 		
-		bluetoothPeer = new BluetoothPeer();
+		int libraryVersion = detectorStack.getLibraryVersion();
+		if (nativeLibraryVersionExpected != libraryVersion) {
+			DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected " + nativeLibraryVersionExpected);
+			return;
+		}
 		
 		String stack = System.getProperty("bluecove.stack");
 		if (stack == null) {
 			//auto detect
-			int aval = common.detectBluetoothStack();
+			int aval = detectorStack.detectBluetoothStack();
 			DebugLog.debug("BluetoothStack detected", aval);
 			if ((aval & 1) != 0) {
 				stack = STACK_WINSOCK;
@@ -162,32 +160,37 @@ public class BlueCoveImpl {
     		bluetoothStack.destroy();
     		bluetoothStack = null;
     	}
+    	BluetoothStack newStack;
     	if (STACK_WIDCOMM.equalsIgnoreCase(stack)) {
-			bluetoothStack = new BluetoothStackWIDCOMM();
+    		newStack = new BluetoothStackWIDCOMM();
 			stack = STACK_WIDCOMM;
 		} else if (STACK_BLUESOLEIL.equalsIgnoreCase(stack)) {
-			bluetoothStack = new BluetoothStackBlueSoleil();
+			newStack = new BluetoothStackBlueSoleil();
 			stack = STACK_BLUESOLEIL;
 		} else {
-			bluetoothStack = new BluetoothStackMicrosoft();
+			newStack = new BluetoothStackMicrosoft();
 			stack = STACK_WINSOCK;
 		}
+    	int libraryVersion = newStack.getLibraryVersion();
+		if (nativeLibraryVersionExpected != libraryVersion) {
+			DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected " + nativeLibraryVersionExpected);
+			return null;
+		}
+		
+    	if (DebugLog.isDebugEnabled()) {
+    		newStack.enableNativeDebug(DebugLog.class, true);
+		}
+    	newStack.initialize();
+    	bluetoothStack = newStack;
     	return stack;
     }
     
     public void enableNativeDebug(boolean on) {
-    	if (common != null) {
-    		common.enableNativeDebug(on);
+    	if (bluetoothStack != null) {
+    		bluetoothStack.enableNativeDebug(DebugLog.class, on);
     	}
     }
     
-    public BluetoothPeer getBluetoothPeer() {
-    	if (bluetoothPeer == null) {
-			throw new Error("BlueCove not avalable");
-		}
-    	return bluetoothPeer;
-	}
-
 	public BluetoothStack getBluetoothStack() {
 		if (bluetoothStack == null) {
 			throw new Error("BlueCove not avalable");

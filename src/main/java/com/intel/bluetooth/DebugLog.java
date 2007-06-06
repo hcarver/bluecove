@@ -145,6 +145,13 @@ public class DebugLog {
 		}
 	}
 	
+	public static void nativeDebugCallback(String fileName, int lineN, String message) {
+		if (fileName.startsWith(".\\")) {
+			fileName = fileName.substring(2);
+		}
+		DebugLog.debugNative(fileName + ":" + lineN, message);
+	}
+	
 	public static void debugNative(String location, String message) {
 		if (!debugCompiledOut && isDebugEnabled()) {
 			System.out.println(message);

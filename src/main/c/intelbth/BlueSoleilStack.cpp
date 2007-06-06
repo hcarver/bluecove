@@ -21,11 +21,16 @@
 
 #include "common.h"
 
-#ifndef _BLUESOLEIL
+#define BLUESOLEIL_DLL L"btfunc.dll"
+
 BOOL isBlueSoleilBluetoothStackPresent() {
-	return FALSE;
+	HMODULE h = LoadLibrary(BLUESOLEIL_DLL);
+	if (h == NULL) {
+		return FALSE;
+	}
+	FreeLibrary(h);
+	return TRUE;
 }
-#endif
 
 #ifdef _BLUESOLEIL
 
@@ -34,14 +39,18 @@ BOOL isBlueSoleilBluetoothStackPresent() {
 #include "bt_ui.h"
 #include "com_intel_bluetooth_BluetoothStackBlueSoleil.h"
 
-#define BLUESOLEIL_DLL "btfunc.dll"
 // We specify which DLLs to delay load with the /delayload:btfunc.dll linker option
+
+#ifdef VC6
+#pragma comment(lib, "DelayImp.lib")
+#pragma comment(linker, "/delayload:btfunc.dll")
+#endif
 
 #define DEVICE_RESPONDED_MAX 50
 #define SERVICE_COUNT_MAX	100
 
 void BsAddrToString(wchar_t* addressString, BYTE* address) {
-	swprintf_s(addressString, 14, _T("%02x%02x%02x%02x%02x%02x"),
+	swprintf_s(addressString, 14, L"%02x%02x%02x%02x%02x%02x",
 			 address[5],
              address[4],
              address[3],
@@ -60,7 +69,7 @@ jlong BsAddrToLong(BYTE* address) {
 
 void LongToBsAddr(jlong addr, BYTE* address) {
 	for (int i = 0; i < 6 ; i++) {
-		address[i] = (UINT8)(addr & 0xFF);
+		address[i] = (BYTE)(addr & 0xFF);
 		addr >>= 8;
 	}
 }
@@ -91,21 +100,29 @@ char * getBsAPIStatusString(DWORD dwResult) {
 
 static BOOL BlueSoleilStarted = FALSE;
 
-BOOL isBlueSoleilBluetoothStackPresent() {
-	HMODULE h = LoadLibrary(_T(BLUESOLEIL_DLL));
-	if (h == NULL) {
-		return FALSE;
-	}
-	FreeLibrary(h);
-	return TRUE;
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getLibraryVersion
+(JNIEnv *, jobject) {
+	return blueCoveVersion();
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_initialize
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_detectBluetoothStack
+(JNIEnv *, jobject) {
+	return detectBluetoothStack();
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_enableNativeDebug
+  (JNIEnv *env, jobject, jclass loggerClass, jboolean on) {
+	enableNativeDebug(env, loggerClass, on);
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_initializeImpl
 (JNIEnv *env, jobject) {
 	if (BT_InitializeLibrary()) {
 		BlueSoleilStarted = TRUE;
+		return TRUE;
 	} else {
 		debug("Error in BlueSoleil InitializeLibrary");
+		return FALSE;
 	}
 }
 
@@ -178,6 +195,11 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_isB
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_isBluetoothReady
 (JNIEnv *, jobject, jint seconds) {
 	return BT_IsBluetoothReady(seconds);
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getDeviceClassImpl
+(JNIEnv *env, jobject) {
+	return getDeviceClassByOS(env);
 }
 
 // --- Device Inquiry
@@ -362,13 +384,13 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_c
 	}
 	debugs("open COM port [%i]", (int)svcInfo.ucComIndex);
 	char portString[20];
-	_snprintf_s(portString, 20, "\\\\.\\COM%i", (int)svcInfo.ucComIndex);
+	sprintf_s(portString, 20, "\\\\.\\COM%i", (int)svcInfo.ucComIndex);
 	HANDLE hComPort;
 	hComPort = CreateFileA(portString, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if (hComPort == INVALID_HANDLE_VALUE) {
 		BT_DisconnectSPPExService(dwHandle);
 		char message[20];
-		_snprintf_s(message, 20, "Can't open COM port [%s]", portString);
+		sprintf_s(message, 20, "Can't open COM port [%s]", portString);
 		throwIOExceptionWinGetLastError(env, message);
 		return NULL;
 	}

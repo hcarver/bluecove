@@ -87,7 +87,20 @@
 // Windows Header Files:
 #include <windows.h>
 #include <tchar.h>
+
+// vc6 = 1200, vc7 = 1300, vc7.1 = 1310, vc8 = 1400 
+
+#if _MSC_VER > 1200 
 #include <strsafe.h>
+#else
+#define VC6
+#define swprintf_s _snwprintf
+#define sprintf_s _snprintf
+#define _vsnprintf_s _vsnprintf
+#ifndef INT_MAX
+#define INT_MAX 2147483647
+#endif
+#endif
 
 #endif // #else // _WIN32_WCE
 
@@ -108,6 +121,9 @@
 #define LIAC 0x9E8B00
 
 #include <jni.h>
+
+void enableNativeDebug(JNIEnv * env, jobject loggerClass, jboolean on);
+
 //#define EXT_DEBUG
 void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...);
 #define debug(fmt) callDebugListener(env, __FILE__, __LINE__, fmt);
@@ -151,6 +167,10 @@ BOOL ExceptionCheckCompatible(JNIEnv *env);
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid);
 void convertGUIDToUUIDBytes(GUID *uuid, jbyte *bytes);
 
+jint detectBluetoothStack();
+jint blueCoveVersion();
 BOOL isMicrosoftBluetoothStackPresent();
 BOOL isWIDCOMMBluetoothStackPresent();
 BOOL isBlueSoleilBluetoothStackPresent();
+
+jint getDeviceClassByOS(JNIEnv *env);

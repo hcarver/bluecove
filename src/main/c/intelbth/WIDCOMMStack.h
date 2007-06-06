@@ -21,6 +21,10 @@
 
 #include "common.h"
 
+#define WIDCOMM_DLL L"wbtapi.dll"
+// DLL wbtapi.dll  -> WIDCOMM version 3.x and 4.x and SDK BTW-5_0_1_902-SDK
+// DLL btwapi.dll  -> WIDCOMM 5.1.x and SDK BTW-5_1_0_3101
+
 #ifdef _BTWLIB
 
 // BTW-5_1_0_3101
@@ -33,11 +37,13 @@
 #include "BtIfClasses.h"
 #include "com_intel_bluetooth_BluetoothStackWIDCOMM.h"
 
-#define WIDCOMM_DLL "wbtapi.dll"
-// DLL wbtapi.dll  -> WIDCOMM version 3.x and 4.x and SDK BTW-5_0_1_902-SDK
-// DLL btwapi.dll  -> WIDCOMM 5.1.x and SDK BTW-5_1_0_3101
 // We specify which DLLs to delay load with the /delayload:btwapi.dll linker option
 // This is how it is now: wbtapi.dll;btfunc.dll;irprops.cpl
+
+#ifdef VC6
+#pragma comment(lib, "DelayImp.lib")
+#pragma comment(linker, "/delayload:wbtapi.dll")
+#endif
 
 void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr);
 

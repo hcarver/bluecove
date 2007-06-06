@@ -38,12 +38,22 @@ public class BluetoothPeer {
 	
 	public static boolean peerInitialized;
 	
+	static {
+		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_MS);
+	}
+
 	/**
 	 * This is implementation specific class, only BlueCoveImpl can create this class
 	 *
 	 */
 	BluetoothPeer() {
 	}
+	
+	public native int getLibraryVersion();
+	
+	public native int detectBluetoothStack();
+	
+	public native void enableNativeDebug(Class nativeDebugCallback, boolean on);
 	
 	static native int initializationStatus() throws IOException;
 	
@@ -140,4 +150,6 @@ public class BluetoothPeer {
 	
 	public native int getDeviceManufacturer(long address);
 	
+	// internal test function
+	public static native byte[] testUUIDConversion(byte[] uuidValue);
 }

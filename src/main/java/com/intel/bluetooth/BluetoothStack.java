@@ -31,6 +31,17 @@ import javax.bluetooth.UUID;
 
 public interface BluetoothStack {
 
+	public int getLibraryVersion();
+	
+	public int detectBluetoothStack();
+	
+	public void enableNativeDebug(Class nativeDebugCallback, boolean on);
+	
+	/**
+	 * Call is made when we want to use this stack.
+	 */
+	public void initialize();
+	
 	public void destroy();
 	
 	public String getStackID();

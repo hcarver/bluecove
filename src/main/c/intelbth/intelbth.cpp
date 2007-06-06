@@ -101,6 +101,21 @@ void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg) {
 	throwIOExceptionWinErrorMessage(env, msg, WSAGetLastError());
 }
 
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getLibraryVersion
+(JNIEnv *, jobject) {
+	return blueCoveVersion();
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_detectBluetoothStack
+(JNIEnv *, jobject) {
+	return detectBluetoothStack();
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug
+  (JNIEnv *env, jobject, jclass loggerClass, jboolean on) {
+	enableNativeDebug(env, loggerClass, on);
+}
+
 BOOL isMicrosoftBluetoothStackPresent() {
 	SOCKET soc = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
 	if (soc == INVALID_SOCKET) {

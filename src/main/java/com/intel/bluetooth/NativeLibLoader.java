@@ -24,30 +24,40 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
 import java.util.Locale;
 
 public class NativeLibLoader {
 
-    public static final String NATIVE_LIB = "intelbth";
+	private static Hashtable libsState = new Hashtable();
+	
+	private static class LibState {
+    
+		boolean triedToLoadAlredy = false;
 
-    private static boolean triedToLoadAlredy;
+		boolean libraryAvailable = false;
+	
+	}
 
-    private static boolean libraryAvailable;
-
-    public static boolean isAvailable() {
-        if (triedToLoadAlredy) {
-            return libraryAvailable;
+    public static boolean isAvailable(String name) {
+    	LibState state = (LibState)libsState.get(name);
+    	if (state == null) {
+    		state = new LibState();
+    		libsState.put(name, state);
+    	}
+        if (state.triedToLoadAlredy) {
+            return state.libraryAvailable;
         }
-        String libName = NATIVE_LIB;
+        String libName = name;
         String libFileName = libName;
 
         String sysName = System.getProperty("os.name");
 
         if (sysName == null) {
-        	DebugLog.fatal("Native Library " + NATIVE_LIB + " not avalable on unknown platform");
-        	triedToLoadAlredy = true;
-            libraryAvailable = false;
-            return libraryAvailable;
+        	DebugLog.fatal("Native Library " + name + " not avalable on unknown platform");
+        	state.triedToLoadAlredy = true;
+        	state.libraryAvailable = false;
+            return state.libraryAvailable;
         }
         
         sysName = sysName.toLowerCase(Locale.ENGLISH);
@@ -63,15 +73,15 @@ public class NativeLibLoader {
 //        } else if (.indexOf("linux") != -1) {
 //            libFileName = "lib" + libFileName + ".so";
         } else {
-        	DebugLog.fatal("Native Library " + NATIVE_LIB + " not avalable on platform " + sysName);
-        	triedToLoadAlredy = true;
-            libraryAvailable = false;
-            return libraryAvailable;
+        	DebugLog.fatal("Native Library " + name + " not avalable on platform " + sysName);
+        	state.triedToLoadAlredy = true;
+        	state.libraryAvailable = false;
+            return state.libraryAvailable;
         }
 
         String path = System.getProperty("bluecove.native.path");
         if (path != null) {
-        	libraryAvailable = tryloadPath(path, libFileName);
+        	state.libraryAvailable = tryloadPath(path, libFileName);
         }
         boolean useResource = true;
         String d = System.getProperty("bluecove.native.resource");
@@ -79,19 +89,19 @@ public class NativeLibLoader {
         	useResource = false;
         }
 
-        if ((!libraryAvailable) && (useResource)) {
-            libraryAvailable = loadAsSystemResource(libFileName);
+        if ((!state.libraryAvailable) && (useResource)) {
+        	state.libraryAvailable = loadAsSystemResource(libFileName);
         }
-        if (!libraryAvailable) {
-        	libraryAvailable = tryload(libName);
+        if (!state.libraryAvailable) {
+        	state.libraryAvailable = tryload(libName);
         }
 
-        if (!libraryAvailable) {
+        if (!state.libraryAvailable) {
             System.err.println("Native Library " + libName + " not avalable");
             DebugLog.debug("java.library.path", System.getProperty("java.library.path"));
         }
-        triedToLoadAlredy = true;
-        return libraryAvailable;
+        state.triedToLoadAlredy = true;
+        return state.libraryAvailable;
     }
 
     private static boolean tryload(String name) {
@@ -242,7 +252,4 @@ public class NativeLibLoader {
 //        Runtime.getRuntime().addShutdownHook(new Thread(r));
 //    }
 
-    static {
-        isAvailable();
-    }
 }

@@ -21,9 +21,9 @@
 
 #include "common.h"
 
-#include "com_intel_bluetooth_BlueCoveNativeCommon.h"
+#include "com_intel_bluetooth_BluetoothPeer.h"
 
-JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BlueCoveNativeCommon_testUUIDConversion
+JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_testUUIDConversion
 (JNIEnv *env, jclass, jbyteArray uuidValue) {
 	GUID service_guid;
 	// pin array

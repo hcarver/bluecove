@@ -21,31 +21,17 @@
 
 #include "common.h"
 
-#include "com_intel_bluetooth_BlueCoveNativeCommon.h"
-
 static BOOL nativeDebugCallback= false;
 static jclass nativeDebugListenerClass;
 static jmethodID nativeDebugMethod = NULL;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-__declspec(dllexport) jint blueCoveVersion() {
+jint blueCoveVersion() {
 	return BLUECOVE_VERSION;
 }
-#ifdef __cplusplus
-}
-#endif
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BlueCoveNativeCommon_getLibraryVersion
-(JNIEnv *, jobject) {
-	return blueCoveVersion();
-}
-
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BlueCoveNativeCommon_enableNativeDebug
-(JNIEnv * env, jobject common, jboolean on) {
+void enableNativeDebug(JNIEnv *env, jobject loggerClass, jboolean on) {
 	if (on) {
-		nativeDebugListenerClass = (jclass)env->NewGlobalRef(env->GetObjectClass(common));
+		nativeDebugListenerClass = (jclass)env->NewGlobalRef(loggerClass);
 		if (nativeDebugListenerClass != NULL) {
 			nativeDebugMethod = env->GetStaticMethodID(nativeDebugListenerClass, "nativeDebugCallback", "(Ljava/lang/String;ILjava/lang/String;)V");
 			if (nativeDebugMethod != NULL) {
@@ -124,7 +110,7 @@ WCHAR *getWinErrorMessage(DWORD last_error) {
 		511,
 		NULL))
 	{
-		swprintf_s(errmsg, 1024, _T("No error message for code %d"), last_error);
+		swprintf_s(errmsg, 1024, L"No error message for code %d", last_error);
 		return errmsg;
 	}
 	size_t last = wcslen(errmsg) - 1;
@@ -158,12 +144,13 @@ BOOL ExceptionCheckCompatible(JNIEnv *env) {
 	}
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BlueCoveNativeCommon_detectBluetoothStack
-(JNIEnv *env, jobject) {
+jint detectBluetoothStack() {
 	jint rc = 0;
+#ifndef VC6
 	if (isMicrosoftBluetoothStackPresent()) {
 		rc += 1;
 	}
+#endif
 	if (isWIDCOMMBluetoothStackPresent()) {
 		rc += 2;
 	}
@@ -195,4 +182,44 @@ void convertGUIDToUUIDBytes(GUID *uuid, jbyte *bytes) {
 	for(int i = 0; i < 8; i++) {
 		bytes[i + 8] = uuid->Data4[i];
 	}
+}
+
+#define MAJOR_COMPUTER 0x0100
+#define MAJOR_PHONE 0x0200
+#define COMPUTER_MINOR_HANDHELD 0x10
+#define PHONE_MINOR_SMARTPHONE 0x0c
+
+jint getDeviceClassByOS(JNIEnv *env) {
+#ifndef _WIN32_WCE
+	return MAJOR_COMPUTER;
+#else
+	OSVERSIONINFO osvi;
+	TCHAR szPlatform[MAX_PATH];
+
+	BOOL rb;
+
+	osvi.dwOSVersionInfoSize = sizeof(osvi);
+	rb = GetVersionEx(&osvi);
+	if (rb == FALSE) {
+		return MAJOR_COMPUTER;
+	}
+	switch (osvi.dwPlatformId) {
+    // A Windows CE platform.
+    case VER_PLATFORM_WIN32_CE:
+        // Get platform string.
+        rb = SystemParametersInfo(SPI_GETPLATFORMTYPE, MAX_PATH, szPlatform, 0);
+        if (rb == FALSE)  // SystemParametersInfo failed.
+        {
+			return MAJOR_COMPUTER & COMPUTER_MINOR_HANDHELD;
+		}
+		debugs("PLATFORMTYPE %S", szPlatform);
+		if (0 == lstrcmpi(szPlatform, TEXT("Smartphone")))  {
+			return MAJOR_PHONE | PHONE_MINOR_SMARTPHONE;
+		}
+		if (0 == lstrcmpi(szPlatform, TEXT("PocketPC"))) {
+			return MAJOR_COMPUTER | COMPUTER_MINOR_HANDHELD;
+		}
+	}
+	return MAJOR_COMPUTER;
+#endif
 }

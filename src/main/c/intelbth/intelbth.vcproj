@@ -631,50 +631,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\..\target\classes\com\intel\bluetooth\BlueCoveNativeCommon.class"
-				>
-				<FileConfiguration
-					Name="Winsock|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Generating Common JNI Header File"
-						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BlueCoveNativeCommon&#x0D;&#x0A;"
-						Outputs=".\com_intel_bluetooth_BlueCoveNativeCommon.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="WIDCOMM|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Generating Common JNI Header File"
-						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BlueCoveNativeCommon&#x0D;&#x0A;"
-						Outputs=".\com_intel_bluetooth_BlueCoveNativeCommon.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="BlueSoleil|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Generating Common JNI Header File"
-						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BlueCoveNativeCommon&#x0D;&#x0A;"
-						Outputs=".\com_intel_bluetooth_BlueCoveNativeCommon.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Generating Common JNI Header File"
-						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BlueCoveNativeCommon&#x0D;&#x0A;"
-						Outputs=".\com_intel_bluetooth_BlueCoveNativeCommon.h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\BlueSoleilStack.cpp"
 				>
 			</File>
@@ -792,10 +748,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\com_intel_bluetooth_BlueCoveNativeCommon.h"
-				>
-			</File>
 			<File
 				RelativePath=".\com_intel_bluetooth_BluetoothPeer.h"
 				>

@@ -40,15 +40,29 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	
 	long bluetoothAddress = 0;
 	
+	private BluetoothPeer bluetoothPeer;
+	
 	BluetoothStackMicrosoft() {
-		initialize();
+		bluetoothPeer = new BluetoothPeer();
 	}
 
 	public String getStackID() {
 		return BlueCoveImpl.STACK_WINSOCK;
 	}
 	
-	private void initialize() {
+	public int getLibraryVersion() {
+		return bluetoothPeer.getLibraryVersion();
+	}
+	
+	public int detectBluetoothStack() {
+		return bluetoothPeer.detectBluetoothStack();
+	}
+	
+	public void enableNativeDebug(Class nativeDebugCallback, boolean on) {
+		bluetoothPeer.enableNativeDebug(nativeDebugCallback, on);
+	}
+	
+	public void initialize() {
 		try {
 			int status = BluetoothPeer.initializationStatus();
 			DebugLog.debug("initializationStatus", status);
@@ -63,7 +77,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	public void destroy() {
 		if (peerInitialized) {
 			peerInitialized = false;
-			BlueCoveImpl.instance().getBluetoothPeer().uninitialize();
+			bluetoothPeer.uninitialize();
 		}
 	}
 	
@@ -74,7 +88,6 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 
 	public String getLocalDeviceBluetoothAddress() {
-		BluetoothPeer bluetoothPeer = BlueCoveImpl.instance().getBluetoothPeer();
 		String address;
 		try {
 			int socket = bluetoothPeer.socket(false, false);
@@ -94,27 +107,27 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		if (bluetoothAddress == 0) {
 			getLocalDeviceBluetoothAddress();
 		}
-		return BlueCoveImpl.instance().getBluetoothPeer().getradioname(bluetoothAddress);
+		return bluetoothPeer.getradioname(bluetoothAddress);
 	}
 
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
-		return BlueCoveImpl.instance().getBluetoothPeer().getpeername(address);
+		return bluetoothPeer.getpeername(address);
 	}
 	
 	public DeviceClass getLocalDeviceClass() {
-		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass(bluetoothAddress));
+		return new DeviceClass(bluetoothPeer.getDeviceClass(bluetoothAddress));
 	}
 	
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
 		switch (mode) {
 		case DiscoveryAgent.NOT_DISCOVERABLE:
-			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(false);
+			bluetoothPeer.setDiscoverable(false);
 			break;
 		case DiscoveryAgent.GIAC:
-			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(true);
+			bluetoothPeer.setDiscoverable(true);
 			break;
 		case DiscoveryAgent.LIAC:
-			BlueCoveImpl.instance().getBluetoothPeer().setDiscoverable(true);
+			bluetoothPeer.setDiscoverable(true);
 			// TODO Timer to turn it off
 			break;
 		}
@@ -122,12 +135,12 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 
 	public boolean isLocalDevicePowerOn() {
-		int mode = BlueCoveImpl.instance().getBluetoothPeer().getBluetoothRadioMode();
+		int mode = bluetoothPeer.getBluetoothRadioMode();
 		return ((mode == BluetoothPeer.BTH_MODE_CONNECTABLE) || (mode == BluetoothPeer.BTH_MODE_DISCOVERABLE));
 	}
 	
 	public int getLocalDeviceDiscoverable() {
-		int mode = BlueCoveImpl.instance().getBluetoothPeer().getBluetoothRadioMode();
+		int mode = bluetoothPeer.getBluetoothRadioMode();
 		if (mode == BluetoothPeer.BTH_MODE_DISCOVERABLE) {
 			return DiscoveryAgent.GIAC;
 		} else {
@@ -154,10 +167,10 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		}
 		
 		if ("bluecove.radio.version".equals(property)) {
-			return String.valueOf(BlueCoveImpl.instance().getBluetoothPeer().getDeviceVersion(bluetoothAddress));
+			return String.valueOf(bluetoothPeer.getDeviceVersion(bluetoothAddress));
 		}
 		if ("bluecove.radio.manufacturer".equals(property)) {
-			return String.valueOf(BlueCoveImpl.instance().getBluetoothPeer().getDeviceManufacturer(bluetoothAddress));
+			return String.valueOf(bluetoothPeer.getDeviceManufacturer(bluetoothAddress));
 		}
 		return null;
 	}
@@ -170,11 +183,11 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
-		return BlueCoveImpl.instance().getBluetoothPeer().cancelInquiry();
+		return bluetoothPeer.cancelInquiry();
 	}
 
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
-		return BlueCoveImpl.instance().getBluetoothPeer().runDeviceInquiry(startedNotify, accessCode, listener);
+		return bluetoothPeer.runDeviceInquiry(startedNotify, accessCode, listener);
 	}
 
 	//	 --- Service search 
@@ -187,7 +200,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		startedNotify.searchServicesStartedCallback();
 		int[] handles;
 		try {
-			handles = BlueCoveImpl.instance().getBluetoothPeer().runSearchServices(uuidSet, Long.parseLong(device.getBluetoothAddress(), 16));
+			handles = bluetoothPeer.runSearchServices(uuidSet, Long.parseLong(device.getBluetoothAddress(), 16));
 		} catch (SearchServicesDeviceNotReachableException e) {
 			return DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
 		} catch (SearchServicesTerminatedException e) {
@@ -270,7 +283,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		 * retrieve SDP blob
 		 */
 
-		byte[] blob = BlueCoveImpl.instance().getBluetoothPeer().getServiceAttributes(sortIDs,
+		byte[] blob = bluetoothPeer.getServiceAttributes(sortIDs,
 				 		Long.parseLong(serviceRecord.getHostDevice().getBluetoothAddress(), 16),
 						(int)serviceRecord.getHandle());
 
@@ -292,27 +305,25 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 //	 --- Client RFCOMM connections
 	
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
-		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
-		int socket = peer.socket(authenticate, encrypt);
-		peer.connect(socket, address, channel);
+		int socket = bluetoothPeer.socket(authenticate, encrypt);
+		bluetoothPeer.connect(socket, address, channel);
 		return socket;
 	}
 	
 	public void connectionRfCloseClientConnection(long handle) throws IOException {
-		BlueCoveImpl.instance().getBluetoothPeer().close((int)handle);
+		bluetoothPeer.close((int)handle);
 	}
 	
 	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
 		/*
 		 * open socket
 		 */
-		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
 
-		int socket = peer.socket(authenticate, encrypt);
-		peer.bind(socket);
-		peer.listen(socket);
+		int socket = bluetoothPeer.socket(authenticate, encrypt);
+		bluetoothPeer.bind(socket);
+		bluetoothPeer.listen(socket);
 
-		int channel = peer.getsockchannel(socket);
+		int channel = bluetoothPeer.getsockchannel(socket);
 		DebugLog.debug("service channel ", channel);
 		
 		int serviceRecordHandle = socket; 
@@ -321,31 +332,30 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		/*
 		 * register service
 		 */
-		serviceRecord.setHandle(peer.registerService(serviceRecord.toByteArray()));
+		serviceRecord.setHandle(bluetoothPeer.registerService(serviceRecord.toByteArray()));
 		
 		return socket;
 	}
 	
 	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
-		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
+
 		/*
 		 * close socket
 		 */
-		peer.close((int)handle);
+		bluetoothPeer.close((int)handle);
 		/*
 		 * unregister service
 		 */
-		peer.unregisterService(serviceRecord.getHandle());
+		bluetoothPeer.unregisterService(serviceRecord.getHandle());
 	}
 	
 	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException {
-		return BlueCoveImpl.instance().getBluetoothPeer().accept((int)handle);
+		return bluetoothPeer.accept((int)handle);
 	}
 	
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
-		BluetoothPeer peer = BlueCoveImpl.instance().getBluetoothPeer();
-		peer.unregisterService(serviceRecord.getHandle());
-		serviceRecord.setHandle(peer.registerService(((ServiceRecordImpl) serviceRecord).toByteArray()));
+		bluetoothPeer.unregisterService(serviceRecord.getHandle());
+		serviceRecord.setHandle(bluetoothPeer.registerService(((ServiceRecordImpl) serviceRecord).toByteArray()));
 		DebugLog.debug("new serviceRecord", serviceRecord);
 	}
 	
@@ -354,26 +364,26 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 
 	public long getConnectionRfRemoteAddress(long handle) throws IOException {
-		return BlueCoveImpl.instance().getBluetoothPeer().getpeeraddress((int)handle);
+		return bluetoothPeer.getpeeraddress((int)handle);
 	}
 	
 	public int connectionRfRead(long handle) throws IOException {
-		return BlueCoveImpl.instance().getBluetoothPeer().recv((int)handle);
+		return bluetoothPeer.recv((int)handle);
 	}
 
 	public int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException {
-		return BlueCoveImpl.instance().getBluetoothPeer().recv((int)handle, b, off, len);
+		return bluetoothPeer.recv((int)handle, b, off, len);
 	}
 
 	public int connectionRfReadAvailable(long handle) throws IOException {
-		return (int)BlueCoveImpl.instance().getBluetoothPeer().recvAvailable((int)handle);
+		return (int)bluetoothPeer.recvAvailable((int)handle);
 	}
 
 	public void connectionRfWrite(long handle, int b) throws IOException {
-		BlueCoveImpl.instance().getBluetoothPeer().send((int)handle, b);
+		bluetoothPeer.send((int)handle, b);
 	}
 
 	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException {
-		BlueCoveImpl.instance().getBluetoothPeer().send((int)handle, b, off, len);
+		bluetoothPeer.send((int)handle, b, off, len);
 	}
 }

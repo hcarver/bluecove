@@ -21,11 +21,14 @@
 
 #include "WIDCOMMStack.h"
 
-#ifndef _BTWLIB
 BOOL isWIDCOMMBluetoothStackPresent() {
-	return FALSE;
+	HMODULE h = LoadLibrary(WIDCOMM_DLL);
+	if (h == NULL) {
+		return FALSE;
+	}
+	FreeLibrary(h);
+	return TRUE;
 }
-#endif
 
 #ifdef _BTWLIB
 
@@ -33,7 +36,7 @@ static WIDCOMMStack* stack;
 static int openConnections = 0;
 
 void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr) {
-	swprintf_s(addressString, 14, _T("%02x%02x%02x%02x%02x%02x"),
+	swprintf_s(addressString, 14, L"%02x%02x%02x%02x%02x%02x",
 			 bd_addr[0],
              bd_addr[1],
              bd_addr[2],
@@ -61,13 +64,19 @@ jint DeviceClassToInt(DEV_CLASS devClass) {
 	return (((devClass[0] << 8) + devClass[1]) << 8) + devClass[2];
 }
 
-BOOL isWIDCOMMBluetoothStackPresent() {
-	HMODULE h = LoadLibrary(_T(WIDCOMM_DLL));
-	if (h == NULL) {
-		return FALSE;
-	}
-	FreeLibrary(h);
-	return TRUE;
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLibraryVersion
+(JNIEnv *, jobject) {
+	return blueCoveVersion();
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_detectBluetoothStack
+(JNIEnv *, jobject) {
+	return detectBluetoothStack();
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_enableNativeDebug
+  (JNIEnv *env, jobject, jclass loggerClass, jboolean on) {
+	enableNativeDebug(env, loggerClass, on);
 }
 
 WIDCOMMStack::WIDCOMMStack() {
@@ -95,7 +104,7 @@ WIDCOMMStack* createWIDCOMMStack() {
 	return new WIDCOMMStack();
 }
 
-JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_initialize
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_initializeImpl
 (JNIEnv *env, jobject) {
 	jboolean rc = TRUE;
 	if (stack == NULL) {
@@ -250,6 +259,11 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemo
 		rc = stack->GetNextRemoteDeviceInfo(&dev_info);
 	}
 	return NULL;
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceClassImpl
+(JNIEnv *env, jobject) {
+	return getDeviceClassByOS(env);
 }
 
 // --- Device Inquiry
@@ -791,6 +805,19 @@ void WIDCOMMStackRfCommPort::OnDataReceived(void *p_data, UINT16 len) {
 	}
 }
 
+#define open_client_return  open_client_finally(rf); return
+
+void open_client_finally(WIDCOMMStackRfCommPort* rf) {
+	if ((rf != NULL) && (stack != NULL)) {
+		// Just in case Close
+		rf->Close();
+		stack->deleteCommPort(rf);
+	}
+	if (stack != NULL) {
+		LeaveCriticalSection(&stack->csCRfCommIf);
+	}
+}
+
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfOpenClientConnection
 (JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt) {
 	BD_ADDR bda;
@@ -798,35 +825,35 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 
 	WIDCOMMStackRfCommPort* rf = NULL;
 	EnterCriticalSection(&stack->csCRfCommIf);
-	__try {
+	//vc6 __try {
 		rf = stack->createCommPort(FALSE);
 		if (rf == NULL) {
 			throwIOException(env, "No free connections Objects in Pool");
-			return 0;
+			open_client_return 0;
 		}
         debugs("RfCommPort handle %i", rf->internalHandle);
 		if ((rf->hEvents[0] == NULL) || (rf->hEvents[1] == NULL)) {
 			throwRuntimeException(env, "fails to CreateEvent");
-			return 0;
+			open_client_return 0;
 		}
 		//debug("AssignScnValue");
 		// What GUID do we need in call to CRfCommIf.AssignScnValue() if we don't have any?
 		//memcpy(&(rf->service_guid), &test_client_service_guid, sizeof(GUID));
 		if (!stack->rfCommIf.AssignScnValue(&(rf->service_guid), (UINT8)channel)) {
 			throwIOException(env, "failed to assign SCN");
-			return 0;
+			open_client_return 0;
 		}
 		//debug("SetSecurityLevel");
 		UINT8 sec_level = BTM_SEC_NONE;
 		if (!stack->rfCommIf.SetSecurityLevel("bluecovesrv"/*rf->service_name*/, sec_level, FALSE)) {
 			throwIOException(env, "Error setting security level");
-			return 0;
+			open_client_return 0;
         }
 		//debug("OpenClient");
 		CRfCommPort::PORT_RETURN_CODE rc = rf->OpenClient((UINT8)channel, bda);
 		if (rc != CRfCommPort::SUCCESS) {
 			throwIOException(env, "Failed to OpenClient");
-			return 0;
+			open_client_return 0;
 		}
 
 		//debug("waitFor Connection signal");
@@ -835,29 +862,29 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 			DWORD  rc = WaitForSingleObject(rf->hEvents[0], 500);
 			if (rc == WAIT_FAILED) {
 				throwRuntimeException(env, "WaitForSingleObject");
-				return 0;
+				open_client_return 0;
 			}
 			if ((GetTickCount() - waitStart)  > COMMPORTS_CONNECT_TIMEOUT) {
 				throwIOException(env, "Connection timeout");
-				return 0;
+				open_client_return 0;
 			}
 		}
 		if ((stack == NULL) || rf->isClosing || rf->isConnectionError) {
 			throwIOException(env, "Failed to connect");
-			return 0;
+			open_client_return 0;
 		}
 		debug("connected");
 		jlong handle = rf->internalHandle;
 		rf = NULL;
-		return handle;
-	} __finally {
+		open_client_return handle;
+	/* vc6 } __finally {
 		if ((rf != NULL) && (stack != NULL)) {
 			// Just in case Close
 			rf->Close();
 			stack->deleteCommPort(rf);
 		}
 		LeaveCriticalSection(&stack->csCRfCommIf);
-	}
+	}*/
 }
 
 void WIDCOMMStackRfCommPort::closeRfCommPort(JNIEnv *env) {
@@ -1058,17 +1085,30 @@ void WIDCOMMStackRfCommPortServer::closeRfCommPort(JNIEnv *env) {
 	}
 }
 
+#define open_server_return  open_server_finally(env, rf); return
+
+void open_server_finally(JNIEnv *env, WIDCOMMStackRfCommPortServer* rf) {
+	if ((rf != NULL) && (stack != NULL)) {
+		rf->closeRfCommPort(env);
+		stack->deleteCommPort(rf);
+	}
+
+	if (stack != NULL) {
+		LeaveCriticalSection(&stack->csCRfCommIf);
+	}
+}
+
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerOpenImpl
 (JNIEnv *env, jobject peer, jbyteArray uuidValue, jbyteArray uuidValue2, jstring name, jboolean authenticate, jboolean encrypt) {
-	
+
 	EnterCriticalSection(&stack->csCRfCommIf);
 	WIDCOMMStackRfCommPortServer* rf = NULL;
-	__try {
+//VC6	__try {
 
-		WIDCOMMStackRfCommPortServer* rf = (WIDCOMMStackRfCommPortServer*)stack->createCommPort(TRUE);
+		rf = (WIDCOMMStackRfCommPortServer*)stack->createCommPort(TRUE);
 		if (rf == NULL) {
 			throwIOException(env, "No free connections Objects in Pool");
-			return 0;
+			open_server_return 0;
 		}
 		const char *cname = env->GetStringUTFChars(name, 0);
 		sprintf_s(rf->service_name, BT_MAX_SERVICE_NAME_LEN, "%s", cname);
@@ -1081,11 +1121,11 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 
 		if (!stack->rfCommIf.AssignScnValue(&(rf->service_guid), 0, rf->service_name)) {
 			throwIOException(env, "failed to assign SCN");
-			return 0;
+			open_server_return 0;
 		}
 		rf->scn = stack->rfCommIf.GetScn();
 
-		
+
 		GUID service_guids[2];
 		int service_guids_len = 1;
 		memcpy(&(service_guids[0]), &(rf->service_guid), sizeof(GUID));
@@ -1100,16 +1140,16 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 		if (rf->sdpService->AddServiceClassIdList(service_guids_len, service_guids) != SDP_OK) {
 		//if (rf->sdpService->AddServiceClassIdList(1, &(rf->service_guid)) != SDP_OK) {
 			throwIOException(env, "Error AddServiceClassIdList");
-			return 0;
+			open_server_return 0;
 		}
 
 		if (rf->sdpService->AddServiceName(rf->service_name) != SDP_OK) {
 			throwIOException(env, "Error AddServiceName");
-			return 0;
+			open_server_return 0;
 		}
 		if (rf->sdpService->AddRFCommProtocolDescriptor(rf->scn) != SDP_OK) {
 			throwIOException(env, "Error AddRFCommProtocolDescriptor");
-			return 0;
+			open_server_return 0;
 		}
 		if (rf->sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, (UINT32)strlen(rf->service_name), (UINT8*)rf->service_name) != SDP_OK) {
 			throwIOException(env, "Error AddAttribute ServiceName");
@@ -1118,19 +1158,20 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 
 		if (rf->sdpService->MakePublicBrowseable() != SDP_OK) {
 			throwIOException(env, "Error MakePublicBrowseable");
-			return 0;
+			open_server_return 0;
 		}
 		rf->sdpService->SetAvailability(255);
 
 		UINT8 sec_level = BTM_SEC_NONE;
 		if (!stack->rfCommIf.SetSecurityLevel(rf->service_name, sec_level, TRUE)) {
 			throwIOException(env, "Error setting security level");
-			return 0;
+			open_server_return 0;
         }
 
 		jlong handle = rf->internalHandle;
 		rf = NULL;
-		return handle;
+		open_server_return handle;
+/*VC6
 	} __finally {
 		if ((rf != NULL) && (stack != NULL)) {
 			rf->closeRfCommPort(env);
@@ -1138,6 +1179,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 		}
 		LeaveCriticalSection(&stack->csCRfCommIf);
 	}
+*/
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerAcceptAndOpenRfServerConnection
@@ -1233,7 +1275,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerAd
 	if (rf == NULL) {
 		return;
 	}
-	
+
 	jchar *chars = env->GetCharArrayElements(value, 0);
 	UINT8 arrLen = (UINT8)env->GetArrayLength(value);
 	UINT8 *p_val = new UINT8[arrLen + 1];
@@ -1241,7 +1283,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerAd
 		p_val[i] = (UINT8)chars[i];
 	}
 	p_val[arrLen] = '\0';
-	
+
 	UINT8 attr_len = arrLen;
 
 	env->ReleaseCharArrayElements(value, chars, 0);
@@ -1251,7 +1293,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerAd
 	} else {
 		debug4("attr set %i type=%i len=%i [%s]", attrID, attrType, attr_len, p_val);
 	}
-	
+
 	delete p_val;
 
 }

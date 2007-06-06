@@ -44,17 +44,32 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	
 	private Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
 	
+	static {
+		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WC_BS);
+	}
+	
 	BluetoothStackWIDCOMM() {
-		if (!initialize()) {
-			throw new RuntimeException("WIDCOMM BluetoothStack not found");
-		}
-		initialized = true;
 	}
 
 	public String getStackID() {
 		return BlueCoveImpl.STACK_WIDCOMM;
 	}
-	public native boolean initialize();
+	
+	public native int getLibraryVersion();
+	
+	public native int detectBluetoothStack();
+	
+	public native void enableNativeDebug(Class nativeDebugCallback, boolean on);
+	
+	
+	public void initialize() {
+		if (!initializeImpl()) {
+			throw new RuntimeException("WIDCOMM BluetoothStack not found");
+		}
+		initialized = true;
+	}
+	
+	public native boolean initializeImpl();
 	
 	private native void uninitialize();
 	
@@ -74,11 +89,14 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public native String getLocalDeviceName();
 
+	
+	public native int getDeviceClassImpl();
+	
 	/**
 	 * @todo
 	 */
 	public DeviceClass getLocalDeviceClass() {
-		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass(0));
+		return new DeviceClass(getDeviceClassImpl());
 	}
 
 	/**

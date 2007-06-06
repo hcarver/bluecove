@@ -41,16 +41,29 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	
 	private Hashtable connectionHandles = new Hashtable();
 	
+	static {
+		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WC_BS);
+	}
+	
 	BluetoothStackBlueSoleil() {
-		initialize();
-		initialized = true;
 	}
 	
 	public String getStackID() {
 		return BlueCoveImpl.STACK_BLUESOLEIL;
 	}
 	
-	private native void initialize();
+	public native int getLibraryVersion();
+	
+	public native int detectBluetoothStack();
+	
+	public native void enableNativeDebug(Class nativeDebugCallback, boolean on);
+	
+	public native boolean initializeImpl();
+	
+	public void initialize() {
+		initializeImpl();
+		initialized = true;
+	}
 	
 	private native void uninitialize();
 	
@@ -78,11 +91,13 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 
 	public native String getLocalDeviceName();
 
+	public native int getDeviceClassImpl();
+	
 	/**
 	 * @todo
 	 */
 	public DeviceClass getLocalDeviceClass() {
-		return new DeviceClass(BlueCoveImpl.instance().getBluetoothPeer().getDeviceClass(0));
+		return new DeviceClass(getDeviceClassImpl());
 	}
 
 	/**
