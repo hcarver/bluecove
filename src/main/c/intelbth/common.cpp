@@ -57,6 +57,14 @@ void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char 
 	va_end(ap);
 }
 
+char* bool2str(BOOL b) { 
+	if (b == false)  { 
+		return "FALSE"; 
+	} else { 
+		return "TRUE";
+	}
+}
+
 void throwException(JNIEnv *env, const char *name, const char *msg) {
 	 //debugss("Throw Exception %s %s", name, msg);
 	 jclass cls = env->FindClass(name);

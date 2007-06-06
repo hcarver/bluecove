@@ -742,6 +742,11 @@ void WIDCOMMStackRfCommPort::readyForReuse() {
 	service_name[0] = '\0';
 }
 
+void WIDCOMMStackRfCommPort::resetReceiveBuffer() {
+   	todo_buf_rcv_idx = 0;
+	todo_buf_read_idx = 0;
+}
+
 WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
 	magic1 = 0;
 	magic2 = 0;
@@ -890,6 +895,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 void WIDCOMMStackRfCommPort::closeRfCommPort(JNIEnv *env) {
 	isClosing = TRUE;
 	SetEvent(hEvents[0]);
+	debugs("closing closeRfCommPort, Connected[%s]", bool2str(isConnected));
 	CRfCommPort::PORT_RETURN_CODE rc = Close();
 	if (rc != CRfCommPort::SUCCESS && rc != CRfCommPort::NOT_OPENED) {
 		throwIOException(env, "Failed to Close");
@@ -936,7 +942,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	if (rf == NULL) {
 		return -1;
 	}
-	debug("->read()");
+	debugs("->read() [%i]", rf->todo_buf_read_idx);
 	if (rf->isClosing) {
 		return -1;
 	}
@@ -966,7 +972,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	if (rf == NULL) {
 		return -1;
 	}
-	debug("->read(byte[])");
+	debugs("->read(byte[]) [%i]", rf->todo_buf_read_idx);
 	if (rf->isClosing) {
 		return -1;
 	}
@@ -1212,6 +1218,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 	rf->isConnected = FALSE;
 	rf->isConnectionError = FALSE;
 	rf->isClosing = FALSE;
+	rf->resetReceiveBuffer();
 
 	CRfCommPort::PORT_RETURN_CODE rc = rf->OpenServer(rf->scn);
 	if (rc != CRfCommPort::SUCCESS) {
@@ -1259,6 +1266,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	}
 	rf->isClosing = TRUE;
 	SetEvent(rf->hEvents[0]);
+	debugs("closing ServerConnection, Connected[%s]", bool2str(rf->isConnected));
 	CRfCommPort::PORT_RETURN_CODE rc = rf->Close();
 	if (rc != CRfCommPort::SUCCESS && rc != CRfCommPort::NOT_OPENED) {
 		throwIOException(env, "Failed to Close");
@@ -1266,6 +1274,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	rf->isConnected = FALSE;
 	rf->isConnectionError = FALSE;
 	rf->isClientOpen = FALSE;
+	debug("norify ServerConnection readers");
 	SetEvent(rf->hEvents[0]);
 }
 

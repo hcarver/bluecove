@@ -151,6 +151,8 @@ public:
 	int todo_buf_rcv_idx;
 	int todo_buf_read_idx;
 
+    void resetReceiveBuffer();
+
 	WIDCOMMStackRfCommPort();
 	virtual ~WIDCOMMStackRfCommPort();
 

@@ -144,6 +144,8 @@ void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char 
 #define Edebugss(fmt, message1, message2)
 #endif
 
+char* bool2str(BOOL b);
+
 void throwException(JNIEnv *env, const char *name, const char *msg);
 
 void throwExceptionExt(JNIEnv *env, const char *name, const char *fmt, ...);
