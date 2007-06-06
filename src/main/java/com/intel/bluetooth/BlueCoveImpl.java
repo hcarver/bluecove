@@ -40,7 +40,9 @@ public class BlueCoveImpl {
 	
 	public static final int versionBuild = 0;
 	
-	public static final String version = String.valueOf(versionMajor) + "." + String.valueOf(versionMinor) + "." + String.valueOf(versionBuild) + "-SNAPSHOT";
+	public static final String versionSufix = "-SNAPSHOT";
+	
+	public static final String version = String.valueOf(versionMajor) + "." + String.valueOf(versionMinor) + "." + String.valueOf(versionBuild) + versionSufix;
 
 	public static final int nativeLibraryVersionExpected = versionMajor * 10000 + versionMinor * 100 + versionBuild;
 	
