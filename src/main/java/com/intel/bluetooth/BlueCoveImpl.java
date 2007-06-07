@@ -52,11 +52,14 @@ public class BlueCoveImpl {
 	
 	public static final String STACK_BLUESOLEIL = "bluesoleil";
 	
-	// We can't use the same DLL on windows for all implemenations.
+	// We can't use the same DLL on windows for all implemenations. 
+	// Since WIDCOMM need to be compile /MD using VC6 and winsock /MT using VC2005 
+	// This can be use to simplify development/test builds
+	private static final boolean oneDLLbuild = false;
 	
 	public static final String NATIVE_LIB_MS = "intelbth";
 	
-	public static final String NATIVE_LIB_WC_BS = "bluecove";
+	public static final String NATIVE_LIB_WC_BS = oneDLLbuild?NATIVE_LIB_MS:"bluecove";
 	
 	private BluetoothStack bluetoothStack;
 	

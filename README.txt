@@ -68,6 +68,12 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
         "Include files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\Include
         "Library files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\lib
 
+ We can't use the same DLL on windows for all implemenations. Since WIDCOMM need to be compile /MD using VC6 and winsock /MT using VC2005
+  intelbth.dll build by VC2005 Configuration "Win32 winsock"
+  bluecove.dll build by VC6 Configuration "Win32 Release"
+
+ Visual C++ 6.0 SP6 used to build bluecove.dll for WIDCOMM and BlueSoleil
+
  Ant or maven2 are used as the build tool for java.
 
 
