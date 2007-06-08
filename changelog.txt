@@ -5,6 +5,7 @@
     2007-06-07 Vlad Skarzhevskyy
     * intelbth.dll build by VC2005 Configuration "Win32 winsock" for Microsoft Bluetooth Stack
     * bluecove.dll build by VC6 Configuration "Win32 Release"  for WIDCOMM and BlueSoleil Bluetooth Stacks
+    * FIFO ReceiveBuffer for WIDCOMM Stack
 
     2007-06-03 Vlad Skarzhevskyy
     * WIDCOMM Stack RFCOMM working Server implementation
