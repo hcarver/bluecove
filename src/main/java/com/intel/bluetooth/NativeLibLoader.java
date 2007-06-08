@@ -31,6 +31,8 @@ public class NativeLibLoader {
 
 	private static Hashtable libsState = new Hashtable();
 	
+	private static String bluecoveDllDir = null;
+	
 	private static class LibState {
     
 		boolean triedToLoadAlredy = false;
@@ -201,31 +203,51 @@ public class NativeLibLoader {
     }
 
     private static File makeTempName(String libFileName) {
+    	if (bluecoveDllDir != null) {
+    		return new File(bluecoveDllDir, libFileName);
+    	}
         String tmpDir = System.getProperty("java.io.tmpdir");
         String uname = System.getProperty("user.name");
         int count = 0;
         File fd = null;
         File dir = null;
+        selectDirectory:
         while (true) {
             if (count > 10) {
             	DebugLog.debug("Can't create temporary dir " + dir.getAbsolutePath());
             	return new File(tmpDir, libFileName);
             }
             dir = new File(tmpDir, "bluecove_" + uname + "_"+ (count ++));
-            fd = new File(dir, libFileName);
-            if ((fd.exists()) && (!fd.delete())) {
-                continue;
+            if (dir.exists()) {
+            	if (!dir.isDirectory()) {
+            		continue selectDirectory;
+            	}
+            	// Remove all files.
+            	try {
+            		File[] files = dir.listFiles();
+            		for (int i = 0; i < files.length; i++) {
+            			if (!files[i].delete()) {
+                    		continue selectDirectory;
+                    	}	
+					}
+        		} catch (NoSuchMethodError e) {
+        			// Java 1.1
+        		}
             }
             if ((!dir.exists()) && (!dir.mkdirs())) {
                 DebugLog.debug("Can't create temporary dir ", dir.getAbsolutePath());
-                continue;
+                continue selectDirectory;
             }
             try {
             	dir.deleteOnExit();
     		} catch (NoSuchMethodError e) {
     			// Java 1.1
     		}
-            try {
+            fd = new File(dir, libFileName);
+            if ((fd.exists()) && (!fd.delete())) {
+                continue;
+            }
+    		try {
 				if (!fd.createNewFile()) {
 				    DebugLog.debug("Can't create file in temporary dir ", fd.getAbsolutePath());
 				    continue;
@@ -236,6 +258,7 @@ public class NativeLibLoader {
 				DebugLog.debug("Can't create file in temporary dir ", fd.getAbsolutePath());
 				continue;
 			}
+			bluecoveDllDir = dir.getAbsolutePath();
             break;
         }
         return fd;
