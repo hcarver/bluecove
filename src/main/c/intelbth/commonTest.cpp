@@ -42,3 +42,56 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_testUUIDConv
 
 	return uuidValueConverted;
 }
+
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferCreate
+(JNIEnv *, jclass, jint size) {
+	return (jlong) new ReceiveBuffer(size);
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferClose
+(JNIEnv *, jclass, jlong bufferHandler) {
+	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
+	delete b;
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferWrite
+(JNIEnv *env, jclass, jlong bufferHandler, jbyteArray data) {
+	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
+	jbyte *bytes = env->GetByteArrayElements(data, 0);
+	jint rc = b->write(bytes, env->GetArrayLength(data));
+	env->ReleaseByteArrayElements(data, bytes, 0);
+	return rc;
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferRead__J_3B
+(JNIEnv *env, jclass, jlong bufferHandler, jbyteArray data) {
+	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
+	jbyte *bytes = env->GetByteArrayElements(data, 0);
+	jint rc = b->read(bytes, env->GetArrayLength(data));
+	env->ReleaseByteArrayElements(data, bytes, 0);
+	return rc;
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferRead__J
+(JNIEnv *env, jclass, jlong bufferHandler) {
+	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
+	return b->readByte();
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferAvailable
+(JNIEnv *env, jclass, jlong bufferHandler) {
+	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
+	return b->available();
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferIsOverflown
+(JNIEnv *, jclass, jlong bufferHandler) {
+	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
+	return b->isOverflown();
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferIsCorrupted
+(JNIEnv *, jclass, jlong bufferHandler) {
+	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
+	return b->isCorrupted();
+}

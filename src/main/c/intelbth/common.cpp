@@ -231,3 +231,151 @@ jint getDeviceClassByOS(JNIEnv *env) {
 	return MAJOR_COMPUTER;
 #endif
 }
+
+ReceiveBuffer::ReceiveBuffer() {
+	safe = RECEIVE_BUFFER_SAFE;
+	if (safe) InitializeCriticalSection(&lock);
+	this->size = RECEIVE_BUFFER_MAX;
+	reset();
+}
+
+ReceiveBuffer::ReceiveBuffer(int size) {
+	safe = RECEIVE_BUFFER_SAFE;
+	if (safe) InitializeCriticalSection(&lock);
+	this->size = size;
+	if (this->size > RECEIVE_BUFFER_MAX) {
+		this->size = RECEIVE_BUFFER_MAX;
+	}
+	reset();
+}
+
+ReceiveBuffer::~ReceiveBuffer() {
+	if (safe) DeleteCriticalSection(&lock);
+}
+
+void ReceiveBuffer::reset() {
+	rcv_idx = 0;
+	read_idx = 0;
+	overflown = FALSE;
+	full = FALSE;
+	magic1b = MAGIC_1;
+	magic2b = MAGIC_2;
+	magic1e = MAGIC_1;
+	magic2e = MAGIC_2;
+}
+
+BOOL ReceiveBuffer::isCorrupted() {
+	return ((magic1b != MAGIC_1) || (magic2b != MAGIC_2) || (magic1e != MAGIC_1) || (magic2e != MAGIC_2));
+}
+
+BOOL ReceiveBuffer::isOverflown() {
+	return overflown && (available() == 0);
+}
+
+int ReceiveBuffer::write(void *p_data, int len) {
+	if (overflown) {
+		return 0;
+	}
+	if (safe) EnterCriticalSection(&lock);
+	int accept;
+	int _read_idx = read_idx;
+
+	if ((_read_idx == rcv_idx) && full) {
+		accept = 0;
+	} else if (_read_idx <= rcv_idx) {
+		accept = size - rcv_idx + _read_idx;
+	} else {
+		accept = _read_idx - rcv_idx;
+	}
+
+	if (accept > len) {
+		accept = len;
+	} else if (accept < len) {
+		overflown = TRUE;
+	}
+
+	if (accept != 0) {
+		if (rcv_idx + accept <= size) {
+			memcpy((buffer + rcv_idx), p_data, accept);
+			int new_rcv_idx = rcv_idx + accept;
+			if (new_rcv_idx >= size) {
+				new_rcv_idx = 0;
+			}
+			rcv_idx = new_rcv_idx;
+		} else {
+			// Read first part till the end of the buffer.
+			int accept_fill_end_size = size - rcv_idx;
+			memcpy((buffer + rcv_idx), p_data, accept_fill_end_size);
+			// Read second part at the beginning of the buffer.
+			int accept_fill_begin_size = accept - accept_fill_end_size;
+			memcpy(buffer, ((jbyte*)p_data + accept_fill_end_size), accept_fill_begin_size);
+			rcv_idx = accept_fill_begin_size;
+		}
+
+		if (read_idx == rcv_idx) {
+			full = TRUE;
+		}
+	}
+	if (safe) LeaveCriticalSection(&lock);
+	return accept;
+}
+
+void ReceiveBuffer::incReadIdx(int count) {
+	int next_read_idx = read_idx + count;
+	if (next_read_idx >= size) {
+		next_read_idx -= size;
+	}
+	read_idx = next_read_idx;
+	full = FALSE;
+}
+
+int ReceiveBuffer::readByte() {
+	if (available() == 0) {
+		return -1;
+	}
+	if (safe) EnterCriticalSection(&lock);
+	jint result = (unsigned char)buffer[read_idx];
+	incReadIdx(1);
+	if (safe) LeaveCriticalSection(&lock);
+	return result;
+}
+
+int ReceiveBuffer::read(void *p_data, int len) {
+	int count = available();
+	if (count == 0) {
+		return 0;
+	}
+	if (safe) EnterCriticalSection(&lock);
+	if (count > len) {
+		count = len;
+	}
+	if (read_idx + count < size) {
+		memcpy(p_data, (buffer + read_idx), count);
+	} else {
+		// Read first part from the end of the buffer.
+		int accept_fill_end_size = size - read_idx;
+		memcpy(p_data, (buffer + read_idx), accept_fill_end_size);
+		// Read second part from the beginning of the buffer.
+		int accept_fill_begin_size = count - accept_fill_end_size;
+		memcpy((jbyte*)p_data + accept_fill_end_size, buffer, accept_fill_begin_size);
+	}
+	incReadIdx(count);
+	if (safe) LeaveCriticalSection(&lock);
+	return count;
+}
+
+int ReceiveBuffer::available() {
+	if (safe) EnterCriticalSection(&lock);
+	int rc;
+	int _rcv_idx = rcv_idx;
+	int _read_idx = read_idx;
+	if ((_read_idx == _rcv_idx) && full) {
+		rc = size;
+	} else if (_read_idx <= _rcv_idx) {
+		rc = (_rcv_idx - _read_idx);
+	} else {
+		rc = (_rcv_idx + (size - _read_idx));
+	}
+	if (safe) LeaveCriticalSection(&lock);
+	return rc;
+}

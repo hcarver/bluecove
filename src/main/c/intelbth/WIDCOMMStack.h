@@ -124,10 +124,6 @@ public:
 };
 
 //	 --- Client RFCOMM connections
-#define TODO_BUF_MAX 0x10000
-
-#define MAGIC_1 0xBC1AA01
-#define MAGIC_2 0xBC2BB02
 
 class WIDCOMMStackRfCommPort : public CRfCommPort {
 public:
@@ -147,16 +143,13 @@ public:
 
 	HANDLE hEvents[2];
 
-	jbyte todo_buf[TODO_BUF_MAX];
-	int todo_buf_rcv_idx;
-	int todo_buf_read_idx;
-
-    void resetReceiveBuffer();
+	ReceiveBuffer receiveBuffer;
 
 	WIDCOMMStackRfCommPort();
 	virtual ~WIDCOMMStackRfCommPort();
 
 	void readyForReuse();
+	void resetReceiveBuffer();
 
 	virtual void closeRfCommPort(JNIEnv *env);
 

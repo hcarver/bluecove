@@ -176,3 +176,45 @@ BOOL isWIDCOMMBluetoothStackPresent();
 BOOL isBlueSoleilBluetoothStackPresent();
 
 jint getDeviceClassByOS(JNIEnv *env);
+
+#define MAGIC_1 0xBC1AA01
+#define MAGIC_2 0xBC2BB02
+
+#define RECEIVE_BUFFER_MAX 0x10000
+// This is extra precaution, may be unnecessary
+#define RECEIVE_BUFFER_SAFE TRUE
+/*
+* FIFO with no memory allocations in write, can be overflown but not with BT communication speed.
+*/
+class ReceiveBuffer {
+private:
+	BOOL safe;
+	CRITICAL_SECTION lock;
+
+	int size;
+	
+	long magic1b;
+	long magic2b;
+	jbyte buffer[RECEIVE_BUFFER_MAX];
+	long magic1e;
+	long magic2e;
+
+	BOOL overflown;
+	BOOL full;
+	int rcv_idx;
+	int read_idx;
+
+	void incReadIdx(int count);
+public:
+	ReceiveBuffer();
+	ReceiveBuffer(int size);
+	~ReceiveBuffer();
+
+    void reset();
+	int write(void *p_data, int len);
+	int readByte();
+	int read(void *p_data, int len);
+	BOOL isOverflown();
+	int available();
+	BOOL isCorrupted();
+};

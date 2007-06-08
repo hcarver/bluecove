@@ -152,4 +152,21 @@ public class BluetoothPeer {
 	
 	// internal test function
 	public static native byte[] testUUIDConversion(byte[] uuidValue);
+
+	public static native long testReceiveBufferCreate(int size);
+
+	public static native void testReceiveBufferClose(long bufferHandler);
+
+	public static native int testReceiveBufferWrite(long bufferHandler, byte[] send);
+
+	public static native int testReceiveBufferRead(long bufferHandler, byte[] rcv);
+	
+	public static native int testReceiveBufferRead(long bufferHandler);
+	
+	public static native int testReceiveBufferAvailable(long bufferHandler);
+	
+	public static native boolean testReceiveBufferIsOverflown(long bufferHandler);
+	
+	public static native boolean testReceiveBufferIsCorrupted(long bufferHandler);
+	
 }

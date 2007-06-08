@@ -733,8 +733,7 @@ WIDCOMMStackRfCommPort::WIDCOMMStackRfCommPort() {
 }
 
 void WIDCOMMStackRfCommPort::readyForReuse() {
-	todo_buf_rcv_idx = 0;
-	todo_buf_read_idx = 0;
+	resetReceiveBuffer();
 	isConnected = FALSE;
 	isConnectionError = FALSE;
 	isClosing = FALSE;
@@ -743,8 +742,7 @@ void WIDCOMMStackRfCommPort::readyForReuse() {
 }
 
 void WIDCOMMStackRfCommPort::resetReceiveBuffer() {
-   	todo_buf_rcv_idx = 0;
-	todo_buf_read_idx = 0;
+	receiveBuffer.reset();
 }
 
 WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
@@ -799,13 +797,8 @@ void WIDCOMMStackRfCommPort::OnDataReceived(void *p_data, UINT16 len) {
 	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || isClosing) {
 		return;
 	}
-	if (isConnected) {
-		int accept = TODO_BUF_MAX - todo_buf_rcv_idx;
-		if (len > accept) {
-			len = accept;
-		}
-		memcpy((todo_buf + todo_buf_rcv_idx), p_data, len);
-		todo_buf_rcv_idx += len;
+	if (isConnected && !isClosing) {
+		receiveBuffer.write(p_data, len);
 		SetEvent(hEvents[1]);
 	}
 }
@@ -942,28 +935,26 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	if (rf == NULL) {
 		return -1;
 	}
-	debugs("->read() [%i]", rf->todo_buf_read_idx);
+	debug("->read()");
 	if (rf->isClosing) {
 		return -1;
 	}
-	while (rf->isConnected && (!rf->isClosing) && (rf->todo_buf_read_idx == rf->todo_buf_rcv_idx)) {
-		if (TODO_BUF_MAX == rf->todo_buf_rcv_idx) {
-			throwIOException(env, "rcv buffer overflown, Fix me");
-			return 0;
-		}
+	if (rf->receiveBuffer.isOverflown()) {
+		throwIOException(env, "Receive buffer overflown");
+		return 0;
+	}
+	while (rf->isConnected && (!rf->isClosing) && (rf->receiveBuffer.available() == 0)) {
 		DWORD  rc = WaitForMultipleObjects(2, rf->hEvents, FALSE, INFINITE);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForMultipleObjects");
 			return 0;
 		}
 	}
-	if ((rf->isClosing) || (!rf->isConnected && (rf->todo_buf_read_idx == rf->todo_buf_rcv_idx))) {
+	if ((rf->isClosing) || (rf->receiveBuffer.available() == 0)) {
 		// See InputStream.read();
 		return -1;
 	}
-	jint result = (unsigned char)rf->todo_buf[rf->todo_buf_read_idx];
-	rf->todo_buf_read_idx ++;
-	return result;
+	return rf->receiveBuffer.readByte();
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfRead__J_3BII
@@ -972,36 +963,45 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	if (rf == NULL) {
 		return -1;
 	}
-	debugs("->read(byte[]) [%i]", rf->todo_buf_read_idx);
+	debug("->read(byte[])");
 	if (rf->isClosing) {
 		return -1;
 	}
+	if (rf->receiveBuffer.isOverflown()) {
+		throwIOException(env, "Receive buffer overflown");
+		return 0;
+	}
+
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
 	int done = 0;
 
 	while (rf->isConnected && (!rf->isClosing) && (done < len)) {
-		while (rf->isConnected && rf->todo_buf_read_idx == rf->todo_buf_rcv_idx) {
-			if (TODO_BUF_MAX == rf->todo_buf_rcv_idx) {
-				throwIOException(env, "rcv buffer overflown, Fix me");
-				return 0;
-			}
+		while (rf->isConnected && (rf->receiveBuffer.available() == 0)) {
 			DWORD  rc = WaitForMultipleObjects(2, rf->hEvents, FALSE, INFINITE);
 			if (rc == WAIT_FAILED) {
+				env->ReleaseByteArrayElements(b, bytes, 0);
 				throwRuntimeException(env, "WaitForMultipleObjects");
 				return 0;
 			}
 		}
-		int count = rf->todo_buf_rcv_idx - rf->todo_buf_read_idx;
+		int count = rf->receiveBuffer.available();
+		if (count > 0) {
+			if (count > len - done) {
+				count = len - done;
+			}
+			done += rf->receiveBuffer.read(bytes + off + done, count);
+		}
+	}
+	// Read from not Connected
+	int count = rf->receiveBuffer.available();
+	if (count > 0) {
 		if (count > len - done) {
 			count = len - done;
 		}
-
-		memcpy(bytes + off + done , (rf->todo_buf + rf->todo_buf_read_idx), count);
-		rf->todo_buf_read_idx += count;
-
-		done += count;
+		done += rf->receiveBuffer.read(bytes + off + done, count);
 	}
+
 	if ((rf->isClosing) || (!rf->isConnected && done == 0)) {
 		// See InputStream.read();
 		done = -1;
@@ -1016,7 +1016,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	if (rf == NULL || rf->isClosing) {
 		return 0;
 	}
-	return (rf->todo_buf_rcv_idx - rf->todo_buf_read_idx);
+	if (rf->receiveBuffer.isOverflown()) {
+		throwIOException(env, "Receive buffer overflown");
+	}
+	return rf->receiveBuffer.available();
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfWrite__JI
