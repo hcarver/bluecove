@@ -136,5 +136,7 @@ public interface BluetoothStack {
 	public void connectionRfWrite(long handle, int b) throws IOException;
 	
 	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
+	
+	public void connectionRfFlush(long handle) throws IOException;
 
 }

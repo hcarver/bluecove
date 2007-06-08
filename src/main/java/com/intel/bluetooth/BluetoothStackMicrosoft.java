@@ -382,8 +382,13 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	public void connectionRfWrite(long handle, int b) throws IOException {
 		bluetoothPeer.send((int)handle, b);
 	}
-
+	
 	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException {
 		bluetoothPeer.send((int)handle, b, off, len);
 	}
+	
+	public void connectionRfFlush(long handle) throws IOException {
+		// TODO are there any flush
+	}
+
 }

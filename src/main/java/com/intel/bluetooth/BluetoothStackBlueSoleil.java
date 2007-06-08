@@ -318,5 +318,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public native void connectionRfWrite(long handle, int b) throws IOException;
 
 	public native void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
+	
+	public native void connectionRfFlush(long handle) throws IOException;
 
 }

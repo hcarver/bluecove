@@ -235,12 +235,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 	if (accessCode == LIAC) {
 		ucInqMode = INQUIRY_LIMITED_MODE;
 	}
-	UCHAR ucInqLen = 0x0F; //~~ 15 sec
+	UCHAR ucInqLen = 0x0A; //~~ 15 sec
 	BLUETOOTH_DEVICE_INFO	lpDevsList[DEVICE_RESPONDED_MAX] = {0};
 	DWORD devsListLen = sizeof(BLUETOOTH_DEVICE_INFO) * DEVICE_RESPONDED_MAX;
 
 	DWORD dwResult = BT_InquireDevices(ucInqMode, ucInqLen, &devsListLen, lpDevsList);
 	if (dwResult != BTSTATUS_SUCCESS) {
+		debugs("BT_InquireDevices return  [%s]", getBsAPIStatusString(dwResult));
 		return INQUIRY_ERROR;
 	}
 
@@ -382,15 +383,18 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_c
 		throwIOExceptionExt(env, "Can't connect SPP [%s]", getBsAPIStatusString(dwResult));
 		return NULL;
 	}
-	debugs("open COM port [%i]", (int)svcInfo.ucComIndex);
+	int portN = svcInfo.ucComIndex;
+	debugs("open COM port [%i]", portN);
 	char portString[20];
-	sprintf_s(portString, 20, "\\\\.\\COM%i", (int)svcInfo.ucComIndex);
+	sprintf_s(portString, 20, "\\\\.\\COM%i", portN);
+	debugs("open COM port [%s]", portString);
 	HANDLE hComPort;
 	hComPort = CreateFileA(portString, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if (hComPort == INVALID_HANDLE_VALUE) {
-		BT_DisconnectSPPExService(dwHandle);
 		char message[20];
 		sprintf_s(message, 20, "Can't open COM port [%s]", portString);
+		debug(message);
+		BT_DisconnectSPPExService(dwHandle);
 		throwIOExceptionWinGetLastError(env, message);
 		return NULL;
 	}
@@ -407,12 +411,19 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_c
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfCloseImpl
 (JNIEnv *env, jobject, jlong comHandle, jlong connectionHandle) {
 	debugs("close connection [%i]", (DWORD)connectionHandle);
-	CloseHandle((HANDLE)comHandle);
+	if (comHandle == 0) {
+		HANDLE hComPort = (HANDLE)comHandle;
+		SetEndOfFile(hComPort); 
+		CloseHandle(hComPort);
+	}
 	BT_DisconnectSPPExService((DWORD)connectionHandle);
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfRead__J
 (JNIEnv *env, jobject peer, jlong handle) {
+	if (handle == 0) {
+		return -1;
+	}
 	HANDLE hComPort = (HANDLE)handle;
 
 	unsigned char c;
@@ -428,6 +439,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfRead__J_3BII
 (JNIEnv *env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
+	if (handle == 0) {
+		return -1;
+	}
 	HANDLE hComPort = (HANDLE)handle;
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 	DWORD numberOfBytesRead;
@@ -453,8 +467,24 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	return 0;
 }
 
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfFlush
+(JNIEnv *env, jobject peer, jlong handle) {
+	if (handle == 0) {
+		return;
+	}
+	/*
+	HANDLE hComPort = (HANDLE)handle;
+	if (!FlushFileBuffers(hComPort)) {
+		throwIOExceptionWinGetLastError(env, "Failed to flush");
+	}
+	*/
+}
+
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfWrite__JI
 (JNIEnv *env, jobject peer, jlong handle, jint b) {
+	if (handle == 0) {
+		return;
+	}
 	HANDLE hComPort = (HANDLE)handle;
 	char c = (char)b;
 	DWORD numberOfBytesWritten;
@@ -465,6 +495,9 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfWrite__J_3BII
 (JNIEnv *env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
+	if (handle == 0) {
+		return;
+	}
 	HANDLE hComPort = (HANDLE)handle;
 
 	jbyte *bytes = env->GetByteArrayElements(b, 0);

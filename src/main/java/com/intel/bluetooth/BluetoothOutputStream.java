@@ -82,6 +82,15 @@ class BluetoothOutputStream extends OutputStream {
 		}
 	}
 
+	public void flush() throws IOException {
+		if (conn == null) {
+			throw new IOException("Stream closed");
+		} else {
+			super.flush();
+			BlueCoveImpl.instance().getBluetoothStack().connectionRfFlush(conn.handle);
+		}
+    }
+	
 	public void close() throws IOException {
 		if (conn != null) {
 			conn.out = null;

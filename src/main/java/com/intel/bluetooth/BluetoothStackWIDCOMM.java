@@ -356,6 +356,10 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public native void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
 
+	public void connectionRfFlush(long handle) throws IOException {
+		// TODO are there any flush
+	}
+	
 	private native long rfServerOpenImpl(byte[] uuidValue, byte[] uuidValue2, String name, boolean authenticate, boolean encrypt) throws IOException;
 	
 	private native int rfServerSCN(long handle) throws IOException;
