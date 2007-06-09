@@ -77,16 +77,19 @@ public class DeviceInquiryThread extends Thread {
 			discType = stack.runDeviceInquiry(this, accessCode, listener);
 		} catch (BluetoothStateException e) {
 			startException = e;
-			return;
+		} catch (Throwable e) {
+			DebugLog.error("runDeviceInquiry", e);
+			// Fine, If Not started then startInquiry return false
 		} finally {
 			terminated = true;
 			synchronized (this) {
 				notifyAll();
 			}
 			DebugLog.debug("runDeviceInquiry ends");
-		}
-		if (started) {
-			listener.inquiryCompleted(discType);
+			if (started) {
+				Utils.j2meUsagePatternDellay();
+				listener.inquiryCompleted(discType);
+			}
 		}
 	}
 	

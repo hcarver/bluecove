@@ -44,4 +44,11 @@ public abstract class Utils {
 		}
 		return buf.toString();
 	}
+	
+	public static void j2meUsagePatternDellay() {
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+		}
+	}
 }

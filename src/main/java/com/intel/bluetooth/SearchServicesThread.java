@@ -87,7 +87,8 @@ public class SearchServicesThread extends Thread {
 			threads.put(new Integer(t.getTransID()), t);
 			return t.getTransID();
 		} else {
-			return 0;
+			// This is arguable accoding to JSR-82 we can probably return 0... 
+			throw new BluetoothStateException();
 		}
 	}
 	
@@ -109,9 +110,10 @@ public class SearchServicesThread extends Thread {
 				notifyAll();
 			}
 			DebugLog.debug("runSearchServices ends");
-		}
-		if (started) {
-			listener.serviceSearchCompleted(getTransID(), respCode);
+			if (started) {
+				Utils.j2meUsagePatternDellay();
+				listener.serviceSearchCompleted(getTransID(), respCode);
+			}
 		}
 	}
 	
