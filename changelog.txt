@@ -2,6 +2,9 @@
 
 * 2.0.0 to be Released 2007-07-xx
 
+    2007-06-09 Vlad Skarzhevskyy
+    * BlueSoleil Stack client using overlapped I/O
+
     2007-06-07 Vlad Skarzhevskyy
     * intelbth.dll build by VC2005 Configuration "Win32 winsock" for Microsoft Bluetooth Stack
     * bluecove.dll build by VC6 Configuration "Win32 Release"  for WIDCOMM and BlueSoleil Bluetooth Stacks

@@ -771,7 +771,7 @@ WIDCOMMStackRfCommPort* validRfCommHandle(JNIEnv *env, jlong handle) {
 	int idx = (int)(handle - stack->commPortsPoolAllocationHandleOffset);
 
 	WIDCOMMStackRfCommPort* rf = stack->commPortsPool[idx];
-	if ((rf->magic1 != MAGIC_1) || (rf->magic2 != MAGIC_2)) {
+	if ((rf == NULL) || (rf->magic1 != MAGIC_1) || (rf->magic2 != MAGIC_2)) {
 		throwIOException(env, "Invalid or destroyed handle");
 		return NULL;
 	}

@@ -338,6 +338,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
         debug("doInquiry, notify listener");
 		env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, classOfDev, deviceName);
 		if (ExceptionCheckCompatible(env)) {
+			debug("doInquiry, ExceptionOccurred");
 			result = INQUIRY_ERROR;
 		    break;
 		}

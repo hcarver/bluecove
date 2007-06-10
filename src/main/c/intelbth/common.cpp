@@ -48,7 +48,7 @@ void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char 
 	va_list ap;
 	va_start(ap, fmt);
 	{
-		if (nativeDebugCallback) {
+		if ((env != NULL) && (nativeDebugCallback)) {
 			char msg[1064];
 			_vsnprintf_s(msg, 1064, fmt, ap);
 			env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, env->NewStringUTF(fileName), lineN, env->NewStringUTF(msg));
@@ -131,7 +131,7 @@ WCHAR *getWinErrorMessage(DWORD last_error) {
 
 void throwExceptionWinErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error) {
 	char errmsg[1064];
-	sprintf_s(errmsg, 1064, "%s [%d] %S", msg, last_error, getWinErrorMessage(last_error));
+	sprintf_s(errmsg, 1064, "%s; [%d] %S", msg, last_error, getWinErrorMessage(last_error));
 	throwException(env, name, errmsg);
 }
 

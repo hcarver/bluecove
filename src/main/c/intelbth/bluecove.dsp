@@ -76,6 +76,10 @@ SOURCE=.\WIDCOMMStack.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\BlueSoleilStack.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\com_intel_bluetooth_BlueCoveNativeCommon.h
 # End Source File
 # Begin Source File

@@ -749,6 +749,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\BlueSoleilStack.h"
+				>
+			</File>
+			<File
 				RelativePath=".\com_intel_bluetooth_BluetoothPeer.h"
 				>
 			</File>

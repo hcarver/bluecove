@@ -21,7 +21,6 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
 import javax.bluetooth.BluetoothStateException;
@@ -38,8 +37,6 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	private boolean initialized = false;
 	
 	private Hashtable devices = new Hashtable();
-	
-	private Hashtable connectionHandles = new Hashtable();
 	
 	static {
 		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WC_BS);
@@ -69,14 +66,6 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	
 	public void destroy() {
 		if (initialized) {
-			for(Enumeration en = connectionHandles.keys(); en.hasMoreElements(); ) {
-				Long handle = (Long)en.nextElement();
-				try {
-					long[] handles =(long[])connectionHandles.get(handle);
-					connectionRfCloseImpl(handles[0], handles[1]);
-				} catch (Throwable e) {
-				} 
-			}
 			uninitialize();
 			initialized = false;
 			DebugLog.debug("BlueSoleil destroyed");
@@ -258,7 +247,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	
 //	 --- Client RFCOMM connections
 	
-	private native long[] connectionRfOpenImpl(long address, byte[] uuidValue) throws IOException;
+	private native long connectionRfOpenImpl(long address, byte[] uuidValue) throws IOException;
 	
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
 		Long addressLong = new Long(address);
@@ -271,22 +260,11 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 			throw new IOException("Device service not discovered");
 		}
 		DebugLog.debug("Connect to service UUID", uuid);
-		long[] handles = connectionRfOpenImpl(address, Utils.UUIDToByteArray(uuid));
-		connectionHandles.put(new Long(handles[0]), handles);
-		
-		return handles[0];
+		return connectionRfOpenImpl(address, Utils.UUIDToByteArray(uuid));
 	}
 	
-	private native void connectionRfCloseImpl(long comHandle, long connectionHandle) throws IOException;
+	public native void connectionRfCloseClientConnection(long handle) throws IOException;
 	
-	public void connectionRfCloseClientConnection(long handle) throws IOException {
-		long[] handles =(long[])connectionHandles.remove(new Long(handle));
-		if (handles == null) {
-			throw new IOException("handle not found");
-		}
-		connectionRfCloseImpl(handles[0], handles[1]);
-	}
-
 	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
 		throw new NotImplementedError();
 	}

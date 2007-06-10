@@ -19,9 +19,7 @@
  *  @version $Id$
  */
 
-#include "common.h"
-
-#define BLUESOLEIL_DLL L"btfunc.dll"
+#include "BlueSoleilStack.h"
 
 BOOL isBlueSoleilBluetoothStackPresent() {
 	HMODULE h = LoadLibrary(BLUESOLEIL_DLL);
@@ -33,21 +31,6 @@ BOOL isBlueSoleilBluetoothStackPresent() {
 }
 
 #ifdef _BLUESOLEIL
-
-// Should be installed to %ProgramFiles%\IVT Corporation\BlueSoleil\api
-#pragma comment(lib, "btfunc.lib")
-#include "bt_ui.h"
-#include "com_intel_bluetooth_BluetoothStackBlueSoleil.h"
-
-// We specify which DLLs to delay load with the /delayload:btfunc.dll linker option
-
-#ifdef VC6
-#pragma comment(lib, "DelayImp.lib")
-#pragma comment(linker, "/delayload:btfunc.dll")
-#endif
-
-#define DEVICE_RESPONDED_MAX 50
-#define SERVICE_COUNT_MAX	100
 
 void BsAddrToString(wchar_t* addressString, BYTE* address) {
 	swprintf_s(addressString, 14, L"%02x%02x%02x%02x%02x%02x",
@@ -119,6 +102,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_ini
 (JNIEnv *env, jobject) {
 	if (BT_InitializeLibrary()) {
 		BlueSoleilStarted = TRUE;
+		stack = new BlueSoleilStack();
 		return TRUE;
 	} else {
 		debug("Error in BlueSoleil InitializeLibrary");
@@ -128,6 +112,11 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_ini
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_uninitialize
 (JNIEnv *env, jobject) {
+	if (stack != NULL) {
+		BlueSoleilStack* stackTmp = stack;
+		stack = NULL;
+		delete stackTmp;
+	}
 	if (BlueSoleilStarted) {
 		BlueSoleilStarted = FALSE;
 		BT_UninitializeLibrary();
@@ -360,8 +349,205 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
 
 //	 --- Client RFCOMM connections
 
-JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfOpenImpl
+BlueSoleilStack::BlueSoleilStack() {
+	commPortsPoolAllocationHandleOffset = 1;
+	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
+		commPortsPool[i] = NULL;
+	}
+}
+
+BlueSoleilStack::~BlueSoleilStack() {
+	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
+		if (commPortsPool[i] != NULL) {
+			delete commPortsPool[i];
+			commPortsPool[i] = NULL;
+		}
+	}
+}
+
+BlueSoleilCOMPort* BlueSoleilStack::createCommPort(BOOL server) {
+	int freeIndex = -1;
+	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
+		if (commPortsPool[i] == NULL) {
+			freeIndex = i;
+			break;
+		}
+	}
+	if (freeIndex == -1) {
+		return NULL;
+	}
+
+	int internalHandle = commPortsPoolAllocationHandleOffset + freeIndex;
+	BlueSoleilCOMPort* rf = new BlueSoleilCOMPort();
+	commPortsPool[freeIndex] = rf;
+	rf->internalHandle = internalHandle;
+
+	return rf;
+
+}
+
+BlueSoleilCOMPort* validRfCommHandle(JNIEnv *env, jlong handle) {
+	if (stack == NULL) {
+		throwIOException(env, "Invalid handle");
+		return NULL;
+	}
+	return stack->getCommPort(env, handle);
+}
+
+BlueSoleilCOMPort* BlueSoleilStack::getCommPort(JNIEnv *env, jlong handle) {
+	if ((handle <= 0) || (stack == NULL)) {
+		throwIOException(env, "Invalid handle");
+		return NULL;
+	}
+	if ((handle < commPortsPoolAllocationHandleOffset) || (handle >= commPortsPoolAllocationHandleOffset + COMMPORTS_POOL_MAX))  {
+		throwIOException(env, "Obsolete handle");
+		return NULL;
+	}
+	int idx = (int)(handle - commPortsPoolAllocationHandleOffset);
+	BlueSoleilCOMPort* rf = commPortsPool[idx];
+	if (rf == NULL) {
+		throwIOException(env, "Destroyed handle");
+		return NULL;
+	}
+	if ((rf->magic1 != MAGIC_1) || (rf->magic2 != MAGIC_2)) {
+		throwIOException(env, "Corrupted handle");
+		return NULL;
+	}
+	return rf;
+}
+
+void BlueSoleilStack::deleteCommPort(BlueSoleilCOMPort* commPort) {
+	if (commPort != NULL) {
+		int idx = (int)(commPort->internalHandle - commPortsPoolAllocationHandleOffset);
+		commPortsPool[idx] = NULL;
+		delete commPort;
+	}
+}
+
+BlueSoleilCOMPort::BlueSoleilCOMPort() {
+	magic1 = MAGIC_1;
+	magic2 = MAGIC_2;
+	hComPort = INVALID_HANDLE_VALUE;
+	dwConnectionHandle = 0;
+	isClosing = FALSE;
+	receivedEOF = FALSE;
+	memset(&ovlRead, 0, sizeof(OVERLAPPED));
+	memset(&ovlWrite, 0, sizeof(OVERLAPPED));
+	memset(&ovlComState, 0, sizeof(OVERLAPPED));
+}
+
+BlueSoleilCOMPort::~BlueSoleilCOMPort() {
+	magic1 = 0;
+	magic2 = 0;
+	close(NULL);
+}
+
+char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
+	
+	/* get any early notifications */
+	if (!SetCommMask(hComPort, EV_RXCHAR | EV_ERR | EV_BREAK | EV_RLSD | EV_TXEMPTY)) {
+		return "SetCommMask error";
+	}
+
+	/* setup device buffers */
+	if (!SetupComm(hComPort, 0x1000, 0x1000)) {
+		return "SetupComm error";
+	}
+
+	/* purge any information in the buffer */
+	if (!PurgeComm(hComPort, PURGE_TXABORT | PURGE_RXABORT |  PURGE_TXCLEAR | PURGE_RXCLEAR)) {
+		return "PurgeComm error";
+	}
+	
+	DCB dcb;
+	memset(&dcb, 0, sizeof(DCB));
+    dcb.DCBlength = sizeof(DCB);
+    if (!GetCommState(hComPort, &dcb)) {
+		return "GetCommState error";
+	}
+	// Fill in DCB: 115,200 bps, 8 data bits, no parity, and 1 stop bit.
+	dcb.BaudRate = CBR_115200;    // set the baud rate
+	dcb.ByteSize = 8;             // data size, xmit, and rcv
+	dcb.Parity = NOPARITY;        // no parity bit
+	dcb.StopBits = ONESTOPBIT;    // one stop bit
+	dcb.fAbortOnError = TRUE; 
+
+	if (!SetCommState(hComPort, &dcb)) {
+		return "SetCommState error";
+	}
+
+	COMMTIMEOUTS commTimeouts;
+
+	if (!GetCommTimeouts(hComPort, &commTimeouts)) {
+		return "GetCommTimeouts error";
+	}
+	Edebugs("commTimeouts.ReadIntervalTimeout         [%i]", commTimeouts.ReadIntervalTimeout);
+	Edebugs("commTimeouts.ReadTotalTimeoutConstant    [%i]", commTimeouts.ReadTotalTimeoutConstant);
+	Edebugs("commTimeouts.ReadTotalTimeoutMultiplier  [%i]", commTimeouts.ReadTotalTimeoutMultiplier);
+	Edebugs("commTimeouts.WriteTotalTimeoutConstant   [%i]", commTimeouts.WriteTotalTimeoutConstant);
+	Edebugs("commTimeouts.WriteTotalTimeoutMultiplier [%i]", commTimeouts.WriteTotalTimeoutMultiplier);
+	
+	/* set up for overlapped I/O */
+	commTimeouts.ReadIntervalTimeout = 0xFFFFFFFF;
+	commTimeouts.ReadTotalTimeoutConstant = 1000;
+	commTimeouts.ReadTotalTimeoutMultiplier = 0; 
+	commTimeouts.WriteTotalTimeoutConstant = 0; 
+	commTimeouts.WriteTotalTimeoutMultiplier = 10; 
+	if (!SetCommTimeouts (hComPort, &commTimeouts)) {
+		return "SetCommTimeouts error";
+	}
+
+	ovlRead.hEvent = CreateEvent(
+            NULL,    // no security attributes
+            TRUE,    // auto-reset event
+            FALSE,   // initial state is NOT signaled
+            NULL);   // object not named
+	if (ovlRead.hEvent == NULL) {
+		return "Error creating overlapped event";
+	}
+
+	ovlWrite.hEvent = CreateEvent(
+            NULL,    // no security attributes
+            TRUE,    // auto-reset event
+            FALSE,   // initial state is NOT signaled
+            NULL);   // object not named
+	if (ovlWrite.hEvent == NULL) {
+		return "Error creating overlapped event";
+	}
+
+	hCloseEvent = CreateEvent(
+            NULL,     // no security attributes
+            FALSE,    // auto-reset event
+            FALSE,    // initial state is NOT signaled
+            NULL);    // object not named
+	if (hCloseEvent == NULL) {
+		return "Error creating event";
+	}
+	ovlComState.hEvent = CreateEvent(
+            NULL,     // no security attributes
+            TRUE,     // auto-reset event
+            FALSE,    // initial state is NOT signaled
+            NULL);    // object not named
+	if (ovlComState.hEvent == NULL) {
+		return "Error creating event";
+	}
+
+	return NULL;
+}
+
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfOpenImpl
 (JNIEnv *env, jobject, jlong address, jbyteArray uuidValue) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
+
+	BlueSoleilCOMPort* rf = stack->createCommPort(FALSE);
+	if (rf == NULL) {
+		throwIOException(env, "No free connections Objects in Pool");
+		return 0;
+	}
+	rf->remoteAddress = address;
 
 	BLUETOOTH_DEVICE_INFO devInfo={0};
 	devInfo.dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
@@ -380,58 +566,194 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_c
 	DWORD dwResult = BT_ConnectSPPExService(&devInfo, &svcInfo, &dwHandle);
 	if (dwResult != BTSTATUS_SUCCESS)	{
 		debugs("BT_ConnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));
+		stack->deleteCommPort(rf);
 		throwIOExceptionExt(env, "Can't connect SPP [%s]", getBsAPIStatusString(dwResult));
-		return NULL;
+		return 0;
 	}
+	if (dwHandle == 0) {
+		stack->deleteCommPort(rf);
+		BT_DisconnectSPPExService(dwHandle);
+		throwIOException(env, "Can't use 0 Handle");
+		return 0;
+	}
+
+	//Sleep(300);
 	int portN = svcInfo.ucComIndex;
 	debugs("open COM port [%i]", portN);
 	char portString[20];
 	sprintf_s(portString, 20, "\\\\.\\COM%i", portN);
 	debugs("open COM port [%s]", portString);
 	HANDLE hComPort;
-	hComPort = CreateFileA(portString, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	hComPort = CreateFileA(portString, GENERIC_READ | GENERIC_WRITE, 
+		0, /* exclusive access */
+		NULL, /* no security attrs */
+		OPEN_EXISTING, 
+		FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, /* overlapped I/O */ 
+		NULL);
 	if (hComPort == INVALID_HANDLE_VALUE) {
-		char message[20];
-		sprintf_s(message, 20, "Can't open COM port [%s]", portString);
+		stack->deleteCommPort(rf);
+		DWORD last_error = GetLastError();
+		char message[80];
+		sprintf_s(message, 80, "Can't open COM port [%s]", portString);
 		debug(message);
 		BT_DisconnectSPPExService(dwHandle);
-		throwIOExceptionWinGetLastError(env, message);
-		return NULL;
+		throwIOExceptionWinErrorMessage(env, message, last_error);
+		return 0;
 	}
-	debugs("Connected [%i]", dwHandle);
-	jlongArray result = env->NewLongArray(2);
-	jlong *longs = env->GetLongArrayElements(result, 0);
-	longs[0] = (jlong)hComPort;
-	longs[1] = (jlong)dwHandle;
-	env->ReleaseLongArrayElements(result, longs, 0);
-
-	return result;
+	rf->dwConnectionHandle = dwHandle;
+	rf->hComPort = hComPort;
+	
+	char* errorMessage = rf->configureComPort(env);
+	if (errorMessage != NULL) {
+		stack->deleteCommPort(rf);
+		DWORD last_error = GetLastError();
+		throwIOExceptionWinErrorMessage(env, errorMessage, last_error);
+		return 0;
+	}
+	debug3("Connected [%i] [%p]-[%i]", rf->internalHandle, rf->hComPort, rf->dwConnectionHandle);	
+	return rf->internalHandle;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfCloseImpl
-(JNIEnv *env, jobject, jlong comHandle, jlong connectionHandle) {
-	debugs("close connection [%i]", (DWORD)connectionHandle);
-	if (comHandle == 0) {
-		HANDLE hComPort = (HANDLE)comHandle;
-		SetEndOfFile(hComPort); 
-		CloseHandle(hComPort);
+void BlueSoleilCOMPort::clearCommError() {
+	dwErrorFlags = 0;
+	ClearCommError(hComPort, &dwErrorFlags, &comStat);
+	if (dwErrorFlags != 0) {
+		comStat.fEof = TRUE;
 	}
-	BT_DisconnectSPPExService((DWORD)connectionHandle);
+}
+
+void BlueSoleilCOMPort::close(JNIEnv *env) {
+	BOOL error = FALSE;
+	DWORD last_error = 0;
+	
+	if (hCloseEvent != NULL) {
+		isClosing = TRUE;
+		SetEvent(hCloseEvent);
+	}
+
+	if (hComPort != INVALID_HANDLE_VALUE) {
+		/*
+		if (!SetEndOfFile(hComPort)) {
+			// [1] Incorrect function.
+			debugss("SetEndOfFile error [%d] %S", last_error, getWinErrorMessage(GetLastError()));
+		}
+		*/
+		/* disable event notification and wait for thread to halt */
+		SetCommMask(hComPort, 0);
+
+		/* drop DTR */
+		EscapeCommFunction(hComPort, CLRDTR);
+
+		/* purge any outstanding reads/writes and close device handle */
+		PurgeComm(hComPort, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
+
+		if (!CloseHandle(hComPort)) {
+			last_error = GetLastError();
+			debugss("close ComPort error [%d] %S", last_error, getWinErrorMessage(last_error));
+			error = TRUE;
+		}
+		hComPort = INVALID_HANDLE_VALUE;
+	}
+	if (dwConnectionHandle != 0) {
+		DWORD dwResult = BT_DisconnectSPPExService(dwConnectionHandle);
+		dwConnectionHandle = 0;
+		if ((dwResult != BTSTATUS_SUCCESS) && (env != NULL))	{
+			debugs("BT_DisconnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));
+			throwIOExceptionExt(env, "Can't disconnect SPP [%s]", getBsAPIStatusString(dwResult));
+			return;
+		}
+	}
+	
+	if (ovlWrite.hEvent != NULL) {
+		CloseHandle(ovlWrite.hEvent);
+		ovlWrite.hEvent = NULL;
+	}
+	if (ovlRead.hEvent != NULL) {
+		CloseHandle(ovlRead.hEvent);
+		ovlRead.hEvent = NULL;
+	}
+	if (hCloseEvent != NULL) {
+		CloseHandle(hCloseEvent);
+		hCloseEvent = NULL;
+	}
+	if (ovlComState.hEvent != NULL) {
+		CloseHandle(ovlComState.hEvent);
+		ovlComState.hEvent = NULL;
+	}
+	if (error && (env != NULL)) {
+		throwIOExceptionWinErrorMessage(env, "close ComPort error", last_error);
+	}
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfCloseClientConnection
+(JNIEnv *env, jobject, jlong handle) {
+	debugs("close connection [%i]", handle);
+	BlueSoleilCOMPort* rf = validRfCommHandle(env, handle);
+	if (rf == NULL) {
+		return;
+	}
+	rf->close(env);
+	stack->deleteCommPort(rf);
+}
+
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getConnectionRfRemoteAddress
+(JNIEnv *env, jobject, jlong handle) {
+	BlueSoleilCOMPort* rf = validRfCommHandle(env, handle);
+	if (rf == NULL) {
+		return 0;
+	}
+	if (rf->isClosing) {
+		throwIOException(env, "Connection is closed");
+		return 0;
+	}
+	return rf->remoteAddress;
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfRead__J
 (JNIEnv *env, jobject peer, jlong handle) {
-	if (handle == 0) {
+	BlueSoleilCOMPort* rf = validRfCommHandle(env, handle);
+	if (rf == NULL) {
 		return -1;
 	}
-	HANDLE hComPort = (HANDLE)handle;
+	debug("->read()");
+	if (rf->isClosing) {
+		return -1;
+	}
+	rf->clearCommError();
+	
+	HANDLE hEvents[2];
+	hEvents[0] = rf->hCloseEvent;
+	hEvents[1] = rf->ovlRead.hEvent;
 
 	unsigned char c;
-	DWORD numberOfBytesRead;
-	if (!ReadFile(hComPort, (char *)&c, 1, &numberOfBytesRead, NULL)) {
-		throwIOExceptionWinGetLastError(env, "Failed to read");
+	DWORD numberOfBytesRead = 0;
+	if (!ReadFile(rf->hComPort, &c, 1, &numberOfBytesRead, &(rf->ovlRead))) {
+		DWORD last_error = GetLastError();
+		if (last_error != ERROR_IO_PENDING) {
+			throwIOExceptionWinErrorMessage(env, "Failed to read", last_error);
+			return -1;
+		} 
+		while ((!rf->isClosing) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlRead), &numberOfBytesRead, FALSE))) {
+			last_error = GetLastError();
+			if (last_error == ERROR_SUCCESS) {
+				break;
+			}
+			if (last_error != ERROR_IO_INCOMPLETE) {
+				throwIOExceptionWinErrorMessage(env, "Failed to read overlapped", last_error);
+				return -1;
+			}
+			DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+			if (rc == WAIT_FAILED) {
+				throwRuntimeException(env, "WaitForMultipleObjects");
+				return -1;
+			}
+		}
+	}
+	if (rf->isClosing) {
+		return -1;
 	}
 	if (numberOfBytesRead == 0) {
+		rf->receivedEOF = TRUE;
 		return -1;
 	}
 	return (int)c;
@@ -439,22 +761,50 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfRead__J_3BII
 (JNIEnv *env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
-	if (handle == 0) {
+	BlueSoleilCOMPort* rf = validRfCommHandle(env, handle);
+	if (rf == NULL) {
 		return -1;
 	}
-	HANDLE hComPort = (HANDLE)handle;
-	jbyte *bytes = env->GetByteArrayElements(b, 0);
-	DWORD numberOfBytesRead;
-
-	if (!ReadFile(hComPort, (void*)(bytes + off), len, &numberOfBytesRead, NULL)) {
-		env->ReleaseByteArrayElements(b, bytes, 0);
-		throwIOExceptionWinGetLastError(env, "Failed to read");
+	debug("->read(byte[])");
+	if (rf->isClosing) {
 		return -1;
+	}
+	rf->clearCommError();
+	jbyte *bytes = env->GetByteArrayElements(b, 0);
+	DWORD numberOfBytesRead = 0;
+
+	HANDLE hEvents[2];
+	hEvents[0] = rf->hCloseEvent;
+	hEvents[1] = rf->ovlRead.hEvent;
+
+	if (!ReadFile(rf->hComPort, (void*)(bytes + off), len, &numberOfBytesRead, &(rf->ovlRead))) {
+		if (GetLastError() != ERROR_IO_PENDING) {
+			env->ReleaseByteArrayElements(b, bytes, 0);
+			throwIOExceptionWinGetLastError(env, "Failed to read array");
+			return -1;
+		} 
+		while ((!rf->isClosing) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlRead), &numberOfBytesRead, FALSE))) {
+			DWORD last_error = GetLastError();
+			if (last_error == ERROR_SUCCESS) {
+				break;
+			}
+			if (last_error != ERROR_IO_INCOMPLETE) {
+				env->ReleaseByteArrayElements(b, bytes, 0);
+				throwIOExceptionWinErrorMessage(env, "Failed to read array overlapped", last_error);
+				return -1;
+			}
+			DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+			if (rc == WAIT_FAILED) {
+				throwRuntimeException(env, "WaitForMultipleObjects");
+				return -1;
+			}
+		}
 	}
 
 	env->ReleaseByteArrayElements(b, bytes, 0);
 
 	if (numberOfBytesRead == 0) {
+		rf->receivedEOF = TRUE;
 		return -1;
 	}
 
@@ -464,57 +814,186 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfReadAvailable
 (JNIEnv *env, jobject peer, jlong handle) {
-	return 0;
+	BlueSoleilCOMPort* rf = validRfCommHandle(env, handle);
+	if (rf == NULL || rf->isClosing) {
+		return 0;
+	}
+	rf->clearCommError();
+	return rf->comStat.cbInQue;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfFlush
 (JNIEnv *env, jobject peer, jlong handle) {
-	if (handle == 0) {
+	BlueSoleilCOMPort* rf = validRfCommHandle(env, handle);
+	if (rf == NULL) {
 		return;
 	}
-	/*
-	HANDLE hComPort = (HANDLE)handle;
-	if (!FlushFileBuffers(hComPort)) {
-		throwIOExceptionWinGetLastError(env, "Failed to flush");
+	debug("->flush");
+	if (rf->isClosing || rf->receivedEOF) {
+		throwIOException(env, "Connection is closed");
+		return;
+	}
+	/* TODO This does not work. "output buffer is empty" all the time. We use rf->receivedEOF hack for now.
+	rf->clearCommError();
+	if (rf->comStat.fEof) {
+        // EOF character received
+		throwIOException(env, "Failed to flush to closed connection");
+		return;
+	}
+	if (rf->comStat.cbOutQue == 0) {
+		debug("output buffer is empty");
+		return;
+	}
+	
+	HANDLE hEvents[2];
+	hEvents[0] = rf->hCloseEvent;
+	hEvents[1] = rf->ovlComState.hEvent;
+	
+	while ((!rf->isClosing) && (!rf->comStat.fEof)) {
+		DWORD dwEvtMask = 0;
+		if (!WaitCommEvent(rf->hComPort, &dwEvtMask, &(rf->ovlComState))) {
+			DWORD last_error = GetLastError();
+			if ((last_error == ERROR_SUCCESS) && (last_error != ERROR_IO_PENDING)) {
+				debug2("connection handle [%i] [%p]", rf->internalHandle, rf->hComPort);
+				throwIOExceptionWinErrorMessage(env, "Failed to flush", last_error);
+				return;
+			}
+			DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+			if (rc == WAIT_FAILED) {
+				throwRuntimeException(env, "WaitForMultipleObjects");
+				return;
+			}
+		}
+
+		if (dwEvtMask & EV_TXEMPTY) {
+			debug("output buffer was sent");
+			break;
+		}
+
+		if ((dwEvtMask & EV_BREAK) || (dwEvtMask & EV_ERR)) {
+			throwIOException(env, "Connection flush error");
+			return;
+		}
+
+	}
+
+	if (rf->isClosing) {
+		throwIOException(env, "Connection is closed");
+		return;
 	}
 	*/
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfWrite__JI
 (JNIEnv *env, jobject peer, jlong handle, jint b) {
-	if (handle == 0) {
+	BlueSoleilCOMPort* rf = validRfCommHandle(env, handle);
+	if (rf == NULL) {
 		return;
 	}
-	HANDLE hComPort = (HANDLE)handle;
+	debug("->write(byte)");
+	if (rf->isClosing) {
+		throwIOException(env, "Connection is closed");
+		return;
+	}
+	rf->clearCommError();
+	if (rf->comStat.fEof || rf->receivedEOF) {
+        // EOF character received
+		throwIOException(env, "Failed to write to closed connection");
+		return;
+	}
+	
+	HANDLE hEvents[2];
+	hEvents[0] = rf->hCloseEvent;
+	hEvents[1] = rf->ovlWrite.hEvent;
+
 	char c = (char)b;
-	DWORD numberOfBytesWritten;
-	if (!WriteFile(hComPort, &c, 1, &numberOfBytesWritten, NULL)) {
-		throwIOExceptionWinGetLastError(env, "Failed to write");
+	DWORD numberOfBytesWritten = 0;
+	if (!WriteFile(rf->hComPort, &c, 1, &numberOfBytesWritten, &(rf->ovlWrite))) {
+		DWORD last_error = GetLastError();
+		if (last_error == ERROR_SUCCESS) {
+			return;
+		}
+		if (last_error != ERROR_IO_PENDING) {
+			debug2("connection handle [%i] [%p]", rf->internalHandle, rf->hComPort);
+			throwIOExceptionWinErrorMessage(env, "Failed to write byte", last_error);
+			rf->clearCommError();
+			return;
+		}
+		DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		if (rc == WAIT_FAILED) {
+			throwRuntimeException(env, "WaitForMultipleObjects");
+			return;
+		}
+		if ((!rf->isClosing) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlWrite), &numberOfBytesWritten, FALSE))) {
+			last_error = GetLastError();
+			if ((last_error != ERROR_SUCCESS) && (last_error != ERROR_IO_PENDING)) {
+				debug2("connection handle [%i] [%p]", handle, rf->hComPort);
+				throwIOExceptionWinErrorMessage(env, "Failed to write byte overlapped", last_error);
+				return;
+			} 
+		}
+	}
+	if (numberOfBytesWritten != 1) {
+		throwIOException(env, "Failed to write byte");
+		return;
 	}
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfWrite__J_3BII
 (JNIEnv *env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
-	if (handle == 0) {
+	BlueSoleilCOMPort* rf = validRfCommHandle(env, handle);
+	if (rf == NULL) {
 		return;
 	}
-	HANDLE hComPort = (HANDLE)handle;
+	debug("->write(byte[])");
+	if (rf->isClosing) {
+		throwIOException(env, "Connection is closed");
+		return;
+	}
+	rf->clearCommError();
+	if (rf->comStat.fEof || rf->receivedEOF) {
+        // EOF character received
+		throwIOException(env, "Failed to write to closed connection");
+		return;
+	}
 
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
+
+	HANDLE hEvents[2];
+	hEvents[0] = rf->hCloseEvent;
+	hEvents[1] = rf->ovlWrite.hEvent;
 
 	int done = 0;
 
 	while(done < len) {
 		DWORD numberOfBytesWritten = 0;
-		if (!WriteFile(hComPort, (char *)(bytes + off + done), len - done, &numberOfBytesWritten, NULL)) {
-			throwIOExceptionWinGetLastError(env, "Failed to write");
+		if (!WriteFile(rf->hComPort, (char *)(bytes + off + done), len - done, &numberOfBytesWritten, &(rf->ovlWrite))) {
+			if (GetLastError() != ERROR_IO_PENDING) {
+				env->ReleaseByteArrayElements(b, bytes, 0);
+				debug2("connection handle [%i] [%p]", handle, rf->hComPort);
+				throwIOExceptionWinGetLastError(env, "Failed to write array");
+				return;
+			}
+			DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+			if (rc == WAIT_FAILED) {
+				throwRuntimeException(env, "WaitForMultipleObjects");
+				return;
+			}
+			if ((!rf->isClosing) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlWrite), &numberOfBytesWritten, FALSE))) {
+				DWORD last_error = GetLastError();
+				if ((last_error == ERROR_SUCCESS) && (last_error != ERROR_IO_PENDING)) {
+					env->ReleaseByteArrayElements(b, bytes, 0);
+					debug2("connection handle [%i] [%p]", handle, rf->hComPort);
+					throwIOExceptionWinErrorMessage(env, "Failed to write array overlapped", last_error);
+					return;
+				} 
+			}
 		}
 		if (numberOfBytesWritten <= 0) {
 			env->ReleaseByteArrayElements(b, bytes, 0);
-			throwIOException(env, "Failed to write");
+			throwIOException(env, "Failed to write full array");
 			return;
 		}
-
 		done += numberOfBytesWritten;
 	}
 
