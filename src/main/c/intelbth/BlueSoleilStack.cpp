@@ -445,7 +445,9 @@ BlueSoleilCOMPort::~BlueSoleilCOMPort() {
 char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
 	
 	/* get any early notifications */
-	if (!SetCommMask(hComPort, EV_RXCHAR | EV_ERR | EV_BREAK | EV_RLSD | EV_TXEMPTY)) {
+	//DWORD dwEvtMask = EV_RXCHAR | EV_ERR | EV_BREAK | EV_RLSD | EV_TXEMPTY;
+	DWORD dwEvtMask = EV_RXCHAR;
+	if (!SetCommMask(hComPort, dwEvtMask)) {
 		return "SetCommMask error";
 	}
 
@@ -457,23 +459,6 @@ char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
 	/* purge any information in the buffer */
 	if (!PurgeComm(hComPort, PURGE_TXABORT | PURGE_RXABORT |  PURGE_TXCLEAR | PURGE_RXCLEAR)) {
 		return "PurgeComm error";
-	}
-	
-	DCB dcb;
-	memset(&dcb, 0, sizeof(DCB));
-    dcb.DCBlength = sizeof(DCB);
-    if (!GetCommState(hComPort, &dcb)) {
-		return "GetCommState error";
-	}
-	// Fill in DCB: 115,200 bps, 8 data bits, no parity, and 1 stop bit.
-	dcb.BaudRate = CBR_115200;    // set the baud rate
-	dcb.ByteSize = 8;             // data size, xmit, and rcv
-	dcb.Parity = NOPARITY;        // no parity bit
-	dcb.StopBits = ONESTOPBIT;    // one stop bit
-	dcb.fAbortOnError = TRUE; 
-
-	if (!SetCommState(hComPort, &dcb)) {
-		return "SetCommState error";
 	}
 
 	COMMTIMEOUTS commTimeouts;
@@ -496,6 +481,34 @@ char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
 	if (!SetCommTimeouts (hComPort, &commTimeouts)) {
 		return "SetCommTimeouts error";
 	}
+
+	DCB dcb;
+	memset(&dcb, 0, sizeof(DCB));
+    dcb.DCBlength = sizeof(DCB);
+    if (!GetCommState(hComPort, &dcb)) {
+		return "GetCommState error";
+	}
+	// Fill in DCB: 115,200 bps, 8 data bits, no parity, and 1 stop bit.
+	dcb.BaudRate = CBR_115200;    // set the baud rate
+	dcb.ByteSize = 8;             // data size, xmit, and rcv
+	dcb.Parity = NOPARITY;        // no parity bit
+	dcb.StopBits = ONESTOPBIT;    // one stop bit
+	dcb.fAbortOnError = TRUE; 
+
+	dcb.fOutxDsrFlow = 0;
+	BOOL hardwareHandshake = TRUE;
+	if (hardwareHandshake) {
+		dcb.fOutxCtsFlow = TRUE;
+		dcb.fRtsControl = RTS_CONTROL_HANDSHAKE;
+	} else {
+		dcb.fOutxCtsFlow = FALSE;
+		dcb.fRtsControl = RTS_CONTROL_ENABLE;
+	}
+
+	if (!SetCommState(hComPort, &dcb)) {
+		return "SetCommState error";
+	}
+
 
 	ovlRead.hEvent = CreateEvent(
             NULL,    // no security attributes
@@ -723,11 +736,36 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	
 	HANDLE hEvents[2];
 	hEvents[0] = rf->hCloseEvent;
+	hEvents[1] = rf->ovlComState.hEvent;
+
+	// In fact we make asynchronous IO synchronous Just to be able to Close it any time!
+	while ((rf->comStat.cbInQue == 0) && (!rf->isClosing) && (!rf->comStat.fEof)) {
+		DWORD dwEvtMask = 0;
+		debug("read WaitCommEvent");
+		if (!WaitCommEvent(rf->hComPort, &dwEvtMask, &(rf->ovlComState))) {
+			DWORD last_error = GetLastError();
+			if ((last_error == ERROR_SUCCESS) && (last_error != ERROR_IO_PENDING)) {
+				debug2("connection handle [%i] [%p]", rf->internalHandle, rf->hComPort);
+				throwIOExceptionWinErrorMessage(env, "Failed to flush", last_error);
+				return -1;
+			}
+			if (last_error != ERROR_SUCCESS)  {
+				debug("read WaitForMultipleObjects");
+				DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+				if (rc == WAIT_FAILED) {
+					throwRuntimeException(env, "WaitForMultipleObjects");
+					return -1;
+				}
+			}
+		}
+		rf->clearCommError();
+	}
+
 	hEvents[1] = rf->ovlRead.hEvent;
 
 	unsigned char c;
 	DWORD numberOfBytesRead = 0;
-	if (!ReadFile(rf->hComPort, &c, 1, &numberOfBytesRead, &(rf->ovlRead))) {
+	if ((!rf->isClosing) && (!ReadFile(rf->hComPort, &c, 1, &numberOfBytesRead, &(rf->ovlRead)))) {
 		DWORD last_error = GetLastError();
 		if (last_error != ERROR_IO_PENDING) {
 			throwIOExceptionWinErrorMessage(env, "Failed to read", last_error);
