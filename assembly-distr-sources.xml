@@ -20,6 +20,8 @@
                 <exclude>.settings/**</exclude>
                 <exclude>**/*.log</exclude>
                 <exclude>**/*.ncb</exclude>
+                <exclude>**/*.opt</exclude>
+                <exclude>**/*.plg</exclude>
                 <exclude>**/*.user</exclude>
                 <exclude>**/*.suar</exclude>
                 <exclude>**/.*</exclude>
