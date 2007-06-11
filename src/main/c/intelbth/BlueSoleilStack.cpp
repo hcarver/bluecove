@@ -445,8 +445,8 @@ BlueSoleilCOMPort::~BlueSoleilCOMPort() {
 char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
 	
 	/* get any early notifications */
-	//DWORD dwEvtMask = EV_RXCHAR | EV_ERR | EV_BREAK | EV_RLSD | EV_TXEMPTY;
-	DWORD dwEvtMask = EV_RXCHAR;
+	DWORD dwEvtMask = EV_RXCHAR | EV_ERR | EV_BREAK | EV_RLSD | EV_TXEMPTY | EV_DSR | EV_CTS;
+	//DWORD dwEvtMask = EV_RXCHAR;
 	if (!SetCommMask(hComPort, dwEvtMask)) {
 		return "SetCommMask error";
 	}
@@ -758,7 +758,28 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 				}
 			}
 		}
+		debug1("dwEvtMask %i", dwEvtMask);
+		if (dwEvtMask & EV_BREAK) {
+			debug("EV_BREAK");
+		}
+		if (dwEvtMask & EV_ERR) {
+			debug("EV_ERR");
+		}
+		if (dwEvtMask & EV_RXCHAR) {
+			debug("EV_RXCHAR");
+		}
+		if (dwEvtMask & EV_RLSD) {
+			debug("EV_RLSD");
+		}
+		if (dwEvtMask & EV_DSR) {
+			debug("EV_DSR");
+		}
+		if (dwEvtMask & EV_CTS) {
+			debug("EV_CTS");
+		}
+
 		rf->clearCommError();
+		
 	}
 
 	hEvents[1] = rf->ovlRead.hEvent;

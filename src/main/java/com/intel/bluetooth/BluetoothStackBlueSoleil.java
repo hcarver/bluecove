@@ -186,6 +186,9 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
 		// TODO Properly if possible
 		RemoteDeviceImpl listedDevice = (RemoteDeviceImpl)devices.get(new Long(address));
+		if (listedDevice == null) {
+			return null;
+		}
 		return listedDevice.name;
 	}
 	
