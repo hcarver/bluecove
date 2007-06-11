@@ -146,16 +146,24 @@ public class DebugLog {
 	}
 	
 	public static void nativeDebugCallback(String fileName, int lineN, String message) {
-		if (fileName.startsWith(".\\")) {
-			fileName = fileName.substring(2);
+		try {
+			if (fileName.startsWith(".\\")) {
+				fileName = fileName.substring(2);
+			}
+			DebugLog.debugNative(fileName + ":" + lineN, message);
+		} catch (Throwable e) {
+			try {
+				System.out.println("Error when calling debug " + e);
+			} catch (Throwable e2) {
+				// We don't want any Exception propagate to Native Code.
+			}
 		}
-		DebugLog.debugNative(fileName + ":" + lineN, message);
 	}
 	
 	public static void debugNative(String location, String message) {
 		if (!debugCompiledOut && isDebugEnabled()) {
 			System.out.println(message);
-			System.out.println("\t  "+ location);
+			System.out.println("\t  " + location);
 			callAppenders(DEBUG, message, null);
 		}
 	}
