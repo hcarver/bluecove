@@ -1,4 +1,4 @@
-<project name="Blue Cove" default="compile" basedir=".">
+<project name="Blue Cove" default="default" basedir=".">
     <description>
         Open source implementation of JSR-82 Java Bluetooth API.
     </description>
@@ -18,11 +18,22 @@
         <mkdir dir="${build}"/>
     </target>
 
+    <target name="default" depends="compile, jni-headers"/>
+
     <target name="compile" depends="init"
-        description="compile the source " >
+        description="compile the source" >
         <!-- Compile the java code from ${src} into ${build} -->
         <javac source="1.3" target="1.1" debug="true"
                srcdir="${src}" destdir="${build}"/>
+    </target>
+
+    <target name="jni-headers" depends="init"
+        description="Create JNI headers" >
+        <javah destdir="src/main/c/intelbth" classpath="${build}">
+            <class name="com.intel.bluetooth.BluetoothPeer"/>
+            <class name="com.intel.bluetooth.BluetoothStackBlueSoleil"/>
+            <class name="com.intel.bluetooth.BluetoothStackWIDCOMM"/>
+        </javah>
     </target>
 
     <target name="jar" depends="compile"
