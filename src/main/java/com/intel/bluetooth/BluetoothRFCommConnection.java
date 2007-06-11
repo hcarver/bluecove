@@ -38,19 +38,37 @@ public abstract class BluetoothRFCommConnection implements StreamConnection {
 
 	protected boolean closing;
 
-	protected boolean closed;
-	
 	protected BluetoothRFCommConnection(long handle) {
 		this.handle = handle;
 	}
 
 	abstract void closeConnectionHandle(long handle) throws IOException;
 	
+	/**
+	 * Implemenation specific
+	 * The idea is to Close Connection 
+	 * 1. When in and out was closed
+	 * 2. When StreamConnection.close() called.	(This was not closing connection in BlueCove v1.2.3)
+	 * 
+	 * Also Connection.close() will close Input/OutputStream
+	 * @throws IOException
+	 */
 	synchronized void closeConnection() throws IOException {
-		if (handle != 0 && in == null && out == null && closing && !closed) {
-			closeConnectionHandle(handle);
-			handle = 0;
-			closed = true;
+		if ((in == null && out == null) || (closing)) {
+			closing = true;
+			if (handle != 0) {
+				closeConnectionHandle(handle);
+				handle = 0;
+			}
+			// This will call this function again but will do nothing.
+			if (in != null) {
+				in.close();
+				in = null;
+			}
+			if (out != null) {
+				out.close();
+				out = null;
+			}
 		}
 	}
 	
@@ -126,12 +144,6 @@ public abstract class BluetoothRFCommConnection implements StreamConnection {
 
 	protected void finalize() {
 		try {
-			if (in != null) {
-				in.close();
-			}
-			if (out != null) {
-				out.close();
-			}
 			close();
 		} catch (IOException e) {
 		}
