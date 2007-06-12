@@ -30,7 +30,7 @@ import javax.microedition.io.Connection;
  * @author vlads
  *
  * Instance of RemoteDevice can be created by User.
- * BlueCove only use RemoteDeviceHelper class. 
+ * BlueCove only use RemoteDeviceHelper class to create RemoteDevice instances. 
  */
 public abstract class RemoteDeviceHelper {
 	
@@ -67,13 +67,38 @@ public abstract class RemoteDeviceHelper {
 		}
 	}
 	
+	private static Hashtable devicesCashed = new Hashtable();
+	
 	private RemoteDeviceHelper() {
 		
 	}
+
+	private static RemoteDeviceWithExtendedInfo getCashedDeviceWithExtendedInfo(long address) {
+		Object key = new Long(address);
+		return (RemoteDeviceWithExtendedInfo)devicesCashed.get(key);
+	}
 	
+	static RemoteDevice getCashedDevice(long address) {
+		return getCashedDeviceWithExtendedInfo(address);
+	}
+
 	static RemoteDevice createRemoteDevice(long address, String name) {
-		RemoteDevice dev = new RemoteDeviceWithExtendedInfo(address, name);
+		RemoteDeviceWithExtendedInfo dev = getCashedDeviceWithExtendedInfo(address);
+		if (dev == null) {
+			dev = new RemoteDeviceWithExtendedInfo(address, name);
+			devicesCashed.put(new Long(address), dev);
+		} else if (dev.name == null) {
+			dev.name = name;
+		}
 		return dev;
+	}
+	
+	static RemoteDevice createRemoteDevice(RemoteDevice device) {
+		if (device instanceof RemoteDeviceWithExtendedInfo) {
+			return device;
+		} else {
+			return createRemoteDevice(getAddress(device), null);
+		}
 	}
 	
 	public static String getFriendlyName(RemoteDevice device, long address, boolean alwaysAsk) throws IOException {
@@ -97,7 +122,8 @@ public abstract class RemoteDeviceHelper {
 	}
 
 	static String getBluetoothAddress(long address) {
-		return Long.toHexString(address).toUpperCase();
+		String s = Long.toHexString(address).toUpperCase();
+		return "000000000000".substring(s.length()) + s;
 	}
 	
 	public static long getAddress(String bluetoothAddress) {
@@ -112,11 +138,9 @@ public abstract class RemoteDeviceHelper {
 		}
 	}
 	
-	private static RemoteDeviceWithExtendedInfo getCashedDevice(RemoteDevice device) {
-		return null;
-	}
-	
 	static void setStackAttributes(RemoteDevice device, Object key, Object value) {
+		RemoteDeviceWithExtendedInfo devInfo = (RemoteDeviceWithExtendedInfo)createRemoteDevice(device);
+		devInfo.setStackAttributes(key, value);
 	}
 	
 	static Object getStackAttributes(RemoteDevice device, Object key) {
@@ -124,7 +148,7 @@ public abstract class RemoteDeviceHelper {
 		if (device instanceof RemoteDeviceWithExtendedInfo) {
 			devInfo = (RemoteDeviceWithExtendedInfo)device;
 		} else {
-			devInfo = getCashedDevice(device);
+			devInfo = getCashedDeviceWithExtendedInfo(getAddress(device));
 		}
 		
 		if (devInfo != null) {

@@ -21,7 +21,6 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
-import java.util.Hashtable;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
@@ -35,8 +34,6 @@ import javax.bluetooth.UUID;
 public class BluetoothStackBlueSoleil implements BluetoothStack {
 
 	private boolean initialized = false;
-	
-	private Hashtable devices = new Hashtable();
 	
 	static {
 		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WC_BS);
@@ -185,10 +182,6 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
 		// TODO Properly if possible
-		RemoteDevice listedDevice = (RemoteDevice)devices.get(new Long(address));
-		if (listedDevice == null) {
-			return null;
-		}
 		return null;
 	}
 	
@@ -232,13 +225,8 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		record.populateRFCOMMAttributes(recordHanlde, channel, uuid, serviceName);
 		DebugLog.debug("servicesFoundCallback", record);
 		
-		Long address = new Long(RemoteDeviceHelper.getAddress(device));
-		RemoteDevice listedDevice = (RemoteDevice)devices.get(address);
-		if (listedDevice == null) {
-			devices.put(address, device);
-			listedDevice = device;
-		}
-		listedDevice.setStackAttributes("RFCOMM_channel" + channel, uuid);
+		RemoteDevice listedDevice = RemoteDeviceHelper.createRemoteDevice(device);
+		RemoteDeviceHelper.setStackAttributes(listedDevice, "RFCOMM_channel" + channel, uuid);
 		
 		ServiceRecord[] records = new ServiceRecordImpl[1];
 		records[0] = record;
@@ -254,12 +242,11 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	private native long connectionRfOpenImpl(long address, byte[] uuidValue) throws IOException;
 	
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
-		Long addressLong = new Long(address);
-		RemoteDeviceHelper listedDevice = (RemoteDeviceHelper)devices.get(addressLong);
+		RemoteDevice listedDevice = RemoteDeviceHelper.getCashedDevice(address);
 		if (listedDevice == null) {
 			throw new IOException("Device not discovered");
 		}
-		UUID uuid = (UUID)listedDevice.getStackAttributes("RFCOMM_channel" + channel);
+		UUID uuid = (UUID)RemoteDeviceHelper.getStackAttributes(listedDevice, "RFCOMM_channel" + channel);
 		if (uuid == null) {
 			throw new IOException("Device service not discovered");
 		}
