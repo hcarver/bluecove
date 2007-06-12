@@ -66,7 +66,10 @@ char* bool2str(BOOL b) {
 }
 
 void throwException(JNIEnv *env, const char *name, const char *msg) {
-	 //debugss("Throw Exception %s %s", name, msg);
+	if (env == NULL) {
+		return;
+	}
+	//debugss("Throw Exception %s %s", name, msg);
 	 jclass cls = env->FindClass(name);
      /* if cls is NULL, an exception has already been thrown */
      if (cls != NULL) {

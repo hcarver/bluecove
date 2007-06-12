@@ -70,6 +70,7 @@ public:
 
 	BOOL isClosing;
 	HANDLE hCloseEvent;
+	BOOL lineSignalDetected;
 	BOOL receivedEOF;
 
 	OVERLAPPED ovlComState;
