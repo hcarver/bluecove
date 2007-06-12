@@ -21,8 +21,10 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
+import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.Connection;
 
@@ -119,6 +121,21 @@ public abstract class RemoteDeviceHelper {
 			throw new IllegalArgumentException("Not a Bluetooth connection");
 		}
 		return createRemoteDevice(((BluetoothRFCommConnection)conn).getRemoteAddress(), null);
+	}
+	
+	public static RemoteDevice[] retrieveDevices(int option) {
+		switch (option) {
+		case DiscoveryAgent.CACHED:
+		case DiscoveryAgent.PREKNOWN:
+			RemoteDevice[] devices = new RemoteDevice[devicesCashed.size()];
+			int i = 0;
+			for(Enumeration en = devicesCashed.elements(); en.hasMoreElements(); ) {
+				devices[i++] = (RemoteDevice)en.nextElement();
+			}
+			return devices; 
+		default:
+			throw new IllegalArgumentException("invalid option");
+		}
 	}
 
 	static String getBluetoothAddress(long address) {

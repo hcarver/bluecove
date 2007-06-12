@@ -22,6 +22,7 @@ package javax.bluetooth;
 
 import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.NotImplementedError;
+import com.intel.bluetooth.RemoteDeviceHelper;
 
 public class DiscoveryAgent {
 	/*
@@ -90,7 +91,7 @@ public class DiscoveryAgent {
 	 */
 
 	public RemoteDevice[] retrieveDevices(int option) {
-		return null; // TODO keep a cache of previous devices
+		return RemoteDeviceHelper.retrieveDevices(option);
 	}
 
 	/*
