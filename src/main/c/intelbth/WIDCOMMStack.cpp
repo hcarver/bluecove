@@ -21,6 +21,10 @@
 
 #include "WIDCOMMStack.h"
 
+#ifdef VC6
+#define CPP_FILE "WIDCOMMStack.cpp"
+#endif
+
 BOOL isWIDCOMMBluetoothStackPresent() {
 	HMODULE h = LoadLibrary(WIDCOMM_DLL);
 	if (h == NULL) {

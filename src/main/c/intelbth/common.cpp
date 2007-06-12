@@ -21,6 +21,10 @@
 
 #include "common.h"
 
+#ifdef VC6
+#define CPP_FILE "common.cpp"
+#endif
+
 static BOOL nativeDebugCallback= false;
 static jclass nativeDebugListenerClass;
 static jmethodID nativeDebugMethod = NULL;

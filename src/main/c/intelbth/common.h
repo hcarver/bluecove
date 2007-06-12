@@ -124,15 +124,19 @@
 
 void enableNativeDebug(JNIEnv * env, jobject loggerClass, jboolean on);
 
+#ifndef VC6
+#define CPP_FILE __FILE__
+#endif
+
 //#define EXT_DEBUG
 void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...);
-#define debug(fmt) callDebugListener(env, __FILE__, __LINE__, fmt);
-#define debugs(fmt, message) callDebugListener(env, __FILE__, __LINE__, fmt, message);
-#define debug1(fmt, message) callDebugListener(env, __FILE__, __LINE__, fmt, message);
-#define debugss(fmt, message1, message2) callDebugListener(env, __FILE__, __LINE__, fmt, message1, message2);
-#define debug2(fmt, message1, message2) callDebugListener(env, __FILE__, __LINE__, fmt, message1, message2);
-#define debug3(fmt, message1, message2, message3) callDebugListener(env, __FILE__, __LINE__, fmt, message1, message2, message3);
-#define debug4(fmt, message1, message2, message3, message4) callDebugListener(env, __FILE__, __LINE__, fmt, message1, message2, message3, message4);
+#define debug(fmt) callDebugListener(env, CPP_FILE, __LINE__, fmt);
+#define debugs(fmt, message) callDebugListener(env, CPP_FILE, __LINE__, fmt, message);
+#define debug1(fmt, message) callDebugListener(env, CPP_FILE, __LINE__, fmt, message);
+#define debugss(fmt, message1, message2) callDebugListener(env, CPP_FILE, __LINE__, fmt, message1, message2);
+#define debug2(fmt, message1, message2) callDebugListener(env, CPP_FILE, __LINE__, fmt, message1, message2);
+#define debug3(fmt, message1, message2, message3) callDebugListener(env, CPP_FILE, __LINE__, fmt, message1, message2, message3);
+#define debug4(fmt, message1, message2, message3, message4) callDebugListener(env, CPP_FILE, __LINE__, fmt, message1, message2, message3, message4);
 
 #ifdef EXT_DEBUG
 #define Edebug(fmt)  debug(fmt) 
