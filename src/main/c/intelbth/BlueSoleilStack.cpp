@@ -434,7 +434,6 @@ BlueSoleilCOMPort::BlueSoleilCOMPort() {
 	hComPort = INVALID_HANDLE_VALUE;
 	dwConnectionHandle = 0;
 	isClosing = FALSE;
-	lineSignalDetected = FALSE;
 	receivedEOF = FALSE;
 	memset(&ovlRead, 0, sizeof(OVERLAPPED));
 	memset(&ovlWrite, 0, sizeof(OVERLAPPED));
@@ -500,6 +499,8 @@ char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
 	dcb.StopBits = ONESTOPBIT;    // one stop bit
 	dcb.fAbortOnError = TRUE;
 
+	dcb.fBinary = TRUE;
+
 	dcb.fOutxDsrFlow = 0;
 	BOOL hardwareHandshake = TRUE;
 	if (hardwareHandshake) {
@@ -514,11 +515,13 @@ char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
 		return "SetCommState error";
 	}
 
-	if (!EscapeCommFunction(hComPort, SETRTS)) { //Sends the DTR (data-terminal-ready) signal.
-		return "EscapeCommFunction error";
-	}
-	if (!EscapeCommFunction(hComPort, SETDTR)) { //Sends the RTS (request-to-send) signal.
-		return "EscapeCommFunction error";
+	if (!hardwareHandshake) {
+		if (!EscapeCommFunction(hComPort, SETRTS)) { //Sends the DTR (data-terminal-ready) signal.
+			return "EscapeCommFunction error";
+		}
+		if (!EscapeCommFunction(hComPort, SETDTR)) { //Sends the RTS (request-to-send) signal.
+			return "EscapeCommFunction error";
+		}
 	}
 
 	ovlRead.hEvent = CreateEvent(
@@ -643,16 +646,6 @@ void BlueSoleilCOMPort::clearCommError() {
 	ClearCommError(hComPort, &dwErrorFlags, &comStat);
 	if (dwErrorFlags != 0) {
 		comStat.fEof = TRUE;
-	}
-
-	DWORD dwModemStat = 0;
-	if (GetCommModemStatus(hComPort, &dwModemStat)) {
-		BOOL RDLS_ON = dwModemStat & MS_RLSD_ON;
-		if (RDLS_ON) {
-			lineSignalDetected = TRUE;
-		} else if (lineSignalDetected) {
-			receivedEOF = TRUE;
-		}
 	}
 }
 
@@ -782,9 +775,7 @@ int waitBytesAvailable(JNIEnv *env, BlueSoleilCOMPort* rf) {
 	HANDLE hEvents[2];
 	hEvents[0] = rf->hCloseEvent;
 	hEvents[1] = rf->ovlComState.hEvent;
-	if (!rf->lineSignalDetected) {
-		debug("wait - NO receive line signal detected");
-	}
+	
 	// In fact we make asynchronous IO synchronous Just to be able to Close it any time!
     while ((rf->comStat.cbInQue == 0) && (!rf->isClosing) && (!rf->comStat.fEof) && (!rf->receivedEOF)) {
 		DWORD dwEvtMask = 0;
@@ -806,11 +797,21 @@ int waitBytesAvailable(JNIEnv *env, BlueSoleilCOMPort* rf) {
 			}
 		}
 		printCOMEvtMask(env, dwEvtMask);
+		if (dwEvtMask & EV_RLSD) {
+			DWORD dwModemStat = 0;
+			if (GetCommModemStatus(rf->hComPort, &dwModemStat)) {
+				BOOL RDLS_ON = dwModemStat & MS_RLSD_ON;
+				if (!RDLS_ON) {
+					rf->receivedEOF = TRUE;
+					debug("read receivedEOF");
+				}
+			}
+		}
 		rf->clearCommError();
 		printCOMSTAT(env, &(rf->comStat));
 	}
 	if ((rf->comStat.fEof) || (rf->receivedEOF)) {
-		return -1;
+		return 0;
 	}
 	return rf->comStat.cbInQue;
 }
@@ -831,7 +832,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	}
 	//printCOMSTAT(env, &(rf->comStat));
 	int avl = waitBytesAvailable(env, rf);
-	if (avl == -1) {
+	if ((avl == -1) || (avl == 0)) {
 		return -1;
 	}
 
@@ -904,6 +905,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 		int avl = waitBytesAvailable(env, rf);
 		if (avl == -1) {
 			return -1;
+		}
+		if (avl == 0) {
+			break;
 		}
 		DWORD numberOfBytesRead = 0;
 		if (!ReadFile(rf->hComPort, (void*)(bytes + off + done), len - done, &numberOfBytesRead, &(rf->ovlRead))) {
