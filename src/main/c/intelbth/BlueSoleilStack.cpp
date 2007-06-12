@@ -21,6 +21,10 @@
 
 #include "BlueSoleilStack.h"
 
+#ifdef VC6
+#define CPP_FILE "BlueSoleilStack.cpp"
+#endif
+
 BOOL isBlueSoleilBluetoothStackPresent() {
 	HMODULE h = LoadLibrary(BLUESOLEIL_DLL);
 	if (h == NULL) {
@@ -453,7 +457,7 @@ char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
 	}
 
 	/* setup device buffers */
-	if (!SetupComm(hComPort, 0x1000, 0x1000)) {
+	if (!SetupComm(hComPort, 0x1000, 0)) {
 		return "SetupComm error";
 	}
 
@@ -662,12 +666,6 @@ void BlueSoleilCOMPort::close(JNIEnv *env) {
 	}
 
 	if (hComPort != INVALID_HANDLE_VALUE) {
-		/*
-		if (!SetEndOfFile(hComPort)) {
-			// [1] Incorrect function.
-			debugss("SetEndOfFile error [%d] %S", last_error, getWinErrorMessage(GetLastError()));
-		}
-		*/
 		/* disable event notification and wait for thread to halt */
 		SetCommMask(hComPort, 0);
 
@@ -779,6 +777,44 @@ void printCOMEvtMask(JNIEnv *env, DWORD dwEvtMask) {
 	}
 }
 
+int waitBytesAvailable(JNIEnv *env, BlueSoleilCOMPort* rf) {
+	
+	HANDLE hEvents[2];
+	hEvents[0] = rf->hCloseEvent;
+	hEvents[1] = rf->ovlComState.hEvent;
+	if (!rf->lineSignalDetected) {
+		debug("wait - NO receive line signal detected");
+	}
+	// In fact we make asynchronous IO synchronous Just to be able to Close it any time!
+    while ((rf->comStat.cbInQue == 0) && (!rf->isClosing) && (!rf->comStat.fEof) && (!rf->receivedEOF)) {
+		DWORD dwEvtMask = 0;
+		debug("read WaitCommEvent");
+		if (!WaitCommEvent(rf->hComPort, &dwEvtMask, &(rf->ovlComState))) {
+			DWORD last_error = GetLastError();
+			if ((last_error == ERROR_SUCCESS) && (last_error != ERROR_IO_PENDING)) {
+				debug2("connection handle [%i] [%p]", rf->internalHandle, rf->hComPort);
+				throwIOExceptionWinErrorMessage(env, "Failed to read", last_error);
+				return -1;
+			}
+			if (last_error != ERROR_SUCCESS)  {
+				debug("read WaitForMultipleObjects");
+				DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+				if (rc == WAIT_FAILED) {
+					throwRuntimeException(env, "WaitForMultipleObjects");
+					return -1;
+				}
+			}
+		}
+		printCOMEvtMask(env, dwEvtMask);
+		rf->clearCommError();
+		printCOMSTAT(env, &(rf->comStat));
+	}
+	if ((rf->comStat.fEof) || (rf->receivedEOF)) {
+		return -1;
+	}
+	return rf->comStat.cbInQue;
+}
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfRead__J
 (JNIEnv *env, jobject peer, jlong handle) {
 	BlueSoleilCOMPort* rf = validRfCommHandle(env, handle);
@@ -794,61 +830,43 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 		return -1;
 	}
 	//printCOMSTAT(env, &(rf->comStat));
+	int avl = waitBytesAvailable(env, rf);
+	if (avl == -1) {
+		return -1;
+	}
+
 	HANDLE hEvents[2];
 	hEvents[0] = rf->hCloseEvent;
-	hEvents[1] = rf->ovlComState.hEvent;
+	hEvents[1] = rf->ovlRead.hEvent;
 
-	// In fact we make asynchronous IO synchronous Just to be able to Close it any time!
-	while ((rf->comStat.cbInQue == 0) && (!rf->isClosing) && (!rf->comStat.fEof) && (!rf->receivedEOF)) {
-		DWORD dwEvtMask = 0;
-		debug("read WaitCommEvent");
-		if (!WaitCommEvent(rf->hComPort, &dwEvtMask, &(rf->ovlComState))) {
+	unsigned char c;
+	DWORD numberOfBytesRead = 0;
+	while ((!rf->isClosing) && (!rf->receivedEOF) && (numberOfBytesRead == 0)) {
+		if (!ReadFile(rf->hComPort, &c, 1, &numberOfBytesRead, &(rf->ovlRead))) {
 			DWORD last_error = GetLastError();
-			if ((last_error == ERROR_SUCCESS) && (last_error != ERROR_IO_PENDING)) {
-				debug2("connection handle [%i] [%p]", rf->internalHandle, rf->hComPort);
-				throwIOExceptionWinErrorMessage(env, "Failed to flush", last_error);
+			if (last_error != ERROR_IO_PENDING) {
+				throwIOExceptionWinErrorMessage(env, "Failed to read", last_error);
 				return -1;
 			}
-			if (last_error != ERROR_SUCCESS)  {
+			while ((!rf->isClosing) && (!rf->receivedEOF) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlRead), &numberOfBytesRead, FALSE))) {
+				last_error = GetLastError();
+				if (last_error == ERROR_SUCCESS) {
+					break;
+				}
+				if (last_error != ERROR_IO_INCOMPLETE) {
+					throwIOExceptionWinErrorMessage(env, "Failed to read overlapped", last_error);
+					return -1;
+				}
 				debug("read WaitForMultipleObjects");
 				DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 				if (rc == WAIT_FAILED) {
 					throwRuntimeException(env, "WaitForMultipleObjects");
 					return -1;
 				}
+				rf->clearCommError();
 			}
 		}
 		rf->clearCommError();
-	}
-	if ((rf->comStat.fEof) || (rf->receivedEOF)) {
-		return -1;
-	}
-
-	hEvents[1] = rf->ovlRead.hEvent;
-
-	unsigned char c;
-	DWORD numberOfBytesRead = 0;
-	if ((!rf->isClosing) && (!ReadFile(rf->hComPort, &c, 1, &numberOfBytesRead, &(rf->ovlRead)))) {
-		DWORD last_error = GetLastError();
-		if (last_error != ERROR_IO_PENDING) {
-			throwIOExceptionWinErrorMessage(env, "Failed to read", last_error);
-			return -1;
-		}
-		while ((!rf->isClosing) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlRead), &numberOfBytesRead, FALSE))) {
-			last_error = GetLastError();
-			if (last_error == ERROR_SUCCESS) {
-				break;
-			}
-			if (last_error != ERROR_IO_INCOMPLETE) {
-				throwIOExceptionWinErrorMessage(env, "Failed to read overlapped", last_error);
-				return -1;
-			}
-			DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
-			if (rc == WAIT_FAILED) {
-				throwRuntimeException(env, "WaitForMultipleObjects");
-				return -1;
-			}
-		}
 	}
 	if (rf->isClosing) {
 		return -1;
@@ -866,7 +884,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	if (rf == NULL) {
 		return -1;
 	}
-	debug("->read(byte[])");
+	debug1("->read(byte[%i])", len);
 	if (rf->isClosing) {
 		return -1;
 	}
@@ -874,15 +892,20 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	if ((rf->comStat.fEof) || (rf->receivedEOF)) {
 		return -1;
 	}
+
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 	int done = 0;
-	DWORD numberOfBytesRead = 0;
 
 	HANDLE hEvents[2];
 	hEvents[0] = rf->hCloseEvent;
 	hEvents[1] = rf->ovlRead.hEvent;
 
 	while (!rf->isClosing && (!rf->receivedEOF) && (done < len)) {
+		int avl = waitBytesAvailable(env, rf);
+		if (avl == -1) {
+			return -1;
+		}
+		DWORD numberOfBytesRead = 0;
 		if (!ReadFile(rf->hComPort, (void*)(bytes + off + done), len - done, &numberOfBytesRead, &(rf->ovlRead))) {
 			if (GetLastError() != ERROR_IO_PENDING) {
 				env->ReleaseByteArrayElements(b, bytes, 0);
@@ -906,8 +929,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 				}
 				rf->clearCommError();
 			}
-			done += numberOfBytesRead;
 		}
+		rf->clearCommError();
+		debug1("numberOfBytesRead [%i]", numberOfBytesRead);
+		done += numberOfBytesRead;
 	}
 
 	env->ReleaseByteArrayElements(b, bytes, 0);
