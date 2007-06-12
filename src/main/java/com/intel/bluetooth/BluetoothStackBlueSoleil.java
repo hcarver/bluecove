@@ -174,7 +174,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
 		DebugLog.debug("deviceDiscoveredCallback", deviceName);
-		listener.deviceDiscovered(new RemoteDeviceImpl(deviceAddr, deviceName), new DeviceClass(deviceClass));			
+		listener.deviceDiscovered(RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName), new DeviceClass(deviceClass));			
 	}
 
 	public native boolean cancelInquirympl();
@@ -185,11 +185,11 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
 		// TODO Properly if possible
-		RemoteDeviceImpl listedDevice = (RemoteDeviceImpl)devices.get(new Long(address));
+		RemoteDevice listedDevice = (RemoteDevice)devices.get(new Long(address));
 		if (listedDevice == null) {
 			return null;
 		}
-		return listedDevice.name;
+		return null;
 	}
 	
 // --- Service search 
@@ -210,11 +210,11 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		if ((uuidSet != null) && (uuidSet.length > 0)) {
 			uuid = uuidSet[uuidSet.length -1];
 		}
-		return runSearchServicesImpl(startedNotify, listener, Utils.UUIDToByteArray(uuid), ((RemoteDeviceImpl)device).getAddress(), device);
+		return runSearchServicesImpl(startedNotify, listener, Utils.UUIDToByteArray(uuid), RemoteDeviceHelper.getAddress(device), device);
 	}
 
 	/*
-	This is all we have under the Blue Sun.
+	This is all we have under the BlueSun.
 	struct SPPEX_SERVICE_INFO {
 		DWORD dwSize;
 		DWORD dwSDAPRecordHanlde;
@@ -223,6 +223,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		UCHAR ucServiceChannel;
 	}
 	 */
+	
 	void servicesFoundCallback(SearchServicesThread startedNotify, DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel, int recordHanlde) {
 		ServiceRecordImpl record = new ServiceRecordImpl(device, 0);
 
@@ -231,11 +232,11 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		record.populateRFCOMMAttributes(recordHanlde, channel, uuid, serviceName);
 		DebugLog.debug("servicesFoundCallback", record);
 		
-		Long address = new Long(((RemoteDeviceImpl)device).getAddress());
-		RemoteDeviceImpl listedDevice = (RemoteDeviceImpl)devices.get(address);
+		Long address = new Long(RemoteDeviceHelper.getAddress(device));
+		RemoteDevice listedDevice = (RemoteDevice)devices.get(address);
 		if (listedDevice == null) {
 			devices.put(address, device);
-			listedDevice = (RemoteDeviceImpl)device;
+			listedDevice = device;
 		}
 		listedDevice.setStackAttributes("RFCOMM_channel" + channel, uuid);
 		
@@ -254,7 +255,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
 		Long addressLong = new Long(address);
-		RemoteDeviceImpl listedDevice = (RemoteDeviceImpl)devices.get(addressLong);
+		RemoteDeviceHelper listedDevice = (RemoteDeviceHelper)devices.get(addressLong);
 		if (listedDevice == null) {
 			throw new IOException("Device not discovered");
 		}

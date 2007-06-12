@@ -26,11 +26,17 @@ import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
-import com.intel.bluetooth.RemoteDeviceImpl;
+import com.intel.bluetooth.RemoteDeviceHelper;
 
+/*
+ * Should not inherit implementation from this class! 
+ * User should be able to subclass RemoteDevice to do the searchServices. Tested on Nokia, Moto and SE
+ */
 public class RemoteDevice {
 	
-	private long address;
+	private long addressLong;
+	
+	private String addressStr;
 
 	/*
 	 * Creates a Bluetooth device based upon its address. The Bluetooth address
@@ -45,7 +51,8 @@ public class RemoteDevice {
 
 	protected RemoteDevice(String address) {
 		DebugLog.debug("new RemoteDevice", address);
-		this.address = Long.parseLong(address, 16);
+		this.addressStr = address;
+		this.addressLong = RemoteDeviceHelper.getAddress(address);
 	}
 
 	/*
@@ -77,7 +84,7 @@ public class RemoteDevice {
 	 */
 
 	public String getFriendlyName(boolean alwaysAsk) throws IOException {
-		throw new RuntimeException("Wrong use of class, see RemoteDeviceImpl");
+		return RemoteDeviceHelper.getFriendlyName(this, this.addressLong, alwaysAsk);
 	}
 
 	/*
@@ -88,8 +95,7 @@ public class RemoteDevice {
 	 */
 
 	public final String getBluetoothAddress() {
-		String s = Long.toHexString(address);
-		return "000000000000".substring(s.length()) + s;
+		return this.addressStr;
 	}
 
 	/*
@@ -103,7 +109,7 @@ public class RemoteDevice {
 
 	public boolean equals(Object obj) {
 		return obj != null && obj instanceof RemoteDevice
-				&& ((RemoteDevice) obj).address == address;
+				&& ((RemoteDevice) obj).addressLong == addressLong;
 	}
 
 	/*
@@ -113,7 +119,7 @@ public class RemoteDevice {
 	 */
 
 	public int hashCode() {
-		return (int) address;
+		return new Long(addressLong).hashCode();
 	}
 
 	/*
@@ -131,7 +137,7 @@ public class RemoteDevice {
 	 */
 
 	public static RemoteDevice getRemoteDevice(Connection conn) throws IOException {
-		return RemoteDeviceImpl.getRemoteDevice(conn);
+		return RemoteDeviceHelper.getRemoteDevice(conn);
 	}
 
 	/*
@@ -298,7 +304,9 @@ public class RemoteDevice {
 	 */
 
 	public boolean isAuthorized(javax.microedition.io.Connection conn) throws IOException {
-		// TODO not yet implemented
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		}
 		return false;
 	}
 
@@ -317,7 +325,9 @@ public class RemoteDevice {
 	 */
 
 	public boolean isEncrypted() {
-		// TODO not yet implemented
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		}
 		return false;
 	}
 

@@ -182,14 +182,15 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
 		DebugLog.debug("deviceDiscoveredCallback deviceName", deviceName);
 		Vector reported = (Vector)deviceDiscoveryListenerReportedDevices.get(listener);
+		String deviceAddrStr = RemoteDeviceHelper.getBluetoothAddress(deviceAddr);
 		for (Enumeration iter = reported.elements(); iter.hasMoreElements();) {
-			RemoteDeviceImpl device = (RemoteDeviceImpl) iter.nextElement();
-			if (device.getAddress() == deviceAddr) {
+			RemoteDevice device = (RemoteDevice) iter.nextElement();
+			if (deviceAddrStr.equalsIgnoreCase(device.getBluetoothAddress())) {
 				return;
 			}
 			
 		}
-		RemoteDeviceImpl remoteDevice = new RemoteDeviceImpl(deviceAddr, deviceName);
+		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName);
 		reported.addElement(remoteDevice);
 		DeviceClass cod = new DeviceClass(deviceClass);
 		DebugLog.debug("deviceDiscoveredCallback addtress", remoteDevice.getBluetoothAddress());
@@ -240,7 +241,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 			byte[] uuidValue = Utils.UUIDToByteArray(BluetoothConsts.L2CAP_PROTOCOL_UUID);
 			long[] handles;
 			try {
-				handles = runSearchServicesImpl(startedNotify, uuidValue, ((RemoteDeviceImpl) device).getAddress());
+				handles = runSearchServicesImpl(startedNotify, uuidValue, RemoteDeviceHelper.getAddress(device));
 			} catch (SearchServicesTerminatedException e) {
 				return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
 			}
@@ -276,7 +277,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 						if ((uuidFiler != null) && !sr.hasServiceClassUUID(uuidFiler)) {
 							continue;
 						}
-						if (!isServiceRecordDiscoverable(((RemoteDeviceImpl) device).getAddress(), sr.getHandle())) {
+						if (!isServiceRecordDiscoverable(RemoteDeviceHelper.getAddress(device), sr.getHandle())) {
 							continue;
 						}
 

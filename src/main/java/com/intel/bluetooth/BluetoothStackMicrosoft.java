@@ -38,7 +38,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 
 	boolean peerInitialized = false;
 	
-	long bluetoothAddress = 0;
+	long localBluetoothAddress = 0;
 	
 	private BluetoothPeer bluetoothPeer;
 	
@@ -92,8 +92,8 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		try {
 			int socket = bluetoothPeer.socket(false, false);
 			bluetoothPeer.bind(socket);
-			bluetoothAddress = bluetoothPeer.getsockaddress(socket);
-			address = Long.toHexString(bluetoothAddress);
+			localBluetoothAddress = bluetoothPeer.getsockaddress(socket);
+			address = Long.toHexString(localBluetoothAddress);
 			bluetoothPeer.storesockopt(socket);
 			bluetoothPeer.close(socket);
 		} catch (IOException e) {
@@ -104,10 +104,10 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 
 	public String getLocalDeviceName() {
-		if (bluetoothAddress == 0) {
+		if (localBluetoothAddress == 0) {
 			getLocalDeviceBluetoothAddress();
 		}
-		return bluetoothPeer.getradioname(bluetoothAddress);
+		return bluetoothPeer.getradioname(localBluetoothAddress);
 	}
 
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
@@ -115,7 +115,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 	
 	public DeviceClass getLocalDeviceClass() {
-		return new DeviceClass(bluetoothPeer.getDeviceClass(bluetoothAddress));
+		return new DeviceClass(bluetoothPeer.getDeviceClass(localBluetoothAddress));
 	}
 	
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
@@ -167,10 +167,10 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		}
 		
 		if ("bluecove.radio.version".equals(property)) {
-			return String.valueOf(bluetoothPeer.getDeviceVersion(bluetoothAddress));
+			return String.valueOf(bluetoothPeer.getDeviceVersion(localBluetoothAddress));
 		}
 		if ("bluecove.radio.manufacturer".equals(property)) {
-			return String.valueOf(bluetoothPeer.getDeviceManufacturer(bluetoothAddress));
+			return String.valueOf(bluetoothPeer.getDeviceManufacturer(localBluetoothAddress));
 		}
 		return null;
 	}
@@ -200,7 +200,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		startedNotify.searchServicesStartedCallback();
 		int[] handles;
 		try {
-			handles = bluetoothPeer.runSearchServices(uuidSet, Long.parseLong(device.getBluetoothAddress(), 16));
+			handles = bluetoothPeer.runSearchServices(uuidSet, RemoteDeviceHelper.getAddress(device));
 		} catch (SearchServicesDeviceNotReachableException e) {
 			return DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
 		} catch (SearchServicesTerminatedException e) {
@@ -283,9 +283,9 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		 * retrieve SDP blob
 		 */
 
-		byte[] blob = bluetoothPeer.getServiceAttributes(sortIDs,
-				 		Long.parseLong(serviceRecord.getHostDevice().getBluetoothAddress(), 16),
-						(int)serviceRecord.getHandle());
+		byte[] blob = bluetoothPeer.getServiceAttributes(sortIDs, 
+				RemoteDeviceHelper.getAddress(serviceRecord.getHostDevice()),
+				(int)serviceRecord.getHandle());
 
 		if (blob.length > 0) {
 			try {
