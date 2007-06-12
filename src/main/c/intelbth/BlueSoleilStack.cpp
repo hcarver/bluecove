@@ -232,7 +232,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 	BLUETOOTH_DEVICE_INFO	lpDevsList[DEVICE_RESPONDED_MAX] = {0};
 	DWORD devsListLen = sizeof(BLUETOOTH_DEVICE_INFO) * DEVICE_RESPONDED_MAX;
 
+	stack->inquiringDevice = TRUE;
 	DWORD dwResult = BT_InquireDevices(ucInqMode, ucInqLen, &devsListLen, lpDevsList);
+	stack->inquiringDevice = FALSE;
 	if (dwResult != BTSTATUS_SUCCESS) {
 		debugs("BT_InquireDevices return  [%s]", getBsAPIStatusString(dwResult));
 		return INQUIRY_ERROR;
@@ -241,14 +243,15 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 	for (DWORD i=0; i < ((devsListLen)/sizeof(BLUETOOTH_DEVICE_INFO)); i++) {
 		BLUETOOTH_DEVICE_INFO *pDevice = (BLUETOOTH_DEVICE_INFO*)((UCHAR*)lpDevsList + i * sizeof(BLUETOOTH_DEVICE_INFO));
 		jlong deviceAddr = BsAddrToLong(pDevice->address);
-		jint deviceClass = BsDeviceClassToInt(pDevice->classOfDevice);
 
 
 		BLUETOOTH_DEVICE_INFO_EX devInfo = {0};
 		memcpy(&devInfo.address, pDevice->address, DEVICE_ADDRESS_LENGTH);
 		devInfo.dwSize = sizeof(BLUETOOTH_DEVICE_INFO_EX);
 		devInfo.szName[0] = '\0';
-		BT_GetRemoteDeviceInfo(MASK_DEVICE_NAME, &devInfo);
+		BT_GetRemoteDeviceInfo(MASK_DEVICE_NAME | MASK_DEVICE_CLASS, &devInfo);
+
+		jint deviceClass = BsDeviceClassToInt(devInfo.classOfDevice);
 
 		env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, env->NewStringUTF((char*)(devInfo.szName)));
 		if (ExceptionCheckCompatible(env)) {
@@ -261,6 +264,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_cancelInquirympl
 (JNIEnv *env, jobject){
+	if (!stack->inquiringDevice) {
+		return FALSE;
+	}
 	DWORD dwResult = BT_CancelInquiry();
 	if (dwResult != BTSTATUS_SUCCESS) {
 		debugs("BT_CancelInquiry return  [%s]", getBsAPIStatusString(dwResult));
@@ -354,6 +360,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
 //	 --- Client RFCOMM connections
 
 BlueSoleilStack::BlueSoleilStack() {
+	inquiringDevice = FALSE;
 	commPortsPoolAllocationHandleOffset = 1;
 	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
 		commPortsPool[i] = NULL;
@@ -361,6 +368,10 @@ BlueSoleilStack::BlueSoleilStack() {
 }
 
 BlueSoleilStack::~BlueSoleilStack() {
+	if (inquiringDevice) {
+		BT_CancelInquiry();
+		inquiringDevice = FALSE;
+	}
 	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
 		if (commPortsPool[i] != NULL) {
 			delete commPortsPool[i];
