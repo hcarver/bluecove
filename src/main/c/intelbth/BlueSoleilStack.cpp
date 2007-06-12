@@ -361,6 +361,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
 
 BlueSoleilStack::BlueSoleilStack() {
 	inquiringDevice = FALSE;
+	InitializeCriticalSection(&openingPortLock);
 	commPortsPoolAllocationHandleOffset = 1;
 	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
 		commPortsPool[i] = NULL;
@@ -368,6 +369,7 @@ BlueSoleilStack::BlueSoleilStack() {
 }
 
 BlueSoleilStack::~BlueSoleilStack() {
+	DeleteCriticalSection(&openingPortLock);
 	if (inquiringDevice) {
 		BT_CancelInquiry();
 		inquiringDevice = FALSE;
@@ -601,21 +603,26 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
 	memcpy(&(svcInfo.serviceClassUuid128), &service_guid, sizeof(UUID));
 
 	DWORD dwHandle;
+	EnterCriticalSection(&stack->openingPortLock);
 	DWORD dwResult = BT_ConnectSPPExService(&devInfo, &svcInfo, &dwHandle);
 	if (dwResult != BTSTATUS_SUCCESS)	{
 		debugs("BT_ConnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));
 		stack->deleteCommPort(rf);
+		LeaveCriticalSection(&stack->openingPortLock);
 		throwIOExceptionExt(env, "Can't connect SPP [%s]", getBsAPIStatusString(dwResult));
 		return 0;
 	}
 	if (dwHandle == 0) {
 		stack->deleteCommPort(rf);
 		BT_DisconnectSPPExService(dwHandle);
+		LeaveCriticalSection(&stack->openingPortLock);
 		throwIOException(env, "Can't use 0 Handle");
 		return 0;
 	}
 
-	//Sleep(300);
+	// To solve concurrent connections problem
+	//Sleep(100);
+
 	int portN = svcInfo.ucComIndex;
 	debugs("open COM port [%i]", portN);
 	char portString[20];
@@ -629,15 +636,17 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
 		FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, /* overlapped I/O */
 		NULL);
 	if (hComPort == INVALID_HANDLE_VALUE) {
-		stack->deleteCommPort(rf);
 		DWORD last_error = GetLastError();
+		stack->deleteCommPort(rf);
 		char message[80];
 		sprintf_s(message, 80, "Can't open COM port [%s]", portString);
 		debug(message);
 		BT_DisconnectSPPExService(dwHandle);
+		LeaveCriticalSection(&stack->openingPortLock);
 		throwIOExceptionWinErrorMessage(env, message, last_error);
 		return 0;
 	}
+	LeaveCriticalSection(&stack->openingPortLock);
 	rf->dwConnectionHandle = dwHandle;
 	rf->hComPort = hComPort;
 
@@ -688,7 +697,9 @@ void BlueSoleilCOMPort::close(JNIEnv *env) {
 	}
 	DWORD dwResult = BTSTATUS_SUCCESS;
 	if (dwConnectionHandle != 0) {
+		EnterCriticalSection(&stack->openingPortLock);
 		dwResult = BT_DisconnectSPPExService(dwConnectionHandle);
+		LeaveCriticalSection(&stack->openingPortLock);
 		dwConnectionHandle = 0;
 		if ((dwResult != BTSTATUS_SUCCESS) && (dwResult != BTSTATUS_CONNECTION_NOT_EXIST) && (env != NULL))	{
 			debugs("BT_DisconnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));

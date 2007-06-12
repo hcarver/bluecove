@@ -47,6 +47,8 @@ class BlueSoleilCOMPort;
 class BlueSoleilStack {
 public:
 	BOOL inquiringDevice;
+	
+	CRITICAL_SECTION openingPortLock;
 	int commPortsPoolAllocationHandleOffset;
 	BlueSoleilCOMPort* commPortsPool[COMMPORTS_POOL_MAX];
 	
