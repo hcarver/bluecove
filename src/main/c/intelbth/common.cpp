@@ -386,3 +386,111 @@ int ReceiveBuffer::available() {
 	if (safe) LeaveCriticalSection(&lock);
 	return rc;
 }
+
+// --------- ObjectPool -------------
+
+PoolableObject::PoolableObject() {
+	magic1 = MAGIC_1;
+	magic2 = MAGIC_2;
+	internalHandle = -1;
+}
+
+PoolableObject::~PoolableObject() {
+	magic1 = 0;
+	magic2 = 0;
+}
+
+BOOL PoolableObject::isValidObject() {
+	return TRUE;
+}
+
+ObjectPool::ObjectPool(int size, int handleOffset) {
+	InitializeCriticalSection(&lock);
+	this->size = size;
+	this->handleOffset = handleOffset;
+	handleMove = 0;
+	objs = new (PoolableObject* [size]);
+	for(int i = 0; i < size; i ++) {
+		objs[i] = NULL;
+	}
+}
+
+ObjectPool::~ObjectPool() {
+	for(int i = 0; i < size; i ++) {
+		if (objs[i] != NULL) {
+			PoolableObject* o = objs[i];
+			objs[i] = NULL;
+			delete o;
+		}
+	}
+	delete objs;
+	DeleteCriticalSection(&lock);
+}
+
+jlong ObjectPool::realIndex(jlong internalHandle) {
+	return internalHandle - handleOffset;
+}
+
+jlong ObjectPool::realIndex(PoolableObject* obj) {
+	return realIndex(obj->internalHandle);
+}
+
+BOOL ObjectPool::addObject(PoolableObject* obj) {
+	EnterCriticalSection(&lock);
+	int freeIndex = -1;
+	for(int k = 0; k < size; k++) {
+		int i = k + handleMove;
+		if (i >= size) {
+			i -= size;
+		}
+
+		if (objs[i] == NULL) {
+			freeIndex = i;
+			objs[freeIndex] = obj;
+			obj->internalHandle = handleOffset + freeIndex;
+
+			handleMove ++;
+			if (handleMove >= size) {
+				handleMove = 0;
+			}
+
+			LeaveCriticalSection(&lock);
+			return TRUE;
+		}
+	}
+	LeaveCriticalSection(&lock);
+	return FALSE;
+}
+
+PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle) {
+	if (handle <= 0) {
+		throwIOException(env, "Invalid handle");
+		return NULL;
+	}
+	jlong idx = realIndex(handle);
+	if ((idx < 0) || (idx >= size)) {
+		throwIOException(env, "Obsolete handle");
+		return NULL;
+	}
+	PoolableObject* o = objs[idx];
+	if (o == NULL) {
+		throwIOException(env, "Destroyed handle");
+		return NULL;
+	}
+	if ((o->magic1 != MAGIC_1) || (o->magic2 != MAGIC_2)) {
+		throwIOException(env, "Corrupted object");
+		return NULL;
+	}
+	if ((o->internalHandle != handle) || (!o->isValidObject())) {
+		throwIOException(env, "Corrupted handle");
+		return NULL;
+	}
+	return o;
+}
+
+void ObjectPool::removeObject(PoolableObject* obj) {
+	jlong idx = realIndex(obj);
+	if ((idx >= 0) && (idx < size)) {
+		objs[idx] = NULL;
+	}
+}

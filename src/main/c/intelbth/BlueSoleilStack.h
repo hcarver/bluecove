@@ -39,33 +39,39 @@
 #define DEVICE_RESPONDED_MAX 50
 #define SERVICE_COUNT_MAX	100
 
-// 7 for Server and 7 for Client, Bluetooth Can't have more
+// 7 for Server and 7 for Client, Bluetooth Can't have more than 7?
 #define COMMPORTS_POOL_MAX 14
+#define SERVERS_POOL_MAX 32
 
 class BlueSoleilCOMPort;
+
+class BlueSoleilSPPExService;
 
 class BlueSoleilStack {
 public:
 	BOOL inquiringDevice;
 	
 	CRITICAL_SECTION openingPortLock;
-	int commPortsPoolAllocationHandleOffset;
-	BlueSoleilCOMPort* commPortsPool[COMMPORTS_POOL_MAX];
 	
+	ObjectPool* commPortsPool;
+	ObjectPool* servicesPool;
+
 	BlueSoleilStack();
 	~BlueSoleilStack();
 
-	BlueSoleilCOMPort* createCommPort(BOOL server);
+	void SPPEXConnectionCallback(DWORD dwServerHandle, BYTE* lpBdAddr, UCHAR ucStatus, DWORD dwConnetionHandle);
+
+	BlueSoleilCOMPort* createCommPort();
 	BlueSoleilCOMPort* getCommPort(JNIEnv *env, jlong handle);
 	void deleteCommPort(BlueSoleilCOMPort* commPort);
+
+	BlueSoleilSPPExService* createService();
+	BlueSoleilSPPExService* getService(JNIEnv *env, jlong handle);
+	void deleteService(BlueSoleilSPPExService* service);
 };
 
-class BlueSoleilCOMPort {
+class BlueSoleilCOMPort : public PoolableObject {
 public:
-	long magic1;
-	long magic2;
-
-	int internalHandle;
 	HANDLE hComPort;
 	DWORD dwConnectionHandle;
 
@@ -79,17 +85,31 @@ public:
 	OVERLAPPED ovlRead;
 	OVERLAPPED ovlWrite;
 
+	long portMagic1;
+
 	COMSTAT comStat;
 	DWORD   dwErrorFlags;
 
 	BlueSoleilCOMPort();
-	~BlueSoleilCOMPort();
+	virtual ~BlueSoleilCOMPort();
 
 	char* configureComPort(JNIEnv *env);
 
 	void clearCommError();
 
 	void close(JNIEnv *env);
+	
+	virtual BOOL isValidObject();
+};
+
+
+class BlueSoleilSPPExService : public PoolableObject {
+private:
+	long serviceMagic1;
+public:
+	BlueSoleilSPPExService();
+	virtual ~BlueSoleilSPPExService();
+	virtual BOOL isValidObject();
 };
 
 static BlueSoleilStack* stack = NULL;

@@ -222,3 +222,46 @@ public:
 	int available();
 	BOOL isCorrupted();
 };
+
+
+class PoolableObject {
+public:
+	long magic1;
+	long magic2;
+
+	int internalHandle;
+
+	PoolableObject();
+	virtual ~PoolableObject();
+
+	virtual BOOL isValidObject();
+};
+
+class ObjectPool {
+private:
+	CRITICAL_SECTION lock;
+
+	int size;
+	
+	//each Handle type is different positive value range.
+	int handleOffset;
+	
+	// generate different handlers for each new object
+	int handleMove;
+
+	PoolableObject** objs;
+
+	jlong realIndex(jlong internalHandle);
+	jlong realIndex(PoolableObject* obj);
+
+public:
+
+	ObjectPool(int size, int handleOffset);
+	~ObjectPool();
+
+	PoolableObject* getObject(JNIEnv *env, jlong handle);
+
+	void removeObject(PoolableObject* obj);
+
+	BOOL addObject(PoolableObject* obj);
+};

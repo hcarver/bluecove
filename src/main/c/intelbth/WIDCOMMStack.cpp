@@ -165,9 +165,12 @@ void WIDCOMMStack::throwExtendedErrorException(JNIEnv * env, const char *name) {
 }
 
 char* WIDCOMMStack::getExtendedError() {
+	static char* noError = "No error code";
+    if (stack == NULL) {
+		return noError;
+	}
 	WBtRc er = stack->GetExtendedError();
 	LPCTSTR msg = WBtRcToString(er);
-	static char* noError = "No error code";
 	if (msg != NULL) {
 		return (char*)msg;
 	} else {
@@ -189,6 +192,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_uninitiali
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLocalDeviceBluetoothAddress
 (JNIEnv *env, jobject peer) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
 	struct CBtIf::DEV_VER_INFO info;
 	if (!stack->GetLocalDeviceVersionInfo(&info)) {
 		stack->throwExtendedErrorException(env, "javax/bluetooth/BluetoothStateException");
@@ -202,6 +209,10 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLocalDeviceName
 (JNIEnv *env, jobject peer) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
 	BD_NAME name;
 	if (!stack->GetLocalDeviceName(&name)) {
 		debugs("WIDCOMM error[%s]", stack->getExtendedError());
@@ -212,16 +223,28 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isLocalDevicePowerOn
 (JNIEnv *env, jobject peer) {
+    if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
 	return stack->IsDeviceReady();
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isStackServerUp
 (JNIEnv *env, jobject peer) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
 	return stack->IsStackServerUp();
 }
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getBTWVersionInfo
 (JNIEnv *env, jobject peer) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
 	BT_CHAR p_version[256];
 	if (!stack->GetBTWVersionInfo(p_version, 256)) {
 		return NULL;
@@ -230,7 +253,11 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getBTWV
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceVersion
-(JNIEnv *, jobject) {
+(JNIEnv *env, jobject) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
 	CBtIf::DEV_VER_INFO dev_Ver_Info;
 	if (!stack->GetLocalDeviceVersionInfo(&dev_Ver_Info)) {
 		return -1;
@@ -239,7 +266,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceV
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceManufacturer
-(JNIEnv *, jobject) {
+(JNIEnv *env, jobject) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
 	CBtIf::DEV_VER_INFO dev_Ver_Info;
 	if (!stack->GetLocalDeviceVersionInfo(&dev_Ver_Info)) {
 		return -1;
@@ -298,6 +329,10 @@ void WIDCOMMStack::OnInquiryComplete(BOOL success, short num_responses) {
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceInquiryImpl
 (JNIEnv * env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
 	debug("StartDeviceInquiry");
 	stack->deviceInquiryComplete = FALSE;
 	stack->deviceInquiryTerminated = FALSE;
@@ -390,6 +425,10 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_device
 
 JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runSearchServicesImpl
 (JNIEnv *env, jobject peer, jobject startedNotify, jbyteArray uuidValue, jlong address) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
 	debug("StartSearchServices");
 
 	BD_ADDR bda;
@@ -600,7 +639,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isServ
 	if (record == NULL) {
 		return NULL;
 	}
-	stack->searchServicesComplete = FALSE;
+stack->searchServicesComplete = FALSE;
 	stack->searchServicesTerminated = FALSE;
 
 	BD_ADDR bda;
@@ -1113,7 +1152,10 @@ void open_server_finally(JNIEnv *env, WIDCOMMStackRfCommPortServer* rf) {
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerOpenImpl
 (JNIEnv *env, jobject peer, jbyteArray uuidValue, jbyteArray uuidValue2, jstring name, jboolean authenticate, jboolean encrypt) {
-
+    if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
 	EnterCriticalSection(&stack->csCRfCommIf);
 	WIDCOMMStackRfCommPortServer* rf = NULL;
 //VC6	__try {
