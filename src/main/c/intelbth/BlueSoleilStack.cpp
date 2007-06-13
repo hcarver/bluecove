@@ -105,13 +105,17 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_enableN
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_initializeImpl
 (JNIEnv *env, jobject) {
 	if (BT_InitializeLibrary()) {
-		BlueSoleilStarted = TRUE;
-		stack = new BlueSoleilStack();
-		return TRUE;
+		if (BT_IsBluetoothReady(10)) {
+			BlueSoleilStarted = TRUE;
+			stack = new BlueSoleilStack();
+			return TRUE;
+		} else {
+			debug("Error in BlueSoleil BT_IsBluetoothReady");
+		}
 	} else {
 		debug("Error in BlueSoleil InitializeLibrary");
-		return FALSE;
 	}
+	return FALSE;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_uninitialize
@@ -633,7 +637,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
 	//Sleep(100);
 
 	int portN = svcInfo.ucComIndex;
-	debugs("open COM port [%i]", portN);
+	debug2("open COM port [%i] for [%i]", portN, address);
 	char portString[20];
 	sprintf_s(portString, 20, "\\\\.\\COM%i", portN);
 	debugs("open COM port [%s]", portString);
@@ -655,17 +659,18 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
 		throwIOExceptionWinErrorMessage(env, message, last_error);
 		return 0;
 	}
-	LeaveCriticalSection(&stack->openingPortLock);
 	rf->dwConnectionHandle = dwHandle;
 	rf->hComPort = hComPort;
 
 	char* errorMessage = rf->configureComPort(env);
 	if (errorMessage != NULL) {
-		stack->deleteCommPort(rf);
 		DWORD last_error = GetLastError();
+		stack->deleteCommPort(rf);
+		LeaveCriticalSection(&stack->openingPortLock);
 		throwIOExceptionWinErrorMessage(env, errorMessage, last_error);
 		return 0;
 	}
+	LeaveCriticalSection(&stack->openingPortLock);
 	debug3("Connected [%i] [%p]-[%i]", rf->internalHandle, rf->hComPort, rf->dwConnectionHandle);
 	return rf->internalHandle;
 }
@@ -778,14 +783,14 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getCon
 }
 
 void printCOMSTAT(JNIEnv *env, COMSTAT* comStat) {
-	debug1("COMSTAT.fEof      %i", comStat->fEof);
-	debug1("COMSTAT.cbInQue   %i", comStat->cbInQue);
-	debug1("COMSTAT.cbOutQue  %i", comStat->cbOutQue);
-	debug1("COMSTAT.fCtsHold  %i", comStat->fCtsHold);
-	debug1("COMSTAT.fDsrHold  %i", comStat->fDsrHold);
-	debug1("COMSTAT.fRlsdHold %i", comStat->fRlsdHold);
-	debug1("COMSTAT.fXoffHold %i", comStat->fXoffHold);
-	debug1("COMSTAT.fXoffSent %i", comStat->fXoffSent);
+	Edebug1("COMSTAT.fEof      %i", comStat->fEof);
+	Edebug1("COMSTAT.cbInQue   %i", comStat->cbInQue);
+	Edebug1("COMSTAT.cbOutQue  %i", comStat->cbOutQue);
+	Edebug1("COMSTAT.fCtsHold  %i", comStat->fCtsHold);
+	Edebug1("COMSTAT.fDsrHold  %i", comStat->fDsrHold);
+	Edebug1("COMSTAT.fRlsdHold %i", comStat->fRlsdHold);
+	Edebug1("COMSTAT.fXoffHold %i", comStat->fXoffHold);
+	Edebug1("COMSTAT.fXoffSent %i", comStat->fXoffSent);
 
 }
 

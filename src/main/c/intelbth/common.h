@@ -142,10 +142,14 @@ void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char 
 #define Edebug(fmt)  debug(fmt) 
 #define Edebugs(fmt, message) debugs(fmt, message)
 #define Edebugss(fmt, message1, message2) debugss(fmt, message1, message2)
+#define Edebug1(fmt, message) debugs(fmt, message)
+#define Edebug2(fmt, message1, message2) debugss(fmt, message1, message2)
 #else
 #define Edebug(fmt) 
 #define Edebugs(fmt, message)
 #define Edebugss(fmt, message1, message2)
+#define Edebug1(fmt, message)
+#define Edebug2(fmt, message1, message2)
 #endif
 
 char* bool2str(BOOL b);

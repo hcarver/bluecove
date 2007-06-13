@@ -55,7 +55,9 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public native boolean initializeImpl();
 	
 	public void initialize() {
-		initializeImpl();
+		if (!initializeImpl()) {
+			throw new RuntimeException("BlueSoleil BluetoothStack not found");
+		}
 		initialized = true;
 	}
 	
@@ -256,25 +258,34 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	
 	public native void connectionRfCloseClientConnection(long handle) throws IOException;
 	
+	private native long rfServerOpenImpl(byte[] uuidValue, String name, boolean authenticate, boolean encrypt) throws IOException;
+	
+	private native int rfServerSCN(long handle) throws IOException;
+	
 	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
-		throw new NotImplementedError();
+		byte[] uuidValue = Utils.UUIDToByteArray(uuid);
+		long handle = rfServerOpenImpl(uuidValue, name, authenticate, encrypt);
+		int channel = rfServerSCN(handle);
+		DebugLog.debug("serverSCN", channel);
+		int serviceRecordHandle = (int)handle;
+		
+		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name);
+		
+		return handle;
+
 	}
 	
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
 		throw new NotImplementedError();
 	}
 	
-	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException {
-		throw new NotImplementedError();
-	}
+	public native long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
 	
 	public void connectionRfCloseServerConnection(long handle) throws IOException {
 		throw new NotImplementedError();
 	}
 	
-	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
-		throw new NotImplementedError();
-	}
+	public native void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
 	
 	public native long getConnectionRfRemoteAddress(long handle) throws IOException;
 	
