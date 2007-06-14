@@ -1,9 +1,11 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual C++ Express 2005
+# Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "intelbth", "intelbth.vcproj", "{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		All|Pocket PC 2003 (ARMV4) = All|Pocket PC 2003 (ARMV4)
+		All|Win32 = All|Win32
 		BlueSoleil|Pocket PC 2003 (ARMV4) = BlueSoleil|Pocket PC 2003 (ARMV4)
 		BlueSoleil|Win32 = BlueSoleil|Win32
 		Release|Pocket PC 2003 (ARMV4) = Release|Pocket PC 2003 (ARMV4)
@@ -14,10 +16,14 @@ Global
 		Winsock|Win32 = Winsock|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.All|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.All|Win32.ActiveCfg = Release|Win32
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.All|Win32.Build.0 = Release|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.BlueSoleil|Pocket PC 2003 (ARMV4).ActiveCfg = BlueSoleil|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.BlueSoleil|Win32.ActiveCfg = BlueSoleil|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.BlueSoleil|Win32.Build.0 = BlueSoleil|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|Pocket PC 2003 (ARMV4).Build.0 = Release|Pocket PC 2003 (ARMV4)
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|Win32.ActiveCfg = Release|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|Win32.Build.0 = Release|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.WIDCOMM|Pocket PC 2003 (ARMV4).ActiveCfg = WIDCOMM|Pocket PC 2003 (ARMV4)

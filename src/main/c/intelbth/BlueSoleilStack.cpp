@@ -437,6 +437,14 @@ BlueSoleilSPPExService* BlueSoleilStack::createService() {
 	return o;
 }
 
+BlueSoleilSPPExService* validServiceHandle(JNIEnv *env, jlong handle) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return NULL;
+	}
+	return stack->getService(env, handle);
+}
+
 BlueSoleilSPPExService* BlueSoleilStack::getService(JNIEnv *env, jlong handle) {
 	return (BlueSoleilSPPExService*)servicesPool->getObject(env, handle);
 }
@@ -607,6 +615,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
 	LongToBsAddr(address, devInfo.address);
 
 	SPPEX_SERVICE_INFO svcInfo;
+	memset(&svcInfo, 0, sizeof(SPPEX_SERVICE_INFO));
 	svcInfo.dwSize = sizeof(SPPEX_SERVICE_INFO);
 
 	GUID service_guid;
@@ -1191,10 +1200,12 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 
 BlueSoleilSPPExService::BlueSoleilSPPExService() {
 	serviceMagic1 = MAGIC_1;
+	wdServerHandle = 0;
 }
 
 BlueSoleilSPPExService::~BlueSoleilSPPExService() {
 	serviceMagic1 = 0;
+	close(NULL);
 }
 
 BOOL BlueSoleilSPPExService::isValidObject() {
@@ -1203,13 +1214,68 @@ BOOL BlueSoleilSPPExService::isValidObject() {
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServerOpenImpl
 (JNIEnv *env, jobject, jbyteArray uuidValue, jstring name, jboolean authenticate, jboolean encrypt) {
-	return -1;
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
+	BlueSoleilSPPExService* srv = stack->createService();
+	if (srv == NULL) {
+		throwIOException(env, "No free connections Objects in Pool");
+		return 0;
+	}
+
+	memset(&(srv->serviceInfo), 0, sizeof(SPPEX_SERVICE_INFO));
+	srv->serviceInfo.dwSize = sizeof(SPPEX_SERVICE_INFO);
+
+	GUID service_guid;
+	jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
+	convertUUIDBytesToGUID(bytes, &service_guid);
+	env->ReleaseByteArrayElements(uuidValue, bytes, 0);
+	memcpy(&(srv->serviceInfo.serviceClassUuid128), &service_guid, sizeof(UUID));
+
+	const char *cname = env->GetStringUTFChars(name, 0);
+	sprintf_s(srv->serviceInfo.szServiceName, MAX_PATH, "%s", cname);
+	env->ReleaseStringUTFChars(name, cname);
+
+	DWORD dwResult = BT_StartSPPExService(&(srv->serviceInfo), &(srv->wdServerHandle));
+	if (dwResult != BTSTATUS_SUCCESS) {
+		debugs("BT_StartSPPExService return  [%s]", getBsAPIStatusString(dwResult));
+		throwIOExceptionExt(env, "Can't create Service [%s]", getBsAPIStatusString(dwResult));
+		return 0;
+	}
+
+
+	return srv->internalHandle;
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServerSCN
 (JNIEnv *env, jobject, jlong handle) {
-	return -1;
+	BlueSoleilSPPExService* srv = validServiceHandle(env, handle);
+	if (srv == NULL) {
+		return -1;
+	}
+	return srv->serviceInfo.ucServiceChannel;
 }
 
+void BlueSoleilSPPExService::close(JNIEnv *env) {
+	DWORD dwResult = BTSTATUS_SUCCESS;
+	if (wdServerHandle != 0) {
+		dwResult = BT_StopSPPExService(wdServerHandle);
+		if ((dwResult != BTSTATUS_SUCCESS) && (env != NULL))	{
+			debugs("BT_DisconnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));
+		}
+		wdServerHandle = 0;
+	}
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServerClose
+(JNIEnv *env, jobject, jlong handle, jobject) {
+	BlueSoleilSPPExService* srv = validServiceHandle(env, handle);
+	if (srv == NULL) {
+		return;
+	}
+	srv->close(env);
+	stack->deleteService(srv);
+}
 
 #endif

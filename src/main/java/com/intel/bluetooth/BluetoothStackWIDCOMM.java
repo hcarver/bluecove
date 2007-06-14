@@ -45,7 +45,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	private Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
 	
 	static {
-		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WC_BS);
+		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WIDCOMM);
 	}
 	
 	BluetoothStackWIDCOMM() {

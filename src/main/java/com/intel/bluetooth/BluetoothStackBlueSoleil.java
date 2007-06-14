@@ -36,7 +36,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	private boolean initialized = false;
 	
 	static {
-		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WC_BS);
+		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_BLUESOLEIL);
 	}
 	
 	BluetoothStackBlueSoleil() {
@@ -56,6 +56,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	
 	public void initialize() {
 		if (!initializeImpl()) {
+			DebugLog.fatal("Can't initialize destroyed");
 			throw new RuntimeException("BlueSoleil BluetoothStack not found");
 		}
 		initialized = true;

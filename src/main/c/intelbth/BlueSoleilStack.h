@@ -107,8 +107,14 @@ class BlueSoleilSPPExService : public PoolableObject {
 private:
 	long serviceMagic1;
 public:
+	DWORD wdServerHandle;
+	SPPEX_SERVICE_INFO serviceInfo;
+	
 	BlueSoleilSPPExService();
 	virtual ~BlueSoleilSPPExService();
+
+	void close(JNIEnv *env);
+
 	virtual BOOL isValidObject();
 };
 

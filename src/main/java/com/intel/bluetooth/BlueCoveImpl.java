@@ -54,12 +54,17 @@ public class BlueCoveImpl {
 	
 	// We can't use the same DLL on windows for all implemenations. 
 	// Since WIDCOMM need to be compile /MD using VC6 and winsock /MT using VC2005 
-	// This can be use to simplify development/test builds
+	// This variable can be used to simplify development/test builds
 	private static final boolean oneDLLbuild = false;
 	
 	public static final String NATIVE_LIB_MS = "intelbth";
 	
-	public static final String NATIVE_LIB_WC_BS = oneDLLbuild?NATIVE_LIB_MS:"bluecove";
+	public static final String NATIVE_LIB_WIDCOMM = oneDLLbuild?NATIVE_LIB_MS:"bluecove";
+	
+	/**
+	 * To work on BlueSoleil version 2.3 we need to compile C++ code /MT the same as winsock.
+	 */
+	public static final String NATIVE_LIB_BLUESOLEIL = NATIVE_LIB_MS; 
 	
 	private BluetoothStack bluetoothStack;
 	
@@ -76,7 +81,7 @@ public class BlueCoveImpl {
 		BluetoothStack detectorStack;
 		if (NativeLibLoader.isAvailable(NATIVE_LIB_MS)) {
 			detectorStack = new BluetoothStackMicrosoft();
-		} else if (NativeLibLoader.isAvailable(NATIVE_LIB_WC_BS)) {
+		} else if (NativeLibLoader.isAvailable(NATIVE_LIB_WIDCOMM)) {
 			detectorStack = new BluetoothStackWIDCOMM();
 		} else {
 			return;

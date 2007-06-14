@@ -72,7 +72,8 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
   intelbth.dll build by VC2005 Configuration "Win32 winsock"
   bluecove.dll build by VC6 Configuration "Win32 Release"
 
- Visual C++ 6.0 SP6 used to build bluecove.dll for WIDCOMM and BlueSoleil
+ Visual C++ 6.0 SP6 used to build bluecove.dll for WIDCOMM
+ Visual Visual C++ 2005 used to build intelbth.dll for winsock and BlueSoleil
 
  Ant or maven2 are used as the build tool for java.
 
