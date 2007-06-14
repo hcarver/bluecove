@@ -535,6 +535,7 @@ char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
 
 	dcb.fBinary = TRUE;
 
+	/*
 	dcb.fOutxDsrFlow = 0;
 	BOOL hardwareHandshake = TRUE;
 	if (hardwareHandshake) {
@@ -544,11 +545,13 @@ char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
 		dcb.fOutxCtsFlow = FALSE;
 		dcb.fRtsControl = RTS_CONTROL_ENABLE;
 	}
+	*/
 
 	if (!SetCommState(hComPort, &dcb)) {
 		return "SetCommState error";
 	}
 
+	/*
 	if (!hardwareHandshake) {
 		if (!EscapeCommFunction(hComPort, SETRTS)) { //Sends the DTR (data-terminal-ready) signal.
 			return "EscapeCommFunction error";
@@ -557,6 +560,7 @@ char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
 			return "EscapeCommFunction error";
 		}
 	}
+	*/
 
 	ovlRead.hEvent = CreateEvent(
             NULL,    // no security attributes
@@ -643,7 +647,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
 	}
 
 	// To solve concurrent connections problem
-	//Sleep(100);
+	//Sleep(5000);
 
 	int portN = svcInfo.ucComIndex;
 	debug2("open COM port [%i] for [%i]", portN, address);
@@ -704,24 +708,6 @@ void BlueSoleilCOMPort::close(JNIEnv *env) {
 		SetEvent(hCloseEvent);
 	}
 
-	if (hComPort != INVALID_HANDLE_VALUE) {
-		/* disable event notification and wait for thread to halt */
-		SetCommMask(hComPort, 0);
-
-		/* drop DTR */
-		EscapeCommFunction(hComPort, CLRDTR);
-
-		/* purge any outstanding reads/writes and close device handle */
-		PurgeComm(hComPort, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
-
-		if (!CloseHandle(hComPort)) {
-			last_error = GetLastError();
-			debugss("close ComPort error [%d] %S", last_error, getWinErrorMessage(last_error));
-			error = TRUE;
-		}
-		hComPort = INVALID_HANDLE_VALUE;
-	}
-	
 	if (ovlWrite.hEvent != NULL) {
 		CloseHandle(ovlWrite.hEvent);
 		ovlWrite.hEvent = NULL;
@@ -730,17 +716,37 @@ void BlueSoleilCOMPort::close(JNIEnv *env) {
 		CloseHandle(ovlRead.hEvent);
 		ovlRead.hEvent = NULL;
 	}
-	if (hCloseEvent != NULL) {
-		CloseHandle(hCloseEvent);
-		hCloseEvent = NULL;
-	}
 	if (ovlComState.hEvent != NULL) {
 		CloseHandle(ovlComState.hEvent);
 		ovlComState.hEvent = NULL;
 	}
 
+	if (hComPort != INVALID_HANDLE_VALUE) {
+		/* disable event notification and wait for thread to halt */
+		//SetCommMask(hComPort, 0);
+
+		/* drop DTR */
+		//EscapeCommFunction(hComPort, CLRDTR);
+
+		/* purge any outstanding reads/writes and close device handle */
+		//PurgeComm(hComPort, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
+
+		if (!CloseHandle(hComPort)) {
+			last_error = GetLastError();
+			debugss("close ComPort error [%d] %S", last_error, getWinErrorMessage(last_error));
+			error = TRUE;
+		}
+		hComPort = INVALID_HANDLE_VALUE;
+	}
+
+	if (hCloseEvent != NULL) {
+		CloseHandle(hCloseEvent);
+		hCloseEvent = NULL;
+	}
+
 	DWORD dwResult = BTSTATUS_SUCCESS;
 	if (dwConnectionHandle != 0) {
+		//Sleep(5500);
 		if (stack != NULL) {
 			EnterCriticalSection(&stack->openingPortLock);
 		}
@@ -1263,7 +1269,7 @@ void BlueSoleilSPPExService::close(JNIEnv *env) {
 	if (wdServerHandle != 0) {
 		dwResult = BT_StopSPPExService(wdServerHandle);
 		if ((dwResult != BTSTATUS_SUCCESS) && (env != NULL))	{
-			debugs("BT_DisconnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));
+			debugs("BT_StopSPPExService return  [%s]", getBsAPIStatusString(dwResult));
 		}
 		wdServerHandle = 0;
 	}
