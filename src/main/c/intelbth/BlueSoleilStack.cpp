@@ -721,21 +721,7 @@ void BlueSoleilCOMPort::close(JNIEnv *env) {
 		}
 		hComPort = INVALID_HANDLE_VALUE;
 	}
-	DWORD dwResult = BTSTATUS_SUCCESS;
-	if (dwConnectionHandle != 0) {
-		if (stack != NULL) {
-			EnterCriticalSection(&stack->openingPortLock);
-		}
-		dwResult = BT_DisconnectSPPExService(dwConnectionHandle);
-		if (stack != NULL) {
-			LeaveCriticalSection(&stack->openingPortLock);
-		}
-		dwConnectionHandle = 0;
-		if ((dwResult != BTSTATUS_SUCCESS) && (dwResult != BTSTATUS_CONNECTION_NOT_EXIST) && (env != NULL))	{
-			debugs("BT_DisconnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));
-		}
-	}
-
+	
 	if (ovlWrite.hEvent != NULL) {
 		CloseHandle(ovlWrite.hEvent);
 		ovlWrite.hEvent = NULL;
@@ -751,6 +737,21 @@ void BlueSoleilCOMPort::close(JNIEnv *env) {
 	if (ovlComState.hEvent != NULL) {
 		CloseHandle(ovlComState.hEvent);
 		ovlComState.hEvent = NULL;
+	}
+
+	DWORD dwResult = BTSTATUS_SUCCESS;
+	if (dwConnectionHandle != 0) {
+		if (stack != NULL) {
+			EnterCriticalSection(&stack->openingPortLock);
+		}
+		dwResult = BT_DisconnectSPPExService(dwConnectionHandle);
+		if (stack != NULL) {
+			LeaveCriticalSection(&stack->openingPortLock);
+		}
+		dwConnectionHandle = 0;
+		if ((dwResult != BTSTATUS_SUCCESS) && (dwResult != BTSTATUS_CONNECTION_NOT_EXIST) && (env != NULL))	{
+			debugs("BT_DisconnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));
+		}
 	}
 
 	if (env != NULL) {
