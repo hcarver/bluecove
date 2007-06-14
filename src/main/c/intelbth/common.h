@@ -239,6 +239,7 @@ public:
 	virtual ~PoolableObject();
 
 	virtual BOOL isValidObject();
+	virtual BOOL isExternalHandle(jlong handle);
 };
 
 class ObjectPool {
@@ -264,6 +265,8 @@ public:
 	~ObjectPool();
 
 	PoolableObject* getObject(JNIEnv *env, jlong handle);
+
+	PoolableObject* getObjectByExternalHandle(jlong handle);
 
 	void removeObject(PoolableObject* obj);
 

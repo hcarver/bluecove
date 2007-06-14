@@ -283,7 +283,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public native long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
 	
 	public void connectionRfCloseServerConnection(long handle) throws IOException {
-		throw new NotImplementedError();
+		connectionRfCloseClientConnection(handle);
 	}
 	
 	public native void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;

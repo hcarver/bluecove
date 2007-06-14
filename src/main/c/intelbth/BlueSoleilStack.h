@@ -93,6 +93,7 @@ public:
 	BlueSoleilCOMPort();
 	virtual ~BlueSoleilCOMPort();
 
+	BOOL openComPort(JNIEnv *env, int portN);
 	char* configureComPort(JNIEnv *env);
 
 	void clearCommError();
@@ -110,12 +111,23 @@ public:
 	DWORD wdServerHandle;
 	SPPEX_SERVICE_INFO serviceInfo;
 	
+	BOOL isClosing;
+	HANDLE hCloseEvent;
+
+	BOOL isConnected;
+	HANDLE hConnectionEvent;
+
+	int portHandle;
+
 	BlueSoleilSPPExService();
 	virtual ~BlueSoleilSPPExService();
+
+	void SPPEXConnectionCallback(BYTE* lpBdAddr, UCHAR ucStatus, DWORD dwConnetionHandle);
 
 	void close(JNIEnv *env);
 
 	virtual BOOL isValidObject();
+	virtual BOOL isExternalHandle(jlong handle);
 };
 
 static BlueSoleilStack* stack = NULL;

@@ -404,6 +404,10 @@ BOOL PoolableObject::isValidObject() {
 	return TRUE;
 }
 
+BOOL PoolableObject::isExternalHandle(jlong handle) {
+	return FALSE;
+}
+
 ObjectPool::ObjectPool(int size, int handleOffset) {
 	InitializeCriticalSection(&lock);
 	this->size = size;
@@ -486,6 +490,18 @@ PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle) {
 		return NULL;
 	}
 	return o;
+}
+
+PoolableObject* ObjectPool::getObjectByExternalHandle(jlong handle) {
+	for(int i = 0; i < size; i ++) {
+		if (objs[i] != NULL) {
+			PoolableObject* o = objs[i];
+			if (o->isExternalHandle(handle)) {
+				return o;
+			}
+		}
+	}
+	return NULL;
 }
 
 void ObjectPool::removeObject(PoolableObject* obj) {

@@ -458,6 +458,10 @@ void BlueSoleilStack::deleteService(BlueSoleilSPPExService* service) {
 
 
 void BlueSoleilStack::SPPEXConnectionCallback(DWORD dwServerHandle, BYTE* lpBdAddr, UCHAR ucStatus, DWORD dwConnetionHandle) {
+	BlueSoleilSPPExService* service = (BlueSoleilSPPExService*)servicesPool->getObjectByExternalHandle(dwServerHandle);
+	if (service != NULL) {
+		service->SPPEXConnectionCallback(lpBdAddr, ucStatus, dwConnetionHandle);
+	}
 }
 
 BlueSoleilCOMPort::BlueSoleilCOMPort() {
@@ -478,6 +482,27 @@ BlueSoleilCOMPort::~BlueSoleilCOMPort() {
 
 BOOL BlueSoleilCOMPort::isValidObject() {
 	return (portMagic1 == MAGIC_1);
+}
+
+BOOL BlueSoleilCOMPort::openComPort(JNIEnv *env, int portN) {
+	char portString[20];
+	sprintf_s(portString, 20, "\\\\.\\COM%i", portN);
+	debugs("open COM port [%s]", portString);
+	hComPort = CreateFileA(portString, GENERIC_READ | GENERIC_WRITE,
+		0, /* exclusive access */
+		NULL, /* no security attrs */
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, /* overlapped I/O */
+		NULL);
+	if (hComPort == INVALID_HANDLE_VALUE) {
+		DWORD last_error = GetLastError();
+		char message[80];
+		sprintf_s(message, 80, "Can't open COM port [%s]", portString);
+		debug(message);
+		throwIOExceptionWinErrorMessage(env, message, last_error);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
@@ -651,29 +676,13 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
 
 	int portN = svcInfo.ucComIndex;
 	debug2("open COM port [%i] for [%i]", portN, address);
-	char portString[20];
-	sprintf_s(portString, 20, "\\\\.\\COM%i", portN);
-	debugs("open COM port [%s]", portString);
-	HANDLE hComPort;
-	hComPort = CreateFileA(portString, GENERIC_READ | GENERIC_WRITE,
-		0, /* exclusive access */
-		NULL, /* no security attrs */
-		OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, /* overlapped I/O */
-		NULL);
-	if (hComPort == INVALID_HANDLE_VALUE) {
-		DWORD last_error = GetLastError();
+	if (!rf->openComPort(env, portN)) {
 		stack->deleteCommPort(rf);
-		char message[80];
-		sprintf_s(message, 80, "Can't open COM port [%s]", portString);
-		debug(message);
 		BT_DisconnectSPPExService(dwHandle);
 		LeaveCriticalSection(&stack->openingPortLock);
-		throwIOExceptionWinErrorMessage(env, message, last_error);
 		return 0;
 	}
 	rf->dwConnectionHandle = dwHandle;
-	rf->hComPort = hComPort;
 
 	char* errorMessage = rf->configureComPort(env);
 	if (errorMessage != NULL) {
@@ -702,6 +711,8 @@ void BlueSoleilCOMPort::clearCommError() {
 void BlueSoleilCOMPort::close(JNIEnv *env) {
 	BOOL error = FALSE;
 	DWORD last_error = 0;
+	
+	debug3("close [%i] [%p]-[%i]", internalHandle, hComPort, dwConnectionHandle);
 
 	if (hCloseEvent != NULL) {
 		isClosing = TRUE;
@@ -807,7 +818,6 @@ void printCOMSTAT(JNIEnv *env, COMSTAT* comStat) {
 	Edebug1("COMSTAT.fRlsdHold %i", comStat->fRlsdHold);
 	Edebug1("COMSTAT.fXoffHold %i", comStat->fXoffHold);
 	Edebug1("COMSTAT.fXoffSent %i", comStat->fXoffSent);
-
 }
 
 void printCOMEvtMask(JNIEnv *env, DWORD dwEvtMask) {
@@ -1208,6 +1218,20 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 BlueSoleilSPPExService::BlueSoleilSPPExService() {
 	serviceMagic1 = MAGIC_1;
 	wdServerHandle = 0;
+	isClosing = FALSE;
+	hCloseEvent = CreateEvent(
+            NULL,     // no security attributes
+            FALSE,    // auto-reset event
+            FALSE,    // initial state is NOT signaled
+            NULL);    // object not named
+	portHandle = 0;
+	isConnected = FALSE;
+	hConnectionEvent = CreateEvent(
+            NULL,     // no security attributes
+            TRUE,     // auto-reset event
+            FALSE,    // initial state is NOT signaled
+            NULL);    // object not named
+
 }
 
 BlueSoleilSPPExService::~BlueSoleilSPPExService() {
@@ -1217,6 +1241,10 @@ BlueSoleilSPPExService::~BlueSoleilSPPExService() {
 
 BOOL BlueSoleilSPPExService::isValidObject() {
 	return (serviceMagic1 == MAGIC_1);
+}
+
+BOOL BlueSoleilSPPExService::isExternalHandle(jlong handle) {
+	return (handle == wdServerHandle);
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServerOpenImpl
@@ -1265,6 +1293,20 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServe
 }
 
 void BlueSoleilSPPExService::close(JNIEnv *env) {
+	if (portHandle != 0) {
+		BlueSoleilCOMPort* rf = validRfCommHandle(NULL, portHandle);
+		if (rf != NULL) {
+			rf->close(env);
+			if (stack != NULL) {
+				stack->deleteCommPort(rf);
+			}
+		}
+		portHandle = 0;
+	}
+	isClosing = TRUE;
+	if (hCloseEvent != NULL) {
+		SetEvent(hCloseEvent);
+	}
 	DWORD dwResult = BTSTATUS_SUCCESS;
 	if (wdServerHandle != 0) {
 		dwResult = BT_StopSPPExService(wdServerHandle);
@@ -1272,6 +1314,18 @@ void BlueSoleilSPPExService::close(JNIEnv *env) {
 			debugs("BT_StopSPPExService return  [%s]", getBsAPIStatusString(dwResult));
 		}
 		wdServerHandle = 0;
+	}
+	if (hConnectionEvent != NULL) {
+		CloseHandle(hConnectionEvent);
+		hConnectionEvent = NULL;
+	}
+	if (hCloseEvent != NULL) {
+		CloseHandle(hCloseEvent);
+		hCloseEvent = NULL;
+	}
+	if (dwResult != BTSTATUS_SUCCESS){
+		throwIOExceptionExt(env, "Can't Stop SPP service [%s]", getBsAPIStatusString(dwResult));
+		return;
 	}
 }
 
@@ -1283,6 +1337,78 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServe
 	}
 	srv->close(env);
 	stack->deleteService(srv);
+}
+
+void BlueSoleilSPPExService::SPPEXConnectionCallback(BYTE* lpBdAddr, UCHAR ucStatus, DWORD dwConnetionHandle) {
+	switch (ucStatus) {
+	case STATUS_INCOMING_CONNECT:
+		isConnected = TRUE;
+		SetEvent(hConnectionEvent);
+		break;
+	case STATUS_INCOMING_DISCONNECT:
+		isConnected = FALSE;
+		SetEvent(hConnectionEvent);
+		break;
+	}
+}
+
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServerAcceptAndOpenRfServerConnection
+(JNIEnv *env, jobject, jlong handle) {
+	BlueSoleilSPPExService* srv = validServiceHandle(env, handle);
+	if (srv == NULL) {
+		return 0;
+	}
+	HANDLE hEvents[2];
+	hEvents[0] = srv->hCloseEvent;
+	hEvents[1] = srv->hConnectionEvent;
+
+	while ((stack != NULL) && (validRfCommHandle(NULL, srv->portHandle) != NULL)) {
+		debug("server waits for client prev connection to close");
+		DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		if (rc == WAIT_FAILED) {
+			throwRuntimeException(env, "WaitForMultipleObjects");
+			return 0;
+		}
+		if ((stack == NULL) || (srv->isClosing)) {
+			throwIOException(env, "Connection closed");
+			return 0;
+		}
+	}
+	
+	while ((stack != NULL) && (!srv->isConnected)) {
+		debug("server waits for connection");
+		DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		if (rc == WAIT_FAILED) {
+			throwRuntimeException(env, "WaitForMultipleObjects");
+			return 0;
+		}
+		if ((stack == NULL) || (srv->isClosing)) {
+			throwIOException(env, "Connection closed");
+			return 0;
+		}
+	}
+
+	BlueSoleilCOMPort* rf = stack->createCommPort();
+	if (rf == NULL) {
+		throwIOException(env, "No free connections Objects in Pool");
+		return 0;
+	}
+	//rf->remoteAddress = address;
+	if (!rf->openComPort(env, srv->serviceInfo.ucComIndex)) {
+		stack->deleteCommPort(rf);
+		return 0;
+	}
+	char* errorMessage = rf->configureComPort(env);
+	if (errorMessage != NULL) {
+		DWORD last_error = GetLastError();
+		stack->deleteCommPort(rf);
+		throwIOExceptionWinErrorMessage(env, errorMessage, last_error);
+		return 0;
+	}
+
+	srv->portHandle = rf->internalHandle;
+
+	return rf->internalHandle;
 }
 
 #endif
