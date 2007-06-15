@@ -100,7 +100,7 @@ SOURCE=.\WIDCOMMStack.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
-SOURCE=.\intelbth.rc
+SOURCE=.\bluecove.rc
 # End Source File
 # End Group
 # End Target
