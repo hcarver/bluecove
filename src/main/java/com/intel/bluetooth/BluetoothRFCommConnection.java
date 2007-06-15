@@ -28,7 +28,7 @@ import java.io.OutputStream;
 
 import javax.microedition.io.StreamConnection;
 
-public abstract class BluetoothRFCommConnection implements StreamConnection {
+public abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothConnectionAccess {
 	
 	protected long handle;
 

@@ -21,15 +21,15 @@
  */
 package com.intel.bluetooth;
 
-import javax.bluetooth.ServiceRecord;
+import java.io.IOException;
 
 /**
  * Used when client application has only access to Proxy of the connection. e.g. WebStart in MicroEmulator
  * @author vlads
  *
  */
-public interface BluetoothStreamServiceRecordAccess {
+public interface BluetoothConnectionAccess {
 	
-	public ServiceRecord getServiceRecord();
+	public long getRemoteAddress() throws IOException;
 	
 }
