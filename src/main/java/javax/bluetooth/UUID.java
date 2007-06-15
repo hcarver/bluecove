@@ -20,6 +20,7 @@
  */ 
 package javax.bluetooth;
 
+import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.Utils;
 
 public class UUID {
@@ -28,8 +29,8 @@ public class UUID {
 
 	/*
 	 * Creates a UUID object from long value uuidValue. A UUID is defined as an
-	 * unsigned integer whose value can range from [0 to 2128-1]. However, this
-	 * constructor allows only those values that are in the range of [0 to 232
+	 * unsigned integer whose value can range from [0 to 2^128-1]. However, this
+	 * constructor allows only those values that are in the range of [0 to 2^32
 	 * -1]. Negative values and values in the range of [2^32, 2^63-1] are not
 	 * allowed and will cause an IllegalArgumentException to be thrown.
 	 * Parameters: uuidValue - the 16-bit or 32-bit value of the UUID Throws:
@@ -75,7 +76,7 @@ public class UUID {
 			if (length < 1 || length > 8) {
 				throw new IllegalArgumentException();
 			}
-			uuidValue = Utils.UUIDToByteArray("00000000".substring(length) + stringValue + "00001000800000805F9B34FB");
+			uuidValue = Utils.UUIDToByteArray("00000000".substring(length) + stringValue + BluetoothConsts.SHORT_UUID_BASE);
 		} else {
 			if (length < 1 || length > 32) {
 				throw new IllegalArgumentException();

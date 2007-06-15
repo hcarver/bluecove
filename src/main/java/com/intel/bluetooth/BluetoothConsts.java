@@ -25,6 +25,8 @@ import javax.bluetooth.UUID;
 
 public class BluetoothConsts {
 
+	public static final String SHORT_UUID_BASE = "00001000800000805F9B34FB";
+	
 	public static final UUID L2CAP_PROTOCOL_UUID = new UUID(0x0100);
 
 	public static final UUID RFCOMM_PROTOCOL_UUID = new UUID(0x0003);

@@ -643,46 +643,74 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
 	devInfo.dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
 	LongToBsAddr(address, devInfo.address);
 
-	SPPEX_SERVICE_INFO svcInfo;
-	memset(&svcInfo, 0, sizeof(SPPEX_SERVICE_INFO));
-	svcInfo.dwSize = sizeof(SPPEX_SERVICE_INFO);
+	SPPEX_SERVICE_INFO svcInfoSPPEx;
+	memset(&svcInfoSPPEx, 0, sizeof(SPPEX_SERVICE_INFO));
+	svcInfoSPPEx.dwSize = sizeof(SPPEX_SERVICE_INFO);
 
 	GUID service_guid;
 	jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
 	convertUUIDBytesToGUID(bytes, &service_guid);
 	env->ReleaseByteArrayElements(uuidValue, bytes, 0);
-	memcpy(&(svcInfo.serviceClassUuid128), &service_guid, sizeof(UUID));
+	memcpy(&(svcInfoSPPEx.serviceClassUuid128), &service_guid, sizeof(UUID));
 
-	DWORD dwHandle;
+	DWORD dwConnectionHandle;
 	EnterCriticalSection(&stack->openingPortLock);
-	DWORD dwResult = BT_ConnectSPPExService(&devInfo, &svcInfo, &dwHandle);
+
+	DWORD dwResult;
+	dwResult = BT_ConnectSPPExService(&devInfo, &svcInfoSPPEx, &dwConnectionHandle);
 	if (dwResult != BTSTATUS_SUCCESS)	{
 		debugs("BT_ConnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));
 		stack->deleteCommPort(rf);
 		LeaveCriticalSection(&stack->openingPortLock);
-		throwIOExceptionExt(env, "Can't connect SPP [%s]", getBsAPIStatusString(dwResult));
+		throwIOExceptionExt(env, "Can't connect [%s]", getBsAPIStatusString(dwResult));
 		return 0;
 	}
-	if (dwHandle == 0) {
+	if (dwConnectionHandle == 0) {
 		stack->deleteCommPort(rf);
-		BT_DisconnectSPPExService(dwHandle);
+		BT_DisconnectSPPExService(dwConnectionHandle);
 		LeaveCriticalSection(&stack->openingPortLock);
 		throwIOException(env, "Can't use 0 Handle");
 		return 0;
 	}
 
+	BOOL bIsOutGoing;
+	SPP_CONNECT_INFO sppConnInfo ={0};
+	sppConnInfo.dwSize = sizeof(SPP_CONNECT_INFO);
+	DWORD dwLen = sizeof(SPP_CONNECT_INFO);
+	BYTE bdAddr[6]={0};
+	WORD wClass;
+
+	dwResult = BT_GetConnectInfo(dwConnectionHandle, &bIsOutGoing, &wClass, bdAddr, &dwLen, (BYTE*)&sppConnInfo);
+	if (dwResult != BTSTATUS_SUCCESS)	{
+		debugs("BT_GetConnectInfo return  [%s]", getBsAPIStatusString(dwResult));
+		stack->deleteCommPort(rf);
+		LeaveCriticalSection(&stack->openingPortLock);
+		throwIOExceptionExt(env, "Can't get SPP info [%s]", getBsAPIStatusString(dwResult));
+		return 0;
+	}
+
+	if (sppConnInfo.ucComPort != svcInfoSPPEx.ucComIndex) {
+		debug2("Port# mismatch [%i] and [%i]", sppConnInfo.ucComPort, svcInfoSPPEx.ucComIndex);
+		stack->deleteCommPort(rf);
+		LeaveCriticalSection(&stack->openingPortLock);
+		throwIOExceptionExt(env, "Port# mismatch [%i] and [%i]", sppConnInfo.ucComPort, svcInfoSPPEx.ucComIndex);
+	}
+
 	// To solve concurrent connections problem
 	//Sleep(5000);
 
-	int portN = svcInfo.ucComIndex;
+	int portN; 
+	//portN = svcInfoSPPEx.ucComIndex;
+	portN = sppConnInfo.ucComPort;
+
 	debug2("open COM port [%i] for [%i]", portN, address);
 	if (!rf->openComPort(env, portN)) {
 		stack->deleteCommPort(rf);
-		BT_DisconnectSPPExService(dwHandle);
+		BT_DisconnectSPPExService(dwConnectionHandle);
 		LeaveCriticalSection(&stack->openingPortLock);
 		return 0;
 	}
-	rf->dwConnectionHandle = dwHandle;
+	rf->dwConnectionHandle = dwConnectionHandle;
 
 	char* errorMessage = rf->configureComPort(env);
 	if (errorMessage != NULL) {
@@ -766,7 +794,7 @@ void BlueSoleilCOMPort::close(JNIEnv *env) {
 			LeaveCriticalSection(&stack->openingPortLock);
 		}
 		dwConnectionHandle = 0;
-		if ((dwResult != BTSTATUS_SUCCESS) && (dwResult != BTSTATUS_CONNECTION_NOT_EXIST) && (env != NULL))	{
+		if ((dwResult != BTSTATUS_SUCCESS) /*&& (dwResult != BTSTATUS_CONNECTION_NOT_EXIST)*/ && (env != NULL))	{
 			debugs("BT_DisconnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));
 		}
 	}
