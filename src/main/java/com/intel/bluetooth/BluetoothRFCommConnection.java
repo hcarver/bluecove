@@ -32,9 +32,9 @@ public abstract class BluetoothRFCommConnection implements StreamConnection {
 	
 	protected long handle;
 
-	protected BluetoothInputStream in;
+	volatile protected BluetoothInputStream in;
 
-	protected BluetoothOutputStream out;
+	volatile protected BluetoothOutputStream out;
 
 	protected boolean closing;
 
@@ -53,12 +53,17 @@ public abstract class BluetoothRFCommConnection implements StreamConnection {
 	 * Also Connection.close() will close Input/OutputStream
 	 * @throws IOException
 	 */
-	synchronized void closeConnection() throws IOException {
+	void closeConnection() throws IOException {
 		if ((in == null && out == null) || (closing)) {
 			closing = true;
 			if (handle != 0) {
-				closeConnectionHandle(handle);
-				handle = 0;
+				synchronized (this) {
+					long h = handle;
+					handle = 0;
+					if (h != 0) {
+						closeConnectionHandle(h);
+					}
+				}
 			}
 			// This will call this function again but will do nothing.
 			if (in != null) {

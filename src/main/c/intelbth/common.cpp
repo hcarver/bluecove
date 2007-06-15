@@ -393,11 +393,30 @@ PoolableObject::PoolableObject() {
 	magic1 = MAGIC_1;
 	magic2 = MAGIC_2;
 	internalHandle = -1;
+	usedCount = 0;
 }
 
 PoolableObject::~PoolableObject() {
 	magic1 = 0;
 	magic2 = 0;
+#ifdef SAFE_OBJECT_DESTRUCTION
+	// Do not allow to free the object until thre are no functions in wait using it. e.g. read and write
+	while (usedCount > 0) {
+		Sleep(50);
+	}
+#endif
+}
+
+void PoolableObject::tInc() {
+#ifdef SAFE_OBJECT_DESTRUCTION
+	InterlockedIncrement(&usedCount);
+#endif
+}
+
+void PoolableObject::tDec() {
+#ifdef SAFE_OBJECT_DESTRUCTION
+	InterlockedDecrement(&usedCount);
+#endif
 }
 
 BOOL PoolableObject::isValidObject() {

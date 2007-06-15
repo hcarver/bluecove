@@ -25,7 +25,7 @@ import java.io.InputStream;
 
 class BluetoothInputStream extends InputStream {
 	
-	private BluetoothRFCommConnection conn;
+	volatile private BluetoothRFCommConnection conn;
 
 	public BluetoothInputStream(BluetoothRFCommConnection conn) {
 		this.conn = conn;
@@ -126,8 +126,9 @@ class BluetoothInputStream extends InputStream {
 	public void close() throws IOException {
 		if (conn != null) {
 			conn.in = null;
-			conn.closeConnection();
+			BluetoothRFCommConnection c = conn; 
 			conn = null;
+			c.closeConnection();
 		}
 	}
 }

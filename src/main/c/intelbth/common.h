@@ -227,6 +227,7 @@ public:
 	BOOL isCorrupted();
 };
 
+//#define SAFE_OBJECT_DESTRUCTION
 
 class PoolableObject {
 public:
@@ -235,8 +236,14 @@ public:
 
 	int internalHandle;
 
+	long usedCount;
+
 	PoolableObject();
 	virtual ~PoolableObject();
+
+	// Used to enable safe object destruction, dellay destructor untill all threads entered are exited from Wait.
+	void tInc();
+	void tDec();
 
 	virtual BOOL isValidObject();
 	virtual BOOL isExternalHandle(jlong handle);

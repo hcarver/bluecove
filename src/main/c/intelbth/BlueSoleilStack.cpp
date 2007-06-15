@@ -905,9 +905,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	if ((rf->comStat.fEof) || (rf->receivedEOF)) {
 		return -1;
 	}
+	rf->tInc();
 	//printCOMSTAT(env, &(rf->comStat));
 	int avl = waitBytesAvailable(env, rf);
 	if ((avl == -1) || (avl == 0)) {
+		rf->tDec();
 		return -1;
 	}
 
@@ -922,6 +924,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 			DWORD last_error = GetLastError();
 			if (last_error != ERROR_IO_PENDING) {
 				throwIOExceptionWinErrorMessage(env, "Failed to read", last_error);
+				rf->tDec();
 				return -1;
 			}
 			while ((!rf->isClosing) && (!rf->receivedEOF) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlRead), &numberOfBytesRead, FALSE))) {
@@ -937,6 +940,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 				DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 				if (rc == WAIT_FAILED) {
 					throwRuntimeException(env, "WaitForMultipleObjects");
+					rf->tDec();
 					return -1;
 				}
 				rf->clearCommError();
@@ -945,12 +949,15 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 		rf->clearCommError();
 	}
 	if (rf->isClosing) {
+		rf->tDec();
 		return -1;
 	}
 	if (numberOfBytesRead == 0) {
 		rf->receivedEOF = TRUE;
+		rf->tDec();
 		return -1;
 	}
+	rf->tDec();
 	return (int)c;
 }
 
@@ -968,7 +975,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	if ((rf->comStat.fEof) || (rf->receivedEOF)) {
 		return -1;
 	}
-
+	rf->tInc();
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 	int done = 0;
 
@@ -979,6 +986,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	while (!rf->isClosing && (!rf->receivedEOF) && (done < len)) {
 		int avl = waitBytesAvailable(env, rf);
 		if (avl == -1) {
+			rf->tDec();
 			return -1;
 		}
 		if (avl == 0) {
@@ -989,6 +997,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 			if (GetLastError() != ERROR_IO_PENDING) {
 				env->ReleaseByteArrayElements(b, bytes, 0);
 				throwIOExceptionWinGetLastError(env, "Failed to read array");
+				rf->tDec();
 				return -1;
 			}
 			while ((!rf->isClosing) && (!rf->receivedEOF) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlRead), &numberOfBytesRead, FALSE))) {
@@ -999,11 +1008,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 				if (last_error != ERROR_IO_INCOMPLETE) {
 					env->ReleaseByteArrayElements(b, bytes, 0);
 					throwIOExceptionWinErrorMessage(env, "Failed to read array overlapped", last_error);
+					rf->tDec();
 					return -1;
 				}
 				DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 				if (rc == WAIT_FAILED) {
 					throwRuntimeException(env, "WaitForMultipleObjects");
+					rf->tDec();
 					return -1;
 				}
 				rf->clearCommError();
@@ -1018,9 +1029,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 
 	if (done == 0) {
 		rf->receivedEOF = TRUE;
-		return -1;
+		done = -1;
 	}
-
+	rf->tDec();
 	return done;
 
 }
@@ -1114,7 +1125,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 		throwIOException(env, "Failed to write to closed connection");
 		return;
 	}
-
+	rf->tInc();
 	HANDLE hEvents[2];
 	hEvents[0] = rf->hCloseEvent;
 	hEvents[1] = rf->ovlWrite.hEvent;
@@ -1124,17 +1135,20 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	if (!WriteFile(rf->hComPort, &c, 1, &numberOfBytesWritten, &(rf->ovlWrite))) {
 		DWORD last_error = GetLastError();
 		if (last_error == ERROR_SUCCESS) {
+			rf->tDec();
 			return;
 		}
 		if (last_error != ERROR_IO_PENDING) {
 			debug2("connection handle [%i] [%p]", rf->internalHandle, rf->hComPort);
 			throwIOExceptionWinErrorMessage(env, "Failed to write byte", last_error);
 			rf->clearCommError();
+			rf->tDec();
 			return;
 		}
 		DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForMultipleObjects");
+			rf->tDec();
 			return;
 		}
 		if ((!rf->isClosing) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlWrite), &numberOfBytesWritten, FALSE))) {
@@ -1142,14 +1156,15 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 			if ((last_error != ERROR_SUCCESS) && (last_error != ERROR_IO_PENDING)) {
 				debug2("connection handle [%i] [%p]", handle, rf->hComPort);
 				throwIOExceptionWinErrorMessage(env, "Failed to write byte overlapped", last_error);
+				rf->tDec();
 				return;
 			}
 		}
 	}
 	if (numberOfBytesWritten != 1) {
 		throwIOException(env, "Failed to write byte");
-		return;
 	}
+	rf->tDec();
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfWrite__J_3BII
@@ -1172,6 +1187,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
+	rf->tInc();
 	HANDLE hEvents[2];
 	hEvents[0] = rf->hCloseEvent;
 	hEvents[1] = rf->ovlWrite.hEvent;
@@ -1185,11 +1201,13 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 				env->ReleaseByteArrayElements(b, bytes, 0);
 				debug2("connection handle [%i] [%p]", handle, rf->hComPort);
 				throwIOExceptionWinGetLastError(env, "Failed to write array");
+				rf->tDec();
 				return;
 			}
 			DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 			if (rc == WAIT_FAILED) {
 				throwRuntimeException(env, "WaitForMultipleObjects");
+				rf->tDec();
 				return;
 			}
 			if ((!rf->isClosing) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlWrite), &numberOfBytesWritten, FALSE))) {
@@ -1198,6 +1216,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 					env->ReleaseByteArrayElements(b, bytes, 0);
 					debug2("connection handle [%i] [%p]", handle, rf->hComPort);
 					throwIOExceptionWinErrorMessage(env, "Failed to write array overlapped", last_error);
+					rf->tDec();
 					return;
 				}
 			}
@@ -1205,12 +1224,14 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 		if (numberOfBytesWritten <= 0) {
 			env->ReleaseByteArrayElements(b, bytes, 0);
 			throwIOException(env, "Failed to write full array");
+			rf->tDec();
 			return;
 		}
 		done += numberOfBytesWritten;
 	}
 
 	env->ReleaseByteArrayElements(b, bytes, 0);
+	rf->tDec();
 }
 
 //	 --- Server RFCOMM connections
