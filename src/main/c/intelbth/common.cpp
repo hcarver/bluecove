@@ -150,6 +150,19 @@ void throwIOExceptionWinGetLastError(JNIEnv *env, const char *msg) {
 	throwIOExceptionWinErrorMessage(env, msg, GetLastError());
 }
 
+char* waitResultsString(DWORD rc) {
+	switch (rc) {
+		case WAIT_FAILED: return "WAIT_FAILED";
+		case WAIT_TIMEOUT: return "WAIT_TIMEOUT";
+		case WAIT_OBJECT_0: return "WAIT_OBJECT_0";
+		case WAIT_OBJECT_0 + 1: return "WAIT_OBJECT_1";
+ 	    case WAIT_OBJECT_0 + 2: return "WAIT_OBJECT_2";
+		case WAIT_ABANDONED_0: return "WAIT_ABANDONED_0";
+		case WAIT_ABANDONED_0 + 1: return "WAIT_ABANDONED_1";
+		case WAIT_ABANDONED_0 + 2: return "WAIT_ABANDONED_2";
+		default : return "Unknown";
+	}
+}
 
 BOOL ExceptionCheckCompatible(JNIEnv *env) {
 	if (env->GetVersion() > JNI_VERSION_1_1) {

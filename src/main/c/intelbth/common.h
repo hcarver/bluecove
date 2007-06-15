@@ -172,6 +172,8 @@ void throwIOExceptionWinGetLastError(JNIEnv *env, const char *msg);
 
 WCHAR *getWinErrorMessage(DWORD last_error);
 
+char* waitResultsString(DWORD rc);
+
 BOOL ExceptionCheckCompatible(JNIEnv *env);
 
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid);

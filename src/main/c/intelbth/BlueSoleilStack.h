@@ -116,6 +116,8 @@ public:
 
 	BOOL isConnected;
 	HANDLE hConnectionEvent;
+	jlong connectedBdAddr;
+	DWORD dwConnectedConnetionHandle;
 
 	int portHandle;
 
