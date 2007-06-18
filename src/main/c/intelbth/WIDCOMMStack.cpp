@@ -143,13 +143,13 @@ void WIDCOMMStack::destroy(JNIEnv * env) {
 	}
 }
 
-void WIDCOMMStack::throwExtendedErrorException(JNIEnv * env, const char *name) {
+void WIDCOMMStack::throwExtendedBluetoothStateException(JNIEnv * env) {
 	WBtRc er = GetExtendedError();
 	LPCTSTR msg = WBtRcToString(er);
 	if (msg != NULL) {
-		throwExceptionExt(env, name, "WIDCOMM error[%s]", msg);
+		throwBluetoothStateExceptionExt(env, "WIDCOMM error[%s]", msg);
 	} else {
-		throwException(env, name, "No error code");
+		throwBluetoothStateException(env, "No error code");
 	}
 }
 
@@ -187,7 +187,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 	}
 	struct CBtIf::DEV_VER_INFO info;
 	if (!stack->GetLocalDeviceVersionInfo(&info)) {
-		stack->throwExtendedErrorException(env, "javax/bluetooth/BluetoothStateException");
+		stack->throwExtendedBluetoothStateException(env);
 		return NULL;
 	}
 
@@ -354,7 +354,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 
 	if (!stack->StartInquiry()) {
 		debug("deviceInquiryStart error");
-		stack->throwExtendedErrorException(env, "javax/bluetooth/BluetoothStateException");
+		stack->throwExtendedBluetoothStateException(env);
 		return INQUIRY_ERROR;
 	}
 	debug("deviceInquiryStarted");
@@ -448,7 +448,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 
 	if (!stack->StartDiscovery(bda, p_service_guid)) {
 		debug("StartSearchServices error");
-		stack->throwExtendedErrorException(env, "javax/bluetooth/BluetoothStateException");
+		stack->throwExtendedBluetoothStateException(env);
 		return NULL;
 	}
 
@@ -695,7 +695,7 @@ WIDCOMMStackRfCommPort* WIDCOMMStack::createCommPort(BOOL server) {
     } else {
         port = new WIDCOMMStackRfCommPort();
     }
-	
+
 	if (!commPool->addObject(port)) {
 		delete port;
 		return NULL;
@@ -748,7 +748,7 @@ WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
 		Close();
 	}
 	isConnected = FALSE;
-	
+
 	CloseHandle(hDataReceivedEvent);
 	CloseHandle(hConnectionEvent);
 	openConnections --;

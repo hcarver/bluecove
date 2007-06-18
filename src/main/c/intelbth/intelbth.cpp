@@ -243,6 +243,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 
 	if (hLookup != NULL) {
 		LeaveCriticalSection(&csLookup);
+		throwBluetoothStateException(env, "Another inquiry already running");
 		return INQUIRY_ERROR;
 	}
 
@@ -252,8 +253,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE|LUP_CONTAINERS, &hLookup)) {
 #endif
 		hLookup = NULL;
+		DWORD last_error = WSAGetLastError();
 
 		LeaveCriticalSection(&csLookup);
+		throwBluetoothStateExceptionWinErrorMessage(env, "Can't start Lookup", last_error);
 		return INQUIRY_ERROR;
 	}
 
@@ -297,7 +300,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 				    result = INQUIRY_COMPLETED;
 					break;
 			    default:
-					debugss("WSALookup error [%d] %S", last_error, getWinErrorMessage(last_error));
+					debug2("WSALookup error [%d] %S", last_error, getWinErrorMessage(last_error));
 				    result = INQUIRY_ERROR;
 			}
 			WSALookupServiceEnd(hLookup);
@@ -1260,7 +1263,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getBluetoothRadioM
 			return BTH_MODE_POWER_OFF;
 		}
 	} else {
-		throwExceptionWinErrorMessage(env, "javax/bluetooth/BluetoothStateException", "Bluetooth mode error ", rc);
+		throwBluetoothStateExceptionWinErrorMessage(env, "Bluetooth mode error ", rc);
 	}
 #endif
 	return 0;
@@ -1286,7 +1289,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_setDiscoverable(JN
 	if (rc == ERROR_SUCCESS) {
 		restoreBtMode = (initialBtMode != dwMode);
 	} else {
-		throwExceptionWinErrorMessage(env, "javax/bluetooth/BluetoothStateException", "Set Bluetooth mode error ", rc);
+		throwBluetoothStateExceptionWinErrorMessage(env, "Set Bluetooth mode error ", rc);
 	}
 #endif
 }

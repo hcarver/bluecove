@@ -29,6 +29,9 @@ static BOOL nativeDebugCallback= false;
 static jclass nativeDebugListenerClass;
 static jmethodID nativeDebugMethod = NULL;
 
+static const char* cIOException = "java/io/IOException";
+static const char* cBluetoothStateException = "javax/bluetooth/BluetoothStateException";
+
 jint blueCoveVersion() {
 	return BLUECOVE_VERSION;
 }
@@ -97,19 +100,21 @@ void throwExceptionExt(JNIEnv *env, const char *name, const char *fmt, ...) {
 }
 
 void throwIOException(JNIEnv *env, const char *msg) {
-	throwException(env, "java/io/IOException", msg);
+	throwException(env, cIOException, msg);
 }
 
 void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	{
-		char msg[1064];
-		_vsnprintf_s(msg, 1064, fmt, ap);
-		throwIOException(env, msg);
-	}
-	va_end(ap);
+	throwExceptionExt(env, cIOException, fmt);
 }
+
+void throwBluetoothStateException(JNIEnv *env, const char *msg) {
+	throwException(env, cBluetoothStateException, msg);
+}
+
+void throwBluetoothStateExceptionExt(JNIEnv *env, const char *fmt, ...) {
+	throwExceptionExt(env, cBluetoothStateException, fmt);
+}
+
 
 void throwRuntimeException(JNIEnv *env, const char *msg) {
 	throwException(env, "java/lang/RuntimeException", msg);
@@ -143,7 +148,11 @@ void throwExceptionWinErrorMessage(JNIEnv *env, const char *name, const char *ms
 }
 
 void throwIOExceptionWinErrorMessage(JNIEnv *env, const char *msg, DWORD last_error) {
-	throwExceptionWinErrorMessage(env, "java/io/IOException", msg, last_error);
+	throwExceptionWinErrorMessage(env, cIOException, msg, last_error);
+}
+
+void throwBluetoothStateExceptionWinErrorMessage(JNIEnv *env, const char *msg, DWORD last_error) {
+	throwExceptionWinErrorMessage(env, cBluetoothStateException, msg, last_error);
 }
 
 void throwIOExceptionWinGetLastError(JNIEnv *env, const char *msg) {

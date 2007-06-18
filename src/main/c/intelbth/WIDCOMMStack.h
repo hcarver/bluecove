@@ -106,7 +106,7 @@ public:
 	virtual ~WIDCOMMStack();
 	void destroy(JNIEnv * env);
 
-	void throwExtendedErrorException(JNIEnv * env, const char *name);
+	void throwExtendedBluetoothStateException(JNIEnv * env);
 	char* getExtendedError();
 
     // methods to replace virtual methods in base class CBtIf

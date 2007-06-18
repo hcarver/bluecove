@@ -162,11 +162,17 @@ void throwIOException(JNIEnv *env, const char *msg);
 
 void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...);
 
+void throwBluetoothStateException(JNIEnv *env, const char *msg);
+
+void throwBluetoothStateExceptionExt(JNIEnv *env, const char *fmt, ...);
+
 void throwRuntimeException(JNIEnv *env, const char *msg);
 
 void throwExceptionWinErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error);
 
 void throwIOExceptionWinErrorMessage(JNIEnv *env, const char *msg, DWORD last_error);
+
+void throwBluetoothStateExceptionWinErrorMessage(JNIEnv *env, const char *msg, DWORD last_error);
 
 void throwIOExceptionWinGetLastError(JNIEnv *env, const char *msg);
 
