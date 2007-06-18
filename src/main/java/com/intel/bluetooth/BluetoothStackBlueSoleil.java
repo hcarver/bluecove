@@ -56,7 +56,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	
 	public void initialize() {
 		if (!initializeImpl()) {
-			DebugLog.fatal("Can't initialize destroyed");
+			DebugLog.fatal("Can't initialize BlueSoleil");
 			throw new RuntimeException("BlueSoleil BluetoothStack not found");
 		}
 		initialized = true;
