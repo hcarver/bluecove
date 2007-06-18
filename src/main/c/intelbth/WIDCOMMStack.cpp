@@ -107,7 +107,7 @@ WIDCOMMStack* createWIDCOMMStack() {
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_initializeImpl
 (JNIEnv *env, jobject) {
-	jboolean rc = TRUE;
+	jboolean rc = JNI_TRUE;
 	if (stack == NULL) {
 		__try  {
 			stack = createWIDCOMMStack();
@@ -115,7 +115,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_initia
 				throwRuntimeException(env, "fails to CreateEvent");
 			}
 		} __except(GetExceptionCode() == 0xC06D007E) {
-			rc = FALSE;
+			rc = JNI_FALSE;
 		}
 	}
 	return rc;
@@ -626,7 +626,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isServ
 (JNIEnv *env, jobject, jlong address, jlong handle) {
 	CSdpDiscoveryRec* record = validDiscoveryRec(env, handle);
 	if (record == NULL) {
-		return NULL;
+		return JNI_FALSE;
 	}
 	stack->searchServicesComplete = FALSE;
 	stack->searchServicesTerminated = FALSE;
@@ -635,31 +635,31 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isServ
 	LongToBcAddr(address, bda);
 	if (!stack->StartDiscovery(bda, &(record->m_service_guid))) {
 		debugs("StartDiscovery WIDCOMM error[%s]", stack->getExtendedError());
-		return FALSE;
+		return JNI_FALSE;
 	}
 
 	while ((stack != NULL) && (!stack->searchServicesComplete) && (!stack->searchServicesTerminated)) {
 		DWORD  rc = WaitForSingleObject(stack->hEvent, 500);
 		if (rc == WAIT_FAILED) {
-			return FALSE;
+			return JNI_FALSE;
 		}
 	}
 	if ((stack == NULL) || (stack->searchServicesTerminated)) {
-		return FALSE;
+		return JNI_FALSE;
 	}
 
 	UINT16 obtainedServicesRecords;
 	CBtIf::DISCOVERY_RESULT searchServicesResultCode = stack->GetLastDiscoveryResult(bda, &obtainedServicesRecords);
 	if (searchServicesResultCode != CBtIf::DISCOVERY_RESULT_SUCCESS) {
 		debugs("isServiceRecordDiscoverable resultCode %i", searchServicesResultCode);
-		return FALSE;
+		return JNI_FALSE;
 	}
 	debugs("isServiceRecordDiscoverable found sr %i", obtainedServicesRecords);
 	if (obtainedServicesRecords < 1) {
-		return FALSE;
+		return JNI_FALSE;
 	}
 
-	return TRUE;
+	return JNI_TRUE;
 }
 
 JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getServiceAttribute

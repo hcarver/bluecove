@@ -108,14 +108,14 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_ini
 		if (BT_IsBluetoothReady(10)) {
 			BlueSoleilStarted = TRUE;
 			stack = new BlueSoleilStack();
-			return TRUE;
+			return JNI_TRUE;
 		} else {
 			debug("Error in BlueSoleil BT_IsBluetoothReady");
 		}
 	} else {
 		debug("Error in BlueSoleil InitializeLibrary");
 	}
-	return FALSE;
+	return JNI_FALSE;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_uninitialize
@@ -1425,7 +1425,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
 	hEvents[1] = srv->hConnectionEvent;
 
 	BOOL debugWaitsOnce = TRUE;
-	while ((stack != NULL) && 
+	while ((stack != NULL) &&
 		(srv->isConnected || (validRfCommHandle(NULL, srv->portHandle) != NULL))) {
 		if (debugWaitsOnce) {
 			debug("server waits for client prev connection to close");
@@ -1488,7 +1488,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
 		throwIOException(env, "No free connections Objects in Pool");
 		return 0;
 	}
-	
+
 	//rf->remoteAddress = BsAddrToLong(bdAddr);
 	rf->remoteAddress = srv->connectedBdAddr;
 	//rf->dwConnectionHandle = srv->dwConnectedConnetionHandle;
