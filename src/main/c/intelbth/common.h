@@ -236,6 +236,7 @@ public:
 	long magic1;
 	long magic2;
 
+	BOOL readyToFree;
 	int internalHandle;
 
 	long usedCount;
@@ -259,6 +260,8 @@ private:
 	
 	//each Handle type is different positive value range.
 	int handleOffset;
+
+	BOOL delayDelete;
 	
 	// generate different handlers for each new object
 	int handleMove;
@@ -270,7 +273,7 @@ private:
 
 public:
 
-	ObjectPool(int size, int handleOffset);
+	ObjectPool(int size, int handleOffset, BOOL delayDelete);
 	~ObjectPool();
 
 	PoolableObject* getObject(JNIEnv *env, jlong handle);

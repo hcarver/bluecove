@@ -407,6 +407,7 @@ PoolableObject::PoolableObject() {
 	magic2 = MAGIC_2;
 	internalHandle = -1;
 	usedCount = 0;
+	readyToFree = FALSE;
 }
 
 PoolableObject::~PoolableObject() {
@@ -440,10 +441,11 @@ BOOL PoolableObject::isExternalHandle(jlong handle) {
 	return FALSE;
 }
 
-ObjectPool::ObjectPool(int size, int handleOffset) {
+ObjectPool::ObjectPool(int size, int handleOffset, BOOL delayDelete) {
 	InitializeCriticalSection(&lock);
 	this->size = size;
 	this->handleOffset = handleOffset;
+	this->delayDelete = delayDelete;
 	handleMove = 0;
 	objs = new (PoolableObject* [size]);
 	for(int i = 0; i < size; i ++) {
@@ -478,6 +480,13 @@ BOOL ObjectPool::addObject(PoolableObject* obj) {
 		int i = k + handleMove;
 		if (i >= size) {
 			i -= size;
+		}
+
+		if (delayDelete && (objs[i] != NULL)) {
+			if (objs[i]->readyToFree) {
+				delete objs[i];
+				objs[i] = NULL;
+			}
 		}
 
 		if (objs[i] == NULL) {

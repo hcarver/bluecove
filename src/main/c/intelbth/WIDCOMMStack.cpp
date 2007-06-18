@@ -91,11 +91,8 @@ WIDCOMMStack::WIDCOMMStack() {
             NULL);    // object not named
 	InitializeCriticalSection(&csCRfCommIf);
 
-	commPortsPoolDeletionCount = 0;
-	commPortsPoolAllocationHandleOffset = 1;
-	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
-		commPortsPool[i] = NULL;
-	}
+	commPool = new ObjectPool(COMMPORTS_POOL_MAX, 1, TRUE);
+
 	discoveryRecHolderCurrent = NULL;
 	discoveryRecHolderHold = NULL;
 }
@@ -132,17 +129,9 @@ WIDCOMMStack::~WIDCOMMStack() {
 
 void WIDCOMMStack::destroy(JNIEnv * env) {
 	SetEvent(hEvent);
-	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
-		if (commPortsPool[i] != NULL) {
-			if (env != NULL) {
-				debugs("destroy commPort %i", i);
-			}
-			delete commPortsPool[i];
-			commPortsPool[i] = NULL;
-			if (env != NULL) {
-				debugs("commPort %i destroyed", i);
-			}
-		}
+	if (commPool != NULL) {
+		delete commPool;
+		commPool = NULL;
 	}
 	if (discoveryRecHolderHold != NULL) {
 		delete discoveryRecHolderHold;
@@ -639,7 +628,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isServ
 	if (record == NULL) {
 		return NULL;
 	}
-stack->searchServicesComplete = FALSE;
+	stack->searchServicesComplete = FALSE;
 	stack->searchServicesTerminated = FALSE;
 
 	BD_ADDR bda;
@@ -699,59 +688,25 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getS
 //	 --- Client RFCOMM connections
 
 // Guarded by CriticalSection csCRfCommIf
-int WIDCOMMStack::getCommPortFreeIndex() {
-	int freeIndex = -1;
-	int minDeletionIndex = INT_MAX;
-	for(int i = 0; i < COMMPORTS_POOL_MAX; i ++) {
-		if (commPortsPool[i] == NULL) {
-			return i;
-		}
-		if (!commPortsPool[i]->readyToFree) {
-			continue;
-		}
-		if (minDeletionIndex > commPortsPool[i]->commPortsPoolDeletionIndex) {
-			minDeletionIndex = commPortsPool[i]->commPortsPoolDeletionIndex;
-			freeIndex = i;
-		}
-	}
-	if ((!COMMPORTS_REUSE_OBJECTS) && (freeIndex != -1))  {
-		delete commPortsPool[freeIndex];
-		commPortsPool[freeIndex] = NULL;
-	}
-
-	// TODO Inc commPortsPoolAllocationHandleOffset to avoid Handle reuse
-
-	return freeIndex;
-}
-
 WIDCOMMStackRfCommPort* WIDCOMMStack::createCommPort(BOOL server) {
-
-	int freeIndex = getCommPortFreeIndex();
-	if (freeIndex == -1) {
+	WIDCOMMStackRfCommPort* port;
+    if (server) {
+	    port = new WIDCOMMStackRfCommPortServer();
+    } else {
+        port = new WIDCOMMStackRfCommPort();
+    }
+	
+	if (!commPool->addObject(port)) {
+		delete port;
 		return NULL;
 	}
-	if (commPortsPool[freeIndex] == NULL) {
-	    if (server) {
-		    commPortsPool[freeIndex] = new WIDCOMMStackRfCommPortServer();
-	    } else {
-	        commPortsPool[freeIndex] = new WIDCOMMStackRfCommPort();
-	    }
-	}
-
-	int internalHandle = commPortsPoolAllocationHandleOffset + freeIndex;
-	WIDCOMMStackRfCommPort* rf = commPortsPool[freeIndex];
-	rf->readyForReuse();
-	rf->internalHandle = internalHandle;
-	rf->commPortsPoolDeletionIndex = 0;
-
-	return rf;
+	return port;
 }
 
 void WIDCOMMStack::deleteCommPort(WIDCOMMStackRfCommPort* commPort) {
 	if (commPort == NULL) {
 		return;
 	}
-	commPort->commPortsPoolDeletionIndex = (++commPortsPoolDeletionCount);
 	commPort->readyToFree = TRUE;
 }
 
@@ -770,8 +725,6 @@ WIDCOMMStackRfCommPort::WIDCOMMStackRfCommPort() {
             FALSE,     // initial state is NOT signaled
             NULL);    // object not named
 
-	magic1 = MAGIC_1;
-	magic2 = MAGIC_2;
 	openConnections ++;
 }
 
@@ -789,8 +742,6 @@ void WIDCOMMStackRfCommPort::resetReceiveBuffer() {
 }
 
 WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
-	magic1 = 0;
-	magic2 = 0;
 	if (isConnected) {
 		isClosing = TRUE;
 		SetEvent(hConnectionEvent);
@@ -804,22 +755,11 @@ WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
 }
 
 WIDCOMMStackRfCommPort* validRfCommHandle(JNIEnv *env, jlong handle) {
-	if ((handle <= 0) || (stack == NULL)) {
-		throwIOException(env, "Invalid handle");
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
 		return NULL;
 	}
-	if ((handle < stack->commPortsPoolAllocationHandleOffset) || (handle >= stack->commPortsPoolAllocationHandleOffset + COMMPORTS_POOL_MAX))  {
-		throwIOException(env, "Obsolete handle");
-		return NULL;
-	}
-	int idx = (int)(handle - stack->commPortsPoolAllocationHandleOffset);
-
-	WIDCOMMStackRfCommPort* rf = stack->commPortsPool[idx];
-	if ((rf == NULL) || (rf->magic1 != MAGIC_1) || (rf->magic2 != MAGIC_2)) {
-		throwIOException(env, "Invalid or destroyed handle");
-		return NULL;
-	}
-	return rf;
+	return (WIDCOMMStackRfCommPort*)stack->commPool->getObject(env, handle);
 }
 
 void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {

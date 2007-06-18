@@ -67,7 +67,6 @@ typedef struct {
 // 7 for Server and 7 for Client, Bluetooth Can't have more
 #define COMMPORTS_POOL_MAX 14
 
-#define COMMPORTS_REUSE_OBJECTS FALSE
 #define COMMPORTS_CONNECT_TIMEOUT 60000
 
 class WIDCOMMStackRfCommPort;
@@ -98,9 +97,7 @@ public:
 	DiscoveryRecHolder* discoveryRecHolderCurrent;
 	DiscoveryRecHolder* discoveryRecHolderHold;
 
-	int commPortsPoolDeletionCount;
-	int commPortsPoolAllocationHandleOffset;
-	WIDCOMMStackRfCommPort* commPortsPool[COMMPORTS_POOL_MAX];
+	ObjectPool* commPool;
 	// One CRfCommIf shared by application, lock it when connection is made
 	CRITICAL_SECTION csCRfCommIf;
 	CRfCommIf rfCommIf;
@@ -118,21 +115,14 @@ public:
 
 	virtual void OnDiscoveryComplete();
 
-	int getCommPortFreeIndex();
 	WIDCOMMStackRfCommPort* createCommPort(BOOL server);
 	void deleteCommPort(WIDCOMMStackRfCommPort* commPort);
 };
 
 //	 --- Client RFCOMM connections
 
-class WIDCOMMStackRfCommPort : public CRfCommPort {
+class WIDCOMMStackRfCommPort : public CRfCommPort, public PoolableObject{
 public:
-	long magic1;
-	long magic2;
-
-	int internalHandle;
-	int commPortsPoolDeletionIndex;
-	BOOL readyToFree;
 
 	GUID service_guid;
 	BT_CHAR service_name[BT_MAX_SERVICE_NAME_LEN + 1];

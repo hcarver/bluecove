@@ -382,8 +382,8 @@ BlueSoleilStack::BlueSoleilStack() {
 	inquiringDevice = FALSE;
 	InitializeCriticalSection(&openingPortLock);
 
-	commPortsPool = new ObjectPool(COMMPORTS_POOL_MAX, 1);
-	servicesPool = new ObjectPool(SERVERS_POOL_MAX, 1000);
+	commPortsPool = new ObjectPool(COMMPORTS_POOL_MAX, 1, FALSE);
+	servicesPool = new ObjectPool(SERVERS_POOL_MAX, 1000, FALSE);
 
 	BT_RegisterCallback(EVENT_SPPEX_CONNECTION_STATUS, BS_SPPEXConnectionCallback);
 }
