@@ -1424,14 +1424,19 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
 	hEvents[0] = srv->hCloseEvent;
 	hEvents[1] = srv->hConnectionEvent;
 
-	while ((stack != NULL) && (validRfCommHandle(NULL, srv->portHandle) != NULL)) {
-		debug("server waits for client prev connection to close");
+	BOOL debugWaitsOnce = TRUE;
+	while ((stack != NULL) && 
+		(srv->isConnected || (validRfCommHandle(NULL, srv->portHandle) != NULL))) {
+		if (debugWaitsOnce) {
+			debug("server waits for client prev connection to close");
+			debugWaitsOnce = FALSE;
+		}
 		DWORD rc = WaitForMultipleObjects(1, hEvents, FALSE, 500);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForMultipleObjects");
 			return 0;
 		} else if (rc == WAIT_OBJECT_0) {
-			debug("hCloseEvent became signaled");
+			debug1("hCloseEvent became signaled, isConnected=%s", bool2str(srv->isConnected));
 		} else if (rc != WAIT_TIMEOUT) {
 			debug1("server prev connection close, waits returns %s", waitResultsString(rc));
 		}
@@ -1450,7 +1455,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
 		} else if (rc == WAIT_OBJECT_0) {
 			debug("hCloseEvent became signaled");
 		} else if (rc == WAIT_OBJECT_0 + 1) {
-			debug("hConnectionEvent became signaled");
+			debug1("hConnectionEvent became signaled, isConnected=%s", bool2str(srv->isConnected));
 		} else {
 			debug1("server waits returns %s", waitResultsString(rc));
 		}
@@ -1459,6 +1464,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
 			return 0;
 		}
 	}
+
+	debug1("server received connection, %i", srv->dwConnectedConnetionHandle);
 
 	/*
 	BOOL bIsOutGoing;
@@ -1484,6 +1491,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
 	
 	//rf->remoteAddress = BsAddrToLong(bdAddr);
 	rf->remoteAddress = srv->connectedBdAddr;
+	//rf->dwConnectionHandle = srv->dwConnectedConnetionHandle;
 
 	if (!rf->openComPort(env, srv->serviceInfo.ucComIndex)) {
 		stack->deleteCommPort(rf);
