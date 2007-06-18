@@ -4,8 +4,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "intelbth", "intelbth.vcproj
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		All|Pocket PC 2003 (ARMV4) = All|Pocket PC 2003 (ARMV4)
-		All|Win32 = All|Win32
+		AllWin|Pocket PC 2003 (ARMV4) = AllWin|Pocket PC 2003 (ARMV4)
+		AllWin|Win32 = AllWin|Win32
 		BlueSoleil|Pocket PC 2003 (ARMV4) = BlueSoleil|Pocket PC 2003 (ARMV4)
 		BlueSoleil|Win32 = BlueSoleil|Win32
 		Release|Pocket PC 2003 (ARMV4) = Release|Pocket PC 2003 (ARMV4)
@@ -16,9 +16,10 @@ Global
 		Winsock|Win32 = Winsock|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.All|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Pocket PC 2003 (ARMV4)
-		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.All|Win32.ActiveCfg = Release|Win32
-		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.All|Win32.Build.0 = Release|Win32
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.AllWin|Pocket PC 2003 (ARMV4).ActiveCfg = AllWin|Pocket PC 2003 (ARMV4)
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.AllWin|Pocket PC 2003 (ARMV4).Build.0 = AllWin|Pocket PC 2003 (ARMV4)
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.AllWin|Win32.ActiveCfg = AllWin|Win32
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.AllWin|Win32.Build.0 = AllWin|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.BlueSoleil|Pocket PC 2003 (ARMV4).ActiveCfg = BlueSoleil|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.BlueSoleil|Win32.ActiveCfg = BlueSoleil|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.BlueSoleil|Win32.Build.0 = BlueSoleil|Win32
