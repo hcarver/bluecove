@@ -141,7 +141,8 @@ public:
 	BOOL isConnected;
 	BOOL isConnectionError;
 
-	HANDLE hEvents[2];
+	HANDLE hConnectionEvent;
+	HANDLE hDataReceivedEvent;
 
 	ReceiveBuffer receiveBuffer;
 

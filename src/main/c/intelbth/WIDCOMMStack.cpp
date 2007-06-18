@@ -759,12 +759,12 @@ WIDCOMMStackRfCommPort::WIDCOMMStackRfCommPort() {
 
 	readyForReuse();
 
-    hEvents[0] = CreateEvent(
+    hConnectionEvent = CreateEvent(
             NULL,     // no security attributes
             FALSE,     // auto-reset event
             FALSE,    // initial state is NOT signaled
             NULL);    // object not named
-    hEvents[1] = CreateEvent(
+    hDataReceivedEvent = CreateEvent(
             NULL,     // no security attributes
             FALSE,     // auto-reset event
             FALSE,     // initial state is NOT signaled
@@ -793,12 +793,13 @@ WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
 	magic2 = 0;
 	if (isConnected) {
 		isClosing = TRUE;
-		SetEvent(hEvents[0]);
+		SetEvent(hConnectionEvent);
 		Close();
 	}
 	isConnected = FALSE;
-	CloseHandle(hEvents[0]);
-	CloseHandle(hEvents[1]);
+	
+	CloseHandle(hDataReceivedEvent);
+	CloseHandle(hConnectionEvent);
 	openConnections --;
 }
 
@@ -827,12 +828,12 @@ void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {
 	}
 	if (PORT_EV_CONNECTED & event_code) {
         isConnected = TRUE;
-		SetEvent(hEvents[0]);
+		SetEvent(hConnectionEvent);
 	}
 	if (PORT_EV_CONNECT_ERR & event_code) {
 		isConnectionError = TRUE;
 		isConnected = FALSE;
-		SetEvent(hEvents[0]);
+		SetEvent(hConnectionEvent);
 	}
 }
 
@@ -842,7 +843,7 @@ void WIDCOMMStackRfCommPort::OnDataReceived(void *p_data, UINT16 len) {
 	}
 	if (isConnected && !isClosing) {
 		receiveBuffer.write(p_data, len);
-		SetEvent(hEvents[1]);
+		SetEvent(hDataReceivedEvent);
 	}
 }
 
@@ -873,7 +874,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 			open_client_return 0;
 		}
         debugs("RfCommPort handle %i", rf->internalHandle);
-		if ((rf->hEvents[0] == NULL) || (rf->hEvents[1] == NULL)) {
+		if ((rf->hConnectionEvent == NULL) || (rf->hDataReceivedEvent == NULL)) {
 			throwRuntimeException(env, "fails to CreateEvent");
 			open_client_return 0;
 		}
@@ -900,7 +901,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 		//debug("waitFor Connection signal");
 		DWORD waitStart = GetTickCount();
 		while ((stack != NULL) && !rf->isClosing && !rf->isConnected && !rf->isConnectionError) {
-			DWORD  rc = WaitForSingleObject(rf->hEvents[0], 500);
+			DWORD  rc = WaitForSingleObject(rf->hConnectionEvent, 500);
 			if (rc == WAIT_FAILED) {
 				throwRuntimeException(env, "WaitForSingleObject");
 				open_client_return 0;
@@ -930,11 +931,13 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 
 void WIDCOMMStackRfCommPort::closeRfCommPort(JNIEnv *env) {
 	isClosing = TRUE;
-	SetEvent(hEvents[0]);
-	debugs("closing closeRfCommPort, Connected[%s]", bool2str(isConnected));
+	SetEvent(hConnectionEvent);
+	debug2("closing RfCommPort [%i], Connected[%s]", internalHandle, bool2str(isConnected));
 	CRfCommPort::PORT_RETURN_CODE rc = Close();
 	if (rc != CRfCommPort::SUCCESS && rc != CRfCommPort::NOT_OPENED) {
 		throwIOException(env, "Failed to Close");
+	} else {
+		debug1("closed RfCommPort [%i]", internalHandle);
 	}
 }
 
@@ -986,8 +989,12 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		throwIOException(env, "Receive buffer overflown");
 		return 0;
 	}
+	HANDLE hEvents[2];
+	hEvents[0] = rf->hConnectionEvent;
+	hEvents[1] = rf->hDataReceivedEvent;
 	while (rf->isConnected && (!rf->isClosing) && (rf->receiveBuffer.available() == 0)) {
-		DWORD  rc = WaitForMultipleObjects(2, rf->hEvents, FALSE, INFINITE);
+		debug("read() waits for data");
+		DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForMultipleObjects");
 			return 0;
@@ -1017,16 +1024,22 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
+	HANDLE hEvents[2];
+	hEvents[0] = rf->hConnectionEvent;
+	hEvents[1] = rf->hDataReceivedEvent;
+
 	int done = 0;
 
 	while (rf->isConnected && (!rf->isClosing) && (done < len)) {
-		while (rf->isConnected && (rf->receiveBuffer.available() == 0)) {
-			DWORD  rc = WaitForMultipleObjects(2, rf->hEvents, FALSE, INFINITE);
+		while (rf->isConnected  && (!rf->isClosing) && (rf->receiveBuffer.available() == 0)) {
+			debug("read[] waits for data");
+			DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 			if (rc == WAIT_FAILED) {
 				env->ReleaseByteArrayElements(b, bytes, 0);
 				throwRuntimeException(env, "WaitForMultipleObjects");
 				return 0;
 			}
+			debug1("read waits returns %s", waitResultsString(rc));
 		}
 		int count = rf->receiveBuffer.available();
 		if (count > 0) {
@@ -1035,6 +1048,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			}
 			done += rf->receiveBuffer.read(bytes + off + done, count);
 		}
+		debug1("read[] received %i", count);
 	}
 	// Read from not Connected
 	int count = rf->receiveBuffer.available();
@@ -1251,7 +1265,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 	if (rf->isClientOpen) {
 		debug("server waits for client prev connection to close");
 		while ((stack != NULL) && (rf->isClientOpen) && (rf->sdpService != NULL)) {
-			DWORD  rc = WaitForSingleObject(rf->hEvents[0], 500);
+			DWORD  rc = WaitForSingleObject(rf->hConnectionEvent, 500);
 			if (rc == WAIT_FAILED) {
 				throwRuntimeException(env, "WaitForSingleObject");
 				return 0;
@@ -1276,7 +1290,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 	}
 	debug("server waits for connection");
 	while ((stack != NULL) && (!rf->isClosing)  && (!rf->isConnected) && (!rf->isConnectionError) && (rf->sdpService != NULL)) {
-		DWORD  rc = WaitForSingleObject(rf->hEvents[0], 500);
+		DWORD  rc = WaitForSingleObject(rf->hConnectionEvent, 500);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForSingleObject");
 			return 0;
@@ -1314,7 +1328,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		return;
 	}
 	rf->isClosing = TRUE;
-	SetEvent(rf->hEvents[0]);
+	SetEvent(rf->hConnectionEvent);
 	debugs("closing ServerConnection, Connected[%s]", bool2str(rf->isConnected));
 	CRfCommPort::PORT_RETURN_CODE rc = rf->Close();
 	if (rc != CRfCommPort::SUCCESS && rc != CRfCommPort::NOT_OPENED) {
@@ -1323,8 +1337,8 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	rf->isConnected = FALSE;
 	rf->isConnectionError = FALSE;
 	rf->isClientOpen = FALSE;
-	debug("norify ServerConnection readers");
-	SetEvent(rf->hEvents[0]);
+	debug("notify ServerConnection readers");
+	SetEvent(rf->hConnectionEvent);
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerAddAttribute
