@@ -40,7 +40,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 static BOOL started;
 static DWORD dllWSAStartupError = 0;
-static HANDLE hLookup;
+static HANDLE hDeviceLookup;
 static CRITICAL_SECTION csLookup;
 
 static BOOL restoreBtMode = false;
@@ -67,7 +67,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 			} else {
 				started = TRUE;
             }
-			hLookup = NULL;
+			hDeviceLookup = NULL;
             //debug("InitializeCriticalSection");
 			InitializeCriticalSection(&csLookup);
 			return started;
@@ -207,7 +207,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 
 #ifndef _WIN32_WCE
 	BTH_QUERY_DEVICE query;
-	query.LAP = 0;
+	query.LAP = accessCode;
 #else
 	BTHNS_INQUIRYBLOB query;
 	query.LAP = accessCode;
@@ -241,18 +241,17 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 
 	EnterCriticalSection(&csLookup);
 
-	if (hLookup != NULL) {
+	if (hDeviceLookup != NULL) {
 		LeaveCriticalSection(&csLookup);
 		throwBluetoothStateException(env, "Another inquiry already running");
 		return INQUIRY_ERROR;
 	}
 
 #ifdef _WIN32_WCE
-	if (WSALookupServiceBegin(&queryset, LUP_CONTAINERS, &hLookup)) {
+	if (WSALookupServiceBegin(&queryset, LUP_CONTAINERS, &hDeviceLookup)) {
 #else
-	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE|LUP_CONTAINERS, &hLookup)) {
+	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE|LUP_CONTAINERS, &hDeviceLookup)) {
 #endif
-		hLookup = NULL;
 		DWORD last_error = WSAGetLastError();
 
 		LeaveCriticalSection(&csLookup);
@@ -268,31 +267,33 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 	}
 
 	// fetch results
-    jint result;
+    jint result = -1;
 
-	while(true) {
-		union {
-			CHAR buf[4096];
-			SOCKADDR_BTH __unused;
-		};
+	int bufSize = 0x2000;
+	void* buf = malloc(bufSize);
+	if (buf == NULL) {
+		result = INQUIRY_ERROR;
+	}
 
-		memset(buf, 0, sizeof(buf));
-
+	while (result == -1) {
+		memset(buf, 0, bufSize);
+		
 		LPWSAQUERYSET pwsaResults = (LPWSAQUERYSET) buf;
 		pwsaResults->dwSize = sizeof(WSAQUERYSET);
 		pwsaResults->dwNameSpace = NS_BTH;
 
-		DWORD size = sizeof(buf);
+		DWORD size = bufSize;
 
 		EnterCriticalSection(&csLookup);
 
-		if (hLookup == NULL) {
+		if (hDeviceLookup == NULL) {
 			LeaveCriticalSection(&csLookup);
 			result = INQUIRY_TERMINATED;
+			debug("doInquiry, INQUIRY_TERMINATED");
 			break;
 		}
         debug("doInquiry, WSALookupServiceNext");
-		if (WSALookupServiceNext(hLookup, LUP_RETURN_NAME|LUP_RETURN_ADDR|LUP_RETURN_BLOB, &size, (WSAQUERYSET *)buf)) {
+		if (WSALookupServiceNext(hDeviceLookup, LUP_RETURN_NAME|LUP_RETURN_ADDR|LUP_RETURN_BLOB, &size, pwsaResults)) {
 			DWORD last_error = WSAGetLastError();
 			switch(last_error) {
 				case WSAENOMORE:
@@ -303,8 +304,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 					debug2("WSALookup error [%d] %S", last_error, getWinErrorMessage(last_error));
 				    result = INQUIRY_ERROR;
 			}
-			WSALookupServiceEnd(hLookup);
-			hLookup = NULL;
+			WSALookupServiceEnd(hDeviceLookup);
+			hDeviceLookup = NULL;
 			LeaveCriticalSection(&csLookup);
 			debug("doInquiry, exits");
 			break;
@@ -348,6 +349,15 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 		debug("doInquiry, listener returns");
 	}
 
+	if (buf != NULL) {
+		free(buf);
+	}
+
+	if (hDeviceLookup != NULL) {
+		WSALookupServiceEnd(hDeviceLookup);
+		hDeviceLookup = NULL;
+	}
+
 	return result;
 }
 
@@ -355,14 +365,16 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothPeer_cancelInquiry(
 	debug("->cancelInquiry");
 	EnterCriticalSection(&csLookup);
 
-	if (hLookup == NULL) {
+	if (hDeviceLookup == NULL) {
 		LeaveCriticalSection(&csLookup);
 		return JNI_FALSE;
 	}
 
-	WSALookupServiceEnd(hLookup);
+	debug("->cancelInquiry WSALookupServiceEnd");
+	
+	WSALookupServiceEnd(hDeviceLookup);
 
-	hLookup = NULL;
+	hDeviceLookup = NULL;
 
 	LeaveCriticalSection(&csLookup);
 
@@ -470,18 +482,18 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 	queryset.lpszContext = addressString;
 #endif
 
-	HANDLE hLookup;
+	HANDLE hLookupSearchServices;
 
 	// begin query
 
 #ifdef _WIN32_WCE
-	if (WSALookupServiceBegin(&queryset, 0, &hLookup)) {
+	if (WSALookupServiceBegin(&queryset, 0, &hLookupSearchServices)) {
 		DWORD last_error = WSAGetLastError();
 		debugss("WSALookupServiceBegin error [%d] %S", last_error, getWinErrorMessage(last_error));
 		return NULL;
 	}
 #else
-	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookup)) {
+	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookupSearchServices)) {
 		DWORD last_error = WSAGetLastError();
 		debugss("WSALookupServiceBegin error [%d] %S", last_error, getWinErrorMessage(last_error));
 		// [10108] No such service is known. The service cannot be found in the specified name space. -> SERVICE_SEARCH_DEVICE_NOT_REACHABLE
@@ -493,46 +505,45 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 #endif
 
 	// fetch results
+    jintArray result = NULL;
 
-	char buf[4096];
+	int bufSize = 0x2000;
+	void* buf = malloc(bufSize);
+	if (buf == NULL) {
+		WSALookupServiceEnd(hLookupSearchServices);
+		return NULL;
+	}
+	memset(buf, 0, bufSize);
 
-	memset(buf, 0, sizeof(buf));
 	LPWSAQUERYSET pwsaResults = (LPWSAQUERYSET) buf;
 	pwsaResults->dwSize = sizeof(WSAQUERYSET);
 	pwsaResults->dwNameSpace = NS_BTH;
 	pwsaResults->lpBlob = NULL;
 
-	DWORD size = sizeof(buf);
+	DWORD size = bufSize;
 
 #ifdef _WIN32_WCE
-	if (WSALookupServiceNext(hLookup, 0, &size, pwsaResults)) {
+	if (WSALookupServiceNext(hLookupSearchServices, 0, &size, pwsaResults)) {
 #else
-	if (WSALookupServiceNext(hLookup, LUP_RETURN_BLOB, &size, pwsaResults)) {
+	if (WSALookupServiceNext(hLookupSearchServices, LUP_RETURN_BLOB, &size, pwsaResults)) {
 #endif
 		DWORD last_error = WSAGetLastError();
 		switch(last_error) {
 			case WSANO_DATA:
-				WSALookupServiceEnd(hLookup);
-				return env->NewIntArray(0);
+				result = env->NewIntArray(0);
 			default:
 				debugss("WSALookupServiceNext error [%d] %S", last_error, getWinErrorMessage(last_error));
-				WSALookupServiceEnd(hLookup);
-				return NULL;
+				result =  NULL;
 		}
+	} else {
+		// construct int array to hold handles
+		result = env->NewIntArray(pwsaResults->lpBlob->cbSize/sizeof(ULONG));
+		jint *ints = env->GetIntArrayElements(result, 0);
+		memcpy(ints, pwsaResults->lpBlob->pBlobData, pwsaResults->lpBlob->cbSize);
+		env->ReleaseIntArrayElements(result, ints, 0);
 	}
-
-	WSALookupServiceEnd(hLookup);
-
-	// construct int array to hold handles
-
-	jintArray result = env->NewIntArray(pwsaResults->lpBlob->cbSize/sizeof(ULONG));
-
-	jint *ints = env->GetIntArrayElements(result, 0);
-
-	memcpy(ints, pwsaResults->lpBlob->pBlobData, pwsaResults->lpBlob->cbSize);
-
-	env->ReleaseIntArrayElements(result, ints, 0);
-
+	WSALookupServiceEnd(hLookupSearchServices);
+	free(buf);
 	return result;
 }
 
@@ -618,14 +629,14 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceAt
 #endif
 	queryset.lpBlob = &blob;
 
-	HANDLE hLookup;
+	HANDLE hLookupServiceAttributes;
 
 	// begin query
 
 #ifdef _WIN32_WCE
-	if (WSALookupServiceBegin(&queryset, 0, &hLookup)) {
+	if (WSALookupServiceBegin(&queryset, 0, &hLookupServiceAttributes)) {
 #else
-	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookup)) {
+	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookupServiceAttributes)) {
 #endif
 		free(queryservice);
 		throwIOExceptionWSAGetLastError(env, "Failed to begin attribute query");
@@ -635,41 +646,41 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceAt
 	free(queryservice);
 
 	// fetch results
-
-	char buf[4096];
-
-	memset(buf, 0, sizeof(buf));
+	int bufSize = 0x2000;
+	void* buf = malloc(bufSize);
+	if (buf == NULL) {
+		WSALookupServiceEnd(hLookupServiceAttributes);
+		return NULL;
+	}
+	memset(buf, 0, bufSize);
 
 	LPWSAQUERYSET pwsaResults = (LPWSAQUERYSET) buf;
 	pwsaResults->dwSize = sizeof(WSAQUERYSET);
 	pwsaResults->dwNameSpace = NS_BTH;
 	pwsaResults->lpBlob = NULL;
 
-	DWORD size = sizeof(buf);
+	DWORD size = bufSize;
 
+	jbyteArray result = NULL;
 #ifdef _WIN32_WCE
-	if (WSALookupServiceNext(hLookup, 0, &size, pwsaResults)) {
+	if (WSALookupServiceNext(hLookupServiceAttributes, 0, &size, pwsaResults)) {
 #else
-	if (WSALookupServiceNext(hLookup, LUP_RETURN_BLOB, &size, (WSAQUERYSET *)buf)) {
+	if (WSALookupServiceNext(hLookupServiceAttributes, LUP_RETURN_BLOB, &size, pwsaResults)) {
 #endif
-		WSALookupServiceEnd(hLookup);
-
 		throwIOExceptionWSAGetLastError(env, "Failed to perform attribute query");
-		return NULL;
+		result = NULL;
+	} else {
+		// construct byte array to hold blob
+		result = env->NewByteArray(pwsaResults->lpBlob->cbSize);
+
+		jbyte *bytes = env->GetByteArrayElements(result, 0);
+
+		memcpy(bytes, pwsaResults->lpBlob->pBlobData, pwsaResults->lpBlob->cbSize);
+
+		env->ReleaseByteArrayElements(result, bytes, 0);
 	}
-
-	WSALookupServiceEnd(hLookup);
-
-	// construct byte array to hold blob
-
-	jbyteArray result = env->NewByteArray(pwsaResults->lpBlob->cbSize);
-
-	jbyte *bytes = env->GetByteArrayElements(result, 0);
-
-	memcpy(bytes, pwsaResults->lpBlob->pBlobData, pwsaResults->lpBlob->cbSize);
-
-	env->ReleaseByteArrayElements(result, bytes, 0);
-
+	WSALookupServiceEnd(hLookupServiceAttributes);
+	free(buf);
 	return result;
 }
 
@@ -1031,30 +1042,32 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 
 	EnterCriticalSection(&csLookup);
 
-	if (hLookup != NULL) {
+	if (hDeviceLookup != NULL) {
 		LeaveCriticalSection(&csLookup);
 		throwIOException(env, "Another inquiry already running");
 		return NULL;
 	}
 
-	if (WSALookupServiceBegin(&querySet, flags, &hLookup)) {
-		hLookup = NULL;
+	HANDLE hLookupPeerName = NULL;
+
+	if (WSALookupServiceBegin(&querySet, flags, &hLookupPeerName)) {
 		LeaveCriticalSection(&csLookup);
-		throwIOExceptionWSAGetLastError(env, "Service Lookup error");
+		throwIOExceptionWSAGetLastError(env, "Name Lookup error");
 		return NULL;
 	}
 
 	LeaveCriticalSection(&csLookup);
 
+	jstring result = NULL;
 	while (true) {
 		BYTE buffer[1000];
 		DWORD bufferLength = sizeof(buffer);
 		WSAQUERYSET *pResults = (WSAQUERYSET*)&buffer;
 
 		EnterCriticalSection(&csLookup);
-		if (WSALookupServiceNext(hLookup, flags, &bufferLength, pResults)) {
-			WSALookupServiceEnd(hLookup);
-			hLookup = NULL;
+		if (WSALookupServiceNext(hLookupPeerName, flags, &bufferLength, pResults)) {
+			WSALookupServiceEnd(hLookupPeerName);
+			hLookupPeerName = NULL;
 			LeaveCriticalSection(&csLookup);
 			int err = GetLastError();
 			switch(err) {
@@ -1071,17 +1084,25 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 
 		if (((SOCKADDR_BTH *)((CSADDR_INFO *)pResults->lpcsaBuffer)->RemoteAddr.lpSockaddr)->btAddr == addr) {
 			EnterCriticalSection(&csLookup);
-			WSALookupServiceEnd(hLookup);
-			hLookup = NULL;
+			WSALookupServiceEnd(hLookupPeerName);
+			hLookupPeerName = NULL;
 			LeaveCriticalSection(&csLookup);
 			WCHAR *name = pResults->lpszServiceInstanceName;
 			debugs("return %s", name);
-			return env->NewString((jchar*)name, (jsize)wcslen(name));
+			result = env->NewString((jchar*)name, (jsize)wcslen(name));
+			break;
 		}
-	} // while(true)
-	//env->ThrowNew(env->FindClass("java/IO/IOException", "No name found"));
-	debug("return empty");
-	return env->NewStringUTF((char*)"");
+	}
+
+	if (hLookupPeerName != NULL) {
+		WSALookupServiceEnd(hLookupPeerName);
+	}
+
+	if (result == NULL) {
+		debug("return empty");
+		result = env->NewStringUTF((char*)"");
+	}
+	return result; 
 #endif
 }
 
