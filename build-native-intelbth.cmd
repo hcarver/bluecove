@@ -20,7 +20,7 @@
 @set p=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin
 @if exist "%p%\VCVARS32.BAT" goto vs_found
 
-@echo Visual Studio Not Found
+@echo Visual Studio 2005 Not Found
 @goto :errormark
 
 :vs_found
@@ -45,12 +45,13 @@ call "%p%\VCVARS32.BAT"
 
 @set CONFIGURATION=Winsock
 
-@rem configuration:  Winsock, WIDCOMM, BlueSoleil or Release
+@rem configuration:  Winsock, need BlueSoleil for Release
 
-@set sdk_widcomm=%ProgramFiles%\Widcomm\BTW DK\SDK
-@if NOT exist "%sdk_widcomm%" goto sdk_other_not_found
-@echo Widcomm SDKs Found [%sdk_widcomm%]
-@set CONFIGURATION=WIDCOMM
+@rem WIDCOMM build by VC6
+@rem @set sdk_widcomm=%ProgramFiles%\Widcomm\BTW DK\SDK
+@rem @if NOT exist "%sdk_widcomm%" goto sdk_other_not_found
+@rem @echo Widcomm SDKs Found [%sdk_widcomm%]
+@rem @set CONFIGURATION=WIDCOMM
 
 @set sdk_BlueSoleil=%ProgramFiles%\IVT Corporation\BlueSoleil\api
 @if NOT exist "%sdk_BlueSoleil%" goto sdk_other_not_found
