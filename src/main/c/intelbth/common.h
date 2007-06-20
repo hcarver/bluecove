@@ -231,6 +231,7 @@ public:
 	int readByte();
 	int read(void *p_data, int len);
 	BOOL isOverflown();
+	void setOverflown();
 	int available();
 	BOOL isCorrupted();
 };

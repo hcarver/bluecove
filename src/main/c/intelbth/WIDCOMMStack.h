@@ -134,6 +134,8 @@ public:
 	HANDLE hConnectionEvent;
 	HANDLE hDataReceivedEvent;
 
+	UINT32 other_event_code;
+
 	ReceiveBuffer receiveBuffer;
 
 	WIDCOMMStackRfCommPort();

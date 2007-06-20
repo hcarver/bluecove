@@ -732,6 +732,7 @@ void WIDCOMMStackRfCommPort::readyForReuse() {
 	resetReceiveBuffer();
 	isConnected = FALSE;
 	isConnectionError = FALSE;
+	other_event_code = 0;
 	isClosing = FALSE;
 	readyToFree = FALSE;
 	service_name[0] = '\0';
@@ -769,10 +770,16 @@ void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {
 	if (PORT_EV_CONNECTED & event_code) {
         isConnected = TRUE;
 		SetEvent(hConnectionEvent);
-	}
-	if (PORT_EV_CONNECT_ERR & event_code) {
+	} else if (PORT_EV_CONNECT_ERR & event_code) {
 		isConnectionError = TRUE;
 		isConnected = FALSE;
+		SetEvent(hConnectionEvent);
+	} else if (PORT_EV_OVERRUN & event_code) {
+		isConnectionError = TRUE;
+		receiveBuffer.setOverflown();
+		SetEvent(hConnectionEvent);
+	} else {
+		other_event_code = event_code;
 		SetEvent(hConnectionEvent);
 	}
 }
@@ -856,6 +863,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 			open_client_return 0;
 		}
 		debug("connected");
+		//rf->SetFlowEnabled(TRUE);
+
 		jlong handle = rf->internalHandle;
 		rf = NULL;
 		open_client_return handle;
@@ -873,6 +882,8 @@ void WIDCOMMStackRfCommPort::closeRfCommPort(JNIEnv *env) {
 	isClosing = TRUE;
 	SetEvent(hConnectionEvent);
 	debug2("closing RfCommPort [%i], Connected[%s]", internalHandle, bool2str(isConnected));
+	Purge(PORT_PURGE_TXCLEAR);
+	Purge(PORT_PURGE_RXCLEAR);
 	CRfCommPort::PORT_RETURN_CODE rc = Close();
 	if (rc != CRfCommPort::SUCCESS && rc != CRfCommPort::NOT_OPENED) {
 		throwIOException(env, "Failed to Close");
@@ -921,7 +932,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	if (rf == NULL) {
 		return -1;
 	}
-	debug("->read()");
+	Edebug("->read()");
 	if (rf->isClosing) {
 		return -1;
 	}
@@ -939,6 +950,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			throwRuntimeException(env, "WaitForMultipleObjects");
 			return 0;
 		}
+		/*
+		if (rf->other_event_code != 0) {
+			debug1("connectionEvent %i", rf->other_event_code);
+			rf->other_event_code = 0;
+		}
+		debug2("isClosing [%s], isConnected[%s]", bool2str(rf->isClosing), bool2str(rf->isConnected));
+		*/
 	}
 	if ((rf->isClosing) || (rf->receiveBuffer.available() == 0)) {
 		// See InputStream.read();
@@ -1021,7 +1039,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfWrite__JI
 (JNIEnv *env, jobject peer, jlong handle, jint b) {
-	debug("->write(int)");
+	Edebug("->write(int)");
 	WIDCOMMStackRfCommPort* rf = validRfCommHandle(env, handle);
 	if (rf == NULL) {
 		return;
@@ -1030,6 +1048,16 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		throwIOException(env, "Failed to write to closed connection");
 		return;
 	}
+
+	while ((rf->isConnected) && (!rf->isClosing)) {
+		UINT8 signal; 
+		rf->GetModemStatus(&signal);
+		if (signal & PORT_CTSRTS_ON) {
+			break;
+		}
+		Sleep(200);
+	}
+
 	char c = (char)b;
 	UINT16 written = 0;
 	while ((written == 0) && rf->isConnected) {
@@ -1037,6 +1065,9 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		if (rc != CRfCommPort::SUCCESS) {
 			throwIOException(env, "Failed to write");
 			return;
+		}
+		if (written == 0) {
+			debug("write(int) write again");
 		}
 	}
 }
@@ -1056,6 +1087,15 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
 	UINT16 done = 0;
+
+	while ((rf->isConnected) && (!rf->isClosing)) {
+		UINT8 signal; 
+		rf->GetModemStatus(&signal);
+		if (signal & PORT_CTSRTS_ON) {
+			break;
+		}
+		Sleep(200);
+	}
 
 	while ((done < len) && rf->isConnected && (!rf->isClosing)) {
 		UINT16 written = 0;

@@ -213,7 +213,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 	query.LAP = accessCode;
 	query.num_responses = 10;
 #endif
-	query.length = 10;
+	query.length = 11;
 
 	// build BLOB pointing to device query
 

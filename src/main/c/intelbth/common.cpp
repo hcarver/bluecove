@@ -301,6 +301,10 @@ BOOL ReceiveBuffer::isOverflown() {
 	return overflown && (available() == 0);
 }
 
+void ReceiveBuffer::setOverflown() {
+	overflown = TRUE;
+}
+
 int ReceiveBuffer::write(void *p_data, int len) {
 	if (overflown) {
 		return 0;
