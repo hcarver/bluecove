@@ -57,6 +57,10 @@ public class Connection implements CreateConnection, StreamConnection, StreamCon
 		impl = MicroeditionConnector.open(PROTOCOL + ":" + spec, access, timeout);
 	}
 
+	public void setParameters2(String spec, int access, boolean timeout) throws IOException {
+		setParameters(spec, access, timeout);
+	}
+	
 	public void close() throws IOException {
 		impl.close();
 	}
