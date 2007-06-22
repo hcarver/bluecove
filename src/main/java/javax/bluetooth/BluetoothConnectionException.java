@@ -14,6 +14,12 @@
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *   
+ *   
+ *  Java docs licensed under the Apache License, Version 2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0 
+ *   (c) Copyright 2001, 2002 Motorola, Inc.  ALL RIGHTS RESERVED.
+ *
  *
  *  @version $Id$
  */ 
@@ -28,6 +34,8 @@ import java.io.IOException;
  * the exception. For example, an L2CAP connection may fail due to a 
  * security problem. This reason is passed on to the application through 
  * this class.
+ *
+ * @version 1.0 February 11, 2002
  *
  */
 public class BluetoothConnectionException extends IOException {
@@ -104,6 +112,7 @@ public class BluetoothConnectionException extends IOException {
 	/**
 	 * Creates a new {@code BluetoothConnectionException} with the error
 	 * indicator and message specified.
+     *
 	 * @param error indicates the exception condition; must be one of 
 	 * 				the constants described in this class
 	 * @param msg a description of the exception; may by {@code null}

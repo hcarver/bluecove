@@ -139,7 +139,7 @@ public abstract class RemoteDeviceHelper {
 	}
 
 	static String getBluetoothAddress(long address) {
-		String s = Utils.toHexString(address).toUpperCase();
+		String s = Utils.toHexString(address).toLowerCase();
 		return "000000000000".substring(s.length()) + s;
 	}
 	
