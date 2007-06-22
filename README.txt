@@ -54,6 +54,11 @@ IBM J9
 
     To run BlueCove with [http://www.ibm.com/software/wireless/weme/ IBMs J9] Java VM on Win32 or PocketPC add this system property `-Dmicroedition.connection.pkgs=com.intel.bluetooth`.
 
+    Tested on
+        # WebSphere Everyplace Micro Environment 5.7.2, CDC 1.0/Foundation 1.0/Personal Profile1.0 for Windows XP/X86
+        # WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile1.0 for Windows XP/X86
+
+
 Debug
 
     If something goes wrong system property `-Dbluecove.debug=true` will enable debug prints in BlueCove code

@@ -33,6 +33,7 @@ import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
 import com.ibm.oti.connection.CreateConnection;
+import com.intel.bluetooth.BluetoothConnectionAccess;
 import com.intel.bluetooth.BluetoothStreamServiceRecordAccess;
 import com.intel.bluetooth.MicroeditionConnector;
 
@@ -42,7 +43,7 @@ import com.intel.bluetooth.MicroeditionConnector;
  * @author vlads
  *
  */
-public class Connection implements CreateConnection, StreamConnection, StreamConnectionNotifier, BluetoothStreamServiceRecordAccess {
+public class Connection implements CreateConnection, StreamConnection, StreamConnectionNotifier, BluetoothStreamServiceRecordAccess, BluetoothConnectionAccess {
 
 	javax.microedition.io.Connection impl;
 	
@@ -82,6 +83,10 @@ public class Connection implements CreateConnection, StreamConnection, StreamCon
 
 	public ServiceRecord getServiceRecord() {
 		return ((BluetoothStreamServiceRecordAccess)impl).getServiceRecord();
+	}
+
+	public long getRemoteAddress() throws IOException {
+		return ((BluetoothConnectionAccess)impl).getRemoteAddress();
 	}
 
 }

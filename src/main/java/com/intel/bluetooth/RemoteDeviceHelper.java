@@ -118,7 +118,7 @@ public abstract class RemoteDeviceHelper {
 	
 	public static RemoteDevice getRemoteDevice(Connection conn) throws IOException {
 		if (!(conn instanceof BluetoothConnectionAccess)) {
-			throw new IllegalArgumentException("Not a Bluetooth connection");
+			throw new IllegalArgumentException("Not a Bluetooth connection " + conn.getClass().getName());
 		}
 		return createRemoteDevice(((BluetoothConnectionAccess)conn).getRemoteAddress(), null);
 	}
