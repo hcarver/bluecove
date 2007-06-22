@@ -20,20 +20,25 @@
  */
 package com.intel.bluetooth;
 
-import java.io.FilterOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.util.Enumeration;
 
 import javax.bluetooth.DataElement;
 import javax.bluetooth.UUID;
 
-public class SDPOutputStream extends FilterOutputStream {
+public class SDPOutputStream extends OutputStream {
+	
+	OutputStream dst;
 	
 	public SDPOutputStream(OutputStream out) {
-		super(out);
+		this.dst = out;
 	}
 
+	public void write(int oneByte) throws IOException {
+		this.dst.write(oneByte);
+	}
+	
 	private void writeLong(long l, int size) throws IOException {
 		for (int i = 0; i < size; i++) {
 			write((int) (l >> (size - 1 << 3)));
@@ -225,4 +230,5 @@ public class SDPOutputStream extends FilterOutputStream {
 			throw new IOException();
 		}
 	}
+
 }

@@ -23,6 +23,8 @@ package javax.bluetooth;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import com.intel.bluetooth.Utils;
+
 public class DataElement {
 	/*
 	 * Defines data of type NULL. The value for data type DataElement.NULL is
@@ -505,7 +507,7 @@ public class DataElement {
 		case INT_2:
 		case INT_4:
 		case INT_8:
-			return typeToString(valueType) + " 0x" + Long.toHexString(((Long) value).longValue());
+			return typeToString(valueType) + " 0x" + Utils.toHexString(((Long) value).longValue());
 		case BOOL:
 		case URL:
 		case STRING:

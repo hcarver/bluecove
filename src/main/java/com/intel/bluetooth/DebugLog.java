@@ -108,7 +108,16 @@ public class DebugLog {
 		if (!debugCompiledOut && isDebugEnabled()) {
 			System.out.println(message + " " + t);
 			printLocation();
-			t.printStackTrace(System.out);
+			// I have the reson not to make this as function.
+			if (!UtilsJavaSE.javaSECompiledOut) {
+				if (!UtilsJavaSE.ibmJ9midp) {
+					t.printStackTrace(System.out);
+				} else {
+					t.printStackTrace();
+				}
+			} else {
+				t.printStackTrace();
+			}
 			callAppenders(DEBUG, message, t);
 		}
 	}
@@ -196,7 +205,17 @@ public class DebugLog {
 		if (!debugCompiledOut && isDebugEnabled()) {
 			System.out.println("error " + message + " " + t);
 			printLocation();
-			t.printStackTrace(System.out);
+			// I have the reson not to make this as function.
+			if (!UtilsJavaSE.javaSECompiledOut) {
+				if (!UtilsJavaSE.ibmJ9midp) {
+					t.printStackTrace(System.out);
+				} else {
+					t.printStackTrace();
+				}
+			} else {
+				t.printStackTrace();
+			}
+
 			callAppenders(ERROR, message, t);
 		}
 	}
@@ -210,7 +229,17 @@ public class DebugLog {
 	public static void fatal(String message, Throwable t) {
 		System.out.println("error " + message + " " + t);
 		printLocation();
-		t.printStackTrace(System.out);
+		// I have the reson not to make this as function.
+		if (!UtilsJavaSE.javaSECompiledOut) {
+			if (!UtilsJavaSE.ibmJ9midp) {
+				t.printStackTrace(System.out);
+			} else {
+				t.printStackTrace();
+			}
+		} else {
+			t.printStackTrace();
+		}
+
 		callAppenders(ERROR, message, t);
 	}
 	
@@ -234,41 +263,21 @@ public class DebugLog {
 			return;
 		}
 		try {
-		 System.out.println("\t  "+ formatLocation(getLocation()));
-		} catch (Throwable e) {
-			java13 = true;
-		}
-	}
-	
-	private static String formatLocation(StackTraceElement ste) {
-		if (ste == null) {
-			return "";
-		}
-		// Make Line# clickable in eclipse
-		return ste.getClassName() + "." + ste.getMethodName() + "(" + ste.getFileName() + ":" + ste.getLineNumber() + ")";
-	}
-	
-    private static StackTraceElement getLocation() {
-		if (java13) {
-			return null;
-		}
-		try {
-			StackTraceElement[] ste = new Throwable().getStackTrace();
-			for (int i = 0; i < ste.length - 1; i++) {
-				if (fqcnSet.contains(ste[i].getClassName())) {
-					String nextClassName = ste[i + 1].getClassName();
-					if (nextClassName.startsWith("java.") || nextClassName.startsWith("sun.")) {
-						continue;
-					}
-					if (!fqcnSet.contains(nextClassName)) {
-						return ste[i + 1];
-					}
-				}
+			UtilsJavaSE.StackTraceLocation ste = UtilsJavaSE.getLocation(fqcnSet);
+			if (ste != null) {
+				System.out.println("\t  "+ formatLocation(ste));
 			}
 		} catch (Throwable e) {
 			java13 = true;
 		}
-		return null;
 	}
-
+	
+	private static String formatLocation(UtilsJavaSE.StackTraceLocation ste) {
+		if (ste == null) {
+			return "";
+		}
+		// Make Line# clickable in eclipse
+		return ste.className + "." + ste.methodName + "(" + ste.fileName + ":" + ste.lineNumber + ")";
+	}
+	
 }

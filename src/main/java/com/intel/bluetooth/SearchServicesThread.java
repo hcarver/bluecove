@@ -69,7 +69,7 @@ public class SearchServicesThread extends Thread {
 	public static int startSearchServices(BluetoothStack stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		SearchServicesThread t = (new SearchServicesThread(stack, attrSet, uuidSet, device, listener));
 		//In case the BTStack hangs, exit JVM anyway
-		t.setDaemon(true);
+		UtilsJavaSE.threadSetDaemon(t);
 		synchronized (t) {
 			t.start();
 			while (!t.started && !t.finished) {

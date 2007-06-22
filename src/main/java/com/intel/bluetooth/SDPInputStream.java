@@ -20,20 +20,25 @@
  */ 
 package com.intel.bluetooth;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import javax.bluetooth.DataElement;
 import javax.bluetooth.UUID;
 
-public class SDPInputStream extends FilterInputStream {
+public class SDPInputStream extends InputStream {
+	
+	private InputStream source;
+	
 	private long pos;
 
 	public SDPInputStream(InputStream in) {
-		super(in);
-
+		this.source = in;
 		pos = 0;
+	}
+	
+	public int read() throws IOException {
+		return source.read();
 	}
 
 	private long readLong(int size) throws IOException {
@@ -230,4 +235,5 @@ public class SDPInputStream extends FilterInputStream {
 			throw new IOException();
 		}
 	}
+
 }

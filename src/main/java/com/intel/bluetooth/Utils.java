@@ -20,6 +20,8 @@
  */
 package com.intel.bluetooth;
 
+import java.util.Vector;
+
 import javax.bluetooth.UUID;
 
 public abstract class Utils {
@@ -60,6 +62,29 @@ public abstract class Utils {
 	
 	public static boolean is16Bit(UUID uuid) {
 		return (UUIDTo16Bit(uuid) != -1);
+	}
+	
+	/**
+	 * J2ME/J9 compatibility instead of Vector.toArray
+	 * 
+	 */
+	public static Object[] vector2toArray(Vector vector, Object[] anArray) {
+		vector.copyInto(anArray);
+		return anArray;
+	}
+	
+	public static String toHexString(long l) {
+		StringBuffer buf = new StringBuffer();
+		String lo = Integer.toHexString((int)l);
+		if (l > 0xffffffffl) {
+			String hi = Integer.toHexString((int)(l >> 32)); 
+			buf.append(hi);
+			for (int i = lo.length(); i < 8; i++) {
+				buf.append('0');
+			}
+		}
+		buf.append(lo);
+		return buf.toString();
 	}
 	
 	public static void j2meUsagePatternDellay() {

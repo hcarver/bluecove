@@ -25,20 +25,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
-import java.util.Locale;
+
+import com.ibm.oti.vm.VM;
+
 
 public class NativeLibLoader {
 
 	private static Hashtable libsState = new Hashtable();
-	
+
 	private static String bluecoveDllDir = null;
-	
+
 	private static class LibState {
-    
+
 		boolean triedToLoadAlredy = false;
 
 		boolean libraryAvailable = false;
-	
+
 	}
 
     public static boolean isAvailable(String name) {
@@ -53,6 +55,9 @@ public class NativeLibLoader {
         String libName = name;
         String libFileName = libName;
 
+        //DebugLog.debug("OS:" + System.getProperty("os.name") + "|" + System.getProperty("os.version") + "|" + System.getProperty("os.arch"));
+        //DebugLog.debug("Java:" + System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
+		
         String sysName = System.getProperty("os.name");
 
         if (sysName == null) {
@@ -61,9 +66,9 @@ public class NativeLibLoader {
         	state.libraryAvailable = false;
             return state.libraryAvailable;
         }
-        
-        sysName = sysName.toLowerCase(Locale.ENGLISH);
-        
+
+        sysName = sysName.toLowerCase();
+
         if (sysName.indexOf("windows") != -1)  {
         	if (sysName.indexOf("ce") != -1) {
         		libName += "_ce";
@@ -75,33 +80,42 @@ public class NativeLibLoader {
 //        } else if (.indexOf("linux") != -1) {
 //            libFileName = "lib" + libFileName + ".so";
         } else {
-        	DebugLog.fatal("Native Library " + name + " not avalable on platform " + sysName);
-        	state.triedToLoadAlredy = true;
-        	state.libraryAvailable = false;
-            return state.libraryAvailable;
-        }
+			DebugLog.fatal("Native Library " + name + " not avalable on platform " + sysName);
+			state.triedToLoadAlredy = true;
+			state.libraryAvailable = false;
+			return state.libraryAvailable;
+		}
 
-        String path = System.getProperty("bluecove.native.path");
-        if (path != null) {
-        	state.libraryAvailable = tryloadPath(path, libFileName);
-        }
-        boolean useResource = true;
-        String d = System.getProperty("bluecove.native.resource");
-        if ((d != null) && (d.equalsIgnoreCase("false"))) {
-        	useResource = false;
-        }
+		String path = System.getProperty("bluecove.native.path");
+		if (path != null) {
+			if (!UtilsJavaSE.ibmJ9midp) {
+				state.libraryAvailable = tryloadPath(path, libFileName);
+			} else {
+				// Not working
+				//state.libraryAvailable = tryloadPathIBMj9MIDP(path, libFileName);
+			}
+		}
+		boolean useResource = true;
+		String d = System.getProperty("bluecove.native.resource");
+		if ((d != null) && (d.equalsIgnoreCase("false"))) {
+			useResource = false;
+		}
 
-        if ((!state.libraryAvailable) && (useResource)) {
-        	state.libraryAvailable = loadAsSystemResource(libFileName);
-        }
-        if (!state.libraryAvailable) {
-        	state.libraryAvailable = tryload(libName);
-        }
+		if ((!state.libraryAvailable) && (useResource) && (!UtilsJavaSE.ibmJ9midp)) {
+			state.libraryAvailable = loadAsSystemResource(libFileName);
+		}
+		if (!state.libraryAvailable) {
+			if (!UtilsJavaSE.ibmJ9midp) {
+				state.libraryAvailable = tryload(libName);
+			} else {
+				state.libraryAvailable = tryloadIBMj9MIDP(libName);
+			}
+		}
 
-        if (!state.libraryAvailable) {
-            System.err.println("Native Library " + libName + " not avalable");
-            DebugLog.debug("java.library.path", System.getProperty("java.library.path"));
-        }
+		if (!state.libraryAvailable) {
+			System.err.println("Native Library " + libName + " not avalable");
+			DebugLog.debug("java.library.path", System.getProperty("java.library.path"));
+		}
         state.triedToLoadAlredy = true;
         return state.libraryAvailable;
     }
@@ -117,6 +131,17 @@ public class NativeLibLoader {
         return true;
     }
 
+    private static boolean tryloadIBMj9MIDP(String name) {
+        try {
+            VM.loadLibrary(name);
+            DebugLog.debug("Library loaded", name);
+        } catch (Throwable e) {
+        	DebugLog.error("Library " + name + " not loaded ", e);
+            return false;
+        }
+        return true;
+    }
+    
     private static boolean tryloadPath(String path, String name) {
         try {
         	File f = new File(path, name);
@@ -132,11 +157,26 @@ public class NativeLibLoader {
         }
         return true;
     }
+    
+    private static boolean tryloadPathIBMj9MIDP(String path, String name) {
+        try {
+        	VM.loadLibrary(path+"\\"+name);
+            DebugLog.debug("Library loaded", path+"\\"+name);
+        } catch (Throwable e) {
+        	 DebugLog.error("Can't load library from path " + path+"\\"+name, e);
+            return false;
+        }
+        return true;
+    }
 
     private static boolean loadAsSystemResource(String libFileName) {
         InputStream is = null;
         try {
-            ClassLoader clo = NativeLibLoader.class.getClassLoader();
+            ClassLoader clo = null;
+            try {
+            	//clo = NativeLibLoader.class.getClassLoader();
+            } catch (Throwable j9) {
+            }
             if (clo == null) {
                 is = ClassLoader.getSystemResourceAsStream(libFileName);
             } else {
@@ -164,8 +204,8 @@ public class NativeLibLoader {
         }
         try {
 			fd.deleteOnExit();
-		} catch (NoSuchMethodError e) {
-			// Java 1.1
+		} catch (Throwable e) {
+			// Java 1.1 or J9
 		}
 //        deleteOnExit(fd);
         try {
@@ -228,10 +268,10 @@ public class NativeLibLoader {
             		for (int i = 0; i < files.length; i++) {
             			if (!files[i].delete()) {
                     		continue selectDirectory;
-                    	}	
+                    	}
 					}
-        		} catch (NoSuchMethodError e) {
-        			// Java 1.1
+        		} catch (Throwable e) {
+        			// Java 1.1 or J9
         		}
             }
             if ((!dir.exists()) && (!dir.mkdirs())) {
@@ -240,8 +280,8 @@ public class NativeLibLoader {
             }
             try {
             	dir.deleteOnExit();
-    		} catch (NoSuchMethodError e) {
-    			// Java 1.1
+    		} catch (Throwable e) {
+    			// Java 1.1 or J9
     		}
             fd = new File(dir, libFileName);
             if ((fd.exists()) && (!fd.delete())) {
@@ -252,12 +292,12 @@ public class NativeLibLoader {
 				    DebugLog.debug("Can't create file in temporary dir ", fd.getAbsolutePath());
 				    continue;
 				}
-            } catch (NoSuchMethodError e) {
-            	// Java 1.1
 			} catch (IOException e) {
 				DebugLog.debug("Can't create file in temporary dir ", fd.getAbsolutePath());
 				continue;
-			}
+            } catch (Throwable e) {
+            	// Java 1.1 or J9
+            }
 			bluecoveDllDir = dir.getAbsolutePath();
             break;
         }

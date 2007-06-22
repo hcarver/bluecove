@@ -93,7 +93,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 			int socket = bluetoothPeer.socket(false, false);
 			bluetoothPeer.bind(socket);
 			localBluetoothAddress = bluetoothPeer.getsockaddress(socket);
-			address = Long.toHexString(localBluetoothAddress);
+			address = Utils.toHexString(localBluetoothAddress);
 			bluetoothPeer.storesockopt(socket);
 			bluetoothPeer.close(socket);
 		} catch (IOException e) {

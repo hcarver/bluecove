@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
-import java.util.StringTokenizer;
 
 import javax.bluetooth.UUID;
 import javax.microedition.io.Connection;
@@ -105,7 +104,7 @@ public class MicroeditionConnector {
 			if (colon > -1) {
 				host = name.substring(8, colon);
 
-				StringTokenizer tok = new StringTokenizer(name.substring(colon + 1), ";");
+				UtilsStringTokenizer tok = new UtilsStringTokenizer(name.substring(colon + 1), ";");
 
 				if (tok.hasMoreTokens()) {
 					port = tok.nextToken();

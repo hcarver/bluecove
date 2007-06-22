@@ -38,7 +38,7 @@ public class UUID {
 	 */
 
 	public UUID(long longValue) {
-		this(Long.toHexString(longValue), true);
+		this(Utils.toHexString(longValue), true);
 	}
 
 	/*

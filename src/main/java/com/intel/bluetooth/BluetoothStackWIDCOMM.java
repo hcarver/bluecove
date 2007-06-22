@@ -298,8 +298,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 					}
 				}
 				if (records.size() != 0) {
-					ServiceRecord[] fileteredRecords = (ServiceRecord[]) records.toArray(new ServiceRecord[records
-							.size()]);
+					ServiceRecord[] fileteredRecords = (ServiceRecord[])Utils.vector2toArray(records, new ServiceRecord[records.size()]);
 					listener.servicesDiscovered(startedNotify.getTransID(), fileteredRecords);
 					return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
 				}

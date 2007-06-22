@@ -20,7 +20,6 @@
  */
 package com.intel.bluetooth;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -32,12 +31,18 @@ import javax.bluetooth.UUID;
  * 
  * @author vlads
  */
-public class BluetoothStackWIDCOMMSDPInputStream extends FilterInputStream {
+public class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 
 	public static final boolean debug = false;
 	
+	private InputStream source;
+	
 	protected BluetoothStackWIDCOMMSDPInputStream(InputStream in) {
-		super(in);
+		this.source = in;
+	}
+	
+	public int read() throws IOException {
+		return source.read();
 	}
 	
 	private long readLong(int size) throws IOException {

@@ -55,9 +55,16 @@ IBM J9
     To run BlueCove with [http://www.ibm.com/software/wireless/weme/ IBMs J9] Java VM on Win32 or PocketPC add this system property `-Dmicroedition.connection.pkgs=com.intel.bluetooth`.
 
     Tested on
-        # WebSphere Everyplace Micro Environment 5.7.2, CDC 1.0/Foundation 1.0/Personal Profile1.0 for Windows XP/X86
-        # WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile1.0 for Windows XP/X86
+        # WebSphere Everyplace Micro Environment 5.7.2, CDC 1.0/Foundation 1.0/Personal Profile 1.0 for Windows XP/X86
+        # WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile 1.0 for Windows XP/X86
 
+IBM J9 midp20 Profile
+    # Copy to `bluecove.jar` %J9_HOME%\lib\jclMidp20\ext directory
+    # Copy all bluecove dlls to %J9_HOME%\bin directory or add -Dcom.ibm.oti.vm.bootstrap.library.path=%bluecove_dll_path%;%J9_HOME%\bin
+    # run app "%J9_HOME%\bin\j9.exe" -jcl:midp20 -Dmicroedition.connection.pkgs=com.intel.bluetooth -cp target\bctest.jar "-jxe:%J9_HOME%\lib\jclMidp20\jclMidp20.jxe" target\bctest.jad
+
+    Tested on
+        # WebSphere Everyplace Micro Environment 5.7.2,	CLDC 1.1, MIDP 2.0 for Windows XP/X86
 
 Debug
 

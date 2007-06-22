@@ -130,7 +130,7 @@ public class BlueCoveImpl {
 		
 		try {
 			// since Java 1.3
-			Runtime.getRuntime().addShutdownHook(new Thread(r));
+			UtilsJavaSE.runtimeAddShutdownHook(new Thread(r));
 		} catch (Throwable java12) {
 		}
 		
@@ -141,7 +141,7 @@ public class BlueCoveImpl {
 		
 		ShutdownHookThread() {
 			super("BluecoveShutdownHookThread");
-			this.setDaemon(true);
+			UtilsJavaSE.threadSetDaemon(this);
 		}
 		
 		public void run() {
