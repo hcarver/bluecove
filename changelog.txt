@@ -2,6 +2,14 @@
 
 * 2.0.0 to be Released 2007-07-xx
 
+    2007-06-22 Vlad Skarzhevskyy
+    * Merged J9 MIDP compatibility enhancements suggested by Kobus Grobler
+
+    2007-06-20 Vlad Skarzhevskyy
+    * Published version 2.0.0-b2
+    * Moved large Winsock discovery buffers to heap instead of stack to improve stability
+    * Fixed WIDCOMM Write Flow to pass all tests
+
     2007-06-15 Vlad Skarzhevskyy
     * Published version 2.0.0-b1
     * BlueSoleil Stack working Server implementation
