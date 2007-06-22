@@ -1,15 +1,15 @@
 # Microsoft Developer Studio Generated NMAKE File, Based on bluecove.dsp
 !IF "$(CFG)" == ""
-CFG=BLUECOVE - WIN32 RELEASE
-!MESSAGE No configuration specified. Defaulting to BLUECOVE - WIN32 RELEASE.
+CFG=bluecove - Win32 Release
+!MESSAGE Defaulting configuration to bluecove - Win32 Release.
 !ENDIF
 
-!IF "$(CFG)" != "BLUECOVE - WIN32 RELEASE"
+!IF "$(CFG)" != "bluecove - Win32 Release"
 !MESSAGE Invalid configuration "$(CFG)" specified.
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE
-!MESSAGE NMAKE /f "bluecove.mak" CFG="BLUECOVE - WIN32 RELEASE"
+!MESSAGE NMAKE /f "bluecove.mak" CFG="bluecove - Win32 Release"
 !MESSAGE
 !MESSAGE Possible choices for configuration are:
 !MESSAGE
@@ -24,6 +24,9 @@ NULL=
 NULL=nul
 !ENDIF
 
+CPP=cl.exe
+MTL=midl.exe
+RSC=rc.exe
 OUTDIR=.\Win32\bluecove
 INTDIR=.\Win32\bluecove
 # Begin Custom Macros
@@ -50,7 +53,31 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP=cl.exe
+BSC32=bscmake.exe
+BSC32_FLAGS=/nologo /o"$(OUTDIR)\bluecove.bsc"
+BSC32_SBRS= \
+	"$(INTDIR)\BlueSoleilStack.sbr" \
+	"$(INTDIR)\common.sbr" \
+	"$(INTDIR)\WIDCOMMStack.sbr"
+
+"$(OUTDIR)\bluecove.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
+    $(BSC32) @<<
+  $(BSC32_FLAGS) $(BSC32_SBRS)
+<<
+
+LINK32=link.exe
+LINK32_FLAGS=ws2_32.lib version.lib advapi32.lib user32.lib winspool.lib ole32.lib /nologo /dll /incremental:no /pdb:"$(OUTDIR)\bluecove.pdb" /machine:I386 /out:"..\..\resources\bluecove.dll" /implib:"$(OUTDIR)\bluecove.lib" /libpath:"$(ProgramFiles)\Widcomm\BTW DK\SDK\Release" /libpath:"$(ProgramFiles)\IVT Corporation\BlueSoleil\api"
+LINK32_OBJS= \
+	"$(INTDIR)\BlueSoleilStack.obj" \
+	"$(INTDIR)\common.obj" \
+	"$(INTDIR)\WIDCOMMStack.obj" \
+	"$(INTDIR)\bluecove.res"
+
+"..\..\resources\bluecove.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
+    $(LINK32) @<<
+  $(LINK32_FLAGS) $(LINK32_OBJS)
+<<
+
 CPP_PROJ=/nologo /MD /W3 /GX /O2 /I "$(JAVA_HOME)\include" /I "$(JAVA_HOME)\include\win32" /I "$(ProgramFiles)\Widcomm\BTW DK\SDK\Inc" /I "$(ProgramFiles)\IVT Corporation\BlueSoleil\api" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "UNICODE" /D "BLUECOVE_EXPORTS" /D "_BTWLIB" /FR"$(INTDIR)\\" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c
 
 .c{$(INTDIR)}.obj::
@@ -83,35 +110,8 @@ CPP_PROJ=/nologo /MD /W3 /GX /O2 /I "$(JAVA_HOME)\include" /I "$(JAVA_HOME)\incl
    $(CPP_PROJ) $<
 <<
 
-MTL=midl.exe
 MTL_PROJ=/nologo /D "NDEBUG" /mktyplib203 /win32
-RSC=rc.exe
 RSC_PROJ=/l 0x1009 /fo"$(INTDIR)\bluecove.res" /d "NDEBUG"
-BSC32=bscmake.exe
-BSC32_FLAGS=/nologo /o"$(OUTDIR)\bluecove.bsc"
-BSC32_SBRS= \
-	"$(INTDIR)\BlueSoleilStack.sbr" \
-	"$(INTDIR)\common.sbr" \
-	"$(INTDIR)\WIDCOMMStack.sbr"
-
-"$(OUTDIR)\bluecove.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
-    $(BSC32) @<<
-  $(BSC32_FLAGS) $(BSC32_SBRS)
-<<
-
-LINK32=link.exe
-LINK32_FLAGS=ws2_32.lib version.lib advapi32.lib user32.lib winspool.lib ole32.lib /nologo /dll /incremental:no /pdb:"$(OUTDIR)\bluecove.pdb" /machine:I386 /out:"..\..\resources\bluecove.dll" /implib:"$(OUTDIR)\bluecove.lib" /libpath:"$(ProgramFiles)\Widcomm\BTW DK\SDK\Release" /libpath:"$(ProgramFiles)\IVT Corporation\BlueSoleil\api"
-LINK32_OBJS= \
-	"$(INTDIR)\BlueSoleilStack.obj" \
-	"$(INTDIR)\common.obj" \
-	"$(INTDIR)\WIDCOMMStack.obj" \
-	"$(INTDIR)\bluecove.res"
-
-"..\..\resources\bluecove.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
-    $(LINK32) @<<
-  $(LINK32_FLAGS) $(LINK32_OBJS)
-<<
-
 
 !IF "$(NO_EXTERNAL_DEPS)" != "1"
 !IF EXISTS("bluecove.dep")
@@ -128,6 +128,15 @@ SOURCE=.\BlueSoleilStack.cpp
 "$(INTDIR)\BlueSoleilStack.obj"	"$(INTDIR)\BlueSoleilStack.sbr" : $(SOURCE) "$(INTDIR)"
 
 
+SOURCE=..\..\..\..\target\classes\com\intel\bluetooth\BluetoothStackWIDCOMM.class
+InputPath=..\..\..\..\target\classes\com\intel\bluetooth\BluetoothStackWIDCOMM.class
+
+".\com_intel_bluetooth_BluetoothStackWIDCOMM.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	<<tempfile.bat
+	@echo off
+	javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothStackWIDCOMM
+<<
+
 SOURCE=.\common.cpp
 
 "$(INTDIR)\common.obj"	"$(INTDIR)\common.sbr" : $(SOURCE) "$(INTDIR)"
@@ -135,7 +144,7 @@ SOURCE=.\common.cpp
 
 SOURCE=.\WIDCOMMStack.cpp
 
-"$(INTDIR)\WIDCOMMStack.obj"	"$(INTDIR)\WIDCOMMStack.sbr" : $(SOURCE) "$(INTDIR)"
+"$(INTDIR)\WIDCOMMStack.obj"	"$(INTDIR)\WIDCOMMStack.sbr" : $(SOURCE) "$(INTDIR)" ".\com_intel_bluetooth_BluetoothStackWIDCOMM.h"
 
 
 SOURCE=.\bluecove.rc

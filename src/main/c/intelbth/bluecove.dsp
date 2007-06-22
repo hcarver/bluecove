@@ -64,6 +64,17 @@ SOURCE=.\BlueSoleilStack.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\..\target\classes\com\intel\bluetooth\BluetoothStackWIDCOMM.class
+# Begin Custom Build
+InputPath=..\..\..\..\target\classes\com\intel\bluetooth\BluetoothStackWIDCOMM.class
+
+".\com_intel_bluetooth_BluetoothStackWIDCOMM.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothStackWIDCOMM
+
+# End Custom Build
+# End Source File
+# Begin Source File
+
 SOURCE=.\common.cpp
 # End Source File
 # Begin Source File
