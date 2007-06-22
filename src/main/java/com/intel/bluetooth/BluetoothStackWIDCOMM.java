@@ -93,14 +93,13 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	public native int getDeviceClassImpl();
 	
 	/**
-	 * @todo
+	 * There are no functions to set WIDCOMM stack 
 	 */
 	public DeviceClass getLocalDeviceClass() {
 		return new DeviceClass(getDeviceClassImpl());
 	}
 
 	/**
-	 * @todo
 	 * There are no functions to set WIDCOMM stack discoverable status.
 	 */
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
@@ -110,7 +109,6 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	private native boolean isStackServerUp();
 	
 	/**
-	 * @todo
 	 * There are no functions to find WIDCOMM discoverable status.
 	 */
 	public int getLocalDeviceDiscoverable() {

@@ -83,14 +83,13 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public native int getDeviceClassImpl();
 	
 	/**
-	 * @todo
+	 * There are no functions in BlueSoleil stack.
 	 */
 	public DeviceClass getLocalDeviceClass() {
 		return new DeviceClass(getDeviceClassImpl());
 	}
 
 	/**
-	 * @todo
 	 * There are no functions to set BlueSoleil stack discoverable status.
 	 */
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
@@ -102,7 +101,6 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	private native boolean isBluetoothReady(int seconds);
 	
 	/**
-	 * @todo
 	 * There are no functions to find BlueSoleil discoverable status.
 	 */
 	public int getLocalDeviceDiscoverable() {
