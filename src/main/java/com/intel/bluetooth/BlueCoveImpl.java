@@ -40,7 +40,7 @@ public class BlueCoveImpl {
 	
 	public static final int versionBuild = 0;
 	
-	public static final String versionSufix = "-b2"; //SNAPSHOT
+	public static final String versionSufix = "-b3-SNAPSHOT"; //SNAPSHOT
 	
 	public static final String version = String.valueOf(versionMajor) + "." + String.valueOf(versionMinor) + "." + String.valueOf(versionBuild) + versionSufix;
 
@@ -78,13 +78,29 @@ public class BlueCoveImpl {
 
 	private BlueCoveImpl() {
 		
-		BluetoothStack detectorStack;
-		if (NativeLibLoader.isAvailable(NATIVE_LIB_MS)) {
-			detectorStack = new BluetoothStackMicrosoft();
-		} else if (NativeLibLoader.isAvailable(NATIVE_LIB_WIDCOMM)) {
-			detectorStack = new BluetoothStackWIDCOMM();
-		} else {
-			return;
+		BluetoothStack detectorStack = null;
+		String stackFirst = System.getProperty("bluecove.stack.first");
+		if (stackFirst == null) {
+			stackFirst = System.getProperty("bluecove.stack");
+		}
+		
+		if (stackFirst != null) {
+			if ((STACK_WIDCOMM.equalsIgnoreCase(stackFirst)) && (NativeLibLoader.isAvailable(NATIVE_LIB_WIDCOMM))) {
+				detectorStack = new BluetoothStackWIDCOMM();
+			} else if ((STACK_BLUESOLEIL.equalsIgnoreCase(stackFirst)) && (NativeLibLoader.isAvailable(NATIVE_LIB_BLUESOLEIL))) {
+				detectorStack = new BluetoothStackBlueSoleil();
+			} else if (NativeLibLoader.isAvailable(NATIVE_LIB_MS)) {
+				detectorStack = new BluetoothStackMicrosoft();
+			}
+		}
+		if (detectorStack == null) {
+			if (NativeLibLoader.isAvailable(NATIVE_LIB_MS)) {
+				detectorStack = new BluetoothStackMicrosoft();
+			} else if (NativeLibLoader.isAvailable(NATIVE_LIB_WIDCOMM)) {
+				detectorStack = new BluetoothStackWIDCOMM();
+			} else {
+				return;
+			}
 		}
 		
 		int libraryVersion = detectorStack.getLibraryVersion();
@@ -108,6 +124,8 @@ public class BlueCoveImpl {
 				DebugLog.fatal("BluetoothStack not detected");
 				throw new RuntimeException("BluetoothStack not detected");
 			}
+		} else {
+			DebugLog.debug("BluetoothStack selected", stack);
 		}
 		
 		stack = setBluetoothStack(stack);

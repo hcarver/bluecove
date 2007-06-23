@@ -43,10 +43,10 @@
 #define _ATL_APARTMENT_THREADED
 #endif // _CE_DCOM
 
-#ifdef SHELL_AYGSHELL
-#include <aygshell.h>
-#pragma comment(lib, "aygshell.lib") 
-#endif // SHELL_AYGSHELL
+//#ifdef SHELL_AYGSHELL
+//#include <aygshell.h>
+//#pragma comment(lib, "aygshell.lib") 
+//#endif // SHELL_AYGSHELL
 
 
 // Windows Header Files:

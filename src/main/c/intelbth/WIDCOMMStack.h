@@ -21,16 +21,36 @@
 
 #include "common.h"
 
-#define WIDCOMM_DLL L"wbtapi.dll"
-// DLL wbtapi.dll  -> WIDCOMM version 3.x and 4.x and SDK BTW-5_0_1_902-SDK
-// DLL btwapi.dll  -> WIDCOMM 5.1.x and SDK BTW-5_1_0_3101
+#ifdef _WIN32_WCE
+	#define WIDCOMM_CE30	
+	#ifdef WIDCOMM_CE30
+		#define WIDCOMM_DLL L"BtSdkCE30.dll"
+	#else
+		#define WIDCOMM_DLL L"BtCoreIf.dll"
+	#endif
+#else // _WIN32_WCE
+	#define WIDCOMM_DLL L"wbtapi.dll"
+	// DLL wbtapi.dll  -> WIDCOMM version 3.x and 4.x and SDK BTW-5_0_1_902-SDK
+	// DLL btwapi.dll  -> WIDCOMM 5.1.x and SDK BTW-5_1_0_3101
+#endif // #else // _WIN32_WCE
+
 
 #ifdef _BTWLIB
 
-// BTW-5_1_0_3101
-// #pragma comment(lib, "BtWdSdkLib.lib")
-// BTW-5_0_1_902-SDK
-#pragma comment(lib, "WidcommSdklib.lib")
+#ifdef _WIN32_WCE
+	#ifdef WIDCOMM_CE30
+		#pragma comment(lib, "BtSdkCE30.lib")
+		// Bug in BtSdkCE30.lib. See function CRfCommIf::SetSecurityLevel(unsigned short *,unsigned char,int)
+		#define WCHAR unsigned short
+	#else
+		#define WIDCOMM_DLL L"BtSdkCE50.lib"
+	#endif
+#else // _WIN32_WCE
+	// BTW-5_1_0_3101
+	// #pragma comment(lib, "BtWdSdkLib.lib")
+	// BTW-5_0_1_902-SDK
+	#pragma comment(lib, "WidcommSdklib.lib")
+#endif // #else // _WIN32_WCE
 
 //#include "btwlib.h"
 #include "BtIfDefinitions.h"
@@ -164,4 +184,4 @@ public:
 	virtual void closeRfCommPort(JNIEnv *env);
 };
 
-#endif
+#endif //  _BTWLIB

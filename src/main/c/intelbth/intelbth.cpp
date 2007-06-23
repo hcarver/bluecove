@@ -86,11 +86,13 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 void dllCleanup() {
 	if (started) {
 		if (restoreBtMode) {
+#ifdef _BTWINSOCKLIB
 #ifdef _WIN32_WCE
 			BthSetMode(initialBtMode);
 #else
 			BluetoothEnableDiscovery(NULL, initialBtIsDiscoverable);
-#endif
+#endif // _WIN32_WCE
+#endif // _BTWINSOCKLIB
 		}
 		WSACleanup();
 	}
@@ -133,11 +135,19 @@ BOOL isMicrosoftBluetoothStackPresent() {
 		closesocket(soc);
 		return FALSE;
 	}
+	SOCKADDR_BTH bt_addr;
+	memset(&bt_addr, 0, sizeof(bt_addr));
+	int size = sizeof(bt_addr);
+	if (getpeername(soc, (sockaddr*)&bt_addr, &size)) {
+		closesocket(soc);
+		return FALSE;
+	}
 	closesocket(soc);
-	return TRUE;
+	return (bt_addr.btAddr != 0);
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStatus(JNIEnv *env, jclass peerClass) {
+#ifdef _BTWINSOCKLIB
 	if (started) {
 #ifdef _WIN32_WCE
 		// Use the BthGetMode function to retrieve the current mode of operation of the Bluetooth radio.
@@ -169,12 +179,17 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStat
     }
 	throwIOExceptionWinErrorMessage(env, "Initialization error ", dllWSAStartupError);
     return 0;
+#else
+	return 0;
+#endif // _BTWINSOCKLIB
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_uninitialize
 (JNIEnv *, jobject) {
 
 }
+
+#ifdef _BTWINSOCKLIB
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 (JNIEnv *env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
@@ -1314,3 +1329,5 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_setDiscoverable(JN
 	}
 #endif
 }
+
+#endif // _BTWINSOCKLIB

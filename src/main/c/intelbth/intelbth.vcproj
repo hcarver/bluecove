@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS;_BTWINSOCKLIB"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -260,8 +260,10 @@
 		</Configuration>
 		<Configuration
 			Name="WIDCOMM|Pocket PC 2003 (ARMV4)"
-			IntermediateDirectory="Pocket PC 2003 (ARMV4)\$(ConfigurationName)"
-			ConfigurationType="1"
+			OutputDirectory="$(SolutionDir)\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)\$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -281,6 +283,10 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
+				AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;$(ProgramFiles)\Widcomm\WIDCOMM BTW-CE SDK\Sdk\Inc"
+				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);$(ARCHFAM);$(_ARCHFAM_);INTELBTH_EXPORTS;_BTWLIB"
+				RuntimeLibrary="0"
+				BrowseInformation="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -293,6 +299,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="ws2.lib"
+				OutputFile="..\..\resources\bluecove_ce.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(ProgramFiles)\Widcomm\WIDCOMM BTW-CE SDK\Sdk\Lib\ArmRel"
+				SubSystem="9"
+				ImportLibrary="$(OutDir)\$(TargetName).lib"
+				TargetMachine="3"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -492,7 +505,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="0"
 				AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;$(ProgramFiles)\IVT Corporation\BlueSoleil\api"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS;_BLUESOLEIL"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS;_BTWINSOCKLIB;_BLUESOLEIL"
 				StringPooling="false"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -577,7 +590,8 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32"
-				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;DEBUG;_WINDOWS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;INTELBTH_EXPORTS"
+				PreprocessorDefinitions="_WIN32_WCE=$(CEVER);UNDER_CE=$(CEVER);WINCE;$(PLATFORMDEFINES);_DEBUG;DEBUG;_WINDOWS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;INTELBTH_EXPORTS;_BTWINSOCKLIB"
+				BrowseInformation="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -649,7 +663,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="0"
 				AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;$(ProgramFiles)\IVT Corporation\BlueSoleil\api;;$(ProgramFiles)\Widcomm\BTW DK\SDK\Inc"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS;_BLUESOLEIL;_BTWLIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;INTELBTH_EXPORTS;_BTWINSOCKLIB;_BLUESOLEIL;_BTWLIB"
 				StringPooling="false"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
