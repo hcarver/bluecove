@@ -174,7 +174,7 @@ public class NativeLibLoader {
         try {
             ClassLoader clo = null;
             try {
-            	//clo = NativeLibLoader.class.getClassLoader();
+            	clo = NativeLibLoader.class.getClassLoader();
             } catch (Throwable j9) {
             }
             if (clo == null) {
