@@ -4,6 +4,7 @@
 
     2007-06-22 Vlad Skarzhevskyy
     * Merged J9 MIDP compatibility enhancements suggested by Kobus Grobler
+    * bluecove_ce.dll WIDCOMM Stack on WinCE
 
     2007-06-20 Vlad Skarzhevskyy
     * Published version 2.0.0-b2
