@@ -224,19 +224,26 @@ public class ServiceRecordImpl implements ServiceRecord {
 		 * ProtocolDescriptorList is DATSEQ of DATSEQ of UUID and optional parameters
 		 */
 		
-		for (Enumeration firstSeqEnum = (Enumeration) protocolDescriptor.getValue(); firstSeqEnum.hasMoreElements();) {
-			DataElement mainSeq = (DataElement) firstSeqEnum.nextElement();
+		boolean isRFCOMM = false;
+		boolean isOBEX = false;
+		
+		for (Enumeration protocolsSeqEnum = (Enumeration) protocolDescriptor.getValue(); protocolsSeqEnum.hasMoreElements();) {
+			DataElement elementSeq = (DataElement) protocolsSeqEnum.nextElement();
 
-			if (mainSeq.getDataType() == DataElement.DATSEQ) {
-				Enumeration mainSeqEnum = (Enumeration) mainSeq.getValue();
+			if (elementSeq.getDataType() == DataElement.DATSEQ) {
+				Enumeration elementSeqEnum = (Enumeration) elementSeq.getValue();
 
-				if (mainSeqEnum.hasMoreElements()) {
-					DataElement protocolElement = (DataElement) mainSeqEnum.nextElement();
+				if (elementSeqEnum.hasMoreElements()) {
+					DataElement protocolElement = (DataElement) elementSeqEnum.nextElement();
+					if (protocolElement.getDataType() != DataElement.UUID) {
+						continue;
+					}
+					Object uuid = protocolElement.getValue();
+					if (BluetoothConsts.OBEX_PROTOCOL_UUID.equals(uuid)) {
+						isOBEX = true;
+					} else if (elementSeqEnum.hasMoreElements() && (BluetoothConsts.RFCOMM_PROTOCOL_UUID.equals(uuid))) {
 
-					if (mainSeqEnum.hasMoreElements() && protocolElement.getDataType() == DataElement.UUID
-							&& (BluetoothConsts.RFCOMM_PROTOCOL_UUID.equals(protocolElement.getValue()))) {
-
-						DataElement protocolPSMElement = (DataElement) mainSeqEnum.nextElement();
+						DataElement protocolPSMElement = (DataElement) elementSeqEnum.nextElement();
 
 						switch (protocolPSMElement.getDataType()) {
 						case DataElement.U_INT_1:
@@ -247,6 +254,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 						case DataElement.INT_4:
 						case DataElement.INT_8:
 							rfcommChannel = (int) protocolPSMElement.getLong();
+							isRFCOMM = true;
 							break;
 						}
 					}
@@ -261,9 +269,16 @@ public class ServiceRecordImpl implements ServiceRecord {
 		/*
 		 * build URL
 		 */
-
-		StringBuffer buf = new StringBuffer("btspp://");
-
+		StringBuffer buf = new StringBuffer();
+		if (isOBEX) {
+			buf.append(BluetoothConsts.PROTOCOL_SCHEME_OBEX);
+		} else if (isRFCOMM) {
+			buf.append(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM);
+		} else {
+			return null;
+		}
+		buf.append("://");
+		
 		if (device == null) {
 			try {
 				buf.append(LocalDevice.getLocalDevice().getBluetoothAddress());

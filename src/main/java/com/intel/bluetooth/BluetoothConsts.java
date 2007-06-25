@@ -27,10 +27,16 @@ public class BluetoothConsts {
 
 	public static final String SHORT_UUID_BASE = "00001000800000805F9B34FB";
 	
+	public static final String PROTOCOL_SCHEME_RFCOMM = "btspp";
+	
+	public static final String PROTOCOL_SCHEME_OBEX = "btgoep";
+	
 	public static final UUID L2CAP_PROTOCOL_UUID = new UUID(0x0100);
 
 	public static final UUID RFCOMM_PROTOCOL_UUID = new UUID(0x0003);
 
+	public static final UUID OBEX_PROTOCOL_UUID = new UUID(0x0008);
+	
 	public static final UUID OBEXFileTransferServiceClass_UUID = new UUID(0x1106);
 
 	public static final UUID SERIAL_PORT_UUID = new UUID(0x1101);

@@ -17,7 +17,7 @@
  *
  *  @version $Id$
  */
-package com.sun.cdc.io.j2me.btspp;
+package com.sun.cdc.io.j2me.btgoep;
 
 import java.io.IOException;
 
@@ -28,14 +28,14 @@ import com.intel.bluetooth.MicroeditionConnector;
 import com.sun.cdc.io.ConnectionBaseInterface;
 
 /**
- * This class is Proxy for btspp (RFCOMM) Connection implementations used in WTK and MicroEmulator
+ * This class is Proxy for btgoep (OBEX) Connection implementations used in WTK and MicroEmulator
  * 
  * @author vlads
  */
 public class Protocol implements ConnectionBaseInterface {
 
 	public Connection openPrim(String name, int mode, boolean timeouts) throws IOException {
-		return MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM + ":" + name, mode, timeouts);
+		return MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_OBEX + ":" + name, mode, timeouts);
 	}
 
 }

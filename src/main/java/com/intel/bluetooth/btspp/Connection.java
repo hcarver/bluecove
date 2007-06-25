@@ -34,11 +34,12 @@ import javax.microedition.io.StreamConnectionNotifier;
 
 import com.ibm.oti.connection.CreateConnection;
 import com.intel.bluetooth.BluetoothConnectionAccess;
+import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.BluetoothStreamServiceRecordAccess;
 import com.intel.bluetooth.MicroeditionConnector;
 
 /**
- * This class is Proxy for different Connection implementations for IBM J9 support
+ * This class is Proxy for btspp (RFCOMM) Connection implementations for IBM J9 support
  * 
  * @author vlads
  *
@@ -47,14 +48,12 @@ public class Connection implements CreateConnection, StreamConnection, StreamCon
 
 	javax.microedition.io.Connection impl;
 	
-	public final static String PROTOCOL = "btspp";
-	
 	public Connection() {
 		
 	}
 	
 	public void setParameters(String spec, int access, boolean timeout) throws IOException {
-		impl = MicroeditionConnector.open(PROTOCOL + ":" + spec, access, timeout);
+		impl = MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM + ":" + spec, access, timeout);
 	}
 
 	public void setParameters2(String spec, int access, boolean timeout) throws IOException {

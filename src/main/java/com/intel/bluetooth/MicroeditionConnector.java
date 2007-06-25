@@ -26,6 +26,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import javax.bluetooth.UUID;
@@ -34,6 +35,9 @@ import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.InputConnection;
 import javax.microedition.io.OutputConnection;
+
+import com.intel.bluetooth.obex.OBEXClientSessionImpl;
+import com.intel.bluetooth.obex.OBEXSessionNotifierImpl;
 
 /**
  * 
@@ -61,16 +65,25 @@ public class MicroeditionConnector {
 
 	private static Hashtable/*<String, any>*/ params = new Hashtable();
 	
+	private static Hashtable/*<String, any>*/ cliParams = new Hashtable();
+	
 	private static final String  AUTHENTICATE = "authenticate";
+	private static final String  AUTHORIZE = "authorize"; 
 	private static final String  ENCRYPT = "encrypt";
 	private static final String  MASTER = "master";
 	private static final String  NAME = "name";
 	
 	static {
+	    //srvParams    ::== name | master | encrypt | authorize | authenticate
 		params.put(AUTHENTICATE, AUTHENTICATE);
+		params.put(AUTHORIZE, AUTHORIZE);
 		params.put(ENCRYPT, ENCRYPT);
 		params.put(MASTER, MASTER);
 		params.put(NAME, NAME);
+	    //cliParams    ::== master | encrypt | authenticate
+		cliParams.put(AUTHENTICATE, AUTHENTICATE);
+		cliParams.put(ENCRYPT, ENCRYPT);
+		cliParams.put(MASTER, MASTER);
 	}
 
 	/*
@@ -93,65 +106,110 @@ public class MicroeditionConnector {
 		 */
 
 		String host = null;
-		String port = null;
+		String portORuuid = null;
 
 		Hashtable values = new Hashtable();
 		
-		if (name.substring(0, 8).equals("btspp://")) {
-			
-			int colon = name.indexOf(':', 8);
+		// scheme  : // host : port [;param=val]
+		int schemeEnd = name.indexOf("://");
+		if (schemeEnd == -1) {
+			throw new ConnectionNotFoundException(name);
+		}
+		String scheme = name.substring(0, schemeEnd);
+		if (!scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM) && scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_OBEX)) {
+			throw new ConnectionNotFoundException(scheme);
+		}
+		
+		int hostEnd = name.indexOf(':', scheme.length() + 3);
 
-			if (colon > -1) {
-				host = name.substring(8, colon);
+		if (hostEnd > -1) {
+			host = name.substring(scheme.length() + 3, hostEnd);
 
-				UtilsStringTokenizer tok = new UtilsStringTokenizer(name.substring(colon + 1), ";");
-
-				if (tok.hasMoreTokens()) {
-					port = tok.nextToken();
-
-					while (tok.hasMoreTokens()) {
-						String t = tok.nextToken();
-						int equals = t.indexOf('=');
-						if (equals > -1) {
-							String param = t.substring(0, equals);
-							String value = t.substring(equals + 1);
-							if (params.contains(param)) {
-								values.put(param, value);
-							}
-						}
+			String paramsStr = name.substring(hostEnd + 1);
+			UtilsStringTokenizer tok = new UtilsStringTokenizer(paramsStr, ";");
+			if (tok.hasMoreTokens()) {
+				portORuuid = tok.nextToken();
+			} else {
+				portORuuid = paramsStr;
+			}
+			while (tok.hasMoreTokens()) {
+				String t = tok.nextToken();
+				int equals = t.indexOf('=');
+				if (equals > -1) {
+					String param = t.substring(0, equals);
+					String value = t.substring(equals + 1);
+					if (params.contains(param)) {
+						values.put(param, value);
+					} else {
+						throw new IllegalArgumentException("invalid param [" + t + "]");
 					}
+				} else {
+					throw new IllegalArgumentException("invalid param [" + t +"]");
 				}
 			}
 		} else {
-			throw new ConnectionNotFoundException(name);
+			throw new IllegalArgumentException(name.substring(scheme.length() + 3));
 		}
 
-		if (host == null || port == null) {
+		if (host == null || portORuuid == null) {
 			throw new IllegalArgumentException();
 		}
 
+		boolean isServer = host.equals("localhost");
+		if ((isServer) && (!allowServer)) {
+			throw new IllegalArgumentException("Can't use server connection URL");
+		}
+		
+		int channel = 0;
+		if (!isServer) {
+			try {
+				channel = Integer.parseInt(portORuuid);
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("channel " + portORuuid);
+			}
+		
+			for (Enumeration e = values.keys(); e.hasMoreElements();) {
+				String paramName = (String)e.nextElement();
+				if (!cliParams.containsKey(paramName)) {
+					throw new IllegalArgumentException("invalid client connection param [" + paramName + "]");
+				}
+			}
+		}
 		/*
 		 * create connection
 		 */
-
-		try {
-			if (host.equals("localhost")) {
-				if (!allowServer) {
-					throw new IllegalArgumentException();
-				}
-				return new BluetoothStreamConnectionNotifier(new UUID(port, false), paramBoolean(values, AUTHENTICATE),
-						paramBoolean(values, ENCRYPT), (String) values.get(NAME)); 
+		if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM)) {
+			if (isServer) {
+				return new BluetoothStreamConnectionNotifier(new UUID(portORuuid, false), paramBoolean(values,
+						AUTHENTICATE), paramBoolean(values, ENCRYPT), (String) values.get(NAME));
 			} else {
-				return new BluetoothRFCommClientConnection(RemoteDeviceHelper.getAddress(host), Integer.parseInt(port), 
-						paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
-			}	
-		} catch (NumberFormatException e) {
-			throw new IllegalArgumentException();
+				return new BluetoothRFCommClientConnection(RemoteDeviceHelper.getAddress(host), channel, paramBoolean(
+						values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
+			}
+		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_OBEX)) {
+			if (isServer) {
+				return new OBEXSessionNotifierImpl(new UUID(portORuuid, false), paramBoolean(values,
+						AUTHENTICATE), paramBoolean(values, ENCRYPT), (String) values.get(NAME));
+			} else {
+				return new OBEXClientSessionImpl(RemoteDeviceHelper.getAddress(host), channel, paramBoolean(
+						values, AUTHENTICATE), paramBoolean(values, ENCRYPT)); 
+			}
+		} else {
+			throw new ConnectionNotFoundException(scheme);
 		}
 	}
 	
 	private static boolean paramBoolean(Hashtable values, String name) {
-		return "true".equals(values.get(name));
+		String v = (String)values.get(name);
+		if (v == null) {
+			return false;
+		} else if ("true".equals(v)) {
+			return true;
+		} else if ("false".equals(v)) {
+			return false;
+		} else {
+			throw new IllegalArgumentException("invalid param value " + name + "=" + v);
+		}
 	}
 
 	/*
