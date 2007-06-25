@@ -31,6 +31,18 @@ import com.ibm.oti.vm.VM;
 
 public class NativeLibLoader {
 
+	public static final int OS_UNSUPPORTED = -1;
+	
+	public static final int OS_LINUX = 1;
+	
+	public static final int OS_WINDOWS = 2;
+	
+	public static final int OS_WINDOWS_CE = 3;
+	
+	public static final int OS_MAC_OS_X = 4;
+	
+	private static int os = 0; 
+	
 	private static Hashtable libsState = new Hashtable();
 
 	private static String bluecoveDllDir = null;
@@ -43,6 +55,34 @@ public class NativeLibLoader {
 
 	}
 
+	public static int getOS() {
+		if (os != 0) {
+			return os;
+		}
+		String sysName = System.getProperty("os.name");
+		if (sysName == null) {
+			DebugLog.fatal("Native Library not avalable on unknown platform");
+			os = OS_UNSUPPORTED;
+		} else {
+			sysName = sysName.toLowerCase();
+			if (sysName.indexOf("windows") != -1) {
+				if (sysName.indexOf("ce") != -1) {
+					os = OS_WINDOWS_CE;
+				} else {
+					os = OS_WINDOWS;
+				}
+			} else if (sysName.indexOf("mac os x") != -1) {
+				os = OS_MAC_OS_X;
+			} else if (sysName.indexOf("linux") != -1) {
+				os = OS_LINUX;
+			} else {
+				DebugLog.fatal("Native Library  not avalable on platform " + sysName);
+				os = OS_UNSUPPORTED;
+			}
+		}
+		return os;
+	}
+	
     public static boolean isAvailable(String name) {
     	LibState state = (LibState)libsState.get(name);
     	if (state == null) {
@@ -60,26 +100,26 @@ public class NativeLibLoader {
 		
         String sysName = System.getProperty("os.name");
 
-        if (sysName == null) {
-        	DebugLog.fatal("Native Library " + name + " not avalable on unknown platform");
-        	state.triedToLoadAlredy = true;
-        	state.libraryAvailable = false;
-            return state.libraryAvailable;
-        }
-
-        sysName = sysName.toLowerCase();
-
-        if (sysName.indexOf("windows") != -1)  {
-        	if (sysName.indexOf("ce") != -1) {
-        		libName += "_ce";
-        		libFileName = libName;
-        	}
-            libFileName = libFileName + ".dll";
-        } else if (sysName.indexOf("mac os x") != -1) {
-        	libFileName = "lib" +libFileName + ".jnilib";
-//        } else if (.indexOf("linux") != -1) {
-//            libFileName = "lib" + libFileName + ".so";
-        } else {
+        switch (getOS()) {
+		case OS_UNSUPPORTED:
+			DebugLog.fatal("Native Library " + name + " not avalable on [" + sysName + "] platform");
+			state.triedToLoadAlredy = true;
+			state.libraryAvailable = false;
+			return state.libraryAvailable;
+		case OS_WINDOWS_CE:
+			libName += "_ce";
+			libFileName = libName;
+			libFileName = libFileName + ".dll";
+			break;
+		case OS_WINDOWS:
+			libFileName = libFileName + ".dll";
+			break;
+		case OS_MAC_OS_X:
+			libFileName = "lib" + libFileName + ".jnilib";
+			break;
+		case OS_LINUX:
+			libFileName = "lib" + libFileName + ".so";
+		default:
 			DebugLog.fatal("Native Library " + name + " not avalable on platform " + sysName);
 			state.triedToLoadAlredy = true;
 			state.libraryAvailable = false;

@@ -31,10 +31,32 @@ import javax.bluetooth.UUID;
 
 public interface BluetoothStack {
 
+	//---------------------- Library initialization ----------------------
+	
+	/**
+	 * Used to verify native library version.
+	 * versionMajor * 10000 + versionMinor * 100 + versionBuild  
+	 * @return Version number in decimal presentation. e.g. 20304  for version 2.3.4
+	 */
 	public int getLibraryVersion();
 	
+	/**
+	 * Used if OS Supports multiple Bluetooth stacks  
+	 * 0x01 winsock
+	 * 0x02 widcomm
+	 * 0x04 bluesoleil
+	 * 0x08 BlueZ
+	 * 0x10 OS X stack?
+	 * 
+	 * @return stackID
+	 */
 	public int detectBluetoothStack();
 	
+	/**
+	 * 
+	 * @param nativeDebugCallback  DebugLog.class
+	 * @param on
+	 */
 	public void enableNativeDebug(Class nativeDebugCallback, boolean on);
 	
 	/**
@@ -45,6 +67,8 @@ public interface BluetoothStack {
 	public void destroy();
 	
 	public String getStackID();
+	
+	//---------------------- LocalDevice ----------------------
 	
 	/**
 	 * Retrieves the Bluetooth address of the local device.
@@ -68,7 +92,7 @@ public interface BluetoothStack {
 	
 	public String getLocalDeviceProperty(String property);
 	
-//	 --- Device Inquiry
+	//---------------------- Device Inquiry ----------------------
 	
 	/**
 	 * called by JSR-82 code Device Inquiry
@@ -86,7 +110,7 @@ public interface BluetoothStack {
 	 */
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
-//	 --- Service search 
+	//---------------------- Service search ---------------------- 
 	
 	/**
 	 * called by JSR-82 code Service search
@@ -109,7 +133,7 @@ public interface BluetoothStack {
 	 */
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException;
 	
-//	 --- Client and Server RFCOMM connections
+	//---------------------- Client and Server RFCOMM connections ----------------------
 	
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
 	
