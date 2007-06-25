@@ -20,6 +20,8 @@
  */
 package com.intel.bluetooth;
 
+import java.util.StringTokenizer;
+
 import junit.framework.TestCase;
 
 /**
@@ -35,6 +37,25 @@ public class UtilsTest extends TestCase {
 	public void testLongtoHexString() {
 		validateLong(0x0100);
 		validateLong(0xBCfffffAffl);
+	}
+	
+	private void validateStringTokenizer(String str, String delimiter) {
+		StringTokenizer stRef = new StringTokenizer(str, delimiter);
+		UtilsStringTokenizer stImp = new UtilsStringTokenizer(str, delimiter);
+		while ((stRef.hasMoreTokens()) && (stImp.hasMoreTokens())) {
+			assertEquals("nextToken", stRef.nextToken(), stImp.nextToken());
+		}
+		assertEquals("hasMoreTokens", stRef.hasMoreTokens(), stImp.hasMoreTokens());
+	}
+	
+	public void testStringTokenizer() {
+		validateStringTokenizer("AB", ";");
+		validateStringTokenizer("AB;", ";");
+		validateStringTokenizer(";AB", ";");
+		validateStringTokenizer(";AB;", ";");
+		validateStringTokenizer("AB;CD", ";");
+		validateStringTokenizer("AB;CD;EF", ";");
+		validateStringTokenizer(";", ";");
 	}
 	
 }
