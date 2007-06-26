@@ -116,7 +116,7 @@ public class MicroeditionConnector {
 			throw new ConnectionNotFoundException(name);
 		}
 		String scheme = name.substring(0, schemeEnd);
-		if (!scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM) && scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_OBEX)) {
+		if (!scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM) && !scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_OBEX)) {
 			throw new ConnectionNotFoundException(scheme);
 		}
 		
@@ -191,8 +191,8 @@ public class MicroeditionConnector {
 				return new OBEXSessionNotifierImpl(new UUID(portORuuid, false), paramBoolean(values,
 						AUTHENTICATE), paramBoolean(values, ENCRYPT), (String) values.get(NAME));
 			} else {
-				return new OBEXClientSessionImpl(RemoteDeviceHelper.getAddress(host), channel, paramBoolean(
-						values, AUTHENTICATE), paramBoolean(values, ENCRYPT)); 
+				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(RemoteDeviceHelper.getAddress(host), channel, paramBoolean(
+						values, AUTHENTICATE), paramBoolean(values, ENCRYPT))); 
 			}
 		} else {
 			throw new ConnectionNotFoundException(scheme);

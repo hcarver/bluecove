@@ -20,6 +20,9 @@
  */
 package com.intel.bluetooth;
 
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Vector;
 
 import javax.bluetooth.UUID;
@@ -62,6 +65,33 @@ public abstract class Utils {
 	
 	public static boolean is16Bit(UUID uuid) {
 		return (UUIDTo16Bit(uuid) != -1);
+	}
+	
+	public static void readFully(InputStream is, byte[] b) throws IOException, EOFException {
+		readFully(is, b, 0, b.length);
+	}
+	
+	public static void readFully(InputStream is, byte[] b, int off, int len) throws IOException, EOFException {
+		int got = off;
+		while (got < len) {
+			int rc = is.read(b, got, len - got);
+			if (rc == -1) {
+				throw new EOFException();
+			}
+			got += rc;
+		}
+	}
+
+	public static byte hiByte(short value) {
+		return (byte)(0x0F & value >> 8);
+	}
+	
+	public static byte loByte(short value) {
+		return (byte)(0x0F & (value));
+	}
+
+	public static short bytesToShort(byte valueHi, byte valueLo) {
+		return (short)((valueHi << 8) | valueLo);
 	}
 	
 	/**
