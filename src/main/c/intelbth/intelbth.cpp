@@ -1049,11 +1049,12 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 
 
 	WSAQUERYSET querySet;
-	memset(&querySet, 0, sizeof(querySet));
-	querySet.dwSize = sizeof(querySet);
+	memset(&querySet, 0, sizeof(WSAQUERYSET));
+	querySet.dwSize = sizeof(WSAQUERYSET);
 	querySet.dwNameSpace = NS_BTH;
 
-	DWORD flags = LUP_RETURN_NAME |LUP_RETURN_ADDR | LUP_CONTAINERS;
+	DWORD flagsBegin = LUP_FLUSHCACHE | LUP_CONTAINERS;
+	DWORD flagsNext = LUP_RETURN_NAME | LUP_RETURN_ADDR | LUP_CONTAINERS;
 
 	EnterCriticalSection(&csLookup);
 
@@ -1065,55 +1066,60 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 
 	HANDLE hLookupPeerName = NULL;
 
-	if (WSALookupServiceBegin(&querySet, flags, &hLookupPeerName)) {
+	if (WSALookupServiceBegin(&querySet, flagsBegin, &hLookupPeerName)) {
 		LeaveCriticalSection(&csLookup);
 		throwIOExceptionWSAGetLastError(env, "Name Lookup error");
 		return NULL;
 	}
 
 	LeaveCriticalSection(&csLookup);
+	DWORD bufSize = 0x2000;
+	void* buf = malloc(bufSize);
+	if (buf == NULL) {
+		return NULL;
+	}
 
 	jstring result = NULL;
-	while (true) {
-		BYTE buffer[1000];
-		DWORD bufferLength = sizeof(buffer);
-		WSAQUERYSET *pResults = (WSAQUERYSET*)&buffer;
+	BOOL error = FALSE;
+	while (!error) {
+		memset(buf, 0, bufSize);
+		WSAQUERYSET *pwsaResults = (WSAQUERYSET*)buf;
+		pwsaResults->dwSize = sizeof(WSAQUERYSET);
+		pwsaResults->dwNameSpace = NS_BTH;
+
+		DWORD bufferLength = bufSize;
 
 		EnterCriticalSection(&csLookup);
-		if (WSALookupServiceNext(hLookupPeerName, flags, &bufferLength, pResults)) {
-			WSALookupServiceEnd(hLookupPeerName);
-			hLookupPeerName = NULL;
+		if (WSALookupServiceNext(hLookupPeerName, flagsNext, &bufferLength, pwsaResults)) {
+			int err = WSAGetLastError();
 			LeaveCriticalSection(&csLookup);
-			int err = GetLastError();
 			switch(err) {
 			case WSAENOMORE:
 			case WSA_E_NO_MORE:
 				break;
 			default:
-				throwIOExceptionWSAGetLastError(env, "Service Lookup error");
-				return NULL;
+				throwIOExceptionWinErrorMessage(env, "Service Lookup error", err);
+				error = TRUE;
+				break;
 			}
+			break;
 		}
 
 		LeaveCriticalSection(&csLookup);
 
-		if (((SOCKADDR_BTH *)((CSADDR_INFO *)pResults->lpcsaBuffer)->RemoteAddr.lpSockaddr)->btAddr == addr) {
-			EnterCriticalSection(&csLookup);
-			WSALookupServiceEnd(hLookupPeerName);
-			hLookupPeerName = NULL;
-			LeaveCriticalSection(&csLookup);
-			WCHAR *name = pResults->lpszServiceInstanceName;
+		if (((SOCKADDR_BTH *)((CSADDR_INFO *)pwsaResults->lpcsaBuffer)->RemoteAddr.lpSockaddr)->btAddr == addr) {
+			WCHAR *name = pwsaResults->lpszServiceInstanceName;
 			debugs("return %s", name);
 			result = env->NewString((jchar*)name, (jsize)wcslen(name));
 			break;
 		}
 	}
-
+	free(buf);
 	if (hLookupPeerName != NULL) {
 		WSALookupServiceEnd(hLookupPeerName);
 	}
 
-	if (result == NULL) {
+	if ((result == NULL) && (!error)) {
 		debug("return empty");
 		result = env->NewStringUTF((char*)"");
 	}
