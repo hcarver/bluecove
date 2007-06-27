@@ -114,8 +114,8 @@ public class JSR82APIDeclarationsTest extends APIDeclarationsTestCase {
 		String aPackage = "javax.bluetooth.";
 		// Interface
 		names.add(aPackage + "DiscoveryListener");
-		//names.add(aPackage + "L2CAPConnection");
-		//names.add(aPackage + "L2CAPConnectionNotifier");
+		names.add(aPackage + "L2CAPConnection");
+		names.add(aPackage + "L2CAPConnectionNotifier");
 		names.add(aPackage + "ServiceRecord");
 
 		// Class
@@ -130,6 +130,32 @@ public class JSR82APIDeclarationsTest extends APIDeclarationsTestCase {
 		names.add(aPackage + "BluetoothConnectionException");
 		names.add(aPackage + "BluetoothStateException");
 		names.add(aPackage + "ServiceRegistrationException");
+
+		verifyClassList(names, ourClassPool, wtkClassPool);
+	}
+	
+	public void testJsr082APIObex() throws Exception {
+
+		ClassPool wtkClassPool = createClassPool(getWtkJarURLList(new String[] { "midpapi20.jar", "cldcapi11.jar",
+				"jsr082.jar" }));
+		ClassPool ourClassPool = createClassPool("javax.obex.Authenticator");
+
+		List names = new Vector();
+
+		String aPackage = "javax.obex.";
+		// Interface
+		names.add(aPackage + "Authenticator");
+		names.add(aPackage + "ClientSession");
+		names.add(aPackage + "HeaderSet");
+		names.add(aPackage + "Operation");
+		names.add(aPackage + "SessionNotifier");
+
+		// Class
+		names.add(aPackage + "PasswordAuthentication");
+		names.add(aPackage + "ResponseCodes");
+		names.add(aPackage + "ServerRequestHandler");
+		
+		// Exception
 
 		verifyClassList(names, ourClassPool, wtkClassPool);
 	}
