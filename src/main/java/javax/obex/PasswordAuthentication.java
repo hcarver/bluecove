@@ -16,6 +16,10 @@ package javax.obex;
  */
 public class PasswordAuthentication {
 
+	private byte[] userName;
+	
+	private byte[] password;
+	
 	/**
 	 * Creates a new <code>PasswordAuthentication</code> with the user name
 	 * and password provided.
@@ -30,7 +34,8 @@ public class PasswordAuthentication {
 	 *                if <code>password</code> is <code>null</code>
 	 */
 	public PasswordAuthentication(byte[] userName, byte[] password) {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		this.userName = userName;
+		this.password = password;
 	}
 
 	/**
@@ -40,7 +45,7 @@ public class PasswordAuthentication {
 	 * @return the user name
 	 */
 	public byte[] getUserName() {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		return this.userName;
 	}
 
 	/**
@@ -49,6 +54,6 @@ public class PasswordAuthentication {
 	 * @return the password
 	 */
 	public byte[] getPassword() {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		return this.password;
 	}
 }

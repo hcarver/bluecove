@@ -82,16 +82,16 @@ public abstract class Utils {
 		}
 	}
 
-	public static byte hiByte(short value) {
-		return (byte)(0x0F & value >> 8);
+	public static byte hiByte(int value) {
+		return (byte)((value >> 8) & 0xFF);
 	}
 	
-	public static byte loByte(short value) {
-		return (byte)(0x0F & (value));
+	public static byte loByte(int value) {
+		return (byte)(0xFF & value);
 	}
 
-	public static short bytesToShort(byte valueHi, byte valueLo) {
-		return (short)((valueHi << 8) | valueLo);
+	public static int bytesToShort(byte valueHi, byte valueLo) {
+		return ((((int)valueHi << 8) & 0xFF00) + (valueLo & 0xFF));
 	}
 	
 	/**

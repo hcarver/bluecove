@@ -39,6 +39,24 @@ public class UtilsTest extends TestCase {
 		validateLong(0xBCfffffAffl);
 	}
 	
+	private void validateBytesLoHi(int i) {
+		byte[] b = new byte[2];
+		b[0] = Utils.hiByte(i);
+		b[1] = Utils.loByte(i);
+		int r = Utils.bytesToShort(b[0], b[1]);
+		assertEquals("short from bytes", i, r);
+	}
+	
+	public void testBytesLoHi() {
+		validateBytesLoHi(0x0A);
+		validateBytesLoHi(0x80);
+		validateBytesLoHi(0xF7);
+		validateBytesLoHi(0x0100);
+		validateBytesLoHi(0x0102);
+		validateBytesLoHi(0xFB00);
+		validateBytesLoHi(0xBCEF);
+	}
+	
 	private void validateStringTokenizer(String str, String delimiter) {
 		StringTokenizer stRef = new StringTokenizer(str, delimiter);
 		UtilsStringTokenizer stImp = new UtilsStringTokenizer(str, delimiter);
