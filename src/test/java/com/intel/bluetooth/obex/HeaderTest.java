@@ -21,6 +21,9 @@
 package com.intel.bluetooth.obex;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 import javax.obex.HeaderSet;
 
@@ -44,6 +47,8 @@ public class HeaderTest extends TestCase {
 		validateWriteLength(2, OBEXHeaderSetImpl.OBEX_HDR_USER | OBEXHeaderSetImpl.OBEX_BYTE, new Byte((byte)1));
 		validateWriteLength(1 + 4, HeaderSet.LENGTH, new Long(1));
 		validateWriteLength(1 + 2 + 3, HeaderSet.HTTP, new byte[]{1, 2, 3});
+		validateWriteLength(1 + 4, HeaderSet.TIME_4_BYTE,  new GregorianCalendar());
+		validateWriteLength(1 + 2 + 16, HeaderSet.TIME_ISO_8601,  new GregorianCalendar());
 	}
 	
 	private void validateReadWrite(HeaderSet headers) throws IOException {
@@ -59,7 +64,11 @@ public class HeaderTest extends TestCase {
 			Object valueR = r.getHeader(hi);
 			assertNotNull("value Write", valueO);
 			assertNotNull("value Read", valueR);
-			if (!(valueO instanceof byte[])) {
+			if ((valueO instanceof Calendar)) {
+				Calendar cO = (Calendar) valueO;
+				Calendar cR = (Calendar) valueR;
+				assertEquals("Header time value", cO.getTime().getTime() / 1000, cR.getTime().getTime() / 1000);
+			} else if (!(valueO instanceof byte[])) {
 				assertEquals("Header value", valueO, valueR);		
 			} else {
 				byte[] bO = (byte[]) valueO;
@@ -122,6 +131,18 @@ public class HeaderTest extends TestCase {
 			s.append(i);
 		}
 		hs.setHeader(OBEXHeaderSetImpl.OBEX_HDR_USER | OBEXHeaderSetImpl.OBEX_STRING, s.toString());
+		validateReadWrite(hs);
+	}
+	
+	public void testHeaderCalendarReadWrite() throws IOException {
+		HeaderSet hs = new OBEXHeaderSetImpl();
+		Calendar c = new GregorianCalendar();
+		c.setTime(new Date());
+		hs.setHeader(HeaderSet.TIME_4_BYTE, c);
+		validateReadWrite(hs);
+		c = new GregorianCalendar();
+		c.setTime(new Date());
+		hs.setHeader(HeaderSet.TIME_ISO_8601, c);
 		validateReadWrite(hs);
 	}
 	

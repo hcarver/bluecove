@@ -24,8 +24,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.TimeZone;
 
 import javax.obex.HeaderSet;
 
@@ -266,10 +268,11 @@ public class OBEXHeaderSetImpl implements HeaderSet {
 			int hi = headerIDArray[i];
 			if (hi == OBEX_HDR_TIME) {
 				Calendar c = (Calendar) headers.getHeader(hi);
-				// TODO UTC YYYYMMDDTHHMMSSZ
+				writeObexLen(buf, hi, 19);
+				writeTimeISO8601(buf, c);
 			} else if (hi == OBEX_HDR_TIME2) {
 				Calendar c = (Calendar) headers.getHeader(hi);
-				writeObexInt(buf, hi, c.getTimeInMillis() / 1000);
+				writeObexInt(buf, hi, c.getTime().getTime() / 1000);
 			} else if (hi == OBEX_HDR_TYPE) {
 				//ASCII string
 				writeObexASCII(buf, hi, (String)headers.getHeader(hi));
@@ -325,6 +328,8 @@ public class OBEXHeaderSetImpl implements HeaderSet {
 					} else {
 						hs.setHeader(hi, new String(data, 0, data.length - 1, "iso-8859-1"));
 					}
+				} else if (hi == OBEX_HDR_TIME) {
+					hs.setHeader(hi, readTimeISO8601(data));
 				} else {
 					hs.setHeader(hi, data);
 				}
@@ -335,7 +340,14 @@ public class OBEXHeaderSetImpl implements HeaderSet {
 				break;
 			case OBEX_INT:
 				len = 5;
-				hs.setHeader(hi, new Long(readObexInt(buf, off + 1)));
+				long intValue = readObexInt(buf, off + 1);
+				if (hi == OBEX_HDR_TIME2) {
+					Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+					cal.setTime(new Date(intValue * 1000));
+					hs.setHeader(hi, cal);
+				} else {
+					hs.setHeader(hi, new Long(intValue));
+				}
 				break;
 			default:
 				throw new IOException("Unsupported encoding " + (hi & OBEX_HDR_HI_MASK));
@@ -344,5 +356,55 @@ public class OBEXHeaderSetImpl implements HeaderSet {
 		}
 		return hs;
 	}
+	
+	private static byte[] d4(int i) {
+		byte[] b = new byte[4];
+		int d = 1000;
+		for (int k = 0; k < 4; k ++) {
+		    b[k] =  (byte)(i / d + '0');
+		    i %= d;
+		    d /=10;
+		}
+		return b;
+	}
+	
+	private static byte[] d2(int i) {
+		byte[] b = new byte[2];
+		b[0] =  (byte)(i / 10 + '0');
+		b[1] =  (byte)(i % 10 + '0');
+		return b;
+	}
 
+	/**
+	 * ISO-8601 UTC YYYYMMDDTHHMMSSZ
+	 */
+	static void writeTimeISO8601(OutputStream out, Calendar c) throws IOException {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		cal.setTime(c.getTime());
+		out.write(d4(cal.get(Calendar.YEAR)));
+		out.write(d2(cal.get(Calendar.MONTH) + 1));
+		out.write(d2(cal.get(Calendar.DAY_OF_MONTH)));
+		out.write('T');
+		out.write(d2(cal.get(Calendar.HOUR_OF_DAY)));
+		out.write(d2(cal.get(Calendar.MINUTE)));
+		out.write(d2(cal.get(Calendar.SECOND)));
+		out.write('Z');
+	}
+	
+	/**
+	 * ISO-8601 UTC YYYYMMDDTHHMMSSZ
+	 */
+	static Calendar readTimeISO8601(byte data[]) throws IOException  {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		if ((data.length != 16) || (data[8] != 'T') || (data[15] != 'Z')) {
+			throw new IOException("Invalid ISO-8601 date " + new String(data));
+		}
+		cal.set(Calendar.YEAR, Integer.valueOf(new String(data, 0, 4)).intValue());
+		cal.set(Calendar.MONTH, Integer.valueOf(new String(data, 4, 2)).intValue() - 1);
+		cal.set(Calendar.DAY_OF_MONTH, Integer.valueOf(new String(data, 6, 2)).intValue());
+		cal.set(Calendar.HOUR_OF_DAY, Integer.valueOf(new String(data, 9, 2)).intValue());
+		cal.set(Calendar.MINUTE, Integer.valueOf(new String(data, 11, 2)).intValue());
+		cal.set(Calendar.SECOND, Integer.valueOf(new String(data, 13, 2)).intValue());
+		return cal;
+	}
 }
