@@ -21,9 +21,13 @@
 package com.intel.bluetooth.obex;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.obex.HeaderSet;
 
@@ -145,7 +149,59 @@ public class HeaderTest extends TestCase {
 		hs.setHeader(HeaderSet.TIME_ISO_8601, c);
 		validateReadWrite(hs);
 	}
+
+    public static Date detectDateformat(String str) throws ParseException {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+		return format.parse(str);
+	}
+
+	public void testHeaderCalendarESTReadWrite() throws IOException, ParseException {
+		HeaderSet hs = new OBEXHeaderSetImpl();
+		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("EST"));
+		c.setTime(detectDateformat("2006-01-02 18:30:21"));
+		hs.setHeader(HeaderSet.TIME_4_BYTE, c);
+		validateReadWrite(hs);
+		c = Calendar.getInstance(TimeZone.getTimeZone("EST"));
+		c.setTime(detectDateformat("2005-03-27 11:15:01"));
+		hs.setHeader(HeaderSet.TIME_ISO_8601, c);
+		validateReadWrite(hs);
+	}
 	
+	public void testHeaderCalendarESTDaylightReadWrite() throws IOException, ParseException {
+		HeaderSet hs = new OBEXHeaderSetImpl();
+		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("EST"));
+		c.setTime(detectDateformat("2006-07-02 18:30:21"));
+		hs.setHeader(HeaderSet.TIME_4_BYTE, c);
+		validateReadWrite(hs);
+		c = Calendar.getInstance(TimeZone.getTimeZone("EST"));
+		c.setTime(detectDateformat("2005-07-27 11:15:01"));
+		hs.setHeader(HeaderSet.TIME_ISO_8601, c);
+		validateReadWrite(hs);
+	}
+
+	public void testHeaderCalendarPSTReadWrite() throws IOException, ParseException {
+		HeaderSet hs = new OBEXHeaderSetImpl();
+		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("PST"));
+		c.setTime(detectDateformat("2006-01-02 18:30:21"));
+		hs.setHeader(HeaderSet.TIME_4_BYTE, c);
+		validateReadWrite(hs);
+		c = Calendar.getInstance(TimeZone.getTimeZone("PST"));
+		c.setTime(detectDateformat("2005-03-27 11:15:01"));
+		hs.setHeader(HeaderSet.TIME_ISO_8601, c);
+		validateReadWrite(hs);
+	}
+	
+	public void testHeaderCalendarPSTDaylightReadWrite() throws IOException, ParseException {
+		HeaderSet hs = new OBEXHeaderSetImpl();
+		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("PST"));
+		c.setTime(detectDateformat("2006-07-02 18:30:21"));
+		hs.setHeader(HeaderSet.TIME_4_BYTE, c);
+		validateReadWrite(hs);
+		c = Calendar.getInstance(TimeZone.getTimeZone("PST"));
+		c.setTime(detectDateformat("2005-07-27 11:15:01"));
+		hs.setHeader(HeaderSet.TIME_ISO_8601, c);
+		validateReadWrite(hs);
+	}
 	public void testHeaderAllReadWrite() throws IOException {
 		HeaderSet hs = new OBEXHeaderSetImpl();
 		hs.setHeader(HeaderSet.NAME, "test.txt");
