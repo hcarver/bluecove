@@ -32,6 +32,20 @@ import junit.framework.TestCase;
  */
 public class HeaderTest extends TestCase {
 
+	private void validateWriteLength(int lenExpected, int headerID, Object headerValue) throws IOException {
+		HeaderSet headers = new OBEXHeaderSetImpl();
+		headers.setHeader(headerID, headerValue);
+		byte b[] = OBEXHeaderSetImpl.toByteArray(headers);
+		assertEquals("length", lenExpected, b.length);
+	}
+	
+	public void testHeaderWriteLength() throws IOException {
+		validateWriteLength(3 + 12, HeaderSet.NAME, "Jumar");
+		validateWriteLength(2, OBEXHeaderSetImpl.OBEX_HDR_USER | OBEXHeaderSetImpl.OBEX_BYTE, new Byte((byte)1));
+		validateWriteLength(1 + 4, HeaderSet.LENGTH, new Long(1));
+		validateWriteLength(1 + 2 + 3, HeaderSet.HTTP, new byte[]{1, 2, 3});
+	}
+	
 	private void validateReadWrite(HeaderSet headers) throws IOException {
 		byte b[] = OBEXHeaderSetImpl.toByteArray(headers);
 		HeaderSet r = OBEXHeaderSetImpl.read((byte)0, b, 0);

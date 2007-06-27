@@ -24,46 +24,7 @@ import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
 
-/**
- * @author vlads
- *
- */
-public class UtilsTest extends TestCase {
-
-	private void validateLong(long l) {
-		assertEquals("hex of " + l, Long.toHexString(l), Utils.toHexString(l));
-	}
-			
-	public void testLongtoHexString() {
-		validateLong(0x0100);
-		validateLong(0xBCfffffAffl);
-	}
-
-	public void testBytesLoHi() {
-		assertEquals("loByte", (byte)0x77, Utils.loByte(0x1077));
-		assertEquals("loByte", (byte)0x81, Utils.loByte(0x1081));
-		
-		assertEquals("hiByte", (byte)0x10, Utils.hiByte(0x1077));
-		assertEquals("hiByte", (byte)0x95, Utils.hiByte(0x9581));
-	}
-	
-	private void validateBytesToShort(int i) {
-		byte[] b = new byte[2];
-		b[0] = Utils.hiByte(i);
-		b[1] = Utils.loByte(i);
-		int r = Utils.bytesToShort(b[0], b[1]);
-		assertEquals("short from bytes", i, r);
-	}
-	
-	public void testBytesToShort() {
-		validateBytesToShort(0x0A);
-		validateBytesToShort(0x80);
-		validateBytesToShort(0xF7);
-		validateBytesToShort(0x0100);
-		validateBytesToShort(0x0102);
-		validateBytesToShort(0xFB00);
-		validateBytesToShort(0xBCEF);
-	}
+public class UtilsStringTokenizerTest extends TestCase {
 	
 	private void validateStringTokenizer(String str, String delimiter) {
 		StringTokenizer stRef = new StringTokenizer(str, delimiter);
@@ -83,5 +44,4 @@ public class UtilsTest extends TestCase {
 		validateStringTokenizer("AB;CD;EF", ";");
 		validateStringTokenizer(";", ";");
 	}
-	
 }
