@@ -90,7 +90,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	public String getLocalDeviceBluetoothAddress() {
 		String address;
 		try {
-			int socket = bluetoothPeer.socket(false, false);
+			long socket = bluetoothPeer.socket(false, false);
 			bluetoothPeer.bind(socket);
 			localBluetoothAddress = bluetoothPeer.getsockaddress(socket);
 			address = Utils.toHexString(localBluetoothAddress);
@@ -305,7 +305,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 //	 --- Client RFCOMM connections
 	
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
-		int socket = bluetoothPeer.socket(authenticate, encrypt);
+		long socket = bluetoothPeer.socket(authenticate, encrypt);
 		bluetoothPeer.connect(socket, address, channel);
 		return socket;
 	}
@@ -319,14 +319,14 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		 * open socket
 		 */
 
-		int socket = bluetoothPeer.socket(authenticate, encrypt);
+		long socket = bluetoothPeer.socket(authenticate, encrypt);
 		bluetoothPeer.bind(socket);
 		bluetoothPeer.listen(socket);
 
 		int channel = bluetoothPeer.getsockchannel(socket);
 		DebugLog.debug("service channel ", channel);
 		
-		int serviceRecordHandle = socket; 
+		int serviceRecordHandle = (int)socket; 
 		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name);
 
 		/*
@@ -342,7 +342,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 		/*
 		 * close socket
 		 */
-		bluetoothPeer.close((int)handle);
+		bluetoothPeer.close(handle);
 		/*
 		 * unregister service
 		 */
@@ -350,7 +350,7 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 	
 	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException {
-		return bluetoothPeer.accept((int)handle);
+		return bluetoothPeer.accept(handle);
 	}
 	
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
@@ -364,27 +364,27 @@ public class BluetoothStackMicrosoft implements BluetoothStack {
 	}
 
 	public long getConnectionRfRemoteAddress(long handle) throws IOException {
-		return bluetoothPeer.getpeeraddress((int)handle);
+		return bluetoothPeer.getpeeraddress(handle);
 	}
 	
 	public int connectionRfRead(long handle) throws IOException {
-		return bluetoothPeer.recv((int)handle);
+		return bluetoothPeer.recv(handle);
 	}
 
 	public int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException {
-		return bluetoothPeer.recv((int)handle, b, off, len);
+		return bluetoothPeer.recv(handle, b, off, len);
 	}
 
 	public int connectionRfReadAvailable(long handle) throws IOException {
-		return (int)bluetoothPeer.recvAvailable((int)handle);
+		return bluetoothPeer.recvAvailable(handle);
 	}
 
 	public void connectionRfWrite(long handle, int b) throws IOException {
-		bluetoothPeer.send((int)handle, b);
+		bluetoothPeer.send(handle, b);
 	}
 	
 	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException {
-		bluetoothPeer.send((int)handle, b, off, len);
+		bluetoothPeer.send(handle, b, off, len);
 	}
 	
 	public void connectionRfFlush(long handle) throws IOException {

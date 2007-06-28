@@ -812,7 +812,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_unregisterService(
 	}
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *env, jobject peer, jboolean authenticate, jboolean encrypt) {
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *env, jobject peer, jboolean authenticate, jboolean encrypt) {
     debug("->socket");
 	// create socket
 
@@ -847,10 +847,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *env
 			return 0;
 		}
 	}
-	return (jint)s;
+	return s;
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockaddress(JNIEnv *env, jobject peer, jint socket) {
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockaddress(JNIEnv *env, jobject peer, jlong socket) {
 	debug("->getsockaddress");
 	// get socket name
 
@@ -858,14 +858,14 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockaddress(JN
 
 	int size = sizeof(SOCKADDR_BTH);
 
-	if (getsockname(socket, (sockaddr *)&addr, &size)) {
+	if (getsockname((SOCKET)socket, (sockaddr *)&addr, &size)) {
 		throwIOExceptionWSAGetLastError(env, "Failed to get socket name");
 		return 0;
 	}
 	return addr.btAddr;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockchannel(JNIEnv *env, jobject peer, jint socket) {
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockchannel(JNIEnv *env, jobject peer, jlong socket) {
 	debug("->getsockchannel");
 	// get socket name
 
@@ -873,14 +873,14 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockchannel(JNI
 
 	int size = sizeof(SOCKADDR_BTH);
 
-	if (getsockname(socket, (sockaddr *)&addr, &size)) {
+	if (getsockname((SOCKET)socket, (sockaddr *)&addr, &size)) {
 		throwIOExceptionWSAGetLastError(env, "Failed to get socket name");
 		return 0;
 	}
 	return addr.port;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_connect(JNIEnv *env, jobject peer, jint socket, jlong address, jint channel) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_connect(JNIEnv *env, jobject peer, jlong socket, jlong address, jint channel) {
     debug("->connect");
 
 	SOCKADDR_BTH addr;
@@ -896,7 +896,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_connect(JNIEnv *en
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_bind(JNIEnv *env, jobject peer, jint socket) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_bind(JNIEnv *env, jobject peer, jlong socket) {
 	// bind socket
 	debug("->bind");
 
@@ -908,14 +908,14 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_bind(JNIEnv *env, 
 #else
 	addr.port = BT_PORT_ANY;
 #endif
-	if (bind(socket, (SOCKADDR *)&addr, sizeof(addr))) {
-		closesocket(socket);
+	if (bind((SOCKET)socket, (SOCKADDR *)&addr, sizeof(addr))) {
+		closesocket((SOCKET)socket);
 		throwIOExceptionWSAGetLastError(env, "Failed to bind socket");
 		return;
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_listen(JNIEnv *env, jobject peer, jint socket)
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_listen(JNIEnv *env, jobject peer, jlong socket)
 {
     debug("->listen");
 	if (listen((SOCKET)socket, 10)) {
@@ -923,7 +923,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_listen(JNIEnv *env
 	}
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_accept(JNIEnv *env, jobject peer, jint socket) {
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_accept(JNIEnv *env, jobject peer, jlong socket) {
 	debug("->accept");
 	SOCKADDR_BTH addr;
 
@@ -938,7 +938,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_accept(JNIEnv *env
 
 	debug("connection accepted");
 
-	return (jint)s;
+	return s;
 }
 
 /*
@@ -947,18 +947,18 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_accept(JNIEnv *env
  * returns the amount of data that can be read in a single call to the recv function, which may not be the same as
  * the total amount of data queued on the socket.
  */
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_recvAvailable(JNIEnv *env, jobject peer, jint socket)
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recvAvailable(JNIEnv *env, jobject peer, jlong socket)
 {
 	unsigned long arg = 0;
-	if (ioctlsocket(socket, FIONREAD, &arg) != 0) {
+	if (ioctlsocket((SOCKET)socket, FIONREAD, &arg) != 0) {
 		throwIOExceptionWSAGetLastError(env, "Failed to read available");
 		return 0;
 	}
-	return arg;
+	return (jint)arg;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__I(JNIEnv *env, jobject peer, jint socket) {
-	debug("->recv(int)");
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__J(JNIEnv *env, jobject peer, jlong socket) {
+	debug("->recv()");
 	unsigned char c;
 
 	int rc = recv((SOCKET)socket, (char *)&c, 1, 0);
@@ -973,8 +973,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__I(JNIEnv *en
 	return (int)c;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__I_3BII(JNIEnv *env, jobject peer, jint socket, jbyteArray b, jint off, jint len) {
-	debug("->recv(int,byte[],int,int)");
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__J_3BII(JNIEnv *env, jobject peer, jlong socket, jbyteArray b, jint off, jint len) {
+	debug("->recv(byte[],int,int)");
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
 	int done = 0;
@@ -1003,7 +1003,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__I_3BII(JNIEn
 	return done;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__II(JNIEnv *env, jobject peer, jint socket, jint b) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__JI(JNIEnv *env, jobject peer, jlong socket, jint b) {
 	debug("->send(int,int)");
 	char c = (char)b;
 
@@ -1012,7 +1012,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__II(JNIEnv *e
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__I_3BII(JNIEnv *env, jobject peer, jint socket, jbyteArray b, jint off, jint len) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__J_3BII(JNIEnv *env, jobject peer, jlong socket, jbyteArray b, jint off, jint len) {
 	debug("->send(int,byte[],int,int)");
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
@@ -1032,7 +1032,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__I_3BII(JNIEn
 	env->ReleaseByteArrayElements(b, bytes, 0);
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_close(JNIEnv *env, jobject peer, jint socket)
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_close(JNIEnv *env, jobject peer, jlong socket)
 {
 	debug("->close");
 	if (closesocket((SOCKET)socket)) {
@@ -1134,7 +1134,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 }
 
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeeraddress(JNIEnv *env, jobject peer, jint socket)
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeeraddress(JNIEnv *env, jobject peer, jlong socket)
 {
 	debug("->getpeeraddress");
 	SOCKADDR_BTH addr;
@@ -1146,15 +1146,14 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeeraddress(JN
 	return addr.btAddr;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_storesockopt
-(JNIEnv * env, jobject peer, jint socket) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_storesockopt(JNIEnv * env, jobject peer, jlong socket) {
 #ifndef _WIN32_WCE
 	int optVal;
 	int optLen = sizeof(int);
-	if (getsockopt(socket, SOL_SOCKET,  SO_RCVBUF,  (char*)&optVal,  &optLen) != SOCKET_ERROR) {
+	if (getsockopt((SOCKET)socket, SOL_SOCKET,  SO_RCVBUF,  (char*)&optVal,  &optLen) != SOCKET_ERROR) {
 		debugs("receive buffer %i", optVal);
 	}
-	if (getsockopt(socket, SOL_SOCKET,  SO_SNDBUF,  (char*)&optVal,  &optLen) != SOCKET_ERROR) {
+	if (getsockopt((SOCKET)socket, SOL_SOCKET,  SO_SNDBUF,  (char*)&optVal,  &optLen) != SOCKET_ERROR) {
 		debugs("send buffer %i", optVal);
 	}
 #else
