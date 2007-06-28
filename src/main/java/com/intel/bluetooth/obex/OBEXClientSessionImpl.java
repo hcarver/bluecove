@@ -30,6 +30,7 @@ import javax.obex.ClientSession;
 import javax.obex.HeaderSet;
 import javax.obex.Operation;
 
+import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
 import com.intel.bluetooth.NotImplementedIOException;
 import com.intel.bluetooth.Utils;
@@ -55,13 +56,19 @@ public class OBEXClientSessionImpl implements ClientSession {
 	
 	private Authenticator authenticator;
 	
-	private short mtu = OBEXOperationCodes.OBEX_DEFAULT_MTU;
-		
+	int mtu = OBEXOperationCodes.OBEX_DEFAULT_MTU;
+	
+	private boolean isConnected;
+	
+	private Operation operation;
+	
 	public OBEXClientSessionImpl(StreamConnection conn) throws IOException {
 		this.conn = conn;
 		this.os = conn.openOutputStream();
 		this.is = conn.openInputStream();
 		this.connectionID = -1;
+		this.isConnected = false;
+		this.operation = null;
 	}
 
 	public HeaderSet createHeaderSet() {
@@ -78,8 +85,11 @@ public class OBEXClientSessionImpl implements ClientSession {
 		
 		byte[] b = readOperation();
 		int serverMTU = Utils.bytesToShort(b[5], b[6]);
+		if (serverMTU < OBEXOperationCodes.OBEX_MINIMUM_MTU) {
+			throw new IOException("Invalid MTU " + serverMTU);
+		}
 		if (serverMTU < this.mtu) {
-			this.mtu = (short)serverMTU;
+			this.mtu = serverMTU;
 		}
 		
 		HeaderSet responseHeaders = OBEXHeaderSetImpl.read(b[0], b, 7);
@@ -104,13 +114,17 @@ public class OBEXClientSessionImpl implements ClientSession {
 			}
 			throw new NotImplementedIOException();
 		}
-		
+		this.isConnected = true;
 		return responseHeaders;
 	}
 
 	public HeaderSet disconnect(HeaderSet headers) throws IOException {
+		if (!isConnected) {
+            throw new IOException("Session not connected");
+		}
 		writeOperation(OBEXOperationCodes.DISCONNECT | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
+		this.isConnected = false;
 		return OBEXHeaderSetImpl.read(b[0], b, 3);
 	}
 
@@ -126,26 +140,47 @@ public class OBEXClientSessionImpl implements ClientSession {
 	}
 
 	public HeaderSet setPath(HeaderSet headers, boolean backup, boolean create) throws IOException {
+		if (!isConnected) {
+            throw new IOException("Session not connected");
+		}
 		byte[] request = new byte[2];
 		request[0] = (byte) ((backup?1:0) | (create?0:2));
 		request[1] = 0;
-		writeOperation(OBEXOperationCodes.SETPATH, request, OBEXHeaderSetImpl.toByteArray(headers));
+		writeOperation(OBEXOperationCodes.SETPATH | OBEXOperationCodes.FINAL_BIT, request, OBEXHeaderSetImpl.toByteArray(headers));
 		
 		byte[] b = readOperation();
 		return OBEXHeaderSetImpl.read(b[0], b, 3);
 	}
 
 	public Operation get(HeaderSet headers) throws IOException {
-		// TODO Auto-generated method stub
+		if (!isConnected) {
+            throw new IOException("Session not connected");
+		}
 		return null;
 	}
 
 	public Operation put(HeaderSet headers) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		if (!isConnected) {
+            throw new IOException("Session not connected");
+		}
+		writeOperation(OBEXOperationCodes.PUT, OBEXHeaderSetImpl.toByteArray(headers));
+		byte[] b = readOperation();
+		HeaderSet replyHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+		DebugLog.debug("PUT reply", replyHeaders.getResponseCode());
+		
+		if (replyHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_CONTINUE) {
+			throw new IOException ("Connection not accepted");
+		}
+				
+		this.operation = new OBEXClientOperationPut(this, replyHeaders);
+		return this.operation;
 	}
 
 	public HeaderSet delete(HeaderSet headers) throws IOException {
+		if (!isConnected) {
+            throw new IOException("Session not connected");
+		}
+		
 		writeOperation(OBEXOperationCodes.PUT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
 		return OBEXHeaderSetImpl.read(b[0], b, 3);
@@ -156,6 +191,10 @@ public class OBEXClientSessionImpl implements ClientSession {
 	}
 
 	public void close() throws IOException {
+		if (this.operation != null) {
+			this.operation.close();
+			this.operation = null;
+		}
 		if (this.is != null) {
 			this.is.close();
 			this.is = null;
@@ -170,16 +209,18 @@ public class OBEXClientSessionImpl implements ClientSession {
 		}
 	}
 
-	private void writeOperation(int commId, byte[] data) throws IOException {
+	void writeOperation(int commId, byte[] data) throws IOException {
 		writeOperation(commId, data, null);
 	}
 	
-	private void writeOperation(int commId, byte[] data1, byte[] data2) throws IOException {
+	void writeOperation(int commId, byte[] data1, byte[] data2) throws IOException {
 		int len = 3;
 		if (this.connectionID != -1) {
 			len += 5;
 		}
-		len += data1.length;
+		if (data1 != null) {
+			len += data1.length;
+		}
 		if (data2 != null) {
 			len += data2.length;
 		}
@@ -187,21 +228,27 @@ public class OBEXClientSessionImpl implements ClientSession {
 		if (this.connectionID != -1) {
 			OBEXHeaderSetImpl.writeObexInt(os, OBEXHeaderSetImpl.OBEX_HDR_CONNECTION, this.connectionID);
 		}
-		os.write(data1);
+		if (data1 != null) {
+			os.write(data1);
+		}
 		if (data2 != null) {
-			os.write(data2);
+			os.write(data2, 0, data2.length);
 		}
 		os.flush();
+		DebugLog.debug0x("obex sent", commId);
 	}
 	
-	private byte[] readOperation() throws IOException {
+	protected byte[] readOperation() throws IOException {
 		byte[] header = new byte[3];
 		Utils.readFully(is, header);
-		//byte code = header[0];
+		DebugLog.debug0x("obex received", header[0] & 0xFF);
 		int lenght = Utils.bytesToShort(header[1], header[2]);
 		byte[] data = new byte[lenght];
 		System.arraycopy(header, 0, data, 0, header.length);
 		Utils.readFully(is, data, header.length, lenght - header.length);
+		if (is.available() > 0) {
+			DebugLog.debug("has more data after read", is.available());
+		}
 		return data;
 	}
 

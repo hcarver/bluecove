@@ -72,16 +72,19 @@ public abstract class Utils {
 	}
 	
 	public static void readFully(InputStream is, byte[] b, int off, int len) throws IOException, EOFException {
-		int got = off;
+		if (len < 0) {
+		    throw new IndexOutOfBoundsException();
+		}
+		int got = 0;
 		while (got < len) {
-			int rc = is.read(b, got, len - got);
-			if (rc == -1) {
+			int rc = is.read(b, off + got, len - got);
+			if (rc < 0) {
 				throw new EOFException();
 			}
 			got += rc;
 		}
 	}
-
+	
 	public static byte hiByte(int value) {
 		return (byte)((value >> 8) & 0xFF);
 	}

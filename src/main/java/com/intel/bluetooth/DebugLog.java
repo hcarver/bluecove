@@ -146,6 +146,14 @@ public class DebugLog {
 		}
 	}
 
+	public static void debug0x(String message, long v) {
+		if (!debugCompiledOut && isDebugEnabled()) {
+			System.out.println(message + " 0x" + Utils.toHexString(v));
+			printLocation();
+			callAppenders(DEBUG, message + " 0x" + Utils.toHexString(v), null);
+		}
+	}
+	
 	public static void debug(String message, boolean v) {
 		if (!debugCompiledOut && isDebugEnabled()) {
 			System.out.println(message + " " + v);

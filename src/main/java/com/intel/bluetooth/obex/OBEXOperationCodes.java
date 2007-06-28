@@ -20,6 +20,8 @@
  */
 package com.intel.bluetooth.obex;
 
+import javax.obex.ResponseCodes;
+
 /**
  * See <a
  * href="http://bluetooth.com/Bluetooth/Learn/Technology/Specifications/">Bluetooth
@@ -35,6 +37,10 @@ public interface OBEXOperationCodes {
 	
 	public static final short OBEX_DEFAULT_MTU = 0x400;
 	
+	public static final short OBEX_MINIMUM_MTU = 0xFF;
+	
+	public static final short OBEX_MTU_HEADER_RESERVE = 6;
+	
 	public static final char FINAL_BIT = 0x80;
 	
 	public static final char CONNECT = 0x00;
@@ -49,6 +55,10 @@ public interface OBEXOperationCodes {
 
 	public static final char SESSION = 0x07;
 
-	public static final char ABORT = 0x7F;
+	public static final char ABORT = 0xFF;
+	
+	public static final int OBEX_RESPONSE_CONTINUE = 0x90;
+	
+	public static final int OBEX_RESPONSE_SUCCESS = ResponseCodes.OBEX_HTTP_OK;
 
 }
