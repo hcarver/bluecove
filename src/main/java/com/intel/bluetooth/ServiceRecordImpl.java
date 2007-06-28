@@ -271,7 +271,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 		 */
 		StringBuffer buf = new StringBuffer();
 		if (isOBEX) {
-			buf.append(BluetoothConsts.PROTOCOL_SCHEME_OBEX);
+			buf.append(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX);
 		} else if (isRFCOMM) {
 			buf.append(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM);
 		} else {

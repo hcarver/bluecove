@@ -87,8 +87,8 @@ public class JSR82APIDeclarationsTest extends APIDeclarationsTestCase {
 		names.add(aPackage + "OutputConnection");
 		//names.add(aPackage + "SecureConnection");
 		//names.add(aPackage + "SecurityInfo");
-		//names.add(aPackage + "ServerSocketConnection");
-		//names.add(aPackage + "SocketConnection");
+		names.add(aPackage + "ServerSocketConnection");
+		names.add(aPackage + "SocketConnection");
 		names.add(aPackage + "StreamConnection");
 		names.add(aPackage + "StreamConnectionNotifier");
 		//names.add(aPackage + "UDPDatagramConnection");

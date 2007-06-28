@@ -17,25 +17,14 @@
  *
  *  @version $Id$
  */
-package com.sun.cdc.io.j2me.btgoep;
+package javax.microedition.io;
 
 import java.io.IOException;
 
-import javax.microedition.io.Connection;
-
-import com.intel.bluetooth.BluetoothConsts;
-import com.intel.bluetooth.MicroeditionConnector;
-import com.sun.cdc.io.ConnectionBaseInterface;
-
-/**
- * This class is Proxy for btgoep (OBEX) Connection implementations used in WTK and MicroEmulator
- * 
- * @author vlads
- */
-public class Protocol implements ConnectionBaseInterface {
-
-	public Connection openPrim(String name, int mode, boolean timeouts) throws IOException {
-		return MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX + ":" + name, mode, timeouts);
-	}
+public interface ServerSocketConnection extends StreamConnectionNotifier {
+	
+	public String getLocalAddress() throws IOException;
+	
+	public int getLocalPort() throws IOException;
 
 }

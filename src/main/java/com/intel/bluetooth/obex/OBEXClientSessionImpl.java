@@ -236,6 +236,7 @@ public class OBEXClientSessionImpl implements ClientSession {
 		}
 		os.flush();
 		DebugLog.debug0x("obex sent", commId);
+		DebugLog.debug("obex sent len", len);
 	}
 	
 	protected byte[] readOperation() throws IOException {

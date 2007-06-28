@@ -143,6 +143,10 @@ public class OBEXClientOperationPut extends OBEXClientOperation {
 		byte[] b = session.readOperation();
 		replyHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
 		DebugLog.debug0x("PUT reply", replyHeaders.getResponseCode());
+		if (replyHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_SUCCESS) {
+		} else if (replyHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_CONTINUE) {
+			throw new IOException ("Can't continue connection, 0x" + Integer.toHexString(replyHeaders.getResponseCode()));
+		}
 	}
 	
 	public void close() throws IOException {

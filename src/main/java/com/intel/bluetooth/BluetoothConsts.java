@@ -29,7 +29,9 @@ public class BluetoothConsts {
 	
 	public static final String PROTOCOL_SCHEME_RFCOMM = "btspp";
 	
-	public static final String PROTOCOL_SCHEME_OBEX = "btgoep";
+	public static final String PROTOCOL_SCHEME_BT_OBEX = "btgoep";
+	
+	public static final String PROTOCOL_SCHEME_TCP_OBEX = "tcpobex";
 	
 	public static final UUID L2CAP_PROTOCOL_UUID = new UUID(0x0100);
 
