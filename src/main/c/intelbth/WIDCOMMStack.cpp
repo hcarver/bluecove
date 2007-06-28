@@ -25,7 +25,7 @@
 #define CPP_FILE "WIDCOMMStack.cpp"
 #endif
 
-BOOL isWIDCOMMBluetoothStackPresent() {
+BOOL isWIDCOMMBluetoothStackPresent(JNIEnv *env) {
 	HMODULE h = LoadLibrary(WIDCOMM_DLL);
 	if (h == NULL) {
 		return FALSE;
@@ -74,8 +74,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLibrary
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_detectBluetoothStack
-(JNIEnv *, jobject) {
-	return detectBluetoothStack();
+(JNIEnv *env, jobject) {
+	return detectBluetoothStack(env);
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_enableNativeDebug

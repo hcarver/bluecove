@@ -185,11 +185,11 @@ BOOL ExceptionCheckCompatible(JNIEnv *env);
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid);
 void convertGUIDToUUIDBytes(GUID *uuid, jbyte *bytes);
 
-jint detectBluetoothStack();
+jint detectBluetoothStack(JNIEnv *env);
 jint blueCoveVersion();
-BOOL isMicrosoftBluetoothStackPresent();
-BOOL isWIDCOMMBluetoothStackPresent();
-BOOL isBlueSoleilBluetoothStackPresent();
+BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env);
+BOOL isWIDCOMMBluetoothStackPresent(JNIEnv *env);
+BOOL isBlueSoleilBluetoothStackPresent(JNIEnv *env);
 
 jint getDeviceClassByOS(JNIEnv *env);
 

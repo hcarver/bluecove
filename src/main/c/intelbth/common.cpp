@@ -181,17 +181,17 @@ BOOL ExceptionCheckCompatible(JNIEnv *env) {
 	}
 }
 
-jint detectBluetoothStack() {
+jint detectBluetoothStack(JNIEnv *env) {
 	jint rc = 0;
 #ifndef VC6
-	if (isMicrosoftBluetoothStackPresent()) {
+	if (isMicrosoftBluetoothStackPresent(env)) {
 		rc += 1;
 	}
 #endif
-	if (isWIDCOMMBluetoothStackPresent()) {
+	if (isWIDCOMMBluetoothStackPresent(env)) {
 		rc += 2;
 	}
-	if (isBlueSoleilBluetoothStackPresent()) {
+	if (isBlueSoleilBluetoothStackPresent(env)) {
 		rc += 4;
 	}
 	return rc;

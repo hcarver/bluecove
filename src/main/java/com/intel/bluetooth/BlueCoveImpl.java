@@ -107,6 +107,9 @@ public class BlueCoveImpl {
 			case NativeLibLoader.OS_WINDOWS:
 			case NativeLibLoader.OS_WINDOWS_CE:
 				detectorStack = createDetectorOnWindows(stackFirstDetector);
+				if (DebugLog.isDebugEnabled()) {
+					detectorStack.enableNativeDebug(DebugLog.class, true);
+				}
 				break;
 			default:
 				throw new Error("BlueCove not avalable");

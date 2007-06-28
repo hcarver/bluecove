@@ -25,7 +25,7 @@
 #define CPP_FILE "BlueSoleilStack.cpp"
 #endif
 
-BOOL isBlueSoleilBluetoothStackPresent() {
+BOOL isBlueSoleilBluetoothStackPresent(JNIEnv *env) {
 	HMODULE h = LoadLibrary(BLUESOLEIL_DLL);
 	if (h == NULL) {
 		return FALSE;
@@ -93,8 +93,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getLibr
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_detectBluetoothStack
-(JNIEnv *, jobject) {
-	return detectBluetoothStack();
+(JNIEnv *env, jobject) {
+	return detectBluetoothStack(env);
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_enableNativeDebug

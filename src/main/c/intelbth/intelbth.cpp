@@ -109,8 +109,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getLibraryVersion
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_detectBluetoothStack
-(JNIEnv *, jobject) {
-	return detectBluetoothStack();
+(JNIEnv *env, jobject) {
+	return detectBluetoothStack(env);
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug
@@ -118,32 +118,38 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug
 	enableNativeDebug(env, loggerClass, on);
 }
 
-BOOL isMicrosoftBluetoothStackPresent() {
-	SOCKET soc = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
-	if (soc == INVALID_SOCKET) {
+BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env) {
+	SOCKET s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
+	if (s == INVALID_SOCKET) {
+		DWORD last_error = WSAGetLastError();
+		debug2("socket error [%d] %S", last_error, getWinErrorMessage(last_error));
 		return FALSE;
 	}
-	SOCKADDR_BTH addr;
-	memset(&addr, 0, sizeof(addr));
-	addr.addressFamily = AF_BTH;
+	SOCKADDR_BTH btAddr;
+	memset(&btAddr, 0, sizeof(SOCKADDR_BTH));
+	btAddr.addressFamily = AF_BTH;
 #ifdef _WIN32_WCE
-	addr.port = 0;
+	btAddr.port = 0;
 #else
-	addr.port = BT_PORT_ANY;
+	btAddr.port = BT_PORT_ANY;
 #endif
-	if (bind(soc, (SOCKADDR *)&addr, sizeof(addr))) {
-		closesocket(soc);
+	if (bind(s, (SOCKADDR *)&btAddr, sizeof(SOCKADDR_BTH))) {
+		DWORD last_error = WSAGetLastError();
+		debug2("bind error [%d] %S", last_error, getWinErrorMessage(last_error));
+		closesocket(s);
 		return FALSE;
 	}
-	SOCKADDR_BTH bt_addr;
-	memset(&bt_addr, 0, sizeof(bt_addr));
-	int size = sizeof(bt_addr);
-	if (getpeername(soc, (sockaddr*)&bt_addr, &size)) {
-		closesocket(soc);
+	
+	int size = sizeof(SOCKADDR_BTH);
+	if (getsockname(s, (sockaddr*)&btAddr, &size)) {
+		DWORD last_error = WSAGetLastError();
+		debug2("getsockname error [%d] %S", last_error, getWinErrorMessage(last_error));
+		closesocket(s);
 		return FALSE;
 	}
-	closesocket(soc);
-	return (bt_addr.btAddr != 0);
+	closesocket(s);
+	//return TRUE;
+	return (btAddr.btAddr != 0);
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStatus(JNIEnv *env, jclass peerClass) {
