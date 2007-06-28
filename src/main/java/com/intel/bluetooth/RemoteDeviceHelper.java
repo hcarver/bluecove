@@ -105,13 +105,13 @@ public abstract class RemoteDeviceHelper {
 	
 	public static String getFriendlyName(RemoteDevice device, long address, boolean alwaysAsk) throws IOException {
 		String name = null;
-		if (device instanceof RemoteDeviceWithExtendedInfo) {
-			name = ((RemoteDeviceWithExtendedInfo)device).name;
-		} else {
-			// TODO
+		if (!(device instanceof RemoteDeviceWithExtendedInfo)) {
+			device = createRemoteDevice(device);
 		}
+		name = ((RemoteDeviceWithExtendedInfo)device).name;
 		if (alwaysAsk || name == null || name.equals("")) {
 			name = BlueCoveImpl.instance().getBluetoothStack().getRemoteDeviceFriendlyName(address);
+			((RemoteDeviceWithExtendedInfo)device).name = name;
 		}
 		return name;
 	}
