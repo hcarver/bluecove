@@ -36,6 +36,8 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.InputConnection;
 import javax.microedition.io.OutputConnection;
 
+import com.intel.bluetooth.gcf.socket.ServerSocketConnection;
+import com.intel.bluetooth.gcf.socket.SocketConnection;
 import com.intel.bluetooth.obex.OBEXClientSessionImpl;
 import com.intel.bluetooth.obex.OBEXSessionNotifierImpl;
 
@@ -63,6 +65,8 @@ public class MicroeditionConnector {
 
 	public static final int READ_WRITE = Connector.READ_WRITE;
 
+	private static Hashtable/*<String, any>*/ suportScheme = new Hashtable();
+	
 	private static Hashtable/*<String, any>*/ params = new Hashtable();
 	
 	private static Hashtable/*<String, any>*/ cliParams = new Hashtable();
@@ -84,6 +88,11 @@ public class MicroeditionConnector {
 		cliParams.put(AUTHENTICATE, AUTHENTICATE);
 		cliParams.put(ENCRYPT, ENCRYPT);
 		cliParams.put(MASTER, MASTER);
+		
+		suportScheme.put(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM, Boolean.TRUE);
+		suportScheme.put(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX, Boolean.TRUE);
+		suportScheme.put(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX, Boolean.TRUE);
+		suportScheme.put("socket", Boolean.TRUE);
 	}
 
 	/*
@@ -116,7 +125,7 @@ public class MicroeditionConnector {
 			throw new ConnectionNotFoundException(name);
 		}
 		String scheme = name.substring(0, schemeEnd);
-		if (!scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM) && !scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX)) {
+		if (!suportScheme.containsKey(scheme)) {
 			throw new ConnectionNotFoundException(scheme);
 		}
 		
@@ -193,6 +202,23 @@ public class MicroeditionConnector {
 			} else {
 				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(RemoteDeviceHelper.getAddress(host), channel, paramBoolean(
 						values, AUTHENTICATE), paramBoolean(values, ENCRYPT))); 
+			}
+		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX)) {
+			if (isServer) {
+				throw new ConnectionNotFoundException(scheme);
+			} else {
+				return new OBEXClientSessionImpl(new SocketConnection(host, channel)); 
+			}
+		} else if (scheme.equals("socket")) {
+			if (isServer) {
+				try {
+					channel = Integer.parseInt(portORuuid);
+				} catch (NumberFormatException e) {
+					throw new IllegalArgumentException("port " + portORuuid);
+				}
+				return new ServerSocketConnection(channel);
+			} else {
+				return new SocketConnection(host, channel);
 			}
 		} else {
 			throw new ConnectionNotFoundException(scheme);

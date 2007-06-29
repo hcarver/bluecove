@@ -91,6 +91,7 @@ public class OBEXClientSessionImpl implements ClientSession {
 		if (serverMTU < this.mtu) {
 			this.mtu = serverMTU;
 		}
+		DebugLog.debug("mtu selected", this.mtu);
 		
 		HeaderSet responseHeaders = OBEXHeaderSetImpl.read(b[0], b, 7);
 		
@@ -166,7 +167,7 @@ public class OBEXClientSessionImpl implements ClientSession {
 		writeOperation(OBEXOperationCodes.PUT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
 		HeaderSet replyHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
-		DebugLog.debug("PUT reply", replyHeaders.getResponseCode());
+		DebugLog.debug0x("PUT reply", replyHeaders.getResponseCode());
 		
 		if (replyHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_CONTINUE) {
 			throw new IOException ("Connection not accepted");
@@ -223,6 +224,9 @@ public class OBEXClientSessionImpl implements ClientSession {
 		}
 		if (data2 != null) {
 			len += data2.length;
+		}
+		if (len > mtu) {
+			 throw new IOException("Can't sent more data than in MTU, len=" + len + ", mtu="+ mtu);
 		}
 		OBEXHeaderSetImpl.writeObexLen(os, commId, len);
 		if (this.connectionID != -1) {

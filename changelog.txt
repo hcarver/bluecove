@@ -2,6 +2,9 @@
 
 * 2.0.0 to be Released 2007-07-xx
 
+    2007-06-29 Vlad Skarzhevskyy
+    * OBEX PUT over rfcomm and tcp  (btgoep and tcpobex)
+
     2007-06-22 Vlad Skarzhevskyy
     * Merged J9 MIDP compatibility enhancements suggested by Kobus Grobler
     * bluecove_ce.dll WIDCOMM Stack on WinCE

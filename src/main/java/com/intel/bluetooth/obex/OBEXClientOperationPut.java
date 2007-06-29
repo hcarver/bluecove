@@ -63,10 +63,10 @@ public class OBEXClientOperationPut extends OBEXClientOperation {
 				int written = 0;
 				while (written < len) {
 					int avalable = (buffer.length - bufferLength);
-					if (len < avalable) {
-						avalable = len;
+					if ((len - written) < avalable) {
+						avalable = len - written;
 					}
-					System.arraycopy(b, off, buffer, bufferLength, avalable);
+					System.arraycopy(b, off + written, buffer, bufferLength, avalable);
 					bufferLength += avalable;
 					written += avalable;
 					if (bufferLength == buffer.length) {
@@ -133,7 +133,7 @@ public class OBEXClientOperationPut extends OBEXClientOperation {
 		HeaderSet dataHeaders = session.createHeaderSet();
 		dataHeaders.setHeader(dataHeaderID, buffer);
 		
-		if (sendHeadersLength + (buffer.length + OBEXOperationCodes.OBEX_MTU_HEADER_RESERVE) > session.mtu) {
+		if ((sendHeadersLength + buffer.length + OBEXOperationCodes.OBEX_MTU_HEADER_RESERVE) > session.mtu) {
 			session.writeOperation(commId, OBEXHeaderSetImpl.toByteArray(dataHeaders));
 		} else {
 			session.writeOperation(commId, OBEXHeaderSetImpl.toByteArray(sendHeaders), OBEXHeaderSetImpl.toByteArray(dataHeaders));
@@ -143,7 +143,7 @@ public class OBEXClientOperationPut extends OBEXClientOperation {
 		byte[] b = session.readOperation();
 		replyHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
 		DebugLog.debug0x("PUT reply", replyHeaders.getResponseCode());
-		if (replyHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_SUCCESS) {
+		if (replyHeaders.getResponseCode() == OBEXOperationCodes.OBEX_RESPONSE_SUCCESS) {
 		} else if (replyHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_CONTINUE) {
 			throw new IOException ("Can't continue connection, 0x" + Integer.toHexString(replyHeaders.getResponseCode()));
 		}

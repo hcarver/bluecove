@@ -39,7 +39,7 @@ public interface OBEXOperationCodes {
 	
 	public static final short OBEX_MINIMUM_MTU = 0xFF;
 	
-	public static final short OBEX_MTU_HEADER_RESERVE = 6;
+	public static final short OBEX_MTU_HEADER_RESERVE = 3 + 5 + 3;
 	
 	public static final char FINAL_BIT = 0x80;
 	
