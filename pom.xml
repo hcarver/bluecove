@@ -65,7 +65,7 @@
     <distributionManagement>
         <site>
             <id>test-pyx4j-site</id>
-            <url>file:///home/apache/pyx4j/snapshot/bluecove</url>
+            <url>file:///home/apache/bluecove</url>
         </site>
         <repository>
             <id>pyx4j.com-file-release</id>
