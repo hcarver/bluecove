@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="BlueCove">
+
+<!-- @version $Revision$ ($Author$) $Date$ -->
+
+    <publishDate position="left" format="MM-dd-yyyy HH:mm z 'GMT'Z" />
+
+    <bannerLeft>
+            <name>BlueCove</name>
+    </bannerLeft>
+
+    <bannerRight>
+        <name>Sourceforge</name>
+        <src>http://sourceforge.net/sflogo.php?group_id=114020&amp;amp;type=4</src>
+        <href>http://sourceforge.net/projects/bluecove/</href>
+    </bannerRight>
+
+    <body>
+
+        <!--4release-->
+        <!-- menu name="Ver #version#" inherit="top"/-->
+
+        <!--4snapshot-->
+        <menu name="Ver #build#" inherit="top">
+            <!--item name="Release 2.0.0" href="http://bluecove.sourceforge.net/"/-->
+        </menu>
+
+        <menu ref="parent" />
+
+        <menu name="Overview">
+            <item name="Main Project" href="http://code.google.com/p/bluecove/" />
+            <item name="Introduction" href="index.html" />
+            <item name="Run Web Start" href="http://bluecove.sourceforge.net/bluecove-tester/awt-bctest.jnlp" />
+
+            <item name="Download" href="#">
+                <item name="Releases" href="http://sourceforge.net/project/showfiles.php?group_id=114020"/>
+                <item name="Snapshot" href="http://www.pyx4me.com/maven2-snapshot/net/sf/bluecove/bluecove/#version#/"/>
+                <item name="SVN Access" href="source-repository.html"/>
+                <item name="Browse SVN" href="http://bluecove.googlecode.com/svn/trunk/"/>
+            </item>
+
+            <item name="Maven" href="maven.html"/>
+
+            <!--4release-->
+            <!--item name="Preview 2.0.1" href="http://pyx4me.com/snapshot/bluecove/"/-->
+
+        </menu>
+
+
+        <menu ref="modules" collapse="true" />
+
+        <menu ref="reports" />
+
+    </body>
+
+</project>

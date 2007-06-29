@@ -1,0 +1,18 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/guides/mini/guide-apt-format.html
+
+                                    ------------------
+                                    BlueCove JSR-82 project
+                                    ------------------
+
+BlueCove
+
+    BlueCove is a Java library for Bluetooth (JSR-82 implementation) that currently interfaces with the WIDCOMM, BlueSoleil and Microsoft Bluetooth stack found in Windows XP SP2 or Windows Vista.
+    BlueCove can be used in  Java 2 Platform Standard Edition (J2SE).
+
+    Main project website {{{http://code.google.com/p/bluecove/}http://code.google.com/p/bluecove/}}
+
+* BlueCove Tests on windows
+
+    You can help us to make BlueCove better or understand how we are testing it look {{{http://bluecove.sourceforge.net/bluecove-tester}here}}.
+

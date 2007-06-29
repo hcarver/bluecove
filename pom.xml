@@ -44,6 +44,19 @@
 		<url>http://code.google.com/p/bluecove/issues/list</url>
 	</issueManagement>
 
+    <mailingLists>
+        <mailingList>
+            <name>bluecove-users</name>
+            <post>bluecove-users@googlegroups.com</post>
+            <archive>http://groups.google.com/group/bluecove-users</archive>
+        </mailingList>
+        <mailingList>
+            <name>bluecove-developers</name>
+            <post>bluecove-developers@googlegroups.com</post>
+            <archive>http://groups.google.com/group/bluecove-developers</archive>
+        </mailingList>
+    </mailingLists>
+
     <ciManagement>
         <system>Cruisecontrol</system>
         <url>https://pyx4j.com/cruisecontrol/</url>
@@ -84,6 +97,8 @@
             <roles>
                 <role>developer</role>
                 <role>Build master</role>
+                <role>developer-Winsock</role>
+                <role>developer-WIDCOMM</role>
             </roles>
             <timezone>-5</timezone>
         </developer>
@@ -95,8 +110,18 @@
             <email>gnuloki@gmail.com</email>
             <roles>
                 <role>developer</role>
+                <role>developer-OS-X</role>
             </roles>
             <timezone>-5</timezone>
+        </contributor>
+
+        <contributor>
+            <name>Hakan Lager</name>
+            <email>digiloo@gmail.com</email>
+            <roles>
+                <role>developer</role>
+                <role>developer-BlueZ</role>
+            </roles>
         </contributor>
 
         <!--
@@ -244,6 +269,161 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>site-fix-css</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <!-- Set build number -->
+                                <replace dir="${project.build.directory}/site">
+                                    <include name="*.html"></include>
+                                    <replacefilter token="#build#" value="${label}"/>
+                                    <replacefilter token="#version#" value="${version}"/>
+                                    <replacetoken><![CDATA[</body>]]></replacetoken>
+                                    <replacevalue><![CDATA[<script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script><script type="text/javascript">_uacct = "UA-1249205-3";urchinTracker();</script></body>]]></replacevalue>
+                                </replace>
+                                <!--
+                                <copy overwrite="true" failonerror="false"
+                                      file="${basedir}/../target/site/css/site-child.css"
+                                      tofile="${project.build.directory}/site/css/site.css"/>
+                                -->
+                                <!-- this done for deep child modules  -->
+                                <copy overwrite="true" failonerror="false"
+                                      file="${basedir}/../target/site/css/site-child.css"
+                                      tofile="${project.build.directory}/site/css/site-child.css"/>
+                                <!--copy overwrite="true" todir="${project.build.directory}/site/css-images" failonerror="false">
+                                    <fileset dir="${basedir}/../target/site/css-images"/>
+                                </copy-->
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <forkMode>always</forkMode>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <quiet>true</quiet>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <configuration>
+                    <linkXref>true</linkXref>
+                    <minimumTokens>100</minimumTokens>
+                    <targetJdk>1.4</targetJdk>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jdepend-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <!-- This is TO-DO list -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>taglist-maven-plugin</artifactId>
+            </plugin>
+            <!--
+            <plugin>
+               <groupId>org.codehaus.mojo</groupId>
+               <artifactId>simian-report-maven-plugin</artifactId>
+               <version>1.0-tmp</version>
+            </plugin>
+            -->
+            <!--
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-changes-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>changes-report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+                <configuration>
+                    <xmlPath>${basedir}/src/changes.xml</xmlPath>
+                </configuration>
+            </plugin>
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>changelog-maven-plugin</artifactId>
+                <!--artifactId>maven-changelog-plugin</artifactId-->
+                <configuration>
+                    <basedir>${basedir}</basedir>
+                </configuration>
+                <reportSets>
+                    <reportSet>
+                        <id>dual-report</id>
+                        <configuration>
+                            <type>range</type>
+                            <range>90</range>
+                        </configuration>
+                        <reports>
+                            <report>changelog</report>
+                            <report>file-activity</report>
+                            <report>dev-activity</report>
+                        </reports>
+                  </reportSet>
+                </reportSets>
+            </plugin>
+       </plugins>
+    </reporting>
+
+    <profiles>
+        <profile>
+            <id>build</id>
+            <build>
+                <plugins>
+                    <!-- jar sources during snapshot build -->
+                    <plugin>
+                        <inherited>true</inherited>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
