@@ -17,7 +17,7 @@
  *
  *  @version $Id$
  */
-package com.sun.cdc.io.j2me.btgoep;
+package com.sun.cdc.io.j2me.tcpobex;
 
 import java.io.IOException;
 
@@ -28,14 +28,14 @@ import com.intel.bluetooth.MicroeditionConnector;
 import com.sun.cdc.io.ConnectionBaseInterface;
 
 /**
- * This class is Proxy for btgoep (OBEX over RFCOMM) Connection implementations used in WTK and MicroEmulator
+ * This class is Proxy for tcpobex (OBEX over TCP) Connection implementations used in WTK and MicroEmulator
  * 
  * @author vlads
  */
 public class Protocol implements ConnectionBaseInterface {
 
 	public Connection openPrim(String name, int mode, boolean timeouts) throws IOException {
-		return MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX + ":" + name, mode, timeouts);
+		return MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX + ":" + name, mode, timeouts);
 	}
 
 }

@@ -18,7 +18,7 @@
  *
  *  @version $Id$
  */ 
-package com.intel.bluetooth.btgoep;
+package com.intel.bluetooth.tcpobex;
 
 import java.io.IOException;
 
@@ -33,8 +33,9 @@ import com.ibm.oti.connection.CreateConnection;
 import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.MicroeditionConnector;
 
+
 /**
- * This class is Proxy for btgoep (OBEX over RFCOMM) Connection implementations for IBM J9 support
+ * This class is Proxy for tcpobex (OBEX over TCP) Connection implementations for IBM J9 support
  * 
  * @author vlads
  *
@@ -48,7 +49,7 @@ public class Connection implements CreateConnection, ClientSession, SessionNotif
 	}
 
 	public void setParameters(String spec, int access, boolean timeout) throws IOException {
-		impl = MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX + ":" + spec, access, timeout);
+		impl = MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX + ":" + spec, access, timeout);
 	}
 
 	public void setParameters2(String spec, int access, boolean timeout) throws IOException {
@@ -107,5 +108,6 @@ public class Connection implements CreateConnection, ClientSession, SessionNotif
 	public javax.microedition.io.Connection acceptAndOpen(ServerRequestHandler handler, Authenticator auth) throws IOException {
 		return ((SessionNotifier)impl).acceptAndOpen(handler, auth);
 	}
+
 
 }
