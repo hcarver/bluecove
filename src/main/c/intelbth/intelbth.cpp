@@ -139,7 +139,7 @@ BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env) {
 		closesocket(s);
 		return FALSE;
 	}
-	
+
 	int size = sizeof(SOCKADDR_BTH);
 	if (getsockname(s, (sockaddr*)&btAddr, &size)) {
 		DWORD last_error = WSAGetLastError();
@@ -268,6 +268,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 		return INQUIRY_ERROR;
 	}
 
+	// WSALookupServiceBegin Do not return for 10 seconds.
+	env->CallVoidMethod(startedNotify, notifyMethod);
+	if (ExceptionCheckCompatible(env)) {
+		LeaveCriticalSection(&csLookup);
+		return INQUIRY_ERROR;
+	}
+
 #ifdef _WIN32_WCE
 	if (WSALookupServiceBegin(&queryset, LUP_CONTAINERS, &hDeviceLookup)) {
 #else
@@ -276,16 +283,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 		DWORD last_error = WSAGetLastError();
 
 		LeaveCriticalSection(&csLookup);
-		throwBluetoothStateExceptionWinErrorMessage(env, "Can't start Lookup", last_error);
+		//throwBluetoothStateExceptionWinErrorMessage(env, "Can't start Lookup", last_error);
+		debug2("WSALookupServiceBegin error [%d] %S", last_error, getWinErrorMessage(last_error));
 		return INQUIRY_ERROR;
 	}
 
 	LeaveCriticalSection(&csLookup);
 
-	env->CallVoidMethod(startedNotify, notifyMethod);
-	if (ExceptionCheckCompatible(env)) {
-		return INQUIRY_ERROR;
-	}
 
 	// fetch results
     jint result = -1;
@@ -298,7 +302,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 
 	while (result == -1) {
 		memset(buf, 0, bufSize);
-		
+
 		LPWSAQUERYSET pwsaResults = (LPWSAQUERYSET) buf;
 		pwsaResults->dwSize = sizeof(WSAQUERYSET);
 		pwsaResults->dwNameSpace = NS_BTH;
@@ -392,7 +396,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothPeer_cancelInquiry(
 	}
 
 	debug("->cancelInquiry WSALookupServiceEnd");
-	
+
 	WSALookupServiceEnd(hDeviceLookup);
 
 	hDeviceLookup = NULL;
@@ -1129,7 +1133,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 		debug("return empty");
 		result = env->NewStringUTF((char*)"");
 	}
-	return result; 
+	return result;
 #endif
 }
 
