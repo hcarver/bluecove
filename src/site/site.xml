@@ -40,6 +40,8 @@
 
             <item name="Maven" href="maven.html"/>
 
+            <item name="Examples" href="bluecove-examples/"/>
+
             <!--4release-->
             <!--item name="Preview 2.0.1" href="http://pyx4me.com/snapshot/bluecove/"/-->
 
