@@ -89,7 +89,7 @@ public abstract class RemoteDeviceHelper {
 		if (dev == null) {
 			dev = new RemoteDeviceWithExtendedInfo(address, name);
 			devicesCashed.put(new Long(address), dev);
-		} else if (dev.name == null) {
+		} else if (!Utils.isStringSet(dev.name)) {
 			dev.name = name;
 		}
 		return dev;

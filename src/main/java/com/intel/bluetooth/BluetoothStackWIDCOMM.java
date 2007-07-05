@@ -184,6 +184,10 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		for (Enumeration iter = reported.elements(); iter.hasMoreElements();) {
 			RemoteDevice device = (RemoteDevice) iter.nextElement();
 			if (deviceAddrStr.equalsIgnoreCase(device.getBluetoothAddress())) {
+				if (Utils.isStringSet(deviceName)) {
+					// Update device name 
+					RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName);
+				}
 				return;
 			}
 			

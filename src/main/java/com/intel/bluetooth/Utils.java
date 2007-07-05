@@ -97,6 +97,10 @@ public abstract class Utils {
 		return ((((int)valueHi << 8) & 0xFF00) + (valueLo & 0xFF));
 	}
 	
+	public static boolean isStringSet(String str) {
+        return ((str != null) && (str.length() > 0));
+	}
+	
 	/**
 	 * J2ME/J9 compatibility instead of Vector.toArray
 	 * 
