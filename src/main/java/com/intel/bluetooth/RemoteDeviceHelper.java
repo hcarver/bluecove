@@ -90,6 +90,10 @@ public abstract class RemoteDeviceHelper {
 			dev = new RemoteDeviceWithExtendedInfo(address, name);
 			devicesCashed.put(new Long(address), dev);
 		} else if (!Utils.isStringSet(dev.name)) {
+			// New name found
+			dev.name = name;
+		} else if (Utils.isStringSet(name)) {
+			// Update name if changed
 			dev.name = name;
 		}
 		return dev;
@@ -109,9 +113,11 @@ public abstract class RemoteDeviceHelper {
 			device = createRemoteDevice(device);
 		}
 		name = ((RemoteDeviceWithExtendedInfo)device).name;
-		if (alwaysAsk || name == null || name.equals("")) {
+		if (alwaysAsk || (!Utils.isStringSet(name))) {
 			name = BlueCoveImpl.instance().getBluetoothStack().getRemoteDeviceFriendlyName(address);
-			((RemoteDeviceWithExtendedInfo)device).name = name;
+			if (Utils.isStringSet(name)) {
+				((RemoteDeviceWithExtendedInfo)device).name = name;
+			}
 		}
 		return name;
 	}
