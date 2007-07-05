@@ -64,10 +64,10 @@ void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char 
 	va_end(ap);
 }
 
-char* bool2str(BOOL b) { 
-	if (b == false)  { 
-		return "FALSE"; 
-	} else { 
+char* bool2str(BOOL b) {
+	if (b == false)  {
+		return "FALSE";
+	} else {
 		return "TRUE";
 	}
 }
@@ -82,6 +82,7 @@ void throwException(JNIEnv *env, const char *name, const char *msg) {
      if (cls != NULL) {
          env->ThrowNew(cls, msg);
 	 } else {
+	     debug1("Can't find Exception %s", name);
 		 env->FatalError("Illegal Exception name");
 	 }
      /* free the local ref */

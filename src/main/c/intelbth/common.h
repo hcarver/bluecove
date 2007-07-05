@@ -45,7 +45,7 @@
 
 //#ifdef SHELL_AYGSHELL
 //#include <aygshell.h>
-//#pragma comment(lib, "aygshell.lib") 
+//#pragma comment(lib, "aygshell.lib")
 //#endif // SHELL_AYGSHELL
 
 
@@ -64,7 +64,7 @@
 
 #if _WIN32_WCE < 0x500 && ( defined(WIN32_PLATFORM_PSPC) || defined(WIN32_PLATFORM_WFSP) )
 	#pragma comment(lib, "ccrtrtti.lib")
-	#ifdef _X86_	
+	#ifdef _X86_
 		#if defined(_DEBUG)
 			#pragma comment(lib, "libcmtx86d.lib")
 		#else
@@ -88,9 +88,9 @@
 #include <windows.h>
 #include <tchar.h>
 
-// vc6 = 1200, vc7 = 1300, vc7.1 = 1310, vc8 = 1400 
+// vc6 = 1200, vc7 = 1300, vc7.1 = 1310, vc8 = 1400
 
-#if _MSC_VER > 1200 
+#if _MSC_VER > 1200
 #include <strsafe.h>
 #else
 #define VC6
@@ -139,13 +139,13 @@ void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char 
 #define debug4(fmt, message1, message2, message3, message4) callDebugListener(env, CPP_FILE, __LINE__, fmt, message1, message2, message3, message4);
 
 #ifdef EXT_DEBUG
-#define Edebug(fmt)  debug(fmt) 
+#define Edebug(fmt)  debug(fmt)
 #define Edebugs(fmt, message) debugs(fmt, message)
 #define Edebugss(fmt, message1, message2) debugss(fmt, message1, message2)
 #define Edebug1(fmt, message) debugs(fmt, message)
 #define Edebug2(fmt, message1, message2) debugss(fmt, message1, message2)
 #else
-#define Edebug(fmt) 
+#define Edebug(fmt)
 #define Edebugs(fmt, message)
 #define Edebugss(fmt, message1, message2)
 #define Edebug1(fmt, message)
@@ -159,14 +159,18 @@ void throwException(JNIEnv *env, const char *name, const char *msg);
 void throwExceptionExt(JNIEnv *env, const char *name, const char *fmt, ...);
 
 void throwIOException(JNIEnv *env, const char *msg);
+#define _throwIOException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwIOException(env, msg); }
 
 void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...);
 
 void throwBluetoothStateException(JNIEnv *env, const char *msg);
+#define _throwBluetoothStateException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwBluetoothStateException(env, msg); }
 
 void throwBluetoothStateExceptionExt(JNIEnv *env, const char *fmt, ...);
 
+
 void throwRuntimeException(JNIEnv *env, const char *msg);
+#define _throwRuntimeException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwRuntimeException(env, msg); }
 
 void throwExceptionWinErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error);
 
@@ -208,7 +212,7 @@ private:
 	CRITICAL_SECTION lock;
 
 	int size;
-	
+
 	long magic1b;
 	long magic2b;
 	jbyte buffer[RECEIVE_BUFFER_MAX];
@@ -264,12 +268,12 @@ private:
 	CRITICAL_SECTION lock;
 
 	int size;
-	
+
 	//each Handle type is different positive value range.
 	int handleOffset;
 
 	BOOL delayDelete;
-	
+
 	// generate different handlers for each new object
 	int handleMove;
 

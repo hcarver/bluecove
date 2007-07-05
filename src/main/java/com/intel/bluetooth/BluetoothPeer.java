@@ -29,7 +29,7 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
-public class BluetoothPeer {
+abstract class BluetoothPeer implements BluetoothStack {
 
 	public static int BTH_MODE_POWER_OFF = 1;
 	
@@ -69,7 +69,7 @@ public class BluetoothPeer {
 	/*
 	 * perform synchronous inquiry
 	 */
-	public native int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener);
+	public native int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
 		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName);

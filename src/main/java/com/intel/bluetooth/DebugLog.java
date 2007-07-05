@@ -164,7 +164,7 @@ public class DebugLog {
 	
 	public static void nativeDebugCallback(String fileName, int lineN, String message) {
 		try {
-			if (fileName.startsWith(".\\")) {
+			if ((fileName != null) && fileName.startsWith(".\\")) {
 				fileName = fileName.substring(2);
 			}
 			DebugLog.debugNative(fileName + ":" + lineN, message);

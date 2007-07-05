@@ -204,23 +204,23 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 
 	jclass peerClass = env->GetObjectClass(peer);
 	if (peerClass == NULL) {
-		throwRuntimeException(env, "Fail to get Object Class");
+		_throwRuntimeException(env, "Fail to get Object Class");
 		return INQUIRY_ERROR;
 	}
 	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;)V");
 	if (deviceDiscoveredCallbackMethod == NULL) {
-		throwRuntimeException(env, "Fail to get MethodID deviceDiscoveredCallback");
+		_throwRuntimeException(env, "Fail to get MethodID deviceDiscoveredCallback");
 		return INQUIRY_ERROR;
 	}
 
 	jclass notifyClass = env->GetObjectClass(startedNotify);
 	if (notifyClass == NULL) {
-		throwRuntimeException(env, "Fail to get Object Class");
+		_throwRuntimeException(env, "Fail to get Object Class");
 		return INQUIRY_ERROR;
 	}
 	jmethodID notifyMethod = env->GetMethodID(notifyClass, "deviceInquiryStartedCallback", "()V");
 	if (notifyMethod == NULL) {
-		throwRuntimeException(env, "Fail to get MethodID deviceInquiryStartedCallback");
+		_throwRuntimeException(env, "Fail to get MethodID deviceInquiryStartedCallback");
 		return INQUIRY_ERROR;
 	}
 
@@ -264,7 +264,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 
 	if (hDeviceLookup != NULL) {
 		LeaveCriticalSection(&csLookup);
-		throwBluetoothStateException(env, "Another inquiry already running");
+		_throwBluetoothStateException(env, "Another inquiry already running");
 		return INQUIRY_ERROR;
 	}
 
@@ -333,7 +333,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 			hDeviceLookup = NULL;
 			LeaveCriticalSection(&csLookup);
 			debug("doInquiry, exits");
-			break;
+		break;
 		}
 
 		LeaveCriticalSection(&csLookup);

@@ -125,6 +125,10 @@ public class BluetoothStackBlueZ implements BluetoothStack {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
+		// TODO Auto-generated method stub
+	}
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
 		// TODO Auto-generated method stub

@@ -110,6 +110,8 @@ public interface BluetoothStack {
 	 */
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName);
+	
 	//---------------------- Service search ---------------------- 
 	
 	/**
