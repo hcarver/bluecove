@@ -1,0 +1,59 @@
+ @version $Revision$ ($Author$) $Date$
+
+* Build
+
+   We are using maven2 to build project.
+
+   Ant can be used as well but the jar created has extra classes that are not supposed to be there.
+
+   To create Eclipse projects run:
+     mvn eclipse:clean eclipse:eclipse -DdownloadSources=true
+
+   To run build without tests:
+     mvn -Dmaven.test.skip=true
+
+   build-native-bluecove.cmd and build-native-intelbth.cmd can be used to build dlls on windows.
+
+* Building Release
+
+    * Test locally
+
+        mvn clean deploy site-deploy
+
+        mvn source:jar javadoc:jar repository:bundle-create
+
+    * Remove all -SNAPSHOT and verify version from pom.xml, BlueCoveImpl.java, build.version, common.h, bluecove.rc, intelbth.rc
+
+    * Comment out sections marked <!--4release--> and <!--4snapshot--> in src/site/site.xml
+
+    * SVN commit
+
+    * run java and c/c++ build again.
+
+    * Upload bluecove-2.X.X-bundle.jar to maven Central Repository
+
+        http://maven.apache.org/guides/mini/guide-central-repository-upload.html
+
+    * Build bluecove-examples project the same way. No need to Upload resulting jars! Only site.
+
+    * Upload the context of /home/apache/bluecove to http://bluecove.sourceforge.net/
+
+    * Upload the distribution jars bluecove-2.X.X.jar and bluecove-2.X.X-sources.tar.gz to http://code.google.com/p/bluecove/ and http://sourceforge.net/projects/bluecove/
+
+    * Create Tag in SVN
+
+    * Update version to  (x+1)-SNAPSHOT in pom.xml, BlueCoveImpl.java, build.version, common.h, bluecove.rc, intelbth.rc
+
+    * Update src/site/site.xml reverse changes for <!--4release--> and <!--4snapshot-->
+
+* cruisecontrol
+
+    "bluecove-nightly" 1AM EST
+        mvn clean --fail-never -P build|scm:update -P build|clean deploy site-deploy -P build
+
+    cruisecontrol runs only on Unix now
+      windows dll are taken from SVN http://bluecove.googlecode.com/svn/build/win-dlls/
+
+      If you made modification to C/C++ code place compiled library in SVN
+
+        https://bluecove.googlecode.com/svn/build/win-dlls/
