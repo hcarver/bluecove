@@ -35,45 +35,45 @@ package com.intel.bluetooth;
 public class BlueCoveImpl {
 
 	public static final int versionMajor = 2;
-	
+
 	public static final int versionMinor = 0;
-	
-	public static final int versionBuild = 0;
-	
-	public static final String versionSufix = ""; //SNAPSHOT
-	
+
+	public static final int versionBuild = 1;
+
+	public static final String versionSufix = "-SNAPSHOT"; //SNAPSHOT
+
 	public static final String version = String.valueOf(versionMajor) + "." + String.valueOf(versionMinor) + "." + String.valueOf(versionBuild) + versionSufix;
 
 	public static final int nativeLibraryVersionExpected = versionMajor * 10000 + versionMinor * 100 + versionBuild;
-	
+
 	public static final String STACK_WINSOCK = "winsock";
-	
+
 	public static final String STACK_WIDCOMM = "widcomm";
-	
+
 	public static final String STACK_BLUESOLEIL = "bluesoleil";
-	
+
 	public static final String STACK_BLUEZ = "bluez";
-	
-	// We can't use the same DLL on windows for all implemenations. 
-	// Since WIDCOMM need to be compile /MD using VC6 and winsock /MT using VC2005 
+
+	// We can't use the same DLL on windows for all implemenations.
+	// Since WIDCOMM need to be compile /MD using VC6 and winsock /MT using VC2005
 	// This variable can be used to simplify development/test builds
 	private static final boolean oneDLLbuild = false;
-	
+
 	public static final String NATIVE_LIB_MS = "intelbth";
-	
+
 	public static final String NATIVE_LIB_WIDCOMM = oneDLLbuild?NATIVE_LIB_MS:"bluecove";
-	
-	public static final String NATIVE_LIB_BLUEZ = "bluecove"; 
-	
+
+	public static final String NATIVE_LIB_BLUEZ = "bluecove";
+
 	public static final String NATIVE_LIB_OSX = "bluecove";
-	
+
 	/**
 	 * To work on BlueSoleil version 2.3 we need to compile C++ code /MT the same as winsock.
 	 */
-	public static final String NATIVE_LIB_BLUESOLEIL = NATIVE_LIB_MS; 
-	
+	public static final String NATIVE_LIB_BLUESOLEIL = NATIVE_LIB_MS;
+
 	private BluetoothStack bluetoothStack;
-	
+
     /**
      * Allow default initialization.
      * In Secure environment instance() should be called initialy from secure contex.
@@ -83,14 +83,14 @@ public class BlueCoveImpl {
     }
 
 	private BlueCoveImpl() {
-		
+
 		BluetoothStack detectorStack = null;
 		String stackFirstDetector = System.getProperty("bluecove.stack.first");
 		String stackSelected = System.getProperty("bluecove.stack");
 		if ( stackFirstDetector == null) {
 			 stackFirstDetector = stackSelected;
 		}
-		
+
 		switch (NativeLibLoader.getOS()) {
 			case NativeLibLoader.OS_LINUX:
 				if (!NativeLibLoader.isAvailable(NATIVE_LIB_BLUEZ)) {
@@ -113,15 +113,15 @@ public class BlueCoveImpl {
 				break;
 			default:
 				throw new Error("BlueCove not avalable");
-					
+
 		}
-		
+
 		int libraryVersion = detectorStack.getLibraryVersion();
 		if (nativeLibraryVersionExpected != libraryVersion) {
 			DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected " + nativeLibraryVersionExpected);
 			return;
 		}
-		
+
 		if (stackSelected == null) {
 			//auto detect
 			int aval = detectorStack.detectBluetoothStack();
@@ -139,13 +139,13 @@ public class BlueCoveImpl {
 		} else {
 			DebugLog.debug("BluetoothStack selected", stackSelected);
 		}
-		
+
 		stackSelected = setBluetoothStack(stackSelected, detectorStack);
-		
+
 		// bluetoothStack.destroy(); May stuck in WIDCOMM forever. Exit JVM anyway.
 		final ShutdownHookThread shutdownHookThread = new ShutdownHookThread();
 		shutdownHookThread.start();
-		
+
 		Runnable r = new Runnable() {
 			public void run() {
 				synchronized (shutdownHookThread) {
@@ -157,23 +157,23 @@ public class BlueCoveImpl {
 				}
 			}
 		};
-		
+
 		try {
 			// since Java 1.3
 			UtilsJavaSE.runtimeAddShutdownHook(new Thread(r));
 		} catch (Throwable java12) {
 		}
-		
+
 		System.out.println("BlueCove version " + version + " on " + stackSelected);
 	}
-	
+
 	private class ShutdownHookThread extends Thread {
-		
+
 		ShutdownHookThread() {
 			super("BluecoveShutdownHookThread");
 			UtilsJavaSE.threadSetDaemon(this);
 		}
-		
+
 		public void run() {
 			synchronized (this) {
 				try {
@@ -188,7 +188,7 @@ public class BlueCoveImpl {
 				this.notifyAll();
 			}
 		}
-		
+
 	}
 
     public static BlueCoveImpl instance() {
@@ -214,11 +214,11 @@ public class BlueCoveImpl {
 			throw new Error("BlueCove not avalable");
 		}
 	}
-    
+
     public String setBluetoothStack(String stack) {
     	return setBluetoothStack(stack, null);
     }
-    
+
     private String setBluetoothStack(String stack, BluetoothStack detectorStack) {
     	if (bluetoothStack != null) {
     		bluetoothStack.destroy();
@@ -239,7 +239,7 @@ public class BlueCoveImpl {
 			DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected " + nativeLibraryVersionExpected);
 			return null;
 		}
-		
+
     	if (DebugLog.isDebugEnabled()) {
     		newStack.enableNativeDebug(DebugLog.class, true);
 		}
@@ -247,13 +247,13 @@ public class BlueCoveImpl {
     	bluetoothStack = newStack;
     	return bluetoothStack.getStackID();
     }
-    
+
     public void enableNativeDebug(boolean on) {
     	if (bluetoothStack != null) {
     		bluetoothStack.enableNativeDebug(DebugLog.class, on);
     	}
     }
-    
+
 	public BluetoothStack getBluetoothStack() {
 		if (bluetoothStack == null) {
 			throw new Error("BlueCove not avalable");

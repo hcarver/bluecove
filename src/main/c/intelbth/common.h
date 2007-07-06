@@ -22,7 +22,7 @@
 #pragma once
 
 #ifndef BLUECOVE_VERSION
-#define BLUECOVE_VERSION 20000
+#define BLUECOVE_VERSION 20001
 #endif
 
 #ifdef _WIN32_WCE
