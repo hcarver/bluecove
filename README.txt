@@ -6,15 +6,17 @@
 == About ==
 
 BlueCove is a LGPL licensed JSR-82 implementation on Java Standard Edition (J2SE) that currently interfaces with
-the Microsoft Bluetooth stack. Originally developed by Intel Research and
+the WIDCOMM, BlueSoleil and Microsoft Bluetooth stack. Originally developed by Intel Research and
 currently maintained by volunteers.
 
 == Requirements ==
 
+  * WIDCOMM (Broadcom) BTW Stack software version 1.4.2.10 SP5 or above
+  * BlueSoleil version 1.6.0 or above
   * Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer and Windows Mobile 2003 or newer)
-  * A Bluetooth device supported by the Microsoft bluetooth stack
+  * A Bluetooth device supported by the WIDCOMM, BlueSoleil or Microsoft bluetooth stack
   * Java 1.1 or newer for the binary execution, Java 1.4 or newer to compile.
-  * Another Bluetooth device to communicate with
+  * Another Bluetooth device to communicate with. See [http://code.google.com/p/bluecove/wiki/phones Complete list of the JSR-82 compliant phones]
 
 == Limitations ==
 
@@ -23,8 +25,10 @@ BlueCove also only supports RFCOMM connections. The operating system support is
 currently limited to Windows XP SP2 and newer, because the Microsoft Bluetooth
 stack is not available on other operating systems. If someone writes code to
 support another stack and/or operating system, it will be considered for
-inclusion.  BlueCove does also not support OBEX, but there are other projects
-that can (possibly) be used to achieve OBEX functionality with BlueCove.
+inclusion.  BlueCove only support OBEX PUT, but there are other projects
+that can (possibly) be used to achieve full OBEX functionality with BlueCove.
+
+ For more details see stacks.txt or [http://code.google.com/p/bluecove/wiki/stacks BlueCove supported stacks].
 
 == Not Implemented functionality ===
 
@@ -37,7 +41,6 @@ that can (possibly) be used to achieve OBEX functionality with BlueCove.
 Installation of the binary (already compiled) version of BlueCove is as follows:
 
   # [http://code.google.com/p/bluecove/downloads/list Download BlueCove] binary release
-  # Unzip the archive
   # Add `bluecove.jar` to your classpath
 
 For maven2 users see [maven2 Using maven2 to build application or MIDlet]
@@ -50,7 +53,7 @@ Native Library location
   # If you wish to load library (.dll) from another location add this system property `-Dbluecove.native.path=/your/path`.
   # If you wish to load library from default location in path e.g. `%SystemRoot%\system32` or any other location in %PATH% use `-Dbluecove.native.resource=false`
 
-IBM J9
+IBM J9 Personal Profile
 
     To run BlueCove with [http://www.ibm.com/software/wireless/weme/ IBMs J9] Java VM on Win32 or PocketPC add this system property `-Dmicroedition.connection.pkgs=com.intel.bluetooth`.
 
@@ -58,7 +61,7 @@ IBM J9
         # WebSphere Everyplace Micro Environment 5.7.2, CDC 1.0/Foundation 1.0/Personal Profile 1.0 for Windows XP/X86
         # WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile 1.0 for Windows XP/X86
 
-IBM J9 midp20 Profile
+IBM J9 MIDP 2.0 Profile
     # Copy to `bluecove.jar` %J9_HOME%\lib\jclMidp20\ext directory
     # Copy all bluecove dlls to %J9_HOME%\bin directory or add -Dcom.ibm.oti.vm.bootstrap.library.path=%bluecove_dll_path%;%J9_HOME%\bin
     # run app "%J9_HOME%\bin\j9.exe" -jcl:midp20 -Dmicroedition.connection.pkgs=com.intel.bluetooth -cp target\bctest.jar "-jxe:%J9_HOME%\lib\jclMidp20\jclMidp20.jxe" target\bctest.jad

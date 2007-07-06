@@ -40,7 +40,7 @@ public class BlueCoveImpl {
 	
 	public static final int versionBuild = 0;
 	
-	public static final String versionSufix = "-b3-SNAPSHOT"; //SNAPSHOT
+	public static final String versionSufix = ""; //SNAPSHOT
 	
 	public static final String version = String.valueOf(versionMajor) + "." + String.valueOf(versionMinor) + "." + String.valueOf(versionBuild) + versionSufix;
 

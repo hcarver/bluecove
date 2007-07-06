@@ -12,18 +12,18 @@ Building project using maven
             <dependency>
                 <groupId>net.sf.bluecove</groupId>
                 <artifactId>bluecove</artifactId>
-                <version>1.2.3</version>
+                <version>2.0.0</version>
             </dependency>
 ---
 
 
- If you are building MIDlet application change _scope_ to _provided_
+ If you are building MIDlet application change <scope> to <provided>
 
 ---
             <dependency>
                <groupId>net.sf.bluecove</groupId>
                <artifactId>bluecove</artifactId>
-               <version>1.2.3</version>
+               <version>2.0.0</version>
                <scope>provided</scope>
             </dependency>
 ---
