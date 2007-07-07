@@ -412,16 +412,16 @@
                         <executions>
                             <execution>
                                 <id>get-compileed-on-windows-dll</id>
-                                <phase>compile</phase>
+                                <phase>process-classes</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/intelbth.dll" dest="src/main/resources/intelbth.dll"/>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/bluecove.dll" dest="src/main/resources/bluecove.dll"/>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/intelbth_ce.dll" dest="src/main/resources/intelbth_ce.dll"/>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/bluecove_ce.dll" dest="src/main/resources/bluecove_ce.dll"/>
+                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/intelbth.dll" dest="${project.build.directory}/classes/intelbth.dll"/>
+                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/bluecove.dll" dest="${project.build.directory}/classes/bluecove.dll"/>
+                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/intelbth_ce.dll" dest="${project.build.directory}/classes/intelbth_ce.dll"/>
+                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/bluecove_ce.dll" dest="${project.build.directory}/classes/bluecove_ce.dll"/>
                                     </tasks>
                                 </configuration>
                             </execution>
