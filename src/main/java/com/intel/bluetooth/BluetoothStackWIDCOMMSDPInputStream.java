@@ -108,20 +108,23 @@ typedef struct {
     } elem [MAX_SEQ_ENTRIES];
 } SDP_DISC_ATTTR_VAL;
  */
+	static final int ATTR_TYPE_INT      = 0; // Attribute value is an integer
+	static final int ATTR_TYPE_TWO_COMP = 1; // Attribute value is an 2's complement integer
+	static final int ATTR_TYPE_UUID     = 2; // Attribute value is a UUID
+	static final int ATTR_TYPE_BOOL     = 3; // Attribute value is a boolean
+	static final int ATTR_TYPE_ARRAY    = 4; // Attribute value is an array of bytes
+	
+	static final int MAX_SEQ_ENTRIES = 20;
+	static final int MAX_ATTR_LEN = 256;
+	
 	public DataElement readElement() throws IOException {
-		final int ATTR_TYPE_INT      = 0; // Attribute value is an integer
-		final int ATTR_TYPE_TWO_COMP = 1; // Attribute value is an 2's complement integer
-		final int ATTR_TYPE_UUID     = 2; // Attribute value is a UUID
-		final int ATTR_TYPE_BOOL     = 3; // Attribute value is a boolean
-		final int ATTR_TYPE_ARRAY    = 4; // Attribute value is an array of bytes
-		
-		final int MAX_SEQ_ENTRIES = 20;
-		final int MAX_ATTR_LEN = 256;
+
 		
 		DataElement result = null;
-		DataElement seq = null;
+		DataElement mainSeq = null;
+		DataElement currentSeq = null;
 		int elements = readInt();
-		if (elements <0 || elements > MAX_SEQ_ENTRIES) {
+		if (elements < 0 || elements > MAX_SEQ_ENTRIES) {
 			throw new IOException("Unexpected number of elements " + elements);
 		}
 		if (debug) {
@@ -221,16 +224,23 @@ typedef struct {
 				DataElement newSeq = new DataElement(DataElement.DATSEQ);
 				newSeq.addElement(dataElement);
 				dataElement = newSeq;
+
+				if (i != 0) {
+					// Second or other sequence
+					if (mainSeq != null) {
+						mainSeq.addElement(newSeq);
+					} else {
+						// move first sequence to new main sequence
+						mainSeq = new DataElement(DataElement.DATSEQ);
+						result = mainSeq;
+						mainSeq.addElement(currentSeq);
+						mainSeq.addElement(newSeq);
+					}
+				}
+				currentSeq = newSeq;
+			} else if (currentSeq != null) {
+				currentSeq.addElement(dataElement);
 			}
-			
-			if (seq != null) {
-				seq.addElement(dataElement);
-			}
-			
-			if (start_of_seq) {
-				seq = dataElement;
-			}
-			
 			
 			if (result == null) {
 				result = dataElement;

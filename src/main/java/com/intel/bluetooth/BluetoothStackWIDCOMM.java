@@ -277,7 +277,13 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 					try {
 						sr.populateRecord(new int[] { BluetoothConsts.ServiceClassIDList });
 						if ((uuidFiler != null) && !sr.hasServiceClassUUID(uuidFiler)) {
+							if (BluetoothStackWIDCOMMSDPInputStream.debug) {
+								DebugLog.debug("filtered ServiceRecord (" + i + ")", sr);
+							}
 							continue;
+						}
+						if (BluetoothStackWIDCOMMSDPInputStream.debug) {
+							DebugLog.debug("accepted ServiceRecord (" + i + ")", sr);
 						}
 						if (!isServiceRecordDiscoverable(RemoteDeviceHelper.getAddress(device), sr.getHandle())) {
 							continue;
