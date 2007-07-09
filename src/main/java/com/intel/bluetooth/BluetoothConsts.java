@@ -20,6 +20,8 @@
  */
 package com.intel.bluetooth;
 
+import java.util.Hashtable;
+
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.UUID;
 
@@ -41,6 +43,21 @@ public class BluetoothConsts {
 	
 	public static final UUID OBEXFileTransferServiceClass_UUID = new UUID(0x1106);
 
+	static Hashtable obexUUIDs = new Hashtable();
+	
+	private static void addObex(int uuid) {
+		UUID u = new UUID(uuid);
+		obexUUIDs.put(u, u);
+	}
+	
+	static {
+		addObex(0x1104);// IR_MC_SYNC
+		addObex(0x1105);// OBEX_OBJECT_PUSH
+		addObex(0x1106);// OBEX_FILE_TRANSFER
+		addObex(0x1107);// IR_MC_SYNC_COMMAND
+		addObex(0x111B);// IMG_RESPONDER
+	}
+	
 	public static final UUID SERIAL_PORT_UUID = new UUID(0x1101);
 	
 	public static final int BluetoothProfileDescriptorList = 0x0009;

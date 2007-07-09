@@ -223,7 +223,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 
 		UUID uuid = new UUID(Utils.UUIDByteArrayToString(uuidValue), false);
 		
-		record.populateRFCOMMAttributes(recordHanlde, channel, uuid, serviceName);
+		record.populateRFCOMMAttributes(recordHanlde, channel, uuid, serviceName, BluetoothConsts.obexUUIDs.contains(uuid));
 		DebugLog.debug("servicesFoundCallback", record);
 		
 		RemoteDevice listedDevice = RemoteDeviceHelper.createRemoteDevice(device);
@@ -268,7 +268,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		DebugLog.debug("serverSCN", channel);
 		int serviceRecordHandle = (int)handle;
 		
-		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name);
+		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name, false);
 		
 		return handle;
 

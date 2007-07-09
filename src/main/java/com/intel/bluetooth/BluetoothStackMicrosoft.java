@@ -328,7 +328,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		DebugLog.debug("service channel ", channel);
 		
 		int serviceRecordHandle = (int)socket; 
-		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name);
+		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name, false);
 
 		/*
 		 * register service

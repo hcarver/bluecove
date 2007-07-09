@@ -542,7 +542,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 	/**
 	 * Internal implemenation function
 	 */
-	void populateRFCOMMAttributes(int handle, int channel, UUID uuid, String name) {
+	void populateRFCOMMAttributes(int handle, int channel, UUID uuid, String name, boolean obex) {
 		
 		this.populateAttributeValue(BluetoothConsts.ServiceRecordHandle, new DataElement(DataElement.U_INT_4, handle));
 
@@ -552,7 +552,9 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 		DataElement serviceClassIDList = new DataElement(DataElement.DATSEQ);
 		serviceClassIDList.addElement(new DataElement(DataElement.UUID, uuid));
-		serviceClassIDList.addElement(new DataElement(DataElement.UUID, BluetoothConsts.SERIAL_PORT_UUID));
+		if (!obex) {
+			serviceClassIDList.addElement(new DataElement(DataElement.UUID, BluetoothConsts.SERIAL_PORT_UUID));
+		}
 
 		this.populateAttributeValue(BluetoothConsts.ServiceClassIDList, serviceClassIDList);
 
@@ -570,6 +572,12 @@ public class ServiceRecordImpl implements ServiceRecord {
 		RFCOMMDescriptor.addElement(new DataElement(DataElement.UUID, BluetoothConsts.RFCOMM_PROTOCOL_UUID));
 		RFCOMMDescriptor.addElement(new DataElement(DataElement.U_INT_1, channel));
 		protocolDescriptorList.addElement(RFCOMMDescriptor);
+		
+		if (obex) {
+			DataElement OBEXDescriptor = new DataElement(DataElement.DATSEQ);
+			OBEXDescriptor.addElement(new DataElement(DataElement.UUID, BluetoothConsts.OBEX_PROTOCOL_UUID));
+			protocolDescriptorList.addElement(OBEXDescriptor);
+		}
 
 		this.populateAttributeValue(BluetoothConsts.ProtocolDescriptorList, protocolDescriptorList);
 

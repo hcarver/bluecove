@@ -379,7 +379,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		DebugLog.debug("serverSCN", channel);
 		int serviceRecordHandle = (int)handle;
 		
-		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name);
+		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name, false);
 		
 		return handle;
 	}
