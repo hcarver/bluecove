@@ -96,13 +96,13 @@ public class BlueCoveImpl {
 		switch (NativeLibLoader.getOS()) {
 			case NativeLibLoader.OS_LINUX:
 				if (!NativeLibLoader.isAvailable(NATIVE_LIB_BLUEZ)) {
-					throw new Error("BlueCove not avalable");
+					throw new Error("BlueCove not available");
 				}
 				detectorStack = new BluetoothStackBlueZ();
 				break;
 			case NativeLibLoader.OS_MAC_OS_X:
 				if (!NativeLibLoader.isAvailable(NATIVE_LIB_OSX)) {
-					throw new Error("BlueCove not avalable");
+					throw new Error("BlueCove not available");
 				}
 				detectorStack = new BluetoothStackOSX();
 				break;
@@ -114,7 +114,7 @@ public class BlueCoveImpl {
 				}
 				break;
 			default:
-				throw new Error("BlueCove not avalable");
+				throw new Error("BlueCove not available");
 
 		}
 
