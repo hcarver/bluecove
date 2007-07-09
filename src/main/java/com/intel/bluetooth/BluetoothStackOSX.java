@@ -44,7 +44,7 @@ public class BluetoothStackOSX implements BluetoothStack {
 	//---------------------- Library initialization ----------------------
 	
 	public String getStackID() {
-		return BlueCoveImpl.STACK_BLUEZ;
+		return BlueCoveImpl.STACK_OSX;
 	}
 
 	public int getLibraryVersion() {

@@ -53,6 +53,8 @@ public class BlueCoveImpl {
 	public static final String STACK_BLUESOLEIL = "bluesoleil";
 
 	public static final String STACK_BLUEZ = "bluez";
+	
+	public static final String STACK_OSX = "mac";
 
 	// We can't use the same DLL on windows for all implemenations.
 	// Since WIDCOMM need to be compile /MD using VC6 and winsock /MT using VC2005
