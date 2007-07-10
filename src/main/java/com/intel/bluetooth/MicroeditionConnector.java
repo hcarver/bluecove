@@ -165,12 +165,15 @@ public class MicroeditionConnector {
 		}
 
 		boolean isServer = host.equals("localhost");
-		if ((isServer) && (!allowServer)) {
-			throw new IllegalArgumentException("Can't use server connection URL");
-		}
-		
 		int channel = 0;
-		if (!isServer) {
+		if (isServer) {
+           if (!allowServer) {
+        	   throw new IllegalArgumentException("Can't use server connection URL");
+           }
+           if (values.get(NAME) == null) {
+        	   values.put(NAME, "BlueCove");
+           }
+		} else { // (!isServer)
 			try {
 				channel = Integer.parseInt(portORuuid);
 			} catch (NumberFormatException e) {

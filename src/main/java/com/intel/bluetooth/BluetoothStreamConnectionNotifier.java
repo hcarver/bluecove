@@ -45,6 +45,9 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	public BluetoothStreamConnectionNotifier(UUID uuid, boolean authenticate, boolean encrypt, String name) throws IOException {
 		
 		this.closed = false;
+		if (name == null) {
+			throw new NullPointerException("Service name is null");
+		}
 		
 		/*
 		 * create service record to be later updated by BluetoothStack
