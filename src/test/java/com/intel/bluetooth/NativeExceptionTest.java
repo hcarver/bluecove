@@ -20,11 +20,17 @@
  */
 package com.intel.bluetooth;
 
-import javax.bluetooth.UUID;
+import java.io.IOException;
+
+import javax.bluetooth.BluetoothStateException;
 
 import junit.framework.TestCase;
 
-public class ConversionTest extends TestCase {
+/**
+ * @author vlads
+ *
+ */
+public class NativeExceptionTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -33,15 +39,23 @@ public class ConversionTest extends TestCase {
 		//System.getProperties().put("bluecove.native.path", "./src/main/resources");
 	}
 	
-	private void verifyUUID(final String uuidString) {
-		UUID uuid = new UUID(uuidString, false);
-		byte[] uuidValue = BluetoothPeer.testUUIDConversion(Utils.UUIDToByteArray(uuid));
-		UUID uuid2 = new UUID(Utils.UUIDByteArrayToString(uuidValue), false);
-		assertEquals("UUID converted by native code", uuid, uuid2);
+	private void verify(int ntype, Throwable e) {
+		try {
+			BluetoothPeer.testThrowException(ntype);
+			 fail("Should raise an Exception" + e); 
+		} catch (Throwable t) {
+			assertEquals("Exception class", e.getClass().getName(), t.getClass().getName());
+			assertEquals("Exception message", e.getMessage(), t.getMessage());
+		}
 	}
 	
-	public void testNativeUUID() {
-		verifyUUID("B1011114111115111111117111110001");
-		verifyUUID("27012f0c68af4fbf8dbe6bbaf7ab651b");
+	public void testExceptions() {
+		verify(0, new Exception("0"));
+		verify(1, new Exception("1[str]"));
+		verify(2, new IOException("2"));
+		verify(3, new IOException("3[str]"));
+		verify(4, new BluetoothStateException("4"));
+		verify(5, new BluetoothStateException("5[str]"));
+		verify(6, new RuntimeException("6"));
 	}
 }

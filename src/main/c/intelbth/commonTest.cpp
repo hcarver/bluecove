@@ -95,3 +95,16 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBuf
 	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
 	return b->isCorrupted();
 }
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_testThrowException
+(JNIEnv *env, jclass, jint extype) {
+	switch (extype) {
+		case 0: throwException(env, "java/lang/Exception", "0"); break;
+		case 1: throwExceptionExt(env, "java/lang/Exception", "1[%s]", "str"); break;
+		case 2: throwIOException(env, "2"); break;
+		case 3: throwIOExceptionExt(env, "3[%s]", "str"); break;
+	    case 4: throwBluetoothStateException(env, "4"); break;
+		case 5: throwBluetoothStateExceptionExt(env, "5[%s]", "str"); break;
+		case 6: throwRuntimeException(env, "6"); break;
+	}
+}

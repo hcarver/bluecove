@@ -164,4 +164,5 @@ abstract class BluetoothPeer implements BluetoothStack {
 	
 	public static native boolean testReceiveBufferIsCorrupted(long bufferHandler);
 	
+	public static native void testThrowException(int type) throws Exception;
 }

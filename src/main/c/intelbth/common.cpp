@@ -89,14 +89,16 @@ void throwException(JNIEnv *env, const char *name, const char *msg) {
     env->DeleteLocalRef(cls);
 }
 
+void _vthrowExceptionExt(JNIEnv *env, const char *name, const char *fmt, va_list ap) {
+	char msg[1064];
+	_vsnprintf_s(msg, 1064, fmt, ap);
+	throwException(env, name, msg);
+}
+
 void throwExceptionExt(JNIEnv *env, const char *name, const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
-	{
-		char msg[1064];
-		_vsnprintf_s(msg, 1064, fmt, ap);
-		throwException(env, name, msg);
-	}
+	_vthrowExceptionExt(env, name, fmt, ap);
 	va_end(ap);
 }
 
@@ -105,7 +107,10 @@ void throwIOException(JNIEnv *env, const char *msg) {
 }
 
 void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...) {
-	throwExceptionExt(env, cIOException, fmt);
+	va_list ap;
+	va_start(ap, fmt);
+	_vthrowExceptionExt(env, cIOException, fmt, ap);
+	va_end(ap);
 }
 
 void throwBluetoothStateException(JNIEnv *env, const char *msg) {
@@ -113,7 +118,10 @@ void throwBluetoothStateException(JNIEnv *env, const char *msg) {
 }
 
 void throwBluetoothStateExceptionExt(JNIEnv *env, const char *fmt, ...) {
-	throwExceptionExt(env, cBluetoothStateException, fmt);
+	va_list ap;
+	va_start(ap, fmt);
+	_vthrowExceptionExt(env, cBluetoothStateException, fmt, ap);
+	va_end(ap);
 }
 
 
