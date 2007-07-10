@@ -21,6 +21,10 @@
 
 #include "common.h"
 
+#ifdef VC6
+#define CPP_FILE "commonTest.cpp"
+#endif
+
 #include "com_intel_bluetooth_BluetoothPeer.h"
 
 JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_testUUIDConversion
@@ -107,4 +111,11 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_testThrowException
 		case 5: throwBluetoothStateExceptionExt(env, "5[%s]", "str"); break;
 		case 6: throwRuntimeException(env, "6"); break;
 	}
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_testDebug
+(JNIEnv *env, jclass, jstring message) {
+	const char *c = env->GetStringUTFChars(message, 0);
+	debugs("message[%s]", c);
+	env->ReleaseStringUTFChars(message, c);
 }
