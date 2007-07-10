@@ -34,26 +34,26 @@ import javax.bluetooth.UUID;
 public class BluetoothStackBlueSoleil implements BluetoothStack {
 
 	private boolean initialized = false;
-	
+
 	static {
 		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_BLUESOLEIL);
 	}
-	
+
 	BluetoothStackBlueSoleil() {
 	}
-	
+
 	public String getStackID() {
 		return BlueCoveImpl.STACK_BLUESOLEIL;
 	}
-	
+
 	public native int getLibraryVersion();
-	
+
 	public native int detectBluetoothStack();
-	
+
 	public native void enableNativeDebug(Class nativeDebugCallback, boolean on);
-	
+
 	public native boolean initializeImpl();
-	
+
 	public void initialize() {
 		if (!initializeImpl()) {
 			DebugLog.fatal("Can't initialize BlueSoleil");
@@ -61,9 +61,9 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		}
 		initialized = true;
 	}
-	
+
 	private native void uninitialize();
-	
+
 	public void destroy() {
 		if (initialized) {
 			uninitialize();
@@ -71,17 +71,17 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 			DebugLog.debug("BlueSoleil destroyed");
 		}
 	}
-	
+
 	protected void finalize() {
 		destroy();
 	}
-	
+
 	public native String getLocalDeviceBluetoothAddress();
 
 	public native String getLocalDeviceName();
 
 	public native int getDeviceClassImpl();
-	
+
 	/**
 	 * There are no functions in BlueSoleil stack.
 	 */
@@ -97,9 +97,9 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	}
 
 	native boolean isBlueSoleilStarted(int seconds);
-	
+
 	private native boolean isBluetoothReady(int seconds);
-	
+
 	/**
 	 * There are no functions to find BlueSoleil discoverable status.
 	 */
@@ -114,13 +114,13 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public boolean isLocalDevicePowerOn() {
 		return isBluetoothReady(15);
 	}
-	
+
 	native int getStackVersionInfo();
-	
+
 	native int getDeviceVersion();
-	
+
 	native int getDeviceManufacturer();
-	
+
 	public String getLocalDeviceProperty(String property) {
 		final String TRUE = "true";
 		if ("bluetooth.connected.devices.max".equals(property)) {
@@ -138,12 +138,12 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		if ("bluetooth.connected.inquiry".equals(property)) {
 			return TRUE;
 		}
-		
+
 		// service attributes are not supported.
 		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
 			return "0";
 		}
-		
+
 //		if ("bluecove.radio.version".equals(property)) {
 //			return String.valueOf(getDeviceVersion());
 //		}
@@ -153,16 +153,16 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		if ("bluecove.stack.version".equals(property)) {
 			return String.valueOf(getStackVersionInfo());
 		}
-		
+
 		return null;
 	}
-	
+
 // --- Device Inquiry
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
 	}
-	
+
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		startedNotify.deviceInquiryStartedCallback();
 		return runDeviceInquiryImpl(startedNotify, accessCode, listener);
@@ -172,22 +172,22 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
 		DebugLog.debug("deviceDiscoveredCallback", deviceName);
-		listener.deviceDiscovered(RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName), new DeviceClass(deviceClass));			
+		listener.deviceDiscovered(RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName), new DeviceClass(deviceClass));
 	}
 
 	public native boolean cancelInquirympl();
-	
+
 	public boolean cancelInquiry(DiscoveryListener listener) {
 		return cancelInquirympl();
 	}
-	
+
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
 		// TODO Properly if possible
 		return null;
 	}
-	
-// --- Service search 
-	
+
+// --- Service search
+
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
 	}
@@ -195,9 +195,9 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public boolean cancelServiceSearch(int transID) {
 		return false;
 	}
-	
+
 	private native int runSearchServicesImpl(SearchServicesThread startedNotify, DiscoveryListener listener, byte[] uuidValue, long address, RemoteDevice device) throws BluetoothStateException;
-	
+
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		startedNotify.searchServicesStartedCallback();
 		UUID uuid = null;
@@ -212,36 +212,36 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	struct SPPEX_SERVICE_INFO {
 		DWORD dwSize;
 		DWORD dwSDAPRecordHanlde;
-		UUID serviceClassUuid128;  
+		UUID serviceClassUuid128;
 		CHAR szServiceName[MAX_SERVICE_NAME_LENGTH];
 		UCHAR ucServiceChannel;
 	}
 	 */
-	
-	void servicesFoundCallback(SearchServicesThread startedNotify, DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel, int recordHanlde) {
+
+	public void servicesFoundCallback(SearchServicesThread startedNotify, DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel, int recordHanlde) {
 		ServiceRecordImpl record = new ServiceRecordImpl(device, 0);
 
 		UUID uuid = new UUID(Utils.UUIDByteArrayToString(uuidValue), false);
-		
+
 		record.populateRFCOMMAttributes(recordHanlde, channel, uuid, serviceName, BluetoothConsts.obexUUIDs.contains(uuid));
 		DebugLog.debug("servicesFoundCallback", record);
-		
+
 		RemoteDevice listedDevice = RemoteDeviceHelper.createRemoteDevice(device);
 		RemoteDeviceHelper.setStackAttributes(listedDevice, "RFCOMM_channel" + channel, uuid);
-		
+
 		ServiceRecord[] records = new ServiceRecordImpl[1];
 		records[0] = record;
 		listener.servicesDiscovered(startedNotify.getTransID(), records);
 	}
-	
+
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
 		return false;
 	}
-	
+
 //	 --- Client RFCOMM connections
-	
+
 	private native long connectionRfOpenImpl(long address, byte[] uuidValue) throws IOException;
-	
+
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
 		RemoteDevice listedDevice = RemoteDeviceHelper.getCashedDevice(address);
 		if (listedDevice == null) {
@@ -254,40 +254,40 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		DebugLog.debug("Connect to service UUID", uuid);
 		return connectionRfOpenImpl(address, Utils.UUIDToByteArray(uuid));
 	}
-	
+
 	public native void connectionRfCloseClientConnection(long handle) throws IOException;
-	
+
 	private native long rfServerOpenImpl(byte[] uuidValue, String name, boolean authenticate, boolean encrypt) throws IOException;
-	
+
 	private native int rfServerSCN(long handle) throws IOException;
-	
+
 	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
 		byte[] uuidValue = Utils.UUIDToByteArray(uuid);
 		long handle = rfServerOpenImpl(uuidValue, name, authenticate, encrypt);
 		int channel = rfServerSCN(handle);
 		DebugLog.debug("serverSCN", channel);
 		int serviceRecordHandle = (int)handle;
-		
+
 		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name, false);
-		
+
 		return handle;
 
 	}
-	
+
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
 		throw new ServiceRegistrationException("NotImplemented");
 	}
-	
+
 	public native long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
-	
+
 	public void connectionRfCloseServerConnection(long handle) throws IOException {
 		connectionRfCloseClientConnection(handle);
 	}
-	
+
 	public native void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
-	
+
 	public native long getConnectionRfRemoteAddress(long handle) throws IOException;
-	
+
 	public native int connectionRfRead(long handle) throws IOException;
 
 	public native int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException;
@@ -297,7 +297,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public native void connectionRfWrite(long handle, int b) throws IOException;
 
 	public native void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
-	
+
 	public native void connectionRfFlush(long handle) throws IOException;
 
 }
