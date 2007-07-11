@@ -144,9 +144,13 @@ public abstract class RemoteDeviceHelper {
 		}
 	}
 
-	static String getBluetoothAddress(long address) {
-		String s = Utils.toHexString(address).toLowerCase();
+	public static String getBluetoothAddress(String address) {
+		String s = address.toUpperCase();
 		return "000000000000".substring(s.length()) + s;
+	}
+	
+	static String getBluetoothAddress(long address) {
+		return getBluetoothAddress(Utils.toHexString(address));
 	}
 	
 	public static long getAddress(String bluetoothAddress) {

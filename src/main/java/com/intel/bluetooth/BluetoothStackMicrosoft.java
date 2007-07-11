@@ -85,19 +85,18 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	}
 
 	public String getLocalDeviceBluetoothAddress() {
-		String address;
 		try {
 			long socket = super.socket(false, false);
 			super.bind(socket);
 			localBluetoothAddress = super.getsockaddress(socket);
-			address = Utils.toHexString(localBluetoothAddress);
+			String address = RemoteDeviceHelper.getBluetoothAddress(localBluetoothAddress);
 			super.storesockopt(socket);
 			super.close(socket);
+			return address;
 		} catch (IOException e) {
 			DebugLog.error("get local bluetoothAddress", e);
-			address = "";
+			return "000000000000";
 		}
-		return "000000000000".substring(address.length()) + address;
 	}
 
 	public String getLocalDeviceName() {

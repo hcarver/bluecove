@@ -31,6 +31,7 @@ import javax.microedition.io.Connection;
 import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothStreamConnectionNotifier;
 import com.intel.bluetooth.BluetoothStreamServiceRecordAccess;
+import com.intel.bluetooth.RemoteDeviceHelper;
 
 /**
  * The <code>LocalDevice</code> class defines the basic functions of the
@@ -50,7 +51,7 @@ public class LocalDevice {
 
 	private DiscoveryAgent discoveryAgent;
 
-	private String address;
+	private String addressStr;
 
 	/**
 	 * The default constructor is hidden so that no one can create a new
@@ -62,7 +63,7 @@ public class LocalDevice {
 	 */
 	private LocalDevice() throws BluetoothStateException {
 		discoveryAgent = new DiscoveryAgent();
-		address = BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceBluetoothAddress();
+		addressStr = RemoteDeviceHelper.getBluetoothAddress(BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceBluetoothAddress());
 	}
 
 	/**
@@ -262,7 +263,7 @@ public class LocalDevice {
 	 * @return the Bluetooth address of the local device
 	 */
 	public String getBluetoothAddress() {
-		return address;
+		return addressStr;
 	}
 
 	/**

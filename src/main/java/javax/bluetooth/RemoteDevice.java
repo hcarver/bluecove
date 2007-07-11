@@ -73,8 +73,25 @@ public class RemoteDevice {
 	 * address of the local device or is not a valid Bluetooth address
 	 */
 	protected RemoteDevice(String address) {
+		if(address == null) {
+            throw new NullPointerException("address is null");
+		}
+		String errorMsg = "Malformed address: " + address;
+        if(address.length() != 12) {
+            throw new IllegalArgumentException(errorMsg);
+        }
+        if(address.startsWith("-")) {
+            throw new IllegalArgumentException(errorMsg);
+        }
 		DebugLog.debug("new RemoteDevice", address);
-		this.addressStr = address;
+		this.addressStr = RemoteDeviceHelper.getBluetoothAddress(address);
+		try {
+			if (this.addressStr.equals(LocalDevice.getLocalDevice().getBluetoothAddress())) {
+				throw new IllegalArgumentException("can't use the LocalDevice address.");
+			}
+		} catch (BluetoothStateException e) {
+			throw new RuntimeException("Can't initialize bluetooth support");
+		}
 		this.addressLong = RemoteDeviceHelper.getAddress(address);
 	}
 
