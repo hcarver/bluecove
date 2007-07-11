@@ -31,6 +31,9 @@ public abstract class Utils {
 
 	public static byte[] UUIDToByteArray(String uuidStringValue) {
 		byte[] uuidValue = new byte[16];
+		if(uuidStringValue.indexOf('-') != -1) {
+            throw new NumberFormatException("The '-' character is not allowed in UUID: " + uuidStringValue);
+		}
 		for (int i = 0; i < 16; i++) {
 			uuidValue[i] = (byte) Integer.parseInt(uuidStringValue.substring(i * 2, i * 2 + 2), 16);
 		}

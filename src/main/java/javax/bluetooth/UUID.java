@@ -103,6 +103,9 @@ public class UUID {
 	 */
 	public UUID(long uuidValue) {
 		this(Utils.toHexString(uuidValue), true);
+		if (uuidValue < 0 || uuidValue > 0xffffffffl) {
+			throw new IllegalArgumentException("uuidValue is not in the range [0, 2^32 -1]");
+		}
 	}
 
 	/**
@@ -151,6 +154,9 @@ public class UUID {
 	 *
 	 */
 	public UUID(String uuidValue, boolean shortUUID) {
+		if (uuidValue == null) {
+            throw new NullPointerException("uuidValue is null");
+		}
 		int length = uuidValue.length();
 		if (shortUUID) {
 			if (length < 1 || length > 8) {
