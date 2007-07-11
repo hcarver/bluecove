@@ -284,6 +284,13 @@ public class DiscoveryAgent {
 			// The same as on Motorola, Nokia and SE Phones
 			throw new IllegalArgumentException("uuidSet is empty");
 		}
+		for (int u1 = 0; u1 < uuidSet.length; u1++) {
+			for (int u2 = u1 + 1; u2 < uuidSet.length; u2++) {
+				if (uuidSet[u1].equals(uuidSet[u2])) {
+					throw new IllegalArgumentException("uuidSet has duplicate values " + uuidSet[u1].toString());
+				}
+			}
+		}
 		if (btDev == null) {
 			throw new NullPointerException("RemoteDevice is null");
 		}
