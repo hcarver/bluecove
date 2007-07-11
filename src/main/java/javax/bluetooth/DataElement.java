@@ -753,10 +753,15 @@ public class DataElement {
 		case URL:
 		case STRING:
 		case UUID:
+			return value;
 		case U_INT_8:
 		case U_INT_16:
 		case INT_16:
-			return value;
+			// Modifying the returned Object will not change this DataElemen
+			int length = ((byte[]) value).length;
+			byte[] bClone = new byte[length];
+			System.arraycopy(value, 0, bClone, 0, length);
+			return bClone;
 		case DATSEQ:
 		case DATALT:
 			return ((Vector) value).elements();
