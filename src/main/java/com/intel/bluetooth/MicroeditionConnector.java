@@ -128,6 +128,7 @@ public class MicroeditionConnector {
 		if (!suportScheme.containsKey(scheme)) {
 			throw new ConnectionNotFoundException(scheme);
 		}
+		boolean schemeBluetooth = (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM)) || (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX));
 		
 		int hostEnd = name.indexOf(':', scheme.length() + 3);
 
@@ -172,11 +173,19 @@ public class MicroeditionConnector {
            }
            if (values.get(NAME) == null) {
         	   values.put(NAME, "BlueCove");
+           } else if (schemeBluetooth) {
+        	   validateBluetoothServiceName((String)values.get(NAME));
            }
 		} else { // (!isServer)
 			try {
 				channel = Integer.parseInt(portORuuid);
 			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("channel " + portORuuid);
+			}
+			if (channel < 0) {
+				throw new IllegalArgumentException("channel " + portORuuid);
+			}
+			if (schemeBluetooth && (channel > 30)) {
 				throw new IllegalArgumentException("channel " + portORuuid);
 			}
 		
@@ -228,6 +237,20 @@ public class MicroeditionConnector {
 		}
 	}
 	
+	private static void validateBluetoothServiceName(String serviceName) {
+		 if(serviceName.length() == 0) {
+             throw new IllegalArgumentException("zero length service name");
+		 }
+		 final String allowNameCharactes = " -_";
+         for(int i = 0; i < serviceName.length(); i++) {
+             char c = serviceName.charAt(i);
+             if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || allowNameCharactes.indexOf(c) != -1) {
+            	 continue;
+             }
+             throw new IllegalArgumentException("Illegal character '" + c + "' in service name");
+         }
+	}
+
 	private static boolean paramBoolean(Hashtable values, String name) {
 		String v = (String)values.get(name);
 		if (v == null) {
