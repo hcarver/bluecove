@@ -326,7 +326,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 				    result = INQUIRY_COMPLETED;
 					break;
 			    default:
-					debug2("WSALookup error [%d] %S", last_error, getWinErrorMessage(last_error));
+					debug2("Device lookup error [%d] %S", last_error, getWinErrorMessage(last_error));
 				    result = INQUIRY_ERROR;
 			}
 			WSALookupServiceEnd(hDeviceLookup);
@@ -556,6 +556,7 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 		switch(last_error) {
 			case WSANO_DATA:
 				result = env->NewIntArray(0);
+				break;
 			default:
 				debugss("WSALookupServiceNext error [%d] %S", last_error, getWinErrorMessage(last_error));
 				result =  NULL;
