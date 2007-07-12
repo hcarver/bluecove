@@ -269,6 +269,8 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 				}
 				if ((uuidFiler == null) && (reqRFCOMM)) {
 					uuidFiler = BluetoothConsts.RFCOMM_PROTOCOL_UUID;
+				} else if (BluetoothStackWIDCOMMSDPInputStream.debug) {
+					DebugLog.debug("uuidFiler selected", uuidFiler);
 				}
 
 				Vector records = new Vector();
