@@ -83,8 +83,17 @@ public class BlueCoveImpl {
      * In Secure environment instance() should be called initialy from secure contex.
      */
     private static class SingletonHolder {
-        private static BlueCoveImpl instance = new BlueCoveImpl();
-    }
+
+    	private static BlueCoveImpl instance;
+		
+    	private static void init() {
+			if (instance != null) {
+				return;
+			}
+			instance = new BlueCoveImpl();
+		}
+
+	}
 
 	private BlueCoveImpl() {
 
@@ -244,7 +253,13 @@ public class BlueCoveImpl {
 
 	}
 
-    public static BlueCoveImpl instance() {
+	/**
+	 * @return Instance of the class with initializaed stack variable. getBluetoothStack() can be called.
+	 * @throws RuntimeException when BluetoothStack not detected. If one connected the hardware later, 
+     * BlueCove would be able to recover and start correctly
+	 */
+    public static BlueCoveImpl instance() throws RuntimeException {
+    	SingletonHolder.init();  
 		return SingletonHolder.instance;
     }
 
