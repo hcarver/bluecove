@@ -131,6 +131,7 @@ public class SearchServicesThread extends Thread {
 	
 	public void setTerminated() {
 		terminated = true;
+		threads.remove(new Integer(getTransID()));
 	}
 
 	public boolean isTerminated() {

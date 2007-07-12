@@ -256,6 +256,9 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 					DebugLog.debug("populateRecord error", e);
 					hasError = true;
 				}
+				if (startedNotify.isTerminated()) {
+					return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
+				}
 			}
 			listener.servicesDiscovered(startedNotify.getTransID(), records);
 			if (hasError) {
@@ -269,8 +272,16 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	}
 	
 	public boolean cancelServiceSearch(int transID) {
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedError();
+		SearchServicesThread sst = SearchServicesThread.getServiceSearchThread(transID);
+		if (sst != null) {
+			sst.setTerminated();
+			//cancelServiceSearchImpl();
+			if (NotImplementedError.enabled) {
+				throw new NotImplementedError();
+			}
+			//cancelServiceSearchImpl();
+			
+			return true;
 		} else {
 			return false;
 		}

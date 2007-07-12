@@ -491,10 +491,19 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	stack->searchServicesComplete = FALSE;
 	stack->searchServicesTerminated = FALSE;
 
+    BOOL discoveryStarted = TRUE;
 	if (!stack->StartDiscovery(bda, p_service_guid)) {
-		debug("StartSearchServices error");
-		stack->throwExtendedBluetoothStateException(env);
-		return NULL;
+	    #ifndef _WIN32_WCE
+	        WBtRc er = stack->GetExtendedError();
+	        if (er == WBT_SUCCESS) {
+	            discoveryStarted = FALSE;
+	        }
+        #endif
+        if (discoveryStarted) {
+		    debug("StartSearchServices error");
+		    stack->throwExtendedBluetoothStateException(env);
+		    return NULL;
+	    }
 	}
 
 	jclass notifyClass = env->GetObjectClass(startedNotify);
@@ -512,13 +521,15 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		return NULL;
 	}
 
-	while ((stack != NULL) && (!stack->searchServicesComplete) && (!stack->searchServicesTerminated)) {
-		DWORD  rc = WaitForSingleObject(stack->hEvent, 500);
-		if (rc == WAIT_FAILED) {
-			throwRuntimeException(env, "WaitForSingleObject");
-			return NULL;
-		}
-	}
+    if (discoveryStarted) {
+	    while ((stack != NULL) && (!stack->searchServicesComplete) && (!stack->searchServicesTerminated)) {
+		    DWORD  rc = WaitForSingleObject(stack->hEvent, 500);
+		    if (rc == WAIT_FAILED) {
+			    throwRuntimeException(env, "WaitForSingleObject");
+			    return NULL;
+		    }
+	    }
+    }
 	if (stack == NULL) {
 		return NULL;
 	}
