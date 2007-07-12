@@ -21,6 +21,8 @@
  */
 package com.intel.bluetooth;
 
+import java.util.Properties;
+
 /**
  *
  * Singleton class used as holder for BluetoothPeer instead of LocalDevice
@@ -166,7 +168,53 @@ public class BlueCoveImpl {
 		} catch (Throwable java12) {
 		}
 
+		copySystemProperty();
 		System.out.println("BlueCove version " + version + " on " + stackSelected);
+	}
+	
+	void copySystemProperty() {
+		if (bluetoothStack != null) {
+			setSystemProperty("bluetooth.api.version", "1.1");
+			String[] property = { 
+					"bluetooth.master.switch", 
+					"bluetooth.sd.attr.retrievable.max",
+					"bluetooth.connected.devices.max",
+					"bluetooth.l2cap.receiveMTU.max", 
+					"bluetooth.sd.trans.max",
+					"bluetooth.connected.inquiry.scan",
+					"bluetooth.connected.page.scan", 
+					"bluetooth.connected.inquiry",
+					"bluetooth.connected.page" };
+			for (int i = 0; i < property.length; i++) {
+				setSystemProperty(property[i], bluetoothStack.getLocalDeviceProperty(property[i]));
+			}
+		}
+	}
+	
+	static void setSystemProperty(String propertyName, String propertyValue) {
+		boolean propertySet = false;
+		try {
+			Properties props = System.getProperties();
+			if (propertyValue != null) { 
+				props.put(propertyName, propertyValue);
+				propertySet = propertyValue.equals(System.getProperty(propertyName));
+			} else {
+				props.remove(propertyName);
+				propertySet = (System.getProperty(propertyName) == null);
+			}
+		} catch (SecurityException e) {
+		}
+		if (!propertySet) {
+			try {
+				if (propertyValue != null) { 
+					System.setProperty(propertyName, propertyValue);
+				} else {
+					// Java 1.5 - OK
+					System.clearProperty(propertyName);
+				}
+			} catch (Throwable java11) {
+			}
+		}		
 	}
 
 	private class ShutdownHookThread extends Thread {
@@ -184,7 +232,10 @@ public class BlueCoveImpl {
 					return;
 				}
 			}
-			bluetoothStack.destroy();
+			if (bluetoothStack != null) {
+				bluetoothStack.destroy();
+				bluetoothStack = null;
+			}
 			System.out.println("BlueCove stack shutdown completed");
 			synchronized (this) {
 				this.notifyAll();

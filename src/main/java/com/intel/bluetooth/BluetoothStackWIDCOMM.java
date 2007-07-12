@@ -129,6 +129,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	
 	public String getLocalDeviceProperty(String property) {
 		final String TRUE = "true";
+		final String FALSE = "false";
 		if ("bluetooth.connected.devices.max".equals(property)) {
 			return "7";
 		}
@@ -143,6 +144,20 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		}
 		if ("bluetooth.connected.inquiry".equals(property)) {
 			return TRUE;
+		}
+		if ("bluetooth.connected.page".equals(property)) {
+			return TRUE;
+		}
+
+		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
+			// TODO what is the real number ?
+			return "256";
+		}
+		if ("bluetooth.master.switch".equals(property)) {
+			return FALSE;
+		}
+		if ("bluetooth.l2cap.receiveMTU.max".equals(property)) {
+			return "0";
 		}
 		
 		if ("bluecove.radio.version".equals(property)) {
