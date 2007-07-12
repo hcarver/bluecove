@@ -52,6 +52,8 @@ nmake /A /F bluecove.mak
 @if errorlevel 1 goto errormark
 @echo [Build OK]
 @cd "%DEFAULT_BUILD_HOME%"
+copy src\main\resources\bluecove.dll target\classes\
+@if errorlevel 1 goto errormark
 @goto endmark
 :errormark
     @cd "%DEFAULT_BUILD_HOME%"

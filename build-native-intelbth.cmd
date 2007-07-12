@@ -67,6 +67,8 @@ call "%p%\VCVARS32.BAT"
 vcbuild /rebuild src\main\c\intelbth\intelbth.sln "%CONFIGURATION%|Win32"
 @if errorlevel 1 goto errormark
 @echo [Build OK]
+copy src\main\resources\intelbth.dll target\classes\
+@if errorlevel 1 goto errormark
 @goto endmark
 :errormark
 	@ENDLOCAL
