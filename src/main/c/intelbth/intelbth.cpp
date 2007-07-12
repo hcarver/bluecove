@@ -1001,6 +1001,15 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__J_3BII(JNIEn
 			}
 		}
 		done += count;
+		if (done != 0) {
+		    unsigned long available = 0;
+	        if (ioctlsocket((SOCKET)socket, FIONREAD, &available) != 0) {
+	            // error;
+	            break;
+	        } else if (available == 0) {
+	            break;
+	        }
+		}
 	}
 
 	env->ReleaseByteArrayElements(b, bytes, 0);
