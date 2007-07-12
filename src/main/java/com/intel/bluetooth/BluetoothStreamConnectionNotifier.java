@@ -21,6 +21,7 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -44,6 +45,8 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	
 	private ServiceRecordImpl serviceRecord;
 
+	protected boolean closing = false;
+	
 	private boolean closed;
 
 	public BluetoothStreamConnectionNotifier(UUID uuid, boolean authenticate, boolean encrypt, String name) throws IOException {
@@ -80,8 +83,13 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	public void close() throws IOException {
 		if (!closed) {
 			serviceRecordsMap.remove(serviceRecord);
-			BlueCoveImpl.instance().getBluetoothStack().rfServerClose(handle, serviceRecord);
-			closed = true;
+			closing = true;
+			try {
+				BlueCoveImpl.instance().getBluetoothStack().rfServerClose(handle, serviceRecord);
+				closed = true;
+			} finally {
+				closing = false;
+			}
 		}
 	}
 
@@ -92,10 +100,20 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	 */
 
 	public StreamConnection acceptAndOpen() throws IOException {
+		if (closed) {
+			throw new IOException("Notifier is closed");
+		}
 		if (((ServiceRecordImpl) serviceRecord).attributeUpdated) {
 			updateServiceRecord(true);
 		}
-		return new BluetoothRFCommServerConnection(BlueCoveImpl.instance().getBluetoothStack().rfServerAcceptAndOpenRfServerConnection(handle));
+		try {
+			return new BluetoothRFCommServerConnection(BlueCoveImpl.instance().getBluetoothStack().rfServerAcceptAndOpenRfServerConnection(handle));
+		} catch (IOException e) {
+			if (closed || closing) {
+				throw new InterruptedIOException("Notifier has been closed");
+			}
+			throw e;
+		}
 	}
 
 	public ServiceRecord getServiceRecord() {
