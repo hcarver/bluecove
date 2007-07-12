@@ -40,6 +40,8 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	
 	long localBluetoothAddress = 0;
 	
+	private DiscoveryListener currentDeviceDiscoveryListener;
+	
 	BluetoothStackMicrosoft() {
 	}
 
@@ -190,15 +192,26 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		initialized();
+		if (currentDeviceDiscoveryListener != null) {
+			throw new BluetoothStateException();
+		}
+		currentDeviceDiscoveryListener = listener;
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
 	}
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
+		if (currentDeviceDiscoveryListener != listener) {
+			return false;
+		}
 		return super.cancelInquiry();
 	}
 
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
-		return super.runDeviceInquiry(startedNotify, accessCode, listener);
+		try {
+			return super.runDeviceInquiry(startedNotify, accessCode, listener);
+		} finally {
+			currentDeviceDiscoveryListener = null;
+		}
 	}
 	
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
