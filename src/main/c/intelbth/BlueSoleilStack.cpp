@@ -1051,6 +1051,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 		rf->clearCommError();
 		debug1("numberOfBytesRead [%i]", numberOfBytesRead);
 		done += numberOfBytesRead;
+		if (done != 0) {
+		    // Don't do readFully!
+		    break;
+		}
 	}
 
 	env->ReleaseByteArrayElements(b, bytes, 0);
