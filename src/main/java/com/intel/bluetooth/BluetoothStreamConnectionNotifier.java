@@ -93,6 +93,9 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	}
 
 	public ServiceRecord getServiceRecord() {
+		if (closed) {
+			throw new IllegalArgumentException("StreamConnectionNotifier is closed");
+		}
 		serviceRecordsMap.put(serviceRecord, this);
 		return serviceRecord;
 	}
