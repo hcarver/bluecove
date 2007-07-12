@@ -21,8 +21,10 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
+import javax.bluetooth.DataElement;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
@@ -38,6 +40,8 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	
 	private long handle;
 
+	private int rfcommChannel = -1;
+	
 	private ServiceRecordImpl serviceRecord;
 
 	private boolean closed;
@@ -55,6 +59,8 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		this.serviceRecord = new ServiceRecordImpl(null, 0);
 		
 		this.handle = BlueCoveImpl.instance().getBluetoothStack().rfServerOpen(uuid, authenticate, encrypt, name, serviceRecord);
+		
+		this.rfcommChannel = serviceRecord.getRFCOMMChannel();
 		
 		this.serviceRecord.attributeUpdated = false;
 	}
@@ -100,11 +106,50 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		return serviceRecord;
 	}
 	
+	private void validateServiceRecord(ServiceRecord srvRecord) {
+		DataElement protocolDescriptor = srvRecord.getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
+		if ((protocolDescriptor == null) || (protocolDescriptor.getDataType() != DataElement.DATSEQ)) {
+			throw new IllegalArgumentException("ProtocolDescriptorList is mandatory");
+		}
+		
+		if (this.rfcommChannel != serviceRecord.getRFCOMMChannel()) {
+			throw new IllegalArgumentException("Must not change the RFCOMM server channel number");
+		}
+		
+		DataElement serviceClassIDList = srvRecord.getAttributeValue(BluetoothConsts.ServiceClassIDList);
+		if ((serviceClassIDList == null) || (serviceClassIDList.getDataType() != DataElement.DATSEQ) || serviceClassIDList.getSize() == 0) {
+			throw new IllegalArgumentException("ServiceClassIDList is mandatory");
+		}
+		
+		boolean isL2CAPpresent = false;
+		for (Enumeration protocolsSeqEnum = (Enumeration) protocolDescriptor.getValue(); protocolsSeqEnum.hasMoreElements();) {
+			DataElement elementSeq = (DataElement) protocolsSeqEnum.nextElement();
+			if (elementSeq.getDataType() == DataElement.DATSEQ) {
+				Enumeration elementSeqEnum = (Enumeration) elementSeq.getValue();
+				if (elementSeqEnum.hasMoreElements()) {
+					DataElement protocolElement = (DataElement) elementSeqEnum.nextElement();
+					if (protocolElement.getDataType() != DataElement.UUID) {
+						continue;
+					}
+					if (elementSeqEnum.hasMoreElements() && (BluetoothConsts.L2CAP_PROTOCOL_UUID.equals(protocolElement.getValue()))) {
+						isL2CAPpresent = true;
+						break;
+					}
+				}
+			}
+		}
+		if (!isL2CAPpresent) {
+			throw new IllegalArgumentException("L2CAP UUID is mandatory in ProtocolDescriptorList");
+		}
+	}
+	
 	private void updateServiceRecord(boolean canFail) throws ServiceRegistrationException {
 		if (canFail) {
+			validateServiceRecord(this.serviceRecord);
 			BlueCoveImpl.instance().getBluetoothStack().rfServerUpdateServiceRecord(handle, serviceRecord);
 		} else {
 			try {
+				validateServiceRecord(this.serviceRecord);
 				BlueCoveImpl.instance().getBluetoothStack().rfServerUpdateServiceRecord(handle, serviceRecord);
 			} catch (Throwable ignore) {
 				DebugLog.debug("warn updateServiceRecord", ignore);
