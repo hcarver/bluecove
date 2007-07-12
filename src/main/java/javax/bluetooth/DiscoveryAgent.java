@@ -192,6 +192,9 @@ public class DiscoveryAgent {
 		if (listener == null) {
 			throw new NullPointerException("DiscoveryListener is null");
 		}
+		if ((accessCode != LIAC) && (accessCode != GIAC) && ((accessCode < 0x9E8B00) || (accessCode > 0x9E8B3F))) {
+			throw new IllegalArgumentException("Invalid accessCode " + accessCode);
+		}
 		return BlueCoveImpl.instance().getBluetoothStack().startInquiry(accessCode, listener);
 	}
 
