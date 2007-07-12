@@ -1059,6 +1059,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			}
 			done += rf->receiveBuffer.read(bytes + off + done, count);
 		}
+		if (done != 0) {
+		    // Don't do readFully!
+		    break;
+		}
 		debug1("read[] received %i", count);
 	}
 	// Read from not Connected
@@ -1103,7 +1107,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	}
 
 	while ((rf->isConnected) && (!rf->isClosing)) {
-		UINT8 signal; 
+		UINT8 signal;
 		rf->GetModemStatus(&signal);
 		if (signal & PORT_CTSRTS_ON) {
 			break;
@@ -1142,7 +1146,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	UINT16 done = 0;
 
 	while ((rf->isConnected) && (!rf->isClosing)) {
-		UINT8 signal; 
+		UINT8 signal;
 		rf->GetModemStatus(&signal);
 		if (signal & PORT_CTSRTS_ON) {
 			break;
