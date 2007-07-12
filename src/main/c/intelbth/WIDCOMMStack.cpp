@@ -412,7 +412,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 
 	int reportedIdx = -1;
 
-	while ((stack != NULL) && ((!stack->deviceInquiryComplete) || (reportedIdx != stack->deviceRespondedIdx))) {
+	while ((stack != NULL) && (!stack->deviceInquiryTerminated) && ((!stack->deviceInquiryComplete) || (reportedIdx != stack->deviceRespondedIdx))) {
 		DWORD  rc = WaitForSingleObject(stack->hEvent, 200);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForSingleObject");

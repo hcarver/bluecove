@@ -27,6 +27,7 @@
 package javax.bluetooth;
 
 import com.intel.bluetooth.BlueCoveImpl;
+import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
@@ -226,6 +227,7 @@ public class DiscoveryAgent {
 		if (listener == null) {
 			throw new NullPointerException("DiscoveryListener is null");
 		}
+		DebugLog.debug("cancelInquiry");
 		return BlueCoveImpl.instance().getBluetoothStack().cancelInquiry(listener);
 	}
 

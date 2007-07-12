@@ -68,6 +68,7 @@ public class DeviceInquiryThread extends Thread {
 				}
 			}
 		}
+		DebugLog.debug("startInquiry return", t.started);
 		return t.started;
 	}
 	
@@ -76,6 +77,7 @@ public class DeviceInquiryThread extends Thread {
 		try {
 			discType = stack.runDeviceInquiry(this, accessCode, listener);
 		} catch (BluetoothStateException e) {
+			DebugLog.debug("runDeviceInquiry throw", e);
 			startException = e;
 		} catch (Throwable e) {
 			DebugLog.error("runDeviceInquiry", e);
