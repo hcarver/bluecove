@@ -119,6 +119,11 @@ class BluetoothInputStream extends InputStream {
 		if (conn == null) {
 			throw new IOException("Stream closed");
 		} else {
+			if (len == 0) {
+				// If the length of b is zero, then no bytes are read and 0 is returned
+				return 0;
+			}
+			// otherwise, there is an attempt to read at least one byte.
 			return BlueCoveImpl.instance().getBluetoothStack().connectionRfRead(conn.handle, b, off, len);
 		}
 	}
