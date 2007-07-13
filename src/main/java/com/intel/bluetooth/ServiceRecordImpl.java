@@ -212,7 +212,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 	public String getConnectionURL(int requiredSecurity, boolean mustBeMaster) {
 
-		int rfcommChannel = -1;
+		int commChannel = -1;
 
 		DataElement protocolDescriptor = getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
 		if ((protocolDescriptor == null) || (protocolDescriptor.getDataType() != DataElement.DATSEQ)) {
@@ -224,6 +224,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 		 * ProtocolDescriptorList is DATSEQ of DATSEQ of UUID and optional parameters
 		 */
 		
+		boolean isL2CAP = false;
 		boolean isRFCOMM = false;
 		boolean isOBEX = false;
 		
@@ -241,6 +242,8 @@ public class ServiceRecordImpl implements ServiceRecord {
 					Object uuid = protocolElement.getValue();
 					if (BluetoothConsts.OBEX_PROTOCOL_UUID.equals(uuid)) {
 						isOBEX = true;
+						isRFCOMM = false;
+						isL2CAP = false;
 					} else if (elementSeqEnum.hasMoreElements() && (BluetoothConsts.RFCOMM_PROTOCOL_UUID.equals(uuid))) {
 
 						DataElement protocolPSMElement = (DataElement) elementSeqEnum.nextElement();
@@ -253,8 +256,23 @@ public class ServiceRecordImpl implements ServiceRecord {
 						case DataElement.INT_2:
 						case DataElement.INT_4:
 						case DataElement.INT_8:
-							rfcommChannel = (int) protocolPSMElement.getLong();
+							commChannel = (int) protocolPSMElement.getLong();
 							isRFCOMM = true;
+							isL2CAP = false;
+							break;
+						}
+					} else if (elementSeqEnum.hasMoreElements() && (BluetoothConsts.L2CAP_PROTOCOL_UUID.equals(uuid))) {
+						DataElement protocolPSMElement = (DataElement) elementSeqEnum.nextElement();
+						switch (protocolPSMElement.getDataType()) {
+						case DataElement.U_INT_1:
+						case DataElement.U_INT_2:
+						case DataElement.U_INT_4:
+						case DataElement.INT_1:
+						case DataElement.INT_2:
+						case DataElement.INT_4:
+						case DataElement.INT_8:
+							commChannel = (int) protocolPSMElement.getLong();
+							isL2CAP = true;
 							break;
 						}
 					}
@@ -262,7 +280,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 			}
 		}
 		
-		if (rfcommChannel == -1) {
+		if (commChannel == -1) {
 			return null;
 		}
 
@@ -274,6 +292,8 @@ public class ServiceRecordImpl implements ServiceRecord {
 			buf.append(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX);
 		} else if (isRFCOMM) {
 			buf.append(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM);
+		} else if (isL2CAP) {
+			buf.append(BluetoothConsts.PROTOCOL_SCHEME_L2CAP);
 		} else {
 			return null;
 		}
@@ -290,7 +310,15 @@ public class ServiceRecordImpl implements ServiceRecord {
 		}
 
 		buf.append(":");
-		buf.append(rfcommChannel);
+		if (isL2CAP) {
+			String hex = Integer.toHexString(commChannel);
+			for (int i = hex.length(); i < 4; i++) {
+				buf.append('0');
+			}
+			buf.append(hex);
+		} else {
+			buf.append(commChannel);
+		}
 
 		switch (requiredSecurity) {
 		case NOAUTHENTICATE_NOENCRYPT:
@@ -308,6 +336,8 @@ public class ServiceRecordImpl implements ServiceRecord {
 
 		if (mustBeMaster) {
 			buf.append(";master=true");
+		} else {
+			buf.append(";master=false");
 		}
 
 		return buf.toString();

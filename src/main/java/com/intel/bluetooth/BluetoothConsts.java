@@ -29,6 +29,8 @@ public class BluetoothConsts {
 
 	public static final String SHORT_UUID_BASE = "00001000800000805F9B34FB";
 	
+	public static final String PROTOCOL_SCHEME_L2CAP = "btl2cap";
+	
 	public static final String PROTOCOL_SCHEME_RFCOMM = "btspp";
 	
 	public static final String PROTOCOL_SCHEME_BT_OBEX = "btgoep";
