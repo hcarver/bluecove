@@ -342,8 +342,21 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 					if (BluetoothStackWIDCOMMSDPInputStream.debug) {
 						DebugLog.debug("decode attribute " + id + " Ox" + Integer.toHexString(id));
 					}
-					DataElement element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(sdpStruct)))
-							.readElement();
+					DataElement element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(sdpStruct))).readElement();
+					
+					// Do special case conversion for only one element in the list.
+					if (id == BluetoothConsts.ProtocolDescriptorList) {
+						Enumeration protocolsSeqEnum = (Enumeration)element.getValue();
+						if (protocolsSeqEnum.hasMoreElements()) {
+							DataElement protocolElement = (DataElement) protocolsSeqEnum.nextElement();
+							if (protocolElement.getDataType() != DataElement.DATSEQ) {
+								DataElement newMainSeq = new DataElement(DataElement.DATSEQ);
+								newMainSeq.addElement(element);
+								element = newMainSeq;
+							}
+						}
+					}
+					
 					serviceRecord.populateAttributeValue(id, element);
 				} else {
 					if (BluetoothStackWIDCOMMSDPInputStream.debug) {
