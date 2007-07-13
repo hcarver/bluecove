@@ -133,4 +133,37 @@ public abstract class Utils {
 		} catch (InterruptedException e) {
 		}
 	}
+	
+	public static class TimerThread extends Thread {
+		
+		long delay; 
+		
+		Runnable run;
+		
+		public TimerThread(long delay, Runnable run) {
+			this.delay = delay;
+			this.run = run;
+		}
+		
+		public void run() {
+			try {
+				Thread.sleep(delay);
+				run.run();
+			} catch (InterruptedException e) {
+			}
+		}
+
+	}
+	/**
+	 * Java 1.1 compatible. Schedules the specified task for execution after the specified delay.
+	 * 
+	 * @param delay delay in milliseconds before task is to be executed.
+	 * @param run task to be scheduled.
+	 */
+	public static TimerThread schedule(final long delay, final Runnable run) {
+		TimerThread t = new TimerThread(delay, run);
+		UtilsJavaSE.threadSetDaemon(t);
+		t.start();
+		return t;
+	}
 }

@@ -42,6 +42,8 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	
 	private DiscoveryListener currentDeviceDiscoveryListener;
 	
+	private Thread limitedDiscoverableTimer;
+	
 	BluetoothStackMicrosoft() {
 	}
 
@@ -78,6 +80,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 			peerInitialized = false;
 			super.uninitialize();
 		}
+		cancelLimitedDiscoverableTimer();
 	}
 	
 	public void initialized() throws BluetoothStateException {
@@ -116,17 +119,43 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		return new DeviceClass(super.getDeviceClass(localBluetoothAddress));
 	}
 	
+	private void cancelLimitedDiscoverableTimer() {
+		if (limitedDiscoverableTimer != null) {
+			limitedDiscoverableTimer.interrupt();
+			limitedDiscoverableTimer = null;
+		}
+	}
+	
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
 		switch (mode) {
 		case DiscoveryAgent.NOT_DISCOVERABLE:
+			cancelLimitedDiscoverableTimer();
+			DebugLog.debug("setDiscoverable(false)");
 			super.setDiscoverable(false);
 			break;
 		case DiscoveryAgent.GIAC:
+			cancelLimitedDiscoverableTimer();
+			DebugLog.debug("setDiscoverable(true)");
 			super.setDiscoverable(true);
 			break;
 		case DiscoveryAgent.LIAC:
+			if (limitedDiscoverableTimer != null) {
+				break;
+			}
+			DebugLog.debug("setDiscoverable(LIAC)");
 			super.setDiscoverable(true);
-			// TODO Timer to turn it off
+			// Timer to turn it off
+			limitedDiscoverableTimer = Utils.schedule(60*1000, new Runnable() {
+				public void run() {
+					try {
+						setDiscoverable(false);
+					} catch (BluetoothStateException e) {
+						DebugLog.debug("error setDiscoverable", e);
+					} finally {
+						limitedDiscoverableTimer = null;
+					}
+				}
+			});
 			break;
 		}
 		return true;
@@ -140,8 +169,15 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	public int getLocalDeviceDiscoverable() {
 		int mode = super.getBluetoothRadioMode();
 		if (mode == BluetoothPeer.BTH_MODE_DISCOVERABLE) {
-			return DiscoveryAgent.GIAC;
+			if (limitedDiscoverableTimer != null) {
+				DebugLog.debug("Discoverable = LIAC");
+				return DiscoveryAgent.LIAC;
+			} else {
+				DebugLog.debug("Discoverable = GIAC");
+				return DiscoveryAgent.GIAC;
+			}
 		} else {
+			DebugLog.debug("Discoverable = NOT_DISCOVERABLE");
 			return DiscoveryAgent.NOT_DISCOVERABLE;
 		}
 	}

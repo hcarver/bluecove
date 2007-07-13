@@ -171,6 +171,10 @@ public class LocalDevice {
 	 *
 	 */
 	public boolean setDiscoverable(int mode) throws BluetoothStateException {
+		if ((mode != DiscoveryAgent.GIAC) && (mode != DiscoveryAgent.LIAC) && (mode != DiscoveryAgent.NOT_DISCOVERABLE) 
+				&& (mode < 0x9E8B00 || mode > 0x9E8B3F)) {
+			throw new IllegalArgumentException("Invalid discoverable mode");
+		}
 		return BlueCoveImpl.instance().getBluetoothStack().setLocalDeviceDiscoverable(mode);
 	}
 

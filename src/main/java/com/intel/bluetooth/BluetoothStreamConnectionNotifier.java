@@ -146,10 +146,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 				Enumeration elementSeqEnum = (Enumeration) elementSeq.getValue();
 				if (elementSeqEnum.hasMoreElements()) {
 					DataElement protocolElement = (DataElement) elementSeqEnum.nextElement();
-					if (protocolElement.getDataType() != DataElement.UUID) {
-						continue;
-					}
-					if (elementSeqEnum.hasMoreElements() && (BluetoothConsts.L2CAP_PROTOCOL_UUID.equals(protocolElement.getValue()))) {
+					if ((protocolElement.getDataType() == DataElement.UUID) && (BluetoothConsts.L2CAP_PROTOCOL_UUID.equals(protocolElement.getValue()))) {
 						isL2CAPpresent = true;
 						break;
 					}

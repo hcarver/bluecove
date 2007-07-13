@@ -1335,11 +1335,15 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_setDiscoverable(JN
 #ifndef _WIN32_WCE
 	BOOL enabled = FALSE;
 	if (on) {
-		BluetoothEnableIncomingConnections(NULL, TRUE);
+		if (!BluetoothEnableIncomingConnections(NULL, TRUE)) {
+		    throwBluetoothStateException(env, "Enable Incoming Connections error");
+		}
 		enabled = TRUE;
 	}
 	if (BluetoothEnableDiscovery(NULL, enabled)) {
 		restoreBtMode = (initialBtIsDiscoverable != enabled);
+	} else {
+	    throwBluetoothStateException(env, "Change Bluetooth Discovery mode error");
 	}
 #else
 	DWORD dwMode = BTH_CONNECTABLE;
