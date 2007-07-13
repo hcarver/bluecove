@@ -450,10 +450,8 @@
             <id>build_on_linux</id>
             <activation>
                 <os>
-                    <name>Linux</name>
+                    <name>linux</name>
                     <family>unix</family>
-                    <arch>x86</arch>
-                    <version>(*)</version>
                 </os>
             </activation>
             <build>
