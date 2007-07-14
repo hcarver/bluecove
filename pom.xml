@@ -290,6 +290,7 @@
                                 <!-- Set build number -->
                                 <replace dir="${project.build.directory}/site">
                                     <include name="*.html"></include>
+                                    <include name="tck/*.html"></include>
                                     <replacefilter token="#build#" value="${buildLabel}"/>
                                     <replacefilter token="#version#" value="${version}"/>
                                     <replacetoken><![CDATA[</body>]]></replacetoken>
