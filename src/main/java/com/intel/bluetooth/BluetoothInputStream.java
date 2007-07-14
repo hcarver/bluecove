@@ -129,11 +129,19 @@ class BluetoothInputStream extends InputStream {
 	}
 
 	public void close() throws IOException {
-		if (conn != null) {
-			conn.in = null;
-			BluetoothRFCommConnection c = conn; 
-			conn = null;
-			c.closeConnection();
+		try {
+			if (conn != null) {
+				conn.in = null;
+				BluetoothRFCommConnection c = conn;
+				conn = null;
+				// Function is not synchronized
+				if (c != null) {
+					c.closeConnection();
+				}
+			}
+		} catch (NullPointerException ignore) {
+			// Function is not synchronized
 		}
 	}
+	
 }

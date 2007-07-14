@@ -66,12 +66,19 @@ public abstract class BluetoothRFCommConnection implements StreamConnection, Blu
 				}
 			}
 			// This will call this function again but will do nothing.
+			// Function is not synchronized so we catch NullPointerException
 			if (in != null) {
-				in.close();
+				try {
+					in.close();
+				} catch (NullPointerException ignore) {
+				}
 				in = null;
 			}
 			if (out != null) {
-				out.close();
+				try {
+					out.close();
+				} catch (NullPointerException ignore) {
+				}
 				out = null;
 			}
 		}

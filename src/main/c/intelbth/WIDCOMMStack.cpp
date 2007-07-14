@@ -704,7 +704,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isServ
 		return JNI_FALSE;
 	}
 
-	UINT16 obtainedServicesRecords;
+	UINT16 obtainedServicesRecords = 0;
 	CBtIf::DISCOVERY_RESULT searchServicesResultCode = stack->GetLastDiscoveryResult(bda, &obtainedServicesRecords);
 	if (searchServicesResultCode != CBtIf::DISCOVERY_RESULT_SUCCESS) {
 		debugs("isServiceRecordDiscoverable resultCode %i", searchServicesResultCode);
@@ -714,6 +714,16 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isServ
 	if (obtainedServicesRecords < 1) {
 		return JNI_FALSE;
 	}
+
+    /* This does not help.
+    CSdpDiscoveryRec sdpDiscoveryRecord;
+	//guid_filter does not work as Expected with SE Phones!
+	int recSize = stack->ReadDiscoveryRecords(bda, 1, &sdpDiscoveryRecord, &(record->m_service_guid));
+	if (recSize == 0) {
+		debug("ReadDiscoveryRecords returns empty, while expected 1");
+		return JNI_FALSE;
+	}
+	*/
 
 	return JNI_TRUE;
 }
@@ -788,6 +798,7 @@ void WIDCOMMStackRfCommPort::readyForReuse() {
 	resetReceiveBuffer();
 	isConnected = FALSE;
 	isConnectionError = FALSE;
+	isConnectionErrorType = 0;
 	other_event_code = 0;
 	isClosing = FALSE;
 	readyToFree = FALSE;
@@ -827,10 +838,12 @@ void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {
         isConnected = TRUE;
 		SetEvent(hConnectionEvent);
 	} else if (PORT_EV_CONNECT_ERR & event_code) {
+		isConnectionErrorType = 1;
 		isConnectionError = TRUE;
 		isConnected = FALSE;
 		SetEvent(hConnectionEvent);
 	} else if (PORT_EV_OVERRUN & event_code) {
+	    isConnectionErrorType = 2;
 		isConnectionError = TRUE;
 		receiveBuffer.setOverflown();
 		SetEvent(hConnectionEvent);
@@ -881,6 +894,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 			throwRuntimeException(env, "fails to CreateEvent");
 			open_client_return 0;
 		}
+		debugs("RfCommPort channel %i", channel);
 		//debug("AssignScnValue");
 		// What GUID do we need in call to CRfCommIf.AssignScnValue() if we don't have any?
 		//memcpy(&(rf->service_guid), &test_client_service_guid, sizeof(GUID));
@@ -923,6 +937,9 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 			}
 		}
 		if ((stack == NULL) || rf->isClosing || rf->isConnectionError) {
+		    if ((stack != NULL) && (rf->isConnectionError)) {
+		        debugs("RfCommPort isConnectionError %i", rf->isConnectionErrorType);
+		    }
 			throwIOException(env, "Failed to connect");
 			open_client_return 0;
 		}

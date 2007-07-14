@@ -260,9 +260,11 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 			try {
 				handles = runSearchServicesImpl(startedNotify, uuidValue, RemoteDeviceHelper.getAddress(device));
 			} catch (SearchServicesTerminatedException e) {
+				DebugLog.debug("SERVICE_SEARCH_TERMINATED");
 				return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
 			}
 			if (handles == null) {
+				DebugLog.debug("SERVICE_SEARCH_ERROR");
 				return DiscoveryListener.SERVICE_SEARCH_ERROR;
 			} else if (handles.length > 0) {
 
@@ -292,8 +294,9 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 				for (int i = 0; i < handles.length; i++) {
 					ServiceRecordImpl sr = new ServiceRecordImpl(device, handles[i]);
 					try {
-						sr.populateRecord(new int[] { BluetoothConsts.ServiceClassIDList });
-						if ((uuidFiler != null) && !sr.hasServiceClassUUID(uuidFiler)) {
+						sr.populateRecord(new int[] { BluetoothConsts.ServiceClassIDList, BluetoothConsts.ProtocolDescriptorList });
+						if ((uuidFiler != null)
+								&& !(sr.hasServiceClassUUID(uuidFiler) || sr.hasProtocolClassUUID(uuidFiler))) {
 							if (BluetoothStackWIDCOMMSDPInputStream.debug) {
 								DebugLog.debug("filtered ServiceRecord (" + i + ")", sr);
 							}
@@ -308,8 +311,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 						records.addElement(sr);
 						sr.populateRecord(new int[] { BluetoothConsts.ServiceRecordHandle,
-								BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID,
-								BluetoothConsts.ProtocolDescriptorList });
+								BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID});
 						if (attrSet != null) {
 							sr.populateRecord(attrSet);
 						}
@@ -319,15 +321,18 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 						DebugLog.debug("populateRecord error", e);
 					}
 					if (startedNotify.isTerminated()) {
+						DebugLog.debug("SERVICE_SEARCH_TERMINATED");
 						return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
 					}
 				}
 				if (records.size() != 0) {
+					DebugLog.debug("SERVICE_SEARCH_COMPLETED");
 					ServiceRecord[] fileteredRecords = (ServiceRecord[])Utils.vector2toArray(records, new ServiceRecord[records.size()]);
 					listener.servicesDiscovered(startedNotify.getTransID(), fileteredRecords);
 					return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
 				}
 			}
+			DebugLog.debug("SERVICE_SEARCH_NO_RECORDS");
 			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
 		}
 	}

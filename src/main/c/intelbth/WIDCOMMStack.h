@@ -22,7 +22,7 @@
 #include "common.h"
 
 #ifdef _WIN32_WCE
-	#define WIDCOMM_CE30	
+	#define WIDCOMM_CE30
 	#ifdef WIDCOMM_CE30
 		#define WIDCOMM_DLL L"BtSdkCE30.dll"
 	#else
@@ -149,6 +149,7 @@ public:
 
 	BOOL isClosing;
 	BOOL isConnected;
+	int isConnectionErrorType;
 	BOOL isConnectionError;
 
 	HANDLE hConnectionEvent;

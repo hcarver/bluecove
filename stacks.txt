@@ -26,6 +26,8 @@
     * RFCOMM Server can accept only one connection at a time
     * `ServiceRecord` attributes of `DataElement` types URL are discovered as STRING
     * `ServiceRecord` attributes of `DataElement` types U_INT_8, INT_8, INT_16 and UINT_16 are not properly discovered (Bug submitted to Support@broadcom)
+    * The discovery database is cumulative. It contains the results of all previous discoveries of the application or any other applications that are running or that have run.
+      So ServiceSearch may return service even when it is down.
 
 
 == Winsock (Microsoft) ==

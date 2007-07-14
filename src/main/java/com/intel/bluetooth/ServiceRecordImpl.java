@@ -548,10 +548,10 @@ public class ServiceRecordImpl implements ServiceRecord {
 	/**
 	 * Internal implemenation function
 	 */
-	public boolean hasServiceClassUUID(UUID uuid) {
+	boolean hasServiceClassUUID(UUID uuid) {
 		DataElement attrDataElement = getAttributeValue(BluetoothConsts.ServiceClassIDList);
 		if ((attrDataElement == null) || (attrDataElement.getDataType() != DataElement.DATSEQ) || attrDataElement.getSize() == 0) {
-			DebugLog.debug("Bogus ServiceClassIDList");
+			//DebugLog.debug("Bogus ServiceClassIDList");
 			return false;
 		}
 		
@@ -578,6 +578,31 @@ public class ServiceRecordImpl implements ServiceRecord {
 		return false;
 	}
 	
+	boolean hasProtocolClassUUID(UUID uuid) {
+		DataElement protocolDescriptor = getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
+		if ((protocolDescriptor == null) || (protocolDescriptor.getDataType() != DataElement.DATSEQ)) {
+			//DebugLog.debug("Bogus ProtocolDescriptorList");
+			return false;
+		}
+
+		for (Enumeration protocolsSeqEnum = (Enumeration) protocolDescriptor.getValue(); protocolsSeqEnum.hasMoreElements();) {
+			DataElement elementSeq = (DataElement) protocolsSeqEnum.nextElement();
+
+			if (elementSeq.getDataType() == DataElement.DATSEQ) {
+				Enumeration elementSeqEnum = (Enumeration) elementSeq.getValue();
+				if (elementSeqEnum.hasMoreElements()) {
+					DataElement protocolElement = (DataElement) elementSeqEnum.nextElement();
+					if (protocolElement.getDataType() != DataElement.UUID) {
+						continue;
+					}
+					if (uuid.equals(protocolElement.getValue())) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 	
 	DataElement clone(DataElement de) {
 		DataElement c = null;

@@ -1,0 +1,36 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/guides/mini/guide-apt-format.html
+
+                                    ------------------
+                                    Testing BlueCove with JSR 82 Technology Compatibility Kit (TCK)
+                                    ------------------
+
+JSR 82 Technology Compatibility Kit
+
+    The TCK for JSR 82 is available under the terms of the Motorola Extensible License! Anyone can now freely download, view, and execute the JSR 82 TCK.
+
+    JSR-82 project website {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.jsr82}https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.jsr82}}
+
+
+* BlueCove Tests on windows
+
+    Since security, OBEX and L2CAP connection are not implemented yet this tests has been exclused from run to save time.
+
+    Latest test reports can be found {{{tck/Bluetooth_1-1_005_TCK/}here}}.
+
+    To run TCK we are using:
+
+    * {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.gatling}Gatling}} v1.0.02 test harness
+
+    * {{{http://www.microemu.org/}MicroEmulator}} v2.0.2-SNAPSHOT as MIDP container.
+
+    * Cellphone Nokia 6265i or Sony Ericson K790a as TCK agent (RFCOMM only)
+
+    []
+
+ Here is how you would run the tests on BlueCove in the "autotest" mode with the help of MicroEmulator:
+
+---
+    java -cp microemulator.jar;bluecove.jar org.microemu.app.Main -Xautotest:http://localhost:8080/getNextApp.jad
+---
+

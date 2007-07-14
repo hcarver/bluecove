@@ -328,6 +328,7 @@ public class DiscoveryAgent {
 	 * does not represent an active service search transaction
 	 */
 	public boolean cancelServiceSearch(int transID) {
+		DebugLog.debug("cancelServiceSearch", transID);
 		return BlueCoveImpl.instance().getBluetoothStack().cancelServiceSearch(transID);
 	}
 
