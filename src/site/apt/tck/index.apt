@@ -16,7 +16,7 @@ JSR 82 Technology Compatibility Kit
 
     Since security, OBEX and L2CAP connection are not implemented yet this tests has been exclused from run to save time.
 
-    Latest test reports can be found {{{tck/Bluetooth_1-1_005_TCK/}here}}.
+    Latest test reports can be found {{{Bluetooth_1-1_005_TCK/}here}}.
 
     To run TCK we are using:
 
