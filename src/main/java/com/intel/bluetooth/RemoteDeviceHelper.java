@@ -89,6 +89,7 @@ public abstract class RemoteDeviceHelper {
 		if (dev == null) {
 			dev = new RemoteDeviceWithExtendedInfo(address, name);
 			devicesCashed.put(new Long(address), dev);
+			DebugLog.debug0x("new devicesCashed", address);
 		} else if (!Utils.isStringSet(dev.name)) {
 			// New name found
 			dev.name = name;
@@ -117,6 +118,8 @@ public abstract class RemoteDeviceHelper {
 			name = BlueCoveImpl.instance().getBluetoothStack().getRemoteDeviceFriendlyName(address);
 			if (Utils.isStringSet(name)) {
 				((RemoteDeviceWithExtendedInfo)device).name = name;
+			} else {
+				throw new IOException("Can't query remote device");
 			}
 		}
 		return name;

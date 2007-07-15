@@ -36,6 +36,10 @@ jint blueCoveVersion() {
 	return BLUECOVE_VERSION;
 }
 
+BOOL isDebugOn() {
+    return nativeDebugCallback;
+}
+
 void enableNativeDebug(JNIEnv *env, jobject loggerClass, jboolean on) {
 	if (on) {
 		nativeDebugListenerClass = (jclass)env->NewGlobalRef(loggerClass);

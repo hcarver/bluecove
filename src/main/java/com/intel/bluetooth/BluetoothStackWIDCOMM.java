@@ -224,7 +224,30 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		return deviceInquiryCancelImpl();
 	}
 	
-	public native String getRemoteDeviceFriendlyName(long address) throws IOException;
+	native String getRemoteDeviceFriendlyName(long address, int majorDeviceClass, int minorDeviceClass) throws IOException;
+	
+	/**
+	 * get device name while discovery running. Device may not report its name first time while discovering.
+	 * @param address
+	 * @return name
+	 */
+	native String peekRemoteDeviceFriendlyName(long address);
+	
+	public String getRemoteDeviceFriendlyName(long address) throws IOException {
+		if (deviceDiscoveryListeners.size() != 0) {
+			// discovery running
+			return peekRemoteDeviceFriendlyName(address);
+		} else {
+			// Another way to get name is to run deviceInquiry
+			DiscoveryListener listener = new DiscoveryListenerAdapter();
+			if (startInquiry(DiscoveryAgent.GIAC, listener)) {
+				String name = peekRemoteDeviceFriendlyName(address);
+				cancelInquiry(listener);
+				return name;
+			}
+		}
+		return null;
+	}
 	
 	// --- Service search 
 	

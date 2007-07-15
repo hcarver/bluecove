@@ -106,6 +106,7 @@ public:
 
 	DeviceFound deviceResponded[DEVICE_FOUND_MAX];
 	int deviceRespondedIdx;
+	BOOL deviceInquiryInProcess;
 	BOOL deviceInquiryTerminated;
 	BOOL deviceInquiryComplete;
 	BOOL deviceInquirySuccess;

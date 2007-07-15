@@ -130,6 +130,7 @@ void enableNativeDebug(JNIEnv * env, jobject loggerClass, jboolean on);
 
 //#define EXT_DEBUG
 void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...);
+BOOL isDebugOn();
 #define debug(fmt) callDebugListener(env, CPP_FILE, __LINE__, fmt);
 #define debugs(fmt, message) callDebugListener(env, CPP_FILE, __LINE__, fmt, message);
 #define debug1(fmt, message) callDebugListener(env, CPP_FILE, __LINE__, fmt, message);

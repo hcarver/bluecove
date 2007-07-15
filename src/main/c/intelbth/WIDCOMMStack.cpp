@@ -93,6 +93,8 @@ WIDCOMMStack::WIDCOMMStack() {
 
 	commPool = new ObjectPool(COMMPORTS_POOL_MAX, 1, TRUE);
 
+    deviceInquiryInProcess = FALSE;
+    deviceRespondedIdx = -1;
 	discoveryRecHolderCurrent = NULL;
 	discoveryRecHolderHold = NULL;
 }
@@ -123,6 +125,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_initia
 
 WIDCOMMStack::~WIDCOMMStack() {
 	destroy(NULL);
+	deviceInquiryInProcess = FALSE;
 	CloseHandle(hEvent);
 	DeleteCriticalSection(&csCRfCommIf);
 }
@@ -310,22 +313,54 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceM
 	#endif
 }
 
+void debugGetRemoteDeviceInfo_rc(JNIEnv *env, CBtIf::REM_DEV_INFO_RETURN_CODE rc) {
+    if ((isDebugOn()) && (rc != CBtIf::REM_DEV_INFO_SUCCESS)) {
+        switch (rc) {
+            case CBtIf::REM_DEV_INFO_EOF: debug("RemoteDeviceFriendlyName REM_DEV_INFO_EOF"); break;
+            case CBtIf::REM_DEV_INFO_ERROR: debug("RemoteDeviceFriendlyName REM_DEV_INFO_ERROR"); break;
+            case CBtIf::REM_DEV_INFO_MEM_ERROR: debug("RemoteDeviceFriendlyName REM_DEV_INFO_MEM_ERROR"); break;
+            default: debug("RemoteDeviceFriendlyName ???"); break;
+        }
+	}
+}
+
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteDeviceFriendlyName
-(JNIEnv *env, jobject, jlong address) {
+(JNIEnv *env, jobject, jlong address, jint majorDeviceClass, jint minorDeviceClass) {
 	if (stack == NULL) {
 		return NULL;
 	}
 	#ifndef WIDCOMM_CE30
-	DEV_CLASS filter_dev_class;
-	CBtIf::REM_DEV_INFO dev_info;
-	CBtIf::REM_DEV_INFO_RETURN_CODE rc = stack->GetRemoteDeviceInfo(filter_dev_class, &dev_info);
-	while (rc == CBtIf::REM_DEV_INFO_SUCCESS) {
-		jlong a = BcAddrToLong(dev_info.bda);
-		if (a == address) {
-			return env->NewStringUTF((char*)dev_info.bd_name);
-		}
-		rc = stack->GetNextRemoteDeviceInfo(&dev_info);
-	}
+	// if device InquiryInProcess wait untill FriendlyName is returned by running running Inquiry
+	do {
+	    // filter needs to be exact....
+	    DEV_CLASS filter_dev_class;
+	    filter_dev_class[0] = 0;
+	    filter_dev_class[1] = (unsigned char)majorDeviceClass;
+	    filter_dev_class[2] = (unsigned char)minorDeviceClass;
+	    CBtIf::REM_DEV_INFO dev_info;
+	    CBtIf::REM_DEV_INFO_RETURN_CODE rc = stack->GetRemoteDeviceInfo(filter_dev_class, &dev_info);
+	    debugGetRemoteDeviceInfo_rc(env, rc);
+	    while ((rc == CBtIf::REM_DEV_INFO_SUCCESS) && (stack != NULL)) {
+		    jlong a = BcAddrToLong(dev_info.bda);
+            if (isDebugOn()) {
+		        wchar_t addressString[14];
+	            BcAddrToString(addressString, dev_info.bda);
+	            debugs("RemoteDeviceFriendlyName found %S", addressString);
+            }
+		    if (a == address) {
+		        if (dev_info.bd_name[0] != '\0') {
+			        return env->NewStringUTF((char*)dev_info.bd_name);
+			    } else {
+			        break;
+			    }
+		    }
+		    rc = stack->GetNextRemoteDeviceInfo(&dev_info);
+            debugGetRemoteDeviceInfo_rc(env, rc);
+	    }
+	    if ((stack != NULL) && (stack->deviceInquiryInProcess)) {
+	        Sleep(400);
+	    }
+    } while ((stack != NULL) && (stack->deviceInquiryInProcess));
 	#endif
 	return NULL;
 }
@@ -338,7 +373,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceC
 // --- Device Inquiry
 
 void WIDCOMMStack::OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected) {
-	if (stack == NULL) {
+	if ((stack == NULL) || (!deviceInquiryInProcess)) {
 		return;
 	}
 	int nextDevice = deviceRespondedIdx + 1;
@@ -356,6 +391,7 @@ void WIDCOMMStack::OnInquiryComplete(BOOL success, short num_responses) {
 	if (stack == NULL) {
 		return;
 	}
+	deviceInquiryInProcess = FALSE;
 	deviceInquirySuccess = success;
 	deviceInquiryComplete = TRUE;
 	SetEvent(hEvent);
@@ -367,6 +403,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 		throwIOException(env, "Stack closed");
 		return 0;
 	}
+	if (stack->deviceInquiryInProcess) {
+	    throwBluetoothStateException(env, "Another inquiry already running");
+	}
+	stack->deviceInquiryInProcess = TRUE;
 	debug("StartDeviceInquiry");
 	stack->deviceInquiryComplete = FALSE;
 	stack->deviceInquiryTerminated = FALSE;
@@ -377,29 +417,34 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 	jclass peerClass = env->GetObjectClass(peer);
 	if (peerClass == NULL) {
 		throwRuntimeException(env, "Fail to get Object Class");
+		stack->deviceInquiryInProcess = FALSE;
 		return INQUIRY_ERROR;
 	}
 
 	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;)V");
 	if (deviceDiscoveredCallbackMethod == NULL) {
 		throwRuntimeException(env, "Fail to get MethodID deviceDiscoveredCallback");
+		stack->deviceInquiryInProcess = FALSE;
 		return INQUIRY_ERROR;
 	}
 
 	jclass notifyClass = env->GetObjectClass(startedNotify);
 	if (notifyClass == NULL) {
 		throwRuntimeException(env, "Fail to get Object Class");
+		stack->deviceInquiryInProcess = FALSE;
 		return INQUIRY_ERROR;
 	}
 	jmethodID notifyMethod = env->GetMethodID(notifyClass, "deviceInquiryStartedCallback", "()V");
 	if (notifyMethod == NULL) {
 		throwRuntimeException(env, "Fail to get MethodID deviceInquiryStartedCallback");
+		stack->deviceInquiryInProcess = FALSE;
 		return INQUIRY_ERROR;
 	}
 
 	if (!stack->StartInquiry()) {
 		debug("deviceInquiryStart error");
 		stack->throwExtendedBluetoothStateException(env);
+		stack->deviceInquiryInProcess = FALSE;
 		return INQUIRY_ERROR;
 	}
 	debug("deviceInquiryStarted");
@@ -407,17 +452,22 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 	env->CallVoidMethod(startedNotify, notifyMethod);
 	if (ExceptionCheckCompatible(env)) {
 		stack->StopInquiry();
+		stack->deviceInquiryInProcess = FALSE;
 		return INQUIRY_ERROR;
 	}
 
 	int reportedIdx = -1;
 
 	while ((stack != NULL) && (!stack->deviceInquiryTerminated) && ((!stack->deviceInquiryComplete) || (reportedIdx != stack->deviceRespondedIdx))) {
-		DWORD  rc = WaitForSingleObject(stack->hEvent, 200);
-		if (rc == WAIT_FAILED) {
-			throwRuntimeException(env, "WaitForSingleObject");
-			return INQUIRY_ERROR;
-		}
+		// When deviceInquiryComplete look at the remainder of Responded devices. Do Not Wait
+		if (!stack->deviceInquiryComplete) {
+		    DWORD  rc = WaitForSingleObject(stack->hEvent, 200);
+		    if (rc == WAIT_FAILED) {
+			    throwRuntimeException(env, "WaitForSingleObject");
+			    stack->deviceInquiryInProcess = FALSE;
+			    return INQUIRY_ERROR;
+		    }
+	    }
 		if ((stack != NULL) && (reportedIdx != stack->deviceRespondedIdx)) {
 			reportedIdx ++;
 			if (reportedIdx >= DEVICE_FOUND_MAX) {
@@ -427,6 +477,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 			env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, dev.deviceAddr, dev.deviceClass, env->NewStringUTF((char*)(dev.bdName)));
 			if (ExceptionCheckCompatible(env)) {
 				stack->StopInquiry();
+				stack->deviceInquiryInProcess = FALSE;
 				return INQUIRY_ERROR;
 			}
 		}
@@ -434,6 +485,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 
 	if (stack != NULL) {
 		stack->StopInquiry();
+		stack->deviceInquiryInProcess = FALSE;
 	}
 
 	if (stack == NULL) {
@@ -449,10 +501,33 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_deviceInquiryCancelImpl
 (JNIEnv *env, jobject peer) {
+	debug("StopInquiry");
 	stack->deviceInquiryTerminated = TRUE;
 	stack->StopInquiry();
 	SetEvent(stack->hEvent);
 	return TRUE;
+}
+
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_peekRemoteDeviceFriendlyName
+(JNIEnv *env, jobject, jlong address) {
+	if (stack == NULL) {
+		return NULL;
+	}
+	while (stack != NULL) {
+	    for(int idx = 0; ((stack != NULL) && idx <= stack->deviceRespondedIdx); idx ++) {
+	        DeviceFound dev = stack->deviceResponded[idx];
+	        if ((address == dev.deviceAddr) && (dev.bdName != '\0')) {
+	            return env->NewStringUTF((char*)dev.bdName);
+	        }
+	    }
+	    if ((stack != NULL) && (stack->deviceInquiryInProcess)) {
+	        debug("peekRemoteDeviceFriendlyName sleeps");
+	        Sleep(200);
+	    } else {
+	        break;
+	    }
+    };
+    return NULL;
 }
 
 // --- Service search
@@ -469,9 +544,11 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	LongToBcAddr(address, bda);
 
 #ifdef EXT_DEBUG
-	wchar_t addressString[14];
-	BcAddrToString(addressString, bda);
-	debugs("StartSearchServices on %S", addressString);
+    if (isDebugOn()) {
+	    wchar_t addressString[14];
+	    BcAddrToString(addressString, bda);
+	    debugs("StartSearchServices on %S", addressString);
+    }
 #endif
 
 	GUID *p_service_guid = NULL;
@@ -596,9 +673,11 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	Edebugs("discoveryRecHolderCurrent %p", stack->discoveryRecHolderCurrent);
 
 #ifdef EXT_DEBUG
-	wchar_t addressString2[14];
-	BcAddrToString(addressString2, bda);
-	debugs("ReadDiscoveryRecords on %S", addressString2);
+    if (isDebugOn()) {
+	    wchar_t addressString2[14];
+	    BcAddrToString(addressString2, bda);
+	    debugs("ReadDiscoveryRecords on %S", addressString2);
+	}
 #endif
 
 	CSdpDiscoveryRec *sdpDiscoveryRecordsList = discoveryRecHolder->sdpDiscoveryRecords + useIdx;
