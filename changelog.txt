@@ -2,6 +2,9 @@
 
 * 2.0.1 to be Released 2007-09-xx
 
+    2007-07-15 Vlad Skarzhevskyy
+    * Use TCK for JSR 82 for tests, fixed major incompatibility problems
+
 * 2.0.0 released 2007-07-05
 
     2007-06-29 Vlad Skarzhevskyy
