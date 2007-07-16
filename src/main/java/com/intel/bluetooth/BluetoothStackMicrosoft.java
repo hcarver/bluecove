@@ -44,6 +44,9 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	
 	private Thread limitedDiscoverableTimer;
 	
+	// TODO what is the real number for Attributes retrivable ?
+	private final static int ATTR_RETRIEVABLE_MAX = 256;
+	
 	BluetoothStackMicrosoft() {
 	}
 
@@ -205,8 +208,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		}
 
 		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
-			// TODO what is the real number ?
-			return "256";
+			return String.valueOf(ATTR_RETRIEVABLE_MAX);
 		}
 		if ("bluetooth.master.switch".equals(property)) {
 			return FALSE;
@@ -324,51 +326,33 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	}
 
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
-		/*
-		 * copy and sort attrIDs (required by MS Bluetooth)
-		 */
-
-		int[] sortIDs = new int[attrIDs.length];
-
-		System.arraycopy(attrIDs, 0, sortIDs, 0, attrIDs.length);
-
-		for (int i = 0; i < sortIDs.length; i++) {
-			for (int j = 0; j < sortIDs.length - i - 1; j++) {
-				if (sortIDs[j] > sortIDs[j + 1]) {
-					int temp = sortIDs[j];
-					sortIDs[j] = sortIDs[j + 1];
-					sortIDs[j + 1] = temp;
-				}
-			}
+		if (attrIDs.length > ATTR_RETRIEVABLE_MAX) {
+			throw new IllegalArgumentException();
 		}
-
-		/*
-		 * check for duplicates
-		 */
-
-		for (int i = 0; i < sortIDs.length - 1; i++) {
-			if (sortIDs[i] == sortIDs[i + 1]) {
-				throw new IllegalArgumentException();
-			}
-			DebugLog.debug("query for ", sortIDs[i]);
-		}
-		DebugLog.debug("query for ", sortIDs[sortIDs.length - 1]);
-
 		/*
 		 * retrieve SDP blob
 		 */
-
-		byte[] blob = super.getServiceAttributes(sortIDs, 
+		byte[] blob = super.getServiceAttributes(attrIDs, 
 				RemoteDeviceHelper.getAddress(serviceRecord.getHostDevice()),
 				(int)serviceRecord.getHandle());
 
 		if (blob.length > 0) {
 			try {
+				boolean anyRetrived = false;
 				DataElement element = (new SDPInputStream(new ByteArrayInputStream(blob))).readElement();
 				for (Enumeration e = (Enumeration) element.getValue(); e.hasMoreElements();) {
-					serviceRecord.populateAttributeValue((int) ((DataElement) e.nextElement()).getLong(), (DataElement)e.nextElement());
+					int attrID = (int) ((DataElement) e.nextElement()).getLong();
+					serviceRecord.populateAttributeValue(attrID, (DataElement)e.nextElement());
+					if (!anyRetrived) {
+						for (int i = 0; i < attrIDs.length; i++) {
+							if (attrIDs[i] == attrID) {
+								anyRetrived = true;
+								break;
+							}
+						}
+					}
 				}
-				return true;
+				return anyRetrived;
 			} catch (Exception e) {
 				throw new IOException();
 			}

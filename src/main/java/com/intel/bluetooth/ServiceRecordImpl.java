@@ -157,15 +157,16 @@ public class ServiceRecordImpl implements ServiceRecord {
 		/*
 		 * check this is not a local service record
 		 */
-
 		if (device == null) {
-			throw new RuntimeException();
+			throw new RuntimeException("This is local device service record");
 		}
 
+		if (attrIDs == null) {
+			throw new NullPointerException("attrIDs is null");
+		}
 		/*
 		 * check attrIDs is non-null and has length > 0
 		 */
-
 		if (attrIDs.length == 0) {
 			throw new IllegalArgumentException();
 		}
@@ -179,8 +180,34 @@ public class ServiceRecordImpl implements ServiceRecord {
 				throw new IllegalArgumentException();
 			}
 		}
+		
+		/*
+		 * copy and sort attrIDs (required by MS Bluetooth and for check for duplicates)
+		 */
+		
+		int[] sortIDs = new int[attrIDs.length];
+		System.arraycopy(attrIDs, 0, sortIDs, 0, attrIDs.length);
+		for (int i = 0; i < sortIDs.length; i++) {
+			for (int j = 0; j < sortIDs.length - i - 1; j++) {
+				if (sortIDs[j] > sortIDs[j + 1]) {
+					int temp = sortIDs[j];
+					sortIDs[j] = sortIDs[j + 1];
+					sortIDs[j + 1] = temp;
+				}
+			}
+		}
+		/*
+		 * check for duplicates
+		 */
+		for (int i = 0; i < sortIDs.length - 1; i++) {
+			if (sortIDs[i] == sortIDs[i + 1]) {
+				throw new IllegalArgumentException();
+			}
+			DebugLog.debug("query for ", sortIDs[i]);
+		}
+		DebugLog.debug("query for ", sortIDs[sortIDs.length - 1]);
 
-		return BlueCoveImpl.instance().getBluetoothStack().populateServicesRecordAttributeValues(this, attrIDs);
+		return BlueCoveImpl.instance().getBluetoothStack().populateServicesRecordAttributeValues(this, sortIDs);
 	}
 
 	/*

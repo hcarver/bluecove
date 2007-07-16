@@ -44,6 +44,9 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	
 	private Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
 	
+	// TODO what is the real number for Attributes retrivable ?
+	private final static int ATTR_RETRIEVABLE_MAX = 256;
+	
 	static {
 		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WIDCOMM);
 	}
@@ -150,8 +153,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		}
 
 		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
-			// TODO what is the real number ?
-			return "256";
+			return String.valueOf(ATTR_RETRIEVABLE_MAX);
 		}
 		if ("bluetooth.master.switch".equals(property)) {
 			return FALSE;
@@ -362,6 +364,10 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	
 
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
+		if (attrIDs.length > ATTR_RETRIEVABLE_MAX) {
+			throw new IllegalArgumentException();
+		}
+		boolean anyRetrived = false;
 		for (int i = 0; i < attrIDs.length; i++) {
 			int id = attrIDs[i];
 			try {
@@ -386,6 +392,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 					}
 					
 					serviceRecord.populateAttributeValue(id, element);
+					anyRetrived = true;
 				} else {
 					if (BluetoothStackWIDCOMMSDPInputStream.debug) {
 						DebugLog.debug("no data for attribute " + id + " Ox" + Integer.toHexString(id));
@@ -397,7 +404,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 				}
 			}
 		}
-		return true;
+		return anyRetrived;
 	}
 	
 //	 --- Client RFCOMM connections
