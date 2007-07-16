@@ -983,6 +983,13 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 		}
 		//debug("SetSecurityLevel");
 		UINT8 sec_level = BTM_SEC_NONE;
+		if (authenticate) {
+			sec_level = BTM_SEC_OUT_AUTHENTICATE;
+		}
+		if (encrypt) {
+			sec_level = sec_level | BTM_SEC_OUT_ENCRYPT;
+		}
+
 		BT_CHAR *p_service_name;
 
 		#ifdef _WIN32_WCE
@@ -1394,6 +1401,14 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 		rf->sdpService->SetAvailability(255);
 
 		UINT8 sec_level = BTM_SEC_NONE;
+		if (authenticate) {
+			sec_level = BTM_SEC_IN_AUTHENTICATE;
+		}
+		
+		if (encrypt) {
+			sec_level = sec_level | BTM_SEC_OUT_ENCRYPT;
+		}
+
 		if (!stack->rfCommIf.SetSecurityLevel(rf->service_name, sec_level, TRUE)) {
 			throwIOException(env, "Error setting security level");
 			open_server_return 0;
