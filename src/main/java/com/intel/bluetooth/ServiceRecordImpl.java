@@ -32,6 +32,8 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
+import com.intel.bluetooth.BluetoothConsts.DeviceClassConsts;
+
 public class ServiceRecordImpl implements ServiceRecord {
 
 	private RemoteDevice device;
@@ -464,6 +466,16 @@ public class ServiceRecordImpl implements ServiceRecord {
 	 */
 
 	public void setDeviceServiceClasses(int classes) {
+		if (device != null) {
+			throw new RuntimeException("Service record obtained from a remote device");
+		}
+		if ((classes & (0xff000000 | DeviceClassConsts.LIMITED_DISCOVERY_SERVICE)) != 0) {
+			throw new IllegalArgumentException();
+		}
+		if ((classes & (DeviceClassConsts.SERVICE_MASK)) != 0) {
+			throw new IllegalArgumentException();
+		}
+	
 		// TODO not yet implemented
 	}
 

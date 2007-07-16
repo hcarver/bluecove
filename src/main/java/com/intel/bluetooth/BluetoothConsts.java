@@ -103,10 +103,17 @@ public class BluetoothConsts {
 	
 	public static class DeviceClassConsts {
 		
+		public static final int SERVICE_MASK = 0xffe000;
+
+		public static final int MAJOR_MASK = 0x001f00;
+
+		public static final int MINOR_MASK = 0x0000fc;
+
 		/*
 		 * service classes
 		 */
 
+		// bit 13
 		public static final int LIMITED_DISCOVERY_SERVICE = 0x002000;
 
 		public static final int RESERVED1_SERVICE = 0x004000;
