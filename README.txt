@@ -47,6 +47,20 @@ For maven2 users see [maven2 Using maven2 to build application or MIDlet]
 
 == Runtime configuration ==
 
+Bluetooth Stack
+
+   If automatic Bluetooth Stack detection is not enough Java System property "bluecove.stack" can be used to force desired Stack Initialization.
+   Values "widcomm", "bluesoleil" or "winsock". By default winsock is selected if available.
+
+   Another property "bluecove.stack.first" is used optimize stack detection.
+   If -Dbluecove.stack.first=widcomm then widcomm (bluecove.dll) stack is loaded first and if not available then !BlueCove will switch to winsock.
+   By default intelbth.dll is loaded first.
+
+   If multiple stacks are detected they are selected in following order: "winsock", "widcomm", "bluesoleil".
+   Since BlueCove v2.0.1 "bluecove.stack.first" will alter the order of stack selection.
+
+   If System property is not an option (e.g. when running in Webstart) create text file "bluecove.stack" or "bluecove.stack.first" containing stack name and add this file to BlueCove or Application jar.
+
 Native Library location
 
   # By default Native Library is extracted from from jar to temporary directory `${java.io.tmpdir}/bluecove_${user.name}_N` and loaded from this location.

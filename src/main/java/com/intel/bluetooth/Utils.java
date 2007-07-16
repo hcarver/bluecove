@@ -104,6 +104,37 @@ public abstract class Utils {
         return ((str != null) && (str.length() > 0));
 	}
 	
+	private static String loadString(InputStream inputstream) {	
+		if (inputstream == null) {
+			return null;
+		}
+		try {
+			byte[] buf = new byte[256];
+			int len = inputstream.read(buf);
+			return new String(buf,0, len);
+		} catch (IOException e) {
+			return null;
+		} finally {
+			try {
+				inputstream.close();
+			} catch (IOException ignore) {
+			}
+		}
+	}
+	
+	public static String getResourceProperty(Object owner, String resourceName) {
+		try {
+			String value = loadString(owner.getClass().getResourceAsStream(resourceName));
+			int cr = value.indexOf('\n');
+			if (cr != -1) {
+				value = value.substring(1, cr);
+			}
+			return value;
+		} catch (RuntimeException e) {
+			return null;
+		}
+	}
+	
 	/**
 	 * J2ME/J9 compatibility instead of Vector.toArray
 	 * 

@@ -98,8 +98,8 @@ public class BlueCoveImpl {
 	private BlueCoveImpl() {
 
 		BluetoothStack detectorStack = null;
-		String stackFirstDetector = System.getProperty("bluecove.stack.first");
-		String stackSelected = System.getProperty("bluecove.stack");
+		String stackFirstDetector = getConfigProperty("bluecove.stack.first");
+		String stackSelected = getConfigProperty("bluecove.stack");
 		if ( stackFirstDetector == null) {
 			 stackFirstDetector = stackSelected;
 		}
@@ -179,6 +179,14 @@ public class BlueCoveImpl {
 
 		copySystemProperty();
 		System.out.println("BlueCove version " + version + " on " + stackSelected);
+	}
+	
+	String getConfigProperty(String key) {
+		String value = System.getProperty(key);
+		if (value == null) {
+			value = Utils.getResourceProperty(this, key);
+		}
+		return value;
 	}
 	
 	void copySystemProperty() {
