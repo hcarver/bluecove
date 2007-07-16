@@ -273,13 +273,21 @@ public class BlueCoveImpl {
 
     private BluetoothStack createDetectorOnWindows(String stackFirst) {
 		if (stackFirst != null) {
-			if ((STACK_WIDCOMM.equalsIgnoreCase(stackFirst)) && (NativeLibLoader.isAvailable(NATIVE_LIB_WIDCOMM))) {
-				return new BluetoothStackWIDCOMM();
-			} else if ((STACK_BLUESOLEIL.equalsIgnoreCase(stackFirst))
-					&& (NativeLibLoader.isAvailable(NATIVE_LIB_BLUESOLEIL))) {
-				return new BluetoothStackBlueSoleil();
-			} else if (NativeLibLoader.isAvailable(NATIVE_LIB_MS)) {
-				return new BluetoothStackMicrosoft();
+			DebugLog.debug("detector stack", stackFirst);
+			if (STACK_WIDCOMM.equalsIgnoreCase(stackFirst)) { 
+				if ((NativeLibLoader.isAvailable(NATIVE_LIB_WIDCOMM))) {
+					return new BluetoothStackWIDCOMM();
+				}
+			} else if (STACK_BLUESOLEIL.equalsIgnoreCase(stackFirst)) {
+				if (NativeLibLoader.isAvailable(NATIVE_LIB_BLUESOLEIL)) {
+					return new BluetoothStackBlueSoleil();
+				}
+			} else if (STACK_WINSOCK.equalsIgnoreCase(stackFirst)) {
+				if (NativeLibLoader.isAvailable(NATIVE_LIB_MS)) {
+					return new BluetoothStackMicrosoft();
+				}
+			} else {
+				throw new Error("Invalid BlueCove detector stack ["+ stackFirst+ "]");
 			}
 		}
 		if (NativeLibLoader.isAvailable(NATIVE_LIB_MS)) {

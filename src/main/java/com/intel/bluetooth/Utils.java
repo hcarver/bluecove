@@ -124,13 +124,15 @@ public abstract class Utils {
 	
 	public static String getResourceProperty(Object owner, String resourceName) {
 		try {
-			String value = loadString(owner.getClass().getResourceAsStream(resourceName));
-			int cr = value.indexOf('\n');
-			if (cr != -1) {
-				value = value.substring(1, cr);
+			String value = loadString(owner.getClass().getResourceAsStream("/" + resourceName));
+			if (value != null) {
+				int cr = value.indexOf('\n');
+				if (cr != -1) {
+					value = value.substring(0, cr - 1);
+				}
 			}
 			return value;
-		} catch (RuntimeException e) {
+		} catch (Throwable e) {
 			return null;
 		}
 	}
