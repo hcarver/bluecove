@@ -28,8 +28,8 @@ package javax.bluetooth;
 
 import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.DebugLog;
-import com.intel.bluetooth.NotImplementedError;
 import com.intel.bluetooth.RemoteDeviceHelper;
+import com.intel.bluetooth.SelectServiceHandler;
 
 /**
  * The <code>DiscoveryAgent</code> class provides methods to perform
@@ -374,11 +374,7 @@ public class DiscoveryAgent {
 	 * <code>ServiceRecord.AUTHENTICATE_ENCRYPT</code>
 	 */
 	public String selectService(UUID uuid, int security, boolean master) throws BluetoothStateException {
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedError();
-		} else {
-			return null;
-		}
+		return  (new SelectServiceHandler(this)).selectService(uuid, security, master);
 	}
 
 }

@@ -67,6 +67,10 @@ public abstract class RemoteDeviceHelper {
 			}
 			return stackAttributes.get(key);
 		}
+		
+		public String toString() {
+			return super.getBluetoothAddress();
+		}
 	}
 	
 	private static Hashtable devicesCashed = new Hashtable();

@@ -32,8 +32,6 @@ that can (possibly) be used to achieve full OBEX functionality with BlueCove.
 
 == Not Implemented functionality ===
 
-  * `DiscoveryAgent.cancelServiceSearch(..)`  Not implemented
-  * `DiscoveryAgent.selectService(..)`  Not implemented
   * `RemoteDevice` authenticate, authorize and encrypt Not implemented
 
 == Installation ==
