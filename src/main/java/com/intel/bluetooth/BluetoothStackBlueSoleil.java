@@ -243,6 +243,9 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	private native long connectionRfOpenImpl(long address, byte[] uuidValue) throws IOException;
 
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
+		if (authenticate || encrypt) {
+			throw new IOException("authenticate not supported on BlueSoleil"); 
+		}
 		RemoteDevice listedDevice = RemoteDeviceHelper.getCashedDevice(address);
 		if (listedDevice == null) {
 			throw new IOException("Device not discovered");
@@ -266,6 +269,9 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	private native int rfServerSCN(long handle) throws IOException;
 
 	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
+		if (authenticate || encrypt) {
+			throw new IOException("authenticate not supported on BlueSoleil"); 
+		}
 		byte[] uuidValue = Utils.UUIDToByteArray(uuid);
 		long handle = rfServerOpenImpl(uuidValue, name, authenticate, encrypt);
 		int channel = rfServerSCN(handle);
