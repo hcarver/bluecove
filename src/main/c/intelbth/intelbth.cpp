@@ -829,7 +829,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *en
 	SOCKET s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
 
 	if (s == INVALID_SOCKET) {
-		throwIOException(env, "Failed to create socket");
+		throwIOExceptionWinGetLastError(env, "Failed to create socket");
 		return 0;
 	}
 
@@ -840,7 +840,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *en
 
 		if (setsockopt(s, SOL_RFCOMM, SO_BTH_AUTHENTICATE, (char *)&ul, sizeof(ULONG))) {
 			closesocket(s);
-			throwIOException(env, "Failed to set authentication option");
+			throwIOExceptionWinGetLastError(env, "Failed to set authentication option");
 			return 0;
 		}
 	}
@@ -853,24 +853,26 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *en
 #endif
 		if (setsockopt(s, SOL_RFCOMM, SO_BTH_ENCRYPT, (char *)&ul, sizeof(ul))) {
 			closesocket(s);
-			throwIOException(env, "Failed to set encryption option");
+			throwIOExceptionWinGetLastError(env, "Failed to set encryption option");
 			return 0;
 		}
 	}
 	return s;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getSecurityOpt(JNIEnv * env, jobject peer, jlong socket, int expected) {
-	ULONG authenticatedVal = 0;
+/* This does not work: [10042] An unknown, invalid, or unsupported option or level was specified in a getsockopt or setsockopt call. */
+/*
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getSecurityOptImpl(JNIEnv * env, jobject peer, jlong socket) {
+	ULONG authenticatedVal = FALSE;
 	int optLen = sizeof(ULONG);
 	if (getsockopt((SOCKET)socket, SOL_RFCOMM,  SO_BTH_AUTHENTICATE,  (char*)&authenticatedVal,  &optLen) == SOCKET_ERROR) {
-		throwIOException(env, "Failed to get authenticate option");
+		throwIOExceptionWinGetLastError(env, "Failed to get authenticate option");
 		return NOAUTHENTICATE_NOENCRYPT;
 	}
-	ULONG encryptedVal = 0;
+	ULONG encryptedVal = FALSE;
 	optLen = sizeof(ULONG);
 	if (getsockopt((SOCKET)socket, SOL_RFCOMM,  SO_BTH_ENCRYPT,  (char*)&encryptedVal,  &optLen) == SOCKET_ERROR) {
-		throwIOException(env, "Failed to get encryption option");
+		throwIOExceptionWinGetLastError(env, "Failed to get encryption option");
 		return NOAUTHENTICATE_NOENCRYPT;
 	}
 	if (!authenticatedVal) {
@@ -882,8 +884,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getSecurityOpt(JNI
 	} else {
 		return AUTHENTICATE_NOENCRYPT;
 	}
-
 }
+*/
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockaddress(JNIEnv *env, jobject peer, jlong socket) {
 	debug("->getsockaddress");

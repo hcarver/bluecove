@@ -117,7 +117,10 @@ abstract class BluetoothPeer implements BluetoothStack {
 
 	public native void connect(long socket, long address, int channel) throws IOException;
 
-	public native int getSecurityOpt(long handle, int expected) throws IOException;
+	//public native int getSecurityOptImpl(long handle) throws IOException;
+	public int getSecurityOpt(long handle, int expected) throws IOException {
+		return expected;
+	}
 	
 	public native void bind(long socket) throws IOException;
 	
