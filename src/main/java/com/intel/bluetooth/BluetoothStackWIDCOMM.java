@@ -433,6 +433,10 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		// TODO are there any flush
 	}
 	
+	public int getSecurityOpt(long handle, int expected) throws IOException {
+		return expected;
+	}
+	
 	private native long rfServerOpenImpl(byte[] uuidValue, byte[] uuidValue2, String name, boolean authenticate, boolean encrypt) throws IOException;
 	
 	private native int rfServerSCN(long handle) throws IOException;

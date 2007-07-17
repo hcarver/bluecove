@@ -30,9 +30,12 @@ public class BluetoothRFCommClientConnection extends BluetoothRFCommConnection {
 
 	public BluetoothRFCommClientConnection(long address, int channel, boolean authenticate,	boolean encrypt) throws IOException {
 		super(BlueCoveImpl.instance().getBluetoothStack().connectionRfOpenClientConnection(address, channel, authenticate, encrypt));
+		this.securityOpt = Utils.securityOpt(authenticate, encrypt);
+		RemoteDeviceHelper.connected(this);
 	}
 	
 	void closeConnectionHandle(long handle) throws IOException {
+		RemoteDeviceHelper.disconnected(this);
 		BlueCoveImpl.instance().getBluetoothStack().connectionRfCloseClientConnection(handle);
 	}
 }

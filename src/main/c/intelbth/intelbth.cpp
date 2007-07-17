@@ -855,6 +855,31 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *en
 	return s;
 }
 
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getSecurityOpt(JNIEnv * env, jobject peer, jlong socket, int expected) {
+	ULONG authenticatedVal = 0;
+	int optLen = sizeof(ULONG);
+	if (getsockopt((SOCKET)socket, SOL_RFCOMM,  SO_BTH_AUTHENTICATE,  (char*)&authenticatedVal,  &optLen) == SOCKET_ERROR) {
+		throwIOException(env, "Failed to get authenticate option");
+		return NOAUTHENTICATE_NOENCRYPT;
+	}
+	ULONG encryptedVal = 0;
+	optLen = sizeof(ULONG);
+	if (getsockopt((SOCKET)socket, SOL_RFCOMM,  SO_BTH_ENCRYPT,  (char*)&encryptedVal,  &optLen) == SOCKET_ERROR) {
+		throwIOException(env, "Failed to get encryption option");
+		return NOAUTHENTICATE_NOENCRYPT;
+	}
+	if (!authenticatedVal) {
+		return NOAUTHENTICATE_NOENCRYPT;
+	}
+
+	if (encryptedVal) {
+		return AUTHENTICATE_ENCRYPT;
+	} else {
+		return AUTHENTICATE_NOENCRYPT;
+	}
+
+}
+
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockaddress(JNIEnv *env, jobject peer, jlong socket) {
 	debug("->getsockaddress");
 	// get socket name

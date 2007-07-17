@@ -29,8 +29,9 @@ import java.io.IOException;
 public class BluetoothRFCommServerConnection extends BluetoothRFCommConnection {
 
 	/** Construct BluetoothConnection with pre-existing socket */
-	protected BluetoothRFCommServerConnection(long socket) {
-		super(socket);
+	protected BluetoothRFCommServerConnection(long handle, int securityOpt) {
+		super(handle);
+		this.securityOpt = securityOpt;
 	}
 	
 	void closeConnectionHandle(long handle) throws IOException {

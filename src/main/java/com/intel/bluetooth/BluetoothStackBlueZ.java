@@ -171,6 +171,10 @@ public class BluetoothStackBlueZ implements BluetoothStack {
 		// TODO Auto-generated method stub
 
 	}
+	
+	public int getSecurityOpt(long handle, int expected) throws IOException {
+		return expected;
+	}
 
 	//---------------------- Server RFCOMM connections ----------------------
 

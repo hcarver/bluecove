@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.StreamConnection;
 
 public abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothConnectionAccess {
@@ -38,6 +39,10 @@ public abstract class BluetoothRFCommConnection implements StreamConnection, Blu
 
 	protected boolean closing;
 
+	protected int securityOpt;
+	
+	RemoteDevice remoteDevice;
+	
 	protected BluetoothRFCommConnection(long handle) {
 		this.handle = handle;
 	}
@@ -159,5 +164,9 @@ public abstract class BluetoothRFCommConnection implements StreamConnection, Blu
 			close();
 		} catch (IOException e) {
 		}
+	}
+
+	public int getSecurityOpt() {
+		return this.securityOpt;
 	}
 }

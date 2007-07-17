@@ -23,9 +23,11 @@ package com.intel.bluetooth;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRecord;
 import javax.microedition.io.Connection;
 
 /**
@@ -44,10 +46,28 @@ public abstract class RemoteDeviceHelper {
 		
 		private Hashtable stackAttributes;
 		
+		private Vector connections;
+		
 		private RemoteDeviceWithExtendedInfo(long address, String name) {
 			super(RemoteDeviceHelper.getBluetoothAddress(address));
 			this.name = name;
 			this.addressLong = address;
+		}
+		
+		private void addConnection(Object connection) {
+			if (connections == null) {
+				connections = new Vector();
+			}
+			connections.addElement(connection);
+			DebugLog.debug("connection open", connections.size());
+		}
+		
+		private void removeConnection(Object connection) {
+			if (connections == null) {
+				return;
+			}
+			connections.removeElement(connection);
+			DebugLog.debug("connection closed", connections.size());
 		}
 		
 		private void setStackAttributes(Object key, Object value) {
@@ -70,6 +90,32 @@ public abstract class RemoteDeviceHelper {
 		
 		public String toString() {
 			return super.getBluetoothAddress();
+		}
+		
+		int connectionsCount() {
+			if (connections == null) {
+				return 0;
+			}
+			return connections.size();
+		}
+
+		boolean hasConnections() {
+			return (connectionsCount() != 0);
+		}
+
+		public boolean isAuthenticated() {
+			if (!hasConnections()) {
+				DebugLog.debug("no connections, Authenticated = false");
+				return false;
+			}
+			return (((BluetoothRFCommConnection)connections.elementAt(0)).getSecurityOpt() != ServiceRecord.NOAUTHENTICATE_NOENCRYPT);
+		}
+		
+		public boolean isEncrypted() {
+			if (!hasConnections()) {
+				return false;
+			}
+			return (((BluetoothRFCommConnection)connections.elementAt(0)).getSecurityOpt() == ServiceRecord.AUTHENTICATE_ENCRYPT);
 		}
 	}
 	
@@ -102,6 +148,10 @@ public abstract class RemoteDeviceHelper {
 			dev.name = name;
 		}
 		return dev;
+	}
+	
+	private static RemoteDeviceWithExtendedInfo remoteDeviceImpl(RemoteDevice device) {
+		return (RemoteDeviceWithExtendedInfo)createRemoteDevice(device);
 	}
 	
 	static RemoteDevice createRemoteDevice(RemoteDevice device) {
@@ -151,6 +201,14 @@ public abstract class RemoteDeviceHelper {
 		}
 	}
 
+	public static int openConnections() {
+		int c = 0;
+		for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
+			c += ((RemoteDeviceWithExtendedInfo) en.nextElement()).connectionsCount();
+		}
+		return c;
+	}
+	
 	public static String getBluetoothAddress(String address) {
 		String s = address.toUpperCase();
 		return "000000000000".substring(s.length()) + s;
@@ -190,6 +248,61 @@ public abstract class RemoteDeviceHelper {
 		} else {
 			return null;
 		}
+	}
+	
+	public static void connected(BluetoothRFCommConnection connection) throws IOException {
+		RemoteDeviceWithExtendedInfo device = (RemoteDeviceWithExtendedInfo)getRemoteDevice(connection);
+		connection.remoteDevice = device;
+		device.addConnection(connection);
+	}
+	
+	public static void disconnected(BluetoothRFCommConnection connection) {
+		if (connection.remoteDevice != null) {
+			((RemoteDeviceWithExtendedInfo)connection.remoteDevice).removeConnection(connection);
+		}
+	}
+	
+	/**
+	 * Determines if this <code>RemoteDevice</code> has been
+	 * authenticated.
+	 * <P>
+	 * A device may have been authenticated by this application
+	 * or another application.  Authentication applies to an ACL link between
+	 * devices and not on a specific L2CAP, RFCOMM, or OBEX connection.
+	 * Therefore, if <code>authenticate()</code> is performed when an L2CAP
+	 * connection is made to device A, then <code>isAuthenticated()</code> may
+	 * return <code>true</code> when tested as part of making an RFCOMM
+	 * connection to device A.
+	 *
+	 * @return <code>true</code> if this <code>RemoteDevice</code> has
+	 * previously been authenticated; <code>false</code> if it has not
+	 * been authenticated or there are no open connections between the
+	 * local device and this <code>RemoteDevice</code>
+	 */
+	public static boolean isAuthenticated(RemoteDevice device) {
+		return remoteDeviceImpl(device).isAuthenticated();
+	}
+	
+	/**
+	 * Determines if data exchanges with this <code>RemoteDevice</code>
+	 * are currently being encrypted.
+	 * <P>
+	 * Encryption may have been previously turned on by this or another
+	 * application.  Encryption applies to an ACL link
+	 * between devices and not on a specific L2CAP, RFCOMM, or OBEX connection.
+	 * Therefore, if <code>encrypt()</code> is performed with the
+	 * <code>on</code> parameter set to <code>true</code> when an L2CAP
+	 * connection is made to device A, then <code>isEncrypted()</code> may
+	 * return <code>true</code> when tested as part of making an RFCOMM
+	 * connection to device A.
+	 *
+	 * @return <code>true</code> if data exchanges with this
+	 * <code>RemoteDevice</code> are being encrypted; <code>false</code>
+	 * if they are not being encrypted, or there are no open connections
+	 * between the local device and this <code>RemoteDevice</code>
+	 */
+	public static boolean isEncrypted(RemoteDevice device) {
+		return remoteDeviceImpl(device).isEncrypted();
 	}
 
 }

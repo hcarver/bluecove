@@ -139,6 +139,14 @@ public interface BluetoothStack {
 	
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
 	
+	/**
+	 * @param handle
+	 * @param expected  Value specified when connection was open ServiceRecord.xxAUTHENTICATE_xxENCRYPT
+	 * @return expected if not implemented by stack
+	 * @throws IOException
+	 */
+	public int getSecurityOpt(long handle, int expected) throws IOException;
+	
 	public void connectionRfCloseClientConnection(long handle) throws IOException;
 	
 	public void connectionRfCloseServerConnection(long handle) throws IOException;

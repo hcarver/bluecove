@@ -1404,9 +1404,9 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 		if (authenticate) {
 			sec_level = BTM_SEC_IN_AUTHENTICATE;
 		}
-		
+
 		if (encrypt) {
-			sec_level = sec_level | BTM_SEC_OUT_ENCRYPT;
+			sec_level = sec_level | BTM_SEC_IN_ENCRYPT;
 		}
 
 		if (!stack->rfCommIf.SetSecurityLevel(rf->service_name, sec_level, TRUE)) {

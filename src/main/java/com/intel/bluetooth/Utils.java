@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
 
+import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
 public abstract class Utils {
@@ -68,6 +69,20 @@ public abstract class Utils {
 	
 	public static boolean is16Bit(UUID uuid) {
 		return (UUIDTo16Bit(uuid) != -1);
+	}
+	
+	public static int securityOpt(boolean authenticate,	boolean encrypt) {
+		int security = ServiceRecord.NOAUTHENTICATE_NOENCRYPT;
+		if (authenticate) {
+			if (encrypt) {
+				security = ServiceRecord.AUTHENTICATE_ENCRYPT;
+			} else {
+				security = ServiceRecord.AUTHENTICATE_NOENCRYPT;
+			}
+		} else if (encrypt) {
+			throw new IllegalArgumentException("Illegal encrypt configuration");
+		}
+		return security;
 	}
 	
 	public static void readFully(InputStream is, byte[] b) throws IOException, EOFException {

@@ -384,10 +384,7 @@ public class RemoteDevice {
 	 * local device and this <code>RemoteDevice</code>
 	 */
 	public boolean isAuthenticated() {
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedError();
-		}
-		return false;
+		return RemoteDeviceHelper.isAuthenticated(this);
 	}
 
 	/**
@@ -443,10 +440,7 @@ public class RemoteDevice {
 	 * between the local device and this <code>RemoteDevice</code>
 	 */
 	public boolean isEncrypted() {
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedError();
-		}
-		return false;
+		return RemoteDeviceHelper.isEncrypted(this);
 	}
 
 }

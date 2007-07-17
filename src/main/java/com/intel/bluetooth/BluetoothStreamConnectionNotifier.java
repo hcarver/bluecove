@@ -48,6 +48,8 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	protected boolean closing = false;
 	
 	private boolean closed;
+	
+	private int securityOpt;
 
 	public BluetoothStreamConnectionNotifier(UUID uuid, boolean authenticate, boolean encrypt, String name) throws IOException {
 		
@@ -66,6 +68,8 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		this.rfcommChannel = serviceRecord.getRFCOMMChannel();
 		
 		this.serviceRecord.attributeUpdated = false;
+		
+		this.securityOpt = Utils.securityOpt(authenticate, encrypt);
 	}
 
 	/*
@@ -107,7 +111,9 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 			updateServiceRecord(true);
 		}
 		try {
-			return new BluetoothRFCommServerConnection(BlueCoveImpl.instance().getBluetoothStack().rfServerAcceptAndOpenRfServerConnection(handle));
+			long clientHandle = BlueCoveImpl.instance().getBluetoothStack().rfServerAcceptAndOpenRfServerConnection(handle);
+			int clientSecurityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(clientHandle, this.securityOpt);
+			return new BluetoothRFCommServerConnection(clientHandle, clientSecurityOpt);
 		} catch (IOException e) {
 			if (closed || closing) {
 				throw new InterruptedIOException("Notifier has been closed");

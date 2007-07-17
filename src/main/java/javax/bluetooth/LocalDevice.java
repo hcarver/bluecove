@@ -255,6 +255,8 @@ public class LocalDevice {
 			return BlueCoveImpl.version;
 		} else if ("bluecove.stack".equals(property)) {
 			return BlueCoveImpl.instance().getBluetoothStack().getStackID();
+		} else if ("bluecove.connections".equals(property)) {
+			return String.valueOf(RemoteDeviceHelper.openConnections());
 		}
 		return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceProperty(property);
 	}
