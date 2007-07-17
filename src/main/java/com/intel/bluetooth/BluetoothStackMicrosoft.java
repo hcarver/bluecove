@@ -365,7 +365,12 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
 		long socket = super.socket(authenticate, encrypt);
-		super.connect(socket, address, channel);
+		try {
+			super.connect(socket, address, channel);
+		} catch (IOException e) {
+			super.close(socket);
+			throw e;
+		}
 		return socket;
 	}
 	
@@ -377,22 +382,27 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		/*
 		 * open socket
 		 */
-
 		long socket = super.socket(authenticate, encrypt);
-		super.bind(socket);
-		super.listen(socket);
-
-		int channel = super.getsockchannel(socket);
-		DebugLog.debug("service channel ", channel);
 		
-		int serviceRecordHandle = (int)socket; 
-		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name, false);
+		try {
+			super.bind(socket);
+			super.listen(socket);
 
-		/*
-		 * register service
-		 */
-		serviceRecord.setHandle(super.registerService(serviceRecord.toByteArray()));
+			int channel = super.getsockchannel(socket);
+			DebugLog.debug("service channel ", channel);
+
+			int serviceRecordHandle = (int) socket;
+			serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name, false);
+
+			/*
+			 * register service
+			 */
+			serviceRecord.setHandle(super.registerService(serviceRecord.toByteArray()));
 		
+		} catch (IOException e) {
+			super.close(socket);
+			throw e;
+		}
 		return socket;
 	}
 	
