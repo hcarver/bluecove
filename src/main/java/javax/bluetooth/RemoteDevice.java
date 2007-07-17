@@ -102,11 +102,7 @@ public class RemoteDevice {
 	 * <code>false</code>
 	 */
 	public boolean isTrustedDevice() {
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedError();
-		} else {
-			return false;
-		}
+		return RemoteDeviceHelper.isTrustedDevice(this);
 	}
 
 	/**

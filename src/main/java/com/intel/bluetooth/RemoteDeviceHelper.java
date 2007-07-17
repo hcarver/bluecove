@@ -46,6 +46,8 @@ public abstract class RemoteDeviceHelper {
 		
 		private Hashtable stackAttributes;
 		
+		private boolean paired;
+		
 		private Vector connections;
 		
 		private RemoteDeviceWithExtendedInfo(long address, String name) {
@@ -117,6 +119,10 @@ public abstract class RemoteDeviceHelper {
 			}
 			return (((BluetoothRFCommConnection)connections.elementAt(0)).getSecurityOpt() == ServiceRecord.AUTHENTICATE_ENCRYPT);
 		}
+		
+		public boolean isTrustedDevice() {
+			return paired;
+		}
 	}
 	
 	private static Hashtable devicesCashed = new Hashtable();
@@ -134,7 +140,7 @@ public abstract class RemoteDeviceHelper {
 		return getCashedDeviceWithExtendedInfo(address);
 	}
 
-	static RemoteDevice createRemoteDevice(long address, String name) {
+	static RemoteDevice createRemoteDevice(long address, String name, boolean paired) {
 		RemoteDeviceWithExtendedInfo dev = getCashedDeviceWithExtendedInfo(address);
 		if (dev == null) {
 			dev = new RemoteDeviceWithExtendedInfo(address, name);
@@ -147,6 +153,9 @@ public abstract class RemoteDeviceHelper {
 			// Update name if changed
 			dev.name = name;
 		}
+		if (paired) {
+			dev.paired = paired;
+		}
 		return dev;
 	}
 	
@@ -158,7 +167,7 @@ public abstract class RemoteDeviceHelper {
 		if (device instanceof RemoteDeviceWithExtendedInfo) {
 			return device;
 		} else {
-			return createRemoteDevice(getAddress(device), null);
+			return createRemoteDevice(getAddress(device), null, false);
 		}
 	}
 	
@@ -183,7 +192,7 @@ public abstract class RemoteDeviceHelper {
 		if (!(conn instanceof BluetoothConnectionAccess)) {
 			throw new IllegalArgumentException("Not a Bluetooth connection " + conn.getClass().getName());
 		}
-		return createRemoteDevice(((BluetoothConnectionAccess)conn).getRemoteAddress(), null);
+		return createRemoteDevice(((BluetoothConnectionAccess)conn).getRemoteAddress(), null, false);
 	}
 	
 	public static RemoteDevice[] retrieveDevices(int option) {
@@ -305,4 +314,7 @@ public abstract class RemoteDeviceHelper {
 		return remoteDeviceImpl(device).isEncrypted();
 	}
 
+	public static boolean isTrustedDevice(RemoteDevice device) {
+		return remoteDeviceImpl(device).isTrustedDevice();
+	}
 }

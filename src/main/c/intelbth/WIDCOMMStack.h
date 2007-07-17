@@ -77,6 +77,7 @@ typedef struct {
 	jlong deviceAddr;
 	jint deviceClass;
 	BD_NAME bdName;
+	DEV_CLASS devClass;
 } DeviceFound;
 
 #define DEVICE_FOUND_MAX 50

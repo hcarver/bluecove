@@ -170,9 +170,9 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 
 	public native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
-	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
 		DebugLog.debug("deviceDiscoveredCallback", deviceName);
-		listener.deviceDiscovered(RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName), new DeviceClass(deviceClass));
+		listener.deviceDiscovered(RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName, paired), new DeviceClass(deviceClass));
 	}
 
 	public native boolean cancelInquirympl();

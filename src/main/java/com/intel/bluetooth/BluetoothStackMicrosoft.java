@@ -252,8 +252,8 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		}
 	}
 	
-	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
-		super.deviceDiscoveredCallback(listener, deviceAddr, deviceClass, deviceName);
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
+		super.deviceDiscoveredCallback(listener, deviceAddr, deviceClass, deviceName, paired);
 	}
 
 	//	 --- Service search 

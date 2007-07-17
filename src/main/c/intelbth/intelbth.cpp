@@ -207,7 +207,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 		_throwRuntimeException(env, "Fail to get Object Class");
 		return INQUIRY_ERROR;
 	}
-	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;)V");
+	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
 	if (deviceDiscoveredCallbackMethod == NULL) {
 		_throwRuntimeException(env, "Fail to get MethodID deviceDiscoveredCallback");
 		return INQUIRY_ERROR;
@@ -354,18 +354,23 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
         debugs("ServiceInstanceName [%S]", name);
 		jstring deviceName = env->NewString((jchar*)name, (jsize)wcslen(name));
 
+        jboolean paired = JNI_FALSE;
+
 #ifdef _WIN32_WCE
 		int classOfDev = p_inqRes->cod;
 		bt_addr deviceAddr;
 #else
 		int classOfDev = p_inqRes->classOfDevice;
+		if (p_inqRes->flags & BDIF_PAIRED) {
+		    paired = JNI_TRUE;
+		}
 		BTH_ADDR deviceAddr;
 #endif
 		deviceAddr = ((SOCKADDR_BTH *)pwsaResults->lpcsaBuffer->RemoteAddr.lpSockaddr)->btAddr;
 
 		// notify listener
         debug("doInquiry, notify listener");
-		env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, classOfDev, deviceName);
+		env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, classOfDev, deviceName, paired);
 		if (ExceptionCheckCompatible(env)) {
 			debug("doInquiry, ExceptionOccurred");
 			result = INQUIRY_ERROR;

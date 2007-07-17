@@ -126,7 +126,7 @@ public class BluetoothStackOSX implements BluetoothStack {
 		return 0;
 	}
 
-	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
 		// TODO Auto-generated method stub
 	}
 	

@@ -365,6 +365,26 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemo
 	return NULL;
 }
 
+jboolean isDevicePaired(JNIEnv *env, jlong address, DEV_CLASS devClass) {
+	if (stack == NULL) {
+		return FALSE;
+	}
+	#ifndef WIDCOMM_CE30
+	    CBtIf::REM_DEV_INFO dev_info;
+	    CBtIf::REM_DEV_INFO_RETURN_CODE rc = stack->GetRemoteDeviceInfo(devClass, &dev_info);
+	    debugGetRemoteDeviceInfo_rc(env, rc);
+	    while ((rc == CBtIf::REM_DEV_INFO_SUCCESS) && (stack != NULL)) {
+		    jlong a = BcAddrToLong(dev_info.bda);
+		    if (a == address) {
+		        return dev_info.b_paired;
+		    }
+		    rc = stack->GetNextRemoteDeviceInfo(&dev_info);
+            debugGetRemoteDeviceInfo_rc(env, rc);
+	    }
+	#endif
+	return FALSE;
+}
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceClassImpl
 (JNIEnv *env, jobject) {
 	return getDeviceClassByOS(env);
@@ -383,6 +403,7 @@ void WIDCOMMStack::OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bd
 	deviceResponded[nextDevice].deviceAddr = BcAddrToLong(bda);
     deviceResponded[nextDevice].deviceClass = DeviceClassToInt(devClass);
 	memcpy(deviceResponded[nextDevice].bdName, bdName, sizeof(BD_NAME));
+	memcpy(deviceResponded[nextDevice].devClass, devClass, sizeof(DEV_CLASS));
 	deviceRespondedIdx = nextDevice;
 	SetEvent(hEvent);
 }
@@ -421,7 +442,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 		return INQUIRY_ERROR;
 	}
 
-	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;)V");
+	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
 	if (deviceDiscoveredCallbackMethod == NULL) {
 		throwRuntimeException(env, "Fail to get MethodID deviceDiscoveredCallback");
 		stack->deviceInquiryInProcess = FALSE;
@@ -474,7 +495,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 				reportedIdx = 0;
 			}
 			DeviceFound dev = stack->deviceResponded[reportedIdx];
-			env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, dev.deviceAddr, dev.deviceClass, env->NewStringUTF((char*)(dev.bdName)));
+			jboolean paired = isDevicePaired(env, dev.deviceAddr, dev.devClass);
+			env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, dev.deviceAddr, dev.deviceClass, env->NewStringUTF((char*)(dev.bdName)), paired);
 			if (ExceptionCheckCompatible(env)) {
 				stack->StopInquiry();
 				stack->deviceInquiryInProcess = FALSE;

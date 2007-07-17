@@ -225,7 +225,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 		return INQUIRY_ERROR;
 	}
 
-	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;)V");
+	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
 	if (deviceDiscoveredCallbackMethod == NULL) {
 		throwRuntimeException(env, "Fail to get MethodID deviceInquiryStartedCallback");
 		return INQUIRY_ERROR;
@@ -257,10 +257,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 		devInfo.dwSize = sizeof(BLUETOOTH_DEVICE_INFO_EX);
 		devInfo.szName[0] = '\0';
 		BT_GetRemoteDeviceInfo(MASK_DEVICE_NAME | MASK_DEVICE_CLASS, &devInfo);
+        jboolean paired = pDevice->bPaired;
 
 		jint deviceClass = BsDeviceClassToInt(devInfo.classOfDevice);
 
-		env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, env->NewStringUTF((char*)(devInfo.szName)));
+		env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, env->NewStringUTF((char*)(devInfo.szName)), paired);
 		if (ExceptionCheckCompatible(env)) {
 		   return INQUIRY_ERROR;
 		}

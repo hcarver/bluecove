@@ -194,7 +194,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
-	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
 		DebugLog.debug("deviceDiscoveredCallback deviceName", deviceName);
 		Vector reported = (Vector)deviceDiscoveryListenerReportedDevices.get(listener);
 		String deviceAddrStr = RemoteDeviceHelper.getBluetoothAddress(deviceAddr);
@@ -203,13 +203,13 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 			if (deviceAddrStr.equalsIgnoreCase(device.getBluetoothAddress())) {
 				if (Utils.isStringSet(deviceName)) {
 					// Update device name 
-					RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName);
+					RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName, paired);
 				}
 				return;
 			}
 			
 		}
-		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName);
+		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName, paired);
 		reported.addElement(remoteDevice);
 		DeviceClass cod = new DeviceClass(deviceClass);
 		DebugLog.debug("deviceDiscoveredCallback addtress", remoteDevice.getBluetoothAddress());

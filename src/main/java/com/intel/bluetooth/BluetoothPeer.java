@@ -71,8 +71,8 @@ abstract class BluetoothPeer implements BluetoothStack {
 	 */
 	public native int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
-	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName) {
-		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName);
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
+		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName, paired);
 		DeviceClass cod = new DeviceClass(deviceClass);
 		DebugLog.debug("deviceDiscoveredCallback addtress", remoteDevice.getBluetoothAddress());
 		DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
