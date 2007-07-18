@@ -67,34 +67,58 @@ public class MicroeditionConnector {
 
 	private static Hashtable/*<String, any>*/ suportScheme = new Hashtable();
 	
-	private static Hashtable/*<String, any>*/ params = new Hashtable();
+	private static Hashtable/*<String, any>*/ srvParams = new Hashtable();
 	
 	private static Hashtable/*<String, any>*/ cliParams = new Hashtable();
+	
+	private static Hashtable/*<String, any>*/ cliParamsL2CAP = new Hashtable();
+	
+	private static Hashtable/*<String, any>*/ srvParamsL2CAP = new Hashtable();
 	
 	private static final String  AUTHENTICATE = "authenticate";
 	private static final String  AUTHORIZE = "authorize"; 
 	private static final String  ENCRYPT = "encrypt";
 	private static final String  MASTER = "master";
 	private static final String  NAME = "name";
+	private static final String  RECEIVE_MTU = "receiveMTU"; 
+	private static final String  TRANSMIT_MTU = "transmitMTU";
 	
 	static {
-	    //srvParams    ::== name | master | encrypt | authorize | authenticate
-		params.put(AUTHENTICATE, AUTHENTICATE);
-		params.put(AUTHORIZE, AUTHORIZE);
-		params.put(ENCRYPT, ENCRYPT);
-		params.put(MASTER, MASTER);
-		params.put(NAME, NAME);
 	    //cliParams    ::== master | encrypt | authenticate
 		cliParams.put(AUTHENTICATE, AUTHENTICATE);
 		cliParams.put(ENCRYPT, ENCRYPT);
 		cliParams.put(MASTER, MASTER);
+
+		//srvParams    ::== name | master | encrypt | authorize | authenticate
+		copyAll(srvParams, cliParams);
+		srvParams.put(AUTHORIZE, AUTHORIZE);
+		srvParams.put(NAME, NAME);
+		
+		copyAll(cliParamsL2CAP, cliParams);
+		cliParamsL2CAP.put(RECEIVE_MTU, RECEIVE_MTU);
+		cliParamsL2CAP.put(TRANSMIT_MTU, TRANSMIT_MTU);
+		
+		copyAll(srvParamsL2CAP, cliParamsL2CAP);
+		srvParamsL2CAP.put(AUTHORIZE, AUTHORIZE);
+		srvParamsL2CAP.put(NAME, NAME);
+		
+		// "socket://" host ":" port
+		// no validation for socket, since this is internal connector 
 		
 		suportScheme.put(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM, Boolean.TRUE);
 		suportScheme.put(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX, Boolean.TRUE);
 		suportScheme.put(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX, Boolean.TRUE);
+		suportScheme.put(BluetoothConsts.PROTOCOL_SCHEME_L2CAP, Boolean.TRUE);
 		suportScheme.put("socket", Boolean.TRUE);
 	}
 
+	static void copyAll(Hashtable dest, Hashtable src) {
+		for(Enumeration en = src.keys(); en.hasMoreElements(); ) {
+			Object key = en.nextElement();
+			src.put(key, src.get(key));
+		}
+	}
+	
 	/*
 	 * Create and open a Connection. Parameters: name - The URL for the
 	 * connection. Returns: A new Connection object. Throws:
@@ -128,13 +152,32 @@ public class MicroeditionConnector {
 		if (!suportScheme.containsKey(scheme)) {
 			throw new ConnectionNotFoundException(scheme);
 		}
-		boolean schemeBluetooth = (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM)) || (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX));
+		boolean schemeBluetooth = (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM)) || (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX) || (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)));
+		
+		
+		boolean isServer;
 		
 		int hostEnd = name.indexOf(':', scheme.length() + 3);
-
+		
 		if (hostEnd > -1) {
 			host = name.substring(scheme.length() + 3, hostEnd);
-
+			isServer = host.equals("localhost");
+			
+			Hashtable params;	
+			if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)) {
+				if (isServer) {
+					params = srvParamsL2CAP;
+				} else {
+					params = cliParamsL2CAP;
+				}
+			} else {
+				if (isServer) {
+					params = srvParams;
+				} else {
+					params = cliParams;
+				}
+			}
+			
 			String paramsStr = name.substring(hostEnd + 1);
 			UtilsStringTokenizer tok = new UtilsStringTokenizer(paramsStr, ";");
 			if (tok.hasMoreTokens()) {
@@ -165,7 +208,6 @@ public class MicroeditionConnector {
 			throw new IllegalArgumentException();
 		}
 
-		boolean isServer = host.equals("localhost");
 		int channel = 0;
 		if (isServer) {
            if (!allowServer) {
@@ -187,13 +229,6 @@ public class MicroeditionConnector {
 			}
 			if (schemeBluetooth && (channel > 30)) {
 				throw new IllegalArgumentException("channel " + portORuuid);
-			}
-		
-			for (Enumeration e = values.keys(); e.hasMoreElements();) {
-				String paramName = (String)e.nextElement();
-				if (!cliParams.containsKey(paramName)) {
-					throw new IllegalArgumentException("invalid client connection param [" + paramName + "]");
-				}
 			}
 		}
 		/*

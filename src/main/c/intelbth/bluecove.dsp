@@ -81,6 +81,10 @@ SOURCE=.\common.cpp
 
 SOURCE=.\WIDCOMMStack.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\WIDCOMMStackL2CAP.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

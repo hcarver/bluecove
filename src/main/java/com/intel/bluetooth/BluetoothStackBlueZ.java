@@ -240,5 +240,66 @@ public class BluetoothStackBlueZ implements BluetoothStack {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	// ---------------------- Client and Server L2CAP connections ----------------------
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(long, int, boolean, boolean, int, int)
+	 */
+	public long l2OpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt, int receiveMTU, int transmitMTU)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
+	 */
+	public void l2CloseClientConnection(long handle) throws IOException {
+		// TODO Auto-generated method stub
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(javax.bluetooth.UUID,
+	 *      boolean, boolean, java.lang.String, int, int,
+	 *      com.intel.bluetooth.ServiceRecordImpl)
+	 */
+	public long l2ServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, int receiveMTU, int transmitMTU,
+			ServiceRecordImpl serviceRecord) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long, com.intel.bluetooth.ServiceRecordImpl)
+	 */
+	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
+	 */
+	public boolean l2Ready(long handle) throws IOException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
+	 */
+	public int l2receive(long handle, byte[] inBuf) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
+	 */
+	public void l2send(long handle, byte[] data) throws IOException {
+		// TODO Auto-generated method stub
+	}
 
 }

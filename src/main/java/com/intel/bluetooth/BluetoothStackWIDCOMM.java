@@ -31,6 +31,7 @@ import javax.bluetooth.DataElement;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
+import javax.bluetooth.L2CAPConnection;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
@@ -553,7 +554,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 				break;
 			case DataElement.DATSEQ:
 			case DataElement.DATALT:
-				// TODO
+				// TODO create Attribute sequence
 			}
 		}
 	}
@@ -565,4 +566,61 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
 		closeRfCommPort(handle);
 	}
+	
+// ---------------------- Client and Server L2CAP connections ----------------------
+	
+	int selectMTU(int receiveMTU, int transmitMTU) {
+		int min = L2CAPConnection.DEFAULT_MTU;
+		if ((receiveMTU > L2CAPConnection.MINIMUM_MTU) && (receiveMTU < min)) {
+			min = receiveMTU;
+		}
+		return min;
+	}
+
+	public native long l2OpenClientConnectionImpl(long address, int channel, boolean authenticate, boolean encrypt, int mtu) throws IOException;
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(long, int, boolean, boolean, int, int)
+	 */
+	public long l2OpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt, int receiveMTU, int transmitMTU) throws IOException {
+		throw new NotSupportedIOException(getStackID());
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
+	 */
+	public native void l2CloseClientConnection(long handle) throws IOException;
+
+	public long l2ServerOpenImpl(UUID uuid, boolean authenticate, boolean encrypt, String name, int mtu, ServiceRecordImpl serviceRecord) throws IOException {
+		return 0;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(javax.bluetooth.UUID, boolean, boolean, java.lang.String, int, int, com.intel.bluetooth.ServiceRecordImpl)
+	 */
+	public long l2ServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
+		return 0;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long, com.intel.bluetooth.ServiceRecordImpl)
+	 */
+	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
+		// TODO Auto-generated method stub
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
+	 */
+	public native boolean l2Ready(long handle) throws IOException;
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
+	 */
+	public native int l2receive(long handle, byte[] inBuf) throws IOException;
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
+	 */
+	public native void l2send(long handle, byte[] data) throws IOException;
 }

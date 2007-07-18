@@ -173,4 +173,19 @@ public interface BluetoothStack {
 	
 	public void connectionRfFlush(long handle) throws IOException;
 
+	//	---------------------- Client and Server L2CAP connections ----------------------
+	
+	public long l2OpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt, int receiveMTU, int transmitMTU) throws IOException;
+	
+	public void l2CloseClientConnection(long handle) throws IOException;
+	
+	public long l2ServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException;
+	
+	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
+	
+	public boolean l2Ready(long handle) throws IOException;
+	
+	public int l2receive(long handle, byte[] inBuf) throws IOException;
+	
+	public void l2send(long handle, byte[] data) throws IOException;
 }

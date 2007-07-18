@@ -943,6 +943,10 @@
 				RelativePath=".\WIDCOMMStack.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\WIDCOMMStackL2CAP.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

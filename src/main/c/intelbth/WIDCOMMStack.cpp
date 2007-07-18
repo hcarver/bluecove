@@ -1408,7 +1408,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 		#ifdef _WIN32_WCE
 			service_name_len = wcslen((wchar_t*)rf->service_name);
 		#else // _WIN32_WCE
-			service_name_len = strlen(rf->service_name);
+			service_name_len = (UINT32)strlen(rf->service_name);
 		#endif // #else // _WIN32_WCE
 
 		if (rf->sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, service_name_len, (UINT8*)rf->service_name) != SDP_OK) {

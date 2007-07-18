@@ -41,8 +41,8 @@ public class BluetoothStackOSX implements BluetoothStack {
 
 	}
 
-	//---------------------- Library initialization ----------------------
-	
+	// ---------------------- Library initialization ----------------------
+
 	public String getStackID() {
 		return BlueCoveImpl.STACK_OSX;
 	}
@@ -71,8 +71,8 @@ public class BluetoothStackOSX implements BluetoothStack {
 
 	}
 
-	//---------------------- LocalDevice ----------------------
-	
+	// ---------------------- LocalDevice ----------------------
+
 	public String getLocalDeviceBluetoothAddress() throws BluetoothStateException {
 		// TODO Auto-generated method stub
 		return null;
@@ -107,14 +107,13 @@ public class BluetoothStackOSX implements BluetoothStack {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
+
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-
-	//---------------------- Device Inquiry ----------------------
+	// ---------------------- Device Inquiry ----------------------
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
@@ -126,16 +125,17 @@ public class BluetoothStackOSX implements BluetoothStack {
 		return 0;
 	}
 
-	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
+			String deviceName, boolean paired) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	public boolean cancelInquiry(DiscoveryListener listener) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	//---------------------- Service search ---------------------- 
+	// ---------------------- Service search ----------------------
 
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
 			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
@@ -159,7 +159,7 @@ public class BluetoothStackOSX implements BluetoothStack {
 		return false;
 	}
 
-	//---------------------- Client RFCOMM connections ----------------------
+	// ---------------------- Client RFCOMM connections ----------------------
 
 	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt)
 			throws IOException {
@@ -171,12 +171,12 @@ public class BluetoothStackOSX implements BluetoothStack {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	public int getSecurityOpt(long handle, int expected) throws IOException {
 		return expected;
 	}
 
-	//---------------------- Server RFCOMM connections ----------------------
+	// ---------------------- Server RFCOMM connections ----------------------
 
 	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name,
 			ServiceRecordImpl serviceRecord) throws IOException {
@@ -204,7 +204,7 @@ public class BluetoothStackOSX implements BluetoothStack {
 		// TODO Auto-generated method stub
 	}
 
-	//---------------------- Shared Client and Server RFCOMM connections ----------------------
+	// ---------------------- Shared Client and Server RFCOMM connections ----------------------
 
 	public void connectionRfFlush(long handle) throws IOException {
 		// TODO Auto-generated method stub
@@ -240,4 +240,81 @@ public class BluetoothStackOSX implements BluetoothStack {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	// ---------------------- Client and Server L2CAP connections ----------------------
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(long, int,
+	 *      boolean, boolean, int, int)
+	 */
+	public long l2OpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt, int receiveMTU, int transmitMTU)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
+	 */
+	public void l2CloseClientConnection(long handle) throws IOException {
+		// TODO Auto-generated method stub
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(javax.bluetooth.UUID,
+	 *      boolean, boolean, java.lang.String, int, int,
+	 *      com.intel.bluetooth.ServiceRecordImpl)
+	 */
+	public long l2ServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, int receiveMTU, int transmitMTU,
+			ServiceRecordImpl serviceRecord) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long,
+	 *      com.intel.bluetooth.ServiceRecordImpl)
+	 */
+	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
+		// TODO Auto-generated method stub
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
+	 */
+	public boolean l2Ready(long handle) throws IOException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
+	 */
+	public int l2receive(long handle, byte[] inBuf) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
+	 */
+	public void l2send(long handle, byte[] data) throws IOException {
+		// TODO Auto-generated method stub
+	}
+
 }
