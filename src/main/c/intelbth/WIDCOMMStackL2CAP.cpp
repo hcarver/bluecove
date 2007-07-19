@@ -212,7 +212,13 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2RemoteA
 		throwIOException(env, "connection is closed");
 		return 0;
 	}
-	return BcAddrToLong(l2c->m_RemoteBdAddr);
+	#ifdef _WIN32_WCE
+		BD_ADDR connected_bd_addr;
+		l2c->GetRemoteBdAddr(connected_bd_addr);
+		return BcAddrToLong(connected_bd_addr);
+	#else // _WIN32_WCE
+	  return BcAddrToLong(l2c->m_RemoteBdAddr);
+    #endif // #else // _WIN32_WCE
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Ready
