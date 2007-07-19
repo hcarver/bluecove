@@ -32,12 +32,12 @@ import javax.bluetooth.UUID;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
-public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, BluetoothStreamServiceRecordAccess {
+public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
 	
 	/**
 	 * Used to find BluetoothStreamConnectionNotifier by ServiceRecord returned by LocalDevice.getRecord()
 	 */
-	private static Hashtable serviceRecordsMap = new Hashtable/*<ServiceRecord, BluetoothStreamConnectionNotifier>*/();
+	private static Hashtable serviceRecordsMap = new Hashtable/*<ServiceRecord, BluetoothConnectionNotifierServiceRecordAccess>*/();
 	
 	private long handle;
 
@@ -51,10 +51,10 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	
 	private int securityOpt;
 
-	public BluetoothStreamConnectionNotifier(UUID uuid, boolean authenticate, boolean encrypt, String name) throws IOException {
+	public BluetoothStreamConnectionNotifier(BluetoothConnectionNotifierParams params) throws IOException {
 		
 		this.closed = false;
-		if (name == null) {
+		if (params.name == null) {
 			throw new NullPointerException("Service name is null");
 		}
 		
@@ -63,13 +63,13 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		 */
 		this.serviceRecord = new ServiceRecordImpl(null, 0);
 		
-		this.handle = BlueCoveImpl.instance().getBluetoothStack().rfServerOpen(uuid, authenticate, encrypt, name, serviceRecord);
+		this.handle = BlueCoveImpl.instance().getBluetoothStack().rfServerOpen(params, serviceRecord);
 		
 		this.rfcommChannel = serviceRecord.getRFCOMMChannel();
 		
 		this.serviceRecord.attributeUpdated = false;
 		
-		this.securityOpt = Utils.securityOpt(authenticate, encrypt);
+		this.securityOpt = Utils.securityOpt(params.authenticate, params.encrypt);
 	}
 
 	/*

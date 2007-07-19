@@ -18,77 +18,108 @@
  *
  *  @version $Id$
  */ 
-package com.intel.bluetooth.btspp;
+package com.intel.bluetooth.btl2cap;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
+import javax.bluetooth.L2CAPConnection;
+import javax.bluetooth.L2CAPConnectionNotifier;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
-import javax.microedition.io.InputConnection;
-import javax.microedition.io.OutputConnection;
-import javax.microedition.io.StreamConnection;
-import javax.microedition.io.StreamConnectionNotifier;
 
 import com.ibm.oti.connection.CreateConnection;
 import com.intel.bluetooth.BluetoothConnectionAccess;
-import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
+import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.MicroeditionConnector;
 
 /**
- * This class is Proxy for btspp (RFCOMM) Connection implementations for IBM J9 support
+ * This class is Proxy for btl2cap (L2CAP) Connection implementations for IBM J9 support
  * 
  * @author vlads
  *
  */
-public class Connection implements CreateConnection, StreamConnection, StreamConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess, BluetoothConnectionAccess {
+public class Connection implements CreateConnection, L2CAPConnection, L2CAPConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess, BluetoothConnectionAccess{
 
 	javax.microedition.io.Connection impl;
 	
 	public Connection() {
 		
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see com.ibm.oti.connection.CreateConnection#setParameters(java.lang.String, int, boolean)
+	 */
 	public void setParameters(String spec, int access, boolean timeout) throws IOException {
 		impl = MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM + ":" + spec, access, timeout);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.ibm.oti.connection.CreateConnection#setParameters2(java.lang.String, int, boolean)
+	 */
 	public void setParameters2(String spec, int access, boolean timeout) throws IOException {
 		setParameters(spec, access, timeout);
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see javax.microedition.io.Connection#close()
+	 */
 	public void close() throws IOException {
 		impl.close();
 	}
 
-	public DataInputStream openDataInputStream() throws IOException {
-		return ((InputConnection)impl).openDataInputStream();
+	/* (non-Javadoc)
+	 * @see javax.bluetooth.L2CAPConnection#getReceiveMTU()
+	 */
+	public int getReceiveMTU() throws IOException {
+		return ((L2CAPConnection)impl).getReceiveMTU();
 	}
 
-	public InputStream openInputStream() throws IOException {
-		return ((InputConnection)impl).openInputStream();
+	/* (non-Javadoc)
+	 * @see javax.bluetooth.L2CAPConnection#getTransmitMTU()
+	 */
+	public int getTransmitMTU() throws IOException {
+		return ((L2CAPConnection)impl).getTransmitMTU();
 	}
 
-	public DataOutputStream openDataOutputStream() throws IOException {
-		return ((OutputConnection)impl).openDataOutputStream();
+	/* (non-Javadoc)
+	 * @see javax.bluetooth.L2CAPConnection#ready()
+	 */
+	public boolean ready() throws IOException {
+		return ((L2CAPConnection)impl).ready();
 	}
 
-	public OutputStream openOutputStream() throws IOException {
-		return ((OutputConnection)impl).openOutputStream();
+	/* (non-Javadoc)
+	 * @see javax.bluetooth.L2CAPConnection#receive(byte[])
+	 */
+	public int receive(byte[] inBuf) throws IOException {
+		return ((L2CAPConnection)impl).receive(inBuf);
 	}
 
-	public StreamConnection acceptAndOpen() throws IOException {
-		return ((StreamConnectionNotifier)impl).acceptAndOpen();
+	/* (non-Javadoc)
+	 * @see javax.bluetooth.L2CAPConnection#send(byte[])
+	 */
+	public void send(byte[] data) throws IOException {
+		((L2CAPConnection)impl).send(data);
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.bluetooth.L2CAPConnectionNotifier#acceptAndOpen()
+	 */
+	public L2CAPConnection acceptAndOpen() throws IOException {
+		return ((L2CAPConnectionNotifier)impl).acceptAndOpen();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#getServiceRecord()
+	 */
 	public ServiceRecord getServiceRecord() {
 		return ((BluetoothConnectionNotifierServiceRecordAccess)impl).getServiceRecord();
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
+	 */
 	public long getRemoteAddress() throws IOException {
 		return ((BluetoothConnectionAccess)impl).getRemoteAddress();
 	}

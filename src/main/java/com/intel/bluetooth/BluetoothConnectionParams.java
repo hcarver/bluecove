@@ -20,22 +20,25 @@
  */
 package com.intel.bluetooth;
 
-import java.io.IOException;
-
 /**
  * @author vlads
  *
  */
-public class BluetoothRFCommClientConnection extends BluetoothRFCommConnection {
-
-	public BluetoothRFCommClientConnection(BluetoothConnectionParams params) throws IOException {
-		super(BlueCoveImpl.instance().getBluetoothStack().connectionRfOpenClientConnection(params));
-		this.securityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(this.handle, Utils.securityOpt(params.authenticate, params.encrypt));
-		RemoteDeviceHelper.connected(this);
-	}
+public class BluetoothConnectionParams {
 	
-	void closeConnectionHandle(long handle) throws IOException {
-		RemoteDeviceHelper.disconnected(this);
-		BlueCoveImpl.instance().getBluetoothStack().connectionRfCloseClientConnection(handle);
+	long address; 
+	
+	int channel; 
+	
+	boolean authenticate;	
+	
+	boolean encrypt;
+
+	public BluetoothConnectionParams(long address, int channel, boolean authenticate, boolean encrypt) {
+		super();
+		this.address = address;
+		this.channel = channel;
+		this.authenticate = authenticate;
+		this.encrypt = encrypt;
 	}
 }

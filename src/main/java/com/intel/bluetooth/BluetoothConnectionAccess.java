@@ -23,6 +23,8 @@ package com.intel.bluetooth;
 
 import java.io.IOException;
 
+import javax.bluetooth.RemoteDevice;
+
 /**
  * Used when client application has only access to Proxy of the connection. e.g. WebStart in MicroEmulator
  * @author vlads
@@ -32,4 +34,9 @@ public interface BluetoothConnectionAccess {
 	
 	public long getRemoteAddress() throws IOException;
 	
+	public int getSecurityOpt();
+	
+	public RemoteDevice getRemoteDevice();
+
+	public void setRemoteDevice(RemoteDevice remoteDevice);
 }

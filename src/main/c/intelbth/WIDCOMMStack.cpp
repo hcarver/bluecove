@@ -977,7 +977,7 @@ void open_client_finally(WIDCOMMStackRfCommPort* rf) {
 	}
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfOpenClientConnection
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfOpenClientConnectionImpl
 (JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt) {
 	BD_ADDR bda;
 	LongToBcAddr(address, bda);

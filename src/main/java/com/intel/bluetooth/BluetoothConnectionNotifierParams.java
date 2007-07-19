@@ -1,6 +1,5 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2004 Intel Corporation
  *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or
@@ -21,15 +20,30 @@
  */
 package com.intel.bluetooth;
 
-import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.UUID;
 
 /**
- * Used when client application has only access to Proxy of the connection. e.g. WebStart in MicroEmulator
  * @author vlads
  *
  */
-public interface BluetoothStreamServiceRecordAccess {
+public class BluetoothConnectionNotifierParams {
 	
-	public ServiceRecord getServiceRecord();
+	UUID uuid;
 	
+	boolean authenticate; 
+	
+	boolean encrypt; 
+	
+	String name; 
+	
+	boolean master;
+
+	public BluetoothConnectionNotifierParams(UUID uuid, boolean authenticate, boolean encrypt, String name, boolean master) {
+		super();
+		this.uuid = uuid;
+		this.authenticate = authenticate;
+		this.encrypt = encrypt;
+		this.name = name;
+		this.master = master;
+	}
 }

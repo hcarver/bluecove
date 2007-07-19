@@ -169,4 +169,12 @@ public abstract class BluetoothRFCommConnection implements StreamConnection, Blu
 	public int getSecurityOpt() {
 		return this.securityOpt;
 	}
+
+	public RemoteDevice getRemoteDevice() {
+		return this.remoteDevice;
+	}
+
+	public void setRemoteDevice(RemoteDevice remoteDevice) {
+		this.remoteDevice = remoteDevice;
+	}
 }

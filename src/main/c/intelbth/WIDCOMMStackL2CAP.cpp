@@ -37,18 +37,23 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2CloseCli
 (JNIEnv *env, jobject, jlong handle) {
 }
 
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2GetMTUImpl
+(JNIEnv *env, jobject, jlong handle) {
+	return 0;
+}
+
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Ready
 (JNIEnv *env, jobject, jlong handle) {
 	return JNI_FALSE;
 }
 
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2receive
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 (JNIEnv *env, jobject, jlong handle, jbyteArray inBuf) {
 	return -1;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2send
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Send
 (JNIEnv *env, jobject, jlong handle, jbyteArray data) {
 }
 

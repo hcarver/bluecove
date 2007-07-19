@@ -28,10 +28,19 @@ import java.io.IOException;
  */
 public class BluetoothL2CAPClientConnection extends BluetoothL2CAPConnection {
 
-	public BluetoothL2CAPClientConnection(long address, int channel, boolean authenticate,	boolean encrypt, int receiveMTU, int transmitMTU) throws IOException {
-		super(BlueCoveImpl.instance().getBluetoothStack().l2OpenClientConnection(address, channel, authenticate, encrypt, receiveMTU, transmitMTU));
-		//this.securityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(this.handle, Utils.securityOpt(authenticate, encrypt));
-		//RemoteDeviceHelper.connected(this);
+	public BluetoothL2CAPClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
+		super(BlueCoveImpl.instance().getBluetoothStack().l2OpenClientConnection(params, receiveMTU, transmitMTU));
+		this.securityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(this.handle, Utils.securityOpt(params.authenticate, params.encrypt));
+		RemoteDeviceHelper.connected(this);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothL2CAPConnection#closeConnectionHandle(long)
+	 */
+	void closeConnectionHandle(long handle) throws IOException {
+		RemoteDeviceHelper.disconnected(this);
+		BlueCoveImpl.instance().getBluetoothStack().l2CloseClientConnection(handle);
+		
 	}
 
 }

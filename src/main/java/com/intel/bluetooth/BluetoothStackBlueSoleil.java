@@ -242,20 +242,20 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 
 	private native long connectionRfOpenImpl(long address, byte[] uuidValue) throws IOException;
 
-	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
-		if (authenticate || encrypt) {
-			throw new IOException("authenticate not supported on BlueSoleil"); 
+	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
+		if (params.authenticate || params.encrypt) {
+			throw new IOException("authenticate not supported on BlueSoleil");
 		}
-		RemoteDevice listedDevice = RemoteDeviceHelper.getCashedDevice(address);
+		RemoteDevice listedDevice = RemoteDeviceHelper.getCashedDevice(params.address);
 		if (listedDevice == null) {
 			throw new IOException("Device not discovered");
 		}
-		UUID uuid = (UUID)RemoteDeviceHelper.getStackAttributes(listedDevice, "RFCOMM_channel" + channel);
+		UUID uuid = (UUID)RemoteDeviceHelper.getStackAttributes(listedDevice, "RFCOMM_channel" + params.channel);
 		if (uuid == null) {
 			throw new IOException("Device service not discovered");
 		}
 		DebugLog.debug("Connect to service UUID", uuid);
-		return connectionRfOpenImpl(address, Utils.UUIDToByteArray(uuid));
+		return connectionRfOpenImpl(params.address, Utils.UUIDToByteArray(uuid));
 	}
 
 	public native void connectionRfCloseClientConnection(long handle) throws IOException;
@@ -263,25 +263,24 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public int getSecurityOpt(long handle, int expected) throws IOException {
 		return expected;
 	}
-	
+
 	private native long rfServerOpenImpl(byte[] uuidValue, String name, boolean authenticate, boolean encrypt) throws IOException;
 
 	private native int rfServerSCN(long handle) throws IOException;
 
-	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
-		if (authenticate || encrypt) {
-			throw new IOException("authenticate not supported on BlueSoleil"); 
+	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException {
+		if (params.authenticate || params.encrypt) {
+			throw new IOException("authenticate not supported on BlueSoleil");
 		}
-		byte[] uuidValue = Utils.UUIDToByteArray(uuid);
-		long handle = rfServerOpenImpl(uuidValue, name, authenticate, encrypt);
+		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
+		long handle = rfServerOpenImpl(uuidValue, params.name, params.authenticate, params.encrypt);
 		int channel = rfServerSCN(handle);
 		DebugLog.debug("serverSCN", channel);
 		int serviceRecordHandle = (int)handle;
 
-		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name, false);
+		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, params.uuid, params.name, false);
 
 		return handle;
-
 	}
 
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
@@ -311,11 +310,11 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public native void connectionRfFlush(long handle) throws IOException;
 
 	//	---------------------- Client and Server L2CAP connections ----------------------
-	
+
 	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(long, int, boolean, boolean, int, int)
+	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams, int, int)
 	 */
-	public long l2OpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt, int receiveMTU, int transmitMTU) throws IOException {
+	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
@@ -327,9 +326,9 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(javax.bluetooth.UUID, boolean, boolean, java.lang.String, int, int, com.intel.bluetooth.ServiceRecordImpl)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams, int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
-	public long l2ServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
+	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
@@ -339,7 +338,7 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
 	 */
@@ -350,16 +349,29 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
 	 */
-	public int l2receive(long handle, byte[] inBuf) throws IOException {
+	public int l2Receive(long handle, byte[] inBuf) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
-	public void l2send(long handle, byte[] data) throws IOException {
+	public void l2Send(long handle, byte[] data) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2GetReceiveMTU(long)
+	 */
+	public int l2GetReceiveMTU(long handle) throws IOException {
+		throw new NotSupportedIOException(getStackID());
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2GetTransmitMTU(long)
+	 */
+	public int l2GetTransmitMTU(long handle) throws IOException {
+		throw new NotSupportedIOException(getStackID());
+	}
 
 }

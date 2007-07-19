@@ -1,6 +1,5 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -18,24 +17,25 @@
  *
  *  @version $Id$
  */
-package com.intel.bluetooth;
+package com.sun.cdc.io.j2me.btl2cap;
 
 import java.io.IOException;
 
-/**
- * @author vlads
- *
- */
-public class BluetoothRFCommClientConnection extends BluetoothRFCommConnection {
+import javax.microedition.io.Connection;
 
-	public BluetoothRFCommClientConnection(BluetoothConnectionParams params) throws IOException {
-		super(BlueCoveImpl.instance().getBluetoothStack().connectionRfOpenClientConnection(params));
-		this.securityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(this.handle, Utils.securityOpt(params.authenticate, params.encrypt));
-		RemoteDeviceHelper.connected(this);
+import com.intel.bluetooth.BluetoothConsts;
+import com.intel.bluetooth.MicroeditionConnector;
+import com.sun.cdc.io.ConnectionBaseInterface;
+
+/**
+ * This class is Proxy for btl2cap (L2CAP) Connection implementations used in WTK and MicroEmulator
+ * 
+ * @author vlads
+ */
+public class Protocol implements ConnectionBaseInterface {
+
+	public Connection openPrim(String name, int mode, boolean timeouts) throws IOException {
+		return MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_L2CAP + ":" + name, mode, timeouts);
 	}
-	
-	void closeConnectionHandle(long handle) throws IOException {
-		RemoteDeviceHelper.disconnected(this);
-		BlueCoveImpl.instance().getBluetoothStack().connectionRfCloseClientConnection(handle);
-	}
+
 }

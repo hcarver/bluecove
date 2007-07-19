@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import javax.bluetooth.L2CAPConnection;
 import javax.bluetooth.UUID;
 import javax.microedition.io.Connection;
 import javax.microedition.io.ConnectionNotFoundException;
@@ -115,7 +116,7 @@ public class MicroeditionConnector {
 	static void copyAll(Hashtable dest, Hashtable src) {
 		for(Enumeration en = src.keys(); en.hasMoreElements(); ) {
 			Object key = en.nextElement();
-			src.put(key, src.get(key));
+			dest.put(key, src.get(key));
 		}
 	}
 	
@@ -207,7 +208,11 @@ public class MicroeditionConnector {
 		if (host == null || portORuuid == null) {
 			throw new IllegalArgumentException();
 		}
+		
+		BluetoothConnectionNotifierParams notifierParams = null;
 
+		BluetoothConnectionParams connectionParams = null;
+		
 		int channel = 0;
 		if (isServer) {
            if (!allowServer) {
@@ -217,6 +222,11 @@ public class MicroeditionConnector {
         	   values.put(NAME, "BlueCove");
            } else if (schemeBluetooth) {
         	   validateBluetoothServiceName((String)values.get(NAME));
+           }
+           if (schemeBluetooth) {
+        	   notifierParams = new BluetoothConnectionNotifierParams(new UUID(portORuuid, false), 
+        			   paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT), 
+        			   (String) values.get(NAME), paramBoolean(values, MASTER));
            }
 		} else { // (!isServer)
 			try {
@@ -230,25 +240,33 @@ public class MicroeditionConnector {
 			if (schemeBluetooth && (channel > 30)) {
 				throw new IllegalArgumentException("channel " + portORuuid);
 			}
+			if (schemeBluetooth) {
+				connectionParams = new BluetoothConnectionParams(RemoteDeviceHelper.getAddress(host), channel, 
+					paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
+			}
 		}
 		/*
 		 * create connection
 		 */
 		if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM)) {
 			if (isServer) {
-				return new BluetoothStreamConnectionNotifier(new UUID(portORuuid, false), paramBoolean(values,
-						AUTHENTICATE), paramBoolean(values, ENCRYPT), (String) values.get(NAME));
+				return new BluetoothStreamConnectionNotifier(notifierParams);
 			} else {
-				return new BluetoothRFCommClientConnection(RemoteDeviceHelper.getAddress(host), channel, paramBoolean(
-						values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
+				return new BluetoothRFCommClientConnection(connectionParams);
 			}
 		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX)) {
 			if (isServer) {
-				return new OBEXSessionNotifierImpl(new UUID(portORuuid, false), paramBoolean(values,
-						AUTHENTICATE), paramBoolean(values, ENCRYPT), (String) values.get(NAME));
+				return new OBEXSessionNotifierImpl(notifierParams);
 			} else {
-				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(RemoteDeviceHelper.getAddress(host), channel, paramBoolean(
-						values, AUTHENTICATE), paramBoolean(values, ENCRYPT))); 
+				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(connectionParams)); 
+			}
+		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)) {
+			if (isServer) {
+				return new BluetoothL2CAPConnectionNotifier(notifierParams,
+						paramL2CAPMTU(values, RECEIVE_MTU), paramL2CAPMTU(values, TRANSMIT_MTU));
+			} else {
+				return new BluetoothL2CAPClientConnection(connectionParams,
+						paramL2CAPMTU(values, RECEIVE_MTU), paramL2CAPMTU(values, TRANSMIT_MTU)); 
 			}
 		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX)) {
 			if (isServer) {
@@ -297,6 +315,22 @@ public class MicroeditionConnector {
 		} else {
 			throw new IllegalArgumentException("invalid param value " + name + "=" + v);
 		}
+	}
+	
+	private static int paramL2CAPMTU(Hashtable values, String name) {
+		String v = (String) values.get(name);
+		if (v == null) {
+			return L2CAPConnection.DEFAULT_MTU;
+		}
+		try {
+			int mtu = Integer.parseInt(v);
+			if (mtu >= L2CAPConnection.MINIMUM_MTU) {
+				return mtu;
+			}
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("invalid MTU value " + v);
+		}
+		throw new IllegalArgumentException("invalid MTU param value " + name + "=" + v);
 	}
 
 	/*

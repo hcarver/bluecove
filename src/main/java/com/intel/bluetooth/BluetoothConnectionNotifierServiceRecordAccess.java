@@ -1,5 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
+ *  Copyright (C) 2004 Intel Corporation
  *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or
@@ -20,22 +21,15 @@
  */
 package com.intel.bluetooth;
 
-import java.io.IOException;
+import javax.bluetooth.ServiceRecord;
 
 /**
+ * Used when client application has only access to Proxy of the connection. e.g. WebStart in MicroEmulator
  * @author vlads
  *
  */
-public class BluetoothRFCommClientConnection extends BluetoothRFCommConnection {
-
-	public BluetoothRFCommClientConnection(BluetoothConnectionParams params) throws IOException {
-		super(BlueCoveImpl.instance().getBluetoothStack().connectionRfOpenClientConnection(params));
-		this.securityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(this.handle, Utils.securityOpt(params.authenticate, params.encrypt));
-		RemoteDeviceHelper.connected(this);
-	}
+public interface BluetoothConnectionNotifierServiceRecordAccess {
 	
-	void closeConnectionHandle(long handle) throws IOException {
-		RemoteDeviceHelper.disconnected(this);
-		BlueCoveImpl.instance().getBluetoothStack().connectionRfCloseClientConnection(handle);
-	}
+	public ServiceRecord getServiceRecord();
+	
 }

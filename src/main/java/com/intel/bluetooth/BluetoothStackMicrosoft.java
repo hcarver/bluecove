@@ -37,35 +37,35 @@ import javax.bluetooth.UUID;
 public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothStack {
 
 	boolean peerInitialized = false;
-	
+
 	long localBluetoothAddress = 0;
-	
+
 	private DiscoveryListener currentDeviceDiscoveryListener;
-	
+
 	private Thread limitedDiscoverableTimer;
-	
+
 	// TODO what is the real number for Attributes retrivable ?
 	private final static int ATTR_RETRIEVABLE_MAX = 256;
-	
+
 	BluetoothStackMicrosoft() {
 	}
 
 	public String getStackID() {
 		return BlueCoveImpl.STACK_WINSOCK;
 	}
-	
+
 	public int getLibraryVersion() {
 		return super.getLibraryVersion();
 	}
-	
+
 	public int detectBluetoothStack() {
 		return super.detectBluetoothStack();
 	}
-	
+
 	public void enableNativeDebug(Class nativeDebugCallback, boolean on) {
 		super.enableNativeDebug(nativeDebugCallback, on);
 	}
-	
+
 	public void initialize() {
 		try {
 			int status = BluetoothPeer.initializationStatus();
@@ -77,7 +77,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 			DebugLog.fatal("initialization", e);
 		}
 	}
-	
+
 	public void destroy() {
 		if (peerInitialized) {
 			peerInitialized = false;
@@ -85,7 +85,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		}
 		cancelLimitedDiscoverableTimer();
 	}
-	
+
 	public void initialized() throws BluetoothStateException {
 		if (!peerInitialized) {
 			throw new BluetoothStateException("Bluetooth system is unavailable");
@@ -117,18 +117,18 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
 		return super.getpeername(address);
 	}
-	
+
 	public DeviceClass getLocalDeviceClass() {
 		return new DeviceClass(super.getDeviceClass(localBluetoothAddress));
 	}
-	
+
 	private void cancelLimitedDiscoverableTimer() {
 		if (limitedDiscoverableTimer != null) {
 			limitedDiscoverableTimer.interrupt();
 			limitedDiscoverableTimer = null;
 		}
 	}
-	
+
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
 		switch (mode) {
 		case DiscoveryAgent.NOT_DISCOVERABLE:
@@ -168,7 +168,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		int mode = super.getBluetoothRadioMode();
 		return ((mode == BluetoothPeer.BTH_MODE_CONNECTABLE) || (mode == BluetoothPeer.BTH_MODE_DISCOVERABLE));
 	}
-	
+
 	public int getLocalDeviceDiscoverable() {
 		int mode = super.getBluetoothRadioMode();
 		if (mode == BluetoothPeer.BTH_MODE_DISCOVERABLE) {
@@ -184,7 +184,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 			return DiscoveryAgent.NOT_DISCOVERABLE;
 		}
 	}
-	
+
 	public String getLocalDeviceProperty(String property) {
 		final String TRUE = "true";
 		final String FALSE = "false";
@@ -216,7 +216,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		if ("bluetooth.l2cap.receiveMTU.max".equals(property)) {
 			return "0";
 		}
-		
+
 		if ("bluecove.radio.version".equals(property)) {
 			return String.valueOf(super.getDeviceVersion(localBluetoothAddress));
 		}
@@ -225,9 +225,9 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		}
 		return null;
 	}
-	
+
 	//	 --- Device Inquiry
-	
+
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		initialized();
 		if (currentDeviceDiscoveryListener != null) {
@@ -251,13 +251,13 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 			currentDeviceDiscoveryListener = null;
 		}
 	}
-	
+
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
 		super.deviceDiscoveredCallback(listener, deviceAddr, deviceClass, deviceName, paired);
 	}
 
-	//	 --- Service search 
-	
+	//	 --- Service search
+
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
 	}
@@ -308,7 +308,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
 		}
 	}
-	
+
 	public boolean cancelServiceSearch(int transID) {
 		SearchServicesThread sst = SearchServicesThread.getServiceSearchThread(transID);
 		if (sst != null) {
@@ -318,7 +318,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 				throw new NotImplementedError();
 			}
 			//cancelServiceSearchImpl();
-			
+
 			return true;
 		} else {
 			return false;
@@ -332,7 +332,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		/*
 		 * retrieve SDP blob
 		 */
-		byte[] blob = super.getServiceAttributes(attrIDs, 
+		byte[] blob = super.getServiceAttributes(attrIDs,
 				RemoteDeviceHelper.getAddress(serviceRecord.getHostDevice()),
 				(int)serviceRecord.getHandle());
 
@@ -362,28 +362,31 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	}
 
 //	 --- Client RFCOMM connections
-	
-	public long connectionRfOpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt) throws IOException {
-		long socket = super.socket(authenticate, encrypt);
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams, int, int)
+	 */
+	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
+		long socket = super.socket(params.authenticate, params.encrypt);
 		try {
-			super.connect(socket, address, channel);
+			super.connect(socket, params.address, params.channel);
 		} catch (IOException e) {
 			super.close(socket);
 			throw e;
 		}
 		return socket;
 	}
-	
+
 	public void connectionRfCloseClientConnection(long handle) throws IOException {
 		super.close(handle);
 	}
-	
-	public long rfServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, ServiceRecordImpl serviceRecord) throws IOException {
+
+	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException {
 		/*
 		 * open socket
 		 */
-		long socket = super.socket(authenticate, encrypt);
-		
+		long socket = super.socket(params.authenticate, params.encrypt);
+
 		try {
 			super.bind(socket);
 			super.listen(socket);
@@ -392,20 +395,20 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 			DebugLog.debug("service channel ", channel);
 
 			int serviceRecordHandle = (int) socket;
-			serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, uuid, name, false);
+			serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, params.uuid, params.name, false);
 
 			/*
 			 * register service
 			 */
 			serviceRecord.setHandle(super.registerService(serviceRecord.toByteArray()));
-		
+
 		} catch (IOException e) {
 			super.close(socket);
 			throw e;
 		}
 		return socket;
 	}
-	
+
 	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
 
 		/*
@@ -417,17 +420,17 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		 */
 		super.unregisterService(serviceRecord.getHandle());
 	}
-	
+
 	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException {
 		return super.accept(handle);
 	}
-	
+
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
 		super.unregisterService(serviceRecord.getHandle());
 		serviceRecord.setHandle(super.registerService(((ServiceRecordImpl) serviceRecord).toByteArray()));
 		DebugLog.debug("new serviceRecord", serviceRecord);
 	}
-	
+
 	public void connectionRfCloseServerConnection(long handle) throws IOException {
 		connectionRfCloseClientConnection(handle);
 	}
@@ -435,7 +438,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	public long getConnectionRfRemoteAddress(long handle) throws IOException {
 		return super.getpeeraddress(handle);
 	}
-	
+
 	public int connectionRfRead(long handle) throws IOException {
 		return super.recv(handle);
 	}
@@ -451,21 +454,21 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	public void connectionRfWrite(long handle, int b) throws IOException {
 		super.send(handle, b);
 	}
-	
+
 	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException {
 		super.send(handle, b, off, len);
 	}
-	
+
 	public void connectionRfFlush(long handle) throws IOException {
 		// TODO are there any flush
 	}
 
 //	---------------------- Client and Server L2CAP connections ----------------------
-	
+
 	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(long, int, boolean, boolean, int, int)
+	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams, int, int)
 	 */
-	public long l2OpenClientConnection(long address, int channel, boolean authenticate, boolean encrypt, int receiveMTU, int transmitMTU) throws IOException {
+	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
@@ -477,9 +480,9 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	}
 
 	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(javax.bluetooth.UUID, boolean, boolean, java.lang.String, int, int, com.intel.bluetooth.ServiceRecordImpl)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams, int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
-	public long l2ServerOpen(UUID uuid, boolean authenticate, boolean encrypt, String name, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
+	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
@@ -489,7 +492,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
 	 */
@@ -500,14 +503,29 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
 	 */
-	public int l2receive(long handle, byte[] inBuf) throws IOException {
+	public int l2Receive(long handle, byte[] inBuf) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
-	public void l2send(long handle, byte[] data) throws IOException {
+	public void l2Send(long handle, byte[] data) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2GetReceiveMTU(long)
+	 */
+	public int l2GetReceiveMTU(long handle) throws IOException {
+		throw new NotSupportedIOException(getStackID());
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2GetTransmitMTU(long)
+	 */
+	public int l2GetTransmitMTU(long handle) throws IOException {
+		throw new NotSupportedIOException(getStackID());
+	}
+
 }

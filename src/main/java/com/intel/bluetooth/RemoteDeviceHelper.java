@@ -110,14 +110,14 @@ public abstract class RemoteDeviceHelper {
 				DebugLog.debug("no connections, Authenticated = false");
 				return false;
 			}
-			return (((BluetoothRFCommConnection)connections.elementAt(0)).getSecurityOpt() != ServiceRecord.NOAUTHENTICATE_NOENCRYPT);
+			return (((BluetoothConnectionAccess)connections.elementAt(0)).getSecurityOpt() != ServiceRecord.NOAUTHENTICATE_NOENCRYPT);
 		}
 		
 		public boolean isEncrypted() {
 			if (!hasConnections()) {
 				return false;
 			}
-			return (((BluetoothRFCommConnection)connections.elementAt(0)).getSecurityOpt() == ServiceRecord.AUTHENTICATE_ENCRYPT);
+			return (((BluetoothConnectionAccess)connections.elementAt(0)).getSecurityOpt() == ServiceRecord.AUTHENTICATE_ENCRYPT);
 		}
 		
 		public boolean isTrustedDevice() {
@@ -259,15 +259,17 @@ public abstract class RemoteDeviceHelper {
 		}
 	}
 	
-	public static void connected(BluetoothRFCommConnection connection) throws IOException {
-		RemoteDeviceWithExtendedInfo device = (RemoteDeviceWithExtendedInfo)getRemoteDevice(connection);
-		connection.remoteDevice = device;
+	public static void connected(BluetoothConnectionAccess connection) throws IOException {
+		RemoteDeviceWithExtendedInfo device = (RemoteDeviceWithExtendedInfo)getRemoteDevice((Connection)connection);
+		connection.setRemoteDevice(device);
 		device.addConnection(connection);
 	}
 	
-	public static void disconnected(BluetoothRFCommConnection connection) {
-		if (connection.remoteDevice != null) {
-			((RemoteDeviceWithExtendedInfo)connection.remoteDevice).removeConnection(connection);
+	public static void disconnected(BluetoothConnectionAccess connection) {
+		RemoteDevice d = connection.getRemoteDevice();
+		if (d != null) {
+			((RemoteDeviceWithExtendedInfo)d).removeConnection(connection);
+			connection.setRemoteDevice(null);
 		}
 	}
 	

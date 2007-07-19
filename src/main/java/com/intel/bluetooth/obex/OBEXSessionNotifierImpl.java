@@ -22,15 +22,16 @@ package com.intel.bluetooth.obex;
 
 import java.io.IOException;
 
-import javax.bluetooth.UUID;
 import javax.microedition.io.Connection;
 import javax.obex.Authenticator;
 import javax.obex.ServerRequestHandler;
 import javax.obex.SessionNotifier;
 
+import com.intel.bluetooth.BluetoothConnectionNotifierParams;
+
 public class OBEXSessionNotifierImpl implements SessionNotifier {
 
-	public OBEXSessionNotifierImpl(UUID uuid, boolean authenticate, boolean encrypt, String name) throws IOException {
+	public OBEXSessionNotifierImpl(BluetoothConnectionNotifierParams params) throws IOException {
 		
 	}
 	

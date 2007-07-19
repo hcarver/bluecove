@@ -1,6 +1,5 @@
 /**
- *  MicroEmulator
- *  Copyright (C) 2006-2007 Bartek Teodorczyk <barteo@barteo.net>
+ *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or

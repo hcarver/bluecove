@@ -30,7 +30,7 @@ import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothStreamConnectionNotifier;
-import com.intel.bluetooth.BluetoothStreamServiceRecordAccess;
+import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
 /**
@@ -329,11 +329,11 @@ public class LocalDevice {
 			throw new NullPointerException();
 		}
 
-		if (!(notifier instanceof BluetoothStreamServiceRecordAccess)) {
+		if (!(notifier instanceof BluetoothConnectionNotifierServiceRecordAccess)) {
 			throw new IllegalArgumentException();
 		}
 
-		return ((BluetoothStreamServiceRecordAccess) notifier).getServiceRecord();
+		return ((BluetoothConnectionNotifierServiceRecordAccess) notifier).getServiceRecord();
 	}
 
 	/**

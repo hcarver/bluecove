@@ -23,18 +23,21 @@ package com.intel.bluetooth;
 import java.io.IOException;
 
 import javax.bluetooth.L2CAPConnection;
+import javax.bluetooth.RemoteDevice;
 
 /**
  * @author vlads
  *
  */
-public class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothConnectionAccess {
+public abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothConnectionAccess {
 
 	protected long handle;
 	
-	protected int receiveMTU = DEFAULT_MTU;
+	protected int securityOpt;
 	
-	protected int transmitMTU = DEFAULT_MTU;
+	RemoteDevice remoteDevice;
+	
+	protected boolean closing = false;
 	
 	protected BluetoothL2CAPConnection(long handle) {
 		this.handle = handle;
@@ -51,45 +54,79 @@ public class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothConne
 	 * @see javax.bluetooth.L2CAPConnection#getReceiveMTU()
 	 */
 	public int getReceiveMTU() throws IOException {
-		return receiveMTU;
+		if (closing) {
+			throw new IOException("Connection closed");
+		}
+		return BlueCoveImpl.instance().getBluetoothStack().l2GetReceiveMTU(handle);
 	}
 
 	/* (non-Javadoc)
 	 * @see javax.bluetooth.L2CAPConnection#getTransmitMTU()
 	 */
 	public int getTransmitMTU() throws IOException {
-		return transmitMTU;
+		if (closing) {
+			throw new IOException("Connection closed");
+		}
+		return BlueCoveImpl.instance().getBluetoothStack().l2GetTransmitMTU(handle);
 	}
 
 	/* (non-Javadoc)
 	 * @see javax.bluetooth.L2CAPConnection#ready()
 	 */
 	public boolean ready() throws IOException {
-		// TODO Auto-generated method stub
-		return false;
+		if (closing) {
+			throw new IOException("Connection closed");
+		}
+		return BlueCoveImpl.instance().getBluetoothStack().l2Ready(handle);;
 	}
 
 	/* (non-Javadoc)
 	 * @see javax.bluetooth.L2CAPConnection#receive(byte[])
 	 */
 	public int receive(byte[] inBuf) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		if (closing) {
+			throw new IOException("Connection closed");
+		}
+		return BlueCoveImpl.instance().getBluetoothStack().l2Receive(handle, inBuf);
 	}
 
 	/* (non-Javadoc)
 	 * @see javax.bluetooth.L2CAPConnection#send(byte[])
 	 */
 	public void send(byte[] data) throws IOException {
-		// TODO Auto-generated method stub
+		if (closing) {
+			throw new IOException("Connection closed");
+		}
+		BlueCoveImpl.instance().getBluetoothStack().l2Send(handle, data);
 	}
 
+	abstract void closeConnectionHandle(long handle) throws IOException;
+	
 	/* (non-Javadoc)
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		
+		closing = true;
+		closeConnectionHandle(handle);
+	}
+	
+	protected void finalize() {
+		try {
+			close();
+		} catch (IOException e) {
+		}
+	}
+	
+	public int getSecurityOpt() {
+		return this.securityOpt;
+	}
+
+	public RemoteDevice getRemoteDevice() {
+		return this.remoteDevice;
+	}
+
+	public void setRemoteDevice(RemoteDevice remoteDevice) {
+		this.remoteDevice = remoteDevice;
 	}
 
 }
