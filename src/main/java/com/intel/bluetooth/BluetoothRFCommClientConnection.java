@@ -30,8 +30,20 @@ public class BluetoothRFCommClientConnection extends BluetoothRFCommConnection {
 
 	public BluetoothRFCommClientConnection(BluetoothConnectionParams params) throws IOException {
 		super(BlueCoveImpl.instance().getBluetoothStack().connectionRfOpenClientConnection(params));
-		this.securityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(this.handle, Utils.securityOpt(params.authenticate, params.encrypt));
-		RemoteDeviceHelper.connected(this);
+		boolean initOK = false;
+		try {
+			this.securityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(this.handle, Utils.securityOpt(params.authenticate, params.encrypt));
+			RemoteDeviceHelper.connected(this);
+			initOK = true;
+		} finally {
+			if (!initOK){
+				try {
+					BlueCoveImpl.instance().getBluetoothStack().connectionRfCloseClientConnection(this.handle);
+				} catch (IOException e) {
+					DebugLog.error("close error", e);
+				}	
+			}
+		}
 	}
 	
 	void closeConnectionHandle(long handle) throws IOException {

@@ -30,8 +30,20 @@ public class BluetoothL2CAPClientConnection extends BluetoothL2CAPConnection {
 
 	public BluetoothL2CAPClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
 		super(BlueCoveImpl.instance().getBluetoothStack().l2OpenClientConnection(params, receiveMTU, transmitMTU));
-		this.securityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(this.handle, Utils.securityOpt(params.authenticate, params.encrypt));
-		RemoteDeviceHelper.connected(this);
+		boolean initOK = false;
+		try {
+			this.securityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(this.handle, Utils.securityOpt(params.authenticate, params.encrypt));
+			RemoteDeviceHelper.connected(this);
+			initOK = true;
+		} finally {
+			if (!initOK) {
+				try {
+				BlueCoveImpl.instance().getBluetoothStack().l2CloseClientConnection(this.handle);
+				} catch (IOException e) {
+					DebugLog.error("close error", e);
+				}
+			}
+		}
 	}
 
 	/* (non-Javadoc)
