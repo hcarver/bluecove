@@ -36,9 +36,11 @@ import java.util.NoSuchElementException;
 public class UtilsStringTokenizer {
 	
 	private int currentPosition;
+	
 	private int newPosition;
-	private int lastPosition;
+
 	private String str;
+
 	private String delimiter;
     
 	/**
@@ -55,20 +57,6 @@ public class UtilsStringTokenizer {
 		this.str = str;
 		this.delimiter = delimiter;
 		this.currentPosition = 0;
-		this.lastPosition = -1;
-		nextPosition();
-	}
-    
-	/**
-	 * Handy class to avoid multipe construction of StringTokenizer Object
-	 * 
-	 * @param str
-	 * 			a string to be parsed
-	 */
-	public void restart(String str, int currentPosition, int lastPosition) {
-		this.str = str;
-		this.lastPosition = lastPosition; 
-		this.currentPosition = currentPosition;
 		nextPosition();
 	}
     

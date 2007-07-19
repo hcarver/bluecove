@@ -263,6 +263,29 @@ public class BluetoothStackOSX implements BluetoothStack {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long, com.intel.bluetooth.ServiceRecordImpl, boolean)
+	 */
+	public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
+		// TODO Auto-generated method stub
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection(long)
+	 */
+	public long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2CloseServerConnection(long)
+	 */
+	public void l2CloseServerConnection(long handle) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long, com.intel.bluetooth.ServiceRecordImpl)

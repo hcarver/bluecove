@@ -29,9 +29,9 @@ package javax.bluetooth;
 import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.BlueCoveImpl;
-import com.intel.bluetooth.BluetoothStreamConnectionNotifier;
 import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
 import com.intel.bluetooth.RemoteDeviceHelper;
+import com.intel.bluetooth.ServiceRecordsRegistry;
 
 /**
  * The <code>LocalDevice</code> class defines the basic functions of the
@@ -435,7 +435,7 @@ public class LocalDevice {
 		if (srvRecord == null) {
 			throw new NullPointerException("Service Record is null");
 		}
-		BluetoothStreamConnectionNotifier.updateServiceRecord(srvRecord);
+		ServiceRecordsRegistry.updateServiceRecord(srvRecord);
 	}
 
 }

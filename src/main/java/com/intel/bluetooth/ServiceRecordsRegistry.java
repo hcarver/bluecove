@@ -1,6 +1,5 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2004 Intel Corporation
  *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or
@@ -21,17 +20,35 @@
  */
 package com.intel.bluetooth;
 
+import java.util.Hashtable;
+
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 
 /**
- * Used when client application has only access to Proxy of the connection. e.g. WebStart in MicroEmulator
  * @author vlads
  *
  */
-public interface BluetoothConnectionNotifierServiceRecordAccess {
+public class ServiceRecordsRegistry {
 	
-	public ServiceRecord getServiceRecord();
+	/**
+	 * Used to find ConnectionNotifier by ServiceRecord returned by LocalDevice.getRecord()
+	 */
+	private static Hashtable serviceRecordsMap = new Hashtable/*<ServiceRecord, BluetoothConnectionNotifierServiceRecordAccess>*/();
+
+	static void register(BluetoothConnectionNotifierServiceRecordAccess notifier, ServiceRecord serviceRecord) {
+		serviceRecordsMap.put(serviceRecord, notifier);
+	}
 	
-	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException;
+	static void unregister(ServiceRecord serviceRecord) {
+		serviceRecordsMap.remove(serviceRecord);
+	}
+	
+	public static void updateServiceRecord(ServiceRecord srvRecord) throws ServiceRegistrationException {
+		BluetoothConnectionNotifierServiceRecordAccess owner = (BluetoothConnectionNotifierServiceRecordAccess)serviceRecordsMap.get(srvRecord);
+		if (owner == null) {
+			throw new IllegalArgumentException("Service record is not registered");
+		}
+		owner.updateServiceRecord(false);
+	}
 }

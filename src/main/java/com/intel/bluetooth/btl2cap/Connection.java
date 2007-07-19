@@ -26,6 +26,7 @@ import javax.bluetooth.L2CAPConnection;
 import javax.bluetooth.L2CAPConnectionNotifier;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.ServiceRegistrationException;
 
 import com.ibm.oti.connection.CreateConnection;
 import com.intel.bluetooth.BluetoothConnectionAccess;
@@ -115,6 +116,13 @@ public class Connection implements CreateConnection, L2CAPConnection, L2CAPConne
 	 */
 	public ServiceRecord getServiceRecord() {
 		return ((BluetoothConnectionNotifierServiceRecordAccess)impl).getServiceRecord();
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#updateServiceRecord(boolean)
+	 */
+	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
+		((BluetoothConnectionNotifierServiceRecordAccess)impl).updateServiceRecord(acceptAndOpen);
 	}
 
 	/* (non-Javadoc)

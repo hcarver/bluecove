@@ -181,6 +181,12 @@ public interface BluetoothStack {
 	
 	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException;
 	
+	public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException;
+	
+	public long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException;
+	
+	public void l2CloseServerConnection(long handle) throws IOException;
+	
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
 	
 	public int l2GetTransmitMTU(long handle) throws IOException;

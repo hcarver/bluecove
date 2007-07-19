@@ -26,29 +26,36 @@ import java.io.IOException;
  * @author vlads
  *
  */
-public class BluetoothRFCommServerConnection extends BluetoothRFCommConnection {
+public class BluetoothL2CAPServerConnection extends BluetoothL2CAPConnection {
 
-	/** Construct BluetoothConnection with pre-existing socket */
-	protected BluetoothRFCommServerConnection(long handle, int securityOpt) throws IOException  {
+	/**
+	 * @param handle
+	 * @throws IOException 
+	 */
+	protected BluetoothL2CAPServerConnection(long handle, int securityOpt) throws IOException {
 		super(handle);
 		boolean initOK = false;
 		try {
 			this.securityOpt = securityOpt;
 			RemoteDeviceHelper.connected(this);
+			initOK = true;
 		} finally {
 			if (!initOK) {
 				try {
-				BlueCoveImpl.instance().getBluetoothStack().connectionRfCloseServerConnection(this.handle);
+				BlueCoveImpl.instance().getBluetoothStack().l2CloseServerConnection(this.handle);
 				} catch (IOException e) {
 					DebugLog.error("close error", e);
 				}
 			}
 		}
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothL2CAPConnection#closeConnectionHandle(long)
+	 */
 	void closeConnectionHandle(long handle) throws IOException {
 		RemoteDeviceHelper.disconnected(this);
-		BlueCoveImpl.instance().getBluetoothStack().connectionRfCloseServerConnection(handle);
+		BlueCoveImpl.instance().getBluetoothStack().l2CloseServerConnection(handle);
 	}
 
 }

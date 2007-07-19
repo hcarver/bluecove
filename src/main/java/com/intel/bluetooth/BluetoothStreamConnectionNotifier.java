@@ -23,21 +23,14 @@ package com.intel.bluetooth;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.Enumeration;
-import java.util.Hashtable;
 
 import javax.bluetooth.DataElement;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
-import javax.bluetooth.UUID;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
 public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
-
-	/**
-	 * Used to find BluetoothStreamConnectionNotifier by ServiceRecord returned by LocalDevice.getRecord()
-	 */
-	private static Hashtable serviceRecordsMap = new Hashtable/*<ServiceRecord, BluetoothConnectionNotifierServiceRecordAccess>*/();
 
 	private long handle;
 
@@ -65,7 +58,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 
 		this.handle = BlueCoveImpl.instance().getBluetoothStack().rfServerOpen(params, serviceRecord);
 
-		this.rfcommChannel = serviceRecord.getRFCOMMChannel();
+		this.rfcommChannel = serviceRecord.getChannel(BluetoothConsts.RFCOMM_PROTOCOL_UUID);
 
 		this.serviceRecord.attributeUpdated = false;
 
@@ -86,7 +79,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 
 	public void close() throws IOException {
 		if (!closed) {
-			serviceRecordsMap.remove(serviceRecord);
+			ServiceRecordsRegistry.unregister(serviceRecord);
 			closing = true;
 			try {
 				BlueCoveImpl.instance().getBluetoothStack().rfServerClose(handle, serviceRecord);
@@ -126,7 +119,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		if (closed) {
 			throw new IllegalArgumentException("StreamConnectionNotifier is closed");
 		}
-		serviceRecordsMap.put(serviceRecord, this);
+		ServiceRecordsRegistry.register(this, serviceRecord);
 		return serviceRecord;
 	}
 
@@ -136,7 +129,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 			throw new IllegalArgumentException("ProtocolDescriptorList is mandatory");
 		}
 
-		if (this.rfcommChannel != serviceRecord.getRFCOMMChannel()) {
+		if (this.rfcommChannel != serviceRecord.getChannel(BluetoothConsts.RFCOMM_PROTOCOL_UUID)) {
 			throw new IllegalArgumentException("Must not change the RFCOMM server channel number");
 		}
 
@@ -168,7 +161,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 	 * @param acceptAndOpen wrap validation in ServiceRegistrationException
 	 * @throws ServiceRegistrationException
 	 */
-	private void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
+	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
 		try {
 			validateServiceRecord(this.serviceRecord);
 		} catch (IllegalArgumentException e) {
@@ -182,11 +175,4 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		serviceRecord.attributeUpdated = false;
 	}
 
-	public static void updateServiceRecord(ServiceRecord srvRecord) throws ServiceRegistrationException {
-		BluetoothStreamConnectionNotifier owner = (BluetoothStreamConnectionNotifier)serviceRecordsMap.get(srvRecord);
-		if (owner == null) {
-			throw new IllegalArgumentException("Service record is not registered");
-		}
-		owner.updateServiceRecord(false);
-	}
 }

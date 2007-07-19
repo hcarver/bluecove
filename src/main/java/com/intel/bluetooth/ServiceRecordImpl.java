@@ -372,9 +372,9 @@ public class ServiceRecordImpl implements ServiceRecord {
 		return buf.toString();
 	}
 	
-	int getRFCOMMChannel() {
+	int getChannel(UUID protocolUUID) {
 		
-		int rfcommChannel = -1;
+		int channel = -1;
 
 		DataElement protocolDescriptor = getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
 		if ((protocolDescriptor == null) || (protocolDescriptor.getDataType() != DataElement.DATSEQ)) {
@@ -382,7 +382,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 		}
 
 		/*
-		 * get RFCOMM Channel
+		 * get RFCOMM Channel or L2CAP PSM
 		 * ProtocolDescriptorList is DATSEQ of DATSEQ of UUID and optional parameters
 		 */
 		
@@ -398,7 +398,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 						continue;
 					}
 					Object uuid = protocolElement.getValue();
-					if (elementSeqEnum.hasMoreElements() && (BluetoothConsts.RFCOMM_PROTOCOL_UUID.equals(uuid))) {
+					if (elementSeqEnum.hasMoreElements() && (protocolUUID.equals(uuid))) {
 
 						DataElement protocolPSMElement = (DataElement) elementSeqEnum.nextElement();
 
@@ -410,14 +410,14 @@ public class ServiceRecordImpl implements ServiceRecord {
 						case DataElement.INT_2:
 						case DataElement.INT_4:
 						case DataElement.INT_8:
-							rfcommChannel = (int) protocolPSMElement.getLong();
+							channel = (int) protocolPSMElement.getLong();
 							break;
 						}
 					}
 				}
 			}
 		}
-		return rfcommChannel;
+		return channel;
 	}
 	
 	/*
@@ -477,6 +477,9 @@ public class ServiceRecordImpl implements ServiceRecord {
 		}
 	
 		// TODO not yet implemented
+		if (NotImplementedError.enabled) {
+			throw new NotImplementedError();
+		}
 	}
 
 	/*

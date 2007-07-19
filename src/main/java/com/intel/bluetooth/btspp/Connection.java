@@ -28,6 +28,7 @@ import java.io.OutputStream;
 
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.ServiceRegistrationException;
 import javax.microedition.io.InputConnection;
 import javax.microedition.io.OutputConnection;
 import javax.microedition.io.StreamConnection;
@@ -85,10 +86,23 @@ public class Connection implements CreateConnection, StreamConnection, StreamCon
 		return ((StreamConnectionNotifier)impl).acceptAndOpen();
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#getServiceRecord()
+	 */
 	public ServiceRecord getServiceRecord() {
 		return ((BluetoothConnectionNotifierServiceRecordAccess)impl).getServiceRecord();
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#updateServiceRecord(boolean)
+	 */
+	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
+		((BluetoothConnectionNotifierServiceRecordAccess)impl).updateServiceRecord(acceptAndOpen);
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
+	 */
 	public long getRemoteAddress() throws IOException {
 		return ((BluetoothConnectionAccess)impl).getRemoteAddress();
 	}
