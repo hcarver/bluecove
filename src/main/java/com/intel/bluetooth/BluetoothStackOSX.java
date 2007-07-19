@@ -188,8 +188,7 @@ public class BluetoothStackOSX implements BluetoothStack {
 
 	}
 
-	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord)
-			throws ServiceRegistrationException {
+	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
 		// TODO Auto-generated method stub
 
 	}
@@ -249,7 +248,7 @@ public class BluetoothStackOSX implements BluetoothStack {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
 	 */
@@ -264,7 +263,7 @@ public class BluetoothStackOSX implements BluetoothStack {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long, com.intel.bluetooth.ServiceRecordImpl)
 	 */

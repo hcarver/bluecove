@@ -153,7 +153,7 @@ public interface BluetoothStack {
 	
 	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException;
 	
-	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException;
+	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException;
 	
 	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
 	

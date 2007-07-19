@@ -425,7 +425,7 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		return super.accept(handle);
 	}
 
-	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
+	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
 		super.unregisterService(serviceRecord.getHandle());
 		serviceRecord.setHandle(super.registerService(((ServiceRecordImpl) serviceRecord).toByteArray()));
 		DebugLog.debug("new serviceRecord", serviceRecord);

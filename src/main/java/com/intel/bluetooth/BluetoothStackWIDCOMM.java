@@ -49,7 +49,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	private final static int ATTR_RETRIEVABLE_MAX = 256;
 
 	private final static int RECEIVE_MTU_MAX = 1024;
-	
+
 	static {
 		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WIDCOMM);
 	}
@@ -485,7 +485,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		return cvalue;
 	}
 
-	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
+	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
 		int[] ids = serviceRecord.getAttributeIDs();
 		if ((ids == null) || (ids.length == 0)) {
 			return;
@@ -656,7 +656,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
 	public native void l2Send(long handle, byte[] data) throws IOException;
-	
+
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
 	 */

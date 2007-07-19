@@ -283,8 +283,10 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		return handle;
 	}
 
-	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
-		throw new ServiceRegistrationException("NotImplemented");
+	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
+		if (!acceptAndOpen) {
+			throw new ServiceRegistrationException("Not Supported on " + getStackID());
+		}
 	}
 
 	public native long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
