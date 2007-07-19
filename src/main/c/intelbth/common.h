@@ -239,6 +239,7 @@ public:
 	int write(void *p_data, int len);
 	int readByte();
 	int read(void *p_data, int len);
+	int skip(int n);
 	BOOL isOverflown();
 	void setOverflown();
 	int available();
@@ -254,6 +255,7 @@ public:
 
 	BOOL readyToFree;
 	int internalHandle;
+	char poolableObjectType;
 
 	long usedCount;
 
@@ -293,10 +295,12 @@ public:
 	~ObjectPool();
 
 	PoolableObject* getObject(JNIEnv *env, jlong handle);
+	PoolableObject* getObject(JNIEnv *env, jlong handle, char poolableObjectType);
 
 	PoolableObject* getObjectByExternalHandle(jlong handle);
 
 	void removeObject(PoolableObject* obj);
 
 	BOOL addObject(PoolableObject* obj);
+	BOOL addObject(PoolableObject* obj, char poolableObjectType);
 };

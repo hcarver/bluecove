@@ -528,4 +528,10 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		throw new NotSupportedIOException(getStackID());
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
+	 */
+	public long l2RemoteAddress(long handle) throws IOException {
+		throw new NotSupportedIOException(getStackID());
+	}
 }

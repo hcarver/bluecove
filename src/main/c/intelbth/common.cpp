@@ -396,18 +396,28 @@ int ReceiveBuffer::read(void *p_data, int len) {
 		count = len;
 	}
 	if (read_idx + count < size) {
-		memcpy(p_data, (buffer + read_idx), count);
+		if (p_data != NULL) {
+			memcpy(p_data, (buffer + read_idx), count);
+		}
 	} else {
 		// Read first part from the end of the buffer.
 		int accept_fill_end_size = size - read_idx;
-		memcpy(p_data, (buffer + read_idx), accept_fill_end_size);
+		if (p_data != NULL) {
+			memcpy(p_data, (buffer + read_idx), accept_fill_end_size);
+		}
 		// Read second part from the beginning of the buffer.
 		int accept_fill_begin_size = count - accept_fill_end_size;
-		memcpy((jbyte*)p_data + accept_fill_end_size, buffer, accept_fill_begin_size);
+		if (p_data != NULL) {
+			memcpy((jbyte*)p_data + accept_fill_end_size, buffer, accept_fill_begin_size);
+		}
 	}
 	incReadIdx(count);
 	if (safe) LeaveCriticalSection(&lock);
 	return count;
+}
+
+int ReceiveBuffer::skip(int n) {
+	return read(NULL, n);
 }
 
 int ReceiveBuffer::available() {
@@ -533,6 +543,11 @@ BOOL ObjectPool::addObject(PoolableObject* obj) {
 	return FALSE;
 }
 
+BOOL ObjectPool::addObject(PoolableObject* obj, char poolableObjectType) {
+	obj->poolableObjectType = poolableObjectType;
+	return addObject(obj);
+}
+
 PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle) {
 	if (handle <= 0) {
 		throwIOException(env, "Invalid handle");
@@ -554,6 +569,15 @@ PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle) {
 	}
 	if ((o->internalHandle != handle) || (!o->isValidObject())) {
 		throwIOException(env, "Corrupted handle");
+		return NULL;
+	}
+	return o;
+}
+
+PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle, char poolableObjectType) {
+	PoolableObject* o = getObject(env, handle);
+	if ((o != NULL) && (o->poolableObjectType != poolableObjectType)) {
+		throwIOException(env, "Invalid handle type");
 		return NULL;
 	}
 	return o;

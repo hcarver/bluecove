@@ -163,6 +163,8 @@ abstract class BluetoothPeer implements BluetoothStack {
 	
 	public static native int testReceiveBufferRead(long bufferHandler);
 	
+	public static native int testReceiveBufferSkip(long bufferHandler, int size);
+	
 	public static native int testReceiveBufferAvailable(long bufferHandler);
 	
 	public static native boolean testReceiveBufferIsOverflown(long bufferHandler);

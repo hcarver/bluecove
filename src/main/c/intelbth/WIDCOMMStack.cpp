@@ -36,7 +36,14 @@ BOOL isWIDCOMMBluetoothStackPresent(JNIEnv *env) {
 
 #ifdef _BTWLIB
 
-static WIDCOMMStack* stack;
+// We specify which DLLs to delay load with the /delayload:btwapi.dll linker option
+// This is how it is now: wbtapi.dll;btfunc.dll;irprops.cpl
+#ifdef VC6
+#pragma comment(lib, "DelayImp.lib")
+#pragma comment(linker, "/delayload:wbtapi.dll")
+#endif
+
+WIDCOMMStack* stack;
 static int openConnections = 0;
 
 void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr) {
@@ -844,6 +851,15 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getS
 		return NULL;
 	}
 
+	/*
+	if (attrID == 4) {
+		UINT16 psm;
+		if (record->FindL2CapPsm(&psm) ) {
+			debugs("FindL2CapPsm %i", psm);
+		}
+	}
+	*/
+
 	jbyteArray result = env->NewByteArray(sizeof(SDP_DISC_ATTTR_VAL));
 	jbyte *bytes = env->GetByteArrayElements(result, 0);
 	memcpy(bytes, pval, sizeof(SDP_DISC_ATTTR_VAL));
@@ -863,11 +879,19 @@ WIDCOMMStackRfCommPort* WIDCOMMStack::createCommPort(BOOL server) {
         port = new WIDCOMMStackRfCommPort();
     }
 
-	if (!commPool->addObject(port)) {
+	if (!commPool->addObject(port, 'r')) {
 		delete port;
 		return NULL;
 	}
 	return port;
+}
+
+WIDCOMMStackRfCommPort* validRfCommHandle(JNIEnv *env, jlong handle) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return NULL;
+	}
+	return (WIDCOMMStackRfCommPort*)stack->commPool->getObject(env, handle, 'r');
 }
 
 void WIDCOMMStack::deleteCommPort(WIDCOMMStackRfCommPort* commPort) {
@@ -877,7 +901,33 @@ void WIDCOMMStack::deleteCommPort(WIDCOMMStackRfCommPort* commPort) {
 	commPort->readyToFree = TRUE;
 }
 
+WIDCOMMStackL2CapConn* WIDCOMMStack::createL2CapConn() {
+	WIDCOMMStackL2CapConn* conn = new WIDCOMMStackL2CapConn();
+	if (!commPool->addObject(conn, 'l')) {
+		delete conn;
+		return NULL;
+	}
+	return conn;
+}
+
+WIDCOMMStackL2CapConn* validL2CapConnHandle(JNIEnv *env, jlong handle) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return NULL;
+	}
+	return (WIDCOMMStackL2CapConn*)stack->commPool->getObject(env, handle, 'l');
+}
+
+void WIDCOMMStack::deleteL2CapConn(WIDCOMMStackL2CapConn* conn) {
+	if (conn == NULL) {
+		return;
+	}
+	conn->readyToFree = TRUE;
+}
+
 WIDCOMMStackRfCommPort::WIDCOMMStackRfCommPort() {
+
+	memset(&service_guid, 0, sizeof(GUID));
 
 	readyForReuse();
 
@@ -921,14 +971,6 @@ WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
 	CloseHandle(hDataReceivedEvent);
 	CloseHandle(hConnectionEvent);
 	openConnections --;
-}
-
-WIDCOMMStackRfCommPort* validRfCommHandle(JNIEnv *env, jlong handle) {
-	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
-		return NULL;
-	}
-	return (WIDCOMMStackRfCommPort*)stack->commPool->getObject(env, handle);
 }
 
 void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {
@@ -1132,7 +1174,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	HANDLE hEvents[2];
 	hEvents[0] = rf->hConnectionEvent;
 	hEvents[1] = rf->hDataReceivedEvent;
-	while (rf->isConnected && (!rf->isClosing) && (rf->receiveBuffer.available() == 0)) {
+	while ((stack != NULL) && rf->isConnected && (!rf->isClosing) && (rf->receiveBuffer.available() == 0)) {
 		debug("read() waits for data");
 		DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 		if (rc == WAIT_FAILED) {
@@ -1147,7 +1189,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		debug2("isClosing [%s], isConnected[%s]", bool2str(rf->isClosing), bool2str(rf->isConnected));
 		*/
 	}
-	if ((rf->isClosing) || (rf->receiveBuffer.available() == 0)) {
+	if ((stack == NULL) || (rf->isClosing) || (rf->receiveBuffer.available() == 0)) {
 		// See InputStream.read();
 		return -1;
 	}
@@ -1177,8 +1219,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 
 	int done = 0;
 
-	while (rf->isConnected && (!rf->isClosing) && (done < len)) {
-		while (rf->isConnected  && (!rf->isClosing) && (rf->receiveBuffer.available() == 0)) {
+	while ((stack != NULL) && rf->isConnected && (!rf->isClosing) && (done < len)) {
+		while ((stack != NULL) && rf->isConnected  && (!rf->isClosing) && (rf->receiveBuffer.available() == 0)) {
 			debug("read[] waits for data");
 			DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 			if (rc == WAIT_FAILED) {
@@ -1210,7 +1252,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		done += rf->receiveBuffer.read(bytes + off + done, count);
 	}
 
-	if ((rf->isClosing) || (!rf->isConnected && done == 0)) {
+	if ((stack != NULL) || (rf->isClosing) || (!rf->isConnected && done == 0)) {
 		// See InputStream.read();
 		done = -1;
 	}

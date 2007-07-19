@@ -170,6 +170,14 @@ public class ReceiveBufferTest extends TestCase {
 			verifyWriteRead(size, size, size, size);
 		}
 	}
+	
+	public void testSkip() {
+		final int size = TEST_BUFFER_SIZE;
+		byte data[] = verifyWrite(size, size);
+		verifyRead(10, 10, data, 0);
+		assertEquals("skip 5", 5, BluetoothPeer.testReceiveBufferSkip(bufferHandler, 5));
+		verifyRead(20, 20, data, 10 + 5);
+	}
 
 	public void testWriteThread() {
 		final int size = TEST_BUFFER_SIZE * 7;

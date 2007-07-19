@@ -90,6 +90,9 @@ public abstract class BluetoothRFCommConnection implements StreamConnection, Blu
 	}
 	
 	public long getRemoteAddress() throws IOException {
+		if (closing) {
+			throw new IOException("Connection closed");
+		}
 		return BlueCoveImpl.instance().getBluetoothStack().getConnectionRfRemoteAddress(handle);
 	}
 

@@ -57,14 +57,6 @@
 #include "BtIfClasses.h"
 #include "com_intel_bluetooth_BluetoothStackWIDCOMM.h"
 
-// We specify which DLLs to delay load with the /delayload:btwapi.dll linker option
-// This is how it is now: wbtapi.dll;btfunc.dll;irprops.cpl
-
-#ifdef VC6
-#pragma comment(lib, "DelayImp.lib")
-#pragma comment(linker, "/delayload:wbtapi.dll")
-#endif
-
 void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr);
 
 jlong BcAddrToLong(BD_ADDR bd_addr);
@@ -91,6 +83,7 @@ typedef struct {
 #define COMMPORTS_CONNECT_TIMEOUT 60000
 
 class WIDCOMMStackRfCommPort;
+class WIDCOMMStackL2CapConn;
 
 class DiscoveryRecHolder {
 public:
@@ -139,11 +132,16 @@ public:
 
 	WIDCOMMStackRfCommPort* createCommPort(BOOL server);
 	void deleteCommPort(WIDCOMMStackRfCommPort* commPort);
+
+	WIDCOMMStackL2CapConn* createL2CapConn();
+	void deleteL2CapConn(WIDCOMMStackL2CapConn* conn);
 };
+
+extern WIDCOMMStack* stack;
 
 //	 --- Client RFCOMM connections
 
-class WIDCOMMStackRfCommPort : public CRfCommPort, public PoolableObject{
+class WIDCOMMStackRfCommPort : public CRfCommPort, public PoolableObject {
 public:
 
 	GUID service_guid;
@@ -169,8 +167,8 @@ public:
 
 	virtual void closeRfCommPort(JNIEnv *env);
 
-	virtual void OnEventReceived (UINT32 event_code);
-	virtual void OnDataReceived (void *p_data, UINT16 len);
+	virtual void OnEventReceived(UINT32 event_code);
+	virtual void OnDataReceived(void *p_data, UINT16 len);
 };
 
 class WIDCOMMStackRfCommPortServer : public WIDCOMMStackRfCommPort {
@@ -185,6 +183,33 @@ public:
 	virtual ~WIDCOMMStackRfCommPortServer();
 
 	virtual void closeRfCommPort(JNIEnv *env);
+};
+
+//	 --- Client and Server L2CAP connections
+
+WIDCOMMStackL2CapConn* validL2CapConnHandle(JNIEnv *env, jlong handle) ;
+
+class WIDCOMMStackL2CapConn : public CL2CapConn, public PoolableObject {
+public:
+	BOOL isConnected;
+
+	GUID service_guid;
+	UINT16 mtu;
+
+	CL2CapIf l2CapIf;
+
+	HANDLE hConnectionEvent;
+	HANDLE hDataReceivedEvent;
+	ReceiveBuffer receiveBuffer;
+
+	WIDCOMMStackL2CapConn();
+	virtual ~WIDCOMMStackL2CapConn();
+
+	void closeConnection(JNIEnv *env);
+
+	virtual void OnConnected();
+    virtual void OnDataReceived(void *p_data, UINT16 length);
+	virtual void OnRemoteDisconnected(UINT16 reason);
 };
 
 #endif //  _BTWLIB

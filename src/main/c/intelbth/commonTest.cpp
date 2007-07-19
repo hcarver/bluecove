@@ -29,18 +29,23 @@
 
 JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_testUUIDConversion
 (JNIEnv *env, jclass, jbyteArray uuidValue) {
-	GUID service_guid;
+	GUID g;
 	// pin array
 	jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
 	// build UUID
-	convertUUIDBytesToGUID(bytes, &service_guid);
+	convertUUIDBytesToGUID(bytes, &g);
 	// unpin array
 	env->ReleaseByteArrayElements(uuidValue, bytes, 0);
+
+	char m[1064];
+	unsigned char* d = g.Data4;
+	sprintf_s(m, 1064, "{%u , %u, %u, {%u , %u, %u , %u, %u, %u , %u, %u}}", g.Data1, g.Data2, g.Data3, d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7]);
+	debugs("UUID = %s", m);
 
 	jbyteArray uuidValueConverted = env->NewByteArray(16);
 	jbyte *bytesConverted = env->GetByteArrayElements(uuidValueConverted, 0);
 
-	convertGUIDToUUIDBytes(&service_guid, bytesConverted);
+	convertGUIDToUUIDBytes(&g, bytesConverted);
 
 	env->ReleaseByteArrayElements(uuidValueConverted, bytesConverted, 0);
 
@@ -80,6 +85,12 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferR
 (JNIEnv *env, jclass, jlong bufferHandler) {
 	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
 	return b->readByte();
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferSkip
+(JNIEnv *env, jclass, jlong bufferHandler, jint size) {
+	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
+	return b->skip(size);
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferAvailable

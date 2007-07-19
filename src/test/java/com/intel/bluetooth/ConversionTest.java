@@ -29,7 +29,8 @@ public class ConversionTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		//System.getProperties().put("bluecove.debug", "true");
+		System.getProperties().put("bluecove.debug", "true");
+		BlueCoveImpl.instance().enableNativeDebug(true);
 		//System.getProperties().put("bluecove.native.path", "./src/main/resources");
 	}
 	
@@ -41,6 +42,7 @@ public class ConversionTest extends TestCase {
 	}
 	
 	public void testNativeUUID() {
+		verifyUUID("B10C0BE1111111111111111111110001");
 		verifyUUID("B1011114111115111111117111110001");
 		verifyUUID("27012f0c68af4fbf8dbe6bbaf7ab651b");
 	}

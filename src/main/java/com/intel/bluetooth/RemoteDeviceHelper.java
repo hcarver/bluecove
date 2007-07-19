@@ -228,7 +228,14 @@ public abstract class RemoteDeviceHelper {
 	}
 	
 	public static long getAddress(String bluetoothAddress) {
-		return Long.parseLong(bluetoothAddress, 16);
+		if(bluetoothAddress.indexOf('-') != -1) {
+			throw new IllegalArgumentException("Illegal bluetoothAddress {" + bluetoothAddress + "}");
+		}
+		try {
+			return Long.parseLong(bluetoothAddress, 16);
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("Illegal bluetoothAddress {" + bluetoothAddress + "}");
+		}
 	}
 	
 	static long getAddress(RemoteDevice device) {

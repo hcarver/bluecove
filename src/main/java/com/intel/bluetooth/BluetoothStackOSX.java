@@ -312,4 +312,11 @@ public class BluetoothStackOSX implements BluetoothStack {
 		return 0;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
+	 */
+	public long l2RemoteAddress(long handle) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

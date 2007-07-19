@@ -47,7 +47,10 @@ public abstract class BluetoothL2CAPConnection implements L2CAPConnection, Bluet
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
 	 */
 	public long getRemoteAddress() throws IOException {
-		return BlueCoveImpl.instance().getBluetoothStack().getConnectionRfRemoteAddress(handle);
+		if (closing) {
+			throw new IOException("Connection closed");
+		}
+		return BlueCoveImpl.instance().getBluetoothStack().l2RemoteAddress(handle);
 	}
 
 	/* (non-Javadoc)
@@ -77,7 +80,7 @@ public abstract class BluetoothL2CAPConnection implements L2CAPConnection, Bluet
 		if (closing) {
 			throw new IOException("Connection closed");
 		}
-		return BlueCoveImpl.instance().getBluetoothStack().l2Ready(handle);;
+		return BlueCoveImpl.instance().getBluetoothStack().l2Ready(handle);
 	}
 
 	/* (non-Javadoc)
@@ -86,6 +89,9 @@ public abstract class BluetoothL2CAPConnection implements L2CAPConnection, Bluet
 	public int receive(byte[] inBuf) throws IOException {
 		if (closing) {
 			throw new IOException("Connection closed");
+		}
+		if (inBuf == null) {
+			throw new NullPointerException ("inBuf is null");
 		}
 		return BlueCoveImpl.instance().getBluetoothStack().l2Receive(handle, inBuf);
 	}
@@ -96,6 +102,9 @@ public abstract class BluetoothL2CAPConnection implements L2CAPConnection, Bluet
 	public void send(byte[] data) throws IOException {
 		if (closing) {
 			throw new IOException("Connection closed");
+		}
+		if (data == null) {
+			throw new NullPointerException ("data is null");
 		}
 		BlueCoveImpl.instance().getBluetoothStack().l2Send(handle, data);
 	}

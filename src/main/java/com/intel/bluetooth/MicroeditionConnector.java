@@ -66,23 +66,23 @@ public class MicroeditionConnector {
 
 	public static final int READ_WRITE = Connector.READ_WRITE;
 
-	private static Hashtable/*<String, any>*/ suportScheme = new Hashtable();
+	private static Hashtable/*<String, String>*/ suportScheme = new Hashtable();
 	
-	private static Hashtable/*<String, any>*/ srvParams = new Hashtable();
+	private static Hashtable/*<String, String>*/ srvParams = new Hashtable();
 	
-	private static Hashtable/*<String, any>*/ cliParams = new Hashtable();
+	private static Hashtable/*<String, String>*/ cliParams = new Hashtable();
 	
-	private static Hashtable/*<String, any>*/ cliParamsL2CAP = new Hashtable();
+	private static Hashtable/*<String, String>*/ cliParamsL2CAP = new Hashtable();
 	
-	private static Hashtable/*<String, any>*/ srvParamsL2CAP = new Hashtable();
+	private static Hashtable/*<String, String>*/ srvParamsL2CAP = new Hashtable();
 	
 	private static final String  AUTHENTICATE = "authenticate";
 	private static final String  AUTHORIZE = "authorize"; 
 	private static final String  ENCRYPT = "encrypt";
 	private static final String  MASTER = "master";
 	private static final String  NAME = "name";
-	private static final String  RECEIVE_MTU = "receiveMTU"; 
-	private static final String  TRANSMIT_MTU = "transmitMTU";
+	private static final String  RECEIVE_MTU = "ReceiveMTU"; 
+	private static final String  TRANSMIT_MTU = "TransmitMTU";
 	
 	static {
 	    //cliParams    ::== master | encrypt | authenticate
@@ -98,6 +98,9 @@ public class MicroeditionConnector {
 		copyAll(cliParamsL2CAP, cliParams);
 		cliParamsL2CAP.put(RECEIVE_MTU, RECEIVE_MTU);
 		cliParamsL2CAP.put(TRANSMIT_MTU, TRANSMIT_MTU);
+		// Some docs describe lower case names. e.g http://developers.sun.com/mobility/midp/ttips/gcfcs/index.html
+		cliParamsL2CAP.put("receiveMTU", RECEIVE_MTU);
+		cliParamsL2CAP.put("transmitMTU", TRANSMIT_MTU);
 		
 		copyAll(srvParamsL2CAP, cliParamsL2CAP);
 		srvParamsL2CAP.put(AUTHORIZE, AUTHORIZE);
@@ -154,7 +157,7 @@ public class MicroeditionConnector {
 			throw new ConnectionNotFoundException(scheme);
 		}
 		boolean schemeBluetooth = (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM)) || (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX) || (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)));
-		
+		boolean isL2CAP = scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP);		
 		
 		boolean isServer;
 		
@@ -164,8 +167,8 @@ public class MicroeditionConnector {
 			host = name.substring(scheme.length() + 3, hostEnd);
 			isServer = host.equals("localhost");
 			
-			Hashtable params;	
-			if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)) {
+			Hashtable params;
+			if (isL2CAP) {
 				if (isServer) {
 					params = srvParamsL2CAP;
 				} else {
@@ -192,10 +195,10 @@ public class MicroeditionConnector {
 				if (equals > -1) {
 					String param = t.substring(0, equals);
 					String value = t.substring(equals + 1);
-					if (params.contains(param)) {
-						values.put(param, value);
+					if (params.containsKey(param)) {
+						values.put(params.get(param), value);
 					} else {
-						throw new IllegalArgumentException("invalid param [" + t + "]");
+						throw new IllegalArgumentException("invalid param [" + param + "] value [" + value +"]");
 					}
 				} else {
 					throw new IllegalArgumentException("invalid param [" + t +"]");
@@ -230,17 +233,33 @@ public class MicroeditionConnector {
            }
 		} else { // (!isServer)
 			try {
-				channel = Integer.parseInt(portORuuid);
+				channel = Integer.parseInt(portORuuid, isL2CAP?16:10);
 			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException("channel " + portORuuid);
 			}
 			if (channel < 0) {
 				throw new IllegalArgumentException("channel " + portORuuid);
 			}
-			if (schemeBluetooth && (channel > 30)) {
-				throw new IllegalArgumentException("channel " + portORuuid);
-			}
 			if (schemeBluetooth) {
+				if (isL2CAP) {
+					// Valid PSM range: 0x0001-0x0019 (0x1001-0xFFFF dynamically assigned, 0x0019-0x0100 reserved for future use).
+					if ((channel <= 3) || (channel > 0xFFFF)) {
+						// PSM 1 discovery, 3 RFCOMM
+						throw new IllegalArgumentException("PCM " + portORuuid);
+					}
+					//has the 9th bit (0x100) set to zero
+					if ((channel & 0x100) != 0) {
+						throw new IllegalArgumentException("9th bit set in PCM " + portORuuid);
+					}
+					if ((channel % 2) != 1) {
+						throw new IllegalArgumentException("PSM value " + portORuuid + " should be odd");
+					}
+				} else {
+					if (channel > 30) {
+						throw new IllegalArgumentException("channel " + portORuuid);
+					}
+				}
+				
 				connectionParams = new BluetoothConnectionParams(RemoteDeviceHelper.getAddress(host), channel, 
 					paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
 			}
@@ -326,6 +345,9 @@ public class MicroeditionConnector {
 			int mtu = Integer.parseInt(v);
 			if (mtu >= L2CAPConnection.MINIMUM_MTU) {
 				return mtu;
+			}
+			if ((mtu >0) && (mtu < L2CAPConnection.MINIMUM_MTU) && (name.equals(TRANSMIT_MTU))) {
+				return L2CAPConnection.MINIMUM_MTU;
 			}
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("invalid MTU value " + v);

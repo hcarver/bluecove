@@ -192,4 +192,6 @@ public interface BluetoothStack {
 	public int l2Receive(long handle, byte[] inBuf) throws IOException;
 	
 	public void l2Send(long handle, byte[] data) throws IOException;
+	
+	public long l2RemoteAddress(long handle) throws IOException;
 }

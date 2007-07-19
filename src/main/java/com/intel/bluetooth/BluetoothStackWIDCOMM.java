@@ -48,6 +48,8 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	// TODO what is the real number for Attributes retrivable ?
 	private final static int ATTR_RETRIEVABLE_MAX = 256;
 
+	private final static int RECEIVE_MTU_MAX = 1024;
+	
 	static {
 		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WIDCOMM);
 	}
@@ -160,7 +162,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 			return FALSE;
 		}
 		if ("bluetooth.l2cap.receiveMTU.max".equals(property)) {
-			return "0";
+			return  String.valueOf(RECEIVE_MTU_MAX);
 		}
 
 		if ("bluecove.radio.version".equals(property)) {
@@ -648,4 +650,9 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
 	public native void l2Send(long handle, byte[] data) throws IOException;
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
+	 */
+	public native long l2RemoteAddress(long handle) throws IOException;
 }
