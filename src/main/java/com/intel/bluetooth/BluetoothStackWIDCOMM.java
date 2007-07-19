@@ -576,6 +576,12 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 // ---------------------- Client and Server L2CAP connections ----------------------
 
 	private int selectMTU(int receiveMTU, int transmitMTU) {
+		if (receiveMTU > RECEIVE_MTU_MAX) {
+			throw new IllegalArgumentException("invalid ReceiveMTU value " + receiveMTU);
+		}
+//		if (transmitMTU > RECEIVE_MTU_MAX) {
+//			throw new IllegalArgumentException("invalid TransmitMTU value " + transmitMTU);
+//		}
 		int min = L2CAPConnection.DEFAULT_MTU;
 		if ((receiveMTU > L2CAPConnection.MINIMUM_MTU) && (receiveMTU < min)) {
 			min = receiveMTU;
