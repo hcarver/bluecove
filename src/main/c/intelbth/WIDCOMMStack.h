@@ -194,6 +194,9 @@ public:
 	BOOL isConnected;
 
 	GUID service_guid;
+	BT_CHAR service_name[BT_MAX_SERVICE_NAME_LEN + 1];
+	CSdpService* sdpService;
+
 	UINT16 mtu;
 
 	CL2CapIf l2CapIf;
@@ -206,10 +209,14 @@ public:
 	virtual ~WIDCOMMStackL2CapConn();
 
 	void closeConnection(JNIEnv *env);
+	void closeServerConnection(JNIEnv *env);
 
 	virtual void OnConnected();
     virtual void OnDataReceived(void *p_data, UINT16 length);
 	virtual void OnRemoteDisconnected(UINT16 reason);
+
+	//Server
+	virtual void OnIncomingConnection();
 };
 
 #endif //  _BTWLIB

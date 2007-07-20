@@ -730,4 +730,34 @@ public class ServiceRecordImpl implements ServiceRecord {
 			this.populateAttributeValue(BluetoothConsts.AttributeIDServiceName, new DataElement(DataElement.STRING, name));
 		}
 	}
+	
+	void populateL2CAPAttributes(int handle, int channel, UUID uuid, String name) {
+		
+		this.populateAttributeValue(BluetoothConsts.ServiceRecordHandle, new DataElement(DataElement.U_INT_4, handle));
+
+		/*
+		 * service class ID list
+		 */
+
+		DataElement serviceClassIDList = new DataElement(DataElement.DATSEQ);
+		serviceClassIDList.addElement(new DataElement(DataElement.UUID, uuid));
+
+		this.populateAttributeValue(BluetoothConsts.ServiceClassIDList, serviceClassIDList);
+
+		/*
+		 * protocol descriptor list
+		 */
+		DataElement protocolDescriptorList = new DataElement(DataElement.DATSEQ);
+
+		DataElement L2CAPDescriptor = new DataElement(DataElement.DATSEQ);
+		L2CAPDescriptor.addElement(new DataElement(DataElement.UUID, BluetoothConsts.L2CAP_PROTOCOL_UUID));
+		L2CAPDescriptor.addElement(new DataElement(DataElement. U_INT_2, channel));
+		protocolDescriptorList.addElement(L2CAPDescriptor);
+
+		this.populateAttributeValue(BluetoothConsts.ProtocolDescriptorList, protocolDescriptorList);
+
+		if (name != null) {
+			this.populateAttributeValue(BluetoothConsts.AttributeIDServiceName, new DataElement(DataElement.STRING, name));
+		}
+	}
 }

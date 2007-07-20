@@ -48,6 +48,11 @@ WIDCOMMStackL2CapConn::WIDCOMMStackL2CapConn() {
 WIDCOMMStackL2CapConn::~WIDCOMMStackL2CapConn() {
 	CloseHandle(hDataReceivedEvent);
 	CloseHandle(hConnectionEvent);
+	if (sdpService != NULL) {
+		delete sdpService;
+		sdpService = NULL;
+	}
+	l2CapIf.Deregister();
 }
 
 void WIDCOMMStackL2CapConn::OnConnected() {
@@ -63,6 +68,16 @@ void WIDCOMMStackL2CapConn::closeConnection(JNIEnv *env) {
 	Disconnect();
 	l2CapIf.Deregister();
 	SetEvent(hConnectionEvent);
+}
+
+void WIDCOMMStackL2CapConn::closeServerConnection(JNIEnv *env) {
+	isConnected = FALSE;
+	Disconnect();
+	SetEvent(hConnectionEvent);
+}
+
+void WIDCOMMStackL2CapConn::OnIncomingConnection() {
+	 Accept(mtu);
 }
 
 void WIDCOMMStackL2CapConn::OnDataReceived(void *p_data, UINT16 length) {
@@ -105,7 +120,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 	//vc6 __try {
 		l2c = stack->createL2CapConn();
 		if (l2c == NULL) {
-			throwIOException(env, "No free connections Objects in Pool");
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 			open_l2client_return 0;
 		}
 		debugs("L2CapConn handle %i", l2c->internalHandle);
@@ -123,7 +138,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 		//l2CapIf = new CL2CapIf();
 
 		if (!l2CapIf->AssignPsmValue(&(l2c->service_guid), (UINT16)channel)) {
-			throwIOExceptionExt(env, "failed to assign PSM 0x%X", (UINT16)channel);
+			throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_UNKNOWN_PSM, "failed to assign PSM 0x%X", (UINT16)channel);
 			open_l2client_return 0;
 		}
 		l2CapIf->Register();
@@ -144,7 +159,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 		#endif // #else // _WIN32_WCE
 
 		if (!l2CapIf->SetSecurityLevel(p_service_name, sec_level, FALSE)) {
-			throwIOException(env, "Error setting security level");
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_SECURITY_BLOCK, "Error setting security level");
 			open_l2client_return 0;
         }
 
@@ -152,7 +167,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 		l2c->mtu = (UINT16)mtu;
 		BOOL rc = l2c->Connect(l2CapIf, bda, l2c->mtu);
 		if (!rc) {
-			throwIOException(env, "Failed to Connect");
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to Connect");
 			open_l2client_return 0;
 		}
 
@@ -165,12 +180,12 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 				open_l2client_return 0;
 			}
 			if ((GetTickCount() - waitStart)  > COMMPORTS_CONNECT_TIMEOUT) {
-				throwIOException(env, "Connection timeout");
+				throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout");
 				open_l2client_return 0;
 			}
 		}
 		if (stack == NULL) {
-			throwIOException(env, "Failed to connect");
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to connect");
 			open_l2client_return 0;
 		}
 
@@ -180,6 +195,144 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 		open_l2client_return handle;
 	/* vc6 } __finally {} */
 }
+
+#define open_l2server_return  open_l2server_finally(env, l2c); return
+
+void open_l2server_finally(JNIEnv *env, WIDCOMMStackL2CapConn* l2c) {
+	if ((l2c != NULL) && (stack != NULL)) {
+		l2c->Disconnect();
+		stack->deleteL2CapConn(l2c);
+	}
+	if (stack != NULL) {
+		LeaveCriticalSection(&stack->csCRfCommIf);
+	}
+}
+
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerOpenImpl
+(JNIEnv *env, jobject, jbyteArray uuidValue, jboolean authenticate, jboolean encrypt, jstring name, jint mtu) {
+	if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return 0;
+	}
+	EnterCriticalSection(&stack->csCRfCommIf);
+	WIDCOMMStackL2CapConn* l2c = NULL;
+//VC6	__try {
+		l2c = stack->createL2CapConn();
+		if (l2c == NULL) {
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
+			open_l2client_return 0;
+		}
+		debugs("L2CapConn server handle %i", l2c->internalHandle);
+		if ((l2c->hConnectionEvent == NULL) || (l2c->hDataReceivedEvent == NULL)) {
+			throwRuntimeException(env, "fails to CreateEvent");
+			open_l2client_return 0;
+		}
+		
+		jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
+		convertUUIDBytesToGUID(bytes, &(l2c->service_guid));
+		env->ReleaseByteArrayElements(uuidValue, bytes, 0);
+
+		CL2CapIf *l2CapIf;
+		l2CapIf = &l2c->l2CapIf;
+
+		if (!l2CapIf->AssignPsmValue(&(l2c->service_guid))) {
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_UNKNOWN_PSM, "failed to assign PSM");
+			open_l2server_return 0;
+		}
+		l2CapIf->Register();
+
+		const char *cname = env->GetStringUTFChars(name, 0);
+		UINT32 service_name_len;
+		#ifdef _WIN32_WCE
+			swprintf_s((wchar_t*)l2c->service_name, BT_MAX_SERVICE_NAME_LEN, L"%s", cname);
+			service_name_len = wcslen((wchar_t*)l2c->service_name);
+		#else // _WIN32_WCE
+			sprintf_s(l2c->service_name, BT_MAX_SERVICE_NAME_LEN, "%s", cname);
+			service_name_len = (UINT32)strlen(l2c->service_name);
+		#endif // #else // _WIN32_WCE
+		env->ReleaseStringUTFChars(name, cname);
+
+		l2c->sdpService = new CSdpService();
+		if (l2c->sdpService->AddServiceClassIdList(1, &(l2c->service_guid)) != SDP_OK) {
+			throwIOException(env, "Error AddServiceClassIdList");
+			open_l2server_return 0;
+		}
+		if (l2c->sdpService->AddServiceName(l2c->service_name) != SDP_OK) {
+			throwIOException(env, "Error AddServiceName");
+			open_l2server_return 0;
+		}
+		if (l2c->sdpService->AddL2CapProtocolDescriptor(l2CapIf->GetPsm()) != SDP_OK) {
+			throwIOException(env, "Error AddRFCommProtocolDescriptor");
+			open_l2server_return 0;
+		}
+		if (l2c->sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, service_name_len, (UINT8*)l2c->service_name) != SDP_OK) {
+			throwIOException(env, "Error AddAttribute ServiceName");
+			open_l2server_return 0;
+		}
+		if (l2c->sdpService->MakePublicBrowseable() != SDP_OK) {
+			throwIOException(env, "Error MakePublicBrowseable");
+			open_l2server_return 0;
+		}
+
+		UINT8 sec_level = BTM_SEC_NONE;
+		if (authenticate) {
+			sec_level = BTM_SEC_IN_AUTHENTICATE;
+		}
+		if (encrypt) {
+			sec_level = sec_level | BTM_SEC_IN_ENCRYPT;
+		}
+		if (!l2CapIf->SetSecurityLevel(l2c->service_name, sec_level, TRUE)) {
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_SECURITY_BLOCK, "Error setting security level");
+			open_l2server_return 0;
+        }
+
+		jlong handle = l2c->internalHandle;
+		l2c = NULL;
+		open_l2server_return handle;
+/*VC6} __finally { } */
+}
+
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerAcceptAndOpenServerConnection
+(JNIEnv *env, jobject, jlong handle) {
+	WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
+	if (l2c == NULL) {
+		return 0;
+	}
+	if (l2c->sdpService == NULL) {
+		throwIOException(env, "Connection closed");
+		return 0;
+	}
+	BOOL rc = l2c->Listen(&(l2c->l2CapIf));
+	if (!rc) {
+		throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to Listen");
+		return 0;
+	}
+	debug("L2CAP server waits for connection");
+	while ((stack != NULL) && (!l2c->isConnected) && (l2c->sdpService != NULL)) {
+		DWORD  rc = WaitForSingleObject(l2c->hConnectionEvent, 500);
+		if (rc == WAIT_FAILED) {
+			throwRuntimeException(env, "WaitForSingleObject");
+			return 0;
+		}
+	}
+	if ((stack == NULL) || (l2c->sdpService == NULL)) {
+		throwIOException(env, "Connection closed");
+		return 0;
+	}
+
+	debug("L2CAP server connection made");
+	return l2c->internalHandle;
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerPSM
+(JNIEnv *env, jobject, jlong handle) {
+	WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
+	if (l2c == NULL) {
+		return -1;
+	}
+	return l2c->l2CapIf.GetPsm();
+}
+
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2CloseClientConnection
 (JNIEnv *env, jobject, jlong handle) {
@@ -191,6 +344,15 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2CloseCli
 	if (stack != NULL) {
 		stack->deleteL2CapConn(l2c);
 	}
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2CloseServerConnection
+(JNIEnv *env, jobject, jlong handle) {
+	WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
+	if (l2c == NULL) {
+		return;
+	}
+	l2c->closeServerConnection(env);
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2GetMTUImpl

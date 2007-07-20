@@ -1029,7 +1029,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 	//vc6 __try {
 		rf = stack->createCommPort(FALSE);
 		if (rf == NULL) {
-			throwIOException(env, "No free connections Objects in Pool");
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 			open_client_return 0;
 		}
         debugs("RfCommPort handle %i", rf->internalHandle);
@@ -1042,7 +1042,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 		// What GUID do we need in call to CRfCommIf.AssignScnValue() if we don't have any?
 		//memcpy(&(rf->service_guid), &test_client_service_guid, sizeof(GUID));
 		if (!stack->rfCommIf.AssignScnValue(&(rf->service_guid), (UINT8)channel)) {
-			throwIOException(env, "failed to assign SCN");
+			throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_UNKNOWN_PSM, "failed to assign SCN %i", (UINT8)channel);
 			open_client_return 0;
 		}
 		//debug("SetSecurityLevel");
@@ -1063,13 +1063,17 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 		#endif // #else // _WIN32_WCE
 
 		if (!stack->rfCommIf.SetSecurityLevel(p_service_name, sec_level, FALSE)) {
-			throwIOException(env, "Error setting security level");
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_SECURITY_BLOCK, "Error setting security level");
 			open_client_return 0;
         }
 		//debug("OpenClient");
 		CRfCommPort::PORT_RETURN_CODE rc = rf->OpenClient((UINT8)channel, bda);
 		if (rc != CRfCommPort::SUCCESS) {
-			throwIOException(env, "Failed to OpenClient");
+			if (rc == CRfCommPort::PEER_TIMEOUT) {
+				throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Failed to OpenClient");
+			} else {
+				throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to OpenClient");
+			}
 			open_client_return 0;
 		}
 
@@ -1082,7 +1086,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 				open_client_return 0;
 			}
 			if ((GetTickCount() - waitStart)  > COMMPORTS_CONNECT_TIMEOUT) {
-				throwIOException(env, "Connection timeout");
+				throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout");
 				open_client_return 0;
 			}
 		}
@@ -1090,7 +1094,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 		    if ((stack != NULL) && (rf->isConnectionError)) {
 		        debugs("RfCommPort isConnectionError %i", rf->isConnectionErrorType);
 		    }
-			throwIOException(env, "Failed to connect");
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to connect");
 			open_client_return 0;
 		}
 		debug("connected");
@@ -1455,6 +1459,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 
 		if (rf->sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, service_name_len, (UINT8*)rf->service_name) != SDP_OK) {
 			throwIOException(env, "Error AddAttribute ServiceName");
+			open_server_return 0;
 		}
 		debug1("service_name assigned [%s]", rf->service_name);
 
@@ -1529,7 +1534,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 		throwIOException(env, "Failed to OpenServer");
 		return 0;
 	}
-	debug("server waits for connection");
+	debug("RFCOMM server waits for connection");
 	while ((stack != NULL) && (!rf->isClosing)  && (!rf->isConnected) && (!rf->isConnectionError) && (rf->sdpService != NULL)) {
 		DWORD  rc = WaitForSingleObject(rf->hConnectionEvent, 500);
 		if (rc == WAIT_FAILED) {
@@ -1548,7 +1553,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 		}
 		return 0;
 	}
-	debug("server connection made");
+	debug("RFCOMM server connection made");
 	rf->isClientOpen = TRUE;
 	return rf->internalHandle;
 }

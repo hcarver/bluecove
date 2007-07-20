@@ -606,17 +606,24 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	 */
 	public native void l2CloseClientConnection(long handle) throws IOException;
 
+	private native long l2ServerOpenImpl(byte[] uuidValue, boolean authenticate, boolean encrypt, String name, int mtu) throws IOException;
 
-	//TODO native
-	private long l2ServerOpenImpl(UUID uuid, boolean authenticate, boolean encrypt, String name, int mtu) throws IOException {
-		return 0;
-	}
-
+	public native int l2ServerPSM(long handle) throws IOException;
+	
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams, int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
-		return l2ServerOpenImpl(params.uuid, params.authenticate, params.encrypt, params.name, selectMTU(receiveMTU, transmitMTU));
+		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
+		long handle = l2ServerOpenImpl(uuidValue, params.authenticate, params.encrypt, params.name, selectMTU(receiveMTU, transmitMTU));
+		
+		int channel = l2ServerPSM(handle);
+		
+		int serviceRecordHandle = (int)handle;
+
+		serviceRecord.populateL2CAPAttributes(serviceRecordHandle, channel, params.uuid, params.name);
+		
+		return handle;
 	}
 	
 	/* (non-Javadoc)
@@ -629,24 +636,18 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection(long)
 	 */
-	public long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	public native long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException;
 
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseServerConnection(long)
 	 */
-	public void l2CloseServerConnection(long handle) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
+	public native void l2CloseServerConnection(long handle) throws IOException;
 	
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long, com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
-		// TODO Auto-generated method stub
+		l2CloseClientConnection(handle);
 	}
 
 	private native int l2GetMTUImpl(long handle) throws IOException;
