@@ -262,7 +262,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerO
 			open_l2server_return 0;
 		}
 		if (l2c->sdpService->AddL2CapProtocolDescriptor(l2CapIf->GetPsm()) != SDP_OK) {
-			throwIOException(env, "Error AddRFCommProtocolDescriptor");
+			throwIOException(env, "Error AddL2CapProtocolDescriptor");
 			open_l2server_return 0;
 		}
 		if (l2c->sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, service_name_len, (UINT8*)l2c->service_name) != SDP_OK) {
