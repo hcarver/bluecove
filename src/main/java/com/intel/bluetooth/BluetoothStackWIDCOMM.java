@@ -460,11 +460,11 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		return handle;
 	}
 
-	private native void rfServerAddAttribute(long handle, int attrID, short attrType, char[] value) throws ServiceRegistrationException;
+	private native void sdpServiceAddAttribute(long handle, char handleType, int attrID, short attrType, char[] value) throws ServiceRegistrationException;
 
-	private void rfServerAddAttribute(long handle, int attrID, short attrType, String value) throws ServiceRegistrationException {
+	private void sdpServiceAddAttribute(long handle, char handleType, int attrID, short attrType, String value) throws ServiceRegistrationException {
 		char[] cvalue = value.toCharArray();
-		rfServerAddAttribute(handle, attrID, attrType, cvalue);
+		sdpServiceAddAttribute(handle, handleType, attrID, attrType, cvalue);
 	}
 
 	private char[] long2char(long value, int len) {
@@ -486,6 +486,10 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	}
 
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
+		sdpServiceUpdateServiceRecord(handle, 'r', serviceRecord);
+	}
+
+	private void sdpServiceUpdateServiceRecord(long handle, char handleType, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {	
 		int[] ids = serviceRecord.getAttributeIDs();
 		if ((ids == null) || (ids.length == 0)) {
 			return;
@@ -514,49 +518,49 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 			DataElement d = serviceRecord.getAttributeValue(id);
 			switch (d.getDataType()) {
 			case DataElement.U_INT_1:
-				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, long2char(d.getLong(), 1));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, long2char(d.getLong(), 1));
 				break;
 			case DataElement.U_INT_2:
-				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, long2char(d.getLong(), 2));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, long2char(d.getLong(), 2));
 				break;
 			case DataElement.U_INT_4:
-				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, long2char(d.getLong(), 4));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, long2char(d.getLong(), 4));
 				break;
 			case DataElement.U_INT_8:
-				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, bytes2char((byte[])d.getValue(), 8));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, bytes2char((byte[])d.getValue(), 8));
 				break;
 			case DataElement.U_INT_16:
-				rfServerAddAttribute(handle, id, UINT_DESC_TYPE, bytes2char((byte[])d.getValue(), 16));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, bytes2char((byte[])d.getValue(), 16));
 				break;
 			case DataElement.INT_1:
-				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 1));
+				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 1));
 				break;
 			case DataElement.INT_2:
-				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 2));
+				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 2));
 				break;
 			case DataElement.INT_4:
-				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 4));
+				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 4));
 				break;
 			case DataElement.INT_8:
-				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 8));
+				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 8));
 				break;
 			case DataElement.INT_16:
-				rfServerAddAttribute(handle, id, TWO_COMP_INT_DESC_TYPE, bytes2char((byte[])d.getValue(), 16));
+				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, bytes2char((byte[])d.getValue(), 16));
 				break;
 			case DataElement.URL:
-				rfServerAddAttribute(handle, id, URL_DESC_TYPE, d.getValue().toString());
+				sdpServiceAddAttribute(handle, handleType, id, URL_DESC_TYPE, d.getValue().toString());
 				break;
 			case DataElement.STRING:
-				rfServerAddAttribute(handle, id, TEXT_STR_DESC_TYPE, d.getValue().toString());
+				sdpServiceAddAttribute(handle, handleType, id, TEXT_STR_DESC_TYPE, d.getValue().toString());
 				break;
 			case DataElement.NULL:
-				rfServerAddAttribute(handle, id, NULL_DESC_TYPE, "");
+				sdpServiceAddAttribute(handle, handleType, id, NULL_DESC_TYPE, "");
 				break;
 			case DataElement.BOOL:
-				rfServerAddAttribute(handle, id, BOOLEAN_DESC_TYPE, d.getBoolean()?"TRUE":"FALSE");
+				sdpServiceAddAttribute(handle, handleType, id, BOOLEAN_DESC_TYPE, d.getBoolean()?"TRUE":"FALSE");
 				break;
 			case DataElement.UUID:
-				rfServerAddAttribute(handle, id, UUID_DESC_TYPE, ((UUID)d.getValue()).toString());
+				sdpServiceAddAttribute(handle, handleType, id, UUID_DESC_TYPE, ((UUID)d.getValue()).toString());
 				break;
 			case DataElement.DATSEQ:
 			case DataElement.DATALT:
@@ -630,7 +634,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long, com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
 	public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
-
+		sdpServiceUpdateServiceRecord(handle, 'l', serviceRecord);
 	}
 
 	/* (non-Javadoc)

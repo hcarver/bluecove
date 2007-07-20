@@ -484,17 +484,16 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Send
 	}
 	jbyte *bytes = env->GetByteArrayElements(data, 0);
 	UINT16 len = (UINT16)env->GetArrayLength(data);
-	UINT16 done = 0;
 
-	while ((done < len) && l2c->isConnected) {
-		UINT16 written = 0;
-		BOOL rc = l2c->Write((void*)(bytes + done), (UINT16)(len - done), &written);
-		if (!rc) {
-			env->ReleaseByteArrayElements(data, bytes, 0);
-			throwIOException(env, "Failed to write");
-			return;
-		}
-		done += written;
+	UINT16 written = 0;
+	BOOL rc = l2c->Write((void*)bytes, (UINT16)len, &written);
+	if (!rc) {
+		env->ReleaseByteArrayElements(data, bytes, 0);
+		throwIOException(env, "Failed to write");
+		return;
+	}
+	if (written < len) {
+		throwIOExceptionExt(env, "Failed to write all data, send %i from %i", written, len);
 	}
 
 	env->ReleaseByteArrayElements(data, bytes, 0);

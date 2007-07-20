@@ -1587,10 +1587,24 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	SetEvent(rf->hConnectionEvent);
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerAddAttribute
-(JNIEnv *env, jobject, jlong handle, jint attrID, jshort attrType, jcharArray value) {
-	WIDCOMMStackRfCommPortServer* rf = (WIDCOMMStackRfCommPortServer*)validRfCommHandle(env, handle);
-	if (rf == NULL) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpServiceAddAttribute
+(JNIEnv *env, jobject, jlong handle, jchar handleType, jint attrID, jshort attrType, jcharArray value) {
+	CSdpService* sdpService;
+	if (handleType == 'r') {
+	    WIDCOMMStackRfCommPortServer* rf = (WIDCOMMStackRfCommPortServer*)validRfCommHandle(env, handle);
+	    if (rf == NULL) {
+		    return;
+	    }
+	    sdpService = rf->sdpService;
+    } else if (handleType == 'l') {
+	    WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
+	    if (l2c == NULL) {
+		    return;
+	    }
+	    sdpService = l2c->sdpService;
+	}
+	if (sdpService == NULL) {
+	    throwIOException(env, "closed connection");
 		return;
 	}
 
@@ -1606,7 +1620,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerAd
 
 	env->ReleaseCharArrayElements(value, chars, 0);
 
-	if (rf->sdpService->AddAttribute((UINT16)attrID, (UINT8)attrType, attr_len, p_val) != SDP_OK) {
+	if (sdpService->AddAttribute((UINT16)attrID, (UINT8)attrType, attr_len, p_val) != SDP_OK) {
 		throwExceptionExt(env, "javax/bluetooth/ServiceRegistrationException", "Failed to AddAttribute %i", attrID);
 	} else {
 		debug4("attr set %i type=%i len=%i [%s]", attrID, attrType, attr_len, p_val);
