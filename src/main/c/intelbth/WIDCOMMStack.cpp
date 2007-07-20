@@ -1604,7 +1604,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
 	    sdpService = l2c->sdpService;
 	}
 	if (sdpService == NULL) {
-	    throwIOException(env, "closed connection");
+		throwException(env, "javax/bluetooth/ServiceRegistrationException", "closed connection");
 		return;
 	}
 
