@@ -22,15 +22,13 @@ package com.intel.bluetooth;
 
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 /**
  * Test FIFO buffer implemented in C++.
  * 
  * @author vlads
  *
  */
-public class ReceiveBufferTest extends TestCase {
+public class ReceiveBufferTest extends NativeTestCase {
 	
 	final static int TEST_BUFFER_SIZE = 4 * 2 * 10;
 	
@@ -40,7 +38,6 @@ public class ReceiveBufferTest extends TestCase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		System.getProperties().put("bluecove.native.path", "./src/main/resources");
 		bufferHandler = BluetoothPeer.testReceiveBufferCreate(TEST_BUFFER_SIZE);
 	}
 	

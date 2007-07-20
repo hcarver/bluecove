@@ -22,30 +22,30 @@ package com.intel.bluetooth;
 
 import java.io.IOException;
 
+import javax.bluetooth.BluetoothConnectionException;
 import javax.bluetooth.BluetoothStateException;
 
-import junit.framework.TestCase;
+import junit.framework.AssertionFailedError;
 
 /**
  * @author vlads
  *
  */
-public class NativeExceptionTest extends TestCase {
+public class NativeExceptionTest extends NativeTestCase {
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		
-		//System.getProperties().put("bluecove.debug", "true");
-		//System.getProperties().put("bluecove.native.path", "./src/main/resources");
-	}
-	
 	private void verify(int ntype, Throwable e) {
 		try {
 			BluetoothPeer.testThrowException(ntype);
-			 fail("Should raise an Exception" + e); 
+			 fail("Should raise an Exception " + e); 
 		} catch (Throwable t) {
+			if (t instanceof AssertionFailedError) {
+				throw (AssertionFailedError)t;
+			}
 			assertEquals("Exception class", e.getClass().getName(), t.getClass().getName());
 			assertEquals("Exception message", e.getMessage(), t.getMessage());
+			if (t instanceof BluetoothConnectionException ) {
+				assertEquals("Exception getStatus", ((BluetoothConnectionException)e).getStatus(), ((BluetoothConnectionException)t).getStatus());	
+			}
 		}
 	}
 	
@@ -57,5 +57,12 @@ public class NativeExceptionTest extends TestCase {
 		verify(4, new BluetoothStateException("4"));
 		verify(5, new BluetoothStateException("5[str]"));
 		verify(6, new RuntimeException("6"));
+		verify(7, new BluetoothConnectionException(1, "7"));
+		verify(8, new BluetoothConnectionException(2, "8[str]"));
+	}
+	
+	public void testThrowTwoExceptions() {
+		//	Throw Exception two times in a row. Second Exception ignored
+		verify(22, new Exception("22.1"));
 	}
 }

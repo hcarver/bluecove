@@ -63,7 +63,7 @@ public class UtilsJavaSE {
 				try {
 					Class.forName("java.lang.StackTraceElement");
 					java14 = true;
-					DebugLog.debug("Java 1.4 detected");
+					DebugLog.debug("Java 1.4+ detected");
 				} catch (ClassNotFoundException e) {
 					java13 = true;
 					return null;

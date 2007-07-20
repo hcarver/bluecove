@@ -22,18 +22,8 @@ package com.intel.bluetooth;
 
 import javax.bluetooth.UUID;
 
-import junit.framework.TestCase;
+public class ConversionTest extends NativeTestCase {
 
-public class ConversionTest extends TestCase {
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		
-		System.getProperties().put("bluecove.debug", "true");
-		BlueCoveImpl.instance().enableNativeDebug(true);
-		//System.getProperties().put("bluecove.native.path", "./src/main/resources");
-	}
-	
 	private void verifyUUID(final String uuidString) {
 		UUID uuid = new UUID(uuidString, false);
 		byte[] uuidValue = BluetoothPeer.testUUIDConversion(Utils.UUIDToByteArray(uuid));

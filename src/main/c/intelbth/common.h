@@ -173,6 +173,16 @@ void throwBluetoothStateException(JNIEnv *env, const char *msg);
 
 void throwBluetoothStateExceptionExt(JNIEnv *env, const char *fmt, ...);
 
+#define BT_CONNECTION_ERROR_UNKNOWN_PSM  1
+#define BT_CONNECTION_ERROR_SECURITY_BLOCK 2 
+#define BT_CONNECTION_ERROR_NO_RESOURCES 3
+#define BT_CONNECTION_ERROR_FAILED_NOINFO 4
+#define BT_CONNECTION_ERROR_TIMEOUT 5
+#define BT_CONNECTION_ERROR_UNACCEPTABLE_PARAMS 6
+
+void throwBluetoothConnectionException(JNIEnv *env, int error, const char *msg);
+
+void throwBluetoothConnectionExceptionExt(JNIEnv *env, int error, const char *fmt, ...);
 
 void throwRuntimeException(JNIEnv *env, const char *msg);
 #define _throwRuntimeException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwRuntimeException(env, msg); }

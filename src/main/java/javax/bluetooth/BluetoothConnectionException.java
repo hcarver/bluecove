@@ -104,8 +104,9 @@ public class BluetoothConnectionException extends IOException {
 	 */
 	public BluetoothConnectionException(int error) {
 		super();
-		if(error < 1 || error > 6) 
+		if(error < 1 || error > 6) {
 			throw new java.lang.IllegalArgumentException();
+		}
 		errorCode = error;			
 	}
 	
@@ -119,11 +120,11 @@ public class BluetoothConnectionException extends IOException {
 	 * @throws java.lang.IllegalArgumentException  if the input value 
 	 * 					is not one of the constants in this class
 	 */
-	public BluetoothConnectionException(int error,
-									java.lang.String msg){
+	public BluetoothConnectionException(int error, String msg){
 		super(msg);
-		if(error < 1 || error > 6) 
+		if (error < 1 || error > 6) {
 			throw new java.lang.IllegalArgumentException();
+		}
 		errorCode = error;
 	}
 	/**

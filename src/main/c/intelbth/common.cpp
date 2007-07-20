@@ -31,6 +31,7 @@ static jmethodID nativeDebugMethod = NULL;
 
 static const char* cIOException = "java/io/IOException";
 static const char* cBluetoothStateException = "javax/bluetooth/BluetoothStateException";
+static const char* cBluetoothConnectionException = "javax/bluetooth/BluetoothConnectionException";
 
 jint blueCoveVersion() {
 	return BLUECOVE_VERSION;
@@ -42,6 +43,9 @@ BOOL isDebugOn() {
 
 void enableNativeDebug(JNIEnv *env, jobject loggerClass, jboolean on) {
 	if (on) {
+		if (nativeDebugCallback) {
+			return;
+		}
 		nativeDebugListenerClass = (jclass)env->NewGlobalRef(loggerClass);
 		if (nativeDebugListenerClass != NULL) {
 			nativeDebugMethod = env->GetStaticMethodID(nativeDebugListenerClass, "nativeDebugCallback", "(Ljava/lang/String;ILjava/lang/String;)V");
@@ -80,16 +84,19 @@ void throwException(JNIEnv *env, const char *name, const char *msg) {
 	if (env == NULL) {
 		return;
 	}
-	//debugss("Throw Exception %s %s", name, msg);
-	 jclass cls = env->FindClass(name);
-     /* if cls is NULL, an exception has already been thrown */
-     if (cls != NULL) {
-         env->ThrowNew(cls, msg);
-	 } else {
-	     debug1("Can't find Exception %s", name);
-		 env->FatalError("Illegal Exception name");
-	 }
-     /* free the local ref */
+	if (ExceptionCheckCompatible(env)) {
+		debugss("ERROR: can't throw second exception %s(%s)", name, msg);
+		return;
+	}
+	jclass cls = env->FindClass(name);
+    /* if cls is NULL, an exception has already been thrown */
+    if (cls != NULL) {
+        env->ThrowNew(cls, msg);
+	} else {
+	    debug1("Can't find Exception %s", name);
+		env->FatalError(name);
+	}
+    /* free the local ref */
     env->DeleteLocalRef(cls);
 }
 
@@ -128,6 +135,44 @@ void throwBluetoothStateExceptionExt(JNIEnv *env, const char *fmt, ...) {
 	va_end(ap);
 }
 
+void throwBluetoothConnectionException(JNIEnv *env, int error, const char *msg) {
+	if (env == NULL) {
+		return;
+	}
+	if (ExceptionCheckCompatible(env)) {
+		debugss("ERROR: can't throw second exception %s(%s)", cBluetoothConnectionException, msg);
+		return;
+	}
+	jclass cls = env->FindClass(cBluetoothConnectionException);
+    /* if cls is NULL, an exception has already been thrown */
+    if (cls != NULL) {
+		jmethodID methodID = env->GetMethodID(cls, "<init>", "(ILjava/lang/String;)V");
+		if (methodID == NULL) {
+			env->FatalError("Fail to get constructor for Exception");
+		} else {
+			jstring excMessage = env->NewStringUTF(msg);
+			jthrowable obj = (jthrowable)env->NewObject(cls, methodID, error, excMessage);
+			if (obj != NULL) {
+				env->Throw(obj);
+			} else {
+				env->FatalError("Fail to create new Exception");
+			}
+		}
+	} else {
+		env->FatalError(cBluetoothConnectionException);
+	}
+    /* free the local ref */
+    env->DeleteLocalRef(cls);
+}
+
+void throwBluetoothConnectionExceptionExt(JNIEnv *env, int error, const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	char msg[1064];
+	_vsnprintf_s(msg, 1064, fmt, ap);
+	throwBluetoothConnectionException(env, error, msg);
+	va_end(ap);
+}
 
 void throwRuntimeException(JNIEnv *env, const char *msg) {
 	throwException(env, "java/lang/RuntimeException", msg);

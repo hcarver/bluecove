@@ -121,6 +121,14 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_testThrowException
 	    case 4: throwBluetoothStateException(env, "4"); break;
 		case 5: throwBluetoothStateExceptionExt(env, "5[%s]", "str"); break;
 		case 6: throwRuntimeException(env, "6"); break;
+		case 7: throwBluetoothConnectionException(env, 1, "7"); break;
+		case 8: throwBluetoothConnectionExceptionExt(env, 2, "8[%s]", "str"); break;
+
+		case 22:
+			// Throw Exception two times in a row. Second Exception ignored
+			throwException(env, "java/lang/Exception", "22.1");
+			throwIOException(env, "22.2");
+			break;
 	}
 }
 
