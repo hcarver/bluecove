@@ -31,7 +31,7 @@ import javax.bluetooth.RemoteDevice;
  */
 public abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothConnectionAccess {
 
-	protected long handle;
+	protected volatile long handle;
 	
 	protected int securityOpt;
 	
@@ -115,8 +115,12 @@ public abstract class BluetoothL2CAPConnection implements L2CAPConnection, Bluet
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {
-		closing = true;
-		closeConnectionHandle(handle);
+		if (!closing) {
+			closing = true;
+			long h = handle;
+			handle = 0;
+			closeConnectionHandle(h);
+		}
 	}
 	
 	protected void finalize() {

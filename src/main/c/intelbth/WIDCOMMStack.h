@@ -192,6 +192,7 @@ WIDCOMMStackL2CapConn* validL2CapConnHandle(JNIEnv *env, jlong handle) ;
 class WIDCOMMStackL2CapConn : public CL2CapConn, public PoolableObject {
 public:
 	BOOL isConnected;
+	BOOL isClientOpen;
 
 	GUID service_guid;
 	BT_CHAR service_name[BT_MAX_SERVICE_NAME_LEN + 1];

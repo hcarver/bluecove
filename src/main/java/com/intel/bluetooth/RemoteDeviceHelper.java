@@ -61,7 +61,7 @@ public abstract class RemoteDeviceHelper {
 				connections = new Vector();
 			}
 			connections.addElement(connection);
-			DebugLog.debug("connection open", connections.size());
+			DebugLog.debug("connection open, open now", connections.size());
 		}
 		
 		private void removeConnection(Object connection) {
@@ -69,7 +69,7 @@ public abstract class RemoteDeviceHelper {
 				return;
 			}
 			connections.removeElement(connection);
-			DebugLog.debug("connection closed", connections.size());
+			DebugLog.debug("connection closed, open now", connections.size());
 		}
 		
 		private void setStackAttributes(Object key, Object value) {

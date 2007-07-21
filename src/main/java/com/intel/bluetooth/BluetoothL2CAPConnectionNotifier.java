@@ -36,7 +36,7 @@ import javax.bluetooth.ServiceRegistrationException;
  */
 public class BluetoothL2CAPConnectionNotifier implements L2CAPConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
 
-	private long handle;
+	private volatile long handle;
 
 	private int psm = -1;
 	
@@ -108,7 +108,9 @@ public class BluetoothL2CAPConnectionNotifier implements L2CAPConnectionNotifier
 		if (!closed) {
 			closed = true;
 			ServiceRecordsRegistry.unregister(serviceRecord);
-			BlueCoveImpl.instance().getBluetoothStack().l2ServerClose(handle, serviceRecord);
+			long h = handle;
+			handle = 0;
+			BlueCoveImpl.instance().getBluetoothStack().l2ServerClose(h, serviceRecord);
 		}
 	}
 

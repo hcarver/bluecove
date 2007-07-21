@@ -14,15 +14,19 @@ JSR 82 Technology Compatibility Kit
 
 * BlueCove Tests on windows
 
-    Since security, OBEX and L2CAP connection are not implemented yet this tests has been exclused from run to save time.
+    Since security and OBEX are not implemented yet this tests has been excluded from run to save time.
 
-    Latest test reports can be found {{{Bluetooth_1-1_005_TCK/}here}}.
+    L2CAP connection can't be implemented on Microsoft stack this tests has been excluded from run to save time.
+
+    Latest test reports for Bluetooth_1-1_005_TCK can be found {{{Bluetooth_1-1_005_TCK/}here}}.
 
     To run TCK we are using:
 
     * {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.gatling}Gatling}} v1.0.02 test harness
 
     * {{{http://www.microemu.org/}MicroEmulator}} v2.0.2-SNAPSHOT as MIDP container.
+
+    * BlueCove on WIDCOMM stack as TCK agent
 
     * Cellphone Nokia 6265i or Sony Ericson K790a as TCK agent (RFCOMM only)
 

@@ -29,6 +29,7 @@
 
 WIDCOMMStackL2CapConn::WIDCOMMStackL2CapConn() {
 	isConnected = FALSE;
+	isClientOpen = FALSE;
 	incomingConnectionCount = 0;
 	sdpService = NULL;
 	
@@ -66,20 +67,25 @@ void WIDCOMMStackL2CapConn::OnConnected() {
 }
 
 void WIDCOMMStackL2CapConn::closeConnection(JNIEnv *env) {
-	isConnected = FALSE;
+	debugs("closeConnection handle %i", internalHandle);
 	Disconnect();
 	if (sdpService != NULL) {
 		delete sdpService;
 		sdpService = NULL;
 	}
+	isConnected = FALSE;
 	l2CapIf.Deregister();
 	SetEvent(hConnectionEvent);
 }
 
 void WIDCOMMStackL2CapConn::closeServerConnection(JNIEnv *env) {
-	isConnected = FALSE;
-	Disconnect();
-	SetEvent(hConnectionEvent);
+	debugs("closeServerConnection handle %i", internalHandle);
+	if (isClientOpen) {
+		Disconnect();
+		isConnected = FALSE;
+		isClientOpen = FALSE;
+		SetEvent(hConnectionEvent);
+	}
 }
 
 void WIDCOMMStackL2CapConn::OnIncomingConnection() {
@@ -311,6 +317,24 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 		throwIOException(env, "Connection closed");
 		return 0;
 	}
+	if (l2c->isClientOpen) {
+		debug("L2CAP server waits for client prev connection to close");
+		while ((stack != NULL) && (l2c->isClientOpen) && (l2c->sdpService != NULL)) {
+			DWORD  rc = WaitForSingleObject(l2c->hConnectionEvent, 500);
+			if (rc == WAIT_FAILED) {
+				throwRuntimeException(env, "WaitForSingleObject");
+				return 0;
+			}
+		}
+		if ((stack == NULL) || (l2c->sdpService == NULL)) {
+			throwIOException(env, "Connection closed");
+			return 0;
+		}
+	}
+
+	l2c->isConnected = FALSE;
+	l2c->receiveBuffer.reset();
+
 	BOOL rc = l2c->Listen(&(l2c->l2CapIf));
 	if (!rc) {
 		throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to Listen");
@@ -335,6 +359,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 	}
 
 	debug("L2CAP server connection made");
+	l2c->isClientOpen = TRUE;
 	return l2c->internalHandle;
 }
 

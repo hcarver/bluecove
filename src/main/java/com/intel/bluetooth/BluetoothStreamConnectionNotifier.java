@@ -32,7 +32,7 @@ import javax.microedition.io.StreamConnectionNotifier;
 
 public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
 
-	private long handle;
+	private volatile long handle;
 
 	private int rfcommChannel = -1;
 
@@ -82,7 +82,9 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 			ServiceRecordsRegistry.unregister(serviceRecord);
 			closing = true;
 			try {
-				BlueCoveImpl.instance().getBluetoothStack().rfServerClose(handle, serviceRecord);
+				long h = handle;
+				handle = 0;
+				BlueCoveImpl.instance().getBluetoothStack().rfServerClose(h, serviceRecord);
 				closed = true;
 			} finally {
 				closing = false;
