@@ -198,7 +198,7 @@ public:
 	BT_CHAR service_name[BT_MAX_SERVICE_NAME_LEN + 1];
 	CSdpService* sdpService;
 
-	UINT16 mtu;
+	UINT16 receiveMTU;
 	long incomingConnectionCount;
 
 	CL2CapIf l2CapIf;

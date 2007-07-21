@@ -91,7 +91,7 @@ void WIDCOMMStackL2CapConn::closeServerConnection(JNIEnv *env) {
 
 void WIDCOMMStackL2CapConn::OnIncomingConnection() {
 	incomingConnectionCount ++; 
-	Accept(mtu);
+	Accept(receiveMTU);
 }
 
 void WIDCOMMStackL2CapConn::OnDataReceived(void *p_data, UINT16 length) {
@@ -125,7 +125,7 @@ void open_l2client_finally(WIDCOMMStackL2CapConn* l2c) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenClientConnectionImpl
-(JNIEnv *env, jobject, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint mtu) { 
+(JNIEnv *env, jobject, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint receiveMTU) { 
 	BD_ADDR bda;
 	LongToBcAddr(address, bda);
 
@@ -178,8 +178,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
         }
 
 		//debug("OpenL2CAPClient");
-		l2c->mtu = (UINT16)mtu;
-		BOOL rc = l2c->Connect(l2CapIf, bda, l2c->mtu);
+		l2c->receiveMTU = (UINT16)receiveMTU;
+		BOOL rc = l2c->Connect(l2CapIf, bda, l2c->receiveMTU);
 		if (!rc) {
 			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to Connect");
 			open_l2client_return 0;
@@ -190,7 +190,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 		while ((stack != NULL) && (!l2c->isConnected)) {
 			DWORD  rc = WaitForSingleObject(l2c->hConnectionEvent, 500);
 			if (rc == WAIT_FAILED) {
-				throwRuntimeException(env, "WaitForSingleObject");
+				_throwRuntimeException(env, "WaitForSingleObject");
 				open_l2client_return 0;
 			}
 			if ((GetTickCount() - waitStart)  > COMMPORTS_CONNECT_TIMEOUT) {
@@ -223,7 +223,7 @@ void open_l2server_finally(JNIEnv *env, WIDCOMMStackL2CapConn* l2c) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerOpenImpl
-(JNIEnv *env, jobject, jbyteArray uuidValue, jboolean authenticate, jboolean encrypt, jstring name, jint mtu) {
+(JNIEnv *env, jobject, jbyteArray uuidValue, jboolean authenticate, jboolean encrypt, jstring name, jint receiveMTU) {
 	if (stack == NULL) {
 		throwIOException(env, "Stack closed");
 		return 0;
@@ -238,10 +238,10 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerO
 		}
 		debugs("L2CapConn server handle %i", l2c->internalHandle);
 		if ((l2c->hConnectionEvent == NULL) || (l2c->hDataReceivedEvent == NULL)) {
-			throwRuntimeException(env, "fails to CreateEvent");
+			_throwRuntimeException(env, "fails to CreateEvent");
 			open_l2client_return 0;
 		}
-		l2c->mtu = (UINT16)mtu;
+		l2c->receiveMTU = (UINT16)receiveMTU;
 
 		jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
 		convertUUIDBytesToGUID(bytes, &(l2c->service_guid));
@@ -270,23 +270,23 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerO
 		CSdpService *sdpService = new CSdpService();
 		l2c->sdpService = sdpService;
 		if (sdpService->AddServiceClassIdList(1, &(l2c->service_guid)) != SDP_OK) {
-			throwIOException(env, "Error AddServiceClassIdList");
+			_throwIOException(env, "Error AddServiceClassIdList");
 			open_l2server_return 0;
 		}
 		if (sdpService->AddServiceName(l2c->service_name) != SDP_OK) {
-			throwIOException(env, "Error AddServiceName");
+			_throwIOException(env, "Error AddServiceName");
 			open_l2server_return 0;
 		}
 		if (sdpService->AddL2CapProtocolDescriptor(l2CapIf->GetPsm()) != SDP_OK) {
-			throwIOException(env, "Error AddL2CapProtocolDescriptor");
+			_throwIOException(env, "Error AddL2CapProtocolDescriptor");
 			open_l2server_return 0;
 		}
 		if (sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, service_name_len, (UINT8*)l2c->service_name) != SDP_OK) {
-			throwIOException(env, "Error AddAttribute ServiceName");
+			_throwIOException(env, "Error AddAttribute ServiceName");
 			open_l2server_return 0;
 		}
 		if (sdpService->MakePublicBrowseable() != SDP_OK) {
-			throwIOException(env, "Error MakePublicBrowseable");
+			_throwIOException(env, "Error MakePublicBrowseable");
 			open_l2server_return 0;
 		}
 
@@ -315,7 +315,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 		return 0;
 	}
 	if (l2c->sdpService == NULL) {
-		throwIOException(env, "Connection closed");
+		_throwIOException(env, "Connection closed");
 		return 0;
 	}
 	if (l2c->isClientOpen) {
@@ -323,12 +323,12 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 		while ((stack != NULL) && (l2c->isClientOpen) && (l2c->sdpService != NULL)) {
 			DWORD  rc = WaitForSingleObject(l2c->hConnectionEvent, 500);
 			if (rc == WAIT_FAILED) {
-				throwRuntimeException(env, "WaitForSingleObject");
+				_throwRuntimeException(env, "WaitForSingleObject");
 				return 0;
 			}
 		}
 		if ((stack == NULL) || (l2c->sdpService == NULL)) {
-			throwIOException(env, "Connection closed");
+			_throwIOException(env, "Connection closed");
 			return 0;
 		}
 	}
@@ -346,7 +346,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 	while ((stack != NULL) && (!l2c->isConnected) && (l2c->sdpService != NULL)) {
 		DWORD  rc = WaitForSingleObject(l2c->hConnectionEvent, 500);
 		if (rc == WAIT_FAILED) {
-			throwRuntimeException(env, "WaitForSingleObject");
+			_throwRuntimeException(env, "WaitForSingleObject");
 			return 0;
 		}
 		if ((stack != NULL) && (incomingConnectionCountWas != l2c->incomingConnectionCount)) {
@@ -355,7 +355,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 		}
 	}
 	if ((stack == NULL) || (l2c->sdpService == NULL)) {
-		throwIOException(env, "Connection closed");
+		_throwIOException(env, "Connection closed");
 		return 0;
 	}
 
@@ -395,13 +395,26 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2CloseSer
 	l2c->closeServerConnection(env);
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2GetMTUImpl
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2GetReceiveMTU
 (JNIEnv *env, jobject, jlong handle) {
 	WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
 	if (l2c == NULL) {
 		return 0;
 	}
-	return l2c->mtu;
+	return l2c->receiveMTU;
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2GetTransmitMTU
+(JNIEnv *env, jobject, jlong handle) {
+	WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
+	if (l2c == NULL) {
+		return 0;
+	}
+	#ifdef _WIN32_WCE
+		return l2c->GetRemoteMtu();
+	#else // _WIN32_WCE
+		return l2c->m_RemoteMtu;
+    #endif // #else // _WIN32_WCE
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2RemoteAddress
@@ -411,7 +424,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2RemoteA
 		return 0;
 	}
 	if (!l2c->isConnected ) {
-		throwIOException(env, "connection is closed");
+		_throwIOException(env, "connection is closed");
 		return 0;
 	}
 	#ifdef _WIN32_WCE
@@ -429,11 +442,15 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Read
 	if (l2c == NULL) {
 		return JNI_FALSE;
 	}
-	if (!l2c->isConnected ) {
-		throwIOException(env, "connection is closed");
+	if (l2c->receiveBuffer.available() > sizeof(UINT16)) {
+		return JNI_TRUE;
+	}
+	if (!l2c->isConnected) {
+		debug("->l2Ready()");
+		_throwIOException(env, "connection is closed");
 		return JNI_FALSE;
 	}
-	return (l2c->receiveBuffer.available() > sizeof(UINT16));
+	return JNI_FALSE;
 }
 
 
@@ -444,12 +461,12 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 	if (l2c == NULL) {
 		return 0;
 	}
-	if (!l2c->isConnected ) {
-		throwIOException(env, "Failed to read from closed connection");
+	if ((!l2c->isConnected ) && (l2c->receiveBuffer.available() < sizeof(UINT16))) {
+		_throwIOException(env, "Failed to read from closed connection");
 		return 0;
 	}
 	if (l2c->receiveBuffer.isOverflown()) {
-		throwIOException(env, "Receive buffer overflown");
+		_throwIOException(env, "Receive buffer overflown");
 		return 0;
 	}
 	
@@ -463,25 +480,25 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 		debug("receive[] waits for data");
 		DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 		if (rc == WAIT_FAILED) {
-			throwRuntimeException(env, "WaitForMultipleObjects");
+			_throwRuntimeException(env, "WaitForMultipleObjects");
 			return 0;
 		}
-		debug1("receive waits returns %s", waitResultsString(rc));
+		debug1("receive[] waits returns %s", waitResultsString(rc));
 	}
-	if ((stack == NULL) || (!l2c->isConnected)) {
-		throwIOException(env, "Connection closed");
+	if ((stack == NULL) || ((!l2c->isConnected) && (l2c->receiveBuffer.available() <= paketLengthSize)) ) {
+		_throwIOException(env, "Connection closed");
 		return 0;
 	}
 
 	int count = l2c->receiveBuffer.available();
 	if (count < paketLengthSize) {
-		throwIOException(env, "Receive buffer corrupted (1)");
+		_throwIOException(env, "Receive buffer corrupted (1)");
 		return 0;
 	}
 	UINT16 paketLength = 0;
 	int done = l2c->receiveBuffer.read(&paketLength, paketLengthSize);
 	if ((done != paketLengthSize) || (paketLength > (count - paketLengthSize))) {
-		throwIOException(env, "Receive buffer corrupted (2)");
+		_throwIOException(env, "Receive buffer corrupted (2)");
 		return 0;
 	}
 	if (paketLength == 0) {
@@ -497,17 +514,18 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 	}
 	done = l2c->receiveBuffer.read(bytes, readLen);
 	if (done != readLen) {
-		throwIOException(env, "Receive buffer corrupted (3)");
+		_throwIOException(env, "Receive buffer corrupted (3)");
 	}
 	if (done < paketLength) {
 		// the rest will be discarded. 
 		int skip = paketLength - done;
 		if (skip != l2c->receiveBuffer.skip(skip)) {
-			throwIOException(env, "Receive buffer corrupted (4)");
+			_throwIOException(env, "Receive buffer corrupted (4)");
 		}
 	}
 
 	env->ReleaseByteArrayElements(inBuf, bytes, 0);
+	debug1("receive[] returns %i", done);
 	return done;
 }
 
@@ -519,20 +537,32 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Send
 		return;
 	}
 	if (!l2c->isConnected ) {
-		throwIOException(env, "Failed to write to closed connection");
+		_throwIOException(env, "Failed to write to closed connection");
 		return;
 	}
 	jbyte *bytes = env->GetByteArrayElements(data, 0);
 	UINT16 len = (UINT16)env->GetArrayLength(data);
 
+	UINT16 transmitMTU;
+	#ifdef _WIN32_WCE
+		transmitMTU =  l2c->GetRemoteMtu();
+	#else // _WIN32_WCE
+		transmitMTU = l2c->m_RemoteMtu;
+    #endif // #else // _WIN32_WCE
+		
+	if (len > transmitMTU) {
+		len = transmitMTU;
+	}
+
 	UINT16 written = 0;
 	BOOL rc = l2c->Write((void*)bytes, (UINT16)len, &written);
 	if (!rc) {
 		env->ReleaseByteArrayElements(data, bytes, 0);
-		throwIOException(env, "Failed to write");
+		_throwIOException(env, "Failed to write");
 		return;
 	}
 	if (written < len) {
+		debug("throw");
 		throwIOExceptionExt(env, "Failed to write all data, send %i from %i", written, len);
 	}
 

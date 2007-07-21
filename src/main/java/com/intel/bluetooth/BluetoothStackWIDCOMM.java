@@ -579,30 +579,31 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 // ---------------------- Client and Server L2CAP connections ----------------------
 
-	private int selectMTU(int receiveMTU, int transmitMTU) {
+	private void validateMTU(int receiveMTU, int transmitMTU) {
 		if (receiveMTU > RECEIVE_MTU_MAX) {
 			throw new IllegalArgumentException("invalid ReceiveMTU value " + receiveMTU);
 		}
 //		if (transmitMTU > RECEIVE_MTU_MAX) {
 //			throw new IllegalArgumentException("invalid TransmitMTU value " + transmitMTU);
 //		}
-		int min = L2CAPConnection.DEFAULT_MTU;
-		if ((receiveMTU > L2CAPConnection.MINIMUM_MTU) && (receiveMTU < min)) {
-			min = receiveMTU;
-		}
-		if ((transmitMTU > L2CAPConnection.MINIMUM_MTU) && (transmitMTU < min)) {
-			min = transmitMTU;
-		}
-		return min;
+//		int min = L2CAPConnection.DEFAULT_MTU;
+//		if ((receiveMTU > L2CAPConnection.MINIMUM_MTU) && (receiveMTU < min)) {
+//			min = receiveMTU;
+//		}
+//		if ((transmitMTU > L2CAPConnection.MINIMUM_MTU) && (transmitMTU < min)) {
+//			min = transmitMTU;
+//		}
+//		return min;
 	}
 
-	private native long l2OpenClientConnectionImpl(long address, int channel, boolean authenticate, boolean encrypt, int mtu) throws IOException;
+	private native long l2OpenClientConnectionImpl(long address, int channel, boolean authenticate, boolean encrypt, int receiveMTU) throws IOException;
 
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams, int, int)
 	 */
 	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
-		return l2OpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt, selectMTU(receiveMTU, transmitMTU));
+		validateMTU(receiveMTU, transmitMTU);
+		return l2OpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt, receiveMTU);
 	}
 
 	/* (non-Javadoc)
@@ -610,7 +611,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	 */
 	public native void l2CloseClientConnection(long handle) throws IOException;
 
-	private native long l2ServerOpenImpl(byte[] uuidValue, boolean authenticate, boolean encrypt, String name, int mtu) throws IOException;
+	private native long l2ServerOpenImpl(byte[] uuidValue, boolean authenticate, boolean encrypt, String name, int receiveMTU) throws IOException;
 
 	public native int l2ServerPSM(long handle) throws IOException;
 	
@@ -618,8 +619,9 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams, int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
+		validateMTU(receiveMTU, transmitMTU);
 		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
-		long handle = l2ServerOpenImpl(uuidValue, params.authenticate, params.encrypt, params.name, selectMTU(receiveMTU, transmitMTU));
+		long handle = l2ServerOpenImpl(uuidValue, params.authenticate, params.encrypt, params.name, receiveMTU);
 		
 		int channel = l2ServerPSM(handle);
 		
@@ -654,21 +656,15 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 		l2CloseClientConnection(handle);
 	}
 
-	private native int l2GetMTUImpl(long handle) throws IOException;
-
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetReceiveMTU(long)
 	 */
-	public int l2GetReceiveMTU(long handle) throws IOException {
-		return l2GetMTUImpl(handle);
-	}
+	public native int l2GetReceiveMTU(long handle) throws IOException;
 
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetTransmitMTU(long)
 	 */
-	public int l2GetTransmitMTU(long handle) throws IOException {
-		return l2GetMTUImpl(handle);
-	}
+	public native int l2GetTransmitMTU(long handle) throws IOException;
 
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
