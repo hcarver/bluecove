@@ -20,6 +20,8 @@
  */
 package com.intel.bluetooth;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -90,7 +92,7 @@ public class DebugLog {
 	
 	public static void debug(String message) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println(message);
+			log(message, null, null);
 			printLocation();
 			callAppenders(DEBUG, message, null);
 		}
@@ -98,7 +100,7 @@ public class DebugLog {
 	
 	public static void debug(String message, String v) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println(message + " " + v);
+			log(message, " ", v);
 			printLocation();
 			callAppenders(DEBUG, message + " " + v, null);
 		}
@@ -106,7 +108,7 @@ public class DebugLog {
 
 	public static void debug(String message, Throwable t) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println(message + " " + t);
+			log(message, " ", t.toString());
 			printLocation();
 			// I have the reson not to make this as function.
 			if (!UtilsJavaSE.javaSECompiledOut) {
@@ -124,7 +126,7 @@ public class DebugLog {
 	
 	public static void debug(String message, Object obj) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println(message + " " + obj.toString());
+			log(message, " ", obj.toString());
 			printLocation();
 			callAppenders(DEBUG, message + " " + obj.toString(), null);
 		}
@@ -132,7 +134,7 @@ public class DebugLog {
 	
 	public static void debug(String message, String v, String v2) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println(message + " " + v + " " + v2);
+			log(message, " ", v + " " + v2);
 			printLocation();
 			callAppenders(DEBUG, message + " " + v + " " + v2, null);
 		}
@@ -140,7 +142,7 @@ public class DebugLog {
 	
 	public static void debug(String message, long v) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println(message + " " + String.valueOf(v));
+			log(message, " ", String.valueOf(v));
 			printLocation();
 			callAppenders(DEBUG, message + " " + String.valueOf(v), null);
 		}
@@ -148,7 +150,7 @@ public class DebugLog {
 
 	public static void debug0x(String message, long v) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println(message + " 0x" + Utils.toHexString(v));
+			log(message, " 0x", Utils.toHexString(v));
 			printLocation();
 			callAppenders(DEBUG, message + " 0x" + Utils.toHexString(v), null);
 		}
@@ -156,7 +158,7 @@ public class DebugLog {
 	
 	public static void debug(String message, boolean v) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println(message + " " + v);
+			log(message, " ", String.valueOf(v));
 			printLocation();
 			callAppenders(DEBUG, message + " " + v, null);
 		}
@@ -179,15 +181,14 @@ public class DebugLog {
 	
 	public static void debugNative(String location, String message) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println(message);
-			System.out.println("\t  " + location);
+			log(message, "\n\t  ", location);
 			callAppenders(DEBUG, message, null);
 		}
 	}
 	
 	public static void error(String message) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println("error " + message);
+			log("error ", message, null);
 			printLocation();
 			callAppenders(ERROR, message, null);
 		}
@@ -195,7 +196,7 @@ public class DebugLog {
 	
 	public static void error(String message, long v) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println("error " + message + " " + v);
+			log("error ", message, " " + v);
 			printLocation();
 			callAppenders(ERROR, message + " " + v, null);
 		}
@@ -203,7 +204,7 @@ public class DebugLog {
 	
 	public static void error(String message, String v) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println("error " + message + " " + v);
+			log("error ", message,  " " + v);
 			printLocation();
 			callAppenders(ERROR, message + " " + v, null);
 		}
@@ -211,7 +212,7 @@ public class DebugLog {
 	
 	public static void error(String message, Throwable t) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			System.out.println("error " + message + " " + t);
+			log("error ", message, " " + t);
 			printLocation();
 			// I have the reson not to make this as function.
 			if (!UtilsJavaSE.javaSECompiledOut) {
@@ -229,13 +230,13 @@ public class DebugLog {
 	}
 
 	public static void fatal(String message) {
-		System.out.println("error " + message);
+		log("error ", message, null);
 		printLocation();
 		callAppenders(ERROR, message, null);
 	}
 	
 	public static void fatal(String message, Throwable t) {
-		System.out.println("error " + message + " " + t);
+		log("error ", message, " " + t);
 		printLocation();
 		// I have the reson not to make this as function.
 		if (!UtilsJavaSE.javaSECompiledOut) {
@@ -264,6 +265,48 @@ public class DebugLog {
 	
 	public static void removeAppender(LoggerAppender newAppender) {
 		loggerAppenders.removeElement(newAppender);
+	}
+	
+	private static String d00(int i) {
+        if (i > 9) {
+            return String.valueOf(i);
+        } else {
+            return "0" + String.valueOf(i);
+        }
+    }
+	
+	private static String d000(int i) {
+    	if (i > 99) {
+            return String.valueOf(i);
+        } else if (i > 9) {
+            return "0" + String.valueOf(i);
+        } else {
+            return "00" + String.valueOf(i);
+        }
+    }
+	
+	private static void log(String message, String va1, String va2) {
+		try {
+			Calendar calendar = Calendar.getInstance();
+		    calendar.setTime(new Date(System.currentTimeMillis()));
+		    
+		    StringBuffer sb;
+		    sb = new StringBuffer();
+		    sb.append(d00(calendar.get(Calendar.HOUR_OF_DAY))).append(":");
+		    sb.append(d00(calendar.get(Calendar.MINUTE))).append(":");
+		    sb.append(d00(calendar.get(Calendar.SECOND))).append(".");
+		    sb.append(d000(calendar.get(Calendar.MILLISECOND))).append(" ");
+		    
+		    sb.append(message);
+		    if (va1 != null) {
+		    	sb.append(va1);	
+		    }
+		    if (va2 != null) {
+		    	sb.append(va2);	
+		    }
+		    
+			System.out.println(sb.toString());
+		} catch (Throwable ignore) {}
 	}
 	
 	private static void printLocation() {
