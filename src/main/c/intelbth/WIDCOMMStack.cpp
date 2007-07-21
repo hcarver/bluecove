@@ -531,9 +531,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_deviceInquiryCancelImpl
 (JNIEnv *env, jobject peer) {
 	debug("StopInquiry");
-	stack->deviceInquiryTerminated = TRUE;
-	stack->StopInquiry();
-	SetEvent(stack->hEvent);
+	if (stack != NULL) {
+		stack->deviceInquiryTerminated = TRUE;
+		stack->StopInquiry();
+		if (stack != NULL) {
+			SetEvent(stack->hEvent);
+		}
+	}
 	return TRUE;
 }
 
@@ -1206,8 +1210,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	if (rf == NULL) {
 		return -1;
 	}
-	debug("->read(byte[])");
+	debugs("->read(byte[%i])", len);
 	if (rf->isClosing) {
+		debug("read([]) isClosing");
 		return -1;
 	}
 	if (rf->receiveBuffer.isOverflown()) {
@@ -1234,6 +1239,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			}
 			debug1("read waits returns %s", waitResultsString(rc));
 		}
+		if (stack == NULL) {
+			env->ReleaseByteArrayElements(b, bytes, 0);
+			return -1;
+		}
 		int count = rf->receiveBuffer.available();
 		if (count > 0) {
 			if (count > len - done) {
@@ -1245,7 +1254,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		    // Don't do readFully!
 		    break;
 		}
-		debug1("read[] received %i", count);
+		debug1("read([]) received %i", count);
+	}
+
+	if (!rf->isConnected) {
+		debug("read([]) not connected");
 	}
 	// Read from not Connected
 	int count = rf->receiveBuffer.available();
@@ -1254,11 +1267,18 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			count = len - done;
 		}
 		done += rf->receiveBuffer.read(bytes + off + done, count);
+		debug1("read[] available %i", done);
 	}
 
-	if ((stack != NULL) || (rf->isClosing) || (!rf->isConnected && done == 0)) {
+	if ((stack == NULL) || (rf->isClosing) || (!rf->isConnected && done == 0)) {
+		if (done == 0) {
+			debug("read([]) no data");
+		}
 		// See InputStream.read();
+		debug("read([]) return EOF");
 		done = -1;
+	} else {
+		debugs("read([]) return %i", done);
 	}
 	env->ReleaseByteArrayElements(b, bytes, 0);
 	return done;

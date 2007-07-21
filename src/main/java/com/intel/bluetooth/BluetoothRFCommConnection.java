@@ -31,7 +31,7 @@ import javax.microedition.io.StreamConnection;
 
 public abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothConnectionAccess {
 	
-	protected long handle;
+	protected volatile long handle;
 
 	volatile protected BluetoothInputStream in;
 
@@ -62,6 +62,7 @@ public abstract class BluetoothRFCommConnection implements StreamConnection, Blu
 		if ((in == null && out == null) || (closing)) {
 			closing = true;
 			if (handle != 0) {
+				DebugLog.debug("closing FRCOMM Connection");
 				synchronized (this) {
 					long h = handle;
 					handle = 0;

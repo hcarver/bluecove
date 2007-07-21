@@ -46,6 +46,7 @@ WIDCOMMStackL2CapConn::WIDCOMMStackL2CapConn() {
             NULL);    // object not named
 	
 	memset(&service_guid, 0, sizeof(GUID));
+	service_name[0] = '\0';
 }
 
 WIDCOMMStackL2CapConn::~WIDCOMMStackL2CapConn() {
@@ -348,7 +349,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 			throwRuntimeException(env, "WaitForSingleObject");
 			return 0;
 		}
-		if (incomingConnectionCountWas != l2c->incomingConnectionCount) {
+		if ((stack != NULL) && (incomingConnectionCountWas != l2c->incomingConnectionCount)) {
 			debugs("L2CAP server incomingConnectionCount %i", l2c->incomingConnectionCount);
 			incomingConnectionCountWas = l2c->incomingConnectionCount;
 		}

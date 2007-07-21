@@ -35,6 +35,7 @@ public class BluetoothRFCommServerConnection extends BluetoothRFCommConnection {
 		try {
 			this.securityOpt = securityOpt;
 			RemoteDeviceHelper.connected(this);
+			initOK = true;
 		} finally {
 			if (!initOK) {
 				try {

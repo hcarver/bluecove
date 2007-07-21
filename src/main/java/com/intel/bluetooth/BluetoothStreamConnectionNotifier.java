@@ -81,6 +81,7 @@ public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifi
 		if (!closed) {
 			ServiceRecordsRegistry.unregister(serviceRecord);
 			closing = true;
+			DebugLog.debug("closing FRCOMM ConnectionNotifier");
 			try {
 				long h = handle;
 				handle = 0;

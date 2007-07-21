@@ -69,4 +69,10 @@ BlueSoleilStack.cpp and BlueSoleilStack.h
 /////////////////////////////////////////////////////////////////////////////
 Other notes:
 
+1)
+   Q. Why so many if (stack == NULL) in the code?
+   A. This is the case of JVM shutdown that can happen any time (User just close the boring app). We don't want to have coredum.
+
 /////////////////////////////////////////////////////////////////////////////
+
+
