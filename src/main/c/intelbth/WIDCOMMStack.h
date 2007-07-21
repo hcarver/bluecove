@@ -198,6 +198,7 @@ public:
 	CSdpService* sdpService;
 
 	UINT16 mtu;
+	long incomingConnectionCount;
 
 	CL2CapIf l2CapIf;
 

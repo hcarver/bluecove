@@ -29,6 +29,8 @@
 
 WIDCOMMStackL2CapConn::WIDCOMMStackL2CapConn() {
 	isConnected = FALSE;
+	incomingConnectionCount = 0;
+	sdpService = NULL;
 	
 	hConnectionEvent = CreateEvent(
             NULL,     // no security attributes
@@ -66,6 +68,10 @@ void WIDCOMMStackL2CapConn::OnConnected() {
 void WIDCOMMStackL2CapConn::closeConnection(JNIEnv *env) {
 	isConnected = FALSE;
 	Disconnect();
+	if (sdpService != NULL) {
+		delete sdpService;
+		sdpService = NULL;
+	}
 	l2CapIf.Deregister();
 	SetEvent(hConnectionEvent);
 }
@@ -77,7 +83,8 @@ void WIDCOMMStackL2CapConn::closeServerConnection(JNIEnv *env) {
 }
 
 void WIDCOMMStackL2CapConn::OnIncomingConnection() {
-	 Accept(mtu);
+	incomingConnectionCount ++; 
+	Accept(mtu);
 }
 
 void WIDCOMMStackL2CapConn::OnDataReceived(void *p_data, UINT16 length) {
@@ -227,7 +234,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerO
 			throwRuntimeException(env, "fails to CreateEvent");
 			open_l2client_return 0;
 		}
-		
+		l2c->mtu = (UINT16)mtu;
+
 		jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
 		convertUUIDBytesToGUID(bytes, &(l2c->service_guid));
 		env->ReleaseByteArrayElements(uuidValue, bytes, 0);
@@ -252,24 +260,25 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerO
 		#endif // #else // _WIN32_WCE
 		env->ReleaseStringUTFChars(name, cname);
 
-		l2c->sdpService = new CSdpService();
-		if (l2c->sdpService->AddServiceClassIdList(1, &(l2c->service_guid)) != SDP_OK) {
+		CSdpService *sdpService = new CSdpService();
+		l2c->sdpService = sdpService;
+		if (sdpService->AddServiceClassIdList(1, &(l2c->service_guid)) != SDP_OK) {
 			throwIOException(env, "Error AddServiceClassIdList");
 			open_l2server_return 0;
 		}
-		if (l2c->sdpService->AddServiceName(l2c->service_name) != SDP_OK) {
+		if (sdpService->AddServiceName(l2c->service_name) != SDP_OK) {
 			throwIOException(env, "Error AddServiceName");
 			open_l2server_return 0;
 		}
-		if (l2c->sdpService->AddL2CapProtocolDescriptor(l2CapIf->GetPsm()) != SDP_OK) {
+		if (sdpService->AddL2CapProtocolDescriptor(l2CapIf->GetPsm()) != SDP_OK) {
 			throwIOException(env, "Error AddL2CapProtocolDescriptor");
 			open_l2server_return 0;
 		}
-		if (l2c->sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, service_name_len, (UINT8*)l2c->service_name) != SDP_OK) {
+		if (sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, service_name_len, (UINT8*)l2c->service_name) != SDP_OK) {
 			throwIOException(env, "Error AddAttribute ServiceName");
 			open_l2server_return 0;
 		}
-		if (l2c->sdpService->MakePublicBrowseable() != SDP_OK) {
+		if (sdpService->MakePublicBrowseable() != SDP_OK) {
 			throwIOException(env, "Error MakePublicBrowseable");
 			open_l2server_return 0;
 		}
@@ -308,11 +317,16 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 		return 0;
 	}
 	debug("L2CAP server waits for connection");
+	long incomingConnectionCountWas = l2c->incomingConnectionCount;
 	while ((stack != NULL) && (!l2c->isConnected) && (l2c->sdpService != NULL)) {
 		DWORD  rc = WaitForSingleObject(l2c->hConnectionEvent, 500);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForSingleObject");
 			return 0;
+		}
+		if (incomingConnectionCountWas != l2c->incomingConnectionCount) {
+			debugs("L2CAP server incomingConnectionCount %i", l2c->incomingConnectionCount);
+			incomingConnectionCountWas = l2c->incomingConnectionCount;
 		}
 	}
 	if ((stack == NULL) || (l2c->sdpService == NULL)) {
