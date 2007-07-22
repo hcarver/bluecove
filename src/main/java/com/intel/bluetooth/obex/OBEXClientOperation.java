@@ -27,6 +27,8 @@ import java.io.IOException;
 import javax.obex.HeaderSet;
 import javax.obex.Operation;
 
+import com.intel.bluetooth.NotImplementedError;
+
 public abstract class OBEXClientOperation implements Operation {
 
 	protected OBEXClientSessionImpl session;
@@ -49,7 +51,8 @@ public abstract class OBEXClientOperation implements Operation {
 	}
 	
 	public void abort() throws IOException {
-		// TODO Auto-generated method stub
+		// TODO implement
+		throw new NotImplementedError();
 	}
 
 	public HeaderSet getReceivedHeaders() throws IOException {
@@ -68,17 +71,18 @@ public abstract class OBEXClientOperation implements Operation {
 	}
 
 	public String getEncoding() {
-		return null;
+		// TODO implement
+		throw new NotImplementedError();
 	}
 
 	public long getLength() {
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO implement
+		throw new NotImplementedError();
 	}
 
 	public String getType() {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO implement
+		throw new NotImplementedError();
 	}
 
 	public DataInputStream openDataInputStream() throws IOException {

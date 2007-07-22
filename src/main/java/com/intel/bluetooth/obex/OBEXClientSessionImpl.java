@@ -153,6 +153,7 @@ public class OBEXClientSessionImpl implements ClientSession {
 		return OBEXHeaderSetImpl.read(b[0], b, 3);
 	}
 
+	//TODO implement
 	public Operation get(HeaderSet headers) throws IOException {
 		if (!isConnected) {
             throw new IOException("Session not connected");
