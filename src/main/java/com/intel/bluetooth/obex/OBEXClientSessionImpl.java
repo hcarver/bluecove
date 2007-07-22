@@ -157,7 +157,7 @@ public class OBEXClientSessionImpl implements ClientSession {
 		if (!isConnected) {
             throw new IOException("Session not connected");
 		}
-		return null;
+		throw new NotImplementedIOException();
 	}
 
 	public Operation put(HeaderSet headers) throws IOException {

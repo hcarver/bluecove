@@ -28,26 +28,27 @@ import javax.obex.ServerRequestHandler;
 import javax.obex.SessionNotifier;
 
 import com.intel.bluetooth.BluetoothConnectionNotifierParams;
+import com.intel.bluetooth.NotImplementedIOException;
 
 public class OBEXSessionNotifierImpl implements SessionNotifier {
 
+	//	TODO implement
 	public OBEXSessionNotifierImpl(BluetoothConnectionNotifierParams params) throws IOException {
-		
+		throw new NotImplementedIOException();
 	}
 	
 	public Connection acceptAndOpen(ServerRequestHandler handler) throws IOException {
-		// TODO Auto-generated method stub
+		// TODO implement
 		return null;
 	}
 
 	public Connection acceptAndOpen(ServerRequestHandler handler, Authenticator auth) throws IOException {
-		// TODO Auto-generated method stub
+		// TODO implement
 		return null;
 	}
 
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
-
+		// TODO implement
 	}
 
 }
