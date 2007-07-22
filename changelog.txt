@@ -2,6 +2,10 @@
 
 * 2.0.1 to be Released 2007-09-xx
 
+    2007-07-22 Vlad Skarzhevskyy
+    * L2CAP imlementation, Only on WIDCOMM stack
+    * Bluetooth_1-1_005_TCK on WIDCOMM, Pass 322, Fail 3. (security not tested)
+
     2007-07-15 Vlad Skarzhevskyy
     * Use TCK for JSR 82 for tests, fixed major incompatibility problems
 

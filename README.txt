@@ -20,15 +20,19 @@ currently maintained by volunteers.
 
 == Limitations ==
 
-Due to the Microsoft Bluetooth stack only supporting RFCOMM connections,
-BlueCove also only supports RFCOMM connections. The operating system support is
+  L2CAP support available only on WIDCOMM Stack.
+
+  Due to the Microsoft Bluetooth stack only supporting RFCOMM connections,
+BlueCove also only supports RFCOMM connections on this stack. The operating system support is
 currently limited to Windows XP SP2 and newer, because the Microsoft Bluetooth
 stack is not available on other operating systems. If someone writes code to
 support another stack and/or operating system, it will be considered for
-inclusion.  BlueCove only support OBEX PUT, but there are other projects
+inclusion. TOSHIBA on Win32 and BlueZ are wellcome!
+
+  BlueCove only support OBEX PUT, but there are other projects
 that can (possibly) be used to achieve full OBEX functionality with BlueCove.
 
- For more details see stacks.txt or [http://code.google.com/p/bluecove/wiki/stacks BlueCove supported stacks].
+ For more limitations details see stacks.txt or [http://code.google.com/p/bluecove/wiki/stacks BlueCove supported stacks].
 
 == Not Implemented functionality ===
 
@@ -95,12 +99,13 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
         "Include files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\Include
         "Library files" %ProgramFiles%\Microsoft SDKs\Windows\v6.0\lib
 
- We can't use the same DLL on windows for all implemenations. Since WIDCOMM need to be compile /MD using VC6 and winsock /MT using VC2005
+ We can't use the same DLL on windows for all implemenations. Since WIDCOMM needs to be compiled /MD using VC6 and winsock /MT using VC2005
   intelbth.dll build by VC2005 Configuration "Win32 winsock"
   bluecove.dll build by VC6 Configuration "Win32 Release"
 
  Visual C++ 6.0 SP6 used to build bluecove.dll for WIDCOMM
  Visual Visual C++ 2005 used to build intelbth.dll for winsock and BlueSoleil
+ More detail on building native code `src\main\c\intelbth\ReadMe.txt`
 
  Ant or maven2 are used as the build tool for java.
 
@@ -108,10 +113,16 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
   # [http://code.google.com/p/bluecove/downloads/list Download BlueCove]source release
   # Unzip the source
   # Run `ant` or `mvn`
+  # When using maven native Dlls are build as well
+
+  If you are uisng `ant`:
+
   # Go into `src\main\c\intelbth`
   # Open `intelbth.sln`
   # Compile the project for your platform (e.g. 'Winsock' for 'Win32')
   # Run `ant jar` or `mvn`
+
+ We don't use `ant` for official distributions! `build.xml` only provided for your convenience
 
 == Source ==
 

@@ -32,7 +32,19 @@ JSR 82 Technology Compatibility Kit
 
     []
 
- Here is how you would run the tests on BlueCove in the "autotest" mode with the help of MicroEmulator:
+    Test environment
+
+    * Microsoft Windows XP Service Pack 2
+
+    * Sun Java(TM) SE Runtime Environment (build 1.6.0_01-b06)
+
+    * System 1 TCK Client, Intel Pentium M 1.7 GHz, RAM 1.25 GB, WIDCOMM (Broadcom Bluetooth stack) v5.0.1.2800, Integrated Cambridge Silicon Radio on HP ZT3380US
+
+    * System 2 TCK Agent, Intel Pentium III 646 MHz, RAM 320 MB, WIDCOMM (Broadcom Bluetooth stack) v5.0.1.2800, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
+
+    []
+
+ Here is how you would run the JSR 82 TCK Gatling tests on BlueCove in the "autotest" mode with the help of MicroEmulator:
 
 ---
     java -cp microemulator.jar;bluecove.jar org.microemu.app.Main -Xautotest:http://localhost:8080/getNextApp.jad
