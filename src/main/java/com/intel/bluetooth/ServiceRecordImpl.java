@@ -477,9 +477,7 @@ public class ServiceRecordImpl implements ServiceRecord {
 		}
 	
 		// TODO not yet implemented
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedError();
-		}
+		throw new NotImplementedError();
 	}
 
 	/*
