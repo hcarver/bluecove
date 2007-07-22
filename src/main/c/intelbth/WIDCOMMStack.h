@@ -199,6 +199,9 @@ public:
 	CSdpService* sdpService;
 
 	UINT16 receiveMTU;
+	UINT16 transmitMTU;
+	UINT16 connectionTransmitMTU;
+
 	long incomingConnectionCount;
 
 	CL2CapIf l2CapIf;
@@ -212,6 +215,8 @@ public:
 
 	void closeConnection(JNIEnv *env);
 	void closeServerConnection(JNIEnv *env);
+
+	void selectConnectionTransmitMTU(JNIEnv *env);
 
 	virtual void OnConnected();
     virtual void OnDataReceived(void *p_data, UINT16 length);

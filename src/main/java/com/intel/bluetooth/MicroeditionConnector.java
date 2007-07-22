@@ -339,14 +339,19 @@ public class MicroeditionConnector {
 	private static int paramL2CAPMTU(Hashtable values, String name) {
 		String v = (String) values.get(name);
 		if (v == null) {
-			return L2CAPConnection.DEFAULT_MTU;
+			if (name.equals(TRANSMIT_MTU)){
+				// This will select RemoteMtu
+				return -1;
+			} else {
+				return L2CAPConnection.DEFAULT_MTU;
+			}
 		}
 		try {
 			int mtu = Integer.parseInt(v);
 			if (mtu >= L2CAPConnection.MINIMUM_MTU) {
 				return mtu;
 			}
-			if ((mtu >0) && (mtu < L2CAPConnection.MINIMUM_MTU) && (name.equals(TRANSMIT_MTU))) {
+			if ((mtu > 0) && (mtu < L2CAPConnection.MINIMUM_MTU) && (name.equals(TRANSMIT_MTU))) {
 				return L2CAPConnection.MINIMUM_MTU;
 			}
 		} catch (NumberFormatException e) {

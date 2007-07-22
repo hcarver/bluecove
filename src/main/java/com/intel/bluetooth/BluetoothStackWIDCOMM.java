@@ -596,14 +596,14 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 //		return min;
 	}
 
-	private native long l2OpenClientConnectionImpl(long address, int channel, boolean authenticate, boolean encrypt, int receiveMTU) throws IOException;
+	private native long l2OpenClientConnectionImpl(long address, int channel, boolean authenticate, boolean encrypt, int receiveMTU, int transmitMTU) throws IOException;
 
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams, int, int)
 	 */
 	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
 		validateMTU(receiveMTU, transmitMTU);
-		return l2OpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt, receiveMTU);
+		return l2OpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt, receiveMTU, transmitMTU);
 	}
 
 	/* (non-Javadoc)
@@ -611,7 +611,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	 */
 	public native void l2CloseClientConnection(long handle) throws IOException;
 
-	private native long l2ServerOpenImpl(byte[] uuidValue, boolean authenticate, boolean encrypt, String name, int receiveMTU) throws IOException;
+	private native long l2ServerOpenImpl(byte[] uuidValue, boolean authenticate, boolean encrypt, String name, int receiveMTU, int transmitMTU) throws IOException;
 
 	public native int l2ServerPSM(long handle) throws IOException;
 	
@@ -621,7 +621,7 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
 		validateMTU(receiveMTU, transmitMTU);
 		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
-		long handle = l2ServerOpenImpl(uuidValue, params.authenticate, params.encrypt, params.name, receiveMTU);
+		long handle = l2ServerOpenImpl(uuidValue, params.authenticate, params.encrypt, params.name, receiveMTU, transmitMTU);
 		
 		int channel = l2ServerPSM(handle);
 		

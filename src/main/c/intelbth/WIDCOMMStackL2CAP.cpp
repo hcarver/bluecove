@@ -111,6 +111,25 @@ void WIDCOMMStackL2CapConn::OnRemoteDisconnected(UINT16 reason) {
 	SetEvent(hConnectionEvent);
 }
 
+void WIDCOMMStackL2CapConn::selectConnectionTransmitMTU(JNIEnv *env) {
+	UINT16 remoteMtu;
+	#ifdef _WIN32_WCE
+	remoteMtu = GetRemoteMtu();
+	#else // _WIN32_WCE
+	remoteMtu = m_RemoteMtu;
+    #endif // #else // _WIN32_WCE
+	
+	if (transmitMTU == -1) {
+		connectionTransmitMTU = remoteMtu;
+	} else if (transmitMTU < remoteMtu) {
+		connectionTransmitMTU = transmitMTU;
+	} else {
+		connectionTransmitMTU = remoteMtu;
+	}
+	debug1("connection TransmitMTU %i", connectionTransmitMTU);
+	debug1("connection  ReceiveMTU %i", receiveMTU);
+}
+
 #define open_l2client_return  open_l2client_finally(l2c); return
 
 void open_l2client_finally(WIDCOMMStackL2CapConn* l2c) {
@@ -125,7 +144,7 @@ void open_l2client_finally(WIDCOMMStackL2CapConn* l2c) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenClientConnectionImpl
-(JNIEnv *env, jobject, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint receiveMTU) { 
+(JNIEnv *env, jobject, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint receiveMTU, jint transmitMTU) { 
 	BD_ADDR bda;
 	LongToBcAddr(address, bda);
 
@@ -178,6 +197,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
         }
 
 		//debug("OpenL2CAPClient");
+		l2c->transmitMTU = (UINT16)transmitMTU;
 		l2c->receiveMTU = (UINT16)receiveMTU;
 		BOOL rc = l2c->Connect(l2CapIf, bda, l2c->receiveMTU);
 		if (!rc) {
@@ -204,6 +224,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 		}
 
 	    debug("connected");
+		l2c->selectConnectionTransmitMTU(env);
 		jlong handle = l2c->internalHandle;
 		l2c = NULL;
 		open_l2client_return handle;
@@ -223,7 +244,7 @@ void open_l2server_finally(JNIEnv *env, WIDCOMMStackL2CapConn* l2c) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerOpenImpl
-(JNIEnv *env, jobject, jbyteArray uuidValue, jboolean authenticate, jboolean encrypt, jstring name, jint receiveMTU) {
+(JNIEnv *env, jobject, jbyteArray uuidValue, jboolean authenticate, jboolean encrypt, jstring name, jint receiveMTU, jint transmitMTU) {
 	if (stack == NULL) {
 		throwIOException(env, "Stack closed");
 		return 0;
@@ -241,6 +262,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerO
 			_throwRuntimeException(env, "fails to CreateEvent");
 			open_l2client_return 0;
 		}
+		l2c->transmitMTU = (UINT16)transmitMTU;
 		l2c->receiveMTU = (UINT16)receiveMTU;
 
 		jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
@@ -360,6 +382,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 	}
 
 	debug("L2CAP server connection made");
+	l2c->selectConnectionTransmitMTU(env);
 	l2c->isClientOpen = TRUE;
 	return l2c->internalHandle;
 }
@@ -410,11 +433,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2GetTrans
 	if (l2c == NULL) {
 		return 0;
 	}
-	#ifdef _WIN32_WCE
-		return l2c->GetRemoteMtu();
-	#else // _WIN32_WCE
-		return l2c->m_RemoteMtu;
-    #endif // #else // _WIN32_WCE
+	return l2c->connectionTransmitMTU;
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2RemoteAddress
@@ -512,6 +531,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 	if (readLen > inBufLen) {
 		readLen = inBufLen;
 	}
+	if (readLen > l2c->receiveMTU) {
+		readLen = l2c->receiveMTU;
+	}
+
 	done = l2c->receiveBuffer.read(bytes, readLen);
 	if (done != readLen) {
 		_throwIOException(env, "Receive buffer corrupted (3)");
@@ -542,16 +565,9 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Send
 	}
 	jbyte *bytes = env->GetByteArrayElements(data, 0);
 	UINT16 len = (UINT16)env->GetArrayLength(data);
-
-	UINT16 transmitMTU;
-	#ifdef _WIN32_WCE
-		transmitMTU =  l2c->GetRemoteMtu();
-	#else // _WIN32_WCE
-		transmitMTU = l2c->m_RemoteMtu;
-    #endif // #else // _WIN32_WCE
 		
-	if (len > transmitMTU) {
-		len = transmitMTU;
+	if (len > l2c->connectionTransmitMTU) {
+		len = l2c->connectionTransmitMTU;
 	}
 
 	UINT16 written = 0;
@@ -561,6 +577,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Send
 		_throwIOException(env, "Failed to write");
 		return;
 	}
+	debugs("sent %i", written);
 	if (written < len) {
 		debug("throw");
 		throwIOExceptionExt(env, "Failed to write all data, send %i from %i", written, len);
