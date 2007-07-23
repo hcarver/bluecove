@@ -1466,10 +1466,36 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 			throwIOException(env, "Error AddServiceName");
 			open_server_return 0;
 		}
+		
+		/*
+		//Note: An L2Cap UUID (100) with a value of 3 is added because RFCOMM protocol is over the L2CAP protocol.
 		if (rf->sdpService->AddRFCommProtocolDescriptor(rf->scn) != SDP_OK) {
 			throwIOException(env, "Error AddRFCommProtocolDescriptor");
 			open_server_return 0;
 		}
+		*/
+		int proto_num_elem = 2;
+		tSDP_PROTOCOL_ELEM* proto_elem_list = new tSDP_PROTOCOL_ELEM[2];
+		proto_elem_list[0].protocol_uuid = 0x0100; // L2CAP
+		proto_elem_list[0].num_params = 0;
+    
+		proto_elem_list[1].protocol_uuid = 0x0001; // RFCOMM
+		proto_elem_list[1].num_params = 1;
+		proto_elem_list[1].params[0] = rf->scn;
+
+		if (false) {
+			proto_elem_list[1].protocol_uuid = 0x0008; // OBEX
+			proto_elem_list[1].num_params = 0;
+		}
+
+		if (rf->sdpService->AddProtocolList(proto_num_elem, proto_elem_list) != SDP_OK) {
+			delete proto_elem_list;
+			throwIOException(env, "Error AddProtocolList");
+			open_server_return 0;
+		}
+		delete proto_elem_list;
+
+
 		UINT32 service_name_len;
 		#ifdef _WIN32_WCE
 			service_name_len = wcslen((wchar_t*)rf->service_name);
