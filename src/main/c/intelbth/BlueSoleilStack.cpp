@@ -345,9 +345,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
 			continue;
 		}
 
-		//printf("SDAP Record Handle:	%d\n", sppex_svc_info[i].dwSDAPRecordHanlde);
-		//printf("Service Name:	%s\n", sppex_svc_info[i].szServiceName);
-		//printf("Service Channel:	%02X\n", sppex_svc_info[i].ucServiceChannel);
+		debugs("SDAP Record Handle:	%d", sr->dwSDAPRecordHanlde);
+		debugs("      Service Name: %s", sr->szServiceName);
+		debugs("   Service Channel: %02X", sr->ucServiceChannel);
+		debugs("         Com Index: %i", sr->ucComIndex);
 
 		jbyteArray uuidValueFound = env->NewByteArray(16);
 		jbyte *bytes = env->GetByteArrayElements(uuidValueFound, 0);
