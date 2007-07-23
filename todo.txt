@@ -1,0 +1,35 @@
+@version $Revision$ ($Author$) $Date$
+
+The list of functionality that can be implemented or investigation should be done if this is possible.
+
+* BlueZ Linux version (C++)  (Hakan is leader here)
+
+* Java IBM J9 MIDP
+    System.setProperty
+    WeakVector implementation
+
+* OS X support. Some code exists in branches\osxPort\
+
+* Bluetooth TOSHIBA Stack (C++)
+
+* Complete OBEX implementation (Java)
+
+* Security (authenticate and encrypt). (C++/Java)
+
+* Connection timeouts. (C++/Java)
+
+* bluecove-log4j redirection of Bluecove logs to log4j framework - separate module.
+  Should be integrated in bluecove using DebugLog.LoggerAppender interface.
+  Main bluecove DebugLog will try to create a class "net.sf.bluecove.log4j.LoggerAppender" during intialization adn use it if avalbe in classpath.
+
+* bluecove-jmx monitoring of connections and other stats using JMX - separate module.
+  Interfaces should be created in Main bluecove
+
+
+* bluecove-emu JSR-82 emulator - separate module.
+  Class should implement com.intel.bluetooth.BluetoothStack
+  -Dbluecove.stack=emu
+  -Dbluecove.emu=net.sf.bluecove.emu.EmulatorBluetoothStack
+
+  Emulator can use http to connect to server this will enable web start demonstrations may be even applets (see MicroEmulator).
+  Emulator can use Multicast DatagramPacket in local network to emulate Bluetooth (address assignment is a local IP address + #)

@@ -23,12 +23,13 @@ package com.intel.bluetooth;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
 
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.microedition.io.Connection;
+
+import com.intel.bluetooth.WeakVectorFactory.WeakVector;
 
 /**
  * @author vlads
@@ -48,7 +49,10 @@ public abstract class RemoteDeviceHelper {
 		
 		private boolean paired;
 		
-		private Vector connections;
+		/**
+		 * Connections can be discarded by the garbage collector.
+		 */
+		private WeakVector connections;
 		
 		private RemoteDeviceWithExtendedInfo(long address, String name) {
 			super(RemoteDeviceHelper.getBluetoothAddress(address));
@@ -58,7 +62,7 @@ public abstract class RemoteDeviceHelper {
 		
 		private void addConnection(Object connection) {
 			if (connections == null) {
-				connections = new Vector();
+				connections = WeakVectorFactory.createWeakVector();
 			}
 			connections.addElement(connection);
 			DebugLog.debug("connection open, open now", connections.size());
@@ -110,14 +114,14 @@ public abstract class RemoteDeviceHelper {
 				DebugLog.debug("no connections, Authenticated = false");
 				return false;
 			}
-			return (((BluetoothConnectionAccess)connections.elementAt(0)).getSecurityOpt() != ServiceRecord.NOAUTHENTICATE_NOENCRYPT);
+			return (((BluetoothConnectionAccess)connections.firstElement()).getSecurityOpt() != ServiceRecord.NOAUTHENTICATE_NOENCRYPT);
 		}
 		
 		public boolean isEncrypted() {
 			if (!hasConnections()) {
 				return false;
 			}
-			return (((BluetoothConnectionAccess)connections.elementAt(0)).getSecurityOpt() == ServiceRecord.AUTHENTICATE_ENCRYPT);
+			return (((BluetoothConnectionAccess)connections.firstElement()).getSecurityOpt() == ServiceRecord.AUTHENTICATE_ENCRYPT);
 		}
 		
 		public boolean isTrustedDevice() {

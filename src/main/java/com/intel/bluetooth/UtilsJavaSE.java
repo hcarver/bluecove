@@ -20,6 +20,7 @@
  */
 package com.intel.bluetooth;
 
+import java.util.Properties;
 import java.util.Vector;
 
 /**
@@ -118,6 +119,35 @@ public class UtilsJavaSE {
 				Runtime.getRuntime().addShutdownHook(thread);
 			}
 		} catch (Throwable java12) {
+		}
+	}
+	
+	public static void setSystemProperty(String propertyName, String propertyValue) {
+		if (ibmJ9midp) {
+			return;
+		}
+		boolean propertySet = false;
+		try {
+			Properties props = System.getProperties();
+			if (propertyValue != null) {
+				props.put(propertyName, propertyValue);
+				propertySet = propertyValue.equals(System.getProperty(propertyName));
+			} else {
+				props.remove(propertyName);
+				propertySet = (System.getProperty(propertyName) == null);
+			}
+		} catch (SecurityException e) {
+		}
+		if (!propertySet) {
+			try {
+				if (propertyValue != null) {
+					System.setProperty(propertyName, propertyValue);
+				} else {
+					// Java 1.5 - OK
+					System.clearProperty(propertyName);
+				}
+			} catch (Throwable java11) {
+			}
 		}
 	}
 }
