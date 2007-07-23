@@ -1479,7 +1479,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 		proto_elem_list[0].protocol_uuid = 0x0100; // L2CAP
 		proto_elem_list[0].num_params = 0;
     
-		proto_elem_list[1].protocol_uuid = 0x0001; // RFCOMM
+		proto_elem_list[1].protocol_uuid = 0x0003; // RFCOMM
 		proto_elem_list[1].num_params = 1;
 		proto_elem_list[1].params[0] = rf->scn;
 
