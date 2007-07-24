@@ -313,12 +313,6 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		SearchServicesThread sst = SearchServicesThread.getServiceSearchThread(transID);
 		if (sst != null) {
 			sst.setTerminated();
-			//cancelServiceSearchImpl();
-			if (NotImplementedError.enabled) {
-				throw new NotImplementedError();
-			}
-			//cancelServiceSearchImpl();
-
 			return true;
 		} else {
 			return false;
