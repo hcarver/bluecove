@@ -83,6 +83,8 @@ public class MicroeditionConnector {
 	private static final String  NAME = "name";
 	private static final String  RECEIVE_MTU = "ReceiveMTU"; 
 	private static final String  TRANSMIT_MTU = "TransmitMTU";
+	private static final String  RECEIVE_MTU_v2 = "receiveMTU"; 
+	private static final String  TRANSMIT_MTU_v2 = "transmitMTU";
 	
 	static {
 	    //cliParams    ::== master | encrypt | authenticate
@@ -96,11 +98,12 @@ public class MicroeditionConnector {
 		srvParams.put(NAME, NAME);
 		
 		copyAll(cliParamsL2CAP, cliParams);
+
 		cliParamsL2CAP.put(RECEIVE_MTU, RECEIVE_MTU);
 		cliParamsL2CAP.put(TRANSMIT_MTU, TRANSMIT_MTU);
 		// Some docs describe lower case names. e.g http://developers.sun.com/mobility/midp/ttips/gcfcs/index.html
-		cliParamsL2CAP.put("receiveMTU", RECEIVE_MTU);
-		cliParamsL2CAP.put("transmitMTU", TRANSMIT_MTU);
+		cliParamsL2CAP.put(RECEIVE_MTU_v2, RECEIVE_MTU);
+		cliParamsL2CAP.put(TRANSMIT_MTU_v2, TRANSMIT_MTU);
 		
 		copyAll(srvParamsL2CAP, cliParamsL2CAP);
 		srvParamsL2CAP.put(AUTHORIZE, AUTHORIZE);
@@ -121,6 +124,21 @@ public class MicroeditionConnector {
 			Object key = en.nextElement();
 			dest.put(key, src.get(key));
 		}
+	}
+	
+	static String validParamName(Hashtable map, String paramName) {
+		String validName = (String)map.get(paramName);
+		if (validName != null) {
+			return validName;
+		}
+		// On J9 Hashtable ignore cases!
+		if (RECEIVE_MTU.equals(paramName)) {
+			return RECEIVE_MTU;
+		}
+		if (TRANSMIT_MTU.equals(paramName)) {
+			return TRANSMIT_MTU;
+		}
+		return null;
 	}
 	
 	/*
@@ -195,8 +213,9 @@ public class MicroeditionConnector {
 				if (equals > -1) {
 					String param = t.substring(0, equals);
 					String value = t.substring(equals + 1);
-					if (params.containsKey(param)) {
-						values.put(params.get(param), value);
+					String validName = validParamName(params, param);
+					if (validName != null) {
+						values.put(validName, value);
 					} else {
 						throw new IllegalArgumentException("invalid param [" + param + "] value [" + value +"]");
 					}

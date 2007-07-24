@@ -52,7 +52,7 @@ public class Connection implements CreateConnection, L2CAPConnection, L2CAPConne
 	 * @see com.ibm.oti.connection.CreateConnection#setParameters(java.lang.String, int, boolean)
 	 */
 	public void setParameters(String spec, int access, boolean timeout) throws IOException {
-		impl = MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM + ":" + spec, access, timeout);
+		impl = MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_L2CAP + ":" + spec, access, timeout);
 	}
 
 	/* (non-Javadoc)
