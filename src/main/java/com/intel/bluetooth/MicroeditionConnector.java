@@ -262,7 +262,7 @@ public class MicroeditionConnector {
 			if (schemeBluetooth) {
 				if (isL2CAP) {
 					// Valid PSM range: 0x0001-0x0019 (0x1001-0xFFFF dynamically assigned, 0x0019-0x0100 reserved for future use).
-					if ((channel <= 3) || (channel > 0xFFFF)) {
+					if ((channel < BluetoothConsts.L2CAP_PSM_MIN) || (channel > BluetoothConsts.L2CAP_PSM_MAX)) {
 						// PSM 1 discovery, 3 RFCOMM
 						throw new IllegalArgumentException("PCM " + portORuuid);
 					}
@@ -274,8 +274,8 @@ public class MicroeditionConnector {
 						throw new IllegalArgumentException("PSM value " + portORuuid + " should be odd");
 					}
 				} else {
-					if (channel > 30) {
-						throw new IllegalArgumentException("channel " + portORuuid);
+					if ((channel < BluetoothConsts.RFCOMM_CHANNEL_MIN) || (channel > BluetoothConsts.RFCOMM_CHANNEL_MAX)) {
+						throw new IllegalArgumentException("RFCOMM channel " + portORuuid);
 					}
 				}
 				

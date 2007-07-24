@@ -285,9 +285,12 @@ public class ServiceRecordImpl implements ServiceRecord {
 						case DataElement.INT_2:
 						case DataElement.INT_4:
 						case DataElement.INT_8:
-							commChannel = (int) protocolPSMElement.getLong();
-							isRFCOMM = true;
-							isL2CAP = false;
+							long val = protocolPSMElement.getLong();
+							if ((val >= BluetoothConsts.RFCOMM_CHANNEL_MIN) && (val <= BluetoothConsts.RFCOMM_CHANNEL_MAX)) { 
+								commChannel = (int) val;
+								isRFCOMM = true;
+								isL2CAP = false;
+							}
 							break;
 						}
 					} else if (elementSeqEnum.hasMoreElements() && (BluetoothConsts.L2CAP_PROTOCOL_UUID.equals(uuid))) {
@@ -300,8 +303,11 @@ public class ServiceRecordImpl implements ServiceRecord {
 						case DataElement.INT_2:
 						case DataElement.INT_4:
 						case DataElement.INT_8:
-							commChannel = (int) protocolPSMElement.getLong();
-							isL2CAP = true;
+							long pcm = protocolPSMElement.getLong();
+							if ((pcm >= BluetoothConsts.L2CAP_PSM_MIN) && (pcm <= BluetoothConsts.L2CAP_PSM_MAX)) {
+								commChannel = (int)pcm; 
+								isL2CAP = true;
+							}
 							break;
 						}
 					}

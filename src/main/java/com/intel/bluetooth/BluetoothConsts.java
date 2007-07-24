@@ -45,6 +45,14 @@ public class BluetoothConsts {
 	
 	public static final UUID OBEXFileTransferServiceClass_UUID = new UUID(0x1106);
 
+	public static final  int RFCOMM_CHANNEL_MIN = 1;
+	
+	public static final  int RFCOMM_CHANNEL_MAX = 30;
+	
+	public static final  int L2CAP_PSM_MIN = 5;
+	
+	public static final  int L2CAP_PSM_MAX = 0xFFFF;
+	
 	static Hashtable obexUUIDs = new Hashtable();
 	
 	private static void addObex(int uuid) {
