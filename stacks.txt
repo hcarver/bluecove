@@ -3,7 +3,9 @@
 = BlueCove supported stacks =
 
    WIDCOMM and BlueSoleil are added in BlueCove version 2.0.0.
+
    To determine which Bluetooth stack is installed on your Windows XP [http://bluecove.sourceforge.net/bluecove-examples/bluetooth-stack.html see this page]
+
    [http://code.google.com/p/bluecove/wiki/WindowsMobile Windows Mobile]
 
    If automatic Bluetooth Stack detection is not enough Java System property "bluecove.stack" can be used to force desired Stack Initialization.
@@ -16,7 +18,7 @@
    If multiple stacks are detected they are selected in following order: "winsock", "widcomm", "bluesoleil".
    Since !BlueCove v2.0.1 "bluecove.stack.first" will alter the order of stack selection.
 
-   If System property is not an option (e.g. when running in Webstart) create text file "bluecove.stack" or "bluecove.stack.first" containing stack name and add this file to BlueCove or Application jar.
+   If System property is not an option (e.g. when running in Webstart) create text file "bluecove.stack" or "bluecove.stack.first" containing stack name and add this file to BlueCove or Application jar. (Since v2.0.1)
 
    Use `LocalDevice.getProperty("bluecove.stack")` to find out what stack is used.
 
@@ -70,6 +72,8 @@
 
     SDK provided by IVT is very limited. We just implemented what we can on top of it.
 
+    * BlueSoleil Bluetooth stack only supporting RFCOMM connections
+    * L2CAP not supported
     * Service attributes are not supported in Service search of when creating Server, `LocalDevice.getProperty("bluetooth.sd.attr.retrievable.max") == "0"`
     * `DiscoveryAgent.searchServices()` can only find 128bits-GUID service with specific UUID. You can't list all service on remote device.
     * `DiscoveryAgent.searchServices(.. UUID[] uuidSet, ..)`  only ONE UUID is used during search, the last one in array.
@@ -77,4 +81,5 @@
     * Client `Connector.open()` use GUID of the discovered service. Only one would be selected
     * Server can't close incoming connection. It will wait until connection is closed remotely. (Our implementation should be changed to restart Service(Server) each time connection is closed to fix this)
     * In our test lab we can only make from 180 to 250 max connections in sequence. After this !BlueSoleil.exe needs to restart or Windows needs to be rebooted (May be you can help fixing this, I wrote to !BlueSoleil support; no reply)
-    * L2CAP not supported
+    * `searchServices` can't distinguish the service type (RFCOMM or OBEX). To solve this following UUIDs are always discoved as obex (btgoep://) connections
+        * IR_MC_SYNC (0x1104), OBEX_OBJECT_PUSH (0x1105), OBEX_FILE_TRANSFER (0x1106), IR_MC_SYNC_COMMAND (0x1107), IMG_RESPONDER (0x111B)

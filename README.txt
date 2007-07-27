@@ -7,7 +7,11 @@
 
 BlueCove is a LGPL licensed JSR-82 implementation on Java Standard Edition (J2SE) that currently interfaces with
 the WIDCOMM, BlueSoleil and Microsoft Bluetooth stack. Originally developed by Intel Research and
-currently maintained by volunteers.
+currently maintained by volunteers. The LGPL license allow to link and distribute commercial software with !BlueCove.
+
+ [http://bluecove.wiki.sourceforge.net/ BlueCove public contirbutions Wiki]
+
+ [http://www.rococosoft.com/weblog/archives/2007/07/another_cool_project_using_jsr.html Blog about Blue Cove]
 
 == Requirements ==
 
@@ -25,12 +29,13 @@ currently maintained by volunteers.
   Due to the Microsoft Bluetooth stack only supporting RFCOMM connections,
 BlueCove also only supports RFCOMM connections on this stack. The operating system support is
 currently limited to Windows XP SP2 and newer, because the Microsoft Bluetooth
-stack is not available on other operating systems. If someone writes code to
-support another stack and/or operating system, it will be considered for
-inclusion. TOSHIBA on Win32 and BlueZ are wellcome!
+stack is not available on other operating systems.
 
   BlueCove only support OBEX PUT, but there are other projects
 that can (possibly) be used to achieve full OBEX functionality with BlueCove.
+
+  If someone writes code to support another stack and/or operating system, it will be considered for
+inclusion. TOSHIBA on Win32 and BlueZ are wellcome!
 
  For more limitations details see stacks.txt or [http://code.google.com/p/bluecove/wiki/stacks BlueCove supported stacks].
 
@@ -108,7 +113,6 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
  More detail on building native code `src\main\c\intelbth\ReadMe.txt`
 
  Ant or maven2 are used as the build tool for java.
-
 
   # [http://code.google.com/p/bluecove/downloads/list Download BlueCove]source release
   # Unzip the source
