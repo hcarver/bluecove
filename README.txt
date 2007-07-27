@@ -66,7 +66,7 @@ Bluetooth Stack
    If multiple stacks are detected they are selected in following order: "winsock", "widcomm", "bluesoleil".
    Since BlueCove v2.0.1 "bluecove.stack.first" will alter the order of stack selection.
 
-   If System property is not an option (e.g. when running in Webstart) create text file "bluecove.stack" or "bluecove.stack.first" containing stack name and add this file to BlueCove or Application jar.
+   If System property is not an option (e.g. when running in Webstart) create text file "bluecove.stack" or "bluecove.stack.first" containing stack name and add this file to BlueCove or Application jar. (Since v2.0.1)
 
 Native Library location
 
