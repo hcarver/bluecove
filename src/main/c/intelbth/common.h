@@ -215,6 +215,10 @@ BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env);
 BOOL isWIDCOMMBluetoothStackPresent(JNIEnv *env);
 BOOL isBlueSoleilBluetoothStackPresent(JNIEnv *env);
 
+#define cSTACK_CLOSED "Stack closed"
+#define cCONNECTION_CLOSED "Connection closed"
+#define cCONNECTION_IS_CLOSED "Connection is closed"
+
 jint getDeviceClassByOS(JNIEnv *env);
 
 #define MAGIC_1 0xBC1AA01

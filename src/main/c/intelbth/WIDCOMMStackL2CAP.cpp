@@ -246,7 +246,7 @@ void open_l2server_finally(JNIEnv *env, WIDCOMMStackL2CapConn* l2c) {
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerOpenImpl
 (JNIEnv *env, jobject, jbyteArray uuidValue, jboolean authenticate, jboolean encrypt, jstring name, jint receiveMTU, jint transmitMTU) {
 	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	EnterCriticalSection(&stack->csCRfCommIf);
@@ -337,7 +337,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 		return 0;
 	}
 	if (l2c->sdpService == NULL) {
-		_throwIOException(env, "Connection closed");
+		_throwIOException(env, cCONNECTION_CLOSED);
 		return 0;
 	}
 	if (l2c->isClientOpen) {
@@ -348,9 +348,17 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 				_throwRuntimeException(env, "WaitForSingleObject");
 				return 0;
 			}
+			if (isCurrentThreadInterrupted(env, peer)) {
+				debug("Interrupted while waiting for connections");
+				return 0;
+			}
 		}
-		if ((stack == NULL) || (l2c->sdpService == NULL)) {
-			_throwIOException(env, "Connection closed");
+		if (stack == NULL) {
+			_throwIOException(env, cSTACK_CLOSED);
+			return 0;
+		}
+		if (l2c->sdpService == NULL) {
+			_throwInterruptedIOException(env, cCONNECTION_CLOSED);
 			return 0;
 		}
 	}
@@ -381,11 +389,11 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 		}
 	}
 	if (stack == NULL) {
-		_throwIOException(env, "Connection closed");
+		_throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	if (l2c->sdpService == NULL) {
-		_throwInterruptedIOException(env, "Connection closed");
+		_throwInterruptedIOException(env, cCONNECTION_CLOSED);
 		return 0;
 	}
 
@@ -450,8 +458,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2RemoteA
 	if (l2c == NULL) {
 		return 0;
 	}
-	if (!l2c->isConnected ) {
-		_throwIOException(env, "connection is closed");
+	if (!l2c->isConnected) {
+		_throwIOException(env, cCONNECTION_IS_CLOSED);
 		return 0;
 	}
 	#ifdef _WIN32_WCE
@@ -474,7 +482,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Read
 	}
 	if (!l2c->isConnected) {
 		debug("->l2Ready()");
-		_throwIOException(env, "connection is closed");
+		_throwIOException(env, cCONNECTION_IS_CLOSED);
 		return JNI_FALSE;
 	}
 	return JNI_FALSE;
@@ -489,7 +497,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 		return 0;
 	}
 	if ((!l2c->isConnected ) && (l2c->receiveBuffer.available() < sizeof(UINT16))) {
-		_throwIOException(env, "Failed to read from closed connection");
+		_throwIOException(env, cCONNECTION_IS_CLOSED);
 		return 0;
 	}
 	if (l2c->receiveBuffer.isOverflown()) {
@@ -517,7 +525,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 		}
 	}
 	if ((stack == NULL) || ((!l2c->isConnected) && (l2c->receiveBuffer.available() <= paketLengthSize)) ) {
-		_throwIOException(env, "Connection closed");
+		_throwIOException(env, cCONNECTION_CLOSED);
 		return 0;
 	}
 
@@ -572,7 +580,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Send
 		return;
 	}
 	if (!l2c->isConnected ) {
-		_throwIOException(env, "Failed to write to closed connection");
+		_throwIOException(env, cCONNECTION_IS_CLOSED);
 		return;
 	}
 	jbyte *bytes = env->GetByteArrayElements(data, 0);

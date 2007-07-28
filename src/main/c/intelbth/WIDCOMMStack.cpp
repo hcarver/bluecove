@@ -892,7 +892,7 @@ WIDCOMMStackRfCommPort* WIDCOMMStack::createCommPort(BOOL server) {
 
 WIDCOMMStackRfCommPort* validRfCommHandle(JNIEnv *env, jlong handle) {
 	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return NULL;
 	}
 	return (WIDCOMMStackRfCommPort*)stack->commPool->getObject(env, handle, 'r');
@@ -916,7 +916,7 @@ WIDCOMMStackL2CapConn* WIDCOMMStack::createL2CapConn() {
 
 WIDCOMMStackL2CapConn* validL2CapConnHandle(JNIEnv *env, jlong handle) {
 	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return NULL;
 	}
 	return (WIDCOMMStackL2CapConn*)stack->commPool->getObject(env, handle, 'l');
@@ -1153,7 +1153,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getConnec
 		return 0;
 	}
 	if (!rf->isConnected || rf->isClosing) {
-		throwIOException(env, "Connection is closed");
+		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return 0;
 	}
 	BD_ADDR connected_bd_addr;
@@ -1322,7 +1322,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		return;
 	}
 	if (!rf->isConnected || rf->isClosing) {
-		throwIOException(env, "Failed to write to closed connection");
+		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return;
 	}
 
@@ -1361,7 +1361,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		return;
 	}
 	if (!rf->isConnected || rf->isClosing) {
-		throwIOException(env, "Failed to write to closed connection");
+		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return;
 	}
 
@@ -1432,7 +1432,7 @@ void open_server_finally(JNIEnv *env, WIDCOMMStackRfCommPortServer* rf) {
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerOpenImpl
 (JNIEnv *env, jobject peer, jbyteArray uuidValue, jbyteArray uuidValue2, jstring name, jboolean authenticate, jboolean encrypt) {
     if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	EnterCriticalSection(&stack->csCRfCommIf);
@@ -1576,7 +1576,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 		return 0;
 	}
 	if (rf->sdpService == NULL) {
-		throwIOException(env, "Connection closed");
+		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return 0;
 	}
 
@@ -1590,11 +1590,11 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 			}
 		}
 		if (stack == NULL) {
-			throwIOException(env, "Connection closed");
+			throwIOException(env, cSTACK_CLOSED);
 			return 0;
 		}
 		if (rf->sdpService == NULL) {
-			_throwInterruptedIOException(env, "Connection closed");
+			_throwInterruptedIOException(env, cCONNECTION_CLOSED);
 			return 0;
 		}
 		//Sleep(200);
@@ -1625,9 +1625,9 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 
 	if ((stack == NULL) || rf->isClosing || rf->isConnectionError || (rf->sdpService == NULL)) {
 		if (stack == NULL) {
-			throwIOException(env, "Connection closed");
+			throwIOException(env, cSTACK_CLOSED);
 		} else if (rf->isClosing || (rf->sdpService == NULL)) {
-			_throwInterruptedIOException(env, "Connection closed");
+			_throwInterruptedIOException(env, cCONNECTION_CLOSED);
 			return 0;
 		} else if (rf->isConnectionError) {
 			throwIOException(env, "Connection error");
@@ -1687,7 +1687,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
 	    sdpService = l2c->sdpService;
 	}
 	if (sdpService == NULL) {
-		throwException(env, "javax/bluetooth/ServiceRegistrationException", "closed connection");
+		throwException(env, "javax/bluetooth/ServiceRegistrationException", cCONNECTION_IS_CLOSED);
 		return;
 	}
 
