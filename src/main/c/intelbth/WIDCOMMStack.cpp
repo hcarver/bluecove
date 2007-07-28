@@ -1544,7 +1544,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerAcceptAndOpenRfServerConnection
-(JNIEnv *env, jobject, jlong handle) {
+(JNIEnv *env, jobject peer, jlong handle) {
 	WIDCOMMStackRfCommPortServer* rf = (WIDCOMMStackRfCommPortServer*)validRfCommHandle(env, handle);
 	if (rf == NULL) {
 		return 0;
@@ -1585,6 +1585,10 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 		DWORD  rc = WaitForSingleObject(rf->hConnectionEvent, 500);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForSingleObject");
+			return 0;
+		}
+		if (isCurrentThreadInterrupted(env, peer)) {
+			debug("Interrupted while waiting for connections");
 			return 0;
 		}
 	}

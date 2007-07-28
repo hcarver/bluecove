@@ -71,6 +71,13 @@ public class BluetoothStackOSX implements BluetoothStack {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
+	 */
+	public boolean isCurrentThreadInterruptedCallback() {
+		return Thread.interrupted();
+	}
+	
 	// ---------------------- LocalDevice ----------------------
 
 	public String getLocalDeviceBluetoothAddress() throws BluetoothStateException {

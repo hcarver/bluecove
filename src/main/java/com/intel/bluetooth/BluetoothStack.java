@@ -68,6 +68,8 @@ public interface BluetoothStack {
 	
 	public String getStackID();
 	
+	public boolean isCurrentThreadInterruptedCallback();
+	
 	//---------------------- LocalDevice ----------------------
 	
 	/**

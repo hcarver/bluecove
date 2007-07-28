@@ -225,6 +225,13 @@ public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothS
 		}
 		return null;
 	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
+	 */
+	public boolean isCurrentThreadInterruptedCallback() {
+		return Thread.interrupted();
+	}
 
 	//	 --- Device Inquiry
 

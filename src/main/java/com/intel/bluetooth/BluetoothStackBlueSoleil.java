@@ -157,6 +157,12 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
+	 */
+	public boolean isCurrentThreadInterruptedCallback() {
+		return Thread.interrupted();
+	}
 // --- Device Inquiry
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
@@ -403,4 +409,5 @@ public class BluetoothStackBlueSoleil implements BluetoothStack {
 	public long l2RemoteAddress(long handle) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
+
 }

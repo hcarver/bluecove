@@ -144,7 +144,7 @@ void open_l2client_finally(WIDCOMMStackL2CapConn* l2c) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenClientConnectionImpl
-(JNIEnv *env, jobject, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint receiveMTU, jint transmitMTU) { 
+(JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint receiveMTU, jint transmitMTU) { 
 	BD_ADDR bda;
 	LongToBcAddr(address, bda);
 
@@ -331,7 +331,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerO
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerAcceptAndOpenServerConnection
-(JNIEnv *env, jobject, jlong handle) {
+(JNIEnv *env, jobject peer, jlong handle) {
 	WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
 	if (l2c == NULL) {
 		return 0;
@@ -374,6 +374,10 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 		if ((stack != NULL) && (incomingConnectionCountWas != l2c->incomingConnectionCount)) {
 			debugs("L2CAP server incomingConnectionCount %i", l2c->incomingConnectionCount);
 			incomingConnectionCountWas = l2c->incomingConnectionCount;
+		}
+		if (isCurrentThreadInterrupted(env, peer)) {
+			debug("Interrupted while waiting for connections");
+			return 0;
 		}
 	}
 	if ((stack == NULL) || (l2c->sdpService == NULL)) {

@@ -201,6 +201,8 @@ char* waitResultsString(DWORD rc);
 
 BOOL ExceptionCheckCompatible(JNIEnv *env);
 
+BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer);
+
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid);
 void convertGUIDToUUIDBytes(GUID *uuid, jbyte *bytes);
 

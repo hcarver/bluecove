@@ -239,6 +239,24 @@ BOOL ExceptionCheckCompatible(JNIEnv *env) {
 	}
 }
 
+BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer) {
+	jclass peerClass = env->GetObjectClass(peer);
+	if (peerClass == NULL) {
+		throwRuntimeException(env, "Fail to get Object Class");
+		return TRUE;
+	}
+	jmethodID aMethod = env->GetMethodID(peerClass, "isCurrentThreadInterruptedCallback", "()Z");
+	if (aMethod == NULL) {
+		throwRuntimeException(env, "Fail to get MethodID isCurrentThreadInterruptedCallback");
+		return TRUE;
+	}
+	if (env->CallBooleanMethod(peer, aMethod)) {
+		throwException(env, "java/io/InterruptedIOException", "thread interrupted");
+		return TRUE;
+	}
+	return FALSE;
+}
+
 jint detectBluetoothStack(JNIEnv *env) {
 	jint rc = 0;
 #ifndef VC6
