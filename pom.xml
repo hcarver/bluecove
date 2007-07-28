@@ -12,7 +12,7 @@
     <version>2.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <url>http://sourceforge.net/projects/bluecove/</url>
+    <url>http://code.google.com/p/bluecove/</url>
     <!--url>http://bluecove.sourceforge.net/</url-->
 
     <name>bluecove</name>
@@ -22,7 +22,7 @@
 
     <organization>
         <name>BlueCove Team</name>
-        <url>http://code.google.com/p/bluecove/</url>
+        <url>http://bluecove.sourceforge.net/</url>
     </organization>
     <inceptionYear>2004</inceptionYear>
 
