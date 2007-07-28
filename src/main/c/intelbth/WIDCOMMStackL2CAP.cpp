@@ -478,7 +478,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Read
 
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
-(JNIEnv *env, jobject, jlong handle, jbyteArray inBuf) {
+(JNIEnv *env, jobject peer, jlong handle, jbyteArray inBuf) {
 	debug("->receive(byte[])");
 	WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
 	if (l2c == NULL) {
@@ -507,6 +507,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 			return 0;
 		}
 		debug1("receive[] waits returns %s", waitResultsString(rc));
+		if (isCurrentThreadInterrupted(env, peer)) {
+			debug("Interrupted while receiving");
+			return 0;
+		}
 	}
 	if ((stack == NULL) || ((!l2c->isConnected) && (l2c->receiveBuffer.available() <= paketLengthSize)) ) {
 		_throwIOException(env, "Connection closed");

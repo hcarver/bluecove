@@ -254,7 +254,7 @@ BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer) {
 		throwException(env, "java/io/InterruptedIOException", "thread interrupted");
 		return TRUE;
 	}
-	return FALSE;
+	return ExceptionCheckCompatible(env);
 }
 
 jint detectBluetoothStack(JNIEnv *env) {

@@ -1189,6 +1189,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			throwRuntimeException(env, "WaitForMultipleObjects");
 			return 0;
 		}
+		if (isCurrentThreadInterrupted(env, peer)) {
+			debug("Interrupted while reading");
+			return 0;
+		}
 		/*
 		if (rf->other_event_code != 0) {
 			debug1("connectionEvent %i", rf->other_event_code);
@@ -1238,6 +1242,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 				return 0;
 			}
 			debug1("read waits returns %s", waitResultsString(rc));
+			if (isCurrentThreadInterrupted(env, peer)) {
+				debug("Interrupted while reading");
+				return 0;
+			}
 		}
 		if (stack == NULL) {
 			env->ReleaseByteArrayElements(b, bytes, 0);
@@ -1328,6 +1336,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		if (written == 0) {
 			debug("write(int) write again");
 		}
+		if (isCurrentThreadInterrupted(env, peer)) {
+			debug("Interrupted while writing");
+			return;
+		}
 	}
 }
 
@@ -1365,6 +1377,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			return;
 		}
 		done += written;
+		if (isCurrentThreadInterrupted(env, peer)) {
+			debug("Interrupted while writing");
+			return;
+		}
 	}
 
 	env->ReleaseByteArrayElements(b, bytes, 0);
