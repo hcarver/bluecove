@@ -871,7 +871,7 @@ void printCOMEvtMask(JNIEnv *env, DWORD dwEvtMask) {
 	}
 }
 
-int waitBytesAvailable(JNIEnv *env, BlueSoleilCOMPort* rf) {
+int waitBytesAvailable(JNIEnv *env, jobject peer, BlueSoleilCOMPort* rf) {
 
 	HANDLE hEvents[2];
 	hEvents[0] = rf->hCloseEvent;
@@ -910,6 +910,10 @@ int waitBytesAvailable(JNIEnv *env, BlueSoleilCOMPort* rf) {
 		}
 		rf->clearCommError();
 		printCOMSTAT(env, &(rf->comStat));
+		if (isCurrentThreadInterrupted(env, peer)) {
+			debug("Interrupted while reading");
+			return -1;
+		}
 	}
 	if (rf->isClosing) {
 		throwIOException(env, "Connection is closed");
@@ -937,7 +941,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	}
 	rf->tInc();
 	//printCOMSTAT(env, &(rf->comStat));
-	int avl = waitBytesAvailable(env, rf);
+	int avl = waitBytesAvailable(env, peer, rf);
 	if ((avl == -1) || (avl == 0)) {
 		rf->tDec();
 		return -1;
@@ -967,10 +971,14 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 					return -1;
 				}
 				debug("read WaitForMultipleObjects");
-				DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+				DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, 500);
 				if (rc == WAIT_FAILED) {
 					throwRuntimeException(env, "WaitForMultipleObjects");
 					rf->tDec();
+					return -1;
+				}
+				if (isCurrentThreadInterrupted(env, peer)) {
+					debug("Interrupted while reading");
 					return -1;
 				}
 				rf->clearCommError();
@@ -1014,7 +1022,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 	hEvents[1] = rf->ovlRead.hEvent;
 
 	while (!rf->isClosing && (!rf->receivedEOF) && (done < len)) {
-		int avl = waitBytesAvailable(env, rf);
+		int avl = waitBytesAvailable(env, peer, rf);
 		if (avl == -1) {
 			rf->tDec();
 			return -1;
@@ -1041,13 +1049,17 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 					rf->tDec();
 					return -1;
 				}
-				DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+				DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, 500);
 				if (rc == WAIT_FAILED) {
 					throwRuntimeException(env, "WaitForMultipleObjects");
 					rf->tDec();
 					return -1;
 				}
 				rf->clearCommError();
+				if (isCurrentThreadInterrupted(env, peer)) {
+					debug("Interrupted while reading");
+					return -1;
+				}
 			}
 		}
 		rf->clearCommError();
@@ -1179,20 +1191,28 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 			rf->tDec();
 			return;
 		}
-		DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
-		if (rc == WAIT_FAILED) {
-			throwRuntimeException(env, "WaitForMultipleObjects");
-			rf->tDec();
-			return;
-		}
-		if ((!rf->isClosing) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlWrite), &numberOfBytesWritten, FALSE))) {
-			last_error = GetLastError();
-			if ((last_error != ERROR_SUCCESS) && (last_error != ERROR_IO_PENDING)) {
-				debug2("connection handle [%i] [%p]", handle, rf->hComPort);
-				throwIOExceptionWinErrorMessage(env, "Failed to write byte overlapped", last_error);
+		BOOL wait = TRUE;
+		while (wait) {
+			DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, 500);
+			if (rc == WAIT_FAILED) {
+				throwRuntimeException(env, "WaitForMultipleObjects");
 				rf->tDec();
 				return;
 			}
+			if ((!rf->isClosing) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlWrite), &numberOfBytesWritten, FALSE))) {
+				last_error = GetLastError();
+				if ((last_error != ERROR_SUCCESS) && (last_error != ERROR_IO_PENDING)) {
+					debug2("connection handle [%i] [%p]", handle, rf->hComPort);
+					throwIOExceptionWinErrorMessage(env, "Failed to write byte overlapped", last_error);
+					rf->tDec();
+					return;
+				}
+			}
+			if (isCurrentThreadInterrupted(env, peer)) {
+				debug("Interrupted while writing");
+				return;
+			}
+			wait = (rc != WAIT_TIMEOUT);
 		}
 	}
 	if (numberOfBytesWritten != 1) {
@@ -1238,21 +1258,29 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
 				rf->tDec();
 				return;
 			}
-			DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
-			if (rc == WAIT_FAILED) {
-				throwRuntimeException(env, "WaitForMultipleObjects");
-				rf->tDec();
-				return;
-			}
-			if ((!rf->isClosing) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlWrite), &numberOfBytesWritten, FALSE))) {
-				DWORD last_error = GetLastError();
-				if ((last_error == ERROR_SUCCESS) && (last_error != ERROR_IO_PENDING)) {
-					env->ReleaseByteArrayElements(b, bytes, 0);
-					debug2("connection handle [%i] [%p]", handle, rf->hComPort);
-					throwIOExceptionWinErrorMessage(env, "Failed to write array overlapped", last_error);
+			BOOL wait = TRUE;
+			while (wait) {
+				DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, 500);
+				if (rc == WAIT_FAILED) {
+					throwRuntimeException(env, "WaitForMultipleObjects");
 					rf->tDec();
 					return;
 				}
+				if ((!rf->isClosing) && (!GetOverlappedResult(rf->hComPort, &(rf->ovlWrite), &numberOfBytesWritten, FALSE))) {
+					DWORD last_error = GetLastError();
+					if ((last_error == ERROR_SUCCESS) && (last_error != ERROR_IO_PENDING)) {
+						env->ReleaseByteArrayElements(b, bytes, 0);
+						debug2("connection handle [%i] [%p]", handle, rf->hComPort);
+						throwIOExceptionWinErrorMessage(env, "Failed to write array overlapped", last_error);
+						rf->tDec();
+						return;
+					}
+				}
+				if (isCurrentThreadInterrupted(env, peer)) {
+					debug("Interrupted while writing");
+					return;
+				}
+				wait = (rc != WAIT_TIMEOUT);
 			}
 		}
 		if (numberOfBytesWritten <= 0) {
@@ -1419,7 +1447,7 @@ void BlueSoleilSPPExService::SPPEXConnectionCallback(BYTE* lpBdAddr, UCHAR ucSta
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServerAcceptAndOpenRfServerConnection
-(JNIEnv *env, jobject, jlong handle) {
+(JNIEnv *env, jobject peer, jlong handle) {
 	BlueSoleilSPPExService* srv = validServiceHandle(env, handle);
 	if (srv == NULL) {
 		return 0;
@@ -1446,15 +1474,27 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
 		} else if (rc != WAIT_TIMEOUT) {
 			debug1("server prev connection close, waits returns %s", waitResultsString(rc));
 		}
-		if ((stack == NULL) || (srv->isClosing)) {
+		if (stack == NULL) {
 			throwIOException(env, "Connection closed");
+			return 0;
+		}
+		if (srv->isClosing) {
+			_throwInterruptedIOException(env, "Connection closed");
+			return 0;
+		}
+		if (isCurrentThreadInterrupted(env, peer)) {
+			debug("Interrupted while waiting for connections");
 			return 0;
 		}
 	}
 
+    BOOL debugOnce = TRUE;
 	while ((stack != NULL) && (!srv->isConnected)) {
-		debug("server waits for connection");
-		DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		if (debugOnce) {
+		    debug("server waits for connection");
+		    debugOnce = FALSE;
+	    }
+		DWORD rc = WaitForMultipleObjects(2, hEvents, FALSE, 500);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForMultipleObjects");
 			return 0;
@@ -1462,11 +1502,19 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
 			debug("hCloseEvent became signaled");
 		} else if (rc == WAIT_OBJECT_0 + 1) {
 			debug1("hConnectionEvent became signaled, isConnected=%s", bool2str(srv->isConnected));
-		} else {
+		} else if (rc != WAIT_TIMEOUT) {
 			debug1("server waits returns %s", waitResultsString(rc));
 		}
-		if ((stack == NULL) || (srv->isClosing)) {
+		if (stack == NULL) {
 			throwIOException(env, "Connection closed");
+			return 0;
+		}
+		if (srv->isClosing) {
+			_throwInterruptedIOException(env, "Connection closed");
+			return 0;
+		}
+		if (isCurrentThreadInterrupted(env, peer)) {
+			debug("Interrupted while waiting for connections");
 			return 0;
 		}
 	}

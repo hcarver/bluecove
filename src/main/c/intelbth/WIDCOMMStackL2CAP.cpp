@@ -380,8 +380,12 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 			return 0;
 		}
 	}
-	if ((stack == NULL) || (l2c->sdpService == NULL)) {
+	if (stack == NULL) {
 		_throwIOException(env, "Connection closed");
+		return 0;
+	}
+	if (l2c->sdpService == NULL) {
+		_throwInterruptedIOException(env, "Connection closed");
 		return 0;
 	}
 

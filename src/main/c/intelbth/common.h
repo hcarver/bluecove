@@ -166,6 +166,9 @@ void throwExceptionExt(JNIEnv *env, const char *name, const char *fmt, ...);
 void throwIOException(JNIEnv *env, const char *msg);
 #define _throwIOException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwIOException(env, msg); }
 
+void throwInterruptedIOException(JNIEnv *env, const char *msg);
+#define _throwInterruptedIOException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwInterruptedIOException(env, msg); }
+
 void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...);
 
 void throwBluetoothStateException(JNIEnv *env, const char *msg);

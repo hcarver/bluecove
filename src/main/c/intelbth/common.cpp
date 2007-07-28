@@ -30,6 +30,7 @@ static jclass nativeDebugListenerClass;
 static jmethodID nativeDebugMethod = NULL;
 
 static const char* cIOException = "java/io/IOException";
+static const char* cInterruptedIOException = "java/io/InterruptedIOException";
 static const char* cBluetoothStateException = "javax/bluetooth/BluetoothStateException";
 static const char* cBluetoothConnectionException = "javax/bluetooth/BluetoothConnectionException";
 
@@ -122,6 +123,10 @@ void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...) {
 	va_start(ap, fmt);
 	_vthrowExceptionExt(env, cIOException, fmt, ap);
 	va_end(ap);
+}
+
+void throwInterruptedIOException(JNIEnv *env, const char *msg) {
+	throwException(env, cInterruptedIOException, msg);
 }
 
 void throwBluetoothStateException(JNIEnv *env, const char *msg) {
@@ -251,7 +256,7 @@ BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer) {
 		return TRUE;
 	}
 	if (env->CallBooleanMethod(peer, aMethod)) {
-		throwException(env, "java/io/InterruptedIOException", "thread interrupted");
+		throwException(env, cInterruptedIOException, "thread interrupted");
 		return TRUE;
 	}
 	return ExceptionCheckCompatible(env);

@@ -1182,9 +1182,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	HANDLE hEvents[2];
 	hEvents[0] = rf->hConnectionEvent;
 	hEvents[1] = rf->hDataReceivedEvent;
+	BOOL debugOnce = TRUE;
 	while ((stack != NULL) && rf->isConnected && (!rf->isClosing) && (rf->receiveBuffer.available() == 0)) {
-		debug("read() waits for data");
-		DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		if (debugOnce) {
+			debug("read() waits for data");
+			debugOnce = FALSE;
+		}
+		DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, 500);
 		if (rc == WAIT_FAILED) {
 			throwRuntimeException(env, "WaitForMultipleObjects");
 			return 0;
@@ -1232,16 +1236,22 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 
 	int done = 0;
 
+	BOOL debugOnce = TRUE;
 	while ((stack != NULL) && rf->isConnected && (!rf->isClosing) && (done < len)) {
 		while ((stack != NULL) && rf->isConnected  && (!rf->isClosing) && (rf->receiveBuffer.available() == 0)) {
-			debug("read[] waits for data");
-			DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+			if (debugOnce) {
+				debug("read[] waits for data");
+				debugOnce = FALSE;
+			}
+			DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, 500);
 			if (rc == WAIT_FAILED) {
 				env->ReleaseByteArrayElements(b, bytes, 0);
 				throwRuntimeException(env, "WaitForMultipleObjects");
 				return 0;
 			}
-			debug1("read waits returns %s", waitResultsString(rc));
+			if (rc != WAIT_TIMEOUT) {
+				debug1("read waits returns %s", waitResultsString(rc));
+			}
 			if (isCurrentThreadInterrupted(env, peer)) {
 				debug("Interrupted while reading");
 				return 0;
@@ -1579,8 +1589,12 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 				return 0;
 			}
 		}
-		if ((stack == NULL) || (rf->sdpService == NULL)) {
+		if (stack == NULL) {
 			throwIOException(env, "Connection closed");
+			return 0;
+		}
+		if (rf->sdpService == NULL) {
+			_throwInterruptedIOException(env, "Connection closed");
 			return 0;
 		}
 		//Sleep(200);
@@ -1610,8 +1624,11 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 	}
 
 	if ((stack == NULL) || rf->isClosing || rf->isConnectionError || (rf->sdpService == NULL)) {
-		if ((stack == NULL) || rf->isClosing || (rf->sdpService == NULL)) {
+		if (stack == NULL) {
 			throwIOException(env, "Connection closed");
+		} else if (rf->isClosing || (rf->sdpService == NULL)) {
+			_throwInterruptedIOException(env, "Connection closed");
+			return 0;
 		} else if (rf->isConnectionError) {
 			throwIOException(env, "Connection error");
 		} else {
