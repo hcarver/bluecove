@@ -9,6 +9,8 @@
  */
 package javax.obex;
 
+import com.intel.bluetooth.obex.OBEXSessionBase;
+
 /**
  * The <code>ServerRequestHandler</code> class defines an event listener that
  * will respond to OBEX requests made to the server.
@@ -47,11 +49,13 @@ package javax.obex;
  */
 public class ServerRequestHandler {
 
+	private long connectionID;
+	
 	/**
 	 * Creates a ServerRequestHandler.
 	 */
 	protected ServerRequestHandler() {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		connectionID = -1;
 	}
 
 	/**
@@ -62,7 +66,7 @@ public class ServerRequestHandler {
 	 *         operations
 	 */
 	public final HeaderSet createHeaderSet() {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		return OBEXSessionBase.createOBEXHeaderSet();
 	}
 
 	/**
@@ -76,7 +80,10 @@ public class ServerRequestHandler {
 	 *                if <code>id</code> is not in the range -1 to 2<sup>32</sup>-1
 	 */
 	public void setConnectionID(long id) {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		if ((id != -1) && ((id < 0 || id > 0xffffffffl))) {
+			throw new IllegalArgumentException("Invalid connectionID " + id);
+		}
+		this.connectionID = id;
 	}
 
 	/**
@@ -87,7 +94,7 @@ public class ServerRequestHandler {
 	 *         used
 	 */
 	public long getConnectionID() {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		return this.connectionID;
 	}
 
 	/**
@@ -115,7 +122,7 @@ public class ServerRequestHandler {
 	 *         code will be used
 	 */
 	public int onConnect(HeaderSet request, HeaderSet reply) {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		return ResponseCodes.OBEX_HTTP_OK;
 	}
 
 	/**
@@ -134,7 +141,6 @@ public class ServerRequestHandler {
 	 *            <code>reply</code> will never be <code>null</code>
 	 */
 	public void onDisconnect(HeaderSet request, HeaderSet reply) {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
 	}
 
 	/**
@@ -174,7 +180,7 @@ public class ServerRequestHandler {
 	 *         code will be used
 	 */
 	public int onSetPath(HeaderSet request, HeaderSet reply, boolean backup, boolean create) {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		return ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED;
 	}
 
 	/**
@@ -202,7 +208,7 @@ public class ServerRequestHandler {
 	 *         code will be used
 	 */
 	public int onDelete(HeaderSet request, HeaderSet reply) {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		return ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED;
 	}
 
 	/**
@@ -226,7 +232,7 @@ public class ServerRequestHandler {
 	 *         code will be used
 	 */
 	public int onPut(Operation op) {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		return ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED;
 	}
 
 	/**
@@ -250,7 +256,7 @@ public class ServerRequestHandler {
 	 *         code will be used
 	 */
 	public int onGet(Operation op) {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
+		return ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED;
 	}
 
 	/**
@@ -267,6 +273,5 @@ public class ServerRequestHandler {
 	 *            response
 	 */
 	public void onAuthenticationFailure(byte[] userName) {
-		throw new RuntimeException("Not Implemented! Used to compile Code");
 	}
 }

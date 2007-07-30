@@ -53,6 +53,8 @@ public class BluetoothConsts {
 	
 	public static final  int L2CAP_PSM_MAX = 0xFFFF;
 	
+	public static final int TCP_OBEX_DEFAULT_PORT = 650;
+	
 	static Hashtable obexUUIDs = new Hashtable();
 	
 	private static void addObex(int uuid) {

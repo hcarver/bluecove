@@ -31,7 +31,6 @@ import javax.bluetooth.DataElement;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
-import javax.bluetooth.L2CAPConnection;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
@@ -457,12 +456,13 @@ public class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException {
 		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
-		long handle = rfServerOpenImpl(uuidValue, Utils.UUIDToByteArray(BluetoothConsts.SERIAL_PORT_UUID), params.name, params.authenticate, params.encrypt);
+		byte[] uuidValue2 = Utils.UUIDToByteArray(params.obex?BluetoothConsts.OBEX_PROTOCOL_UUID:BluetoothConsts.SERIAL_PORT_UUID);
+		long handle = rfServerOpenImpl(uuidValue, uuidValue2, params.name, params.authenticate, params.encrypt);
 		int channel = rfServerSCN(handle);
 		DebugLog.debug("serverSCN", channel);
 		int serviceRecordHandle = (int)handle;
 
-		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, params.uuid, params.name, false);
+		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, params.uuid, params.name, params.obex);
 
 		return handle;
 	}

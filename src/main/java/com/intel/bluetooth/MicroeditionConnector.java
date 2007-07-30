@@ -175,7 +175,8 @@ public class MicroeditionConnector {
 			throw new ConnectionNotFoundException(scheme);
 		}
 		boolean schemeBluetooth = (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM)) || (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX) || (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)));
-		boolean isL2CAP = scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP);		
+		boolean isL2CAP = scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP);
+		boolean isTCPOBEX = scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX);
 		
 		boolean isServer;
 		
@@ -186,7 +187,10 @@ public class MicroeditionConnector {
 			isServer = host.equals("localhost");
 			
 			Hashtable params;
-			if (isL2CAP) {
+			if (isTCPOBEX) {
+				params = new Hashtable();
+				isServer = (host.length() == 0);
+			} else if (isL2CAP) {
 				if (isServer) {
 					params = srvParamsL2CAP;
 				} else {
@@ -223,8 +227,15 @@ public class MicroeditionConnector {
 					throw new IllegalArgumentException("invalid param [" + t +"]");
 				}
 			}
+		} else if (isTCPOBEX) {
+			isServer = true;
+			host = "";
 		} else {
 			throw new IllegalArgumentException(name.substring(scheme.length() + 3));
+		}
+		
+		if ((isTCPOBEX)  && ((portORuuid == null) || portORuuid.length() == 0)) {
+			portORuuid = String.valueOf(BluetoothConsts.TCP_OBEX_DEFAULT_PORT); 
 		}
 
 		if (host == null || portORuuid == null) {
@@ -294,7 +305,8 @@ public class MicroeditionConnector {
 			}
 		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX)) {
 			if (isServer) {
-				return new OBEXSessionNotifierImpl(notifierParams);
+				notifierParams.obex = true;
+				return new OBEXSessionNotifierImpl(new BluetoothStreamConnectionNotifier(notifierParams));
 			} else {
 				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(connectionParams)); 
 			}
@@ -308,7 +320,12 @@ public class MicroeditionConnector {
 			}
 		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX)) {
 			if (isServer) {
-				throw new ConnectionNotFoundException(scheme);
+				try {
+					channel = Integer.parseInt(portORuuid);
+				} catch (NumberFormatException e) {
+					throw new IllegalArgumentException("port " + portORuuid);
+				}
+				return new OBEXSessionNotifierImpl(new ServerSocketConnection(channel));
 			} else {
 				return new OBEXClientSessionImpl(new SocketConnection(host, channel)); 
 			}

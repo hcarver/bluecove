@@ -38,6 +38,8 @@ public class BluetoothConnectionNotifierParams {
 	
 	boolean master;
 
+	boolean obex;
+	
 	public BluetoothConnectionNotifierParams(UUID uuid, boolean authenticate, boolean encrypt, String name, boolean master) {
 		super();
 		this.uuid = uuid;
@@ -45,5 +47,6 @@ public class BluetoothConnectionNotifierParams {
 		this.encrypt = encrypt;
 		this.name = name;
 		this.master = master;
+		this.obex = false;
 	}
 }
