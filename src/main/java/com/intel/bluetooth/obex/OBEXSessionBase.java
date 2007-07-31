@@ -30,7 +30,7 @@ import javax.obex.HeaderSet;
 
 import com.intel.bluetooth.DebugLog;
 
-abstract class OBEXSessionBase implements Connection {
+public abstract class OBEXSessionBase implements Connection {
 	
 	protected StreamConnection conn;
 	
