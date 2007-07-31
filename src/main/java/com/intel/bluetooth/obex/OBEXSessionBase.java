@@ -63,6 +63,8 @@ public abstract class OBEXSessionBase implements Connection {
 	}
 	
 	public void close() throws IOException {
+		StreamConnection c = this.conn;
+		this.conn = null;
 		if (this.is != null) {
 			this.is.close();
 			this.is = null;
@@ -71,14 +73,13 @@ public abstract class OBEXSessionBase implements Connection {
 			this.os.close();
 			this.os = null;
 		}
-		if (this.conn != null) {
-			this.conn.close();
-			this.conn = null;
+		if (c != null) {
+			c.close();
 		}
 	}
 	
 	protected boolean isClosed() {
-		return (this.conn != null);
+		return (this.conn == null);
 	}
 	
 	public static HeaderSet createOBEXHeaderSet() {

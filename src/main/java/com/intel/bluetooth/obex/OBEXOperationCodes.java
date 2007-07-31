@@ -1,6 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
+ *  Copyright (C) 2007 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -43,9 +43,9 @@ public interface OBEXOperationCodes {
 	
 	public static final char FINAL_BIT = 0x80;
 	
-	public static final char CONNECT = 0x00;
+	public static final char CONNECT = 0x00 | FINAL_BIT;
 
-	public static final char DISCONNECT = 0x01;
+	public static final char DISCONNECT = 0x01 | FINAL_BIT;
 
 	public static final char PUT = 0x02;
 

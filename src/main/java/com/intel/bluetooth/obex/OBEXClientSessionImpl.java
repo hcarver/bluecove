@@ -1,6 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
+ *  Copyright (C) 2007 Vlad Skarzhevskyy
  * 
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -48,7 +48,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 	
 	private boolean isConnected;
 	
-	private Operation operation;
+	private OBEXClientOperation operation;
 	
 	public OBEXClientSessionImpl(StreamConnection conn) throws IOException {
 		super(conn);
@@ -66,7 +66,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		connectRequest[1] = 0; /* Flags */
 		connectRequest[2] = Utils.hiByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
 		connectRequest[3] = Utils.loByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
-		writeOperation(OBEXOperationCodes.CONNECT | OBEXOperationCodes.FINAL_BIT, connectRequest, OBEXHeaderSetImpl.toByteArray(headers));
+		writeOperation(OBEXOperationCodes.CONNECT, connectRequest, OBEXHeaderSetImpl.toByteArray(headers));
 		
 		byte[] b = readOperation();
 		int serverMTU = Utils.bytesToShort(b[5], b[6]);
@@ -108,7 +108,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		if (!isConnected) {
             throw new IOException("Session not connected");
 		}
-		writeOperation(OBEXOperationCodes.DISCONNECT | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(headers));
+		writeOperation(OBEXOperationCodes.DISCONNECT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
 		this.isConnected = false;
 		return OBEXHeaderSetImpl.read(b[0], b, 3);
@@ -138,17 +138,34 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		return OBEXHeaderSetImpl.read(b[0], b, 3);
 	}
 
-	//TODO implement
 	public Operation get(HeaderSet headers) throws IOException {
 		if (!isConnected) {
             throw new IOException("Session not connected");
 		}
-		throw new NotImplementedIOException();
+		if (this.operation != null) {
+			this.operation.close();
+			this.operation = null;
+		}
+		writeOperation(OBEXOperationCodes.GET, OBEXHeaderSetImpl.toByteArray(headers));
+		byte[] b = readOperation();
+		HeaderSet replyHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+		DebugLog.debug0x("GET reply", replyHeaders.getResponseCode());
+		
+		if (replyHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_CONTINUE) {
+			throw new IOException ("Connection not accepted");
+		}
+				
+		this.operation = new OBEXClientOperationGet(this, replyHeaders);
+		return this.operation;
 	}
 
 	public Operation put(HeaderSet headers) throws IOException {
 		if (!isConnected) {
             throw new IOException("Session not connected");
+		}
+		if (this.operation != null) {
+			this.operation.close();
+			this.operation = null;
 		}
 		writeOperation(OBEXOperationCodes.PUT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
@@ -168,7 +185,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
             throw new IOException("Session not connected");
 		}
 		
-		writeOperation(OBEXOperationCodes.PUT, OBEXHeaderSetImpl.toByteArray(headers));
+		writeOperation(OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
 		return OBEXHeaderSetImpl.read(b[0], b, 3);
 	}

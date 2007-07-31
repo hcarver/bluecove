@@ -81,10 +81,8 @@ public class MicroeditionConnector {
 	private static final String  ENCRYPT = "encrypt";
 	private static final String  MASTER = "master";
 	private static final String  NAME = "name";
-	private static final String  RECEIVE_MTU = "ReceiveMTU"; 
-	private static final String  TRANSMIT_MTU = "TransmitMTU";
-	private static final String  RECEIVE_MTU_v2 = "receiveMTU"; 
-	private static final String  TRANSMIT_MTU_v2 = "transmitMTU";
+	private static final String  RECEIVE_MTU = "receivemtu"; 
+	private static final String  TRANSMIT_MTU = "transmitmtu";
 	
 	static {
 	    //cliParams    ::== master | encrypt | authenticate
@@ -101,9 +99,6 @@ public class MicroeditionConnector {
 
 		cliParamsL2CAP.put(RECEIVE_MTU, RECEIVE_MTU);
 		cliParamsL2CAP.put(TRANSMIT_MTU, TRANSMIT_MTU);
-		// Some docs describe lower case names. e.g http://developers.sun.com/mobility/midp/ttips/gcfcs/index.html
-		cliParamsL2CAP.put(RECEIVE_MTU_v2, RECEIVE_MTU);
-		cliParamsL2CAP.put(TRANSMIT_MTU_v2, TRANSMIT_MTU);
 		
 		copyAll(srvParamsL2CAP, cliParamsL2CAP);
 		srvParamsL2CAP.put(AUTHORIZE, AUTHORIZE);
@@ -127,16 +122,9 @@ public class MicroeditionConnector {
 	}
 	
 	static String validParamName(Hashtable map, String paramName) {
-		String validName = (String)map.get(paramName);
+		String validName = (String)map.get(paramName.toLowerCase());
 		if (validName != null) {
 			return validName;
-		}
-		// On J9 Hashtable ignore cases!
-		if (RECEIVE_MTU.equals(paramName)) {
-			return RECEIVE_MTU;
-		}
-		if (TRANSMIT_MTU.equals(paramName)) {
-			return TRANSMIT_MTU;
 		}
 		return null;
 	}
@@ -219,6 +207,10 @@ public class MicroeditionConnector {
 					String value = t.substring(equals + 1);
 					String validName = validParamName(params, param);
 					if (validName != null) {
+						String hasValue = (String)values.get(validName);
+						if ((hasValue != null) && (!hasValue.equals(value))) {
+							throw new IllegalArgumentException("duplicate param [" + param + "] value [" + value +"]");	
+						}
 						values.put(validName, value);
 					} else {
 						throw new IllegalArgumentException("invalid param [" + param + "] value [" + value +"]");
