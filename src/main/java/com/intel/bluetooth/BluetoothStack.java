@@ -29,6 +29,14 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
+/**
+ * New native stack support should ONLY implement this interface. No other
+ * classes should ideally be changed except BlueCoveImpl where the instance of
+ * new class should be created.
+ * 
+ * @author vlads
+ * 
+ */
 public interface BluetoothStack {
 
 	//---------------------- Library initialization ----------------------

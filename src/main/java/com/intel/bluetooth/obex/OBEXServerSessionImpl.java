@@ -30,10 +30,9 @@ import javax.obex.ResponseCodes;
 import javax.obex.ServerRequestHandler;
 
 import com.intel.bluetooth.DebugLog;
-import com.intel.bluetooth.Utils;
 import com.intel.bluetooth.UtilsJavaSE;
 
-public class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runnable {
+class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runnable {
 
 	private ServerRequestHandler handler;
 	
@@ -128,7 +127,7 @@ public class OBEXServerSessionImpl extends OBEXSessionBase implements Connection
 		if (b.length < 7) {
 			throw new IOException("Corrupted OBEX data");
 		}
-		int requestedMTU = Utils.bytesToShort(b[5], b[6]);
+		int requestedMTU = OBEXUtils.bytesToShort(b[5], b[6]);
 		if (requestedMTU < OBEXOperationCodes.OBEX_MINIMUM_MTU) {
 			throw new IOException("Invalid MTU " + requestedMTU);
 		}
@@ -146,8 +145,8 @@ public class OBEXServerSessionImpl extends OBEXSessionBase implements Connection
 		byte[] connectResponse = new byte[4];
 		connectResponse[0] = OBEXOperationCodes.OBEX_VERSION;
 		connectResponse[1] = 0; /* Flags */
-		connectResponse[2] = Utils.hiByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
-		connectResponse[3] = Utils.loByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
+		connectResponse[2] = OBEXUtils.hiByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
+		connectResponse[3] = OBEXUtils.loByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
 		writeOperation(rc, connectResponse, OBEXHeaderSetImpl.toByteArray(replyHeaders));
 		this.isConnected = true;
 	}

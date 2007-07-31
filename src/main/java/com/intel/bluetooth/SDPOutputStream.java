@@ -27,7 +27,7 @@ import java.util.Enumeration;
 import javax.bluetooth.DataElement;
 import javax.bluetooth.UUID;
 
-public class SDPOutputStream extends OutputStream {
+class SDPOutputStream extends OutputStream {
 	
 	OutputStream dst;
 	

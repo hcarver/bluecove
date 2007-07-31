@@ -20,6 +20,12 @@
  */ 
 package com.intel.bluetooth;
 
+/**
+ * Thrown when current implemenation do not implement the functionality.
+ * 
+ * @author vlads
+ *
+ */
 public class NotImplementedError extends Error {
 	
 	private static final long serialVersionUID = 1L;

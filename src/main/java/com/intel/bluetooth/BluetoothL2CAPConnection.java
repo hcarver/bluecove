@@ -29,7 +29,7 @@ import javax.bluetooth.RemoteDevice;
  * @author vlads
  *
  */
-public abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothConnectionAccess {
+abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothConnectionAccess {
 
 	protected volatile long handle;
 	

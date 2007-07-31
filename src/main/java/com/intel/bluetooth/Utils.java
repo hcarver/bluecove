@@ -28,6 +28,11 @@ import java.util.Vector;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
+/**
+ * Conversion and JVM compatibility functions.
+ *  
+ * @author vlads
+ */
 public abstract class Utils {
 
 	public static byte[] UUIDToByteArray(String uuidStringValue) {
@@ -41,7 +46,7 @@ public abstract class Utils {
 		return uuidValue;
 	}
 	
-	public static byte[] UUIDToByteArray(UUID uuid) {
+	static byte[] UUIDToByteArray(UUID uuid) {
 		return UUIDToByteArray(uuid.toString());
 	}
 	
@@ -54,7 +59,7 @@ public abstract class Utils {
 		return buf.toString();
 	}
 	
-	public static int UUIDTo16Bit(UUID uuid) {
+	static int UUIDTo16Bit(UUID uuid) {
 		if (uuid == null) {
 			return -1;
 		}
@@ -67,11 +72,11 @@ public abstract class Utils {
 		return -1;
 	}
 	
-	public static boolean is16Bit(UUID uuid) {
+	static boolean is16Bit(UUID uuid) {
 		return (UUIDTo16Bit(uuid) != -1);
 	}
 	
-	public static int securityOpt(boolean authenticate,	boolean encrypt) {
+	static int securityOpt(boolean authenticate,	boolean encrypt) {
 		int security = ServiceRecord.NOAUTHENTICATE_NOENCRYPT;
 		if (authenticate) {
 			if (encrypt) {
@@ -85,41 +90,11 @@ public abstract class Utils {
 		return security;
 	}
 	
-	public static void readFully(InputStream is, byte[] b) throws IOException, EOFException {
-		readFully(is, b, 0, b.length);
-	}
-	
-	public static void readFully(InputStream is, byte[] b, int off, int len) throws IOException, EOFException {
-		if (len < 0) {
-		    throw new IndexOutOfBoundsException();
-		}
-		int got = 0;
-		while (got < len) {
-			int rc = is.read(b, off + got, len - got);
-			if (rc < 0) {
-				throw new EOFException();
-			}
-			got += rc;
-		}
-	}
-	
-	public static byte hiByte(int value) {
-		return (byte)((value >> 8) & 0xFF);
-	}
-	
-	public static byte loByte(int value) {
-		return (byte)(0xFF & value);
-	}
-
-	public static int bytesToShort(byte valueHi, byte valueLo) {
-		return ((((int)valueHi << 8) & 0xFF00) + (valueLo & 0xFF));
-	}
-	
-	public static boolean isStringSet(String str) {
+	static boolean isStringSet(String str) {
         return ((str != null) && (str.length() > 0));
 	}
 	
-	private static String loadString(InputStream inputstream) {	
+	static String loadString(InputStream inputstream) {	
 		if (inputstream == null) {
 			return null;
 		}
@@ -137,7 +112,7 @@ public abstract class Utils {
 		}
 	}
 	
-	public static String getResourceProperty(Object owner, String resourceName) {
+	static String getResourceProperty(Object owner, String resourceName) {
 		try {
 			String value = loadString(owner.getClass().getResourceAsStream("/" + resourceName));
 			if (value != null) {
@@ -156,11 +131,15 @@ public abstract class Utils {
 	 * J2ME/J9 compatibility instead of Vector.toArray
 	 * 
 	 */
-	public static Object[] vector2toArray(Vector vector, Object[] anArray) {
+	static Object[] vector2toArray(Vector vector, Object[] anArray) {
 		vector.copyInto(anArray);
 		return anArray;
 	}
 	
+	/**
+	 * J2ME/J9 compatibility instead of Long.toHexString
+	 * 
+	 */
 	public static String toHexString(long l) {
 		StringBuffer buf = new StringBuffer();
 		String lo = Integer.toHexString((int)l);
@@ -175,14 +154,14 @@ public abstract class Utils {
 		return buf.toString();
 	}
 	
-	public static void j2meUsagePatternDellay() {
+	static void j2meUsagePatternDellay() {
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 		}
 	}
 	
-	public static class TimerThread extends Thread {
+	static class TimerThread extends Thread {
 		
 		long delay; 
 		
@@ -208,7 +187,7 @@ public abstract class Utils {
 	 * @param delay delay in milliseconds before task is to be executed.
 	 * @param run task to be scheduled.
 	 */
-	public static TimerThread schedule(final long delay, final Runnable run) {
+	static TimerThread schedule(final long delay, final Runnable run) {
 		TimerThread t = new TimerThread(delay, run);
 		UtilsJavaSE.threadSetDaemon(t);
 		t.start();

@@ -26,7 +26,7 @@ import java.io.IOException;
  * @author vlads
  *
  */
-public class BluetoothRFCommClientConnection extends BluetoothRFCommConnection {
+class BluetoothRFCommClientConnection extends BluetoothRFCommConnection {
 
 	public BluetoothRFCommClientConnection(BluetoothConnectionParams params) throws IOException {
 		super(BlueCoveImpl.instance().getBluetoothStack().connectionRfOpenClientConnection(params));

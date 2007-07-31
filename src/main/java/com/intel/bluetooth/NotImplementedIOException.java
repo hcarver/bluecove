@@ -22,6 +22,12 @@ package com.intel.bluetooth;
 
 import java.io.IOException;
 
+/**
+ * Thrown when current implemenation do not implement the functionality.
+ * 
+ * @author vlads
+ *
+ */
 public class NotImplementedIOException extends IOException {
 
 	private static final long serialVersionUID = 1L;

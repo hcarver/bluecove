@@ -31,9 +31,7 @@ import java.util.TimeZone;
 
 import javax.obex.HeaderSet;
 
-import com.intel.bluetooth.Utils;
-
-public class OBEXHeaderSetImpl implements HeaderSet {
+class OBEXHeaderSetImpl implements HeaderSet {
 
 	 /** Number of objects (used by connect) (0xC0)*/
 	static final int OBEX_HDR_COUNT = HeaderSet.COUNT;
@@ -232,8 +230,8 @@ public class OBEXHeaderSetImpl implements HeaderSet {
 		if ((len < 0) || len > 0xFFFF) {
 			throw new IOException("very large data" + len);
 		}
-		b[1] = Utils.hiByte(len);
-		b[2] = Utils.loByte(len);
+		b[1] = OBEXUtils.hiByte(len);
+		b[2] = OBEXUtils.loByte(len);
         out.write(b);
     }
 	
@@ -309,7 +307,7 @@ public class OBEXHeaderSetImpl implements HeaderSet {
 			int len = 0;
 			switch (hi & OBEX_HDR_HI_MASK) {
 			case OBEX_STRING:
-				len = Utils.bytesToShort(buf[off + 1], buf[off + 2]);
+				len = OBEXUtils.bytesToShort(buf[off + 1], buf[off + 2]);
 				if (len == 3) {
 					hs.setHeader(hi, "");
 				} else {
@@ -319,7 +317,7 @@ public class OBEXHeaderSetImpl implements HeaderSet {
 				}
 				break;
 			case OBEX_BYTE_STREAM:
-				len = Utils.bytesToShort(buf[off + 1], buf[off + 2]);
+				len = OBEXUtils.bytesToShort(buf[off + 1], buf[off + 2]);
 				byte data[] = new byte[len - 3];
 				System.arraycopy(buf, off + 3, data, 0, data.length);
 				if (hi == OBEX_HDR_TYPE) {

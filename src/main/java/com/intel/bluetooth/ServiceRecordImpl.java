@@ -34,7 +34,7 @@ import javax.bluetooth.UUID;
 
 import com.intel.bluetooth.BluetoothConsts.DeviceClassConsts;
 
-public class ServiceRecordImpl implements ServiceRecord {
+class ServiceRecordImpl implements ServiceRecord {
 
 	private RemoteDevice device;
 

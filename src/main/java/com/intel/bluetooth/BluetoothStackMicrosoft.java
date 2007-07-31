@@ -34,7 +34,7 @@ import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
-public class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothStack {
+class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothStack {
 
 	boolean peerInitialized = false;
 

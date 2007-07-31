@@ -32,7 +32,7 @@ import com.intel.bluetooth.DebugLog;
  * @author vlads
  *
  */
-public class OBEXServerOperationPut extends OBEXServerOperation {
+class OBEXServerOperationPut extends OBEXServerOperation {
 
 	private OperationInputStream is;
 	

@@ -31,7 +31,6 @@ import javax.obex.Operation;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
 import com.intel.bluetooth.NotImplementedIOException;
-import com.intel.bluetooth.Utils;
 
 /**
  * See <a
@@ -64,12 +63,12 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		byte[] connectRequest = new byte[4];
 		connectRequest[0] = OBEXOperationCodes.OBEX_VERSION;
 		connectRequest[1] = 0; /* Flags */
-		connectRequest[2] = Utils.hiByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
-		connectRequest[3] = Utils.loByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
+		connectRequest[2] = OBEXUtils.hiByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
+		connectRequest[3] = OBEXUtils.loByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
 		writeOperation(OBEXOperationCodes.CONNECT, connectRequest, OBEXHeaderSetImpl.toByteArray(headers));
 		
 		byte[] b = readOperation();
-		int serverMTU = Utils.bytesToShort(b[5], b[6]);
+		int serverMTU = OBEXUtils.bytesToShort(b[5], b[6]);
 		if (serverMTU < OBEXOperationCodes.OBEX_MINIMUM_MTU) {
 			throw new IOException("Invalid MTU " + serverMTU);
 		}

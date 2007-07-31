@@ -29,7 +29,7 @@ import javax.obex.Operation;
 
 import com.intel.bluetooth.NotImplementedError;
 
-public abstract class OBEXClientOperation implements Operation {
+abstract class OBEXClientOperation implements Operation {
 
 	protected OBEXClientSessionImpl session;
 	

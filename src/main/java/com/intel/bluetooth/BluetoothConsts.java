@@ -25,6 +25,12 @@ import java.util.Hashtable;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.UUID;
 
+/**
+ * Constants defined by Bluetooth and JSR-82 specifications
+ * 
+ * @author vlads
+ *
+ */
 public class BluetoothConsts {
 
 	public static final String SHORT_UUID_BASE = "00001000800000805F9B34FB";
@@ -110,8 +116,11 @@ public class BluetoothConsts {
 
 	public static final int VersionNumberList = 0x0200;
 	
+	public static String toString(DeviceClass dc) {
+		return DeviceClassConsts.toString(dc);
+	}
 	
-	public static class DeviceClassConsts {
+	static class DeviceClassConsts {
 		
 		public static final int SERVICE_MASK = 0xffe000;
 

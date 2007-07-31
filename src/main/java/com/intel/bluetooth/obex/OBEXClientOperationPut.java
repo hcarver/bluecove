@@ -28,7 +28,7 @@ import javax.obex.HeaderSet;
 
 import com.intel.bluetooth.DebugLog;
 
-public class OBEXClientOperationPut extends OBEXClientOperation {
+class OBEXClientOperationPut extends OBEXClientOperation {
 
 	protected OperationOutputStream os;
 	

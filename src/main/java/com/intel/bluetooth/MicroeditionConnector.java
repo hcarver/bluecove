@@ -44,7 +44,7 @@ import com.intel.bluetooth.obex.OBEXSessionNotifierImpl;
 
 /**
  * 
- * This is renamed class javax.microedition.io.Connector
+ * Implementation of javax.microedition.io.Connector
  * 
  */
 public class MicroeditionConnector {

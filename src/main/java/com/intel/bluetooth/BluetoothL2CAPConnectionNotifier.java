@@ -34,7 +34,7 @@ import javax.bluetooth.ServiceRegistrationException;
  * @author vlads
  *
  */
-public class BluetoothL2CAPConnectionNotifier implements L2CAPConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
+class BluetoothL2CAPConnectionNotifier implements L2CAPConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
 
 	private volatile long handle;
 

@@ -30,7 +30,7 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
-public class BluetoothStackOSX implements BluetoothStack {
+class BluetoothStackOSX implements BluetoothStack {
 
 	// Used mainly in Unit Tests
 	static {

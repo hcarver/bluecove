@@ -32,10 +32,12 @@ import javax.microedition.io.Connection;
 import com.intel.bluetooth.WeakVectorFactory.WeakVector;
 
 /**
- * @author vlads
- *
+ * Implementation of RemoteDevice.
+ * 
  * Instance of RemoteDevice can be created by User.
- * BlueCove only use RemoteDeviceHelper class to create RemoteDevice instances. 
+ * BlueCove use only RemoteDeviceHelper class to create RemoteDevice instances.
+ *  
+ * @author vlads
  */
 public abstract class RemoteDeviceHelper {
 	

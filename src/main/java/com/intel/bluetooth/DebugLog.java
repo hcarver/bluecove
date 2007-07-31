@@ -26,9 +26,14 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
+ * BlueCove log system. If enabled "-Dbluecove.debug=true" System.out.println would be used for debug.
+ * 
+ * @author vlads
+ *
+ */
+/*
  * The methods of this calls would be removed automaticaly because they are
  * empty if debugCompiledOut = true.
- * 
  * This class itself will disappear from bytecode after obfuscation by proguard.
  * 
  */
@@ -53,6 +58,12 @@ public class DebugLog {
 
 	private static Vector loggerAppenders = new Vector();
 	
+	/**
+	 * Different log system can be injected in BlueCove using DebugLog.addAppender(customLoggerAppender)
+	 * 
+	 * @author vlads
+	 *
+	 */
 	public static interface LoggerAppender {
 		public void appendLog(int level, String message, Throwable throwable);
 	}

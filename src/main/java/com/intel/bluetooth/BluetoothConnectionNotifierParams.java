@@ -26,7 +26,7 @@ import javax.bluetooth.UUID;
  * @author vlads
  *
  */
-public class BluetoothConnectionNotifierParams {
+class BluetoothConnectionNotifierParams {
 	
 	UUID uuid;
 	

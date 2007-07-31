@@ -30,7 +30,7 @@ import javax.bluetooth.ServiceRegistrationException;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
-public class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
+class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
 
 	private volatile long handle;
 

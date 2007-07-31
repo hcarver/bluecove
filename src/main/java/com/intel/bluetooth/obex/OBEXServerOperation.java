@@ -31,7 +31,7 @@ import javax.obex.Operation;
  * @author vlads
  *
  */
-public abstract class OBEXServerOperation implements Operation {
+abstract class OBEXServerOperation implements Operation {
 
 	protected OBEXServerSessionImpl session;
 	

@@ -26,7 +26,7 @@ import java.io.InputStream;
 import javax.bluetooth.DataElement;
 import javax.bluetooth.UUID;
 
-public class SDPInputStream extends InputStream {
+class SDPInputStream extends InputStream {
 	
 	private InputStream source;
 	

@@ -32,6 +32,8 @@ import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
 /**
+ * Implementation of DiscoveryAgent.selectService().
+ * 
  * @author vlads
  *
  */

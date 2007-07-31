@@ -31,7 +31,7 @@ import javax.obex.ResponseCodes;
  * @author vlads
  * 
  */
-public interface OBEXOperationCodes {
+interface OBEXOperationCodes {
 
 	public static final byte OBEX_VERSION = 0x10;  /* OBEX Protocol Version 1.1 */
 	

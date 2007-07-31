@@ -26,6 +26,10 @@ import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 
 /**
+ * Maps ServiceRecord to ConnectionNotifier.
+ * 
+ * USed by ServiceRecordsRegistry.updateServiceRecord().
+ * 
  * @author vlads
  *
  */

@@ -23,8 +23,9 @@ package com.intel.bluetooth;
 import java.io.IOException;
 
 /**
- * @author vlads
+ * Thrown when current native implemenation can't implement the functionality.
  *
+ * @author vlads
  */
 public class NotSupportedIOException extends IOException {
 

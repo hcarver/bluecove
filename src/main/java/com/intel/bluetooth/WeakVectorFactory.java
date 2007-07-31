@@ -31,7 +31,7 @@ import java.util.WeakHashMap;
  * @author vlads
  *
  */
-public class WeakVectorFactory {
+class WeakVectorFactory {
 
 	public static interface WeakVector {
 		

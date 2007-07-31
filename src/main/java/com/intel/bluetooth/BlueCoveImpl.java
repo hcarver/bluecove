@@ -23,15 +23,34 @@ package com.intel.bluetooth;
 
 
 /**
- *
- * Singleton class used as holder for BluetoothPeer instead of LocalDevice
- *
+ * 
+ * Singleton class used as holder for BluetoothStack. 
+ * 
  * All you need to do is initialize BlueCoveImpl inside Privileged context.
- *
- * n/a: Also this class hold Secirity Context to enable work in webstart applications.
- *
+ * <p>
+ * If automatic Bluetooth Stack detection is not enough Java System property
+ * "bluecove.stack" can be used to force desired Stack Initialization. Values
+ * "widcomm", "bluesoleil" or "winsock". By default winsock is selected if
+ * available.
+ * <p>
+ * Another property "bluecove.stack.first" is used optimize stack detection. If
+ * -Dbluecove.stack.first=widcomm then widcomm (bluecove.dll) stack is loaded
+ * first and if not available then BlueCove will switch to winsock. By default
+ * intelbth.dll is loaded first.
+ * <p>
+ * If multiple stacks are detected they are selected in following order:
+ * "winsock", "widcomm", "bluesoleil". Since BlueCove v2.0.1
+ * "bluecove.stack.first" will alter the order of stack selection.
+ * <p>
+ * If System property is not an option (e.g. when running in Webstart) create
+ * text file "bluecove.stack" or "bluecove.stack.first" containing stack name
+ * and add this file to BlueCove or Application jar. (Since v2.0.1)
+ * <p>
+ * Use `LocalDevice.getProperty("bluecove.stack")` to find out which stack is
+ * used.
+ * 
  * @author vlads
- *
+ * 
  */
 public class BlueCoveImpl {
 

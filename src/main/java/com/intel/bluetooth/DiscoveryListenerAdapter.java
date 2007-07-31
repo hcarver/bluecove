@@ -29,7 +29,7 @@ import javax.bluetooth.ServiceRecord;
  * @author vlads
  *
  */
-public class DiscoveryListenerAdapter implements DiscoveryListener {
+class DiscoveryListenerAdapter implements DiscoveryListener {
 
 	/* (non-Javadoc)
 	 * @see javax.bluetooth.DiscoveryListener#deviceDiscovered(javax.bluetooth.RemoteDevice, javax.bluetooth.DeviceClass)

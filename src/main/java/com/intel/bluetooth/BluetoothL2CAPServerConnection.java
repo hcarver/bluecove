@@ -26,7 +26,7 @@ import java.io.IOException;
  * @author vlads
  *
  */
-public class BluetoothL2CAPServerConnection extends BluetoothL2CAPConnection {
+class BluetoothL2CAPServerConnection extends BluetoothL2CAPConnection {
 
 	/**
 	 * @param handle

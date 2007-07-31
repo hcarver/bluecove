@@ -28,7 +28,24 @@ import java.util.Hashtable;
 
 import com.ibm.oti.vm.VM;
 
-
+/**
+ * Load native library from resources.
+ * 
+ * 
+ * By default Native Library is extracted from from jar to temporary directory
+ * `${java.io.tmpdir}/bluecove_${user.name}_N` and loaded from this location.
+ * <p>
+ * If you wish to load library (.dll) from another location add this system
+ * property `-Dbluecove.native.path=/your/path`.
+ * <p>
+ * If you wish to load library from default location in path e.g.
+ * `%SystemRoot%\system32` or any other location in %PATH% use
+ * `-Dbluecove.native.resource=false`
+ * 
+ * 
+ * @author vlads
+ * 
+ */
 public class NativeLibLoader {
 
 	public static final int OS_UNSUPPORTED = -1;

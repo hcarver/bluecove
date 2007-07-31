@@ -29,9 +29,8 @@ import javax.microedition.io.StreamConnection;
 import javax.obex.HeaderSet;
 
 import com.intel.bluetooth.DebugLog;
-import com.intel.bluetooth.Utils;
 
-public abstract class OBEXSessionBase implements Connection {
+abstract class OBEXSessionBase implements Connection {
 	
 	protected StreamConnection conn;
 	
@@ -121,12 +120,12 @@ public abstract class OBEXSessionBase implements Connection {
 	
 	protected byte[] readOperation() throws IOException {
 		byte[] header = new byte[3];
-		Utils.readFully(is, header);
+		OBEXUtils.readFully(is, header);
 		DebugLog.debug0x("obex received", header[0] & 0xFF);
-		int lenght = Utils.bytesToShort(header[1], header[2]);
+		int lenght = OBEXUtils.bytesToShort(header[1], header[2]);
 		byte[] data = new byte[lenght];
 		System.arraycopy(header, 0, data, 0, header.length);
-		Utils.readFully(is, data, header.length, lenght - header.length);
+		OBEXUtils.readFully(is, data, header.length, lenght - header.length);
 		if (is.available() > 0) {
 			DebugLog.debug("has more data after read", is.available());
 		}

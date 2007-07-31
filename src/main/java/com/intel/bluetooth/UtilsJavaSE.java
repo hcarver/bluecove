@@ -24,16 +24,16 @@ import java.util.Properties;
 import java.util.Vector;
 
 /**
- * @author vlads
- *
+ * 
  * J2ME/J9 compatibility module.
  * 
+ * @author vlads
  */
 public class UtilsJavaSE {
 	
 	public static final boolean javaSECompiledOut = false;
 	
-	public static class StackTraceLocation {
+	static class StackTraceLocation {
 		
 		public String className;
 		
@@ -55,7 +55,7 @@ public class UtilsJavaSE {
 		return (ibmJ9config != null) &&  (ibmJ9config.indexOf("midp") != -1);
 	}
 	
-	public static StackTraceLocation getLocation(Vector fqcnSet) {
+	static StackTraceLocation getLocation(Vector fqcnSet) {
 		if (java13 || ibmJ9midp) {
 			return null;
 		}
@@ -79,7 +79,7 @@ public class UtilsJavaSE {
 		return null;
 	}
 	
-	public static StackTraceLocation getLocationJava14(Vector fqcnSet) {
+	private static StackTraceLocation getLocationJava14(Vector fqcnSet) {
 		if (!UtilsJavaSE.javaSECompiledOut) {
 			StackTraceElement[] ste = new Throwable().getStackTrace();
 			for (int i = 0; i < ste.length - 1; i++) {
@@ -112,7 +112,7 @@ public class UtilsJavaSE {
 		}
 	}
 	
-	public static void runtimeAddShutdownHook(Thread thread) {
+	static void runtimeAddShutdownHook(Thread thread) {
 		try {
 			// since Java 1.3
 			if ((!javaSECompiledOut) && (!ibmJ9midp)) {
@@ -122,7 +122,7 @@ public class UtilsJavaSE {
 		}
 	}
 	
-	public static void setSystemProperty(String propertyName, String propertyValue) {
+	static void setSystemProperty(String propertyName, String propertyValue) {
 		if (ibmJ9midp) {
 			return;
 		}

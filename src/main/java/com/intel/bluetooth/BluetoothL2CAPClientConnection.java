@@ -26,7 +26,7 @@ import java.io.IOException;
  * @author vlads
  *
  */
-public class BluetoothL2CAPClientConnection extends BluetoothL2CAPConnection {
+class BluetoothL2CAPClientConnection extends BluetoothL2CAPConnection {
 
 	public BluetoothL2CAPClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
 		super(BlueCoveImpl.instance().getBluetoothStack().l2OpenClientConnection(params, receiveMTU, transmitMTU));

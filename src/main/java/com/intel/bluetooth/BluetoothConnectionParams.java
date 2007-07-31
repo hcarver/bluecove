@@ -24,7 +24,7 @@ package com.intel.bluetooth;
  * @author vlads
  *
  */
-public class BluetoothConnectionParams {
+class BluetoothConnectionParams {
 	
 	long address; 
 	

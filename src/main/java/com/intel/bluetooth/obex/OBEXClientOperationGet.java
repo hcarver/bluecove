@@ -30,7 +30,7 @@ import javax.obex.HeaderSet;
  * @author vlads
  *
  */
-public class OBEXClientOperationGet extends OBEXClientOperation {
+class OBEXClientOperationGet extends OBEXClientOperation {
 
 	OBEXClientOperationGet(OBEXClientSessionImpl session, HeaderSet replyHeaders) {
 		super(session, replyHeaders);

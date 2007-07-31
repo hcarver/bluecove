@@ -31,7 +31,7 @@ import javax.bluetooth.UUID;
  * 
  * @author vlads
  */
-public class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
+class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 
 	public static final boolean debug = false;
 	

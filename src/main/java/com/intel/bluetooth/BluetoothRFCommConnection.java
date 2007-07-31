@@ -29,7 +29,7 @@ import java.io.OutputStream;
 import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.StreamConnection;
 
-public abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothConnectionAccess {
+abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothConnectionAccess {
 	
 	protected volatile long handle;
 

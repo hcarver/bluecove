@@ -27,7 +27,7 @@ import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.UUID;
 
-public class SearchServicesThread extends Thread {
+class SearchServicesThread extends Thread {
 	
 	private static int transIDGenerator = 0;
 	

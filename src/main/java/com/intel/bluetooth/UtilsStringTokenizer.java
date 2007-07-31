@@ -33,7 +33,7 @@ import java.util.NoSuchElementException;
  * @author vlads
  * @version $Revision$ ($Author$)  $Date$
  */
-public class UtilsStringTokenizer {
+class UtilsStringTokenizer {
 	
 	private int currentPosition;
 	
