@@ -43,9 +43,9 @@ public abstract class RemoteDeviceHelper {
 	
 	private static class RemoteDeviceWithExtendedInfo extends RemoteDevice {
 		
-		private String name;
+		String name;
 		
-		private long addressLong;
+		long addressLong;
 		
 		private Hashtable stackAttributes;
 		

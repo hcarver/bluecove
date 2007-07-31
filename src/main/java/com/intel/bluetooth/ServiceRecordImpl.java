@@ -52,7 +52,7 @@ class ServiceRecordImpl implements ServiceRecord {
 		attributes = new Hashtable();
 	}
 
-	byte[] toByteArray() {
+	byte[] toByteArray() throws IOException {
 		DataElement element = new DataElement(DataElement.DATSEQ);
 
 		for (Enumeration e = attributes.keys(); e.hasMoreElements();) {
@@ -64,10 +64,7 @@ class ServiceRecordImpl implements ServiceRecord {
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-		try {
-			(new SDPOutputStream(out)).writeElement(element);
-		} catch (Exception e) {
-		}
+		(new SDPOutputStream(out)).writeElement(element);
 
 		return out.toByteArray();
 	}

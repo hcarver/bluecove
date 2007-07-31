@@ -57,28 +57,26 @@ class SDPOutputStream extends OutputStream {
 		case DataElement.NULL:
 			return 1;
 
+			
+		case DataElement.BOOL:
 		case DataElement.U_INT_1:
-			return 2;
-		case DataElement.U_INT_2:
-			return 3;
-		case DataElement.U_INT_4:
-			return 5;
-		case DataElement.U_INT_8:
-			return 9;
-		case DataElement.U_INT_16:
-			return 17;
-
 		case DataElement.INT_1:
 			return 2;
+		
+		case DataElement.U_INT_2:
 		case DataElement.INT_2:
 			return 3;
+		
+		case DataElement.U_INT_4:
 		case DataElement.INT_4:
 			return 5;
+		
+		case DataElement.U_INT_8:
 		case DataElement.INT_8:
 			return 9;
+		
+		case DataElement.U_INT_16:
 		case DataElement.INT_16:
-			return 17;
-
 		case DataElement.UUID:
 			return 17;
 
@@ -93,9 +91,6 @@ class SDPOutputStream extends OutputStream {
 			else
 				return b.length + 5;
 		}
-
-		case DataElement.BOOL:
-			return 2;
 
 		case DataElement.DATSEQ:
 		case DataElement.DATALT: {

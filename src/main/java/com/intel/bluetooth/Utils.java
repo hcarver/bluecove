@@ -20,7 +20,6 @@
  */
 package com.intel.bluetooth;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
@@ -125,6 +124,21 @@ public abstract class Utils {
 		} catch (Throwable e) {
 			return null;
 		}
+	}
+	
+	/**
+	 * Modifying the returned Object will not change the internal representation of the object.
+	 * @param value
+	 * @return a clone of the array
+	 */
+	public static byte[] clone(byte[] value) {
+		if (value == null) {
+			return null;
+		}
+		int length = ((byte[]) value).length;
+		byte[] bClone = new byte[length];
+		System.arraycopy(value, 0, bClone, 0, length);
+		return bClone;
 	}
 	
 	/**

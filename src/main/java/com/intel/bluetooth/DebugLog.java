@@ -267,7 +267,7 @@ public class DebugLog {
 		for (Enumeration iter = loggerAppenders.elements(); iter.hasMoreElements();) {
 			LoggerAppender a = (LoggerAppender) iter.nextElement();
 			a.appendLog(level, message, throwable);
-		};
+		}
 	}
 	
 	public static void addAppender(LoggerAppender newAppender) {

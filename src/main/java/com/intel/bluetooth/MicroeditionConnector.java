@@ -273,7 +273,7 @@ public class MicroeditionConnector {
 					if ((channel & 0x100) != 0) {
 						throw new IllegalArgumentException("9th bit set in PCM " + portORuuid);
 					}
-					if ((channel % 2) != 1) {
+					if ((channel % 2) == 0) {
 						throw new IllegalArgumentException("PSM value " + portORuuid + " should be odd");
 					}
 				} else {

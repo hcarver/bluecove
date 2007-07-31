@@ -344,6 +344,11 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
+                <configuration>
+                    <!--threshold>High|Normal|Low|Exp|Ignore</threshold-->
+                    <!--effort>Max</effort-->
+                    <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
+                </configuration>
             </plugin>
             <plugin>
                 <!-- This is TO-DO list -->

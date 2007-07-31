@@ -44,11 +44,11 @@ public class UtilsJavaSE {
 		public int lineNumber;
 	}
 	
-	public static boolean java13 = false;
+	static boolean java13 = false;
 	
-	public static boolean java14 = false;
+	static boolean java14 = false;
 	
-	public static final boolean ibmJ9midp = detectJ9midp();
+	static final boolean ibmJ9midp = detectJ9midp();
 	
 	private static boolean detectJ9midp() {
 		String ibmJ9config = System.getProperty("com.ibm.oti.configuration");

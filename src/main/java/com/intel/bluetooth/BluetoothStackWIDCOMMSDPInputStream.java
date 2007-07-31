@@ -246,8 +246,8 @@ typedef struct {
 				result = dataElement;
 			}
 			
-			if (elements != 1) {
-				skip(MAX_ATTR_LEN - length);
+			if ((i < (elements - 1)) && (skip(MAX_ATTR_LEN - length) != (MAX_ATTR_LEN - length))) {
+				throw new IOException("Unexpected end of data");
 			}
 		}
 		return result;

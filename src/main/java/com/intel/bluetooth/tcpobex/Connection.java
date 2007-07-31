@@ -45,7 +45,7 @@ public class Connection implements CreateConnection, ClientSession, SessionNotif
 	private javax.microedition.io.Connection impl;
 	
 	public Connection() {
-		
+		impl = null;
 	}
 
 	public void setParameters(String spec, int access, boolean timeout) throws IOException {

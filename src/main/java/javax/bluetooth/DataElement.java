@@ -276,7 +276,7 @@ public class DataElement {
 	 */
 
 	public DataElement(boolean bool) {
-		value = new Boolean(bool);
+		value = bool?Boolean.TRUE:Boolean.FALSE;
 		valueType = BOOL;
 	}
 
@@ -758,10 +758,7 @@ public class DataElement {
 		case U_INT_16:
 		case INT_16:
 			// Modifying the returned Object will not change this DataElemen
-			int length = ((byte[]) value).length;
-			byte[] bClone = new byte[length];
-			System.arraycopy(value, 0, bClone, 0, length);
-			return bClone;
+			return Utils.clone((byte[])value);
 		case DATSEQ:
 		case DATALT:
 			return ((Vector) value).elements();

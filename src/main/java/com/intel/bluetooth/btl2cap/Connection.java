@@ -45,7 +45,7 @@ public class Connection implements CreateConnection, L2CAPConnection, L2CAPConne
 	javax.microedition.io.Connection impl;
 	
 	public Connection() {
-		
+		impl = null;
 	}
 
 	/* (non-Javadoc)

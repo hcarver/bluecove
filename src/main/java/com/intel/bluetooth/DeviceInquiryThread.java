@@ -41,6 +41,8 @@ class DeviceInquiryThread extends Thread {
 	
 	private boolean terminated = false;
 	
+	private Object inquiryStartedEvent = new Object();
+	
 	private DeviceInquiryThread(BluetoothStack stack, int accessCode, DiscoveryListener listener) {
 		super("DeviceInquiryThread");
 		this.stack = stack;
@@ -55,11 +57,11 @@ class DeviceInquiryThread extends Thread {
 		DeviceInquiryThread t = (new DeviceInquiryThread(stack, accessCode, listener));
 		// In case the BTStack hangs, exit JVM anyway
 		UtilsJavaSE.threadSetDaemon(t);
-		synchronized (t) {
+		synchronized (t.inquiryStartedEvent) {
 			t.start();
 			while (!t.started && !t.terminated) {
 				try {
-					t.wait();
+					t.inquiryStartedEvent.wait();
 				} catch (InterruptedException e) {
 					return false;
 				}
@@ -84,8 +86,8 @@ class DeviceInquiryThread extends Thread {
 			// Fine, If Not started then startInquiry return false
 		} finally {
 			terminated = true;
-			synchronized (this) {
-				notifyAll();
+			synchronized (inquiryStartedEvent) {
+				inquiryStartedEvent.notifyAll();
 			}
 			DebugLog.debug("runDeviceInquiry ends");
 			if (started) {
@@ -98,8 +100,8 @@ class DeviceInquiryThread extends Thread {
 	public void deviceInquiryStartedCallback() {
 		DebugLog.debug("deviceInquiryStartedCallback");
 		started = true;
-		synchronized (this) {
-			notifyAll();
+		synchronized (inquiryStartedEvent) {
+			inquiryStartedEvent.notifyAll();
 		}
 	}
 	

@@ -9,6 +9,8 @@
  */
 package javax.obex;
 
+import com.intel.bluetooth.Utils;
+
 /**
  * This class holds user name and password combinations.
  * 
@@ -34,8 +36,8 @@ public class PasswordAuthentication {
 	 *                if <code>password</code> is <code>null</code>
 	 */
 	public PasswordAuthentication(byte[] userName, byte[] password) {
-		this.userName = userName;
-		this.password = password;
+		this.userName = Utils.clone(userName);
+		this.password = Utils.clone(password);
 	}
 
 	/**
@@ -45,7 +47,7 @@ public class PasswordAuthentication {
 	 * @return the user name
 	 */
 	public byte[] getUserName() {
-		return this.userName;
+		return Utils.clone(this.userName);
 	}
 
 	/**
@@ -54,6 +56,6 @@ public class PasswordAuthentication {
 	 * @return the password
 	 */
 	public byte[] getPassword() {
-		return this.password;
+		return Utils.clone(this.password);
 	}
 }

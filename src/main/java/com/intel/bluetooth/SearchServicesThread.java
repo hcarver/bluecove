@@ -53,6 +53,8 @@ class SearchServicesThread extends Thread {
 	
 	private boolean terminated = false;
 	
+	private Object serviceSearchStartedEvent = new Object();
+	
 	private SearchServicesThread(BluetoothStack stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
 		super("SearchServicesThread");
 		this.stack = stack;
@@ -70,11 +72,11 @@ class SearchServicesThread extends Thread {
 		SearchServicesThread t = (new SearchServicesThread(stack, attrSet, uuidSet, device, listener));
 		//In case the BTStack hangs, exit JVM anyway
 		UtilsJavaSE.threadSetDaemon(t);
-		synchronized (t) {
+		synchronized (t.serviceSearchStartedEvent) {
 			t.start();
 			while (!t.started && !t.finished) {
 				try {
-					t.wait();
+					t.serviceSearchStartedEvent.wait();
 				} catch (InterruptedException e) {
 					return 0;
 				}
@@ -106,8 +108,8 @@ class SearchServicesThread extends Thread {
 		} finally {
 			finished = true;
 			threads.remove(new Integer(getTransID()));
-			synchronized (this) {
-				notifyAll();
+			synchronized (serviceSearchStartedEvent) {
+				serviceSearchStartedEvent.notifyAll();
 			}
 			DebugLog.debug("runSearchServices ends");
 			if (started) {
@@ -120,8 +122,8 @@ class SearchServicesThread extends Thread {
 	public void searchServicesStartedCallback() {
 		DebugLog.debug("searchServicesStartedCallback");
 		started = true;
-		synchronized (this) {
-			notifyAll();
+		synchronized (serviceSearchStartedEvent) {
+			serviceSearchStartedEvent.notifyAll();
 		}
 	}
 	

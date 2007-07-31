@@ -1,0 +1,5 @@
+<!-- @version $Revision$ ($Author$) $Date$ -->
+<FindBugsFilter>
+    <!-- we need to run under MIDP, There are no String.toUpperCase(Locale) -->
+    <Match><Bug code="Dm" /></Match>
+</FindBugsFilter>

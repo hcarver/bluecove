@@ -11,8 +11,6 @@ package javax.obex;
 
 import java.io.IOException;
 
-import javax.bluetooth.BluetoothStateException;
-import javax.bluetooth.ServiceRegistrationException;
 import javax.microedition.io.Connection;
 
 /**

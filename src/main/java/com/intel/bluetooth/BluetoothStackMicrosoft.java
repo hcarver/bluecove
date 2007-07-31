@@ -292,10 +292,8 @@ class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothStack {
 					if (!records[i].populateRecord(new int[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004 })) {
 						hasError = true;
 					}
-					if (attrSet != null) {
-						if (!records[i].populateRecord(attrSet)) {
-							hasError = true;
-						}
+					if ((attrSet != null) && (!records[i].populateRecord(attrSet))) {
+						hasError = true;
 					}
 				} catch (Exception e) {
 					DebugLog.debug("populateRecord error", e);
@@ -354,7 +352,9 @@ class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothStack {
 					}
 				}
 				return anyRetrived;
-			} catch (Exception e) {
+			} catch (IOException e) {
+				throw e;
+			} catch (Throwable e) {
 				throw new IOException();
 			}
 		} else {
@@ -428,7 +428,13 @@ class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothStack {
 
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
 		super.unregisterService(serviceRecord.getHandle());
-		serviceRecord.setHandle(super.registerService(((ServiceRecordImpl) serviceRecord).toByteArray()));
+		byte[] blob;
+		try {
+			blob = serviceRecord.toByteArray();
+		} catch (IOException e) {
+			throw new ServiceRegistrationException(e.toString()); 
+		}
+		serviceRecord.setHandle(super.registerService(blob));
 		DebugLog.debug("new serviceRecord", serviceRecord);
 	}
 
