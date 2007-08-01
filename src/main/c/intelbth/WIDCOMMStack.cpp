@@ -1053,7 +1053,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 			open_client_return 0;
 		}
 		debugs("RfCommPort channel %i", channel);
-		CRfCommIf* rfCommIf = &(stack->rfCommIf);
+		CRfCommIf* rfCommIf = &(stack->rfCommIfClient);
 
 		//debug("AssignScnValue");
 		// What GUID do we need in call to CRfCommIf.AssignScnValue() if we don't have any?
@@ -1470,18 +1470,20 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 		convertUUIDBytesToGUID(bytes, &(rf->service_guid));
 		env->ReleaseByteArrayElements(uuidValue, bytes, 0);
 
+		CRfCommIf* rfCommIf = &(rf->rfCommIf);
+
 		BOOL assignScnRC;
 		#ifdef _WIN32_WCE
-			assignScnRC = stack->rfCommIf.AssignScnValue(&(rf->service_guid), (UINT8)0);
+			assignScnRC = rfCommIf->AssignScnValue(&(rf->service_guid), (UINT8)0);
 		#else // _WIN32_WCE
-			assignScnRC = stack->rfCommIf.AssignScnValue(&(rf->service_guid), 0, rf->service_name);
+			assignScnRC = rfCommIf->AssignScnValue(&(rf->service_guid), 0, rf->service_name);
 		#endif // #else // _WIN32_WCE
 
 		if (!assignScnRC) {
 			throwIOException(env, "failed to assign SCN");
 			open_server_return 0;
 		}
-		rf->scn = stack->rfCommIf.GetScn();
+		rf->scn = rfCommIf->GetScn();
 
 
 		GUID service_guids[2];
@@ -1564,7 +1566,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 			sec_level = sec_level | BTM_SEC_IN_ENCRYPT;
 		}
 
-		if (!stack->rfCommIf.SetSecurityLevel(rf->service_name, sec_level, TRUE)) {
+		if (!rfCommIf->SetSecurityLevel(rf->service_name, sec_level, TRUE)) {
 			throwIOException(env, "Error setting security level");
 			open_server_return 0;
         }

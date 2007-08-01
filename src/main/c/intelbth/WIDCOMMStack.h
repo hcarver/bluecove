@@ -113,9 +113,10 @@ public:
 	DiscoveryRecHolder* discoveryRecHolderHold;
 
 	ObjectPool* commPool;
-	// One CRfCommIf shared by application, lock it when connection is made
+	// CRfCommIf shared by application, lock it when connection is made
 	CRITICAL_SECTION csCRfCommIf;
-	CRfCommIf rfCommIf;
+	CRfCommIf rfCommIfClient;
+	//CRfCommIf rfCommIf;
 
 	WIDCOMMStack();
 	virtual ~WIDCOMMStack();
@@ -176,7 +177,7 @@ public:
 	UINT8 scn;
 	BOOL isClientOpen;
 
-	//CRfCommIf rfCommIf;
+	CRfCommIf rfCommIf;
 	CSdpService* sdpService;
 
 	WIDCOMMStackRfCommPortServer();
