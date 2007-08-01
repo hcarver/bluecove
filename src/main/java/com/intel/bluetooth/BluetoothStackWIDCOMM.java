@@ -450,14 +450,14 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		return expected;
 	}
 
-	private native long rfServerOpenImpl(byte[] uuidValue, byte[] uuidValue2, String name, boolean authenticate, boolean encrypt) throws IOException;
+	private native long rfServerOpenImpl(byte[] uuidValue, byte[] uuidValue2, boolean obexSrv, String name, boolean authenticate, boolean encrypt) throws IOException;
 
 	private native int rfServerSCN(long handle) throws IOException;
 
 	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException {
 		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
-		byte[] uuidValue2 = Utils.UUIDToByteArray(params.obex?BluetoothConsts.OBEX_PROTOCOL_UUID:BluetoothConsts.SERIAL_PORT_UUID);
-		long handle = rfServerOpenImpl(uuidValue, uuidValue2, params.name, params.authenticate, params.encrypt);
+		byte[] uuidValue2 = params.obex?null:Utils.UUIDToByteArray(BluetoothConsts.SERIAL_PORT_UUID);
+		long handle = rfServerOpenImpl(uuidValue, uuidValue2, params.obex, params.name, params.authenticate, params.encrypt);
 		int channel = rfServerSCN(handle);
 		DebugLog.debug("serverSCN", channel);
 		int serviceRecordHandle = (int)handle;

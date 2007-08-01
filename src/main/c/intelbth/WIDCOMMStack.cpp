@@ -603,6 +603,10 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 
     BOOL discoveryStarted = TRUE;
 	if (!stack->StartDiscovery(bda, p_service_guid)) {
+	    if (stack == NULL) {
+		    throwIOException(env, "Stack closed");
+		    return NULL;
+	    }
 	    #ifndef _WIN32_WCE
 	        WBtRc er = stack->GetExtendedError();
 	        if (er == WBT_SUCCESS) {
@@ -614,6 +618,11 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 		    stack->throwExtendedBluetoothStateException(env);
 		    return NULL;
 	    }
+	}
+
+    if (stack == NULL) {
+		throwIOException(env, "Stack closed");
+		return NULL;
 	}
 
 	jclass notifyClass = env->GetObjectClass(startedNotify);
@@ -1031,7 +1040,9 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 	WIDCOMMStackRfCommPort* rf = NULL;
 	EnterCriticalSection(&stack->csCRfCommIf);
 	//vc6 __try {
-		rf = stack->createCommPort(FALSE);
+	    if (stack != NULL) {
+		    rf = stack->createCommPort(FALSE);
+	    }
 		if (rf == NULL) {
 			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 			open_client_return 0;
@@ -1042,10 +1053,12 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 			open_client_return 0;
 		}
 		debugs("RfCommPort channel %i", channel);
+		CRfCommIf* rfCommIf = &(stack->rfCommIf);
+
 		//debug("AssignScnValue");
 		// What GUID do we need in call to CRfCommIf.AssignScnValue() if we don't have any?
 		//memcpy(&(rf->service_guid), &test_client_service_guid, sizeof(GUID));
-		if (!stack->rfCommIf.AssignScnValue(&(rf->service_guid), (UINT8)channel)) {
+		if (!rfCommIf->AssignScnValue(&(rf->service_guid), (UINT8)channel)) {
 			throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_UNKNOWN_PSM, "failed to assign SCN %i", (UINT8)channel);
 			open_client_return 0;
 		}
@@ -1066,7 +1079,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 			p_service_name = "bluecovesrv";
 		#endif // #else // _WIN32_WCE
 
-		if (!stack->rfCommIf.SetSecurityLevel(p_service_name, sec_level, FALSE)) {
+		if (!rfCommIf->SetSecurityLevel(p_service_name, sec_level, FALSE)) {
 			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_SECURITY_BLOCK, "Error setting security level");
 			open_client_return 0;
         }
@@ -1430,7 +1443,7 @@ void open_server_finally(JNIEnv *env, WIDCOMMStackRfCommPortServer* rf) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerOpenImpl
-(JNIEnv *env, jobject peer, jbyteArray uuidValue, jbyteArray uuidValue2, jstring name, jboolean authenticate, jboolean encrypt) {
+(JNIEnv *env, jobject peer, jbyteArray uuidValue, jbyteArray uuidValue2, jboolean obexSrv, jstring name, jboolean authenticate, jboolean encrypt) {
     if (stack == NULL) {
 		throwIOException(env, cSTACK_CLOSED);
 		return 0;
@@ -1492,7 +1505,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 			throwIOException(env, "Error AddServiceName");
 			open_server_return 0;
 		}
-		
+
 		/*
 		//Note: An L2Cap UUID (100) with a value of 3 is added because RFCOMM protocol is over the L2CAP protocol.
 		if (rf->sdpService->AddRFCommProtocolDescriptor(rf->scn) != SDP_OK) {
@@ -1501,17 +1514,18 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 		}
 		*/
 		int proto_num_elem = 2;
-		tSDP_PROTOCOL_ELEM* proto_elem_list = new tSDP_PROTOCOL_ELEM[2];
+		tSDP_PROTOCOL_ELEM* proto_elem_list = new tSDP_PROTOCOL_ELEM[3];
 		proto_elem_list[0].protocol_uuid = 0x0100; // L2CAP
 		proto_elem_list[0].num_params = 0;
-    
+
 		proto_elem_list[1].protocol_uuid = 0x0003; // RFCOMM
 		proto_elem_list[1].num_params = 1;
 		proto_elem_list[1].params[0] = rf->scn;
 
-		if (false) {
-			proto_elem_list[1].protocol_uuid = 0x0008; // OBEX
-			proto_elem_list[1].num_params = 0;
+		if (obexSrv) {
+			proto_num_elem++;
+			proto_elem_list[2].protocol_uuid = 0x0008; // OBEX
+			proto_elem_list[2].num_params = 0;
 		}
 
 		if (rf->sdpService->AddProtocolList(proto_num_elem, proto_elem_list) != SDP_OK) {
