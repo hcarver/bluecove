@@ -34,10 +34,11 @@ stack is not available on other operating systems.
   BlueCove only support OBEX PUT, but there are other projects
 that can (possibly) be used to achieve full OBEX functionality with BlueCove.
 
-  If someone writes code to support another stack and/or operating system, it will be considered for
-inclusion. TOSHIBA on Win32 and BlueZ are wellcome!
-
  For more limitations details see stacks.txt or [http://code.google.com/p/bluecove/wiki/stacks BlueCove supported stacks].
+
+ We hope you enjoy using BlueCove. Please note that this is an open-source effort.
+If you feel the code could use new features or fixes, or the documentation can be improved, please get involved and lend us a hand!
+The BlueCove developer community welcomes your participation.
 
 == Not Implemented functionality ===
 
