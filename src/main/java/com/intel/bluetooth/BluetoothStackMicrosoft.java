@@ -289,11 +289,9 @@ class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothStack {
 			for (int i = 0; i < handles.length; i++) {
 				records[i] = new ServiceRecordImpl(device, handles[i]);
 				try {
-					if (!records[i].populateRecord(new int[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004 })) {
-						hasError = true;
-					}
-					if ((attrSet != null) && (!records[i].populateRecord(attrSet))) {
-						hasError = true;
+					records[i].populateRecord(new int[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004 });
+					if (attrSet != null) {
+						records[i].populateRecord(attrSet);
 					}
 				} catch (Exception e) {
 					DebugLog.debug("populateRecord error", e);
