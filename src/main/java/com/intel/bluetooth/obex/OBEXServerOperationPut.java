@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.obex.HeaderSet;
+import javax.obex.ResponseCodes;
 
 import com.intel.bluetooth.DebugLog;
 
@@ -58,9 +59,11 @@ class OBEXServerOperationPut extends OBEXServerOperation {
 			synchronized (lock) {
 				while (!isClosed && (appendPos == readPos)) {	
 					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						return -1;
+						receiveData();
+					} catch (IOException e) {
+						if (!isClosed) {
+							throw e;
+						}
 					}
 				}
 				if (appendPos == readPos) {
@@ -145,6 +148,33 @@ class OBEXServerOperationPut extends OBEXServerOperation {
 		DebugLog.debug("server put close");
 		is.close();
 		super.close();
+	}
+	
+	private void receiveData() throws IOException {
+		byte[] b = session.readOperation();
+		int opcode = b[0] & 0xFF;
+		boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
+		if (finalPacket) {
+			DebugLog.debug("OBEXServerSession operation finalPacket");	
+		}
+		switch (opcode) {
+		case OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT:
+		case OBEXOperationCodes.PUT:
+			HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+			processRequest(requestHeaders, finalPacket);
+			break;
+		case OBEXOperationCodes.ABORT:
+			processAbort();
+			break;
+		default:
+			session.writeOperation(ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED, null);
+		}
+	}
+	
+	private void processAbort() throws IOException {
+		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);
+		close();
+		throw new IOException("Operation aborted by client");
 	}
 	
 	private boolean processData(HeaderSet requestHeaders) throws IOException {

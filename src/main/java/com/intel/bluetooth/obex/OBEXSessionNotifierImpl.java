@@ -22,15 +22,18 @@ package com.intel.bluetooth.obex;
 
 import java.io.IOException;
 
+import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.ServiceRegistrationException;
 import javax.microedition.io.Connection;
 import javax.microedition.io.StreamConnectionNotifier;
 import javax.obex.Authenticator;
 import javax.obex.ServerRequestHandler;
 import javax.obex.SessionNotifier;
 
+import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
 import com.intel.bluetooth.NotImplementedIOException;
 
-public class OBEXSessionNotifierImpl implements SessionNotifier {
+public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
 	
 	private StreamConnectionNotifier notifier;
 	
@@ -57,6 +60,26 @@ public class OBEXSessionNotifierImpl implements SessionNotifier {
 			this.notifier.close();
 			this.notifier = null;
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#getServiceRecord()
+	 */
+	public ServiceRecord getServiceRecord() {
+		if (!(notifier instanceof BluetoothConnectionNotifierServiceRecordAccess)) {
+			throw new IllegalArgumentException("connection is not a Bluetooth notifier");
+		}
+		return ((BluetoothConnectionNotifierServiceRecordAccess) notifier).getServiceRecord();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#updateServiceRecord(boolean)
+	 */
+	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
+		if (!(notifier instanceof BluetoothConnectionNotifierServiceRecordAccess)) {
+			throw new IllegalArgumentException("connection is not a Bluetooth notifier");
+		}
+		((BluetoothConnectionNotifierServiceRecordAccess) notifier).updateServiceRecord(acceptAndOpen);
 	}
 
 }

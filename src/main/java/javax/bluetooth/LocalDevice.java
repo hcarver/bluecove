@@ -326,11 +326,11 @@ public class LocalDevice {
 	 */
 	public ServiceRecord getRecord(Connection notifier) {
 		if (notifier == null) {
-			throw new NullPointerException();
+			throw new NullPointerException("notifier is null");
 		}
 
 		if (!(notifier instanceof BluetoothConnectionNotifierServiceRecordAccess)) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("connection is not a Bluetooth notifier");
 		}
 
 		return ((BluetoothConnectionNotifierServiceRecordAccess) notifier).getServiceRecord();

@@ -201,16 +201,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 		if (finalPacket && processDelete(requestHeaders)) {
 			return;
 		}
-		
-		if (operation != null) {
-			if (!(operation instanceof OBEXServerOperationPut)) {
-				operation.close();
-				operation = null;
-			} else if (operation.isClosed()) {
-				operation = null;
-			}
-		}
-		if (operation == null) {
+		try {
 			operation = new OBEXServerOperationPut(this, requestHeaders, finalPacket);
 			int rc = ResponseCodes.OBEX_HTTP_OK;
 			try {
@@ -220,8 +211,9 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 				DebugLog.error("onPut", e);
 			}
 			writeOperation(rc, null);
-		} else {
-			operation.processRequest(requestHeaders, finalPacket);
+		} finally {
+			operation.close();
+			operation = null;
 		}
 	}
 	
@@ -232,13 +224,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 		}
 		HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
 		
-		if (operation != null) {
-			if (!(operation instanceof OBEXServerOperationGet)) {
-				operation.close();
-				operation = null;
-			}
-		}
-		if (operation == null) {
+		try {
 			operation = new OBEXServerOperationGet(this, requestHeaders);
 			int rc = ResponseCodes.OBEX_HTTP_OK;
 			try {
@@ -248,8 +234,9 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 				DebugLog.error("onGet", e);
 			}
 			writeOperation(rc, null);
-		} else {
-			operation.processRequest(requestHeaders, finalPacket);
+		} finally {
+			operation.close();
+			operation = null;
 		}
 	}
 

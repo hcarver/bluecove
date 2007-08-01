@@ -46,8 +46,6 @@ abstract class OBEXServerOperation implements Operation {
 		this.receivedHeaders = receivedHeaders;
 	}
 	
-	protected abstract void processRequest(HeaderSet requestHeaders, boolean finalPacket) throws IOException;
-
 	/* (non-Javadoc)
 	 * @see javax.obex.Operation#abort()
 	 */
@@ -122,7 +120,7 @@ abstract class OBEXServerOperation implements Operation {
 		this.isClosed = true;
 	}
 
-	public boolean isClosed() {
+	boolean isClosed() {
 		return this.isClosed;
 	}
 }
