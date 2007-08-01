@@ -130,6 +130,18 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		this.responseCode = responseCode;
 	}
 	
+	static void validateCreatedHeaderSet(HeaderSet headers) {
+		if (headers == null) {
+			return;
+		}
+		if (!(headers instanceof OBEXHeaderSetImpl)) {
+			throw new IllegalArgumentException("Unsupported HeaderSet type");
+		}
+		if (((OBEXHeaderSetImpl)headers).responseCode != Integer.MIN_VALUE) {
+			throw new IllegalArgumentException("Unsupported HeaderSet");
+		}
+	}
+	
 	public void setHeader(int headerID, Object headerValue) {
 		if (headerValue == null) {
 			headerValues.remove(new Integer(headerID));
@@ -184,7 +196,13 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		return headerValues.get(new Integer(headerID));
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.obex.HeaderSet#getHeaderList()
+	 */
 	public int[] getHeaderList() throws IOException {
+		if (headerValues.size() == 0) {
+			return null;
+		}
 		int[] headerIDArray = new int[headerValues.size()];
 		int i = 0;
 		for (Enumeration e = headerValues.keys(); e.hasMoreElements();) {
@@ -262,7 +280,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		}
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
 		int[] headerIDArray = headers.getHeaderList();
-		for (int i = 0; i < headerIDArray.length; i++) {
+		for (int i = 0; (headerIDArray != null) && (i < headerIDArray.length); i++) {
 			int hi = headerIDArray[i];
 			if (hi == OBEX_HDR_TIME) {
 				Calendar c = (Calendar) headers.getHeader(hi);
@@ -405,4 +423,5 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		cal.set(Calendar.SECOND, Integer.valueOf(new String(data, 13, 2)).intValue());
 		return cal;
 	}
+
 }

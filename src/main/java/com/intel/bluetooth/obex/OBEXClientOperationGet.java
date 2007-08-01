@@ -26,22 +26,45 @@ import java.io.OutputStream;
 
 import javax.obex.HeaderSet;
 
+import com.intel.bluetooth.DebugLog;
+
 /**
  * @author vlads
  *
  */
-class OBEXClientOperationGet extends OBEXClientOperation {
+class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperationReceive {
 
-	OBEXClientOperationGet(OBEXClientSessionImpl session, HeaderSet replyHeaders) {
+	private OBEXOperationInputStream inputStream;
+	
+	private boolean inputStreamOpened = false;
+	
+	OBEXClientOperationGet(OBEXClientSessionImpl session, HeaderSet replyHeaders) throws IOException {
 		super(session, replyHeaders);
+		this.inputStream = new OBEXOperationInputStream(this);
+		processData(replyHeaders, inputStream);
 	}
 
 	/* (non-Javadoc)
 	 * @see javax.microedition.io.InputConnection#openInputStream()
 	 */
 	public InputStream openInputStream() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		if (isClosed) {
+            throw new IOException("operation closed");
+		}
+		if (inputStreamOpened) {
+            throw new IOException("input stream already open");
+		}
+		DebugLog.debug("openInputStream");
+		inputStreamOpened = true;
+		return inputStream;
+	}
+	
+	/* (non-Javadoc)
+	 * @see javax.microedition.io.Connection#close()
+	 */
+	public void close() throws IOException {
+		inputStream.close();
+		super.close();
 	}
 
 	/* (non-Javadoc)
@@ -49,6 +72,38 @@ class OBEXClientOperationGet extends OBEXClientOperation {
 	 */
 	public OutputStream openOutputStream() throws IOException {
 		throw new IOException("Output not supported");
+	}
+	
+	public void receiveData(OBEXOperationInputStream is) throws IOException {
+		session.writeOperation(OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		byte[] b = session.readOperation();
+		HeaderSet dataHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+		switch (dataHeaders.getResponseCode()) {
+		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
+			processData(dataHeaders, is);
+			break;
+		case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
+			processData(dataHeaders, is);
+			replyHeaders = dataHeaders;
+			close();
+			break;
+		default:
+			throw new IOException("Operation error");
+		}
+	}
+	
+	private boolean processData(HeaderSet requestHeaders, OBEXOperationInputStream is) throws IOException {
+		byte[] data = (byte[])requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);
+		if (data == null) {
+			data = (byte[])requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
+		}
+		if ((data != null) && (data.length != 0)) {
+			DebugLog.debug("processData len", data.length);
+			is.appendData(data);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

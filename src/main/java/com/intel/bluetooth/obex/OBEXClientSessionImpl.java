@@ -59,7 +59,14 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		return OBEXSessionBase.createOBEXHeaderSet();
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.obex.ClientSession#connect(javax.obex.HeaderSet)
+	 */
 	public HeaderSet connect(HeaderSet headers) throws IOException {
+		validateCreatedHeaderSet(headers);
+		if (isConnected) {
+            throw new IOException("Session already connected");
+		}
 		byte[] connectRequest = new byte[4];
 		connectRequest[0] = OBEXOperationCodes.OBEX_VERSION;
 		connectRequest[1] = 0; /* Flags */
@@ -104,6 +111,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 	}
 
 	public HeaderSet disconnect(HeaderSet headers) throws IOException {
+		validateCreatedHeaderSet(headers);
 		if (!isConnected) {
             throw new IOException("Session not connected");
 		}
@@ -125,6 +133,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 	}
 
 	public HeaderSet setPath(HeaderSet headers, boolean backup, boolean create) throws IOException {
+		validateCreatedHeaderSet(headers);
 		if (!isConnected) {
             throw new IOException("Session not connected");
 		}
@@ -138,6 +147,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 	}
 
 	public Operation get(HeaderSet headers) throws IOException {
+		validateCreatedHeaderSet(headers);
 		if (!isConnected) {
             throw new IOException("Session not connected");
 		}
@@ -145,13 +155,17 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 			this.operation.close();
 			this.operation = null;
 		}
-		writeOperation(OBEXOperationCodes.GET, OBEXHeaderSetImpl.toByteArray(headers));
+		writeOperation(OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
 		HeaderSet replyHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
 		DebugLog.debug0x("GET reply", replyHeaders.getResponseCode());
 		
-		if (replyHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_CONTINUE) {
-			throw new IOException ("Connection not accepted");
+		switch (replyHeaders.getResponseCode()) {
+		case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
+		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
+			break;
+		default:
+			throw new IOException("Connection not accepted, 0x" + Integer.toHexString(replyHeaders.getResponseCode()));
 		}
 				
 		this.operation = new OBEXClientOperationGet(this, replyHeaders);
@@ -159,6 +173,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 	}
 
 	public Operation put(HeaderSet headers) throws IOException {
+		validateCreatedHeaderSet(headers);
 		if (!isConnected) {
             throw new IOException("Session not connected");
 		}
@@ -171,8 +186,12 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		HeaderSet replyHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
 		DebugLog.debug0x("PUT reply", replyHeaders.getResponseCode());
 		
-		if (replyHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_CONTINUE) {
-			throw new IOException ("Connection not accepted");
+		switch (replyHeaders.getResponseCode()) {
+		case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
+		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
+			break;
+		default:
+			throw new IOException("Connection not accepted, 0x" + Integer.toHexString(replyHeaders.getResponseCode()));
 		}
 				
 		this.operation = new OBEXClientOperationPut(this, replyHeaders);
@@ -180,6 +199,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 	}
 
 	public HeaderSet delete(HeaderSet headers) throws IOException {
+		validateCreatedHeaderSet(headers);
 		if (!isConnected) {
             throw new IOException("Session not connected");
 		}

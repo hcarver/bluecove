@@ -25,13 +25,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.obex.HeaderSet;
+import javax.obex.ResponseCodes;
 
 /**
  * @author vlads
  *
  */
-class OBEXServerOperationGet extends OBEXServerOperation {
+class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperationDelivery {
 
+	protected OBEXOperationOutputStream os;
+	
 	protected OBEXServerOperationGet(OBEXServerSessionImpl session, HeaderSet receivedHeaders) {
 		super(session, receivedHeaders);
 	}
@@ -47,15 +50,59 @@ class OBEXServerOperationGet extends OBEXServerOperation {
 	 * @see javax.microedition.io.OutputConnection#openOutputStream()
 	 */
 	public OutputStream openOutputStream() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		if (isClosed) {
+            throw new IOException("operation closed");
+		}
+		if (os != null) {
+            throw new IOException("output still open");
+		}
+		os = new OBEXOperationOutputStream(session.mtu, this);
+		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		return os;
 	}
 
+	public void close() throws IOException {
+		if (os != null) {
+			os.close();
+			os = null;
+		}
+		super.close();
+	}
+	
 	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.obex.OBEXServerOperation#processRequest(javax.obex.HeaderSet, boolean)
+	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean, byte[])
 	 */
-	protected void processRequest(HeaderSet requestHeaders, boolean finalPacket) throws IOException {
-		// TODO Auto-generated method stub
+	public void deliverPacket(boolean finalPacket, byte[] buffer) throws IOException {
+		byte[] b = session.readOperation();
+		HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+		switch (requestHeaders.getResponseCode()) {
+		case OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT:
+			replyWithPacket(finalPacket, buffer);
+			break;
+		case OBEXOperationCodes.ABORT:
+			processAbort();
+			break;
+		default:
+			session.writeOperation(ResponseCodes.OBEX_HTTP_UNAVAILABLE, null);
+		}
+	}
+	
+	private void processAbort() throws IOException {
+		
+	}
+	
+	private void replyWithPacket(boolean finalPacket, byte[] buffer) throws IOException {
+		HeaderSet dataHeaders = OBEXSessionBase.createOBEXHeaderSet();
+		dataHeaders.setHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY, buffer);
+		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(dataHeaders));
+		
+		if (finalPacket) {
+			byte[] b = session.readOperation();
+			HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+			if (requestHeaders.getResponseCode() != (OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT)) {
+				throw new IOException("wrong final request");
+			}
+		}
 	}
 
 }

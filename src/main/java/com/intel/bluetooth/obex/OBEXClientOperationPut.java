@@ -28,74 +28,9 @@ import javax.obex.HeaderSet;
 
 import com.intel.bluetooth.DebugLog;
 
-class OBEXClientOperationPut extends OBEXClientOperation {
+class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperationDelivery {
 
-	protected OperationOutputStream os;
-	
-	protected class OperationOutputStream extends OutputStream {
-
-		byte[] buffer; 
-		
-		int bufferLength;
-		
-		OperationOutputStream() {
-			buffer = new byte[session.mtu - OBEXOperationCodes.OBEX_MTU_HEADER_RESERVE];
-			bufferLength = 0;
-		}
-		     
-        public void write(int i) throws IOException {
-			write(new byte[] {(byte)i}, 0, 1);
-		}
-        
-        public void write(byte b[], int off, int len) throws IOException {
-			if ((os == null) || (isClosed)) {
-				throw new IOException("stream closed");
-			}
-			if (b == null) {
-				throw new NullPointerException();
-			} else if ((off < 0) || (len < 0) || ((off + len) > b.length)) {
-				throw new IndexOutOfBoundsException();
-			} else if (len == 0) {
-				return;
-			}
-
-			synchronized (lock) {
-				int written = 0;
-				while (written < len) {
-					int avalable = (buffer.length - bufferLength);
-					if ((len - written) < avalable) {
-						avalable = len - written;
-					}
-					System.arraycopy(b, off + written, buffer, bufferLength, avalable);
-					bufferLength += avalable;
-					written += avalable;
-					if (bufferLength == buffer.length) {
-						deliverPacket(false, buffer);
-						bufferLength = 0;
-					}
-				}
-			}
-		}
-        
-        void deliverBuffer(boolean finalPacket) throws IOException {
-			synchronized (lock) {
-				byte[] b = new byte[bufferLength];
-				System.arraycopy(buffer, 0, b, 0, bufferLength);
-				deliverPacket(finalPacket, b);
-				bufferLength = 0;
-			}
-		}
-
-		public void close() throws IOException {
-			synchronized (lock) {
-				if (os != null) {
-					os = null;
-					deliverBuffer(true);
-				}
-			}
-		}
-		
-	}
+	protected OBEXOperationOutputStream os;
 	
 	OBEXClientOperationPut(OBEXClientSessionImpl session, HeaderSet headers) {
 		super(session, headers);
@@ -112,7 +47,7 @@ class OBEXClientOperationPut extends OBEXClientOperation {
 		if (os != null) {
             throw new IOException("output still open");
 		}
-		os = new OperationOutputStream();
+		os = new OBEXOperationOutputStream(session.mtu, this);
 		return os;
 	}
 
@@ -123,7 +58,10 @@ class OBEXClientOperationPut extends OBEXClientOperation {
 		}
 	}
 	
-	private void deliverPacket(boolean finalPacket, byte buffer[]) throws IOException {
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean, byte[])
+	 */
+	public void deliverPacket(boolean finalPacket, byte buffer[]) throws IOException {
 		int commId = OBEXOperationCodes.PUT;
 		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY; 
 		if (finalPacket) {
@@ -142,10 +80,12 @@ class OBEXClientOperationPut extends OBEXClientOperation {
 		}
 		byte[] b = session.readOperation();
 		replyHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
-		DebugLog.debug0x("PUT reply", replyHeaders.getResponseCode());
-		if (replyHeaders.getResponseCode() == OBEXOperationCodes.OBEX_RESPONSE_SUCCESS) {
-		} else if (replyHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_CONTINUE) {
-			throw new IOException ("Can't continue connection, 0x" + Integer.toHexString(replyHeaders.getResponseCode()));
+		DebugLog.debug0x("PUT server reply", replyHeaders.getResponseCode());
+		switch(replyHeaders.getResponseCode()) {
+			case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
+			case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
+				break;
+			default: throw new IOException ("Can't continue connection, 0x" + Integer.toHexString(replyHeaders.getResponseCode()));
 		}
 	}
 	
@@ -155,6 +95,7 @@ class OBEXClientOperationPut extends OBEXClientOperation {
 				if (os != null) {
 					os.close();
 				}
+				os = null;
 			}
 		}
 		super.close();

@@ -97,4 +97,7 @@ abstract class OBEXClientOperation implements Operation {
 		this.isClosed = true;
 	}
 
+	public boolean isClosed() {
+		return this.isClosed;
+	}
 }

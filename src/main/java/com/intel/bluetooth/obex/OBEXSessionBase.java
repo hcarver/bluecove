@@ -84,6 +84,10 @@ public abstract class OBEXSessionBase implements Connection {
 	public static HeaderSet createOBEXHeaderSet() {
 		return new OBEXHeaderSetImpl();
 	}
+	
+	static void validateCreatedHeaderSet(HeaderSet headers) {
+		OBEXHeaderSetImpl.validateCreatedHeaderSet(headers);
+	}
 
 	protected void writeOperation(int commId, byte[] data) throws IOException {
 		writeOperation(commId, data, null);

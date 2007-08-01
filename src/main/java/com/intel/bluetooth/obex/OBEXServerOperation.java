@@ -120,7 +120,7 @@ abstract class OBEXServerOperation implements Operation {
 		this.isClosed = true;
 	}
 
-	boolean isClosed() {
+	public boolean isClosed() {
 		return this.isClosed;
 	}
 }

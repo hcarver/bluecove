@@ -42,6 +42,12 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 	
 	private OBEXServerOperation operation;
 	
+	private boolean closeRequested = false;
+	
+	private boolean delayClose = false;
+	
+	private Object canCloseEvent = new Object();
+	
 	public OBEXServerSessionImpl(StreamConnection connection, ServerRequestHandler handler, Authenticator auth) throws IOException {
 		super(connection);
 		this.handler = handler;
@@ -54,7 +60,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 
 	public void run() {
 		try {
-			while (!isClosed()) {
+			while (!isClosed() && !closeRequested) {
 				if (processOperation()) {
 					break;
 				}
@@ -72,6 +78,15 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 	}
 
 	public void close() throws IOException {
+		closeRequested = true;
+		if (delayClose) {
+			synchronized(canCloseEvent) {
+				try {
+					canCloseEvent.wait(700);
+				} catch (InterruptedException e) {
+				}
+			}
+		}
 		if (!isClosed()) {
 			DebugLog.debug("OBEXServerSession close");
 			if (operation != null) {
@@ -86,7 +101,9 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 	private boolean processOperation() throws IOException {
 		boolean isEOF = false;
 		DebugLog.debug("OBEXServerSession readOperation");
+		delayClose = false;
 		byte[] b = readOperation();
+		delayClose = true;
 		int opcode = b[0] & 0xFF;
 		boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
 		if (finalPacket) {
@@ -98,6 +115,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 			break;
 		case OBEXOperationCodes.DISCONNECT:
 			processDisconnect(b);
+			isEOF = true;
 			break;
 		case OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT:
 		case OBEXOperationCodes.PUT:
@@ -116,6 +134,9 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 			break;
 		default:
 			writeOperation(ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED, null);
+		}
+		synchronized(canCloseEvent) {
+			canCloseEvent.notifyAll();
 		}
 		return isEOF;
 	}

@@ -33,89 +33,16 @@ import com.intel.bluetooth.DebugLog;
  * @author vlads
  *
  */
-class OBEXServerOperationPut extends OBEXServerOperation {
+class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperationReceive {
 
-	private OperationInputStream is;
+	private OBEXOperationInputStream inputStream;
 	
 	private boolean inputStreamOpened = false;
 	
-	private class OperationInputStream extends InputStream {
-
-		private byte[] buffer = new byte[0x100];
-	    
-		private int readPos = 0;
-	    
-		private int appendPos = 0;
-	
-		protected Object lock = new Object();
-		
-		/* (non-Javadoc)
-		 * @see java.io.InputStream#read()
-		 */
-		public int read() throws IOException {
-			if (isClosed && (appendPos == readPos)) {
-				return -1;
-			}
-			synchronized (lock) {
-				while (!isClosed && (appendPos == readPos)) {	
-					try {
-						receiveData();
-					} catch (IOException e) {
-						if (!isClosed) {
-							throw e;
-						}
-					}
-				}
-				if (appendPos == readPos) {
-					return -1;
-				}
-				return buffer[readPos++] & 0xFF;
-			}
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.io.InputStream#available()
-		 */
-		public int available() throws IOException {
-			synchronized (lock) {
-				return (appendPos - readPos);
-			}
-		}
-
-		/* (non-Javadoc)
-		 * @see java.io.InputStream#close()
-		 */
-		public void close() throws IOException {
-			synchronized (lock) {
-				lock.notify();
-			}
-		}
-		 
-		public void appendData(byte[] b) {
-			synchronized (lock) {
-				if (appendPos + b.length > buffer.length) {
-					int newSize = (b.length + (appendPos - readPos)) * 2;
-					if (newSize < buffer.length) {
-						newSize = buffer.length;
-					}
-					byte[] newBuffer = new byte[newSize];
-			        System.arraycopy(buffer, readPos, newBuffer, 0, appendPos - readPos);
-			        buffer = newBuffer;
-			        appendPos -= readPos;
-			        readPos = 0;
-				}
-				System.arraycopy(b, 0, buffer, appendPos, b.length);
-				appendPos += b.length;
-				
-				lock.notify();
-			}
-		}
-	}
-	
 	protected OBEXServerOperationPut(OBEXServerSessionImpl session, HeaderSet receivedHeaders, boolean finalPacket) throws IOException {
 		super(session, receivedHeaders);
-		this.is = new OperationInputStream();
-		processData(receivedHeaders);
+		this.inputStream = new OBEXOperationInputStream(this);
+		processData(receivedHeaders, inputStream);
 	}
 
 	/* (non-Javadoc)
@@ -131,7 +58,7 @@ class OBEXServerOperationPut extends OBEXServerOperation {
 		DebugLog.debug("openInputStream");
 		inputStreamOpened = true;
 		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
-		return is;
+		return inputStream;
 	}
 
 	/* (non-Javadoc)
@@ -146,11 +73,11 @@ class OBEXServerOperationPut extends OBEXServerOperation {
 	 */
 	public void close() throws IOException {
 		DebugLog.debug("server put close");
-		is.close();
+		inputStream.close();
 		super.close();
 	}
 	
-	private void receiveData() throws IOException {
+	public void receiveData(OBEXOperationInputStream is) throws IOException {
 		byte[] b = session.readOperation();
 		int opcode = b[0] & 0xFF;
 		boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
@@ -161,7 +88,7 @@ class OBEXServerOperationPut extends OBEXServerOperation {
 		case OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT:
 		case OBEXOperationCodes.PUT:
 			HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
-			processRequest(requestHeaders, finalPacket);
+			processRequest(requestHeaders, finalPacket, is);
 			break;
 		case OBEXOperationCodes.ABORT:
 			processAbort();
@@ -177,7 +104,7 @@ class OBEXServerOperationPut extends OBEXServerOperation {
 		throw new IOException("Operation aborted by client");
 	}
 	
-	private boolean processData(HeaderSet requestHeaders) throws IOException {
+	private boolean processData(HeaderSet requestHeaders, OBEXOperationInputStream is) throws IOException {
 		byte[] data = (byte[])requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);
 		if (data == null) {
 			data = (byte[])requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
@@ -191,11 +118,8 @@ class OBEXServerOperationPut extends OBEXServerOperation {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.obex.OBEXServerOperation#processRequest(javax.obex.HeaderSet, boolean)
-	 */
-	protected void processRequest(HeaderSet requestHeaders, boolean finalPacket) throws IOException {
-		processData(requestHeaders);
+	protected void processRequest(HeaderSet requestHeaders, boolean finalPacket, OBEXOperationInputStream is) throws IOException {
+		processData(requestHeaders, is);
 		if (finalPacket || (requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END) != null)) {
 			close();
 		} else {
