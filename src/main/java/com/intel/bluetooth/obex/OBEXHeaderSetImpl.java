@@ -104,6 +104,8 @@ class OBEXHeaderSetImpl implements HeaderSet {
 	
 	static final int OBEX_HDR_HI_MASK = 0xC0;
 	
+	static final int OBEX_HDR_ID_MASK = 0x3F;
+	
 	/** null terminated Unicode text, length prefixed with 2 byte unsigned integer */
 	static final int OBEX_STRING = 0x00;
 	
@@ -142,7 +144,18 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		}
 	}
 	
+	private void validateHeaderID(int headerID) throws IllegalArgumentException {
+		if (headerID < 0 || headerID > 0xff) {
+			throw new IllegalArgumentException("Expected header ID in range 0 to 255");
+		}
+		int identifier = headerID & OBEX_HDR_ID_MASK;
+		if (identifier >= 0x10 && identifier < 0x2F) {
+			throw new IllegalArgumentException("Reserved header ID");
+		}
+	}
+	
 	public void setHeader(int headerID, Object headerValue) {
+		validateHeaderID(headerID);
 		if (headerValue == null) {
 			headerValues.remove(new Integer(headerID));
 		} else {
@@ -190,9 +203,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 	}
 
 	public Object getHeader(int headerID) throws IOException {
-		if (headerID < 0 || headerID > 0xff) {
-			throw new IllegalArgumentException("Expected header ID in range 0 to 255");
-		}
+		validateHeaderID(headerID);
 		return headerValues.get(new Integer(headerID));
 	}
 
