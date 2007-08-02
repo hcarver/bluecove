@@ -21,6 +21,8 @@
  */
 package com.intel.bluetooth;
 
+import java.util.Hashtable;
+
 
 /**
  * 
@@ -96,6 +98,8 @@ public class BlueCoveImpl {
 
 	private BluetoothStack bluetoothStack;
 
+	private static Hashtable configProperty = new Hashtable();
+	
     /**
      * Allow default initialization.
      * In Secure environment instance() should be called initialy from secure contex.
@@ -199,8 +203,33 @@ public class BlueCoveImpl {
 		System.out.println("BlueCove version " + version + " on " + stackSelected);
 	}
 	
+	/**
+	 * API that can be used to configure BlueCove properties instead of System properties.
+	 * Should be used before stack intitialized. If <code>null</code> is passed as the
+	 * <code>value</code> then the property will be removed.
+	 * 
+	 * @param key
+	 * @param value
+	 * 
+	 * @exception IllegalArgumentException
+	 *                if the stack alredy intitialized.
+	 */
+	public static void setConfigProperty(String key, String value) {
+		if (SingletonHolder.instance != null) {
+			throw new IllegalArgumentException("BlueCove Stack alredy intitialized");
+		}
+		if (value == null) {
+			configProperty.remove(key);
+		} else {
+			configProperty.put(key, value);
+		}
+	}
+	
 	String getConfigProperty(String key) {
-		String value = System.getProperty(key);
+		String value = (String)configProperty.get(key);
+		if (value == null) {
+			value = System.getProperty(key);
+		}
 		if (value == null) {
 			value = Utils.getResourceProperty(this, key);
 		}
