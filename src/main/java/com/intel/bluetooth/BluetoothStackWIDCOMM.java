@@ -221,7 +221,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName, paired);
 		reported.addElement(remoteDevice);
 		DeviceClass cod = new DeviceClass(deviceClass);
-		DebugLog.debug("deviceDiscoveredCallback addtress", remoteDevice.getBluetoothAddress());
+		DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
 		DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
 		listener.deviceDiscovered(remoteDevice, cod);
 	}

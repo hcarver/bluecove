@@ -27,6 +27,7 @@ import javax.obex.Authenticator;
 import javax.obex.ClientSession;
 import javax.obex.HeaderSet;
 import javax.obex.Operation;
+import javax.obex.ResponseCodes;
 
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
@@ -106,7 +107,9 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 			}
 			throw new NotImplementedIOException();
 		}
-		this.isConnected = true;
+		if (responseHeaders.getResponseCode() == ResponseCodes.OBEX_HTTP_OK) {
+			this.isConnected = true;
+		}
 		return responseHeaders;
 	}
 
@@ -118,6 +121,10 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		writeOperation(OBEXOperationCodes.DISCONNECT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
 		this.isConnected = false;
+		if (this.operation != null) {
+			this.operation.close();
+			this.operation = null;
+		}
 		return OBEXHeaderSetImpl.read(b[0], b, 3);
 	}
 

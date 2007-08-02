@@ -20,6 +20,7 @@
  */
 package com.intel.bluetooth.obex;
 
+import java.io.EOFException;
 import java.io.IOException;
 
 import javax.microedition.io.Connection;
@@ -61,19 +62,14 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 	public void run() {
 		try {
 			while (!isClosed() && !closeRequested) {
-				if (processOperation()) {
-					break;
+				if (!processOperation()) {
+					return;
 				}
 			}
 		} catch (Throwable e) {
 			DebugLog.error("OBEXServerSession error", e);
 		} finally {
 			DebugLog.debug("OBEXServerSession ends");
-			try {
-				super.close();
-			} catch (IOException e) {
-				DebugLog.error("close error", e);
-			}
 		}
 	}
 
@@ -99,46 +95,58 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 	
 
 	private boolean processOperation() throws IOException {
-		boolean isEOF = false;
 		DebugLog.debug("OBEXServerSession readOperation");
 		delayClose = false;
-		byte[] b = readOperation();
-		delayClose = true;
-		int opcode = b[0] & 0xFF;
-		boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
-		if (finalPacket) {
-			DebugLog.debug("OBEXServerSession operation finalPacket");	
+		byte[] b;
+		try {
+			b = readOperation();
+		} catch (EOFException e) {
+			if (isConnected) {
+				throw e;
+			}
+			DebugLog.debug("OBEXServerSession got EOF");
+			close();
+			return false;
 		}
-		switch (opcode) {
-		case OBEXOperationCodes.CONNECT:
-			processConnect(b);
-			break;
-		case OBEXOperationCodes.DISCONNECT:
-			processDisconnect(b);
-			isEOF = true;
-			break;
-		case OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT:
-		case OBEXOperationCodes.PUT:
-			processPut(b, finalPacket);
-			break;
-		case OBEXOperationCodes.SETPATH | OBEXOperationCodes.FINAL_BIT:
-		case OBEXOperationCodes.SETPATH:
-			processSetPath(b, finalPacket);
-			break;
-		case OBEXOperationCodes.ABORT:
-			processAbort();
-			break;
-		case OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT:
-		case OBEXOperationCodes.GET:
-			processGet(b, finalPacket);
-			break;
-		default:
-			writeOperation(ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED, null);
+		delayClose = true;
+		try {
+			int opcode = b[0] & 0xFF;
+			boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
+			if (finalPacket) {
+				DebugLog.debug("OBEXServerSession operation finalPacket");	
+			}
+			switch (opcode) {
+			case OBEXOperationCodes.CONNECT:
+				processConnect(b);
+				break;
+			case OBEXOperationCodes.DISCONNECT:
+				processDisconnect(b);
+				break;
+			case OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT:
+			case OBEXOperationCodes.PUT:
+				processPut(b, finalPacket);
+				break;
+			case OBEXOperationCodes.SETPATH | OBEXOperationCodes.FINAL_BIT:
+			case OBEXOperationCodes.SETPATH:
+				processSetPath(b, finalPacket);
+				break;
+			case OBEXOperationCodes.ABORT:
+				processAbort();
+				break;
+			case OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT:
+			case OBEXOperationCodes.GET:
+				processGet(b, finalPacket);
+				break;
+			default:
+				writeOperation(ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED, null);
+			}
+		} finally {
+			delayClose = false;
 		}
 		synchronized(canCloseEvent) {
 			canCloseEvent.notifyAll();
 		}
-		return isEOF;
+		return true;
 	}
 
 	private void processConnect(byte[] b) throws IOException {
@@ -169,7 +177,9 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 		connectResponse[2] = OBEXUtils.hiByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
 		connectResponse[3] = OBEXUtils.loByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
 		writeOperation(rc, connectResponse, OBEXHeaderSetImpl.toByteArray(replyHeaders));
-		this.isConnected = true;
+		if (rc == ResponseCodes.OBEX_HTTP_OK) {
+			this.isConnected = true;
+		}
 	}
 
 	private boolean validateConnection() throws IOException {

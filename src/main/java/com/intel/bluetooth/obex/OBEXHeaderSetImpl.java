@@ -135,10 +135,10 @@ class OBEXHeaderSetImpl implements HeaderSet {
 			return;
 		}
 		if (!(headers instanceof OBEXHeaderSetImpl)) {
-			throw new IllegalArgumentException("Unsupported HeaderSet type");
+			throw new IllegalArgumentException("Illegal HeaderSet type");
 		}
 		if (((OBEXHeaderSetImpl)headers).responseCode != Integer.MIN_VALUE) {
-			throw new IllegalArgumentException("Unsupported HeaderSet");
+			throw new IllegalArgumentException("Illegal HeaderSet");
 		}
 	}
 	
