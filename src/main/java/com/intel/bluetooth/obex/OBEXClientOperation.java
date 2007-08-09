@@ -41,21 +41,35 @@ abstract class OBEXClientOperation implements Operation {
 	
 	protected boolean isClosed;
 	
+	protected boolean operationInProgress;
+	
 	protected Object lock;
 	
 	OBEXClientOperation(OBEXClientSessionImpl session, HeaderSet replyHeaders) {
 		this.session = session;
 		this.replyHeaders = replyHeaders;
 		this.isClosed = false;
+		this.operationInProgress = true;
 		this.lock = new Object();
 	}
 	
-	public void abort() throws IOException {
-		// TODO implement
-		throw new NotImplementedError();
+	protected void writeAbort() throws IOException {
+		try {
+			session.writeOperation(OBEXOperationCodes.ABORT, null);
+			byte[] b = session.readOperation();
+			HeaderSet dataHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+			if (dataHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_SUCCESS) {
+				throw new IOException("Fails to abort operation");
+			}
+		} finally {
+			close();
+		}
 	}
 
 	public HeaderSet getReceivedHeaders() throws IOException {
+		if (isClosed) {
+            throw new IOException("operation closed");
+		}
 		return this.replyHeaders;
 	}
 

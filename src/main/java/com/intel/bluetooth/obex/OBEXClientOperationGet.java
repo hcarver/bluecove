@@ -60,6 +60,19 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 	}
 	
 	/* (non-Javadoc)
+	 * @see javax.obex.Operation#abort()
+	 */
+	public void abort() throws IOException {
+		if (isClosed) {
+            throw new IOException("operation closed");
+		}
+		if (!this.operationInProgress) {
+			return;
+		}
+		writeAbort();
+	}
+	
+	/* (non-Javadoc)
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {
@@ -71,7 +84,10 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 	 * @see javax.microedition.io.OutputConnection#openOutputStream()
 	 */
 	public OutputStream openOutputStream() throws IOException {
-		throw new IOException("Output not supported");
+		if (isClosed) {
+            throw new IOException("operation closed");
+		}
+		return new UnsupportedOutputStream();
 	}
 	
 	public void receiveData(OBEXOperationInputStream is) throws IOException {

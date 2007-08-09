@@ -43,7 +43,10 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 	 * @see javax.microedition.io.InputConnection#openInputStream()
 	 */
 	public InputStream openInputStream() throws IOException {
-		throw new IOException("Input not supported");
+		if (isClosed) {
+            throw new IOException("operation closed");
+		}
+		return new UnsupportedInputStream();
 	}
 
 	/* (non-Javadoc)

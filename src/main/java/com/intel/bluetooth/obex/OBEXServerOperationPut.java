@@ -65,7 +65,10 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 	 * @see javax.microedition.io.OutputConnection#openOutputStream()
 	 */
 	public OutputStream openOutputStream() throws IOException {
-		throw new IOException("Output not supported");
+		if (isClosed) {
+            throw new IOException("operation closed");
+		}
+		return new UnsupportedOutputStream();
 	}
 
 	/* (non-Javadoc)

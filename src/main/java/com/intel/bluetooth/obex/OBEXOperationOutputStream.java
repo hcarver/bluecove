@@ -75,6 +75,10 @@ class OBEXOperationOutputStream extends OutputStream {
 		}
 	}
     
+    public void flush() throws IOException {
+		deliverBuffer(false);
+    }
+    
     void deliverBuffer(boolean finalPacket) throws IOException {
 		synchronized (lock) {
 			byte[] b = new byte[bufferLength];
@@ -84,6 +88,12 @@ class OBEXOperationOutputStream extends OutputStream {
 		}
 	}
 
+    void abort() {
+    	synchronized (lock) {
+			isClosed = true;
+    	}
+    }
+    
 	public void close() throws IOException {
 		if (!isClosed) {
 			synchronized (lock) {

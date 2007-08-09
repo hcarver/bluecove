@@ -37,7 +37,10 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 	}
 
 	public InputStream openInputStream() throws IOException {
-		throw new IOException("Input not supported");
+		if (isClosed) {
+            throw new IOException("operation closed");
+		}
+		return new UnsupportedInputStream();
 	}
 	
 	public OutputStream openOutputStream() throws IOException {
@@ -83,10 +86,29 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		DebugLog.debug0x("PUT server reply", replyHeaders.getResponseCode());
 		switch(replyHeaders.getResponseCode()) {
 			case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
+				this.operationInProgress = false;
 			case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
 				break;
 			default: throw new IOException ("Can't continue connection, 0x" + Integer.toHexString(replyHeaders.getResponseCode()));
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see javax.obex.Operation#abort()
+	 */
+	public void abort() throws IOException {
+		if (isClosed) {
+            throw new IOException("operation closed");
+		}
+		if (!this.operationInProgress) {
+			return;
+		}
+		synchronized (lock) {
+			if (os != null) {
+				os.abort();
+			}
+		}
+		writeAbort();
 	}
 	
 	public void close() throws IOException {
@@ -100,4 +122,5 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		}
 		super.close();
 	}
+
 }
