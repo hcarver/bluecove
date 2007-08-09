@@ -618,25 +618,25 @@ BOOL ObjectPool::addObject(PoolableObject* obj, char poolableObjectType) {
 
 PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle) {
 	if (handle <= 0) {
-		_throwIOException(env, "Invalid handle");
+		throwIOExceptionExt(env, "Invalid handle %i", handle);
 		return NULL;
 	}
 	jlong idx = realIndex(handle);
 	if ((idx < 0) || (idx >= size)) {
-		_throwIOException(env, "Obsolete handle");
+		throwIOExceptionExt(env, "Obsolete handle %i", handle);
 		return NULL;
 	}
 	PoolableObject* o = objs[idx];
 	if (o == NULL) {
-		_throwIOException(env, "Destroyed handle");
+		throwIOExceptionExt(env, "Destroyed handle %i", handle);
 		return NULL;
 	}
 	if ((o->magic1 != MAGIC_1) || (o->magic2 != MAGIC_2)) {
-		_throwIOException(env, "Corrupted object");
+		throwIOExceptionExt(env, "Corrupted object %i", handle);
 		return NULL;
 	}
 	if ((o->internalHandle != handle) || (!o->isValidObject())) {
-		_throwIOException(env, "Corrupted handle");
+		throwIOExceptionExt(env, "Corrupted handle %i", handle);
 		return NULL;
 	}
 	return o;
@@ -645,7 +645,7 @@ PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle) {
 PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle, char poolableObjectType) {
 	PoolableObject* o = getObject(env, handle);
 	if ((o != NULL) && (o->poolableObjectType != poolableObjectType)) {
-		_throwIOException(env, "Invalid handle type");
+		throwIOExceptionExt(env, "Invalid handle type %i", handle);
 		return NULL;
 	}
 	return o;
