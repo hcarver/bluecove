@@ -80,6 +80,9 @@
     * You need to run `DiscoveryAgent.searchServices()` with UUID of your service before you can make connection to it using `Connector.open(url);`
     * Client `Connector.open()` use GUID of the discovered service. Only one would be selected
     * Server can't close incoming connection. It will wait until connection is closed remotely. (Our implementation should be changed to restart Service(Server) each time connection is closed to fix this)
-    * In our test lab we can only make from 180 to 250 max connections in sequence. After this !BlueSoleil.exe needs to restart or Windows needs to be rebooted (May be you can help fixing this, I wrote to !BlueSoleil support; no reply)
     * `searchServices` can't distinguish the service type (RFCOMM or OBEX). To solve this following UUIDs are always discoved as obex (btgoep://) connections
         * IR_MC_SYNC (0x1104), OBEX_OBJECT_PUSH (0x1105), OBEX_FILE_TRANSFER (0x1106), IR_MC_SYNC_COMMAND (0x1107), IMG_RESPONDER (0x111B)
+
+
+*N.B.* In our test lab when using fake ES-388 Bluetooth USB Adapter we can only make from 180 to 250 max connections in sequence. After this !BlueSoleil.exe needs to restart or Windows needs to be rebooted.
+This does not happen when we used dongle bought from [http://bluesoleil.com bluesoleil.com]
