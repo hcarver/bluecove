@@ -55,7 +55,12 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 		fqcnSet.addElement(FQCN);
 	}
 	
-	public OBEXSessionNotifierImpl(StreamConnectionNotifier notifier) throws IOException {
+    /**
+     * Applications should not used this function.
+     * 
+     * @exception Error if called from outside of BlueCove internal code.
+     */
+	public OBEXSessionNotifierImpl(StreamConnectionNotifier notifier) throws IOException, Error {
 		Utils.isLegalAPICall(fqcnSet);
 		if (false) {
 			throw new NotImplementedIOException();

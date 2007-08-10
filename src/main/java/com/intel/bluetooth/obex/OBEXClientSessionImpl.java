@@ -60,7 +60,12 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		fqcnSet.addElement(FQCN);
 	}
 	
-	public OBEXClientSessionImpl(StreamConnection conn) throws IOException {
+    /**
+     * Applications should not used this function.
+     * 
+     * @exception Error if called from outside of BlueCove internal code.
+     */
+	public OBEXClientSessionImpl(StreamConnection conn) throws IOException, Error {
 		super(conn);
 		Utils.isLegalAPICall(fqcnSet);
 		this.isConnected = false;

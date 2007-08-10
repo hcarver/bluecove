@@ -21,6 +21,7 @@
  */
 package com.intel.bluetooth;
 
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -67,7 +68,7 @@ public class BlueCoveImpl {
 
 	public static final String version = String.valueOf(versionMajor) + "." + String.valueOf(versionMinor) + "." + String.valueOf(versionBuild) + versionSufix;
 
-	public static final int nativeLibraryVersionExpected = versionMajor * 10000 + versionMinor * 100 + versionBuild;
+	private static final int nativeLibraryVersionExpected = versionMajor * 10000 + versionMinor * 100 + versionBuild;
 
 	public static final String STACK_WINSOCK = "winsock";
 
@@ -374,8 +375,10 @@ public class BlueCoveImpl {
      * Applications should not used this function.
      * 
      * @return curent BluetoothStack implementation
+     * 
+     * @exception Error if called from outside of BlueCove internal code.
      */
-	public BluetoothStack getBluetoothStack() {
+	public BluetoothStack getBluetoothStack() throws Error {
 		Utils.isLegalAPICall(fqcnSet);
 		if (bluetoothStack == null) {
 			throw new Error("BlueCove not avalable");
