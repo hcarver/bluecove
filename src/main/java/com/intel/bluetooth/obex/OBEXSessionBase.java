@@ -30,6 +30,14 @@ import javax.obex.HeaderSet;
 
 import com.intel.bluetooth.DebugLog;
 
+/**
+ * Base for Client and Server implementations. See <a
+ * href="http://bluetooth.com/Bluetooth/Learn/Technology/Specifications/">Bluetooth
+ * Specification Documents</A> for details.
+ * 
+ * @author vlads
+ * 
+ */
 public abstract class OBEXSessionBase implements Connection {
 	
 	protected StreamConnection conn;
@@ -127,6 +135,9 @@ public abstract class OBEXSessionBase implements Connection {
 		OBEXUtils.readFully(is, header);
 		DebugLog.debug0x("obex received", header[0] & 0xFF);
 		int lenght = OBEXUtils.bytesToShort(header[1], header[2]);
+		if (lenght == 3) {
+			return header;
+		}
 		byte[] data = new byte[lenght];
 		System.arraycopy(header, 0, data, 0, header.length);
 		OBEXUtils.readFully(is, data, header.length, lenght - header.length);

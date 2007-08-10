@@ -57,7 +57,7 @@ public class HeaderTest extends TestCase {
 	
 	private void validateReadWrite(HeaderSet headers) throws IOException {
 		byte b[] = OBEXHeaderSetImpl.toByteArray(headers);
-		HeaderSet r = OBEXHeaderSetImpl.read((byte)0, b, 0);
+		HeaderSet r = OBEXHeaderSetImpl.readHeaders((byte)0, b, 0);
 		
 		int[] headerIDArray = headers.getHeaderList();
 		assertEquals("HeaderList.length", headerIDArray.length, r.getHeaderList().length);

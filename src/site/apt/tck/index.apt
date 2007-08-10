@@ -20,6 +20,8 @@ JSR 82 Technology Compatibility Kit
 
     Latest test reports for Bluetooth_1-1_005_TCK can be found {{{Bluetooth_1-1_005_TCK/}here}}.
 
+    Latest test reports for OBEX_1-1_005_TCK can be found {{{OBEX_1-1_005_TCK/}here}}.
+
     To run TCK we are using:
 
     * {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.gatling}Gatling}} v1.0.02 test harness

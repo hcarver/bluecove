@@ -31,6 +31,8 @@ import java.util.TimeZone;
 
 import javax.obex.HeaderSet;
 
+import com.intel.bluetooth.DebugLog;
+
 class OBEXHeaderSetImpl implements HeaderSet {
 
 	 /** Number of objects (used by connect) (0xC0)*/
@@ -123,8 +125,10 @@ class OBEXHeaderSetImpl implements HeaderSet {
 	
 	private Hashtable headerValues;
 
+	private static final int NO_RESPONSE_CODE = Integer.MIN_VALUE;
+	
 	OBEXHeaderSetImpl() {
-		this(Integer.MIN_VALUE);
+		this(NO_RESPONSE_CODE);
 	}
 
 	private OBEXHeaderSetImpl(int responseCode) {
@@ -139,7 +143,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		if (!(headers instanceof OBEXHeaderSetImpl)) {
 			throw new IllegalArgumentException("Illegal HeaderSet type");
 		}
-		if (((OBEXHeaderSetImpl)headers).responseCode != Integer.MIN_VALUE) {
+		if (((OBEXHeaderSetImpl)headers).responseCode != NO_RESPONSE_CODE) {
 			throw new IllegalArgumentException("Illegal HeaderSet");
 		}
 	}
@@ -223,10 +227,27 @@ class OBEXHeaderSetImpl implements HeaderSet {
 	}
 
 	public int getResponseCode() throws IOException {
-		if (this.responseCode == Integer.MIN_VALUE) {
+		if (this.responseCode == NO_RESPONSE_CODE) {
 			throw new IOException();
 		}
 		return this.responseCode;
+	}
+	
+	static HeaderSet cloneHeaders(HeaderSet headers) throws IOException {
+		if (headers == null) {
+			return null;
+		}
+		if (!(headers instanceof OBEXHeaderSetImpl)) {
+			throw new IllegalArgumentException("Illegal HeaderSet type");
+		}
+		HeaderSet hs = new OBEXHeaderSetImpl(((OBEXHeaderSetImpl)headers).responseCode);
+		
+		int[] headerIDArray = headers.getHeaderList();
+		for (int i = 0; (headerIDArray != null) && (i < headerIDArray.length); i++) {
+			int headerID = headerIDArray[i];
+			hs.setHeader(headerID,  headers.getHeader(headerID));
+		}
+		return hs;
 	}
 
 	public void createAuthenticationChallenge(String realm, boolean userID, boolean access) {
@@ -325,12 +346,25 @@ class OBEXHeaderSetImpl implements HeaderSet {
 				}
 			}
 		}
+		if ((headerIDArray != null) && (headerIDArray.length != 0)) {
+			DebugLog.debug("written headers", headerIDArray.length);
+		}
 		return buf.toByteArray();
 	}
 	
-	static HeaderSet read(byte responseCode, byte[] buf, int off) throws IOException {
-		HeaderSet hs = new OBEXHeaderSetImpl(0xFF & responseCode);
-		
+	/*
+	 * Read by server 
+	 */
+	static HeaderSet readHeaders(byte[] buf, int off) throws IOException {
+		return readHeaders(new OBEXHeaderSetImpl(NO_RESPONSE_CODE), buf, off);
+	}
+	
+	static HeaderSet readHeaders(byte responseCode, byte[] buf, int off) throws IOException {
+		return readHeaders(new OBEXHeaderSetImpl(0xFF & responseCode), buf, off);
+	}
+	
+	private static HeaderSet readHeaders(HeaderSet hs, byte[] buf, int off) throws IOException {
+		int count = 0;
 		while (off < buf.length) {
 			int hi = 0xFF & buf[off];
 			int len = 0;
@@ -380,6 +414,10 @@ class OBEXHeaderSetImpl implements HeaderSet {
 				throw new IOException("Unsupported encoding " + (hi & OBEX_HDR_HI_MASK));
 			}
 			off += len;
+			count ++;
+		}
+		if (count != 0) {
+			DebugLog.debug("read headers", count);
 		}
 		return hs;
 	}

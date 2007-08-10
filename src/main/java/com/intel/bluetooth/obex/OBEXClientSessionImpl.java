@@ -34,7 +34,7 @@ import com.intel.bluetooth.NotImplementedError;
 import com.intel.bluetooth.NotImplementedIOException;
 
 /**
- * See <a
+ * ClientSession implementation. See <a
  * href="http://bluetooth.com/Bluetooth/Learn/Technology/Specifications/">Bluetooth
  * Specification Documents</A> for details.
  * 
@@ -76,6 +76,9 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		writeOperation(OBEXOperationCodes.CONNECT, connectRequest, OBEXHeaderSetImpl.toByteArray(headers));
 		
 		byte[] b = readOperation();
+		if (b.length < 6) {
+			throw new IOException("Invalid response from OBEX server");
+		}
 		int serverMTU = OBEXUtils.bytesToShort(b[5], b[6]);
 		if (serverMTU < OBEXOperationCodes.OBEX_MINIMUM_MTU) {
 			throw new IOException("Invalid MTU " + serverMTU);
@@ -85,7 +88,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		}
 		DebugLog.debug("mtu selected", this.mtu);
 		
-		HeaderSet responseHeaders = OBEXHeaderSetImpl.read(b[0], b, 7);
+		HeaderSet responseHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 7);
 		
 		Object connID = responseHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_CONNECTION);
 		if (connID != null) {
@@ -125,7 +128,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 			this.operation.close();
 			this.operation = null;
 		}
-		return OBEXHeaderSetImpl.read(b[0], b, 3);
+		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 	}
 
 	public void setConnectionID(long id) {
@@ -150,7 +153,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		writeOperation(OBEXOperationCodes.SETPATH | OBEXOperationCodes.FINAL_BIT, request, OBEXHeaderSetImpl.toByteArray(headers));
 		
 		byte[] b = readOperation();
-		return OBEXHeaderSetImpl.read(b[0], b, 3);
+		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 	}
 
 	public Operation get(HeaderSet headers) throws IOException {
@@ -159,22 +162,16 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
             throw new IOException("Session not connected");
 		}
 		if (this.operation != null) {
-			this.operation.close();
+			if (!this.operation.isClosed()) {
+				throw new IOException("Client is already in an operation");
+			}
 			this.operation = null;
 		}
 		writeOperation(OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
-		HeaderSet replyHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
-		DebugLog.debug0x("GET reply", replyHeaders.getResponseCode());
+		HeaderSet replyHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+		DebugLog.debug0x("GET got reply", replyHeaders.getResponseCode());
 		
-		switch (replyHeaders.getResponseCode()) {
-		case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
-		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
-			break;
-		default:
-			throw new IOException("Connection not accepted, 0x" + Integer.toHexString(replyHeaders.getResponseCode()));
-		}
-				
 		this.operation = new OBEXClientOperationGet(this, replyHeaders);
 		return this.operation;
 	}
@@ -185,23 +182,12 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
             throw new IOException("Session not connected");
 		}
 		if (this.operation != null) {
-			this.operation.close();
+			if (!this.operation.isClosed()) {
+				throw new IOException("Client is already in an operation");
+			}
 			this.operation = null;
 		}
-		writeOperation(OBEXOperationCodes.PUT, OBEXHeaderSetImpl.toByteArray(headers));
-		byte[] b = readOperation();
-		HeaderSet replyHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
-		DebugLog.debug0x("PUT reply", replyHeaders.getResponseCode());
-		
-		switch (replyHeaders.getResponseCode()) {
-		case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
-		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
-			break;
-		default:
-			throw new IOException("Connection not accepted, 0x" + Integer.toHexString(replyHeaders.getResponseCode()));
-		}
-				
-		this.operation = new OBEXClientOperationPut(this, replyHeaders);
+		this.operation = new OBEXClientOperationPut(this, headers);
 		return this.operation;
 	}
 
@@ -213,7 +199,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		
 		writeOperation(OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
-		return OBEXHeaderSetImpl.read(b[0], b, 3);
+		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 	}
 
 	public void setAuthenticator(Authenticator auth) {

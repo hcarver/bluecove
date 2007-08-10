@@ -23,7 +23,6 @@ package com.intel.bluetooth.obex;
 import java.io.EOFException;
 import java.io.IOException;
 
-import javax.microedition.io.Connection;
 import javax.microedition.io.StreamConnection;
 import javax.obex.Authenticator;
 import javax.obex.HeaderSet;
@@ -33,7 +32,7 @@ import javax.obex.ServerRequestHandler;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.UtilsJavaSE;
 
-class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runnable {
+class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 
 	private ServerRequestHandler handler;
 	
@@ -75,12 +74,15 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 
 	public void close() throws IOException {
 		closeRequested = true;
-		if (delayClose) {
+		while (delayClose) {
 			synchronized(canCloseEvent) {
 				try {
-					canCloseEvent.wait(700);
+					if (delayClose) {
+						canCloseEvent.wait(700);
+					}
 				} catch (InterruptedException e) {
 				}
+				delayClose = false;
 			}
 		}
 		if (!isClosed()) {
@@ -150,6 +152,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 	}
 
 	private void processConnect(byte[] b) throws IOException {
+		DebugLog.debug("Connect operation");
 		if (b[3] != OBEXOperationCodes.OBEX_VERSION) {
             throw new IOException("Unsupported client OBEX version " + b[3]);
 		}
@@ -163,7 +166,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 		this.mtu = requestedMTU;
 		DebugLog.debug("mtu selected", this.mtu);
 		
-		HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 7);
+		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 7);
 		HeaderSet replyHeaders = createOBEXHeaderSet();
 		int rc = ResponseCodes.OBEX_HTTP_INTERNAL_ERROR;
 		try {
@@ -191,10 +194,11 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 	}
 	
 	private void processDisconnect(byte[] b) throws IOException {
+		DebugLog.debug("Disconnect operation");
 		if (!validateConnection()) {
 			return;
 		}
-		HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 3);
 		HeaderSet replyHeaders = createOBEXHeaderSet();
 		int rc = ResponseCodes.OBEX_HTTP_OK;
 		try {
@@ -210,6 +214,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 
 	private boolean processDelete(HeaderSet requestHeaders) throws IOException {
 		if ((requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY) == null) && (requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END) == null)) {
+			DebugLog.debug("Delete operation");
 			HeaderSet replyHeaders = createOBEXHeaderSet();
 			int rc = ResponseCodes.OBEX_HTTP_OK;
 			try {
@@ -225,10 +230,11 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 	}
 	
 	private void processPut(byte[] b, boolean finalPacket) throws IOException {
+		DebugLog.debug("Put operation");
 		if (!validateConnection()) {
 			return;
 		}
-		HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 3);
 		if (finalPacket && processDelete(requestHeaders)) {
 			return;
 		}
@@ -241,7 +247,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 				rc = ResponseCodes.OBEX_HTTP_UNAVAILABLE;
 				DebugLog.error("onPut", e);
 			}
-			writeOperation(rc, null);
+			writeOperation(rc, OBEXHeaderSetImpl.toByteArray(operation.sendHeaders));
 		} finally {
 			operation.close();
 			operation = null;
@@ -250,10 +256,11 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 	
 
 	private void processGet(byte[] b, boolean finalPacket) throws IOException {
+		DebugLog.debug("Get operation");
 		if (!validateConnection()) {
 			return;
 		}
-		HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 3);
 		
 		try {
 			operation = new OBEXServerOperationGet(this, requestHeaders);
@@ -264,7 +271,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 				rc = ResponseCodes.OBEX_HTTP_UNAVAILABLE;
 				DebugLog.error("onGet", e);
 			}
-			writeOperation(rc, null);
+			writeOperation(rc, OBEXHeaderSetImpl.toByteArray(operation.sendHeaders));
 		} finally {
 			operation.close();
 			operation = null;
@@ -273,6 +280,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 
 	
 	private void processAbort() throws IOException {
+		DebugLog.debug("Abort operation");
 		if (!validateConnection()) {
 			return;
 		}
@@ -284,13 +292,14 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Connection, Runna
 	}
 	
 	private void processSetPath(byte[] b, boolean finalPacket) throws IOException {
+		DebugLog.debug("SetPath operation");
 		if (!validateConnection()) {
 			return;
 		}
 		if (b.length < 5) {
 			throw new IOException("Corrupted OBEX data");
 		}
-		HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 5);
+		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 5);
 		boolean backup = ((b[4] & 1) != 0);
 		boolean create = ((b[4] & 2) != 0);
 		

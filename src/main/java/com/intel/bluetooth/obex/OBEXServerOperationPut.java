@@ -90,7 +90,7 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 		switch (opcode) {
 		case OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT:
 		case OBEXOperationCodes.PUT:
-			HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+			HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 			processRequest(requestHeaders, finalPacket, is);
 			break;
 		case OBEXOperationCodes.ABORT:

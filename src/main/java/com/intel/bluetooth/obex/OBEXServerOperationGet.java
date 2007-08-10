@@ -77,7 +77,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 	 */
 	public void deliverPacket(boolean finalPacket, byte[] buffer) throws IOException {
 		byte[] b = session.readOperation();
-		HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 		switch (requestHeaders.getResponseCode()) {
 		case OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT:
 			replyWithPacket(finalPacket, buffer);
@@ -101,7 +101,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		
 		if (finalPacket) {
 			byte[] b = session.readOperation();
-			HeaderSet requestHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+			HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 			if (requestHeaders.getResponseCode() != (OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT)) {
 				throw new IOException("wrong final request");
 			}

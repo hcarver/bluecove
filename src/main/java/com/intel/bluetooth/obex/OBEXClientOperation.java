@@ -43,37 +43,62 @@ abstract class OBEXClientOperation implements Operation {
 	
 	protected boolean operationInProgress;
 	
+	protected boolean operationStarted;
+	
 	protected Object lock;
 	
-	OBEXClientOperation(OBEXClientSessionImpl session, HeaderSet replyHeaders) {
+	OBEXClientOperation(OBEXClientSessionImpl session, HeaderSet replyHeaders) throws IOException {
 		this.session = session;
 		this.replyHeaders = replyHeaders;
 		this.isClosed = false;
-		this.operationInProgress = true;
 		this.lock = new Object();
+		if (replyHeaders != null) {
+			switch (replyHeaders.getResponseCode()) {
+			case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
+			case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
+				this.operationInProgress = true;
+				break;
+			default:
+				this.operationInProgress = false;
+			}
+		} else {
+			this.operationInProgress = false;
+		}
 	}
 	
 	protected void writeAbort() throws IOException {
 		try {
 			session.writeOperation(OBEXOperationCodes.ABORT, null);
 			byte[] b = session.readOperation();
-			HeaderSet dataHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+			HeaderSet dataHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 			if (dataHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_SUCCESS) {
 				throw new IOException("Fails to abort operation");
 			}
 		} finally {
-			close();
+			closeStream();
 		}
 	}
 
+	abstract void started() throws IOException;
+	
+	abstract void closeStream() throws IOException;
+	
 	public HeaderSet getReceivedHeaders() throws IOException {
 		if (isClosed) {
             throw new IOException("operation closed");
 		}
-		return this.replyHeaders;
+		started();
+		return OBEXHeaderSetImpl.cloneHeaders(this.replyHeaders);
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.obex.Operation#getResponseCode()
+	 * 
+	 *  A call will do an implicit close on the Stream and therefore signal that the request is done.
+	 */
 	public int getResponseCode() throws IOException {
+		started();
+		closeStream();
 		return this.replyHeaders.getResponseCode();
 	}
 
@@ -107,7 +132,12 @@ abstract class OBEXClientOperation implements Operation {
 		return new DataOutputStream(openOutputStream());
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.microedition.io.Connection#close()
+	 */
 	public void close() throws IOException {
+		started();
+		closeStream();
 		this.isClosed = true;
 	}
 

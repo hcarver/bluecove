@@ -44,6 +44,9 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 		processData(replyHeaders, inputStream);
 	}
 
+	void started() throws IOException {
+	}
+	
 	/* (non-Javadoc)
 	 * @see javax.microedition.io.InputConnection#openInputStream()
 	 */
@@ -72,12 +75,8 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 		writeAbort();
 	}
 	
-	/* (non-Javadoc)
-	 * @see javax.microedition.io.Connection#close()
-	 */
-	public void close() throws IOException {
+	public void closeStream() throws IOException {
 		inputStream.close();
-		super.close();
 	}
 
 	/* (non-Javadoc)
@@ -93,7 +92,7 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 	public void receiveData(OBEXOperationInputStream is) throws IOException {
 		session.writeOperation(OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(sendHeaders));
 		byte[] b = session.readOperation();
-		HeaderSet dataHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+		HeaderSet dataHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 		switch (dataHeaders.getResponseCode()) {
 		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
 			processData(dataHeaders, is);

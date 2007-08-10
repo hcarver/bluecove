@@ -64,8 +64,7 @@ abstract class OBEXServerOperation implements Operation {
 	 * @see javax.obex.Operation#getResponseCode()
 	 */
 	public int getResponseCode() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new IOException("Operation object was created by an OBEX server");
 	}
 
 	/* (non-Javadoc)

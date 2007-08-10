@@ -32,8 +32,11 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 
 	protected OBEXOperationOutputStream os;
 	
-	OBEXClientOperationPut(OBEXClientSessionImpl session, HeaderSet headers) {
-		super(session, headers);
+	private boolean outputStreamOpened = false;
+	
+	OBEXClientOperationPut(OBEXClientSessionImpl session, HeaderSet sendHeaders) throws IOException {
+		super(session, null);
+		this.sendHeaders = sendHeaders;
 	}
 
 	public InputStream openInputStream() throws IOException {
@@ -43,13 +46,31 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		return new UnsupportedInputStream();
 	}
 	
+	void started() throws IOException {
+		if ((!outputStreamOpened) && (!operationStarted)) {
+			this.replyHeaders = session.delete(sendHeaders);
+			operationStarted = true;
+		}
+	}
+	
+	private void startPutOperation() throws IOException {
+		session.writeOperation(OBEXOperationCodes.PUT, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		sendHeaders = null;
+		byte[] b = session.readOperation();
+		this.replyHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+		DebugLog.debug0x("PUT got reply", replyHeaders.getResponseCode());
+		this.operationInProgress = true;
+	}
+	
 	public OutputStream openOutputStream() throws IOException {
 		if (isClosed) {
             throw new IOException("operation closed");
 		}
-		if (os != null) {
-            throw new IOException("output still open");
+		if (outputStreamOpened) {
+            throw new IOException("output already open");
 		}
+		outputStreamOpened = true;
+		startPutOperation();
 		os = new OBEXOperationOutputStream(session.mtu, this);
 		return os;
 	}
@@ -82,11 +103,12 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 			sendHeadersLength = 0;
 		}
 		byte[] b = session.readOperation();
-		replyHeaders = OBEXHeaderSetImpl.read(b[0], b, 3);
+		replyHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 		DebugLog.debug0x("PUT server reply", replyHeaders.getResponseCode());
 		switch(replyHeaders.getResponseCode()) {
 			case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
 				this.operationInProgress = false;
+				break;
 			case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
 				break;
 			default: throw new IOException ("Can't continue connection, 0x" + Integer.toHexString(replyHeaders.getResponseCode()));
@@ -111,7 +133,7 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		writeAbort();
 	}
 	
-	public void close() throws IOException {
+	public void closeStream() throws IOException {
 		if (os != null) {
 			synchronized (lock) {
 				if (os != null) {
@@ -120,7 +142,6 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 				os = null;
 			}
 		}
-		super.close();
 	}
 
 }

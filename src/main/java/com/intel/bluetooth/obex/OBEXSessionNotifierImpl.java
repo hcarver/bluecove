@@ -33,6 +33,14 @@ import javax.obex.SessionNotifier;
 import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
 import com.intel.bluetooth.NotImplementedIOException;
 
+/**
+ * SessionNotifier implementation. See <a
+ * href="http://bluetooth.com/Bluetooth/Learn/Technology/Specifications/">Bluetooth
+ * Specification Documents</A> for details.
+ * 
+ * @author vlads
+ * 
+ */
 public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
 	
 	private StreamConnectionNotifier notifier;

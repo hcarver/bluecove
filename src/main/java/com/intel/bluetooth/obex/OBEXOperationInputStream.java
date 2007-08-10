@@ -80,7 +80,7 @@ class OBEXOperationInputStream extends InputStream {
 	public void close() throws IOException {
 		isClosed = true;
 		synchronized (lock) {
-			lock.notify();
+			lock.notifyAll();
 		}
 	}
 	 
@@ -100,7 +100,7 @@ class OBEXOperationInputStream extends InputStream {
 			System.arraycopy(b, 0, buffer, appendPos, b.length);
 			appendPos += b.length;
 			
-			lock.notify();
+			lock.notifyAll();
 		}
 	}
 }
