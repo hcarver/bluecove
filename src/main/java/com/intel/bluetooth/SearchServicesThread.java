@@ -68,7 +68,7 @@ class SearchServicesThread extends Thread {
 	/**
 	 * Start DeviceInquiry and wait for startException or deviceInquiryStartedCallback
 	 */
-	public static int startSearchServices(BluetoothStack stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+	static int startSearchServices(BluetoothStack stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		SearchServicesThread t = (new SearchServicesThread(stack, attrSet, uuidSet, device, listener));
 		//In case the BTStack hangs, exit JVM anyway
 		UtilsJavaSE.threadSetDaemon(t);
@@ -94,7 +94,7 @@ class SearchServicesThread extends Thread {
 		}
 	}
 	
-	public static SearchServicesThread getServiceSearchThread(int transID) {
+	static SearchServicesThread getServiceSearchThread(int transID) {
 		return (SearchServicesThread)threads.get(new Integer(transID));
 	}
 	
@@ -119,7 +119,7 @@ class SearchServicesThread extends Thread {
 		}
 	}
 	
-	public void searchServicesStartedCallback() {
+	void searchServicesStartedCallback() {
 		DebugLog.debug("searchServicesStartedCallback");
 		started = true;
 		synchronized (serviceSearchStartedEvent) {
@@ -127,16 +127,16 @@ class SearchServicesThread extends Thread {
 		}
 	}
 	
-	public int getTransID() {
+	int getTransID() {
 		return this.transID;
 	}
 	
-	public void setTerminated() {
+	void setTerminated() {
 		terminated = true;
 		threads.remove(new Integer(getTransID()));
 	}
 
-	public boolean isTerminated() {
+	boolean isTerminated() {
 		return terminated;
 	}
 
