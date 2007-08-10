@@ -208,7 +208,7 @@ public abstract class Utils {
 		return t;
 	}
 	
-	static void isLegalAPICall(Vector fqcnSet) throws Error {
+	public static void isLegalAPICall(Vector fqcnSet) throws Error {
 		UtilsJavaSE.StackTraceLocation ste = UtilsJavaSE.getLocation(fqcnSet);
 		if (ste != null) {
 			if (ste.className.startsWith("javax.bluetooth.")) {

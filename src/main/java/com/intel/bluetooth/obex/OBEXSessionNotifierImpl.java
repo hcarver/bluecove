@@ -21,6 +21,7 @@
 package com.intel.bluetooth.obex;
 
 import java.io.IOException;
+import java.util.Vector;
 
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
@@ -32,6 +33,7 @@ import javax.obex.SessionNotifier;
 
 import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
 import com.intel.bluetooth.NotImplementedIOException;
+import com.intel.bluetooth.Utils;
 
 /**
  * SessionNotifier implementation. See <a
@@ -45,7 +47,16 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 	
 	private StreamConnectionNotifier notifier;
 	
+	private static final String FQCN = OBEXSessionNotifierImpl.class.getName();
+	
+	private static final Vector fqcnSet = new Vector(); 
+	
+	static {
+		fqcnSet.addElement(FQCN);
+	}
+	
 	public OBEXSessionNotifierImpl(StreamConnectionNotifier notifier) throws IOException {
+		Utils.isLegalAPICall(fqcnSet);
 		if (false) {
 			throw new NotImplementedIOException();
 		}

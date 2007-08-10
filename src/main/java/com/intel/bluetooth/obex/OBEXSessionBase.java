@@ -38,7 +38,7 @@ import com.intel.bluetooth.DebugLog;
  * @author vlads
  * 
  */
-public abstract class OBEXSessionBase implements Connection {
+abstract class OBEXSessionBase implements Connection {
 	
 	protected StreamConnection conn;
 	

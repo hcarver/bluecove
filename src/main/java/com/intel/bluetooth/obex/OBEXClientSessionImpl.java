@@ -21,6 +21,7 @@
 package com.intel.bluetooth.obex;
 
 import java.io.IOException;
+import java.util.Vector;
 
 import javax.microedition.io.StreamConnection;
 import javax.obex.Authenticator;
@@ -32,6 +33,7 @@ import javax.obex.ResponseCodes;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.NotImplementedError;
 import com.intel.bluetooth.NotImplementedIOException;
+import com.intel.bluetooth.Utils;
 
 /**
  * ClientSession implementation. See <a
@@ -42,7 +44,7 @@ import com.intel.bluetooth.NotImplementedIOException;
  * @author vlads
  * 
  */
-public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSession {
+public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSession {
 
 	private Authenticator authenticator;
 	
@@ -50,8 +52,17 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 	
 	private OBEXClientOperation operation;
 	
+	private static final String FQCN = OBEXClientSessionImpl.class.getName();
+	
+	private static final Vector fqcnSet = new Vector(); 
+	
+	static {
+		fqcnSet.addElement(FQCN);
+	}
+	
 	public OBEXClientSessionImpl(StreamConnection conn) throws IOException {
 		super(conn);
+		Utils.isLegalAPICall(fqcnSet);
 		this.isConnected = false;
 		this.operation = null;
 	}

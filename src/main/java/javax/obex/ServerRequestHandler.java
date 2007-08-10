@@ -9,7 +9,7 @@
  */
 package javax.obex;
 
-import com.intel.bluetooth.obex.OBEXSessionBase;
+import com.intel.bluetooth.obex.OBEXClientSessionImpl;
 
 /**
  * The <code>ServerRequestHandler</code> class defines an event listener that
@@ -66,7 +66,7 @@ public class ServerRequestHandler {
 	 *         operations
 	 */
 	public final HeaderSet createHeaderSet() {
-		return OBEXSessionBase.createOBEXHeaderSet();
+		return OBEXClientSessionImpl.createOBEXHeaderSet();
 	}
 
 	/**

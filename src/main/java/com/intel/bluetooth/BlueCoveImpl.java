@@ -103,7 +103,6 @@ public class BlueCoveImpl {
 	
 	private static final String FQCN = BlueCoveImpl.class.getName();
 	
-	//private static final Set fqcnSet = new HashSet();
 	private static final Vector fqcnSet = new Vector(); 
 	
 	static {
