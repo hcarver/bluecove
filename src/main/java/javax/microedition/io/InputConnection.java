@@ -24,18 +24,27 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * This interface defines the capabilities that an input stream connection must have.
+ *
+ */
 public interface InputConnection extends Connection {
-	/*
-	 * Open and return an input stream for a connection. Returns: An input
-	 * stream Throws: IOException - If an I/O error occurs
+	
+	/**
+	 * Open and return an input stream for a connection. 
+	 * 
+	 * @return An input stream
+	 * 
+	 * @exception IOException If an I/O error occur
 	 */
-
 	public InputStream openInputStream() throws IOException;
 
-	/*
-	 * Open and return a data input stream for a connection. Returns: An input
-	 * stream Throws: IOException - If an I/O error occurs
+	/**
+	 * Open and return a data input stream for a connection.
+	 * 
+	 * @return An input stream
+	 * 
+	 * @exception IOException If an I/O error occur
 	 */
-
 	public DataInputStream openDataInputStream() throws IOException;
 }

@@ -17,8 +17,21 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package javax.microedition.io;
 
+/**
+ * This interface defines the capabilities that a stream connection must have.
+ * <p>
+ * In a typical implementation of this interface (for instance in MIDP 2.0), all
+ * StreamConnections have one underlying InputStream and one OutputStream.
+ * Opening a DataInputStream counts as opening an InputStream and opening a
+ * DataOutputStream counts as opening an OutputStream. Trying to open another
+ * InputStream or OutputStream causes an IOException. Trying to open the
+ * InputStream or OutputStream after they have been closed causes an
+ * IOException.
+ * <p>
+ * The methods of StreamConnection are not synchronized. The only stream method that can be called safely in another thread is close. 
+ */
 public interface StreamConnection extends InputConnection, OutputConnection {
 }

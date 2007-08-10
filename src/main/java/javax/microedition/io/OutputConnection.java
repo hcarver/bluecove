@@ -24,18 +24,26 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * This interface defines the capabilities that an output stream connection must have.
+ */
 public interface OutputConnection extends Connection {
-	/*
-	 * Open and return an output stream for a connection. Returns: An output
-	 * stream Throws: IOException - If an I/O error occurs
-	 */
 
+	/**
+	 * Open and return an output stream for a connection. 
+	 * 
+	 * @return An output stream
+	 * 
+	 * @exception IOException If an I/O error occur
+	 */
 	public OutputStream openOutputStream() throws IOException;
 
-	/*
-	 * Open and return a data output stream for a connection. Returns: An output
-	 * stream Throws: IOException - If an I/O error occurs
+	/**
+	 * Open and return a data output stream for a connection. 
+	 * 
+	 * @return An output stream
+	 * 
+	 * @exception IOException If an I/O error occur
 	 */
-
 	public DataOutputStream openDataOutputStream() throws IOException;
 }
