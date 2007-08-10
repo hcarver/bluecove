@@ -207,4 +207,17 @@ public abstract class Utils {
 		t.start();
 		return t;
 	}
+	
+	static void isLegalAPICall(Vector fqcnSet) throws Error {
+		UtilsJavaSE.StackTraceLocation ste = UtilsJavaSE.getLocation(fqcnSet);
+		if (ste != null) {
+			if (ste.className.startsWith("javax.bluetooth.")) {
+				return;
+			}
+			if (ste.className.startsWith("com.intel.bluetooth.")) {
+				return;
+			}
+			throw new Error("Illegal use of the JSR-82 API");
+		}
+	}
 }

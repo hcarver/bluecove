@@ -22,6 +22,7 @@
 package com.intel.bluetooth;
 
 import java.util.Hashtable;
+import java.util.Vector;
 
 
 /**
@@ -99,6 +100,15 @@ public class BlueCoveImpl {
 	private BluetoothStack bluetoothStack;
 
 	private static Hashtable configProperty = new Hashtable();
+	
+	private static final String FQCN = BlueCoveImpl.class.getName();
+	
+	//private static final Set fqcnSet = new HashSet();
+	private static final Vector fqcnSet = new Vector(); 
+	
+	static {
+		fqcnSet.addElement(FQCN);
+	}
 	
     /**
      * Allow default initialization.
@@ -283,6 +293,8 @@ public class BlueCoveImpl {
 	}
 
 	/**
+	 * Applications should not used this function.
+	 * 
 	 * @return Instance of the class with initializaed stack variable. getBluetoothStack() can be called.
 	 * @throws RuntimeException when BluetoothStack not detected. If one connected the hardware later, 
      * BlueCove would be able to recover and start correctly
@@ -359,7 +371,13 @@ public class BlueCoveImpl {
     	}
     }
 
+    /**
+     * Applications should not used this function.
+     * 
+     * @return curent BluetoothStack implementation
+     */
 	public BluetoothStack getBluetoothStack() {
+		Utils.isLegalAPICall(fqcnSet);
 		if (bluetoothStack == null) {
 			throw new Error("BlueCove not avalable");
 		}
