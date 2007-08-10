@@ -27,8 +27,6 @@ import java.io.IOException;
 import javax.obex.HeaderSet;
 import javax.obex.Operation;
 
-import com.intel.bluetooth.NotImplementedError;
-
 abstract class OBEXClientOperation implements Operation {
 
 	protected OBEXClientSessionImpl session;
@@ -44,6 +42,10 @@ abstract class OBEXClientOperation implements Operation {
 	protected boolean operationInProgress;
 	
 	protected boolean operationStarted;
+	
+	protected boolean outputStreamOpened = false;
+	
+	protected boolean inputStreamOpened = false;
 	
 	protected Object lock;
 	
@@ -75,6 +77,7 @@ abstract class OBEXClientOperation implements Operation {
 				throw new IOException("Fails to abort operation");
 			}
 		} finally {
+			this.isClosed = true;
 			closeStream();
 		}
 	}
@@ -83,6 +86,9 @@ abstract class OBEXClientOperation implements Operation {
 	
 	abstract void closeStream() throws IOException;
 	
+	/* (non-Javadoc)
+	 * @see javax.obex.Operation#getReceivedHeaders()
+	 */
 	public HeaderSet getReceivedHeaders() throws IOException {
 		if (isClosed) {
             throw new IOException("operation closed");
@@ -97,6 +103,9 @@ abstract class OBEXClientOperation implements Operation {
 	 *  A call will do an implicit close on the Stream and therefore signal that the request is done.
 	 */
 	public int getResponseCode() throws IOException {
+		if (isClosed) {
+            throw new IOException("operation closed");
+		}
 		started();
 		closeStream();
 		return this.replyHeaders.getResponseCode();
@@ -109,19 +118,43 @@ abstract class OBEXClientOperation implements Operation {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.microedition.io.ContentConnection#getEncoding()
+	 * <code>getEncoding()</code> will always return <code>null</code>
+	 */
 	public String getEncoding() {
-		// TODO implement
-		throw new NotImplementedError();
+		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.microedition.io.ContentConnection#getLength()
+	 * <code>getLength()</code> will return the length specified by the OBEX
+     * Length header or -1 if the OBEX Length header was not included.
+	 */
 	public long getLength() {
-		// TODO implement
-		throw new NotImplementedError();
+		Long len;
+		try {
+			len = (Long)replyHeaders.getHeader(HeaderSet.LENGTH);
+		} catch (IOException e) {
+			return -1;
+		}
+		if (len == null) {
+			return -1;
+		}
+		return len.longValue();
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.microedition.io.ContentConnection#getType()
+	 * <code>getType()</code> will return the value specified in the OBEX Type
+     * header or <code>null</code> if the OBEX Type header was not included.
+	 */
 	public String getType() {
-		// TODO implement
-		throw new NotImplementedError();
+		try {
+			return (String)replyHeaders.getHeader(HeaderSet.TYPE);
+		} catch (IOException e) {
+			return null;
+		}
 	}
 
 	public DataInputStream openDataInputStream() throws IOException {

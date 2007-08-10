@@ -32,8 +32,6 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 
 	protected OBEXOperationOutputStream os;
 	
-	private boolean outputStreamOpened = false;
-	
 	OBEXClientOperationPut(OBEXClientSessionImpl session, HeaderSet sendHeaders) throws IOException {
 		super(session, null);
 		this.sendHeaders = sendHeaders;
@@ -43,6 +41,11 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		if (isClosed) {
             throw new IOException("operation closed");
 		}
+		if (inputStreamOpened) {
+            throw new IOException("input stream already open");
+		}
+		this.inputStreamOpened = true;
+		this.operationInProgress = true;
 		return new UnsupportedInputStream();
 	}
 	
@@ -123,7 +126,7 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
             throw new IOException("operation closed");
 		}
 		if (!this.operationInProgress) {
-			return;
+			throw new IOException("the transaction has already ended");
 		}
 		synchronized (lock) {
 			if (os != null) {
@@ -134,6 +137,7 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 	}
 	
 	public void closeStream() throws IOException {
+		this.operationInProgress = false;
 		if (os != null) {
 			synchronized (lock) {
 				if (os != null) {

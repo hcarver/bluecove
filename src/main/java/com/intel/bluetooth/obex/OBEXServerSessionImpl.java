@@ -86,6 +86,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		}
 		if (!isClosed()) {
 			DebugLog.debug("OBEXServerSession close");
+			//(new Throwable()).printStackTrace();
 			if (operation != null) {
 				operation.close();
 				operation = null;
@@ -94,7 +95,6 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		super.close();
 	}
 	
-
 	private boolean processOperation() throws IOException {
 		DebugLog.debug("OBEXServerSession readOperation");
 		delayClose = false;
@@ -210,7 +210,6 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		this.isConnected = false;
 	}
 
-
 	private boolean processDelete(HeaderSet requestHeaders) throws IOException {
 		if ((requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY) == null) && (requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END) == null)) {
 			DebugLog.debug("Delete operation");
@@ -246,13 +245,12 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 				rc = ResponseCodes.OBEX_HTTP_UNAVAILABLE;
 				DebugLog.error("onPut", e);
 			}
-			writeOperation(rc, OBEXHeaderSetImpl.toByteArray(operation.sendHeaders));
+			operation.writeResponse(rc);
 		} finally {
 			operation.close();
 			operation = null;
 		}
 	}
-	
 
 	private void processGet(byte[] b, boolean finalPacket) throws IOException {
 		DebugLog.debug("Get operation");
@@ -270,13 +268,12 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 				rc = ResponseCodes.OBEX_HTTP_UNAVAILABLE;
 				DebugLog.error("onGet", e);
 			}
-			writeOperation(rc, OBEXHeaderSetImpl.toByteArray(operation.sendHeaders));
+			operation.writeResponse(rc);
 		} finally {
 			operation.close();
 			operation = null;
 		}
 	}
-
 	
 	private void processAbort() throws IOException {
 		DebugLog.debug("Abort operation");

@@ -75,7 +75,8 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {
-		DebugLog.debug("server put close");
+		DebugLog.debug("server close put");
+		//(new Throwable()).printStackTrace();
 		inputStream.close();
 		super.close();
 	}
@@ -85,7 +86,8 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 		int opcode = b[0] & 0xFF;
 		boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
 		if (finalPacket) {
-			DebugLog.debug("OBEXServerSession operation finalPacket");	
+			DebugLog.debug("OBEXServerSession operation final packet");	
+			finalPacketReceived = true;
 		}
 		switch (opcode) {
 		case OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT:
@@ -112,7 +114,7 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 		if (data == null) {
 			data = (byte[])requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
 		}
-		if ((data != null) && (data.length != 0)) {
+		if ((data != null) && (data.length != 0) && (is != null)) {
 			DebugLog.debug("processData len", data.length);
 			is.appendData(data);
 			return true;
@@ -123,11 +125,30 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 	
 	protected void processRequest(HeaderSet requestHeaders, boolean finalPacket, OBEXOperationInputStream is) throws IOException {
 		processData(requestHeaders, is);
-		if (finalPacket || (requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END) != null)) {
+		if (finalPacket) {
+			DebugLog.debug("put got final packet");
 			close();
 		} else {
 			DebugLog.debug("reply continue");
 			session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.obex.OBEXServerOperation#writeResponse(int)
+	 */
+	void writeResponse(int responseCode) throws IOException {
+		session.writeOperation(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		if (responseCode == ResponseCodes.OBEX_HTTP_OK) {
+			while ((!finalPacketReceived) && (!isClosed())) {
+				DebugLog.debug("receive final packet");
+				receiveData(null);
+				if (finalPacketReceived) {
+					session.writeOperation(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));			
+				}
+			}
+		} else {
+			DebugLog.debug("sent final reply");
 		}
 	}
 

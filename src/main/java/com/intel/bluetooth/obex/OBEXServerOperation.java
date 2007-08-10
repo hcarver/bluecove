@@ -41,10 +41,14 @@ abstract class OBEXServerOperation implements Operation {
 	
 	protected boolean isClosed = false;
 
+	protected boolean finalPacketReceived = false;
+	
 	protected OBEXServerOperation(OBEXServerSessionImpl session, HeaderSet receivedHeaders) {
 		this.session = session;
 		this.receivedHeaders = receivedHeaders;
 	}
+	
+	abstract void writeResponse(int responseCode) throws IOException;
 	
 	/* (non-Javadoc)
 	 * @see javax.obex.Operation#abort()
@@ -76,26 +80,42 @@ abstract class OBEXServerOperation implements Operation {
 
 	/* (non-Javadoc)
 	 * @see javax.microedition.io.ContentConnection#getEncoding()
+	 * <code>getEncoding()</code> will always return <code>null</code>
 	 */
 	public String getEncoding() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+
 	/* (non-Javadoc)
 	 * @see javax.microedition.io.ContentConnection#getLength()
+	 * <code>getLength()</code> will return the length specified by the OBEX
+     * Length header or -1 if the OBEX Length header was not included.
 	 */
 	public long getLength() {
-		// TODO Auto-generated method stub
-		return 0;
+		Long len;
+		try {
+			len = (Long)receivedHeaders.getHeader(HeaderSet.LENGTH);
+		} catch (IOException e) {
+			return -1;
+		}
+		if (len == null) {
+			return -1;
+		}
+		return len.longValue();
 	}
 
 	/* (non-Javadoc)
 	 * @see javax.microedition.io.ContentConnection#getType()
+	 * <code>getType()</code> will return the value specified in the OBEX Type
+     * header or <code>null</code> if the OBEX Type header was not included.
 	 */
 	public String getType() {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return (String)receivedHeaders.getHeader(HeaderSet.TYPE);
+		} catch (IOException e) {
+			return null;
+		}
 	}
 
 	/* (non-Javadoc)

@@ -80,6 +80,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 		switch (requestHeaders.getResponseCode()) {
 		case OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT:
+			finalPacketReceived = true;
 			replyWithPacket(finalPacket, buffer);
 			break;
 		case OBEXOperationCodes.ABORT:
@@ -91,7 +92,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 	}
 	
 	private void processAbort() throws IOException {
-		
+		finalPacketReceived = true;
 	}
 	
 	private void replyWithPacket(boolean finalPacket, byte[] buffer) throws IOException {
@@ -108,4 +109,10 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.obex.OBEXServerOperation#writeResponse(int)
+	 */
+	void writeResponse(int responseCode) throws IOException {
+		session.writeOperation(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+	}
 }
