@@ -23,6 +23,7 @@ package com.intel.bluetooth;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.RemoteDevice;
@@ -111,6 +112,9 @@ public abstract class RemoteDeviceHelper {
 			return (connectionsCount() != 0);
 		}
 
+		/* (non-Javadoc)
+		 * @see javax.bluetooth.RemoteDevice#isAuthenticated()
+		 */
 		public boolean isAuthenticated() {
 			if (!hasConnections()) {
 				DebugLog.debug("no connections, Authenticated = false");
@@ -119,6 +123,9 @@ public abstract class RemoteDeviceHelper {
 			return (((BluetoothConnectionAccess)connections.firstElement()).getSecurityOpt() != ServiceRecord.NOAUTHENTICATE_NOENCRYPT);
 		}
 		
+		/* (non-Javadoc)
+		 * @see javax.bluetooth.RemoteDevice#isEncrypted()
+		 */
 		public boolean isEncrypted() {
 			if (!hasConnections()) {
 				return false;
@@ -126,6 +133,9 @@ public abstract class RemoteDeviceHelper {
 			return (((BluetoothConnectionAccess)connections.firstElement()).getSecurityOpt() == ServiceRecord.AUTHENTICATE_ENCRYPT);
 		}
 		
+		/* (non-Javadoc)
+		 * @see javax.bluetooth.RemoteDevice#isTrustedDevice()
+		 */
 		public boolean isTrustedDevice() {
 			return paired;
 		}
@@ -201,14 +211,39 @@ public abstract class RemoteDeviceHelper {
 		return createRemoteDevice(((BluetoothConnectionAccess)conn).getRemoteAddress(), null, false);
 	}
 	
+	/* (non-Javadoc)
+	 * @see javax.bluetooth.DiscoveryAgent#retrieveDevices(int)
+	 */
 	public static RemoteDevice[] retrieveDevices(int option) {
 		switch (option) {
-		case DiscoveryAgent.CACHED:
 		case DiscoveryAgent.PREKNOWN:
-			RemoteDevice[] devices = new RemoteDevice[devicesCashed.size()];
-			int i = 0;
+			if (devicesCashed.size() == 0) {
+				return null;
+			}
+			Vector devicesPaired = new Vector();
 			for(Enumeration en = devicesCashed.elements(); en.hasMoreElements(); ) {
-				devices[i++] = (RemoteDevice)en.nextElement();
+				RemoteDeviceWithExtendedInfo d = (RemoteDeviceWithExtendedInfo)en.nextElement();
+				if (d.isTrustedDevice()) {
+					devicesPaired.addElement(d);
+				}
+			}
+			if (devicesPaired.size() == 0) {
+				return null;
+			}
+			RemoteDevice[] pdevices = new RemoteDevice[devicesPaired.size()];
+			int i = 0;
+			for(Enumeration en = devicesPaired.elements(); en.hasMoreElements(); ) {
+				pdevices[i++] = (RemoteDevice)en.nextElement();
+			}
+			return pdevices;
+		case DiscoveryAgent.CACHED:
+			if (devicesCashed.size() == 0) {
+				return null;
+			}
+			RemoteDevice[] devices = new RemoteDevice[devicesCashed.size()];
+			int k = 0;
+			for(Enumeration en = devicesCashed.elements(); en.hasMoreElements(); ) {
+				devices[k++] = (RemoteDevice)en.nextElement();
 			}
 			return devices; 
 		default:
