@@ -138,6 +138,9 @@ public abstract class OBEXSessionBase implements Connection {
 		if (lenght == 3) {
 			return header;
 		}
+		if ((lenght < 3) || (lenght > OBEXOperationCodes.OBEX_MAX_PACKET_LEN)) {
+			throw new IOException("Invalid packet lenght");
+		}
 		byte[] data = new byte[lenght];
 		System.arraycopy(header, 0, data, 0, header.length);
 		OBEXUtils.readFully(is, data, header.length, lenght - header.length);

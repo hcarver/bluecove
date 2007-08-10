@@ -142,22 +142,7 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 		return this.connectionID;
 	}
 
-	public HeaderSet setPath(HeaderSet headers, boolean backup, boolean create) throws IOException {
-		validateCreatedHeaderSet(headers);
-		if (!isConnected) {
-            throw new IOException("Session not connected");
-		}
-		byte[] request = new byte[2];
-		request[0] = (byte) ((backup?1:0) | (create?0:2));
-		request[1] = 0;
-		writeOperation(OBEXOperationCodes.SETPATH | OBEXOperationCodes.FINAL_BIT, request, OBEXHeaderSetImpl.toByteArray(headers));
-		
-		byte[] b = readOperation();
-		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
-	}
-
-	public Operation get(HeaderSet headers) throws IOException {
-		validateCreatedHeaderSet(headers);
+	private void canStartOperation()  throws IOException {
 		if (!isConnected) {
             throw new IOException("Session not connected");
 		}
@@ -167,6 +152,24 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 			}
 			this.operation = null;
 		}
+	}
+	
+	public HeaderSet setPath(HeaderSet headers, boolean backup, boolean create) throws IOException {
+		validateCreatedHeaderSet(headers);
+		canStartOperation();
+		byte[] request = new byte[2];
+		request[0] = (byte) ((backup?1:0) | (create?0:2));
+		request[1] = 0;
+		//DebugLog.debug("setPath b[3]", request[0]);
+		writeOperation(OBEXOperationCodes.SETPATH | OBEXOperationCodes.FINAL_BIT, request, OBEXHeaderSetImpl.toByteArray(headers));
+		
+		byte[] b = readOperation();
+		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+	}
+
+	public Operation get(HeaderSet headers) throws IOException {
+		validateCreatedHeaderSet(headers);
+		canStartOperation();
 		writeOperation(OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
 		HeaderSet replyHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
@@ -178,25 +181,14 @@ public class OBEXClientSessionImpl  extends OBEXSessionBase implements ClientSes
 
 	public Operation put(HeaderSet headers) throws IOException {
 		validateCreatedHeaderSet(headers);
-		if (!isConnected) {
-            throw new IOException("Session not connected");
-		}
-		if (this.operation != null) {
-			if (!this.operation.isClosed()) {
-				throw new IOException("Client is already in an operation");
-			}
-			this.operation = null;
-		}
+		canStartOperation();
 		this.operation = new OBEXClientOperationPut(this, headers);
 		return this.operation;
 	}
 
 	public HeaderSet delete(HeaderSet headers) throws IOException {
 		validateCreatedHeaderSet(headers);
-		if (!isConnected) {
-            throw new IOException("Session not connected");
-		}
-		
+		canStartOperation();
 		writeOperation(OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
 		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);

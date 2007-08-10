@@ -41,6 +41,8 @@ interface OBEXOperationCodes {
 	
 	public static final short OBEX_MTU_HEADER_RESERVE = 3 + 5 + 3;
 	
+	public static final int OBEX_MAX_PACKET_LEN = 0xFFFF;
+	
 	public static final char FINAL_BIT = 0x80;
 	
 	public static final char CONNECT = 0x00 | FINAL_BIT;
