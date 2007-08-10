@@ -45,7 +45,7 @@ public abstract class Utils {
 		return uuidValue;
 	}
 	
-	static byte[] UUIDToByteArray(UUID uuid) {
+	static byte[] UUIDToByteArray(final UUID uuid) {
 		return UUIDToByteArray(uuid.toString());
 	}
 	

@@ -92,18 +92,12 @@ class BluetoothOutputStream extends OutputStream {
     }
 	
 	public void close() throws IOException {
-		try {
-			if (conn != null) {
-				conn.out = null;
-				BluetoothRFCommConnection c = conn;
-				conn = null;
-				// Function is not synchronized
-				if (c != null) {
-					c.closeConnection();
-				}
-			}
-		} catch (NullPointerException ignore) {
-			// Function is not synchronized
+		// Function is not synchronized
+		BluetoothRFCommConnection c = conn;
+		if (c != null) {
+			c.out = null;
+			conn = null;
+			c.closeConnection();
 		}
 	}
 }

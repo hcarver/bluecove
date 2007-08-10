@@ -208,7 +208,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 		startedNotify.searchServicesStartedCallback();
 		UUID uuid = null;
 		if ((uuidSet != null) && (uuidSet.length > 0)) {
-			uuid = uuidSet[uuidSet.length -1];
+			uuid = uuidSet[uuidSet.length - 1];
 		}
 		return runSearchServicesImpl(startedNotify, listener, Utils.UUIDToByteArray(uuid), RemoteDeviceHelper.getAddress(device), device);
 	}
