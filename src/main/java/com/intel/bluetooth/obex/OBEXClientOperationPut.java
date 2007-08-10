@@ -48,7 +48,7 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 	
 	void started() throws IOException {
 		if ((!outputStreamOpened) && (!operationStarted)) {
-			this.replyHeaders = session.delete(sendHeaders);
+			this.replyHeaders = session.deleteImp(sendHeaders);
 			operationStarted = true;
 		}
 	}

@@ -205,11 +205,15 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 	public HeaderSet delete(HeaderSet headers) throws IOException {
 		validateCreatedHeaderSet(headers);
 		canStartOperation();
+		return deleteImp(headers);
+	}
+
+	HeaderSet deleteImp(HeaderSet headers) throws IOException {
 		writeOperation(OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
 		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 	}
-
+	
 	public void setAuthenticator(Authenticator auth) {
 		this.authenticator = auth;
 	}
