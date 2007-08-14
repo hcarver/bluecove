@@ -76,6 +76,9 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 		if (notifier == null) {
             throw new IOException("Session closed");
 		}
+		if (handler == null) {
+			throw new NullPointerException("handler is null");
+		}
 		return new OBEXServerSessionImpl(notifier.acceptAndOpen(), handler, auth);
 	}
 
