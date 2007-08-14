@@ -14,9 +14,7 @@ JSR 82 Technology Compatibility Kit
 
 * BlueCove Tests on windows
 
-    Since security and OBEX are not implemented yet this tests has been excluded from run to save time.
-
-    L2CAP connection can't be implemented on Microsoft stack this tests has been excluded from run to save time.
+    L2CAP connection can't be implemented on Microsoft stack this tests has been excluded from run on this stack to save time.
 
     Latest test reports for Bluetooth_1-1_005_TCK can be found {{{Bluetooth_1-1_005_TCK/}here}}.
 
@@ -24,13 +22,13 @@ JSR 82 Technology Compatibility Kit
 
     To run TCK we are using:
 
-    * {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.gatling}Gatling}} v1.0.02 test harness
+    * {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.gatling}Gatling}} v1.0.03 test harness
 
     * {{{http://www.microemu.org/}MicroEmulator}} v2.0.2-SNAPSHOT as MIDP container.
 
     * BlueCove on WIDCOMM stack as TCK agent
 
-    * Cellphone Nokia 6265i or Sony Ericson K790a as TCK agent (RFCOMM only)
+    * Cellphone Nokia 6265i (RFCOMM only) or Sony Ericson K790a as TCK agent
 
     []
 
@@ -41,6 +39,8 @@ JSR 82 Technology Compatibility Kit
     * Sun Java(TM) SE Runtime Environment (build 1.6.0_01-b06)
 
     * System 1 TCK Client, Intel Pentium M 1.7 GHz, RAM 1.25 GB, WIDCOMM (Broadcom Bluetooth stack) v5.0.1.2800, Integrated Cambridge Silicon Radio on HP ZT3380US
+
+    * System 1 TCK Client, Intel Pentium M 1.7 GHz, RAM 1.25 GB, Microsoft Bluetooth stack, D-Link DBT-120
 
     * System 2 TCK Agent, Intel Pentium III 646 MHz, RAM 320 MB, WIDCOMM (Broadcom Bluetooth stack) v5.0.1.2800, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
