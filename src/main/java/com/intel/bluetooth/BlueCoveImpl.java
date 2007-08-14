@@ -21,7 +21,6 @@
  */
 package com.intel.bluetooth;
 
-import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -249,6 +248,7 @@ public class BlueCoveImpl {
 	void copySystemProperty() {
 		if (bluetoothStack != null) {
 			UtilsJavaSE.setSystemProperty("bluetooth.api.version", "1.1");
+			UtilsJavaSE.setSystemProperty("obex.api.version", "1.1");
 			String[] property = { 
 					"bluetooth.master.switch", 
 					"bluetooth.sd.attr.retrievable.max",
