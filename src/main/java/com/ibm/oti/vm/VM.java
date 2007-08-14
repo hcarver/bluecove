@@ -3,9 +3,11 @@ package com.ibm.oti.vm;
 import java.io.IOException;
 
 /**
+ * Stub for IBM J9 implemenation.
+ * <p>
  * Licensed Materials - Property of IBM,
  * (c) Copyright IBM Corp. 2000, 2002  All Rights Reserved
- * 
+ * <p>
  * This class is not distributed with BlueCove binary distrubution: bluecove.jar
  */
 

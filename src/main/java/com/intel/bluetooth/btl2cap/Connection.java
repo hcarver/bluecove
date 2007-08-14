@@ -37,6 +37,9 @@ import com.intel.bluetooth.MicroeditionConnector;
 /**
  * This class is Proxy for btl2cap (L2CAP) Connection implementations for IBM J9 support
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ * 
  * @author vlads
  *
  */

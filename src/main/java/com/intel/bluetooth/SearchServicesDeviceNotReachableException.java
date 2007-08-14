@@ -20,9 +20,12 @@
  */
 package com.intel.bluetooth;
 
+
 /**
+ * Thrown from JNI code when service search could not be completed because the
+ * remote device could not be reached.
+ * 
  * @author vlads
- *
  */
 public class SearchServicesDeviceNotReachableException extends SearchServicesException {
 

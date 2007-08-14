@@ -28,18 +28,25 @@ import javax.bluetooth.ServiceRegistrationException;
 /**
  * Maps ServiceRecord to ConnectionNotifier.
  * 
- * USed by ServiceRecordsRegistry.updateServiceRecord().
+ * Used by ServiceRecordsRegistry.updateServiceRecord().
+ * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
  * 
  * @author vlads
  *
  */
-public class ServiceRecordsRegistry {
+public abstract class ServiceRecordsRegistry {
 	
 	/**
 	 * Used to find ConnectionNotifier by ServiceRecord returned by LocalDevice.getRecord()
 	 */
 	private static Hashtable serviceRecordsMap = new Hashtable/*<ServiceRecord, BluetoothConnectionNotifierServiceRecordAccess>*/();
 
+	private ServiceRecordsRegistry() {
+		
+	}
+	
 	static void register(BluetoothConnectionNotifierServiceRecordAccess notifier, ServiceRecord serviceRecord) {
 		serviceRecordsMap.put(serviceRecord, notifier);
 	}

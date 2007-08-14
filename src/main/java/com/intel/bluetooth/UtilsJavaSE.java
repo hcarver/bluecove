@@ -27,11 +27,14 @@ import java.util.Vector;
  * 
  * J2ME/J9 compatibility module.
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ *  
  * @author vlads
  */
 public class UtilsJavaSE {
 	
-	public static final boolean javaSECompiledOut = false;
+	static final boolean javaSECompiledOut = false;
 	
 	static class StackTraceLocation {
 		
@@ -49,6 +52,10 @@ public class UtilsJavaSE {
 	static boolean java14 = false;
 	
 	static final boolean ibmJ9midp = detectJ9midp();
+	
+	private UtilsJavaSE() {
+		
+	}
 	
 	private static boolean detectJ9midp() {
 		String ibmJ9config = System.getProperty("com.ibm.oti.configuration");
@@ -103,6 +110,12 @@ public class UtilsJavaSE {
 		return null;
 	}
 	
+    /**
+	 * Marks the thread as a daemon thread. The Java Virtual Machine exits when
+	 * the only threads running are all daemon threads. 
+	 * 
+	 * @see java.lang.Thread#setDaemon(boolean)
+	 */ 
 	public static void threadSetDaemon(Thread thread) {
 		try {
 			if ((!javaSECompiledOut) && (!ibmJ9midp)) {

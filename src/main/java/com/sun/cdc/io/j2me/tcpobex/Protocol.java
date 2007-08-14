@@ -30,6 +30,9 @@ import com.sun.cdc.io.ConnectionBaseInterface;
 /**
  * This class is Proxy for tcpobex (OBEX over TCP) Connection implementations used in WTK and MicroEmulator
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ *
  * @author vlads
  */
 public class Protocol implements ConnectionBaseInterface {

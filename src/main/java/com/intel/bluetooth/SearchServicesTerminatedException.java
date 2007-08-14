@@ -21,6 +21,8 @@
 package com.intel.bluetooth;
 
 /**
+ * Thrown from JNI code when service search has been canceled by the application.
+ * 
  * @author vlads
  *
  */

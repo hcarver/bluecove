@@ -41,6 +41,9 @@ import com.intel.bluetooth.Utils;
  * href="http://bluetooth.com/Bluetooth/Learn/Technology/Specifications/">Bluetooth
  * Specification Documents</A> for details.
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ *
  * @author vlads
  * 
  */

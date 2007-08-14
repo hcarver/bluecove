@@ -23,6 +23,8 @@ package com.intel.bluetooth;
 import java.io.IOException;
 
 /**
+ * Thrown from JNI code.
+ * 
  * @author vlads
  *
  */

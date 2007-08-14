@@ -45,9 +45,10 @@ import com.intel.bluetooth.obex.OBEXSessionNotifierImpl;
 /**
  * 
  * Implementation of javax.microedition.io.Connector
- * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
  */
-public class MicroeditionConnector {
+public abstract class MicroeditionConnector {
 	/*
 	 * Access mode READ. The value 1 is assigned to READ.
 	 */
@@ -114,6 +115,10 @@ public class MicroeditionConnector {
 		suportScheme.put("socket", Boolean.TRUE);
 	}
 
+	private MicroeditionConnector() {
+		
+	}
+	
 	static void copyAll(Hashtable dest, Hashtable src) {
 		for(Enumeration en = src.keys(); en.hasMoreElements(); ) {
 			Object key = en.nextElement();

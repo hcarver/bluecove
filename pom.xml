@@ -327,6 +327,21 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <quiet>true</quiet>
+                    <excludePackageNames>com.ibm.*:com.intel.bluetooth.btgoep:com.intel.bluetooth.btspp:com.intel.bluetooth.btl2cap:com.intel.bluetooth.tcpobex:com.intel.bluetooth.gcf.socket:com.sun.cdc.*</excludePackageNames>
+                    <groups>
+                        <group>
+                            <title>JSR 82: Java APIs for Bluetooth</title>
+                            <packages>javax.bluetooth:javax.obex</packages>
+                        </group>
+                        <group>
+                            <title>BlueCove implementation</title>
+                            <packages>com.intel.bluetooth:com.intel.bluetooth.obex</packages>
+                        </group>
+                    </groups>
+                    <links>
+                        <link>http://java.sun.com/j2se/1.4.2/docs/api</link>
+                    </links>
+                    <overview>${basedir}/src/main/javadoc/overview.html</overview>
                 </configuration>
             </plugin>
             <plugin>

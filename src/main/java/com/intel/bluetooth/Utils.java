@@ -30,10 +30,17 @@ import javax.bluetooth.UUID;
 /**
  * Conversion and JVM compatibility functions.
  *  
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ *   
  * @author vlads
  */
 public abstract class Utils {
 
+	private Utils() {
+		
+	}
+	
 	public static byte[] UUIDToByteArray(String uuidStringValue) {
 		byte[] uuidValue = new byte[16];
 		if(uuidStringValue.indexOf('-') != -1) {

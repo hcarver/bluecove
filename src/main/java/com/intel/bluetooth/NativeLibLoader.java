@@ -46,17 +46,17 @@ import com.ibm.oti.vm.VM;
  * @author vlads
  * 
  */
-public class NativeLibLoader {
+public abstract class NativeLibLoader {
 
-	public static final int OS_UNSUPPORTED = -1;
+	static final int OS_UNSUPPORTED = -1;
 	
-	public static final int OS_LINUX = 1;
+	static final int OS_LINUX = 1;
 	
-	public static final int OS_WINDOWS = 2;
+	static final int OS_WINDOWS = 2;
 	
-	public static final int OS_WINDOWS_CE = 3;
+	static final int OS_WINDOWS_CE = 3;
 	
-	public static final int OS_MAC_OS_X = 4;
+	static final int OS_MAC_OS_X = 4;
 	
 	private static int os = 0; 
 	
@@ -71,8 +71,12 @@ public class NativeLibLoader {
 		boolean libraryAvailable = false;
 
 	}
+	
+	private NativeLibLoader() {
+		
+	}
 
-	public static int getOS() {
+	static int getOS() {
 		if (os != 0) {
 			return os;
 		}
@@ -100,7 +104,7 @@ public class NativeLibLoader {
 		return os;
 	}
 	
-    public static boolean isAvailable(String name) {
+    static boolean isAvailable(String name) {
     	LibState state = (LibState)libsState.get(name);
     	if (state == null) {
     		state = new LibState();

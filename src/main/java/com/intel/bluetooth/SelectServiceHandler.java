@@ -34,6 +34,9 @@ import javax.bluetooth.UUID;
 /**
  * Implementation of DiscoveryAgent.selectService().
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ * 
  * @author vlads
  *
  */

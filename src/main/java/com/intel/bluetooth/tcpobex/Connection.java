@@ -35,8 +35,11 @@ import com.intel.bluetooth.MicroeditionConnector;
 
 
 /**
- * This class is Proxy for tcpobex (OBEX over TCP) Connection implementations for IBM J9 support
+ * This class is Proxy for tcpobex (OBEX over TCP) Connection implementations for IBM J9 support.
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ *
  * @author vlads
  *
  */

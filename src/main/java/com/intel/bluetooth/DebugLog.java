@@ -37,7 +37,7 @@ import java.util.Vector;
  * This class itself will disappear from bytecode after obfuscation by proguard.
  * 
  */
-public class DebugLog {
+public abstract class DebugLog {
 
 	private static final boolean debugCompiledOut = false;
 
@@ -70,6 +70,10 @@ public class DebugLog {
 
 	static {
 		fqcnSet.addElement(FQCN);
+	}
+	
+	private DebugLog() {
+		
 	}
 	
 	private static void initialize() {

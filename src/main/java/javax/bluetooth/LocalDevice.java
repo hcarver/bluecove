@@ -242,7 +242,14 @@ public class LocalDevice {
 	 * device if it is already connected to another device.  Valid values are
 	 * either "true" or "false".</TD></TR>
 	 * </TABLE>
-	 *
+     * <p>
+	 * BlueCove specific properties.
+	 * <TABLE>
+	 * <TR><TH>Property Name</TH><TH>Description</TH></TR>
+	 * <TR><TD>bluecove</TD><TD>The version of BlueCove implementation</TD></TR>
+	 * <TR><TD>bluecove.stack</TD><TD>The Bluetooth Stack: "winsock", "widcomm" or "bluesoleil"</TD></TR>
+	 * </TABLE>
+     *
 	 * @param property the property to retrieve as defined in this class.
 	 *
 	 * @return the value of the property specified; <code>null</code> if
