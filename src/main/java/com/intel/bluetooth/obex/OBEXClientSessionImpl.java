@@ -134,6 +134,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 
 	public HeaderSet disconnect(HeaderSet headers) throws IOException {
 		validateCreatedHeaderSet(headers);
+		canStartOperation();
 		if (!isConnected) {
             throw new IOException("Session not connected");
 		}
