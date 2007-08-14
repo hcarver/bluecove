@@ -22,6 +22,8 @@ package com.intel.bluetooth.tcpobex;
 
 import java.io.IOException;
 
+import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.ServiceRegistrationException;
 import javax.obex.Authenticator;
 import javax.obex.ClientSession;
 import javax.obex.HeaderSet;
@@ -30,6 +32,7 @@ import javax.obex.ServerRequestHandler;
 import javax.obex.SessionNotifier;
 
 import com.ibm.oti.connection.CreateConnection;
+import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
 import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.MicroeditionConnector;
 
@@ -43,7 +46,7 @@ import com.intel.bluetooth.MicroeditionConnector;
  * @author vlads
  *
  */
-public class Connection implements CreateConnection, ClientSession, SessionNotifier {
+public class Connection implements CreateConnection, ClientSession, SessionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
 
 	private javax.microedition.io.Connection impl;
 	
@@ -110,6 +113,20 @@ public class Connection implements CreateConnection, ClientSession, SessionNotif
 
 	public javax.microedition.io.Connection acceptAndOpen(ServerRequestHandler handler, Authenticator auth) throws IOException {
 		return ((SessionNotifier)impl).acceptAndOpen(handler, auth);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#getServiceRecord()
+	 */
+	public ServiceRecord getServiceRecord() {
+		return ((BluetoothConnectionNotifierServiceRecordAccess)impl).getServiceRecord();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#updateServiceRecord(boolean)
+	 */
+	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
+		((BluetoothConnectionNotifierServiceRecordAccess)impl).updateServiceRecord(acceptAndOpen);
 	}
 
 

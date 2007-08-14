@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import javax.bluetooth.BluetoothConnectionException;
 import javax.bluetooth.L2CAPConnection;
 import javax.bluetooth.UUID;
 import javax.microedition.io.Connection;
@@ -149,6 +150,9 @@ public abstract class MicroeditionConnector {
 	}
 	
 	private static Connection openImpl(String name, boolean allowServer) throws IOException {
+		
+		DebugLog.debug("connecting", name);
+		
 		/*
 		 * parse URL
 		 */
@@ -254,10 +258,26 @@ public abstract class MicroeditionConnector {
         	   validateBluetoothServiceName((String)values.get(NAME));
            }
            if (schemeBluetooth) {
-        	   notifierParams = new BluetoothConnectionNotifierParams(new UUID(portORuuid, false), 
-        			   paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT), 
-        			   (String) values.get(NAME), paramBoolean(values, MASTER));
-           }
+				notifierParams = new BluetoothConnectionNotifierParams(new UUID(portORuuid, false), paramBoolean(
+						values, AUTHENTICATE), paramBoolean(values, ENCRYPT), paramBoolean(values, AUTHORIZE),
+						(String) values.get(NAME), paramBoolean(values, MASTER));
+				if (notifierParams.encrypt && (!notifierParams.authenticate)) {
+					if (values.get(AUTHENTICATE) == null) {
+						notifierParams.authenticate = true;
+					} else {
+						throw new BluetoothConnectionException(BluetoothConnectionException.UNACCEPTABLE_PARAMS,
+								"encryption requires authentication");
+					}
+				}
+				if (notifierParams.authorize && (!notifierParams.authenticate)) {
+					if (values.get(AUTHENTICATE) == null) {
+						notifierParams.authenticate = true;
+					} else {
+						throw new BluetoothConnectionException(BluetoothConnectionException.UNACCEPTABLE_PARAMS,
+								"authorization requires authentication");
+					}
+				}
+			}
 		} else { // (!isServer)
 			try {
 				channel = Integer.parseInt(portORuuid, isL2CAP?16:10);
@@ -289,6 +309,13 @@ public abstract class MicroeditionConnector {
 				
 				connectionParams = new BluetoothConnectionParams(RemoteDeviceHelper.getAddress(host), channel, 
 					paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
+				if (connectionParams.encrypt && (!connectionParams.authenticate)) {
+					if (values.get(AUTHENTICATE) == null) {
+						connectionParams.authenticate = true;
+					} else {
+						throw new BluetoothConnectionException(BluetoothConnectionException.UNACCEPTABLE_PARAMS, "encryption requires authentication");
+					}
+				}
 			}
 		}
 		/*

@@ -24,10 +24,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.Connection;
 import javax.microedition.io.StreamConnection;
 import javax.obex.HeaderSet;
 
+import com.intel.bluetooth.BluetoothConnectionAccess;
 import com.intel.bluetooth.DebugLog;
 
 /**
@@ -38,7 +40,7 @@ import com.intel.bluetooth.DebugLog;
  * @author vlads
  * 
  */
-abstract class OBEXSessionBase implements Connection {
+abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess {
 	
 	protected StreamConnection conn;
 	
@@ -148,6 +150,44 @@ abstract class OBEXSessionBase implements Connection {
 			DebugLog.debug("has more data after read", is.available());
 		}
 		return data;
+	}
+	
+	private void validateBluetoothConnection() {
+		if (!(conn instanceof BluetoothConnectionAccess)) {
+			throw new IllegalArgumentException("Not a Bluetooth connection " + conn.getClass().getName());
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
+	 */
+	public long getRemoteAddress() throws IOException {
+		validateBluetoothConnection();
+		return ((BluetoothConnectionAccess)conn).getRemoteAddress();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteDevice()
+	 */
+	public RemoteDevice getRemoteDevice() {
+		validateBluetoothConnection();
+		return ((BluetoothConnectionAccess)conn).getRemoteDevice();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
+	 */
+	public int getSecurityOpt() {
+		validateBluetoothConnection();
+		return ((BluetoothConnectionAccess)conn).getSecurityOpt();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#setRemoteDevice(javax.bluetooth.RemoteDevice)
+	 */
+	public void setRemoteDevice(RemoteDevice remoteDevice) {
+		validateBluetoothConnection();
+		((BluetoothConnectionAccess)conn).setRemoteDevice(remoteDevice);
 	}
 	
 }

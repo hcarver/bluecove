@@ -34,17 +34,20 @@ class BluetoothConnectionNotifierParams {
 	
 	boolean encrypt; 
 	
+	boolean authorize;
+	
 	String name; 
 	
 	boolean master;
 
 	boolean obex;
 	
-	public BluetoothConnectionNotifierParams(UUID uuid, boolean authenticate, boolean encrypt, String name, boolean master) {
+	public BluetoothConnectionNotifierParams(UUID uuid, boolean authenticate, boolean encrypt, boolean authorize, String name, boolean master) {
 		super();
 		this.uuid = uuid;
 		this.authenticate = authenticate;
 		this.encrypt = encrypt;
+		this.authorize = authorize;
 		this.name = name;
 		this.master = master;
 		this.obex = false;
