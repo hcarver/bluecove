@@ -38,9 +38,7 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 	}
 
 	public InputStream openInputStream() throws IOException {
-		if (isClosed) {
-            throw new IOException("operation closed");
-		}
+		validateOperationIsOpen();
 		if (inputStreamOpened) {
             throw new IOException("input stream already open");
 		}
@@ -57,6 +55,7 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 	}
 	
 	private void startPutOperation() throws IOException {
+		operationStarted = true;
 		session.writeOperation(OBEXOperationCodes.PUT, OBEXHeaderSetImpl.toByteArray(sendHeaders));
 		sendHeaders = null;
 		byte[] b = session.readOperation();
@@ -66,9 +65,7 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 	}
 	
 	public OutputStream openOutputStream() throws IOException {
-		if (isClosed) {
-            throw new IOException("operation closed");
-		}
+		validateOperationIsOpen();
 		if (outputStreamOpened) {
             throw new IOException("output already open");
 		}
@@ -122,9 +119,7 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 	 * @see javax.obex.Operation#abort()
 	 */
 	public void abort() throws IOException {
-		if (isClosed) {
-            throw new IOException("operation closed");
-		}
+		validateOperationIsOpen();
 		if (!this.operationInProgress) {
 			throw new IOException("the transaction has already ended");
 		}

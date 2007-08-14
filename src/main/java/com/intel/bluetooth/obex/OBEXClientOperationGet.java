@@ -49,14 +49,13 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 	 * @see javax.microedition.io.InputConnection#openInputStream()
 	 */
 	public InputStream openInputStream() throws IOException {
-		if (isClosed) {
-            throw new IOException("operation closed");
-		}
+		validateOperationIsOpen();
 		if (inputStreamOpened) {
             throw new IOException("input stream already open");
 		}
 		DebugLog.debug("openInputStream");
 		inputStreamOpened = true;
+		operationStarted = true;
 		return inputStream;
 	}
 	
@@ -64,9 +63,7 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 	 * @see javax.obex.Operation#abort()
 	 */
 	public void abort() throws IOException {
-		if (isClosed) {
-            throw new IOException("operation closed");
-		}
+		validateOperationIsOpen();
 		if (!this.operationInProgress) {
 			throw new IOException("the transaction has already ended");
 		}
@@ -82,9 +79,7 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 	 * @see javax.microedition.io.OutputConnection#openOutputStream()
 	 */
 	public OutputStream openOutputStream() throws IOException {
-		if (isClosed) {
-            throw new IOException("operation closed");
-		}
+		validateOperationIsOpen();
 		if (outputStreamOpened) {
             throw new IOException("output already open");
 		}

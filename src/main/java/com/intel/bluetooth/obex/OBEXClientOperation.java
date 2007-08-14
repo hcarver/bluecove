@@ -86,13 +86,17 @@ abstract class OBEXClientOperation implements Operation {
 	
 	abstract void closeStream() throws IOException;
 	
+	protected void validateOperationIsOpen()  throws IOException {
+		if (isClosed) {
+            throw new IOException("operation closed");
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see javax.obex.Operation#getReceivedHeaders()
 	 */
 	public HeaderSet getReceivedHeaders() throws IOException {
-		if (isClosed) {
-            throw new IOException("operation closed");
-		}
+		validateOperationIsOpen();
 		started();
 		return OBEXHeaderSetImpl.cloneHeaders(this.replyHeaders);
 	}
@@ -103,15 +107,21 @@ abstract class OBEXClientOperation implements Operation {
 	 *  A call will do an implicit close on the Stream and therefore signal that the request is done.
 	 */
 	public int getResponseCode() throws IOException {
-		if (isClosed) {
-            throw new IOException("operation closed");
-		}
+		validateOperationIsOpen();
 		started();
 		closeStream();
 		return this.replyHeaders.getResponseCode();
 	}
 
 	public void sendHeaders(HeaderSet headers) throws IOException {
+		if (headers == null) {
+			throw new NullPointerException("headers are null");
+		}
+		OBEXHeaderSetImpl.validateCreatedHeaderSet(headers);
+		validateOperationIsOpen();
+		if ((this.operationStarted) && (!this.operationInProgress)) {
+			throw new IOException("the transaction has already ended");
+		}
 		synchronized (lock) {
 			sendHeaders = headers;
 			sendHeadersLength = OBEXHeaderSetImpl.toByteArray(sendHeaders).length;
