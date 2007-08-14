@@ -26,6 +26,7 @@ import java.util.Vector;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.microedition.io.Connection;
+import javax.microedition.io.ServerSocketConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 import javax.obex.Authenticator;
 import javax.obex.ServerRequestHandler;
@@ -93,6 +94,9 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#getServiceRecord()
 	 */
 	public ServiceRecord getServiceRecord() {
+		if (notifier instanceof ServerSocketConnection) {
+			return new OBEXTCPServiceRecordImpl((ServerSocketConnection)notifier);
+		}
 		if (!(notifier instanceof BluetoothConnectionNotifierServiceRecordAccess)) {
 			throw new IllegalArgumentException("connection is not a Bluetooth notifier");
 		}

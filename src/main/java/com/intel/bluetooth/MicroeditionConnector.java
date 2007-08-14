@@ -220,8 +220,8 @@ public class MicroeditionConnector {
 				}
 			}
 		} else if (isTCPOBEX) {
-			isServer = true;
-			host = "";
+			host = name.substring(scheme.length() + 3);
+			isServer = (host.length() == 0);
 		} else {
 			throw new IllegalArgumentException(name.substring(scheme.length() + 3));
 		}

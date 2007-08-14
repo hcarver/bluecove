@@ -22,6 +22,7 @@
 package com.intel.bluetooth.gcf.socket;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 
 import javax.microedition.io.StreamConnection;
@@ -36,7 +37,8 @@ public class ServerSocketConnection implements
 	}
 
 	public String getLocalAddress() throws IOException {
-		return serverSocket.getInetAddress().toString();
+		InetAddress localHost = InetAddress.getLocalHost();
+		return localHost.getHostAddress();
 	}
 
 	public int getLocalPort() throws IOException {
