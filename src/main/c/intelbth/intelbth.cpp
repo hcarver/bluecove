@@ -928,8 +928,24 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_connect(JNIEnv *en
 	addr.btAddr = address;
 	addr.port = channel;
 
+	int retyCount = 0;
+	int retyMAX = 2;
+connectRety:
 	if (connect((SOCKET)socket, (sockaddr *)&addr, sizeof(SOCKADDR_BTH))) {
-		throwIOExceptionWSAGetLastError(env, "Failed to connect socket");
+		retyCount ++;
+		DWORD last_error = WSAGetLastError();
+		//10051 - A socket operation was attempted to an unreachable network. / Error other than time-out at L2CAP or Bluetooth radio level.
+		if (last_error == WSAENETUNREACH) {
+			if (retyCount < retyMAX) {
+				debugs("connectRety %i", retyCount);
+				goto connectRety;
+			}
+		}
+		if (last_error == WSAEACCES) {
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_SECURITY_BLOCK, "[10013] Connecting application requested authentication, but authentication failed.");
+		} else {
+			throwIOExceptionWinErrorMessage(env, "Failed to connect socket", last_error);
+		}
 	}
 }
 
