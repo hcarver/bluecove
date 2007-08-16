@@ -24,6 +24,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.obex.ResponseCodes;
+
 /**
  * OBEX IO Utils
  * 
@@ -60,5 +62,92 @@ abstract class OBEXUtils {
 
 	static int bytesToShort(byte valueHi, byte valueLo) {
 		return ((((int)valueHi << 8) & 0xFF00) + (valueLo & 0xFF));
+	}
+	
+	public static String toStringObexResponseCodes(byte code) {
+		return toStringObexResponseCodes(code & 0xFF);
+	}
+	
+	public static String toStringObexResponseCodes(int code) {
+		switch (code) {
+		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
+			return "OBEX_RESPONSE_CONTINUE";
+		case ResponseCodes.OBEX_HTTP_OK:
+			return "OBEX_HTTP_OK";
+		case ResponseCodes.OBEX_HTTP_CREATED:
+			return "OBEX_HTTP_CREATED";
+		case ResponseCodes.OBEX_HTTP_ACCEPTED:
+			return "OBEX_HTTP_ACCEPTED";
+		case ResponseCodes.OBEX_HTTP_NOT_AUTHORITATIVE:
+			return "OBEX_HTTP_NOT_AUTHORITATIVE";
+		case ResponseCodes.OBEX_HTTP_NO_CONTENT:
+			return "OBEX_HTTP_NO_CONTENT";
+		case ResponseCodes.OBEX_HTTP_RESET:
+			return "OBEX_HTTP_RESET";
+		case ResponseCodes.OBEX_HTTP_PARTIAL:
+			return "OBEX_HTTP_PARTIAL";
+		case ResponseCodes.OBEX_HTTP_MULT_CHOICE:
+			return "OBEX_HTTP_MULT_CHOICE";
+		case ResponseCodes.OBEX_HTTP_MOVED_PERM:
+			return "OBEX_HTTP_MOVED_PERM";
+		case ResponseCodes.OBEX_HTTP_MOVED_TEMP:
+			return "OBEX_HTTP_MOVED_TEMP";
+		case ResponseCodes.OBEX_HTTP_SEE_OTHER:
+			return "OBEX_HTTP_SEE_OTHER";
+		case ResponseCodes.OBEX_HTTP_NOT_MODIFIED:
+			return "OBEX_HTTP_NOT_MODIFIED";
+		case ResponseCodes.OBEX_HTTP_USE_PROXY:
+			return "OBEX_HTTP_USE_PROXY";
+		case ResponseCodes.OBEX_HTTP_BAD_REQUEST:
+			return "OBEX_HTTP_BAD_REQUEST";
+		case ResponseCodes.OBEX_HTTP_UNAUTHORIZED:
+			return "OBEX_HTTP_UNAUTHORIZED";
+		case ResponseCodes.OBEX_HTTP_PAYMENT_REQUIRED:
+			return "OBEX_HTTP_PAYMENT_REQUIRED";
+		case ResponseCodes.OBEX_HTTP_FORBIDDEN:
+			return "OBEX_HTTP_FORBIDDEN";
+		case ResponseCodes.OBEX_HTTP_NOT_FOUND:
+			return "OBEX_HTTP_NOT_FOUND";
+		case ResponseCodes.OBEX_HTTP_BAD_METHOD:
+			return "OBEX_HTTP_BAD_METHOD";
+		case ResponseCodes.OBEX_HTTP_NOT_ACCEPTABLE:
+			return "OBEX_HTTP_NOT_ACCEPTABLE";
+		case ResponseCodes.OBEX_HTTP_PROXY_AUTH:
+			return "OBEX_HTTP_PROXY_AUTH";
+		case ResponseCodes.OBEX_HTTP_TIMEOUT:
+			return "OBEX_HTTP_TIMEOUT";
+		case ResponseCodes.OBEX_HTTP_CONFLICT:
+			return "OBEX_HTTP_CONFLICT";
+		case ResponseCodes.OBEX_HTTP_GONE:
+			return "OBEX_HTTP_GONE";
+		case ResponseCodes.OBEX_HTTP_LENGTH_REQUIRED:
+			return "OBEX_HTTP_LENGTH_REQUIRED";
+		case ResponseCodes.OBEX_HTTP_PRECON_FAILED:
+			return "OBEX_HTTP_PRECON_FAILED";
+		case ResponseCodes.OBEX_HTTP_ENTITY_TOO_LARGE:
+			return "OBEX_HTTP_ENTITY_TOO_LARGE";
+		case ResponseCodes.OBEX_HTTP_REQ_TOO_LARGE:
+			return "OBEX_HTTP_REQ_TOO_LARGE";
+		case ResponseCodes.OBEX_HTTP_UNSUPPORTED_TYPE:
+			return "OBEX_HTTP_UNSUPPORTED_TYPE";
+		case ResponseCodes.OBEX_HTTP_INTERNAL_ERROR:
+			return "OBEX_HTTP_INTERNAL_ERROR";
+		case ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED:
+			return "OBEX_HTTP_NOT_IMPLEMENTED";
+		case ResponseCodes.OBEX_HTTP_BAD_GATEWAY:
+			return "OBEX_HTTP_BAD_GATEWAY";
+		case ResponseCodes.OBEX_HTTP_UNAVAILABLE:
+			return "OBEX_HTTP_UNAVAILABLE";
+		case ResponseCodes.OBEX_HTTP_GATEWAY_TIMEOUT:
+			return "OBEX_HTTP_GATEWAY_TIMEOUT";
+		case ResponseCodes.OBEX_HTTP_VERSION:
+			return "OBEX_HTTP_VERSION";
+		case ResponseCodes.OBEX_DATABASE_FULL:
+			return "OBEX_DATABASE_FULL";
+		case ResponseCodes.OBEX_DATABASE_LOCKED:
+			return "OBEX_DATABASE_LOCKED";
+		default:
+			return "Unknown 0x" + Integer.toHexString(code);
+		}
 	}
 }

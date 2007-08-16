@@ -95,6 +95,9 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		
 		byte[] b = readOperation();
 		if (b.length < 6) {
+			if (b.length == 3) {
+				throw new IOException("Invalid response from OBEX server " + OBEXUtils.toStringObexResponseCodes(b[0]));
+			}
 			throw new IOException("Invalid response from OBEX server");
 		}
 		int serverMTU = OBEXUtils.bytesToShort(b[5], b[6]);
