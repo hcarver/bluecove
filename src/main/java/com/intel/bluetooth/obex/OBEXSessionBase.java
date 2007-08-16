@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.Connection;
 import javax.microedition.io.StreamConnection;
+import javax.obex.Authenticator;
 import javax.obex.HeaderSet;
 
 import com.intel.bluetooth.BluetoothConnectionAccess;
@@ -51,6 +52,8 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	protected long connectionID;
 	
 	protected int mtu = OBEXOperationCodes.OBEX_DEFAULT_MTU;
+	
+	protected Authenticator authenticator;
 	
 	public OBEXSessionBase(StreamConnection conn) throws IOException {
 		this.conn = conn;

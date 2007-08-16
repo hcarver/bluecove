@@ -252,8 +252,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 	}
 
 	public void createAuthenticationChallenge(String realm, boolean userID, boolean access) {
-		// TODO Auto-generated method stub
-
+		setHeader(OBEX_HDR_AUTH_CHALLENGE, OBEXAuthentication.createChallenge(realm, userID, access));
 	}
 	
     static long readObexInt(byte[] data, int off) throws IOException {

@@ -36,8 +36,6 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 
 	private ServerRequestHandler handler;
 	
-	private Authenticator auth;
-	
 	private boolean isConnected = false;
 	
 	private OBEXServerOperation operation;
@@ -48,10 +46,10 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 	
 	private Object canCloseEvent = new Object();
 	
-	OBEXServerSessionImpl(StreamConnection connection, ServerRequestHandler handler, Authenticator auth) throws IOException {
+	OBEXServerSessionImpl(StreamConnection connection, ServerRequestHandler handler, Authenticator authenticator) throws IOException {
 		super(connection);
 		this.handler = handler;
-		this.auth = auth;
+		this.authenticator = authenticator;
 		Thread t = new Thread(this);
 		UtilsJavaSE.threadSetDaemon(t);
 		t.start();

@@ -48,8 +48,6 @@ import com.intel.bluetooth.Utils;
  */
 public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSession {
 
-	private Authenticator authenticator;
-	
 	private boolean isConnected;
 	
 	private OBEXClientOperation operation;
@@ -221,6 +219,9 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 	}
 	
 	public void setAuthenticator(Authenticator auth) {
+		if (auth == null) {
+			throw new NullPointerException("auth is null");
+		}
 		this.authenticator = auth;
 	}
 
