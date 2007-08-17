@@ -77,16 +77,19 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	public void close() throws IOException {
 		StreamConnection c = this.conn;
 		this.conn = null;
-		if (this.is != null) {
-			this.is.close();
-			this.is = null;
-		}
-		if (this.os != null) {
-			this.os.close();
-			this.os = null;
-		}
-		if (c != null) {
-			c.close();
+		try {
+			if (this.is != null) {
+				this.is.close();
+				this.is = null;
+			}
+			if (this.os != null) {
+				this.os.close();
+				this.os = null;
+			}
+		} finally {
+			if (c != null) {
+				c.close();
+			}
 		}
 	}
 	

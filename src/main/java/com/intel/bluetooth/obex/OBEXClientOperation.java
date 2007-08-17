@@ -27,6 +27,8 @@ import java.io.IOException;
 import javax.obex.HeaderSet;
 import javax.obex.Operation;
 
+import com.intel.bluetooth.DebugLog;
+
 abstract class OBEXClientOperation implements Operation {
 
 	protected OBEXClientSessionImpl session;
@@ -181,7 +183,10 @@ abstract class OBEXClientOperation implements Operation {
 	public void close() throws IOException {
 		started();
 		closeStream();
-		this.isClosed = true;
+		if (!this.isClosed) {
+			this.isClosed = true;
+			DebugLog.debug("operation closed");
+		}
 	}
 
 	public boolean isClosed() {

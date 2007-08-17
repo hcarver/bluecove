@@ -66,6 +66,11 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 			DebugLog.error("OBEXServerSession error", e);
 		} finally {
 			DebugLog.debug("OBEXServerSession ends");
+			try {
+				super.close();
+			} catch (IOException e) {
+				DebugLog.debug("OBEXServerSession close error", e);
+			}
 		}
 	}
 

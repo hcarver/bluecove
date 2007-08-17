@@ -98,7 +98,7 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 		case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
 			processData(dataHeaders, is);
 			replyHeaders = dataHeaders;
-			close();
+			closeStream();
 			break;
 		default:
 			throw new IOException("Operation error");
