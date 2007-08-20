@@ -79,16 +79,20 @@ class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, Blu
 
 	public void close() throws IOException {
 		if (!closed) {
-			ServiceRecordsRegistry.unregister(serviceRecord);
-			closing = true;
-			DebugLog.debug("closing FRCOMM ConnectionNotifier");
-			try {
-				long h = handle;
-				handle = 0;
-				BlueCoveImpl.instance().getBluetoothStack().rfServerClose(h, serviceRecord);
-				closed = true;
-			} finally {
-				closing = false;
+			long h = handle;
+			handle = 0;
+			if (h != 0) {
+				ServiceRecordsRegistry.unregister(serviceRecord);
+				closing = true;
+				DebugLog.debug("closing FRCOMM ConnectionNotifier");
+				try {
+					if (h != 0) {
+						BlueCoveImpl.instance().getBluetoothStack().rfServerClose(h, serviceRecord);
+					}
+					closed = true;
+				} finally {
+					closing = false;
+				}
 			}
 		}
 	}

@@ -87,9 +87,10 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 	}
 
 	public void close() throws IOException {
-		if (this.notifier != null) {
-			this.notifier.close();
-			this.notifier = null;
+		StreamConnectionNotifier n = this.notifier;
+		this.notifier = null;
+		if (n != null) {
+			n.close();
 		}
 	}
 
