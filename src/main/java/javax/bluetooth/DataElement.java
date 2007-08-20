@@ -338,27 +338,27 @@ public class DataElement {
 		switch (valueType) {
 		case U_INT_1:
 			if (value < 0 || value > 0xff)
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(value + " not U_INT_1");
 			break;
 		case U_INT_2:
 			if (value < 0 || value > 0xffff)
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(value + " not U_INT_2");
 			break;
 		case U_INT_4:
 			if (value < 0 || value > 0xffffffffl)
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(value + " not U_INT_4");
 			break;
 		case INT_1:
 			if (value < -0x80 || value > 0x7f)
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(value + " not INT_1");
 			break;
 		case INT_2:
 			if (value < -0x8000 || value > 0x7fff)
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(value + " not INT_2");
 			break;
 		case INT_4:
 			if (value < -0x80000000 || value > 0x7fffffff)
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(value + " not INT_4");
 			break;
 		case INT_8:
 			break;

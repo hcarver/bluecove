@@ -214,7 +214,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 	}
 
 	/*
-	This is all we have under the BlueSun.
+	This is all we have under the BlueSoleil.
 	struct SPPEX_SERVICE_INFO {
 		DWORD dwSize;
 		DWORD dwSDAPRecordHanlde;
