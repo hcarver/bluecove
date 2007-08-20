@@ -198,7 +198,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_uninitiali
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLocalDeviceBluetoothAddress
 (JNIEnv *env, jobject peer) {
 	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	wchar_t addressString[14];
@@ -222,7 +222,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLocalDeviceName
 (JNIEnv *env, jobject peer) {
 	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	#ifndef WIDCOMM_CE30
@@ -240,7 +240,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLoca
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isLocalDevicePowerOn
 (JNIEnv *env, jobject peer) {
     if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	#ifndef WIDCOMM_CE30
@@ -253,7 +253,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isLoca
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isStackServerUp
 (JNIEnv *env, jobject peer) {
 	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	#ifndef WIDCOMM_CE30
@@ -266,7 +266,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isStac
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getBTWVersionInfo
 (JNIEnv *env, jobject peer) {
 	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	BT_CHAR p_version[256];
@@ -289,7 +289,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getBTWV
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceVersion
 (JNIEnv *env, jobject) {
 	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	#ifndef WIDCOMM_CE30
@@ -306,7 +306,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceV
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getDeviceManufacturer
 (JNIEnv *env, jobject) {
 	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	#ifndef WIDCOMM_CE30
@@ -428,7 +428,7 @@ void WIDCOMMStack::OnInquiryComplete(BOOL success, short num_responses) {
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceInquiryImpl
 (JNIEnv * env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
 	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	if (stack->deviceInquiryInProcess) {
@@ -568,7 +568,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_peekRem
 JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runSearchServicesImpl
 (JNIEnv *env, jobject peer, jobject startedNotify, jbyteArray uuidValue, jlong address) {
 	if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
 	debug("StartSearchServices");
@@ -604,7 +604,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
     BOOL discoveryStarted = TRUE;
 	if (!stack->StartDiscovery(bda, p_service_guid)) {
 	    if (stack == NULL) {
-		    throwIOException(env, "Stack closed");
+		    throwIOException(env, cSTACK_CLOSED);
 		    return NULL;
 	    }
 	    #ifndef _WIN32_WCE
@@ -621,7 +621,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	}
 
     if (stack == NULL) {
-		throwIOException(env, "Stack closed");
+		throwIOException(env, cSTACK_CLOSED);
 		return NULL;
 	}
 

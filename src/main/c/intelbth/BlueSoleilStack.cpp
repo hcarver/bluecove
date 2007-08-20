@@ -241,6 +241,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 
     stack->inquiringDevice = TRUE;
     DWORD dwResult = BT_InquireDevices(ucInqMode, ucInqLen, &devsListLen, lpDevsList);
+    if (stack == NULL) {
+		return INQUIRY_ERROR;
+	}
     stack->inquiringDevice = FALSE;
     if (dwResult != BTSTATUS_SUCCESS) {
         debugs("BT_InquireDevices return  [%s]", getBsAPIStatusString(dwResult));
@@ -661,6 +664,10 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
 
     DWORD dwResult;
     dwResult = BT_ConnectSPPExService(&devInfo, &svcInfoSPPEx, &dwConnectionHandle);
+    if (stack == NULL) {
+		throwIOException(env, cSTACK_CLOSED);
+		return 0;
+	}
     if (dwResult != BTSTATUS_SUCCESS)   {
         debugs("BT_ConnectSPPExService return  [%s]", getBsAPIStatusString(dwResult));
         stack->deleteCommPort(rf);
@@ -684,6 +691,10 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
     WORD wClass;
 
     dwResult = BT_GetConnectInfo(dwConnectionHandle, &bIsOutGoing, &wClass, bdAddr, &dwLen, (BYTE*)&sppConnInfo);
+    if (stack == NULL) {
+		throwIOException(env, cSTACK_CLOSED);
+		return NULL;
+	}
     if (dwResult != BTSTATUS_SUCCESS)   {
         debugs("BT_GetConnectInfo return  [%s]", getBsAPIStatusString(dwResult));
         stack->deleteCommPort(rf);
@@ -708,6 +719,10 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
 
     debug2("open COM port [%i] for [%i]", portN, address);
     if (!rf->openComPort(env, portN)) {
+        if (stack == NULL) {
+		    throwIOException(env, cSTACK_CLOSED);
+		    return NULL;
+	    }
         stack->deleteCommPort(rf);
         BT_DisconnectSPPExService(dwConnectionHandle);
         LeaveCriticalSection(&stack->openingPortLock);
