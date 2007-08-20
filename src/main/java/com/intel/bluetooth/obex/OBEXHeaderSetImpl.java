@@ -300,7 +300,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 			writeObexLen(out, headerID, 3);
 			return;
 		}
-		byte[] b = value.getBytes("UTF-16BE");
+		byte[] b = OBEXUtils.getUTF16Bytes(value);
 		writeObexLen(out, headerID, 3 + b.length + 2);
 		out.write(b);
 		out.write(new byte[]{0, 0});
@@ -376,7 +376,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 				} else {
 					byte data[] = new byte[len - 5];
 					System.arraycopy(buf, off + 3, data, 0, data.length);
-					hs.setHeader(hi, new String(data, "UTF-16BE"));
+					hs.setHeader(hi, OBEXUtils.newStringUTF16(data));
 				}
 				break;
 			case OBEX_BYTE_STREAM:

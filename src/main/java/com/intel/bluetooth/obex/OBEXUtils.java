@@ -20,9 +20,11 @@
  */
 package com.intel.bluetooth.obex;
 
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 import javax.obex.ResponseCodes;
 
@@ -49,6 +51,49 @@ abstract class OBEXUtils {
 				throw new EOFException();
 			}
 			got += rc;
+		}
+	}
+	
+	static String newStringUTF16Simple(byte bytes[]) throws UnsupportedEncodingException {
+		StringBuffer buf = new StringBuffer(); 
+		for (int i = 0; i < bytes.length; i+=2) {
+			buf.append((char)bytesToShort(bytes[i], bytes[i + 1]));
+		}
+		return buf.toString();
+	}
+	
+	static String newStringUTF16(byte bytes[]) throws UnsupportedEncodingException {
+		 try {
+			return new String(bytes, "UTF-16BE");
+		 } catch (IllegalArgumentException e) {
+			 // Java 1.1
+			 return newStringUTF16Simple(bytes);
+		 } catch (UnsupportedEncodingException e) {
+			 // IBM J9
+			return newStringUTF16Simple(bytes);
+		}
+	}
+	
+	static byte[] getUTF16BytesSimple(String str) throws UnsupportedEncodingException {
+		ByteArrayOutputStream buf = new ByteArrayOutputStream();
+		int len = str.length();
+		for (int i = 0; i < len; i++) {
+			char c = str.charAt(i);
+			buf.write(hiByte(c));
+			buf.write(loByte(c));
+		}
+		return buf.toByteArray();
+	}
+	
+	static byte[] getUTF16Bytes(String str) throws UnsupportedEncodingException {
+		try {
+			return str.getBytes("UTF-16BE");
+		} catch (IllegalArgumentException e) {
+			// Java 1.1
+			return getUTF16BytesSimple(str);
+		} catch (UnsupportedEncodingException e) {
+			// IBM J9
+			return getUTF16BytesSimple(str);
 		}
 	}
 	

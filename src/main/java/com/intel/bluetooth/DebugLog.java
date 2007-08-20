@@ -179,6 +179,34 @@ public abstract class DebugLog {
 		}
 	}
 	
+	public static void debug(String message, byte[] data) {
+		debug(message, data, 0, (data==null)?0:data.length);
+	}
+	
+	public static void debug(String message, byte[] data, int off, int len) {
+		if (!debugCompiledOut && isDebugEnabled()) {
+			StringBuffer buf = new StringBuffer();
+			if (data == null) {
+				buf.append(" null byte[]");
+			} else {
+				buf.append(" [");
+				for (int i = off; i < off + len; i++) {
+					if (i != off) {
+						buf.append(", ");
+					}
+					buf.append((new Byte(data[i])).toString());
+				}
+				buf.append("]");
+				if (len > 4) {
+					buf.append(" ").append(len);
+				}
+			}
+			log(message, buf.toString(), null);
+			printLocation();
+			callAppenders(DEBUG, message +  buf.toString(), null);
+		}
+	}
+	
 	public static void nativeDebugCallback(String fileName, int lineN, String message) {
 		try {
 			if ((fileName != null) && fileName.startsWith(".\\")) {

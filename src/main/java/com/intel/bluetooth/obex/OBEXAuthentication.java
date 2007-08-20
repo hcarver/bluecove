@@ -49,7 +49,7 @@ class OBEXAuthentication {
 			byte realmArray[];
 			byte charSetCode;
 			try {
-				realmArray = realm.getBytes("UTF-16BE");
+				realmArray = OBEXUtils.getUTF16Bytes(realm);
 				charSetCode = -1; // 0xFF; Unicode
 			} catch (UnsupportedEncodingException e) {
 				try {
