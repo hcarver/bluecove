@@ -393,7 +393,7 @@ class BluetoothStackMicrosoft extends BluetoothPeer implements BluetoothStack {
 			int channel = super.getsockchannel(socket);
 			DebugLog.debug("service channel ", channel);
 
-			int serviceRecordHandle = (int) socket;
+			long serviceRecordHandle = socket;
 			serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, params.uuid, params.name, params.obex);
 
 			/*

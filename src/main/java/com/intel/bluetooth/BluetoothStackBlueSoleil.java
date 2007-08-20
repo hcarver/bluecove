@@ -224,7 +224,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 	}
 	 */
 
-	public void servicesFoundCallback(SearchServicesThread startedNotify, DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel, int recordHanlde) {
+	public void servicesFoundCallback(SearchServicesThread startedNotify, DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel, long recordHanlde) {
 		ServiceRecordImpl record = new ServiceRecordImpl(device, 0);
 
 		UUID uuid = new UUID(Utils.UUIDByteArrayToString(uuidValue), false);

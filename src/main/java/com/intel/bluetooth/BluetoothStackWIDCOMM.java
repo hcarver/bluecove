@@ -460,7 +460,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		long handle = rfServerOpenImpl(uuidValue, uuidValue2, params.obex, params.name, params.authenticate, params.encrypt);
 		int channel = rfServerSCN(handle);
 		DebugLog.debug("serverSCN", channel);
-		int serviceRecordHandle = (int)handle;
+		long serviceRecordHandle = handle;
 
 		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, params.uuid, params.name, params.obex);
 

@@ -688,7 +688,7 @@ class ServiceRecordImpl implements ServiceRecord {
 	/**
 	 * Internal implemenation function
 	 */
-	void populateRFCOMMAttributes(int handle, int channel, UUID uuid, String name, boolean obex) {
+	void populateRFCOMMAttributes(long handle, int channel, UUID uuid, String name, boolean obex) {
 		
 		this.populateAttributeValue(BluetoothConsts.ServiceRecordHandle, new DataElement(DataElement.U_INT_4, handle));
 
