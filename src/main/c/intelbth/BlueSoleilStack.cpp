@@ -349,7 +349,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
             continue;
         }
 
-        debugs("SDAP Record Handle: %d", sr->dwSDAPRecordHanlde);
+        debugs("SDAP Record Handle: %ud", sr->dwSDAPRecordHanlde);
         debugs("      Service Name: %s", sr->szServiceName);
         debugs("   Service Channel: %02X", sr->ucServiceChannel);
         debugs("         Com Index: %i", sr->ucComIndex);
