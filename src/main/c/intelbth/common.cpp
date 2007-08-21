@@ -193,7 +193,7 @@ WCHAR *getWinErrorMessage(DWORD last_error) {
 		511,
 		NULL))
 	{
-		swprintf_s(errmsg, 1024, L"No error message for code %d", last_error);
+		swprintf_s(errmsg, 1024, L"No error message for code %lu", last_error);
 		return errmsg;
 	}
 	size_t last = wcslen(errmsg) - 1;
@@ -206,7 +206,7 @@ WCHAR *getWinErrorMessage(DWORD last_error) {
 
 void throwExceptionWinErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error) {
 	char errmsg[1064];
-	sprintf_s(errmsg, 1064, "%s; [%d] %S", msg, last_error, getWinErrorMessage(last_error));
+	sprintf_s(errmsg, 1064, "%s; [%lu] %S", msg, last_error, getWinErrorMessage(last_error));
 	throwException(env, name, errmsg);
 }
 

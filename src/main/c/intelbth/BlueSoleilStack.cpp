@@ -349,10 +349,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
             continue;
         }
 
-        debugs("SDAP Record Handle: %ud", sr->dwSDAPRecordHanlde);
+        debugs("SDAP Record Handle: %u", sr->dwSDAPRecordHanlde);
         debugs("      Service Name: %s", sr->szServiceName);
         debugs("   Service Channel: %02X", sr->ucServiceChannel);
-        debugs("         Com Index: %i", sr->ucComIndex);
+        debugs("         Com Index: %u", (unsigned int)(sr->ucComIndex));
 
         jbyteArray uuidValueFound = env->NewByteArray(16);
         jbyte *bytes = env->GetByteArrayElements(uuidValueFound, 0);
@@ -535,11 +535,11 @@ char* BlueSoleilCOMPort::configureComPort(JNIEnv *env) {
     if (!GetCommTimeouts(hComPort, &commTimeouts)) {
         return "GetCommTimeouts error";
     }
-    Edebugs("commTimeouts.ReadIntervalTimeout         [%i]", commTimeouts.ReadIntervalTimeout);
-    Edebugs("commTimeouts.ReadTotalTimeoutConstant    [%i]", commTimeouts.ReadTotalTimeoutConstant);
-    Edebugs("commTimeouts.ReadTotalTimeoutMultiplier  [%i]", commTimeouts.ReadTotalTimeoutMultiplier);
-    Edebugs("commTimeouts.WriteTotalTimeoutConstant   [%i]", commTimeouts.WriteTotalTimeoutConstant);
-    Edebugs("commTimeouts.WriteTotalTimeoutMultiplier [%i]", commTimeouts.WriteTotalTimeoutMultiplier);
+    Edebugs("commTimeouts.ReadIntervalTimeout         [%u]", commTimeouts.ReadIntervalTimeout);
+    Edebugs("commTimeouts.ReadTotalTimeoutConstant    [%u]", commTimeouts.ReadTotalTimeoutConstant);
+    Edebugs("commTimeouts.ReadTotalTimeoutMultiplier  [%u]", commTimeouts.ReadTotalTimeoutMultiplier);
+    Edebugs("commTimeouts.WriteTotalTimeoutConstant   [%u]", commTimeouts.WriteTotalTimeoutConstant);
+    Edebugs("commTimeouts.WriteTotalTimeoutMultiplier [%u]", commTimeouts.WriteTotalTimeoutMultiplier);
 
     /* set up for overlapped I/O */
     commTimeouts.ReadIntervalTimeout = 0xFFFFFFFF;
@@ -704,10 +704,10 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
     }
 
     if (sppConnInfo.ucComPort != svcInfoSPPEx.ucComIndex) {
-        debug2("Port# mismatch [%i] and [%i]", sppConnInfo.ucComPort, svcInfoSPPEx.ucComIndex);
+        debug2("Port# mismatch [%u] and [%u]", (unsigned int)(sppConnInfo.ucComPort), (unsigned int)(svcInfoSPPEx.ucComIndex));
         stack->deleteCommPort(rf);
         LeaveCriticalSection(&stack->openingPortLock);
-        throwIOExceptionExt(env, "Port# mismatch [%i] and [%i]", sppConnInfo.ucComPort, svcInfoSPPEx.ucComIndex);
+        throwIOExceptionExt(env, "Port# mismatch [%u] and [%u]", (unsigned int)(sppConnInfo.ucComPort), (unsigned int)(svcInfoSPPEx.ucComIndex));
     }
 
     // To solve concurrent connections problem
@@ -717,7 +717,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
     //portN = svcInfoSPPEx.ucComIndex;
     portN = sppConnInfo.ucComPort;
 
-    debug2("open COM port [%i] for [%i]", portN, address);
+    debug2("open COM port [%i] for [%li]", portN, address);
     if (!rf->openComPort(env, portN)) {
         if (stack == NULL) {
 		    throwIOException(env, cSTACK_CLOSED);
@@ -739,7 +739,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
         return 0;
     }
     LeaveCriticalSection(&stack->openingPortLock);
-    debug3("Connected [%i] [%p]-[%i]", rf->internalHandle, rf->hComPort, rf->dwConnectionHandle);
+    debug3("Connected [%i] [%p]-[%lu]", rf->internalHandle, rf->hComPort, rf->dwConnectionHandle);
     return rf->internalHandle;
 }
 
@@ -758,7 +758,7 @@ void BlueSoleilCOMPort::close(JNIEnv *env) {
     BOOL error = FALSE;
     DWORD last_error = 0;
 
-    debug3("close [%i] [%p]-[%i]", internalHandle, hComPort, dwConnectionHandle);
+    debug3("close [%i] [%p]-[%lu]", internalHandle, hComPort, dwConnectionHandle);
 
     if (hCloseEvent != NULL) {
         isClosing = TRUE;
@@ -790,7 +790,7 @@ void BlueSoleilCOMPort::close(JNIEnv *env) {
 
         if (!CloseHandle(hComPort)) {
             last_error = GetLastError();
-            debugss("close ComPort error [%d] %S", last_error, getWinErrorMessage(last_error));
+            debugss("close ComPort error [%lu] %S", last_error, getWinErrorMessage(last_error));
             error = TRUE;
         }
         hComPort = INVALID_HANDLE_VALUE;
@@ -831,7 +831,7 @@ void BlueSoleilCOMPort::close(JNIEnv *env) {
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connectionRfCloseClientConnection
 (JNIEnv *env, jobject, jlong handle) {
-    debugs("close connection [%i]", handle);
+    debugs("close connection [%li]", handle);
     BlueSoleilCOMPort* rf = validRfCommHandle(env, handle);
     if (rf == NULL) {
         return;
@@ -1227,7 +1227,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
                     break;
                 }
                 if (last_error != ERROR_IO_PENDING) {
-                    debug2("connection handle [%i] [%p]", handle, rf->hComPort);
+                    debug2("connection handle [%li] [%p]", handle, rf->hComPort);
                     throwIOExceptionWinErrorMessage(env, "Failed to write byte overlapped", last_error);
                     rf->tDec();
                     return;
@@ -1282,7 +1282,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
         if (!WriteFile(rf->hComPort, (char *)(bytes + off + done), len - done, &numberOfBytesWritten, &(rf->ovlWrite))) {
             if (GetLastError() != ERROR_IO_PENDING) {
                 env->ReleaseByteArrayElements(b, bytes, 0);
-                debug2("connection handle [%i] [%p]", handle, rf->hComPort);
+                debug2("connection handle [%li] [%p]", handle, rf->hComPort);
                 throwIOExceptionWinGetLastError(env, "Failed to write array");
                 rf->tDec();
                 return;
@@ -1308,7 +1308,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
                     }
                     if (last_error != ERROR_IO_PENDING) {
                         env->ReleaseByteArrayElements(b, bytes, 0);
-                        debug2("connection handle [%i] [%p]", handle, rf->hComPort);
+                        debug2("connection handle [%li] [%p]", handle, rf->hComPort);
                         throwIOExceptionWinErrorMessage(env, "Failed to write array overlapped", last_error);
                         rf->tDec();
                         return;
@@ -1419,7 +1419,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServe
 }
 
 void BlueSoleilSPPExService::close(JNIEnv *env) {
-    debug3("service close [%i] [%i] port [%i]", internalHandle, wdServerHandle, portHandle);
+    debug3("service close [%i] [%lu] port [%i]", internalHandle, wdServerHandle, portHandle);
     if (portHandle != 0) {
         BlueSoleilCOMPort* rf = validRfCommHandle(NULL, portHandle);
         if (rf != NULL) {
@@ -1494,7 +1494,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
     if (srv == NULL) {
         return 0;
     }
-    debug3("service accept [%i] [%i] port [%i]", srv->internalHandle, srv->wdServerHandle, srv->portHandle);
+    debug3("service accept [%i] [%lu] port [%i]", srv->internalHandle, srv->wdServerHandle, srv->portHandle);
 
     HANDLE hEvents[2];
     hEvents[0] = srv->hCloseEvent;
@@ -1561,7 +1561,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
         }
     }
 
-    debug1("server received connection, %i", srv->dwConnectedConnetionHandle);
+    debug1("server received connection, %lu", srv->dwConnectedConnetionHandle);
 
     /*
     BOOL bIsOutGoing;
@@ -1603,7 +1603,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
 
     srv->portHandle = rf->internalHandle;
 
-    debug3("service connected [%i] [%i] port [%i]", srv->internalHandle, srv->wdServerHandle, srv->portHandle);
+    debug3("service connected [%i] [%lu] port [%i]", srv->internalHandle, srv->wdServerHandle, srv->portHandle);
 
     return rf->internalHandle;
 }

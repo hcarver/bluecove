@@ -39,7 +39,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
 static BOOL started;
-static DWORD dllWSAStartupError = 0;
+static int dllWSAStartupError = 0;
 static HANDLE hDeviceLookup;
 static CRITICAL_SECTION csLookup;
 
@@ -121,7 +121,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug
 BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env) {
 	SOCKET s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
 	if (s == INVALID_SOCKET) {
-		DWORD last_error = WSAGetLastError();
+		int last_error = WSAGetLastError();
 		debug2("socket error [%d] %S", last_error, getWinErrorMessage(last_error));
 		return FALSE;
 	}
@@ -134,7 +134,7 @@ BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env) {
 	btAddr.port = BT_PORT_ANY;
 #endif
 	if (bind(s, (SOCKADDR *)&btAddr, sizeof(SOCKADDR_BTH))) {
-		DWORD last_error = WSAGetLastError();
+		int last_error = WSAGetLastError();
 		debug2("bind error [%d] %S", last_error, getWinErrorMessage(last_error));
 		closesocket(s);
 		return FALSE;
@@ -142,7 +142,7 @@ BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env) {
 
 	int size = sizeof(SOCKADDR_BTH);
 	if (getsockname(s, (sockaddr*)&btAddr, &size)) {
-		DWORD last_error = WSAGetLastError();
+		int last_error = WSAGetLastError();
 		debug2("getsockname error [%d] %S", last_error, getWinErrorMessage(last_error));
 		closesocket(s);
 		return FALSE;
@@ -280,7 +280,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 #else
 	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE|LUP_CONTAINERS, &hDeviceLookup)) {
 #endif
-		DWORD last_error = WSAGetLastError();
+		int last_error = WSAGetLastError();
 
 		LeaveCriticalSection(&csLookup);
 		//throwBluetoothStateExceptionWinErrorMessage(env, "Can't start Lookup", last_error);
@@ -319,7 +319,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 		}
         debug("doInquiry, WSALookupServiceNext");
 		if (WSALookupServiceNext(hDeviceLookup, LUP_RETURN_NAME|LUP_RETURN_ADDR|LUP_RETURN_BLOB, &size, pwsaResults)) {
-			DWORD last_error = WSAGetLastError();
+			int last_error = WSAGetLastError();
 			switch(last_error) {
 				case WSAENOMORE:
 			    case WSA_E_NO_MORE:
@@ -518,14 +518,14 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 
 #ifdef _WIN32_WCE
 	if (WSALookupServiceBegin(&queryset, 0, &hLookupSearchServices)) {
-		DWORD last_error = WSAGetLastError();
-		debugss("WSALookupServiceBegin error [%d] %S", last_error, getWinErrorMessage(last_error));
+		int last_error = WSAGetLastError();
+		debugss("WSALookupServiceBegin error [%i] %S", last_error, getWinErrorMessage(last_error));
 		return NULL;
 	}
 #else
 	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookupSearchServices)) {
-		DWORD last_error = WSAGetLastError();
-		debugss("WSALookupServiceBegin error [%d] %S", last_error, getWinErrorMessage(last_error));
+		int last_error = WSAGetLastError();
+		debugss("WSALookupServiceBegin error [%i] %S", last_error, getWinErrorMessage(last_error));
 		// [10108] No such service is known. The service cannot be found in the specified name space. -> SERVICE_SEARCH_DEVICE_NOT_REACHABLE
 		if (10108 == last_error) {
 			throwException(env, "com/intel/bluetooth/SearchServicesDeviceNotReachableException", "");
@@ -557,13 +557,13 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 #else
 	if (WSALookupServiceNext(hLookupSearchServices, LUP_RETURN_BLOB, &size, pwsaResults)) {
 #endif
-		DWORD last_error = WSAGetLastError();
+		int last_error = WSAGetLastError();
 		switch(last_error) {
 			case WSANO_DATA:
 				result = env->NewIntArray(0);
 				break;
 			default:
-				debugss("WSALookupServiceNext error [%d] %S", last_error, getWinErrorMessage(last_error));
+				debugss("WSALookupServiceNext error [%i] %S", last_error, getWinErrorMessage(last_error));
 				result =  NULL;
 		}
 	} else {
@@ -933,7 +933,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_connect(JNIEnv *en
 connectRety:
 	if (connect((SOCKET)socket, (sockaddr *)&addr, sizeof(SOCKADDR_BTH))) {
 		retyCount ++;
-		DWORD last_error = WSAGetLastError();
+		int last_error = WSAGetLastError();
 		//10051 - A socket operation was attempted to an unreachable network. / Error other than time-out at L2CAP or Bluetooth radio level.
 		if (last_error == WSAENETUNREACH) {
 			if (retyCount < retyMAX) {

@@ -672,10 +672,10 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
 	}
 
 	if (obtainedServicesRecords > SDP_DISCOVERY_RECORDS_DEVICE_MAX) {
-		debugs("WARN too many ServicesRecords %i", obtainedServicesRecords);
+		debugs("WARN too many ServicesRecords %u", obtainedServicesRecords);
 		//obtainedServicesRecords = SDP_DISCOVERY_RECORDS_USED_MAX;
 	}
-	debugs("obtainedServicesRecords %i", obtainedServicesRecords);
+	debugs("obtainedServicesRecords %u", obtainedServicesRecords);
 	// Retrive all Records and filter in Java
 	int retriveRecords = SDP_DISCOVERY_RECORDS_DEVICE_MAX;
 
