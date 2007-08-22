@@ -235,8 +235,19 @@ public abstract class MicroeditionConnector {
 			throw new IllegalArgumentException(name.substring(scheme.length() + 3));
 		}
 		
-		if ((isTCPOBEX)  && ((portORuuid == null) || portORuuid.length() == 0)) {
-			portORuuid = String.valueOf(BluetoothConsts.TCP_OBEX_DEFAULT_PORT); 
+		if (isTCPOBEX) {
+			if ((portORuuid == null) || (portORuuid.length() == 0)) {
+				portORuuid = String.valueOf(BluetoothConsts.TCP_OBEX_DEFAULT_PORT);
+			} else {
+				try {
+					int port = Integer.parseInt(portORuuid);
+					if ((port < 1023) && (port != BluetoothConsts.TCP_OBEX_DEFAULT_PORT)) {
+						throw new IllegalArgumentException("Port " + portORuuid + " can't be used; the 0-1023 range is reserved");
+					}
+				} catch (NumberFormatException e) {
+					throw new IllegalArgumentException("port " + portORuuid);
+				}
+			}
 		}
 
 		if (host == null || portORuuid == null) {
