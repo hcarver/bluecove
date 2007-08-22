@@ -21,7 +21,11 @@
 package com.intel.bluetooth.obex;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
+
+import javax.obex.Authenticator;
 
 /**
  * @author vlads
@@ -32,6 +36,95 @@ class OBEXAuthentication {
 	private static byte[] privateKey;
 	
 	private static long uniqueTimestamp = 0;
+	
+	private static final byte column[] = { ':' };
+	
+	private static class Challenge {
+		
+		String realm; 
+		
+		boolean userID;
+		
+		boolean access;
+		
+		byte nonce[];
+		
+		void read(byte data[])  throws IOException {
+			for (int i = 0; i < data.length;) {
+				int tag = data[i] & 0xFF;
+				int len = data[i + 1] & 0xFF;
+				i += 2;
+				switch(tag) {
+				case 0:
+					if (len != 0x10) {
+						throw new IOException("OBEX Digest Challenge error in tag Nonce");
+					}
+					nonce = new byte[0x10];
+	                System.arraycopy(data, i, nonce, 0, 0x10);
+	                break;
+				case 1:
+					byte options = data[i];
+					userID = ((options & 1) != 0);
+					access = ((options & 2) != 0);
+					break;
+				case 2:
+					int charSetCode = data[i] & 0xFF;
+					byte chars[] = new byte[len - 1];
+					System.arraycopy(data, i + 1, chars, 0, chars.length);
+					if (charSetCode == 0xFF) {
+						realm = OBEXUtils.newStringUTF16(chars);
+					} else if (charSetCode == 0) {
+						realm = new String(chars, "ASCII");
+					} else if (charSetCode <= 9) {
+						realm = new String(chars, "ISO-8859-" + charSetCode);
+					} else {
+                        throw new UnsupportedEncodingException();
+					}
+					break;
+				}
+				i += len;
+			}
+		}
+		
+	}
+	
+	private static class DigestResponse {
+		
+		byte requestDigest[];
+		
+		byte userName[];
+		
+		byte nonce[];
+		
+		void read(byte data[])  throws IOException {
+			for (int i = 0; i < data.length;) {
+				int tag = data[i] & 0xFF;
+				int len = data[i + 1] & 0xFF;
+				i += 2;
+				switch(tag) {
+				case 0:
+					if (len != 0x10) {
+						throw new IOException("OBEX Digest Response error in tag request-digest");
+					}
+					requestDigest = new byte[0x10];
+	                System.arraycopy(data, i, requestDigest, 0, 0x10);
+	                break;
+				case 1:
+					userName = new byte[len];
+					System.arraycopy(data, i, userName, 0, userName.length);
+					break;
+				case 2:
+					if (len != 0x10) {
+						throw new IOException("OBEX Digest Response error in tag Nonce");
+					}
+					nonce = new byte[0x10];
+	                System.arraycopy(data, i, nonce, 0, 0x10);
+	                break;
+				}
+				i += len;
+			}
+		}
+	}
 	
 	static byte[] createChallenge(String realm, boolean userID, boolean access) {
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
@@ -67,12 +160,41 @@ class OBEXAuthentication {
 		
 		return buf.toByteArray();
 	}
-	
+
+	static void handleAuthenticationResponse(OBEXHeaderSetImpl responseHeaders, Authenticator authenticator) throws IOException {
+		for (Enumeration iter = responseHeaders.getAuthenticationResponses(); iter.hasMoreElements();) {
+			byte[] authResponse = (byte[]) iter.nextElement();
+			DigestResponse dr = new DigestResponse();
+			dr.read(authResponse);
+			byte[] password = authenticator.onAuthenticationResponse(dr.userName);
+			if (password == null) {
+				throw new IOException("authentication request failed");
+			}
+			MD5DigestWrapper md5 = new MD5DigestWrapper();
+			md5.update(dr.nonce);
+			md5.update(column);
+			md5.update(password);
+			if (!equals(dr.requestDigest, md5.digest())) {
+				throw new IOException ("Authentication failure");
+			}
+		}
+	}
+
 	private static synchronized byte[] createNonce() {
 		MD5DigestWrapper md5 = new MD5DigestWrapper();
 		md5.update(createTimestamp());
+		md5.update(column);
 		md5.update(getPrivateKey());
 		return md5.digest();
+	}
+	
+	private static boolean equals(byte[] digest1, byte[] digest2) {
+		for (int i = 0; i < 0x10; i++) {
+			if (digest1[i] != digest2[i]) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	private static synchronized byte[] getPrivateKey() {

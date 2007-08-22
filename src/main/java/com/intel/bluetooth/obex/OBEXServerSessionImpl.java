@@ -58,7 +58,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 	public void run() {
 		try {
 			while (!isClosed() && !closeRequested) {
-				if (!processOperation()) {
+				if (!handleRequest()) {
 					return;
 				}
 			}
@@ -98,8 +98,8 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		super.close();
 	}
 	
-	private boolean processOperation() throws IOException {
-		DebugLog.debug("OBEXServerSession readOperation");
+	private boolean handleRequest() throws IOException {
+		DebugLog.debug("OBEXServerSession handleRequest");
 		delayClose = false;
 		byte[] b;
 		try {

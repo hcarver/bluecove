@@ -165,6 +165,19 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		}
 	}
 	
+	void validateAuthenticationResponse(OBEXHeaderSetImpl requestHeaders, OBEXHeaderSetImpl responseHeaders) throws IOException {
+		if (requestHeaders.hasAuthenticationChallenge() && (!responseHeaders.hasAuthenticationResponse())) {
+			// TODO verify that this appropriate Exception 
+			throw new IOException("Authentication response is missing");
+		}
+		if (responseHeaders.hasAuthenticationResponse()) {
+			if (authenticator == null) {
+				throw new IOException("Authenticator required for authentication");
+			}
+			OBEXAuthentication.handleAuthenticationResponse(responseHeaders, authenticator);
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
 	 */

@@ -27,7 +27,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.TimeZone;
+import java.util.Vector;
 
 import javax.obex.HeaderSet;
 
@@ -125,6 +127,10 @@ class OBEXHeaderSetImpl implements HeaderSet {
 	private int responseCode;
 	
 	private Hashtable headerValues;
+	
+	private Vector authResponses;
+	
+	private Vector authChallenges;
 
 	private static final int NO_RESPONSE_CODE = Integer.MIN_VALUE;
 	
@@ -133,8 +139,10 @@ class OBEXHeaderSetImpl implements HeaderSet {
 	}
 
 	private OBEXHeaderSetImpl(int responseCode) {
-		headerValues = new Hashtable();
+		this.headerValues = new Hashtable();
 		this.responseCode = responseCode;
+		this.authResponses = new Vector();
+		this.authChallenges = new Vector();
 	}
 	
 	static void validateCreatedHeaderSet(HeaderSet headers) {
@@ -252,7 +260,23 @@ class OBEXHeaderSetImpl implements HeaderSet {
 	}
 
 	public void createAuthenticationChallenge(String realm, boolean userID, boolean access) {
-		setHeader(OBEX_HDR_AUTH_CHALLENGE, OBEXAuthentication.createChallenge(realm, userID, access));
+		authChallenges.addElement(OBEXAuthentication.createChallenge(realm, userID, access));
+	}
+	
+	boolean hasAuthenticationChallenge() {
+		return !authChallenges.isEmpty();
+	}
+	
+	Enumeration getAuthenticationChallenges() {
+		return authChallenges.elements();
+	}
+	
+	boolean hasAuthenticationResponse() {
+		return !authResponses.isEmpty();
+	}
+	
+	Enumeration getAuthenticationResponses() {
+		return authResponses.elements();
 	}
 	
     static long readObexInt(byte[] data, int off) throws IOException {
@@ -349,21 +373,33 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		if ((headerIDArray != null) && (headerIDArray.length != 0)) {
 			DebugLog.debug("written headers", headerIDArray.length);
 		}
+		for (Enumeration iter = ((OBEXHeaderSetImpl)headers).authChallenges.elements(); iter.hasMoreElements();) {
+			byte[] authChallenge = (byte[]) iter.nextElement();
+			writeObexLen(buf, OBEX_HDR_AUTH_CHALLENGE, 3 + authChallenge.length);
+			buf.write(authChallenge);
+			DebugLog.debug("written AUTH_CHALLENGE");
+		}
+		for (Enumeration iter = ((OBEXHeaderSetImpl)headers).authResponses.elements(); iter.hasMoreElements();) {
+			byte[] authResponse = (byte[]) iter.nextElement();
+			writeObexLen(buf, OBEX_HDR_AUTH_RESPONSE, 3 + authResponse.length);
+			buf.write(authResponse);
+			DebugLog.debug("written AUTH_RESPONSE");
+		}
 		return buf.toByteArray();
 	}
 	
 	/*
 	 * Read by server 
 	 */
-	static HeaderSet readHeaders(byte[] buf, int off) throws IOException {
+	static OBEXHeaderSetImpl readHeaders(byte[] buf, int off) throws IOException {
 		return readHeaders(new OBEXHeaderSetImpl(NO_RESPONSE_CODE), buf, off);
 	}
 	
-	static HeaderSet readHeaders(byte responseCode, byte[] buf, int off) throws IOException {
+	static OBEXHeaderSetImpl readHeaders(byte responseCode, byte[] buf, int off) throws IOException {
 		return readHeaders(new OBEXHeaderSetImpl(0xFF & responseCode), buf, off);
 	}
 	
-	private static HeaderSet readHeaders(HeaderSet hs, byte[] buf, int off) throws IOException {
+	private static OBEXHeaderSetImpl readHeaders(OBEXHeaderSetImpl hs, byte[] buf, int off) throws IOException {
 		int count = 0;
 		while (off < buf.length) {
 			int hi = 0xFF & buf[off];
@@ -391,6 +427,12 @@ class OBEXHeaderSetImpl implements HeaderSet {
 					}
 				} else if (hi == OBEX_HDR_TIME) {
 					hs.setHeader(hi, readTimeISO8601(data));
+				} else if (hi == OBEX_HDR_AUTH_CHALLENGE) {
+					((OBEXHeaderSetImpl)hs).authChallenges.addElement(data);
+					DebugLog.debug("received AUTH_CHALLENGE");
+				} else if (hi == OBEX_HDR_AUTH_RESPONSE) {
+					((OBEXHeaderSetImpl)hs).authResponses.addElement(data);
+					DebugLog.debug("received AUTH_RESPONSE");
 				} else {
 					hs.setHeader(hi, data);
 				}

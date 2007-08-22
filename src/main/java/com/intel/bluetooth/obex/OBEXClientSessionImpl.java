@@ -107,20 +107,14 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		}
 		DebugLog.debug("mtu selected", this.mtu);
 		
-		HeaderSet responseHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 7);
+		OBEXHeaderSetImpl responseHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 7);
 		
 		Object connID = responseHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_CONNECTION);
 		if (connID != null) {
 			this.connectionID = ((Long)connID).longValue(); 
 		}
 		
-		Object authResp = responseHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_AUTH_RESPONSE);
-		if ((authResp != null) && (authenticator != null)) {
-			if (NotImplementedError.enabled) {
-				throw new NotImplementedIOException();	
-			}
-			throw new NotImplementedIOException();
-		}
+		validateAuthenticationResponse((OBEXHeaderSetImpl)headers, responseHeaders);
 		
 		Object authChallenge = responseHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_AUTH_CHALLENGE);
 		if ((authChallenge != null) && (authenticator != null)) {
