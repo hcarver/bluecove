@@ -29,6 +29,7 @@ import javax.microedition.io.Connection;
 import javax.microedition.io.StreamConnection;
 import javax.obex.Authenticator;
 import javax.obex.HeaderSet;
+import javax.obex.ServerRequestHandler;
 
 import com.intel.bluetooth.BluetoothConnectionAccess;
 import com.intel.bluetooth.DebugLog;
@@ -165,16 +166,29 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		}
 	}
 	
-	void validateAuthenticationResponse(OBEXHeaderSetImpl requestHeaders, OBEXHeaderSetImpl responseHeaders) throws IOException {
-		if (requestHeaders.hasAuthenticationChallenge() && (!responseHeaders.hasAuthenticationResponse())) {
+	void validateAuthenticationResponse(OBEXHeaderSetImpl requestHeaders, OBEXHeaderSetImpl incomingHeaders) throws IOException {
+		if (requestHeaders.hasAuthenticationChallenge() && (!incomingHeaders.hasAuthenticationResponse())) {
 			// TODO verify that this appropriate Exception 
 			throw new IOException("Authentication response is missing");
 		}
-		if (responseHeaders.hasAuthenticationResponse()) {
+		handleAuthenticationResponse(incomingHeaders, null);
+	}
+	
+	void handleAuthenticationResponse(OBEXHeaderSetImpl incomingHeaders, ServerRequestHandler serverHandler) throws IOException {
+		if (incomingHeaders.hasAuthenticationResponse()) {
 			if (authenticator == null) {
 				throw new IOException("Authenticator required for authentication");
 			}
-			OBEXAuthentication.handleAuthenticationResponse(responseHeaders, authenticator);
+			OBEXAuthentication.handleAuthenticationResponse(incomingHeaders, authenticator, serverHandler);
+		}
+	}
+	
+	void handleAuthenticationChallenge(OBEXHeaderSetImpl incomingHeaders, OBEXHeaderSetImpl replyHeaders) throws IOException {
+		if (incomingHeaders.hasAuthenticationChallenge()) {
+			if (authenticator == null) {
+				throw new IOException("Authenticator required for authentication");
+			}
+			OBEXAuthentication.handleAuthenticationChallenge(incomingHeaders, replyHeaders, authenticator);
 		}
 	}
 	

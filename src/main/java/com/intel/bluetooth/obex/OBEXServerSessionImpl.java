@@ -168,8 +168,10 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		this.mtu = requestedMTU;
 		DebugLog.debug("mtu selected", this.mtu);
 		
-		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 7);
+		OBEXHeaderSetImpl requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 7);
+		handleAuthenticationResponse(requestHeaders, handler);
 		HeaderSet replyHeaders = createOBEXHeaderSet();
+		handleAuthenticationChallenge(requestHeaders, (OBEXHeaderSetImpl)replyHeaders);
 		int rc = ResponseCodes.OBEX_HTTP_INTERNAL_ERROR;
 		try {
 			rc = handler.onConnect(requestHeaders, replyHeaders);

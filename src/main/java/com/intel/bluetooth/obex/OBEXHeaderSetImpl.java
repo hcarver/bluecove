@@ -263,6 +263,10 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		authChallenges.addElement(OBEXAuthentication.createChallenge(realm, userID, access));
 	}
 	
+	void addAuthenticationResponse(byte[] authResponse) {
+		authResponses.addElement(authResponse);
+	}
+	
 	boolean hasAuthenticationChallenge() {
 		return !authChallenges.isEmpty();
 	}
