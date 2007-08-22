@@ -36,6 +36,9 @@ public class PasswordAuthentication {
 	 *                if <code>password</code> is <code>null</code>
 	 */
 	public PasswordAuthentication(byte[] userName, byte[] password) {
+		if (password == null) {
+			throw new NullPointerException("password is null");
+		}
 		this.userName = Utils.clone(userName);
 		this.password = Utils.clone(password);
 	}

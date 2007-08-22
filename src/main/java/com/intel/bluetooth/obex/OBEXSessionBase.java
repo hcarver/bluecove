@@ -167,7 +167,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	}
 	
 	void validateAuthenticationResponse(OBEXHeaderSetImpl requestHeaders, OBEXHeaderSetImpl incomingHeaders) throws IOException {
-		if (requestHeaders.hasAuthenticationChallenge() && (!incomingHeaders.hasAuthenticationResponse())) {
+		if ((requestHeaders != null) && requestHeaders.hasAuthenticationChallenge() && (!incomingHeaders.hasAuthenticationResponse())) {
 			// TODO verify that this appropriate Exception 
 			throw new IOException("Authentication response is missing");
 		}

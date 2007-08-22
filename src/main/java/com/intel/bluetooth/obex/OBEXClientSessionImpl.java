@@ -31,8 +31,6 @@ import javax.obex.Operation;
 import javax.obex.ResponseCodes;
 
 import com.intel.bluetooth.DebugLog;
-import com.intel.bluetooth.NotImplementedError;
-import com.intel.bluetooth.NotImplementedIOException;
 import com.intel.bluetooth.Utils;
 
 /**
@@ -80,6 +78,10 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 	 * @see javax.obex.ClientSession#connect(javax.obex.HeaderSet)
 	 */
 	public HeaderSet connect(HeaderSet headers) throws IOException {
+		return connectImpl(headers, false);
+	}
+	
+	private HeaderSet connectImpl(HeaderSet headers, boolean retry) throws IOException {
 		validateCreatedHeaderSet(headers);
 		if (isConnected) {
             throw new IOException("Session already connected");
@@ -115,13 +117,11 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		}
 		
 		validateAuthenticationResponse((OBEXHeaderSetImpl)headers, responseHeaders);
-		
-		Object authChallenge = responseHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_AUTH_CHALLENGE);
-		if ((authChallenge != null) && (authenticator != null)) {
-			if (NotImplementedError.enabled) {
-				throw new NotImplementedIOException();	
-			}
-			throw new NotImplementedIOException();
+		if ((!retry) && (responseHeaders.getResponseCode() == ResponseCodes.OBEX_HTTP_UNAUTHORIZED)) {
+			HeaderSet replyHeaders = OBEXHeaderSetImpl.cloneHeaders(headers);
+			handleAuthenticationChallenge(responseHeaders, (OBEXHeaderSetImpl)replyHeaders);
+			return connectImpl(replyHeaders, true);
+			
 		}
 		if (responseHeaders.getResponseCode() == ResponseCodes.OBEX_HTTP_OK) {
 			this.isConnected = true;

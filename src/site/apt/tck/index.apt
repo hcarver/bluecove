@@ -16,9 +16,9 @@ JSR 82 Technology Compatibility Kit
 
     L2CAP connection can't be implemented on Microsoft stack this tests has been excluded from run on this stack to save time.
 
-    Latest test reports for Bluetooth_1-1_005_TCK can be found {{{Bluetooth_1-1_005_TCK/}here}}.
+    Latest test reports for Bluetooth_1-1_006_TCK can be found {{{Bluetooth_1-1_006_TCK/}here}}.
 
-    Latest test reports for OBEX_1-1_005_TCK can be found {{{OBEX_1-1_005_TCK/}here}}.
+    Latest test reports for OBEX_1-1_006_TCK can be found {{{OBEX_1-1_006_TCK/}here}}.
 
     To run TCK we are using:
 
@@ -29,6 +29,8 @@ JSR 82 Technology Compatibility Kit
     * BlueCove on WIDCOMM stack as TCK agent
 
     * Cellphone Nokia 6265i (RFCOMM only) or Sony Ericson K790a as TCK agent
+
+    * Sun Java Wireless Toolkit 2.5.1 as OBEX TCK agent for <<<tcpobex>>> tests
 
     []
 

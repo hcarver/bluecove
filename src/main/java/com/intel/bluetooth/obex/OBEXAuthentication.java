@@ -41,7 +41,7 @@ class OBEXAuthentication {
 	
 	private static final byte column[] = { ':' };
 	
-	private static class Challenge {
+	static class Challenge {
 		
 		String realm; 
 		
@@ -137,7 +137,7 @@ class OBEXAuthentication {
 	
 	}
 	
-	private static class DigestResponse {
+	static class DigestResponse {
 		
 		byte requestDigest[];
 		
@@ -250,7 +250,7 @@ class OBEXAuthentication {
 		return md5.digest();
 	}
 	
-	private static boolean equals(byte[] digest1, byte[] digest2) {
+	static boolean equals(byte[] digest1, byte[] digest2) {
 		for (int i = 0; i < 0x10; i++) {
 			if (digest1[i] != digest2[i]) {
 				return false;

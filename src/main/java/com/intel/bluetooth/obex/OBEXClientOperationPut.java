@@ -104,14 +104,18 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		}
 		byte[] b = session.readOperation();
 		replyHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
-		DebugLog.debug0x("PUT server reply", replyHeaders.getResponseCode());
-		switch(replyHeaders.getResponseCode()) {
+		int responseCode = replyHeaders.getResponseCode();
+		DebugLog.debug0x("PUT server reply", responseCode);
+		switch(responseCode) {
 			case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
 				this.operationInProgress = false;
 				break;
 			case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
 				break;
-			default: throw new IOException ("Can't continue connection, 0x" + Integer.toHexString(replyHeaders.getResponseCode()));
+			default: 
+				if (!finalPacket) {
+					throw new IOException ("Can't continue connection, 0x" + Integer.toHexString(responseCode) + " " + OBEXUtils.toStringObexResponseCodes(responseCode));
+				}
 		}
 	}
 
