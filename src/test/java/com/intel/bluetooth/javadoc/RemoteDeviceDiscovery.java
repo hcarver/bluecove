@@ -31,44 +31,46 @@ import javax.bluetooth.*;
  */
 public class RemoteDeviceDiscovery {
 
-	public static void main(String[] args) throws IOException, InterruptedException {
+    public static final Vector/*<RemoteDevice>*/ devicesDiscovered = new Vector();
 
-		final Object inquiryCompletedEvent = new Object();
-		
-		final Vector devicesDiscovered = new Vector();
-		
-		DiscoveryListener listener = new DiscoveryListener() {
+    public static void main(String[] args) throws IOException, InterruptedException {
 
-			public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
-				System.out.println("Device " + btDevice.getBluetoothAddress() + " found");
-				devicesDiscovered.addElement(btDevice);
-				try {
-					System.out.println("     name " + btDevice.getFriendlyName(false));
-				} catch (IOException cantGetDeviceName) {
-				}
-			}
+        final Object inquiryCompletedEvent = new Object();
 
-			public void inquiryCompleted(int discType) {
-				System.out.println("Device Inquiry completed!");
-				synchronized(inquiryCompletedEvent){
-					inquiryCompletedEvent.notifyAll();
-		        }
-			}
+        devicesDiscovered.clear();
 
-			public void serviceSearchCompleted(int transID, int respCode) {
-			}
+        DiscoveryListener listener = new DiscoveryListener() {
 
-			public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
-			}
-		};
-		
-		synchronized(inquiryCompletedEvent) {
-			boolean started = LocalDevice.getLocalDevice().getDiscoveryAgent().startInquiry(DiscoveryAgent.GIAC, listener);
-			if (started) {
-				System.out.println("wait for device inquiry to complete...");
-				inquiryCompletedEvent.wait();
-				System.out.println(devicesDiscovered.size() +  " device(s) found");
-			}
-		}
-	}
+            public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
+                System.out.println("Device " + btDevice.getBluetoothAddress() + " found");
+                devicesDiscovered.addElement(btDevice);
+                try {
+                    System.out.println("     name " + btDevice.getFriendlyName(false));
+                } catch (IOException cantGetDeviceName) {
+                }
+            }
+
+            public void inquiryCompleted(int discType) {
+                System.out.println("Device Inquiry completed!");
+                synchronized(inquiryCompletedEvent){
+                    inquiryCompletedEvent.notifyAll();
+                }
+            }
+
+            public void serviceSearchCompleted(int transID, int respCode) {
+            }
+
+            public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
+            }
+        };
+
+        synchronized(inquiryCompletedEvent) {
+            boolean started = LocalDevice.getLocalDevice().getDiscoveryAgent().startInquiry(DiscoveryAgent.GIAC, listener);
+            if (started) {
+                System.out.println("wait for device inquiry to complete...");
+                inquiryCompletedEvent.wait();
+                System.out.println(devicesDiscovered.size() +  " device(s) found");
+            }
+        }
+    }
 }
