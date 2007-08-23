@@ -15,4 +15,70 @@ BlueCove JSR-82 for J2SE implementation.
 <p>
     See <a href="javax/bluetooth/package-summary.html">javax.bluetooth</A> package for JSR-82 Bluetooth API and <a href="javax/obex/package-summary.html">javax.obex</A> package for JSR-82 OBEX API.
 
+    Examples avalable on this page can be downloaded from <a href="http://bluecove.googlecode.com/svn/trunk/src/test/java/com/intel/bluetooth/javadoc">SVN repository</a>
+
+<h3>Remote Device Discovery</h3>
+
+    The LocalDevice class provides method 'getDiscoveryAgent' that returns an instance of the DiscoveryAgent.
+    This DiscoveryAgent can then be used to discover remote bluetooth devices (start HCI inquiry).
+
+<pre>
+import java.io.IOException;
+import java.util.Vector;
+import javax.bluetooth.*;
+
+/**
+ * Minimal DeviceDiscovery example.
+ */
+public class RemoteDeviceDiscovery {
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+
+        final Object inquiryCompletedEvent = new Object();
+
+        final Vector devicesDiscovered = new Vector();
+
+        DiscoveryListener listener = new DiscoveryListener() {
+
+            public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
+                System.out.println("Device " + btDevice.getBluetoothAddress() + " found");
+                devicesDiscovered.addElement(btDevice);
+                try {
+                    System.out.println("     name " + btDevice.getFriendlyName(false));
+                } catch (IOException cantGetDeviceName) {
+                }
+            }
+
+            public void inquiryCompleted(int discType) {
+                System.out.println("Device Inquiry completed!");
+                synchronized(inquiryCompletedEvent){
+                    inquiryCompletedEvent.notifyAll();
+                }
+            }
+
+            public void serviceSearchCompleted(int transID, int respCode) {
+            }
+
+            public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
+            }
+        };
+
+        synchronized(inquiryCompletedEvent) {
+            boolean started = LocalDevice.getLocalDevice().getDiscoveryAgent().startInquiry(DiscoveryAgent.GIAC, listener);
+            if (started) {
+                System.out.println("wait for device inquiry to complete...");
+                inquiryCompletedEvent.wait();
+                System.out.println(devicesDiscovered.size() +  " device(s) found");
+            }
+        }
+    }
+}
+</pre>
+
+<h3>Services Search</h3>
+
+<pre>
+    TODO
+</pre>
+
 </body>
