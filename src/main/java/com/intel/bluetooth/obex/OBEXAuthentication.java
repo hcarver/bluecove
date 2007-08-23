@@ -70,7 +70,7 @@ class OBEXAuthentication {
 			buf.write(0x10); // Len
 			buf.write(nonce, 0, 0x10);
 			
-			byte options = (byte)((userID ? 1 : 0) | (access ? 2 : 0));
+			byte options = (byte)((userID ? 1 : 0) | ((!access) ? 2 : 0));
 			buf.write(0x01); // Tag
 			buf.write(0x01); // Len
 			buf.write(options);
@@ -114,7 +114,7 @@ class OBEXAuthentication {
 				case 1:
 					byte options = data[i];
 					userID = ((options & 1) != 0);
-					access = ((options & 2) != 0);
+					access = ((options & 2) == 0);
 					break;
 				case 2:
 					int charSetCode = data[i] & 0xFF;
