@@ -101,7 +101,7 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 			closeStream();
 			break;
 		default:
-			throw new IOException("Operation error");
+			throw new IOException("Operation error " + OBEXUtils.toStringObexResponseCodes(dataHeaders.getResponseCode()));
 		}
 	}
 	

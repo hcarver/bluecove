@@ -13,11 +13,20 @@ BlueCove JSR-82 for J2SE implementation.
 
 <h2>Quick Tutorial</h2>
 <p>
-    See <a href="javax/bluetooth/package-summary.html">javax.bluetooth</A> package for JSR-82 Bluetooth API and <a href="javax/obex/package-summary.html">javax.obex</A> package for JSR-82 OBEX API.
+    BlueCove provides an implementation of the JSR 82. Applications should use API defined in JSR-82. See <a href="javax/bluetooth/package-summary.html">javax.bluetooth</A> package for JSR-82 Bluetooth API and <a href="javax/obex/package-summary.html">javax.obex</A> package for JSR-82 OBEX API.
+<p>
+
+    <ul>
+        <li><a href="#DeviceDiscovery">Remote Device Discovery</a></li>
+        <li><a href="#ServicesSearch">Services Search</a></li>
+        <li><a href="#OBEXPutClient">OBEX Put Client</a></li>
+        <li><a href="#OBEXPutServer">OBEX Put Server</a></li>
+    </ul>
+
 <p>
     Examples avalable on this page can be downloaded from <a href="http://bluecove.googlecode.com/svn/trunk/src/test/java/com/intel/bluetooth/javadoc">SVN repository</a>
 
-<h3>Remote Device Discovery</h3>
+<h3><a name="DeviceDiscovery">Remote Device Discovery</a></h3>
 
     The LocalDevice class provides method 'getDiscoveryAgent' that returns an instance of the DiscoveryAgent.
     This DiscoveryAgent can then be used to discover remote bluetooth devices (start HCI inquiry).
@@ -32,7 +41,7 @@ import javax.bluetooth.*;
  */
 public class RemoteDeviceDiscovery {
 
-    public static final Vector/*<RemoteDevice>*/ devicesDiscovered = new Vector();
+    public static final Vector/*&lt;RemoteDevice&gt;*/ devicesDiscovered = new Vector();
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -78,7 +87,7 @@ public class RemoteDeviceDiscovery {
 }
 </pre>
 
-<h3>Services Search</h3>
+<h3><a name="ServicesSearch">Services Search</a></h3>
     The following example shows how to use the DiscoveryAgent to find OBEX Push bluetooth service.
     Class from DeviceDiscovery example is used to find Bluetooth Devices.
 <pre>
@@ -93,11 +102,9 @@ import javax.bluetooth.*;
  */
 public class ServicesSearch {
 
-    static final UUID OBEX_OBJECT_PUSH = new UUID(0x1105);
-
     static final UUID OBEX_FILE_TRANSFER = new UUID(0x1106);
 
-    public static final Vector/*<String>*/ serviceFound = new Vector();
+    public static final Vector/*&lt;String&gt;*/ serviceFound = new Vector();
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -163,6 +170,126 @@ public class ServicesSearch {
 
     }
 
+}
+</pre>
+
+<h3><a name="OBEXPutClient">OBEX Put Client</a></h3>
+<pre>
+import java.io.IOException;
+import java.io.OutputStream;
+import javax.microedition.io.Connector;
+import javax.obex.*;
+
+public class ObexPutClient {
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+
+        String serverURL = null; // = "btgoep://0019639C4007:6";
+        if ((args != null) && (args.length > 0)) {
+            serverURL = args[0];
+        }
+        if (serverURL == null) {
+            String[] searchArgs = null;
+            // Connect to OBEXPutServer from examples
+            // searchArgs = new String[] { "11111111111111111111111111111123" };
+            ServicesSearch.main(searchArgs);
+            if (ServicesSearch.serviceFound.size() == 0) {
+                System.out.println("OBEX service not found");
+                return;
+            }
+            // Select the first service found
+            serverURL = (String)ServicesSearch.serviceFound.elementAt(0);
+        }
+
+        System.out.println("Connecting to " + serverURL);
+
+        ClientSession clientSession = (ClientSession) Connector.open(serverURL);
+        HeaderSet hsConnectReply = clientSession.connect(null);
+        if (hsConnectReply.getResponseCode() != ResponseCodes.OBEX_HTTP_OK) {
+            System.out.println("Failed to connect");
+            return;
+        }
+
+        HeaderSet hsOperation = clientSession.createHeaderSet();
+        hsOperation.setHeader(HeaderSet.NAME, "Hello.txt");
+        hsOperation.setHeader(HeaderSet.TYPE, "text");
+
+        //Create PUT Operation
+        Operation putOperation = clientSession.put(hsOperation);
+
+        // Send some text to server
+        byte data[] = "Hello world!".getBytes("iso-8859-1");
+        OutputStream os = putOperation.openOutputStream();
+        os.write(data);
+        os.close();
+
+        putOperation.close();
+
+        clientSession.disconnect(null);
+
+        clientSession.close();
+    }
+}
+</pre>
+
+<h3><a name="OBEXPutServer">OBEX Put Server</a></h3>
+    This class will start an OBEX service that will accept Put commands and print it to standard out.
+<pre>
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.bluetooth.*;
+import javax.microedition.io.Connector;
+import javax.obex.*;
+
+public class OBEXPutServer {
+
+    static final String serverUUID = "11111111111111111111111111111123";
+
+    public static void main(String[] args) throws IOException {
+
+        LocalDevice.getLocalDevice().setDiscoverable(DiscoveryAgent.GIAC);
+
+        SessionNotifier serverConnection = (SessionNotifier) Connector.open("btgoep://localhost:"
+                + serverUUID + ";name=ObexExample");
+
+        int count = 0;
+        while(count < 2) {
+            RequestHandler handler = new RequestHandler();
+            serverConnection.acceptAndOpen(handler);
+            System.out.println("Received OBEX connection " + (++count));
+        }
+    }
+
+    private static class RequestHandler extends ServerRequestHandler {
+
+        public int onPut(Operation op) {
+            try {
+                HeaderSet hs = op.getReceivedHeaders();
+                String name = (String) hs.getHeader(HeaderSet.NAME);
+                if (name != null) {
+                    System.out.println("put name:" + name);
+                }
+
+                InputStream is = op.openInputStream();
+
+                StringBuffer buf = new StringBuffer();
+                int data;
+                while ((data = is.read()) != -1) {
+                    buf.append((char) data);
+                }
+
+                System.out.println("got:" + buf.toString());
+
+                op.close();
+                return ResponseCodes.OBEX_HTTP_OK;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ResponseCodes.OBEX_HTTP_UNAVAILABLE;
+            }
+        }
+    }
 }
 </pre>
 
