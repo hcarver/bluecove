@@ -29,6 +29,8 @@ import javax.obex.Authenticator;
 import javax.obex.PasswordAuthentication;
 import javax.obex.ServerRequestHandler;
 
+import com.intel.bluetooth.DebugLog;
+
 /**
  * @author vlads
  *
@@ -127,7 +129,10 @@ class OBEXAuthentication {
 					} else if (charSetCode <= 9) {
 						realm = new String(chars, "ISO-8859-" + charSetCode);
 					} else {
-                        throw new UnsupportedEncodingException();
+						DebugLog.error("Unsupported charset code " + charSetCode + " in Challenge");
+						//throw new UnsupportedEncodingException("charset code " + charSetCode);
+                        // BUG on SE K790a
+						realm = new String(chars, 1, len, "ASCII");
 					}
 					break;
 				}
