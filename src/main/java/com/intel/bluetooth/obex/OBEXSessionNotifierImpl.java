@@ -33,7 +33,6 @@ import javax.obex.ServerRequestHandler;
 import javax.obex.SessionNotifier;
 
 import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
-import com.intel.bluetooth.NotImplementedIOException;
 import com.intel.bluetooth.Utils;
 
 /**
@@ -66,9 +65,6 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
      */
 	public OBEXSessionNotifierImpl(StreamConnectionNotifier notifier) throws IOException, Error {
 		Utils.isLegalAPICall(fqcnSet);
-		if (false) {
-			throw new NotImplementedIOException();
-		}
 		this.notifier = notifier;
 	}
 	
