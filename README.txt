@@ -13,6 +13,10 @@ currently maintained by volunteers. The LGPL license allow to link and distribut
 
  [http://www.rococosoft.com/weblog/archives/2007/07/another_cool_project_using_jsr.html Blog about Blue Cove]
 
+== Library API ===
+
+BlueCove provides an implementation of the JSR 82. Applications should use API defined in JSR-82. See [http://bluecove.sourceforge.net/apidocs/index.html BlueCove JSR-82 API]
+
 == Requirements ==
 
   * WIDCOMM (Broadcom) BTW Stack software version 1.4.2.10 SP5 or above
