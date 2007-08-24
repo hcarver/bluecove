@@ -25,7 +25,7 @@
         <menu name="Ver #build#" inherit="top">
             <item name="Release 2.0.0" href="http://bluecove.sourceforge.net/"/>
 
-            <item name="Main Project" href="http://code.google.com/p/bluecove/" />
+            <item name="Main Project" href="#remove#http://code.google.com/p/bluecove/" />
             <item name="sf.net" href="http://sourceforge.net/projects/bluecove/" />
             <item name="Introduction" href="index.html" />
 
