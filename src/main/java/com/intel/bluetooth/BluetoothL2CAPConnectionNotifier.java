@@ -22,9 +22,7 @@ package com.intel.bluetooth;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.util.Enumeration;
 
-import javax.bluetooth.DataElement;
 import javax.bluetooth.L2CAPConnection;
 import javax.bluetooth.L2CAPConnectionNotifier;
 import javax.bluetooth.ServiceRecord;
@@ -34,30 +32,12 @@ import javax.bluetooth.ServiceRegistrationException;
  * @author vlads
  *
  */
-class BluetoothL2CAPConnectionNotifier implements L2CAPConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
-
-	private volatile long handle;
+class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase implements L2CAPConnectionNotifier  {
 
 	private int psm = -1;
 	
-	private ServiceRecordImpl serviceRecord;
-	
-	private boolean closed;
-	
-	private int securityOpt;
-	
 	public BluetoothL2CAPConnectionNotifier(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU) throws IOException {
-		
-		this.closed = false;
-		
-		if (params.name == null) {
-			throw new NullPointerException("Service name is null");
-		}
-		
-		/*
-		 * create service record to be later updated by BluetoothStack
-		 */
-		this.serviceRecord = new ServiceRecordImpl(null, 0);
+		super(params);
 		
 		this.handle = BlueCoveImpl.instance().getBluetoothStack().l2ServerOpen(params, receiveMTU, transmitMTU, serviceRecord);
 		
@@ -68,17 +48,6 @@ class BluetoothL2CAPConnectionNotifier implements L2CAPConnectionNotifier, Bluet
 		this.securityOpt = Utils.securityOpt(params.authenticate, params.encrypt);
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#getServiceRecord()
-	 */
-	public ServiceRecord getServiceRecord() {
-		if (closed) {
-			throw new IllegalArgumentException("L2CAPConnectionNotifier is closed");
-		}
-		ServiceRecordsRegistry.register(this, serviceRecord);
-		return serviceRecord;
-	}
-
 	/* (non-Javadoc)
 	 * @see javax.bluetooth.L2CAPConnectionNotifier#acceptAndOpen()
 	 */
@@ -102,68 +71,24 @@ class BluetoothL2CAPConnectionNotifier implements L2CAPConnectionNotifier, Bluet
 	}
 
 	/* (non-Javadoc)
-	 * @see javax.microedition.io.Connection#close()
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#closeStack(long)
 	 */
-	public void close() throws IOException {
-		if (!closed) {
-			closed = true;
-			ServiceRecordsRegistry.unregister(serviceRecord);
-			long h = handle;
-			handle = 0;
-			BlueCoveImpl.instance().getBluetoothStack().l2ServerClose(h, serviceRecord);
-		}
+	protected void closeStack(long handle) throws IOException {
+		BlueCoveImpl.instance().getBluetoothStack().l2ServerClose(handle, serviceRecord);
 	}
-
-	private void validateServiceRecord(ServiceRecord srvRecord) {
-		DataElement protocolDescriptor = srvRecord.getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
-		if ((protocolDescriptor == null) || (protocolDescriptor.getDataType() != DataElement.DATSEQ)) {
-			throw new IllegalArgumentException("ProtocolDescriptorList is mandatory");
-		}
-
+	
+	protected void validateServiceRecord(ServiceRecord srvRecord) {
 		if (this.psm != serviceRecord.getChannel(BluetoothConsts.L2CAP_PROTOCOL_UUID)) {
 			throw new IllegalArgumentException("Must not change the PSM");
 		}
-
-		DataElement serviceClassIDList = srvRecord.getAttributeValue(BluetoothConsts.ServiceClassIDList);
-		if ((serviceClassIDList == null) || (serviceClassIDList.getDataType() != DataElement.DATSEQ) || serviceClassIDList.getSize() == 0) {
-			throw new IllegalArgumentException("ServiceClassIDList is mandatory");
-		}
-
-		boolean isL2CAPpresent = false;
-		for (Enumeration protocolsSeqEnum = (Enumeration) protocolDescriptor.getValue(); protocolsSeqEnum.hasMoreElements();) {
-			DataElement elementSeq = (DataElement) protocolsSeqEnum.nextElement();
-			if (elementSeq.getDataType() == DataElement.DATSEQ) {
-				Enumeration elementSeqEnum = (Enumeration) elementSeq.getValue();
-				if (elementSeqEnum.hasMoreElements()) {
-					DataElement protocolElement = (DataElement) elementSeqEnum.nextElement();
-					if ((protocolElement.getDataType() == DataElement.UUID) && (BluetoothConsts.L2CAP_PROTOCOL_UUID.equals(protocolElement.getValue()))) {
-						isL2CAPpresent = true;
-						break;
-					}
-				}
-			}
-		}
-		if (!isL2CAPpresent) {
-			throw new IllegalArgumentException("L2CAP UUID is mandatory in ProtocolDescriptorList");
-		}
+		super.validateServiceRecord(srvRecord);
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#updateServiceRecord(boolean)
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#updateStackServiceRecord(com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
-	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
-		try {
-			validateServiceRecord(this.serviceRecord);
-		} catch (IllegalArgumentException e) {
-			if (acceptAndOpen) {
-				throw new ServiceRegistrationException(e.getMessage());
-			} else {
-				throw e;
-			}
-		}
+	protected void updateStackServiceRecord(ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
 		BlueCoveImpl.instance().getBluetoothStack().l2ServerUpdateServiceRecord(handle, serviceRecord, acceptAndOpen);
-		serviceRecord.attributeUpdated = false;
-		
 	}
 
 }

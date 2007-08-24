@@ -33,5 +33,9 @@ public interface BluetoothConnectionNotifierServiceRecordAccess {
 	
 	public ServiceRecord getServiceRecord();
 	
+	/**
+	 * @param acceptAndOpen wrap validation in ServiceRegistrationException
+	 * @throws ServiceRegistrationException
+	 */
 	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException;
 }

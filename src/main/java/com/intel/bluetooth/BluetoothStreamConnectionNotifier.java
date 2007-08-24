@@ -22,39 +22,18 @@ package com.intel.bluetooth;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.util.Enumeration;
 
-import javax.bluetooth.DataElement;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
-class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
-
-	private volatile long handle;
+class BluetoothStreamConnectionNotifier extends BluetoothConnectionNotifierBase implements StreamConnectionNotifier {
 
 	private int rfcommChannel = -1;
 
-	private ServiceRecordImpl serviceRecord;
-
-	protected boolean closing = false;
-
-	private boolean closed;
-
-	private int securityOpt;
-
 	public BluetoothStreamConnectionNotifier(BluetoothConnectionNotifierParams params) throws IOException {
-
-		this.closed = false;
-		if (params.name == null) {
-			throw new NullPointerException("Service name is null");
-		}
-
-		/*
-		 * create service record to be later updated by BluetoothStack
-		 */
-		this.serviceRecord = new ServiceRecordImpl(null, 0);
+		super(params);
 
 		this.handle = BlueCoveImpl.instance().getBluetoothStack().rfServerOpen(params, serviceRecord);
 
@@ -64,38 +43,14 @@ class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, Blu
 
 		this.securityOpt = Utils.securityOpt(params.authenticate, params.encrypt);
 	}
-
-	/*
-	 * Close the connection. When a connection has been closed, access to any of
-	 * its methods except this close() will cause an an IOException to be
-	 * thrown. Closing an already closed connection has no effect. Streams
-	 * derived from the connection may be open when method is called. Any open
-	 * streams will cause the connection to be held open until they themselves
-	 * are closed. In this latter case access to the open streams is permitted,
-	 * but access to the connection is not.
-	 *
-	 * Throws: IOException - If an I/O error occurs
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#closeStack(long)
 	 */
-
-	public void close() throws IOException {
-		if (!closed) {
-			long h = handle;
-			handle = 0;
-			if (h != 0) {
-				ServiceRecordsRegistry.unregister(serviceRecord);
-				closing = true;
-				DebugLog.debug("closing FRCOMM ConnectionNotifier");
-				try {
-					if (h != 0) {
-						BlueCoveImpl.instance().getBluetoothStack().rfServerClose(h, serviceRecord);
-					}
-					closed = true;
-				} finally {
-					closing = false;
-				}
-			}
-		}
+	protected void closeStack(long handle) throws IOException {
+		BlueCoveImpl.instance().getBluetoothStack().rfServerClose(handle, serviceRecord);
 	}
+
 
 	/*
 	 * Returns a StreamConnection that represents a server side socket
@@ -122,64 +77,18 @@ class BluetoothStreamConnectionNotifier implements StreamConnectionNotifier, Blu
 		}
 	}
 
-	public ServiceRecord getServiceRecord() {
-		if (closed) {
-			throw new IllegalArgumentException("StreamConnectionNotifier is closed");
-		}
-		ServiceRecordsRegistry.register(this, serviceRecord);
-		return serviceRecord;
-	}
-
-	private void validateServiceRecord(ServiceRecord srvRecord) {
-		DataElement protocolDescriptor = srvRecord.getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
-		if ((protocolDescriptor == null) || (protocolDescriptor.getDataType() != DataElement.DATSEQ)) {
-			throw new IllegalArgumentException("ProtocolDescriptorList is mandatory");
-		}
-
+	protected void validateServiceRecord(ServiceRecord srvRecord) {
 		if (this.rfcommChannel != serviceRecord.getChannel(BluetoothConsts.RFCOMM_PROTOCOL_UUID)) {
 			throw new IllegalArgumentException("Must not change the RFCOMM server channel number");
 		}
-
-		DataElement serviceClassIDList = srvRecord.getAttributeValue(BluetoothConsts.ServiceClassIDList);
-		if ((serviceClassIDList == null) || (serviceClassIDList.getDataType() != DataElement.DATSEQ) || serviceClassIDList.getSize() == 0) {
-			throw new IllegalArgumentException("ServiceClassIDList is mandatory");
-		}
-
-		boolean isL2CAPpresent = false;
-		for (Enumeration protocolsSeqEnum = (Enumeration) protocolDescriptor.getValue(); protocolsSeqEnum.hasMoreElements();) {
-			DataElement elementSeq = (DataElement) protocolsSeqEnum.nextElement();
-			if (elementSeq.getDataType() == DataElement.DATSEQ) {
-				Enumeration elementSeqEnum = (Enumeration) elementSeq.getValue();
-				if (elementSeqEnum.hasMoreElements()) {
-					DataElement protocolElement = (DataElement) elementSeqEnum.nextElement();
-					if ((protocolElement.getDataType() == DataElement.UUID) && (BluetoothConsts.L2CAP_PROTOCOL_UUID.equals(protocolElement.getValue()))) {
-						isL2CAPpresent = true;
-						break;
-					}
-				}
-			}
-		}
-		if (!isL2CAPpresent) {
-			throw new IllegalArgumentException("L2CAP UUID is mandatory in ProtocolDescriptorList");
-		}
+		super.validateServiceRecord(srvRecord);
 	}
 	
-	/**
-	 * @param acceptAndOpen wrap validation in ServiceRegistrationException
-	 * @throws ServiceRegistrationException
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#updateStackServiceRecord(com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
-	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
-		try {
-			validateServiceRecord(this.serviceRecord);
-		} catch (IllegalArgumentException e) {
-			if (acceptAndOpen) {
-				throw new ServiceRegistrationException(e.getMessage());
-			} else {
-				throw e;
-			}
-		}
+	protected void updateStackServiceRecord(ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
 		BlueCoveImpl.instance().getBluetoothStack().rfServerUpdateServiceRecord(handle, serviceRecord, acceptAndOpen);
-		serviceRecord.attributeUpdated = false;
 	}
 
 }
