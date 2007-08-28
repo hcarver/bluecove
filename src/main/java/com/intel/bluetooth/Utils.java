@@ -37,6 +37,8 @@ import javax.bluetooth.UUID;
  */
 public abstract class Utils {
 
+	private static final String blueCoveImplPackage = BlueCoveImpl.class.getPackage().getName();
+	
 	private Utils() {
 		
 	}
@@ -221,7 +223,7 @@ public abstract class Utils {
 			if (ste.className.startsWith("javax.bluetooth.")) {
 				return;
 			}
-			if (ste.className.startsWith("com.intel.bluetooth.")) {
+			if (ste.className.startsWith(blueCoveImplPackage + ".")) {
 				return;
 			}
 			throw new Error("Illegal use of the JSR-82 API");
