@@ -119,7 +119,7 @@ class SearchServicesThread extends Thread {
 		}
 	}
 	
-	void searchServicesStartedCallback() {
+	public void searchServicesStartedCallback() {
 		DebugLog.debug("searchServicesStartedCallback");
 		started = true;
 		synchronized (serviceSearchStartedEvent) {
