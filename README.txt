@@ -35,9 +35,6 @@ BlueCove also only supports RFCOMM connections on this stack. The operating syst
 currently limited to Windows XP SP2 and newer, because the Microsoft Bluetooth
 stack is not available on other operating systems.
 
-  BlueCove only support OBEX PUT, but there are other projects
-that can (possibly) be used to achieve full OBEX functionality with BlueCove.
-
  For more limitations details see stacks.txt or [http://code.google.com/p/bluecove/wiki/stacks BlueCove supported stacks].
 
  We hope you enjoy using BlueCove. Please note that this is an open-source effort.
