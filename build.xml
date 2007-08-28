@@ -3,7 +3,7 @@
         Open source implementation of JSR-82 Java Bluetooth API.
     </description>
 
-    <property name="product-version" value="2.0.1"/>
+    <property name="product-version" value="2.0.2-SNAPSHOT"/>
 
     <!-- set global properties for this build -->
     <property name="src" location="src/main/java"/>
