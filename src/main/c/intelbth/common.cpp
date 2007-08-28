@@ -35,7 +35,7 @@ static const char* cBluetoothStateException = "javax/bluetooth/BluetoothStateExc
 static const char* cBluetoothConnectionException = "javax/bluetooth/BluetoothConnectionException";
 
 jint blueCoveVersion() {
-	return BLUECOVE_VERSION;
+	return BLUECOVE_VERSION * 100 + BLUECOVE_BUILD;
 }
 
 BOOL isDebugOn() {

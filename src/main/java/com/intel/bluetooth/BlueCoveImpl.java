@@ -26,9 +26,9 @@ import java.util.Vector;
 
 
 /**
- * 
- * Singleton class used as holder for BluetoothStack. 
- * 
+ *
+ * Singleton class used as holder for BluetoothStack.
+ *
  * All you need to do is initialize BlueCoveImpl inside Privileged context.
  * <p>
  * If automatic Bluetooth Stack detection is not enough Java System property
@@ -51,23 +51,25 @@ import java.util.Vector;
  * <p>
  * Use `LocalDevice.getProperty("bluecove.stack")` to find out which stack is
  * used.
- * 
+ *
  * @author vlads
- * 
+ *
  */
 public class BlueCoveImpl {
 
-	public static final int versionMajor = 2;
+	public static final int versionMajor1 = 2;
 
-	public static final int versionMinor = 0;
+    public static final int versionMajor2 = 0;
 
-	public static final int versionBuild = 1;
+	public static final int versionMinor = 2;
 
-	public static final String versionSufix = ""; //SNAPSHOT
+	public static final int versionBuild = 0;
 
-	public static final String version = String.valueOf(versionMajor) + "." + String.valueOf(versionMinor) + "." + String.valueOf(versionBuild) + versionSufix;
+	public static final String versionSufix = "-SNAPSHOT"; //SNAPSHOT
 
-	private static final int nativeLibraryVersionExpected = versionMajor * 10000 + versionMinor * 100 + versionBuild;
+	public static final String version = String.valueOf(versionMajor1) + "." + String.valueOf(versionMajor2) + "." + String.valueOf(versionMinor) + versionSufix;
+
+	private static final int nativeLibraryVersionExpected = versionMajor1 * 1000000 + versionMajor2 * 10000 + versionMinor * 100 + versionBuild;
 
 	public static final String STACK_WINSOCK = "winsock";
 
@@ -76,7 +78,7 @@ public class BlueCoveImpl {
 	public static final String STACK_BLUESOLEIL = "bluesoleil";
 
 	public static final String STACK_BLUEZ = "bluez";
-	
+
 	public static final String STACK_OSX = "mac";
 
 	// We can't use the same DLL on windows for all implemenations.
@@ -100,15 +102,15 @@ public class BlueCoveImpl {
 	private BluetoothStack bluetoothStack;
 
 	private static Hashtable configProperty = new Hashtable();
-	
+
 	private static final String FQCN = BlueCoveImpl.class.getName();
-	
-	private static final Vector fqcnSet = new Vector(); 
-	
+
+	private static final Vector fqcnSet = new Vector();
+
 	static {
 		fqcnSet.addElement(FQCN);
 	}
-	
+
     /**
      * Allow default initialization.
      * In Secure environment instance() should be called initialy from secure contex.
@@ -116,7 +118,7 @@ public class BlueCoveImpl {
     private static class SingletonHolder {
 
     	private static BlueCoveImpl instance;
-		
+
     	private static void init() {
 			if (instance != null) {
 				return;
@@ -211,15 +213,15 @@ public class BlueCoveImpl {
 		copySystemProperty();
 		System.out.println("BlueCove version " + version + " on " + stackSelected);
 	}
-	
+
 	/**
 	 * API that can be used to configure BlueCove properties instead of System properties.
 	 * Should be used before stack intitialized. If <code>null</code> is passed as the
 	 * <code>value</code> then the property will be removed.
-	 * 
+	 *
 	 * @param key
 	 * @param value
-	 * 
+	 *
 	 * @exception IllegalArgumentException
 	 *                if the stack alredy intitialized.
 	 */
@@ -233,7 +235,7 @@ public class BlueCoveImpl {
 			configProperty.put(key, value);
 		}
 	}
-	
+
 	String getConfigProperty(String key) {
 		String value = (String)configProperty.get(key);
 		if (value == null) {
@@ -244,19 +246,19 @@ public class BlueCoveImpl {
 		}
 		return value;
 	}
-	
+
 	void copySystemProperty() {
 		if (bluetoothStack != null) {
 			UtilsJavaSE.setSystemProperty("bluetooth.api.version", "1.1");
 			UtilsJavaSE.setSystemProperty("obex.api.version", "1.1");
-			String[] property = { 
-					"bluetooth.master.switch", 
+			String[] property = {
+					"bluetooth.master.switch",
 					"bluetooth.sd.attr.retrievable.max",
 					"bluetooth.connected.devices.max",
-					"bluetooth.l2cap.receiveMTU.max", 
+					"bluetooth.l2cap.receiveMTU.max",
 					"bluetooth.sd.trans.max",
 					"bluetooth.connected.inquiry.scan",
-					"bluetooth.connected.page.scan", 
+					"bluetooth.connected.page.scan",
 					"bluetooth.connected.inquiry",
 					"bluetooth.connected.page" };
 			for (int i = 0; i < property.length; i++) {
@@ -264,7 +266,7 @@ public class BlueCoveImpl {
 			}
 		}
 	}
-	
+
 	private class ShutdownHookThread extends Thread {
 
 		ShutdownHookThread() {
@@ -294,20 +296,20 @@ public class BlueCoveImpl {
 
 	/**
 	 * Applications should not used this function.
-	 * 
+	 *
 	 * @return Instance of the class with initializaed stack variable. getBluetoothStack() can be called.
-	 * @throws RuntimeException when BluetoothStack not detected. If one connected the hardware later, 
+	 * @throws RuntimeException when BluetoothStack not detected. If one connected the hardware later,
      * BlueCove would be able to recover and start correctly
 	 */
     public static BlueCoveImpl instance() throws RuntimeException {
-    	SingletonHolder.init();  
+    	SingletonHolder.init();
 		return SingletonHolder.instance;
     }
 
     private BluetoothStack createDetectorOnWindows(String stackFirst) {
 		if (stackFirst != null) {
 			DebugLog.debug("detector stack", stackFirst);
-			if (STACK_WIDCOMM.equalsIgnoreCase(stackFirst)) { 
+			if (STACK_WIDCOMM.equalsIgnoreCase(stackFirst)) {
 				if ((NativeLibLoader.isAvailable(NATIVE_LIB_WIDCOMM))) {
 					return new BluetoothStackWIDCOMM();
 				}
@@ -373,9 +375,9 @@ public class BlueCoveImpl {
 
     /**
      * Applications should not used this function.
-     * 
+     *
      * @return curent BluetoothStack implementation
-     * 
+     *
      * @exception Error if called from outside of BlueCove internal code.
      */
 	public BluetoothStack getBluetoothStack() throws Error {

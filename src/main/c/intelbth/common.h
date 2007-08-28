@@ -21,8 +21,12 @@
 
 #pragma once
 
+#ifndef BLUECOVE_BUILD
+#define BLUECOVE_BUILD 00
+#endif
+
 #ifndef BLUECOVE_VERSION
-#define BLUECOVE_VERSION 20001
+#define BLUECOVE_VERSION 20002
 #endif
 
 #ifdef _WIN32_WCE
@@ -177,7 +181,7 @@ void throwBluetoothStateException(JNIEnv *env, const char *msg);
 void throwBluetoothStateExceptionExt(JNIEnv *env, const char *fmt, ...);
 
 #define BT_CONNECTION_ERROR_UNKNOWN_PSM  1
-#define BT_CONNECTION_ERROR_SECURITY_BLOCK 2 
+#define BT_CONNECTION_ERROR_SECURITY_BLOCK 2
 #define BT_CONNECTION_ERROR_NO_RESOURCES 3
 #define BT_CONNECTION_ERROR_FAILED_NOINFO 4
 #define BT_CONNECTION_ERROR_TIMEOUT 5
