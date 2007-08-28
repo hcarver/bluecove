@@ -1,6 +1,6 @@
 @version $Id$
 
-* 2.0.1 to be Released 2007-09-xx
+* 2.0.1 released 2007-08-28
 
     2007-07-22 Vlad Skarzhevskyy
     * L2CAP imlementation, Only on WIDCOMM stack

@@ -18,13 +18,12 @@
     <body>
 
         <!--4release-->
-        <!--
         <menu name="Ver #version#">
-        -->
         <!--4snapshot-->
+        <!--
         <menu name="Ver #build#" inherit="top">
-            <item name="Release 2.0.0" href="http://bluecove.sourceforge.net/"/>
-
+            <item name="Release 2.0.1" href="http://bluecove.sourceforge.net/"/>
+        -->
             <item name="Main Project" href="#remove#http://code.google.com/p/bluecove/" />
             <item name="sf.net" href="http://sourceforge.net/projects/bluecove/" />
             <item name="Introduction" href="index.html" />
@@ -42,9 +41,7 @@
             <item name="Examples" href="bluecove-examples/"/>
 
             <!--4release-->
-            <!--
             <item name="Preview 2.0.2" href="http://pyx4me.com/snapshot/bluecove/"/>
-            -->
 
         </menu>
 

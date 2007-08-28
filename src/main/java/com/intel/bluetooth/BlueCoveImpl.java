@@ -63,7 +63,7 @@ public class BlueCoveImpl {
 
 	public static final int versionBuild = 1;
 
-	public static final String versionSufix = "-SNAPSHOT"; //SNAPSHOT
+	public static final String versionSufix = ""; //SNAPSHOT
 
 	public static final String version = String.valueOf(versionMajor) + "." + String.valueOf(versionMinor) + "." + String.valueOf(versionBuild) + versionSufix;
 
