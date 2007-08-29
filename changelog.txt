@@ -1,5 +1,10 @@
 @version $Id$
 
+* 2.0.2 to be released 2007-10-??
+
+    2007-08-28
+    * log4j integration, Bluecove log redirected to log4j when one is available in classpath
+
 * 2.0.1 released 2007-08-28
 
     2007-08-24

@@ -24,7 +24,8 @@
         description="compile the source" >
         <!-- Compile the java code from ${src} into ${build} -->
         <javac source="1.3" target="1.1" debug="true"
-               srcdir="${src}" destdir="${build}"/>
+               srcdir="${src}" destdir="${build}"
+               excludes="com/intel/bluetooth/DebugLog4jAppender.java"/>
     </target>
 
     <target name="jni-headers" depends="init"

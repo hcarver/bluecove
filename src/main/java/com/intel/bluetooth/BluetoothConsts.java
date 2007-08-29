@@ -31,7 +31,7 @@ import javax.bluetooth.UUID;
  * @author vlads
  *
  */
-public class BluetoothConsts {
+public abstract class BluetoothConsts {
 
 	public static final String SHORT_UUID_BASE = "00001000800000805F9B34FB";
 	
@@ -62,6 +62,10 @@ public class BluetoothConsts {
 	public static final int TCP_OBEX_DEFAULT_PORT = 650;
 	
 	static Hashtable obexUUIDs = new Hashtable();
+	
+	private BluetoothConsts() {
+		
+	}
 	
 	private static void addObex(int uuid) {
 		UUID u = new UUID(uuid);

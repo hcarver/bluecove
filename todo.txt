@@ -12,15 +12,16 @@ The list of functionality that can be implemented or investigation should be don
 
 * Bluetooth TOSHIBA Stack (C++)
 
-* Complete OBEX implementation (Java)
+* Complete OBEX implementation (Java)  DONE 95%
 
-* Security (authenticate and encrypt). (C++/Java)
+* Security (authenticate and encrypt). (C++/Java)  DONE 70%
 
 * Connection timeouts. (C++/Java)
 
-* bluecove-log4j redirection of Bluecove logs to log4j framework - separate module.
+* DONE
+  redirection of Bluecove logs to log4j framework - same module.
   Should be integrated in bluecove using DebugLog.LoggerAppender interface.
-  Main bluecove DebugLog will try to create a class "net.sf.bluecove.log4j.LoggerAppender" during intialization adn use it if avalbe in classpath.
+  Main bluecove DebugLog will try to create a class "com.intel.bluetooth.DebugLog4jAppender" during intialization and use it if log4j available in classpath.
 
 * bluecove-jmx monitoring of connections and other stats using JMX - separate module.
   Interfaces should be created in Main bluecove

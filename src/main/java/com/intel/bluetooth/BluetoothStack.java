@@ -43,18 +43,18 @@ public interface BluetoothStack {
 	
 	/**
 	 * Used to verify native library version.
-	 * versionMajor * 10000 + versionMinor * 100 + versionBuild  
-	 * @return Version number in decimal presentation. e.g. 20304  for version 2.3.4
+	 * versionMajor1 * 1000000 + versionMajor2 * 10000 + versionMinor * 100 + versionBuild
+	 * @return Version number in decimal presentation. e.g. 2030407  for version 2.3.4 build 7
 	 */
 	public int getLibraryVersion();
 	
 	/**
 	 * Used if OS Supports multiple Bluetooth stacks  
-	 * 0x01 winsock
-	 * 0x02 widcomm
-	 * 0x04 bluesoleil
-	 * 0x08 BlueZ
-	 * 0x10 OS X stack?
+	 * 0x01 winsock;
+	 * 0x02 widcomm;
+	 * 0x04 bluesoleil;
+	 * 0x08 BlueZ;
+	 * 0x10 OS X stack;
 	 * 
 	 * @return stackID
 	 */

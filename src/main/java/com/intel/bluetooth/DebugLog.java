@@ -26,7 +26,10 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * BlueCove log system. If enabled "-Dbluecove.debug=true" System.out.println would be used for debug.
+ * BlueCove log system. 
+ * 
+ * If enabled "-Dbluecove.debug=true" System.out.println would be used for debug.
+ * Alternatively if log4j is available in classpath Bluecove log would be redirected to log4j and can be enable using log4j configuration. 
  * 
  * @author vlads
  *
@@ -49,9 +52,10 @@ public abstract class DebugLog {
 
 	private static boolean initialized = false;
 	
+	private static boolean logRedirected = false;
+	
 	private static final String FQCN = DebugLog.class.getName();
 	
-	//private static final Set fqcnSet = new HashSet();
 	private static final Vector fqcnSet = new Vector(); 
 	
 	private static boolean java13 = false;
@@ -68,6 +72,10 @@ public abstract class DebugLog {
 		public void appendLog(int level, String message, Throwable throwable);
 	}
 
+	public static interface LoggerAppenderExt extends LoggerAppender {
+		public boolean isLogEnabled(int level);
+	}
+	
 	static {
 		fqcnSet.addElement(FQCN);
 	}
@@ -76,13 +84,26 @@ public abstract class DebugLog {
 		
 	}
 	
-	private static void initialize() {
+	private synchronized static void initialize() {
+		if (initialized) {
+			return;
+		}
 		initialized = true;
 		String d = System.getProperty("bluecove.debug");
 		debugEnabled = ((d != null) && (d.equalsIgnoreCase("true") || d.equalsIgnoreCase("1")));
 		if (debugEnabled && debugCompiledOut) {
 			debugEnabled = false;
 			System.err.println("BlueCove debug functions have been Compiled Out");
+		}
+		try {
+			LoggerAppenderExt log4jAppender = (LoggerAppenderExt)Class.forName("com.intel.bluetooth.DebugLog4jAppender").newInstance();
+			System.out.println("BlueCove log redirected to log4j");
+			addAppender(log4jAppender);
+			if (log4jAppender.isLogEnabled(DEBUG)) {
+				debugEnabled = true;
+			}
+			logRedirected = true;
+		} catch (Throwable e) {
 		}
 	}
 	
@@ -94,8 +115,9 @@ public abstract class DebugLog {
 	}
 	
 	public static void setDebugEnabled(boolean debugEnabled) {
-		//boolean initialized = DebugLog.initialized;
-		initialize();
+		if (!initialized) {
+			initialize();
+		}
 		if (debugEnabled && debugCompiledOut) {
 			debugEnabled = false;
 			System.err.println("BlueCove debug functions have been Compiled Out");
@@ -129,7 +151,7 @@ public abstract class DebugLog {
 			if (!UtilsJavaSE.javaSECompiledOut) {
 				if (!UtilsJavaSE.ibmJ9midp) {
 					t.printStackTrace(System.out);
-				} else {
+				} else if (!logRedirected) {
 					t.printStackTrace();
 				}
 			} else {
@@ -261,7 +283,7 @@ public abstract class DebugLog {
 			if (!UtilsJavaSE.javaSECompiledOut) {
 				if (!UtilsJavaSE.ibmJ9midp) {
 					t.printStackTrace(System.out);
-				} else {
+				} else if (!logRedirected) {
 					t.printStackTrace();
 				}
 			} else {
@@ -285,7 +307,7 @@ public abstract class DebugLog {
 		if (!UtilsJavaSE.javaSECompiledOut) {
 			if (!UtilsJavaSE.ibmJ9midp) {
 				t.printStackTrace(System.out);
-			} else {
+			} else if (!logRedirected) {
 				t.printStackTrace();
 			}
 		} else {
@@ -329,6 +351,9 @@ public abstract class DebugLog {
     }
 	
 	private static void log(String message, String va1, String va2) {
+		if (logRedirected) {
+			return;
+		}
 		try {
 			Calendar calendar = Calendar.getInstance();
 		    calendar.setTime(new Date(System.currentTimeMillis()));
@@ -353,7 +378,7 @@ public abstract class DebugLog {
 	}
 	
 	private static void printLocation() {
-		if (java13) {
+		if (java13 || logRedirected) {
 			return;
 		}
 		try {
