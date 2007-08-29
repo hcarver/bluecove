@@ -37,10 +37,19 @@ import javax.bluetooth.UUID;
  */
 public abstract class Utils {
 
-	private static final String blueCoveImplPackage = BlueCoveImpl.class.getPackage().getName();
+	private static final String blueCoveImplPackage = getPackage(BlueCoveImpl.class.getName());
 	
 	private Utils() {
 		
+	}
+	
+	private static String getPackage(String className) {
+		int pStart = className.lastIndexOf('.');
+		if (pStart == -1) {
+			return "";
+		} else {
+			return className.substring(0, pStart);
+		}
 	}
 	
 	public static byte[] UUIDToByteArray(String uuidStringValue) {
