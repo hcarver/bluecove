@@ -22,8 +22,6 @@ package com.intel.bluetooth.obex;
 
 import java.io.IOException;
 
-import com.intel.bluetooth.DebugLog;
-
 import junit.framework.TestCase;
 
 public class OBEXUtilsTest extends TestCase {
@@ -55,7 +53,6 @@ public class OBEXUtilsTest extends TestCase {
 	}
 	
 	public void testUTF() throws IOException {
-		DebugLog.setDebugEnabled(true);
 		String value = "BlueCove";
 		assertEquals("UTF16 ASCI String", value, new String(OBEXUtils.getUTF16BytesSimple(value), "UTF-16BE"));
 		assertEquals("UTF16 ASCI String", value, OBEXUtils.newStringUTF16Simple(OBEXUtils.getUTF16Bytes(value)));

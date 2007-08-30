@@ -487,12 +487,14 @@
             <build>
                 <plugins>
 
-                    <!-- Ignore unit test Failure for now -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                            <testFailureIgnore>true</testFailureIgnore>
+                            <testFailureIgnore>false</testFailureIgnore>
+                            <excludes>
+                                <exclude>**/Native*.*</exclude>
+                            </excludes>
                         </configuration>
                     </plugin>
 

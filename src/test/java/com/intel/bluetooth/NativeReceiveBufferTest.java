@@ -28,7 +28,7 @@ import java.util.Random;
  * @author vlads
  *
  */
-public class ReceiveBufferTest extends NativeTestCase {
+public class NativeReceiveBufferTest extends NativeTestCase {
 	
 	final static int TEST_BUFFER_SIZE = 4 * 2 * 10;
 	

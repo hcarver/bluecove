@@ -22,7 +22,7 @@ package com.intel.bluetooth;
 
 import javax.bluetooth.UUID;
 
-public class ConversionTest extends NativeTestCase {
+public class NativeConversionTest extends NativeTestCase {
 
 	private void verifyUUID(final String uuidString) {
 		UUID uuid = new UUID(uuidString, false);
