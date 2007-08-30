@@ -131,3 +131,7 @@
     * Added some docs
     * Added the method setDeviceServiceClasses(int service_telephony) in
         javax.bluetooth.ServiceRecord for compatibility with Benhui example.
+
+* Beginning
+
+    2004 James Scott, Eben Upton and Christophe Diot at Intel Research Cambridge

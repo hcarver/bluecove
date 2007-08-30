@@ -1,0 +1,12 @@
+BlueCove was written and maintained by:
+
+ 2004 James Scott, Eben Upton and Christophe Diot at Intel Research Cambridge
+ 2005 Denis Labaye
+ 2006 Paul Totterman
+ 2007 Vlad Skarzhevskyy
+
+Important bug fixes/reports and other suggestions from:
+ Kobus Grobler
+ Hakan Lager
+ Eric Wagner (Initial OS X)
+ Remco Poortinga
