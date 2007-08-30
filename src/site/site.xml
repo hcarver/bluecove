@@ -6,12 +6,14 @@
     <publishDate position="left" format="MM-dd-yyyy HH:mm z 'GMT'Z" />
 
     <bannerLeft>
-            <name>BlueCove</name>
+        <name>BlueCove</name>
+        <src>logo.png</src>
+        <href>http://bluecove.sourceforge.net/</href>
     </bannerLeft>
 
     <bannerRight>
         <name>Sourceforge</name>
-        <src>http://sourceforge.net/sflogo.php?group_id=114020&amp;amp;type=4</src>
+        <src>http://sourceforge.net/sflogo.php?group_id=114020&amp;amp;type=2</src>
         <href>http://sourceforge.net/projects/bluecove/</href>
     </bannerRight>
 
