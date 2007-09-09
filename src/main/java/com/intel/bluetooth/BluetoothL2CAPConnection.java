@@ -35,19 +35,20 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 	
 	protected int securityOpt;
 	
-	RemoteDevice remoteDevice;
+	private RemoteDevice remoteDevice;
 	
-	protected boolean closing = false;
+	private boolean isClosed;
 	
 	protected BluetoothL2CAPConnection(long handle) {
 		this.handle = handle;
+		this.isClosed = false;
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
 	 */
 	public long getRemoteAddress() throws IOException {
-		if (closing) {
+		if (isClosed) {
 			throw new IOException("Connection closed");
 		}
 		return BlueCoveImpl.instance().getBluetoothStack().l2RemoteAddress(handle);
@@ -57,7 +58,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 	 * @see javax.bluetooth.L2CAPConnection#getReceiveMTU()
 	 */
 	public int getReceiveMTU() throws IOException {
-		if (closing) {
+		if (isClosed) {
 			throw new IOException("Connection closed");
 		}
 		return BlueCoveImpl.instance().getBluetoothStack().l2GetReceiveMTU(handle);
@@ -67,7 +68,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 	 * @see javax.bluetooth.L2CAPConnection#getTransmitMTU()
 	 */
 	public int getTransmitMTU() throws IOException {
-		if (closing) {
+		if (isClosed) {
 			throw new IOException("Connection closed");
 		}
 		return BlueCoveImpl.instance().getBluetoothStack().l2GetTransmitMTU(handle);
@@ -77,7 +78,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 	 * @see javax.bluetooth.L2CAPConnection#ready()
 	 */
 	public boolean ready() throws IOException {
-		if (closing) {
+		if (isClosed) {
 			throw new IOException("Connection closed");
 		}
 		return BlueCoveImpl.instance().getBluetoothStack().l2Ready(handle);
@@ -87,7 +88,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 	 * @see javax.bluetooth.L2CAPConnection#receive(byte[])
 	 */
 	public int receive(byte[] inBuf) throws IOException {
-		if (closing) {
+		if (isClosed) {
 			throw new IOException("Connection closed");
 		}
 		if (inBuf == null) {
@@ -100,7 +101,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 	 * @see javax.bluetooth.L2CAPConnection#send(byte[])
 	 */
 	public void send(byte[] data) throws IOException {
-		if (closing) {
+		if (isClosed) {
 			throw new IOException("Connection closed");
 		}
 		if (data == null) {
@@ -115,11 +116,21 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {
-		if (!closing) {
-			closing = true;
-			long h = handle;
+		if (isClosed) {
+			return;
+		}
+
+		isClosed = true;
+		DebugLog.debug("closing L2CAP Connection");
+		
+		// close() can be called safely in another thread 
+		long synchronizedHandle;
+		synchronized (this) {
+			synchronizedHandle = handle;
 			handle = 0;
-			closeConnectionHandle(h);
+		}
+		if (synchronizedHandle != 0) {
+			closeConnectionHandle(synchronizedHandle);
 		}
 	}
 	

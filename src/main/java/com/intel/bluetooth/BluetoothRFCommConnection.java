@@ -29,15 +29,28 @@ import java.io.OutputStream;
 import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.StreamConnection;
 
+/**
+ * All StreamConnections have one underlying InputStream and one OutputStream.
+ * Opening a DataInputStream counts as opening an InputStream and opening a
+ * DataOutputStream counts as opening an OutputStream. Trying to open another
+ * InputStream or OutputStream causes an IOException. Trying to open the
+ * InputStream or OutputStream after they have been closed causes an
+ * IOException.
+ * <p>
+ * The methods of StreamConnection are not synchronized. The only stream method
+ * that can be called safely in another thread is close.
+ * 
+ * 
+ */
 abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothConnectionAccess {
 	
 	protected volatile long handle;
 
-	volatile protected BluetoothInputStream in;
+	private BluetoothRFCommInputStream in;
 
-	volatile protected BluetoothOutputStream out;
+	private BluetoothRFCommOutputStream out;
 
-	protected boolean closing;
+	private boolean isClosed;
 
 	protected int securityOpt;
 	
@@ -45,109 +58,149 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	
 	protected BluetoothRFCommConnection(long handle) {
 		this.handle = handle;
+		this.isClosed = false;
 	}
 
 	abstract void closeConnectionHandle(long handle) throws IOException;
 	
 	/**
-	 * Implemenation specific
-	 * The idea is to Close Connection 
-	 * 1. When in and out was closed
-	 * 2. When StreamConnection.close() called.	(This was not closing connection in BlueCove v1.2.3)
+	 * Close the connection.
+	 * <p> 
+	 * Streams derived from the connection may be open when close() method is called.
+	 * Any open streams will cause the connection to be held open until they
+	 * themselves are closed. In this latter case access to the open streams is
+	 * permitted, but access to the connection is not.
 	 * 
-	 * Also Connection.close() will close Input/OutputStream
 	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
-	void closeConnection() throws IOException {
-		if ((in == null && out == null) || (closing)) {
-			closing = true;
-			if (handle != 0) {
-				DebugLog.debug("closing FRCOMM Connection");
-				synchronized (this) {
-					long h = handle;
-					handle = 0;
-					if (h != 0) {
-						closeConnectionHandle(h);
-					}
-				}
+	void streamClosed() throws IOException {
+		// Closing streams does not close connection
+		if (!isClosed) {
+			return;
+		}
+		
+		// Any open streams will cause the connection to be held open
+		if ((in != null) && (!in.isClosed())) {
+			return;
+		}
+		
+		if ((out != null) && (!out.isClosed())) {
+			return;
+		}
+		
+		if (handle != 0) {
+			DebugLog.debug("closing RFCOMM Connection");
+			// close() can be called safely in another thread
+			long synchronizedHandle;
+			synchronized (this) {
+				synchronizedHandle = handle;
+				handle = 0;
 			}
-			// This will call this function again but will do nothing.
-			// Function is not synchronized so we catch NullPointerException
-			if (in != null) {
-				try {
-					in.close();
-				} catch (NullPointerException ignore) {
-				}
-				in = null;
-			}
-			if (out != null) {
-				try {
-					out.close();
-				} catch (NullPointerException ignore) {
-				}
-				out = null;
+			if (synchronizedHandle != 0) {
+				closeConnectionHandle(synchronizedHandle);
 			}
 		}
 	}
 	
-	public long getRemoteAddress() throws IOException {
-		if (closing) {
-			throw new IOException("Connection closed");
-		}
-		return BlueCoveImpl.instance().getBluetoothStack().getConnectionRfRemoteAddress(handle);
-	}
-
-	/*
-	 * Open and return an input stream for a connection. Returns: An input
-	 * stream Throws: IOException - If an I/O error occurs
+    /**
+	 * Open and return an input stream for a connection.
+	 * <p>
+	 * Trying to open another InputStream or OutputStream causes an IOException.
+	 * <p>
+	 * Trying to open the InputStream or OutputStream after they have been
+	 * closed causes an IOException.
+	 * 
+	 * @return An input stream
+	 * 
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
 	public InputStream openInputStream() throws IOException {
-		if (closing) {
-			throw new IOException();
+		if (isClosed) {
+			throw new IOException("RFCOMM Connection is already closed");
 		} else {
 			if (in == null) {
-				in = new BluetoothInputStream(this);
+				in = new BluetoothRFCommInputStream(this);
+				return in;
+			} else if (in.isClosed()) {
+				throw new IOException("Stream cannot be reopened");
+			} else {
+				throw new IOException("Another InputStream already opened");
 			}
-			return in;
 		}
 	}
 
-	/*
-	 * Open and return a data input stream for a connection. Returns: An input
-	 * stream Throws: IOException - If an I/O error occurs
+    /**
+	 * Open and return an data input stream for a connection.
+	 * <p>
+	 * Opening a DataInputStream counts as opening an InputStream
+	 * <p>
+	 * Trying to open another InputStream or OutputStream causes an IOException.
+	 * <p>
+	 * Trying to open the InputStream or OutputStream after they have been
+	 * closed causes an IOException.
+	 * 
+	 * @return An input stream
+	 * 
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
-
 	public DataInputStream openDataInputStream() throws IOException {
 		return new DataInputStream(openInputStream());
 	}
 
-	/*
-	 * Open and return an output stream for a connection. Returns: An output
-	 * stream Throws: IOException - If an I/O error occurs
+    /**
+	 * Open and return an output stream for a connection.
+	 * <p>
+	 * Trying to open another InputStream or OutputStream causes an IOException.
+	 * <p>
+	 * Trying to open the InputStream or OutputStream after they have been
+	 * closed causes an IOException.
+	 * 
+	 * @return An output stream
+	 * 
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
-
 	public OutputStream openOutputStream() throws IOException {
-		if (closing) {
-			throw new IOException();
+		if (isClosed) {
+			throw new IOException("RFCOMM Connection is already closed");
 		} else {
 			if (out == null) {
-				out = new BluetoothOutputStream(this);
+				out = new BluetoothRFCommOutputStream(this);
+				return out;
+			} else if (out.isClosed()) {
+				throw new IOException("Stream cannot be reopened");
+			} else {
+				throw new IOException("Another OutputStream already opened");
 			}
-			return out;
 		}
 	}
 
-	/*
-	 * Open and return a data output stream for a connection. Returns: An output
-	 * stream Throws: IOException - If an I/O error occurs
+    /**
+	 * Open and return an data output stream for a connection.
+	 * <p>
+	 * Opening a DataOutputStream counts as opening an OutputStream
+	 * <p>
+	 * Trying to open another InputStream or OutputStream causes an IOException.
+	 * <p>
+	 * Trying to open the InputStream or OutputStream after they have been
+	 * closed causes an IOException.
+	 * 
+	 * @return An output stream
+	 * 
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
-
 	public DataOutputStream openDataOutputStream() throws IOException {
 		return new DataOutputStream(openOutputStream());
 	}
 
-	/*
-	 * Close the connection. When a connection has been closed, access to any of
+	/**
+	 * Close the connection. 
+	 * <p>
+	 * When a connection has been closed, access to any of
 	 * its methods except this close() will cause an an IOException to be
 	 * thrown. Closing an already closed connection has no effect. Streams
 	 * derived from the connection may be open when method is called. Any open
@@ -155,12 +208,14 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	 * are closed. In this latter case access to the open streams is permitted,
 	 * but access to the connection is not.
 	 * 
-	 * Throws: IOException - If an I/O error occurs
+	 * @throws IOException If an I/O error occurs
 	 */
-
 	public void close() throws IOException {
-		closing = true;
-		closeConnection();
+		if (isClosed) {
+			return;
+		}
+		isClosed = true;
+		streamClosed();
 	}
 
 	protected void finalize() {
@@ -170,14 +225,33 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
+	 */
 	public int getSecurityOpt() {
 		return this.securityOpt;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
+	 */
+	public long getRemoteAddress() throws IOException {
+		if (isClosed) {
+			throw new IOException("Connection closed");
+		}
+		return BlueCoveImpl.instance().getBluetoothStack().getConnectionRfRemoteAddress(handle);
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteDevice()
+	 */
 	public RemoteDevice getRemoteDevice() {
 		return this.remoteDevice;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#setRemoteDevice(javax.bluetooth.RemoteDevice)
+	 */
 	public void setRemoteDevice(RemoteDevice remoteDevice) {
 		this.remoteDevice = remoteDevice;
 	}

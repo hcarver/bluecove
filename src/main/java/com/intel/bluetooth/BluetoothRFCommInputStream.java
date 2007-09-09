@@ -23,11 +23,11 @@ package com.intel.bluetooth;
 import java.io.IOException;
 import java.io.InputStream;
 
-class BluetoothInputStream extends InputStream {
+class BluetoothRFCommInputStream extends InputStream {
 	
 	volatile private BluetoothRFCommConnection conn;
 
-	public BluetoothInputStream(BluetoothRFCommConnection conn) {
+	public BluetoothRFCommInputStream(BluetoothRFCommConnection conn) {
 		this.conn = conn;
 	}
 
@@ -128,14 +128,26 @@ class BluetoothInputStream extends InputStream {
 		}
 	}
 
+	/**
+	 * Closes this input stream and releases any system resources associated with the stream.
+	 * <p>
+	 * The general contract of close is that it closes the stream. A
+	 * closed stream cannot perform output operations and cannot be reopened.
+	 * 
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
 	public void close() throws IOException {
 		// Function is not synchronized
 		BluetoothRFCommConnection c = conn;
 		if (c != null) {
-			c.in = null;
 			conn = null;
-			c.closeConnection();
+			c.streamClosed();
 		}
+	}
+	
+	boolean isClosed() {
+		return this.conn == null;
 	}
 	
 }
