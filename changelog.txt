@@ -2,6 +2,9 @@
 
 * 2.0.2 to be released 2007-10-??
 
+    2007-09-09
+    * connection and stream close() functions will work according to specification.
+
     2007-09-04
     * for J9 -Dmicroedition.connection.pkgs=com.intel.bluetooth is optonal when bluecove.jar installed to "%J9_HOME%\lib\jclMidp20\ext\
 
