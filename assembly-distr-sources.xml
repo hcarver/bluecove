@@ -17,8 +17,9 @@
                 <exclude>src/main/resources/**</exclude>
                 <exclude>src/main/c/intelbth/Win32/**</exclude>
                 <exclude>src/main/c/intelbth/Pocket PC 2003 (ARMV4)/**</exclude>
-                <exclude>src/main/c/intelbth/com*.h</exclude>
+                <exclude>src/main/c/intelbth/com_*.h</exclude>
                 <exclude>.settings/**</exclude>
+                <exclude>**/Thumbs.db</exclude>
                 <exclude>**/*.log</exclude>
                 <exclude>**/*.ncb</exclude>
                 <exclude>**/*.opt</exclude>
