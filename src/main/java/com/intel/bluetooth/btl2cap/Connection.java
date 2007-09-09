@@ -61,8 +61,9 @@ public class Connection implements CreateConnection, L2CAPConnection, L2CAPConne
 	/* (non-Javadoc)
 	 * @see com.ibm.oti.connection.CreateConnection#setParameters2(java.lang.String, int, boolean)
 	 */
-	public void setParameters2(String spec, int access, boolean timeout) throws IOException {
+	public javax.microedition.io.Connection setParameters2(String spec, int access, boolean timeout) throws IOException {
 		setParameters(spec, access, timeout);
+		return this;
 	}
 
 	/* (non-Javadoc)

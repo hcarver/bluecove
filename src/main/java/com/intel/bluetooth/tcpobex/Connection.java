@@ -58,8 +58,9 @@ public class Connection implements CreateConnection, ClientSession, SessionNotif
 		impl = MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX + ":" + spec, access, timeout);
 	}
 
-	public void setParameters2(String spec, int access, boolean timeout) throws IOException {
+	public javax.microedition.io.Connection setParameters2(String spec, int access, boolean timeout) throws IOException {
 		setParameters(spec, access, timeout);
+		return this;
 	}
 	
 	public void close() throws IOException {

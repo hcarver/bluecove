@@ -52,7 +52,7 @@ public abstract class DebugLog {
 
 	private static boolean initialized = false;
 	
-	private static boolean logRedirected = false;
+	private static boolean debugInternalEnabled = false;
 	
 	private static final String FQCN = DebugLog.class.getName();
 	
@@ -89,20 +89,20 @@ public abstract class DebugLog {
 			return;
 		}
 		initialized = true;
-		String d = System.getProperty("bluecove.debug");
+		String d = BlueCoveImpl.getConfigProperty("bluecove.debug");
 		debugEnabled = ((d != null) && (d.equalsIgnoreCase("true") || d.equalsIgnoreCase("1")));
 		if (debugEnabled && debugCompiledOut) {
 			debugEnabled = false;
 			System.err.println("BlueCove debug functions have been Compiled Out");
 		}
+		debugInternalEnabled = debugEnabled;
 		try {
 			LoggerAppenderExt log4jAppender = (LoggerAppenderExt)Class.forName("com.intel.bluetooth.DebugLog4jAppender").newInstance();
 			System.out.println("BlueCove log redirected to log4j");
 			addAppender(log4jAppender);
 			if (log4jAppender.isLogEnabled(DEBUG)) {
-				debugEnabled = true;
+				debugEnabled = true || debugEnabled;
 			}
-			logRedirected = true;
 		} catch (Throwable e) {
 		}
 	}
@@ -124,6 +124,7 @@ public abstract class DebugLog {
 		} else {
 			BlueCoveImpl.instance().enableNativeDebug(debugEnabled);
 			DebugLog.debugEnabled = debugEnabled;
+			DebugLog.debugInternalEnabled = DebugLog.debugEnabled;
 		}
 	}
 	
@@ -151,7 +152,7 @@ public abstract class DebugLog {
 			if (!UtilsJavaSE.javaSECompiledOut) {
 				if (!UtilsJavaSE.ibmJ9midp) {
 					t.printStackTrace(System.out);
-				} else if (!logRedirected) {
+				} else if (debugInternalEnabled) {
 					t.printStackTrace();
 				}
 			} else {
@@ -283,7 +284,7 @@ public abstract class DebugLog {
 			if (!UtilsJavaSE.javaSECompiledOut) {
 				if (!UtilsJavaSE.ibmJ9midp) {
 					t.printStackTrace(System.out);
-				} else if (!logRedirected) {
+				} else if (debugInternalEnabled) {
 					t.printStackTrace();
 				}
 			} else {
@@ -307,7 +308,7 @@ public abstract class DebugLog {
 		if (!UtilsJavaSE.javaSECompiledOut) {
 			if (!UtilsJavaSE.ibmJ9midp) {
 				t.printStackTrace(System.out);
-			} else if (!logRedirected) {
+			} else if (debugInternalEnabled) {
 				t.printStackTrace();
 			}
 		} else {
@@ -351,7 +352,7 @@ public abstract class DebugLog {
     }
 	
 	private static void log(String message, String va1, String va2) {
-		if (logRedirected) {
+		if (!debugInternalEnabled) {
 			return;
 		}
 		try {
@@ -378,7 +379,7 @@ public abstract class DebugLog {
 	}
 	
 	private static void printLocation() {
-		if (java13 || logRedirected) {
+		if (java13 || !debugInternalEnabled) {
 			return;
 		}
 		try {

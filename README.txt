@@ -88,13 +88,18 @@ IBM J9 MIDP 2.0 Profile
     # Copy to `bluecove.jar` %J9_HOME%\lib\jclMidp20\ext directory
     # Copy all bluecove dlls to %J9_HOME%\bin directory or add -Dcom.ibm.oti.vm.bootstrap.library.path=%bluecove_dll_path%;%J9_HOME%\bin
     # run app "%J9_HOME%\bin\j9.exe" -jcl:midp20 -Dmicroedition.connection.pkgs=com.intel.bluetooth -cp target\bctest.jar "-jxe:%J9_HOME%\lib\jclMidp20\jclMidp20.jxe" target\bctest.jad
+    # -Dmicroedition.connection.pkgs=com.intel.bluetooth is optonal if you place bluecove.jar to ext directory (Since v2.0.2)
 
     Tested on
         # WebSphere Everyplace Micro Environment 5.7.2,	CLDC 1.1, MIDP 2.0 for Windows XP/X86
+        # WebSphere Everyplace Micro Environment 6.1.1,	CLDC 1.1, MIDP 2.0 for Windows XP/X86
 
 Debug
 
     If something goes wrong system property `-Dbluecove.debug=true` will enable debug prints in BlueCove code
+    If System property is not an option (e.g. when running MIDP application in emulator) create text file "bluecove.debug" containing one line 'true' and add this file to BlueCove.jar. (Since v2.0.2)
+
+    Bluecove log is redirected to log4j when log4j.jar is available in classpath. Debug can be enabled using log4j configuration. (Since v2.0.2)
 
 == Compilation ==
 

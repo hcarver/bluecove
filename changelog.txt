@@ -2,6 +2,9 @@
 
 * 2.0.2 to be released 2007-10-??
 
+    2007-09-04
+    * for J9 -Dmicroedition.connection.pkgs=com.intel.bluetooth is optonal when bluecove.jar installed to "%J9_HOME%\lib\jclMidp20\ext\
+
     2007-08-28
     * log4j integration, Bluecove log redirected to log4j when one is available in classpath
 
@@ -13,7 +16,7 @@
     * Review javadocs
 
     2007-07-22 Vlad Skarzhevskyy
-    * L2CAP imlementation, Only on WIDCOMM stack
+    * L2CAP implementation, Only on WIDCOMM stack
     * Bluetooth_1-1_005_TCK on WIDCOMM, Pass 322, Fail 3. (security not tested)
 
     2007-07-15 Vlad Skarzhevskyy

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.MicroeditionConnector;
 
 /**
@@ -76,6 +77,7 @@ public class Connector {
 	 */
 
 	public static Connection open(String name) throws IOException {
+		DebugLog.debug("open using BlueCove javax.microedition.io.Connector");
 		return MicroeditionConnector.open(name);
 	}
 

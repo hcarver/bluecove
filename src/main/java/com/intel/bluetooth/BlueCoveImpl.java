@@ -236,13 +236,13 @@ public class BlueCoveImpl {
 		}
 	}
 
-	String getConfigProperty(String key) {
+	static String getConfigProperty(String key) {
 		String value = (String)configProperty.get(key);
 		if (value == null) {
 			value = System.getProperty(key);
 		}
 		if (value == null) {
-			value = Utils.getResourceProperty(this, key);
+			value = Utils.getResourceProperty(BlueCoveImpl.class, key);
 		}
 		return value;
 	}

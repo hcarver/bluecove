@@ -129,9 +129,9 @@ public abstract class Utils {
 		}
 	}
 	
-	static String getResourceProperty(Object owner, String resourceName) {
+	static String getResourceProperty(Class owner, String resourceName) {
 		try {
-			String value = loadString(owner.getClass().getResourceAsStream("/" + resourceName));
+			String value = loadString(owner.getResourceAsStream("/" + resourceName));
 			if (value != null) {
 				int cr = value.indexOf('\n');
 				if (cr != -1) {

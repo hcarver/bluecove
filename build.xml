@@ -59,7 +59,7 @@
             </manifest>
             <fileset dir="${build}">
                 <include name="**/*.class"/>
-                <exclude name="com/ibm/**"/>
+                <exclude name="com/ibm/oti/connection/CreateConnection.class"/>
                 <exclude name="com/sun/cdc/io/ConnectionBaseInterface.class"/>
             </fileset>
             <fileset dir="${resources}">
