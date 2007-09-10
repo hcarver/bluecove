@@ -137,7 +137,9 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
 
 == Source ==
 
-Available as downloadable packages or at the Subversion repository. Organized in:
+Available as downloadable packages or at the Subversion repository http://bluecove.googlecode.com/svn/trunk/ or for each released version http://bluecove.googlecode.com/svn/tags/.
+
+Organized in:
 
   * *`src\main\c\intelbth`* - The native windows JNI dll
   * *`src\main\java`* - The implementation of JSR-82 with calls to intelbth
