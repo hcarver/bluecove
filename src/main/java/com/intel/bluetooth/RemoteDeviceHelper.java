@@ -221,6 +221,7 @@ public abstract class RemoteDeviceHelper {
 		switch (option) {
 		case DiscoveryAgent.PREKNOWN:
 			if (devicesCashed.size() == 0) {
+				// Spec: null if no devices meet the criteria
 				return null;
 			}
 			Vector devicesPaired = new Vector();
@@ -231,6 +232,7 @@ public abstract class RemoteDeviceHelper {
 				}
 			}
 			if (devicesPaired.size() == 0) {
+				// Spec: null if no devices meet the criteria
 				return null;
 			}
 			RemoteDevice[] pdevices = new RemoteDevice[devicesPaired.size()];
@@ -241,6 +243,7 @@ public abstract class RemoteDeviceHelper {
 			return pdevices;
 		case DiscoveryAgent.CACHED:
 			if (devicesCashed.size() == 0) {
+				// Spec: null if no devices meet the criteria
 				return null;
 			}
 			RemoteDevice[] devices = new RemoteDevice[devicesCashed.size()];
