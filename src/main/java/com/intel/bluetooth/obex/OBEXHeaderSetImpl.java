@@ -224,6 +224,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 	 */
 	public int[] getHeaderList() throws IOException {
 		if (headerValues.size() == 0) {
+			// Spec: null if no headers are available
 			return null;
 		}
 		int[] headerIDArray = new int[headerValues.size()];
