@@ -2,6 +2,9 @@
 
 * 2.0.2 to be released 2007-10-??
 
+    2007-10-04
+    * fixed initialization exceptions, e.g. BluetoothStateException when device is not read or no stack found
+
     2007-09-09
     * connection and stream close() functions will work according to specification.
 

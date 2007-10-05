@@ -155,14 +155,24 @@ void WIDCOMMStack::destroy(JNIEnv * env) {
 
 void WIDCOMMStack::throwExtendedBluetoothStateException(JNIEnv * env) {
 	LPCTSTR msg = NULL;
+	#ifndef WIDCOMM_CE30
+	if (!IsDeviceReady()) {
+		throwBluetoothStateException(env, "Bluetooth Device is not ready");
+		return;
+	}
+	#endif
 #ifndef _WIN32_WCE
 	WBtRc er = GetExtendedError();
+	if (er == WBT_SUCCESS) {
+		throwBluetoothStateException(env, "No errors in WIDCOMM stack");
+		return;
+	}
 	msg = WBtRcToString(er);
 #endif //! _WIN32_WCE
 	if (msg != NULL) {
 		throwBluetoothStateExceptionExt(env, "WIDCOMM error[%s]", msg);
 	} else {
-		throwBluetoothStateException(env, "No error code");
+		throwBluetoothStateException(env, "No WIDCOMM error code");
 	}
 }
 

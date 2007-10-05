@@ -113,6 +113,11 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	private native boolean isStackServerUp();
 
+	private void verifyDeviceReady() throws BluetoothStateException {
+		if (!isLocalDevicePowerOn()) {
+			throw new BluetoothStateException("Bluetooth Device is not ready");
+		}
+	}
 	/**
 	 * There are no functions to find WIDCOMM discoverable status.
 	 */
@@ -287,7 +292,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
 			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
-		// Retrive all Records, Filter here in Java
+		// Retrieve all Records, Filter here in Java
 		synchronized (BluetoothStackWIDCOMM.class) {
 			byte[] uuidValue = Utils.UUIDToByteArray(BluetoothConsts.L2CAP_PROTOCOL_UUID);
 			long[] handles;
@@ -421,7 +426,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	private native long connectionRfOpenClientConnectionImpl(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
 
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
-	    return connectionRfOpenClientConnectionImpl(params.address, params.channel, params.authenticate,params.encrypt);
+		verifyDeviceReady();
+		return connectionRfOpenClientConnectionImpl(params.address, params.channel, params.authenticate,params.encrypt);
     }
 
 	public native void closeRfCommPort(long handle) throws IOException;
@@ -455,6 +461,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	private native int rfServerSCN(long handle) throws IOException;
 
 	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException {
+		verifyDeviceReady();
 		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
 		byte[] uuidValue2 = params.obex?null:Utils.UUIDToByteArray(BluetoothConsts.SERIAL_PORT_UUID);
 		long handle = rfServerOpenImpl(uuidValue, uuidValue2, params.obex, params.name, params.authenticate, params.encrypt);
@@ -609,6 +616,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams, int, int)
 	 */
 	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
+		verifyDeviceReady();
 		validateMTU(receiveMTU, transmitMTU);
 		return l2OpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt, receiveMTU, transmitMTU);
 	}
@@ -626,6 +634,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams, int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
+		verifyDeviceReady();
 		validateMTU(receiveMTU, transmitMTU);
 		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
 		long handle = l2ServerOpenImpl(uuidValue, params.authenticate, params.encrypt, params.name, receiveMTU, transmitMTU);
