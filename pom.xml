@@ -215,6 +215,7 @@
                 <configuration>
                     <skip>flase</skip>
                     <testFailureIgnore>false</testFailureIgnore>
+                    <forkMode>pertest</forkMode>
                     <includes>
                         <include>**/*Test.*</include>
                         <include>**/*Tests.*</include>
