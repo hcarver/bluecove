@@ -20,38 +20,14 @@
  */
 package com.intel.bluetooth;
 
-import com.intel.bluetooth.DebugLog.LoggerAppender;
-
-import junit.framework.TestCase;
-
 /**
  * @author vlads
  *
  */
-public class NativeDebugTest extends TestCase implements LoggerAppender {
-	
-	protected void setUp() throws Exception {
-		DebugLog.addAppender(this);
-	}
-	
-	protected void tearDown() throws Exception {
-		DebugLog.removeAppender(this);
-	}
-	
-	String lastMessage;
-	
-	public void testDebug() {
-		BluetoothStack anyStack = new BluetoothStackMicrosoft();
-		anyStack.enableNativeDebug(DebugLog.class, true);
-		DebugLog.setDebugEnabled(true);
-		
-		NativeTestInterfaces.testDebug("test-message");
-		assertNotNull("Debug recived", lastMessage);
-		assertTrue("Debug {" + lastMessage + "}", lastMessage.startsWith("message[test-message]"));
-	}
+public class NativeExceptionWIDCOMMTest extends NativeExceptionTest {
 
-	public void appendLog(int level, String message, Throwable throwable) {
-		lastMessage = message;
+	protected boolean needDllWIDCOMM() {
+		return true;
 	}
 	
 }

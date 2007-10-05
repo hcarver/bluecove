@@ -79,6 +79,10 @@ SOURCE=.\common.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\commonTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\WIDCOMMStack.cpp
 # End Source File
 # Begin Source File
@@ -100,6 +104,10 @@ SOURCE=.\com_intel_bluetooth_BluetoothStackBlueSoleil.h
 # Begin Source File
 
 SOURCE=.\com_intel_bluetooth_BluetoothStackWIDCOMM.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\com_intel_bluetooth_NativeTestInterfaces.h
 # End Source File
 # Begin Source File
 

@@ -38,17 +38,17 @@ public class NativeReceiveBufferTest extends NativeTestCase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		bufferHandler = BluetoothPeer.testReceiveBufferCreate(TEST_BUFFER_SIZE);
+		bufferHandler = NativeTestInterfaces.testReceiveBufferCreate(TEST_BUFFER_SIZE);
 	}
 	
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (bufferHandler != 0) {
-			if (BluetoothPeer.testReceiveBufferIsCorrupted(bufferHandler)) {
+			if (NativeTestInterfaces.testReceiveBufferIsCorrupted(bufferHandler)) {
 				System.err.println("Buffer IsCorrupted");
 				System.exit(1);
 			}
-			BluetoothPeer.testReceiveBufferClose(bufferHandler);
+			NativeTestInterfaces.testReceiveBufferClose(bufferHandler);
 		}
 	}
 
@@ -65,14 +65,14 @@ public class NativeReceiveBufferTest extends NativeTestCase {
 	}
 	private byte[] verifyWrite(int writeSize, int expectedWritten) {
 		byte data[] = createData(writeSize);
-		assertEquals("write", expectedWritten, BluetoothPeer.testReceiveBufferWrite(bufferHandler, data));
-		assertEquals("available", expectedWritten, BluetoothPeer.testReceiveBufferAvailable(bufferHandler));
+		assertEquals("write", expectedWritten, NativeTestInterfaces.testReceiveBufferWrite(bufferHandler, data));
+		assertEquals("available", expectedWritten, NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler));
 		return data;
 	}
 	
 	private void verifyRead(int readSize, int expectedReadSize, byte expectedReadData[], int off) {
 		byte rcv[] = new byte[readSize];
-		int recieved = BluetoothPeer.testReceiveBufferRead(bufferHandler, rcv);
+		int recieved = NativeTestInterfaces.testReceiveBufferRead(bufferHandler, rcv);
 		assertEquals("recieved len from buffer", expectedReadSize, recieved);
 		for (int i = 0; i < recieved; i++) {
 			assertEquals("recieved data buffer["+i+"]", rcv[i], expectedReadData[i + off]);			
@@ -81,8 +81,8 @@ public class NativeReceiveBufferTest extends NativeTestCase {
 	private void verifyWriteRead(int writeSize, int expectedWritten, int readSize, int expectedReadSize) {
 		byte data[] = verifyWrite(writeSize, expectedWritten);
 		verifyRead(readSize, expectedReadSize, data, 0);
-		assertEquals("available", 0, BluetoothPeer.testReceiveBufferAvailable(bufferHandler));
-		assertEquals("read not available", -1, BluetoothPeer.testReceiveBufferRead(bufferHandler));
+		assertEquals("available", 0, NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler));
+		assertEquals("read not available", -1, NativeTestInterfaces.testReceiveBufferRead(bufferHandler));
 	}
 	
 	public void testWriteReadSimple() {
@@ -91,7 +91,7 @@ public class NativeReceiveBufferTest extends NativeTestCase {
 	
 	public void testWriteReadOverflow() {
 		verifyWriteRead(TEST_BUFFER_SIZE * 2, TEST_BUFFER_SIZE, TEST_BUFFER_SIZE * 2, TEST_BUFFER_SIZE);
-		assertEquals("IsOverflown", true, BluetoothPeer.testReceiveBufferIsOverflown(bufferHandler));
+		assertEquals("IsOverflown", true, NativeTestInterfaces.testReceiveBufferIsOverflown(bufferHandler));
 	}
 	
 	public void testWriteReadMoreThanSize() {
@@ -105,12 +105,12 @@ public class NativeReceiveBufferTest extends NativeTestCase {
 		final int size = TEST_BUFFER_SIZE * 3;
 		byte data[] = createData(size);
 		for (int i = 0; i < size; i++) {
-			int writen = BluetoothPeer.testReceiveBufferWrite(bufferHandler, new byte[] { data[i] });
+			int writen = NativeTestInterfaces.testReceiveBufferWrite(bufferHandler, new byte[] { data[i] });
 			assertEquals("writen["+i+"]", 1,  writen);
-			assertEquals("available["+i+"]", 1, BluetoothPeer.testReceiveBufferAvailable(bufferHandler));
-			int b = BluetoothPeer.testReceiveBufferRead(bufferHandler);
+			assertEquals("available["+i+"]", 1, NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler));
+			int b = NativeTestInterfaces.testReceiveBufferRead(bufferHandler);
 			assertEquals("recieved data buffer["+i+"]", data[i], (byte)b);
-			assertEquals("available["+i+"]", 0, BluetoothPeer.testReceiveBufferAvailable(bufferHandler));
+			assertEquals("available["+i+"]", 0, NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler));
 		}
 	}
 	
@@ -126,25 +126,25 @@ public class NativeReceiveBufferTest extends NativeTestCase {
 		byte data[] = createData(size);
 		int w;
 		for (w = 0; w < shift; w++) {
-			int writen = BluetoothPeer.testReceiveBufferWrite(bufferHandler, new byte[] { data[w] });
+			int writen = NativeTestInterfaces.testReceiveBufferWrite(bufferHandler, new byte[] { data[w] });
 			assertEquals("writen["+w+"]", 1,  writen);
-			assertEquals("available["+w+"]", w + 1, BluetoothPeer.testReceiveBufferAvailable(bufferHandler));
+			assertEquals("available["+w+"]", w + 1, NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler));
 		}
 		int r;
 		for (r = 0; r < size - shift; r++) {
-			int b = BluetoothPeer.testReceiveBufferRead(bufferHandler);
+			int b = NativeTestInterfaces.testReceiveBufferRead(bufferHandler);
 			assertEquals("recieved data buffer["+r+"]", data[r], (byte)b);
-			assertEquals("available shift["+r+"]", shift - 1, BluetoothPeer.testReceiveBufferAvailable(bufferHandler));
+			assertEquals("available shift["+r+"]", shift - 1, NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler));
 
 			w = r + shift;
-			int writen = BluetoothPeer.testReceiveBufferWrite(bufferHandler, new byte[] { data[w] });
+			int writen = NativeTestInterfaces.testReceiveBufferWrite(bufferHandler, new byte[] { data[w] });
 			assertEquals("writen["+w+"]", 1,  writen);
-			assertEquals("available["+w+"]", shift, BluetoothPeer.testReceiveBufferAvailable(bufferHandler));
+			assertEquals("available["+w+"]", shift, NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler));
 		}
 		for (; r < size; r++) {
-			int b = BluetoothPeer.testReceiveBufferRead(bufferHandler);
+			int b = NativeTestInterfaces.testReceiveBufferRead(bufferHandler);
 			assertEquals("recieved data buffer["+r+"]", data[r], (byte)b);
-			assertEquals("available shift["+r+"]", size - r - 1, BluetoothPeer.testReceiveBufferAvailable(bufferHandler));
+			assertEquals("available shift["+r+"]", size - r - 1, NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler));
 		}
 	}
 	
@@ -159,10 +159,10 @@ public class NativeReceiveBufferTest extends NativeTestCase {
 		int parts = 8;
 		int size = TEST_BUFFER_SIZE / parts;
 		for (int i = 0; i < parts; i++) {
-			assertEquals("available ["+i+"]", size * (parts -i), BluetoothPeer.testReceiveBufferAvailable(bufferHandler));
+			assertEquals("available ["+i+"]", size * (parts -i), NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler));
 			verifyRead(size, size, data, size * i);
 		}
-		assertEquals("available", 0, BluetoothPeer.testReceiveBufferAvailable(bufferHandler));
+		assertEquals("available", 0, NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler));
 		for (int i = 0; i < 5; i++) {
 			verifyWriteRead(size, size, size, size);
 		}
@@ -172,7 +172,7 @@ public class NativeReceiveBufferTest extends NativeTestCase {
 		final int size = TEST_BUFFER_SIZE;
 		byte data[] = verifyWrite(size, size);
 		verifyRead(10, 10, data, 0);
-		assertEquals("skip 5", 5, BluetoothPeer.testReceiveBufferSkip(bufferHandler, 5));
+		assertEquals("skip 5", 5, NativeTestInterfaces.testReceiveBufferSkip(bufferHandler, 5));
 		verifyRead(20, 20, data, 10 + 5);
 	}
 
@@ -183,11 +183,11 @@ public class NativeReceiveBufferTest extends NativeTestCase {
 		Thread t = new Thread() {
 			public void run() {
 				for (int i = 0; i < size; i++) {
-					int writen = BluetoothPeer.testReceiveBufferWrite(bufferHandler, new byte[]{send[i]});
+					int writen = NativeTestInterfaces.testReceiveBufferWrite(bufferHandler, new byte[]{send[i]});
 					if (writen != 1) {
 						return;
 					}
-					while (BluetoothPeer.testReceiveBufferAvailable(bufferHandler) > TEST_BUFFER_SIZE / 2) {
+					while (NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler) > TEST_BUFFER_SIZE / 2) {
 						try {
 							Thread.sleep(100);
 						} catch (InterruptedException e) {
@@ -203,7 +203,7 @@ public class NativeReceiveBufferTest extends NativeTestCase {
 		int i;
 		for (i = 0; i < size; i++) {
 			int sleepCount = 0;
-			while (BluetoothPeer.testReceiveBufferAvailable(bufferHandler) == 0) {
+			while (NativeTestInterfaces.testReceiveBufferAvailable(bufferHandler) == 0) {
 				if (sleepCount > 50) {
 					fail("Writer not runnning");
 				}
@@ -214,7 +214,7 @@ public class NativeReceiveBufferTest extends NativeTestCase {
 					return;
 				}
 			}
-			int data = BluetoothPeer.testReceiveBufferRead(bufferHandler);
+			int data = NativeTestInterfaces.testReceiveBufferRead(bufferHandler);
 			assertEquals("recieved data buffer["+i+"]", send[i], (byte)data);
 		}
 		assertEquals("recieved all", size, i);

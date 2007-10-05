@@ -25,9 +25,9 @@
 #define CPP_FILE "commonTest.cpp"
 #endif
 
-#include "com_intel_bluetooth_BluetoothPeer.h"
+#include "com_intel_bluetooth_NativeTestInterfaces.h"
 
-JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_testUUIDConversion
+JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testUUIDConversion
 (JNIEnv *env, jclass, jbyteArray uuidValue) {
 	GUID g;
 	// pin array
@@ -52,18 +52,18 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_testUUIDConv
 	return uuidValueConverted;
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferCreate
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testReceiveBufferCreate
 (JNIEnv *, jclass, jint size) {
 	return (jlong) new ReceiveBuffer(size);
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferClose
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testReceiveBufferClose
 (JNIEnv *, jclass, jlong bufferHandler) {
 	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
 	delete b;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferWrite
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testReceiveBufferWrite
 (JNIEnv *env, jclass, jlong bufferHandler, jbyteArray data) {
 	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
 	jbyte *bytes = env->GetByteArrayElements(data, 0);
@@ -72,7 +72,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferW
 	return rc;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferRead__J_3B
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testReceiveBufferRead__J_3B
 (JNIEnv *env, jclass, jlong bufferHandler, jbyteArray data) {
 	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
 	jbyte *bytes = env->GetByteArrayElements(data, 0);
@@ -81,37 +81,37 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferR
 	return rc;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferRead__J
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testReceiveBufferRead__J
 (JNIEnv *env, jclass, jlong bufferHandler) {
 	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
 	return b->readByte();
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferSkip
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testReceiveBufferSkip
 (JNIEnv *env, jclass, jlong bufferHandler, jint size) {
 	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
 	return b->skip(size);
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferAvailable
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testReceiveBufferAvailable
 (JNIEnv *env, jclass, jlong bufferHandler) {
 	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
 	return b->available();
 }
 
-JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferIsOverflown
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testReceiveBufferIsOverflown
 (JNIEnv *, jclass, jlong bufferHandler) {
 	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
 	return b->isOverflown();
 }
 
-JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothPeer_testReceiveBufferIsCorrupted
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testReceiveBufferIsCorrupted
 (JNIEnv *, jclass, jlong bufferHandler) {
 	ReceiveBuffer* b = (ReceiveBuffer*)bufferHandler;
 	return b->isCorrupted();
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_testThrowException
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testThrowException
 (JNIEnv *env, jclass, jint extype) {
 	switch (extype) {
 		case 0: throwException(env, "java/lang/Exception", "0"); break;
@@ -132,7 +132,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_testThrowException
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_testDebug
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testDebug
 (JNIEnv *env, jclass, jstring message) {
 	const char *c = env->GetStringUTFChars(message, 0);
 	debugs("message[%s]", c);

@@ -149,29 +149,4 @@ abstract class BluetoothPeer implements BluetoothStack {
 	public native int getDeviceVersion(long address);
 	
 	public native int getDeviceManufacturer(long address);
-	
-	// internal test function
-	public static native byte[] testUUIDConversion(byte[] uuidValue);
-
-	public static native long testReceiveBufferCreate(int size);
-
-	public static native void testReceiveBufferClose(long bufferHandler);
-
-	public static native int testReceiveBufferWrite(long bufferHandler, byte[] send);
-
-	public static native int testReceiveBufferRead(long bufferHandler, byte[] rcv);
-	
-	public static native int testReceiveBufferRead(long bufferHandler);
-	
-	public static native int testReceiveBufferSkip(long bufferHandler, int size);
-	
-	public static native int testReceiveBufferAvailable(long bufferHandler);
-	
-	public static native boolean testReceiveBufferIsOverflown(long bufferHandler);
-	
-	public static native boolean testReceiveBufferIsCorrupted(long bufferHandler);
-	
-	public static native void testThrowException(int type) throws Exception;
-	
-	public static native void testDebug(String message);
 }

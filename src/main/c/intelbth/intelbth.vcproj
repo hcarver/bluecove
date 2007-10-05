@@ -860,6 +860,60 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\..\target\classes\com\intel\bluetooth\NativeTestInterfaces.class"
+				>
+				<FileConfiguration
+					Name="Winsock|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating NativeTestInterfaces JNI Header File"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.NativeTestInterfaces&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_NativeTestInterfaces.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="WIDCOMM|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating NativeTestInterfaces JNI Header File"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.NativeTestInterfaces&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_NativeTestInterfaces.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="BlueSoleil|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating NativeTestInterfaces JNI Header File"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.NativeTestInterfaces&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_NativeTestInterfaces.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating NativeTestInterfaces JNI Header File"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.NativeTestInterfaces&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_NativeTestInterfaces.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="AllWin|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating NativeTestInterfaces JNI Header File"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.NativeTestInterfaces&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_NativeTestInterfaces.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\..\..\target\classes\com\intel\bluetooth\BluetoothStackBlueSoleil.class"
 				>
 				<FileConfiguration
@@ -955,6 +1009,10 @@
 			>
 			<File
 				RelativePath=".\BlueSoleilStack.h"
+				>
+			</File>
+			<File
+				RelativePath=".\com_intel_bluetooth_NativeTestInterfaces.h"
 				>
 			</File>
 			<File

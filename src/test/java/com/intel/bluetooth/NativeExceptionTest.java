@@ -35,7 +35,7 @@ public class NativeExceptionTest extends NativeTestCase {
 
 	private void verify(int ntype, Throwable e) {
 		try {
-			BluetoothPeer.testThrowException(ntype);
+			NativeTestInterfaces.testThrowException(ntype);
 			 fail("Should raise an Exception " + e); 
 		} catch (Throwable t) {
 			if (t instanceof AssertionFailedError) {

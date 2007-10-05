@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 /**
  * Base class for test cases that are calling native function.
  * 
- * Native Debug automaticaly enabled when running tests in Eclipse
+ * Native Debug automatically enabled when running tests in Eclipse
  * 
  * @author vlads
  *
@@ -56,10 +56,20 @@ public class NativeTestCase extends TestCase {
 			System.getProperties().put("bluecove.debug", "true");
 			BlueCoveImpl.instance().enableNativeDebug(true);
 		}
+		
+		if (needDllWIDCOMM()) {
+			NativeTestInterfaces.loadDllWIDCOMM();
+		} else {
+			NativeTestInterfaces.loadDllMS();
+		}
 	}
 	
 	boolean isEclipse() {
 		StackTraceElement[] ste = new Throwable().getStackTrace();
 		return (ste[ste.length - 1].getClassName().startsWith("org.eclipse.jdt"));
+	}
+	
+	protected boolean needDllWIDCOMM() {
+		return false;
 	}
 }
