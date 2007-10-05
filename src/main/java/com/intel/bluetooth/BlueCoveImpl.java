@@ -114,7 +114,7 @@ public class BlueCoveImpl {
 	}
 
     /**
-     * Allow default initialisation.
+     * Allow default initialization.
      * In Secure environment instance() should be called initially from secure context.
      */
     private static class SingletonHolder {

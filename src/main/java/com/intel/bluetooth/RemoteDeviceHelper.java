@@ -52,7 +52,7 @@ public abstract class RemoteDeviceHelper {
 		
 		long addressLong;
 
-		private BluetoothStack bluetoothStack;
+		BluetoothStack bluetoothStack;
 		
 		private Hashtable stackAttributes;
 		
