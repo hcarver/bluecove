@@ -23,6 +23,7 @@ package com.intel.bluetooth;
 import java.io.IOException;
 import java.util.Enumeration;
 
+import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DataElement;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
@@ -34,6 +35,8 @@ import javax.microedition.io.Connection;
  */
 abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothConnectionNotifierServiceRecordAccess {
 
+	protected BluetoothStack bluetoothStack;
+	
 	protected volatile long handle;
 
 	protected ServiceRecordImpl serviceRecord;
@@ -44,7 +47,8 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 	
 	protected int securityOpt;
 	
-	protected BluetoothConnectionNotifierBase(BluetoothConnectionNotifierParams params) {
+	protected BluetoothConnectionNotifierBase(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params) throws BluetoothStateException, Error {
+		this.bluetoothStack = bluetoothStack;
 		this.closed = false;
 		this.closing = false;
 		if (params.name == null) {
@@ -53,7 +57,7 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 		/*
 		 * create service record to be later updated by BluetoothStack
 		 */
-		this.serviceRecord = new ServiceRecordImpl(null, 0);
+		this.serviceRecord = new ServiceRecordImpl(this.bluetoothStack, null, 0);
 	}
 
 	protected abstract void closeStack(long handle) throws IOException;

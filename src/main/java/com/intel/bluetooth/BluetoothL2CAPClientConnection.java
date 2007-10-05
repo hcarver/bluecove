@@ -28,17 +28,17 @@ import java.io.IOException;
  */
 class BluetoothL2CAPClientConnection extends BluetoothL2CAPConnection {
 
-	public BluetoothL2CAPClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
-		super(BlueCoveImpl.instance().getBluetoothStack().l2OpenClientConnection(params, receiveMTU, transmitMTU));
+	public BluetoothL2CAPClientConnection(BluetoothStack bluetoothStack, BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
+		super(bluetoothStack, bluetoothStack.l2OpenClientConnection(params, receiveMTU, transmitMTU));
 		boolean initOK = false;
 		try {
-			this.securityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(this.handle, Utils.securityOpt(params.authenticate, params.encrypt));
+			this.securityOpt = bluetoothStack.getSecurityOpt(this.handle, Utils.securityOpt(params.authenticate, params.encrypt));
 			RemoteDeviceHelper.connected(this);
 			initOK = true;
 		} finally {
 			if (!initOK) {
 				try {
-				BlueCoveImpl.instance().getBluetoothStack().l2CloseClientConnection(this.handle);
+					bluetoothStack.l2CloseClientConnection(this.handle);
 				} catch (IOException e) {
 					DebugLog.error("close error", e);
 				}
@@ -51,8 +51,7 @@ class BluetoothL2CAPClientConnection extends BluetoothL2CAPConnection {
 	 */
 	void closeConnectionHandle(long handle) throws IOException {
 		RemoteDeviceHelper.disconnected(this);
-		BlueCoveImpl.instance().getBluetoothStack().l2CloseClientConnection(handle);
-		
+		bluetoothStack.l2CloseClientConnection(handle);
 	}
 
 }

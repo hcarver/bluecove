@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.microedition.io.InputConnection;
@@ -36,8 +35,9 @@ import javax.microedition.io.StreamConnectionNotifier;
 
 import com.ibm.oti.connection.CreateConnection;
 import com.intel.bluetooth.BluetoothConnectionAccess;
-import com.intel.bluetooth.BluetoothConsts;
+import com.intel.bluetooth.BluetoothConnectionAccessAdapter;
 import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
+import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.MicroeditionConnector;
 
 /**
@@ -49,12 +49,19 @@ import com.intel.bluetooth.MicroeditionConnector;
  * @author vlads
  *
  */
-public class Connection implements CreateConnection, StreamConnection, StreamConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess, BluetoothConnectionAccess {
+public class Connection extends BluetoothConnectionAccessAdapter implements CreateConnection, StreamConnection, StreamConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess, BluetoothConnectionAccess {
 
 	javax.microedition.io.Connection impl;
 	
 	public Connection() {
 		impl = null;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccessAdapter#getImpl()
+	 */
+	protected BluetoothConnectionAccess getImpl() {
+		return (BluetoothConnectionAccess)impl;
 	}
 	
 	public void setParameters(String spec, int access, boolean timeout) throws IOException {
@@ -102,34 +109,6 @@ public class Connection implements CreateConnection, StreamConnection, StreamCon
 	 */
 	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
 		((BluetoothConnectionNotifierServiceRecordAccess)impl).updateServiceRecord(acceptAndOpen);
-	}
-	
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
-	 */
-	public long getRemoteAddress() throws IOException {
-		return ((BluetoothConnectionAccess)impl).getRemoteAddress();
-	}
-
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteDevice()
-	 */
-	public RemoteDevice getRemoteDevice() {
-		return ((BluetoothConnectionAccess)impl).getRemoteDevice();
-	}
-
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
-	 */
-	public int getSecurityOpt() {
-		return ((BluetoothConnectionAccess)impl).getSecurityOpt();
-	}
-
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothConnectionAccess#setRemoteDevice(javax.bluetooth.RemoteDevice)
-	 */
-	public void setRemoteDevice(RemoteDevice remoteDevice) {
-		((BluetoothConnectionAccess)impl).setRemoteDevice(remoteDevice);
 	}
 
 }

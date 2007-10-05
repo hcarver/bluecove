@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
@@ -50,6 +51,8 @@ public abstract class RemoteDeviceHelper {
 		String name;
 		
 		long addressLong;
+
+		private BluetoothStack bluetoothStack;
 		
 		private Hashtable stackAttributes;
 		
@@ -60,8 +63,9 @@ public abstract class RemoteDeviceHelper {
 		 */
 		private WeakVector connections;
 		
-		private RemoteDeviceWithExtendedInfo(long address, String name) {
+		private RemoteDeviceWithExtendedInfo(BluetoothStack bluetoothStack, long address, String name) {
 			super(RemoteDeviceHelper.getBluetoothAddress(address));
+			this.bluetoothStack = bluetoothStack;
 			this.name = name;
 			this.addressLong = address;
 		}
@@ -159,10 +163,10 @@ public abstract class RemoteDeviceHelper {
 		return getCashedDeviceWithExtendedInfo(address);
 	}
 
-	static RemoteDevice createRemoteDevice(long address, String name, boolean paired) {
+	static RemoteDevice createRemoteDevice(BluetoothStack bluetoothStack, long address, String name, boolean paired) {
 		RemoteDeviceWithExtendedInfo dev = getCashedDeviceWithExtendedInfo(address);
 		if (dev == null) {
-			dev = new RemoteDeviceWithExtendedInfo(address, name);
+			dev = new RemoteDeviceWithExtendedInfo(bluetoothStack, address, name);
 			devicesCashed.put(new Long(address), dev);
 			DebugLog.debug0x("new devicesCashed", address);
 		} else if (!Utils.isStringSet(dev.name)) {
@@ -179,25 +183,32 @@ public abstract class RemoteDeviceHelper {
 	}
 	
 	private static RemoteDeviceWithExtendedInfo remoteDeviceImpl(RemoteDevice device) {
-		return (RemoteDeviceWithExtendedInfo)createRemoteDevice(device);
+		return (RemoteDeviceWithExtendedInfo)createRemoteDevice(null, device);
 	}
 	
-	static RemoteDevice createRemoteDevice(RemoteDevice device) {
+	static RemoteDevice createRemoteDevice(BluetoothStack bluetoothStack, RemoteDevice device) throws RuntimeException {
 		if (device instanceof RemoteDeviceWithExtendedInfo) {
 			return device;
 		} else {
-			return createRemoteDevice(getAddress(device), null, false);
+			if (bluetoothStack == null) {
+				try {
+					bluetoothStack = BlueCoveImpl.instance().getBluetoothStack();
+				} catch (BluetoothStateException e) {
+					throw new RuntimeException("Can't initialize bluetooth support");
+				}
+			}
+			return createRemoteDevice(bluetoothStack, getAddress(device), null, false);
 		}
 	}
 	
 	public static String getFriendlyName(RemoteDevice device, long address, boolean alwaysAsk) throws IOException {
 		String name = null;
 		if (!(device instanceof RemoteDeviceWithExtendedInfo)) {
-			device = createRemoteDevice(device);
+			device = createRemoteDevice(null, device);
 		}
 		name = ((RemoteDeviceWithExtendedInfo)device).name;
 		if (alwaysAsk || (!Utils.isStringSet(name))) {
-			name = BlueCoveImpl.instance().getBluetoothStack().getRemoteDeviceFriendlyName(address);
+			name = ((RemoteDeviceWithExtendedInfo)device).bluetoothStack.getRemoteDeviceFriendlyName(address);
 			if (Utils.isStringSet(name)) {
 				((RemoteDeviceWithExtendedInfo)device).name = name;
 			} else {
@@ -211,7 +222,7 @@ public abstract class RemoteDeviceHelper {
 		if (!(conn instanceof BluetoothConnectionAccess)) {
 			throw new IllegalArgumentException("Not a Bluetooth connection " + conn.getClass().getName());
 		}
-		return createRemoteDevice(((BluetoothConnectionAccess)conn).getRemoteAddress(), null, false);
+		return createRemoteDevice(((BluetoothConnectionAccess)conn).getBluetoothStack(), ((BluetoothConnectionAccess)conn).getRemoteAddress(), null, false);
 	}
 	
 	/* (non-Javadoc)
@@ -293,8 +304,8 @@ public abstract class RemoteDeviceHelper {
 		}
 	}
 	
-	static void setStackAttributes(RemoteDevice device, Object key, Object value) {
-		RemoteDeviceWithExtendedInfo devInfo = (RemoteDeviceWithExtendedInfo)createRemoteDevice(device);
+	static void setStackAttributes(BluetoothStack bluetoothStack, RemoteDevice device, Object key, Object value) {
+		RemoteDeviceWithExtendedInfo devInfo = (RemoteDeviceWithExtendedInfo)createRemoteDevice(bluetoothStack, device);
 		devInfo.setStackAttributes(key, value);
 	}
 	

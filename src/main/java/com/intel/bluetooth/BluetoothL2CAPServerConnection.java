@@ -32,8 +32,8 @@ class BluetoothL2CAPServerConnection extends BluetoothL2CAPConnection {
 	 * @param handle
 	 * @throws IOException 
 	 */
-	protected BluetoothL2CAPServerConnection(long handle, int securityOpt) throws IOException {
-		super(handle);
+	protected BluetoothL2CAPServerConnection(BluetoothStack bluetoothStack, long handle, int securityOpt) throws IOException {
+		super(bluetoothStack, handle);
 		boolean initOK = false;
 		try {
 			this.securityOpt = securityOpt;
@@ -42,7 +42,7 @@ class BluetoothL2CAPServerConnection extends BluetoothL2CAPConnection {
 		} finally {
 			if (!initOK) {
 				try {
-				BlueCoveImpl.instance().getBluetoothStack().l2CloseServerConnection(this.handle);
+					bluetoothStack.l2CloseServerConnection(this.handle);
 				} catch (IOException e) {
 					DebugLog.error("close error", e);
 				}
@@ -55,7 +55,7 @@ class BluetoothL2CAPServerConnection extends BluetoothL2CAPConnection {
 	 */
 	void closeConnectionHandle(long handle) throws IOException {
 		RemoteDeviceHelper.disconnected(this);
-		BlueCoveImpl.instance().getBluetoothStack().l2CloseServerConnection(handle);
+		bluetoothStack.l2CloseServerConnection(handle);
 	}
 
 }

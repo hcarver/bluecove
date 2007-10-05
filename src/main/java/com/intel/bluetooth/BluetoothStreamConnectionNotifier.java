@@ -32,10 +32,10 @@ class BluetoothStreamConnectionNotifier extends BluetoothConnectionNotifierBase 
 
 	private int rfcommChannel = -1;
 
-	public BluetoothStreamConnectionNotifier(BluetoothConnectionNotifierParams params) throws IOException {
-		super(params);
+	public BluetoothStreamConnectionNotifier(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params) throws IOException {
+		super(bluetoothStack, params);
 
-		this.handle = BlueCoveImpl.instance().getBluetoothStack().rfServerOpen(params, serviceRecord);
+		this.handle = bluetoothStack.rfServerOpen(params, serviceRecord);
 
 		this.rfcommChannel = serviceRecord.getChannel(BluetoothConsts.RFCOMM_PROTOCOL_UUID);
 
@@ -48,7 +48,7 @@ class BluetoothStreamConnectionNotifier extends BluetoothConnectionNotifierBase 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#closeStack(long)
 	 */
 	protected void closeStack(long handle) throws IOException {
-		BlueCoveImpl.instance().getBluetoothStack().rfServerClose(handle, serviceRecord);
+		bluetoothStack.rfServerClose(handle, serviceRecord);
 	}
 
 
@@ -66,9 +66,9 @@ class BluetoothStreamConnectionNotifier extends BluetoothConnectionNotifierBase 
 			updateServiceRecord(true);
 		}
 		try {
-			long clientHandle = BlueCoveImpl.instance().getBluetoothStack().rfServerAcceptAndOpenRfServerConnection(handle);
-			int clientSecurityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(clientHandle, this.securityOpt);
-			return new BluetoothRFCommServerConnection(clientHandle, clientSecurityOpt);
+			long clientHandle = bluetoothStack.rfServerAcceptAndOpenRfServerConnection(handle);
+			int clientSecurityOpt = bluetoothStack.getSecurityOpt(clientHandle, this.securityOpt);
+			return new BluetoothRFCommServerConnection(bluetoothStack, clientHandle, clientSecurityOpt);
 		} catch (IOException e) {
 			if (closed || closing) {
 				throw new InterruptedIOException("Notifier has been closed");
@@ -88,7 +88,7 @@ class BluetoothStreamConnectionNotifier extends BluetoothConnectionNotifierBase 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#updateStackServiceRecord(com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
 	protected void updateStackServiceRecord(ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
-		BlueCoveImpl.instance().getBluetoothStack().rfServerUpdateServiceRecord(handle, serviceRecord, acceptAndOpen);
+		bluetoothStack.rfServerUpdateServiceRecord(handle, serviceRecord, acceptAndOpen);
 	}
 
 }

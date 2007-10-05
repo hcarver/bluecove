@@ -178,7 +178,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
 		DebugLog.debug("deviceDiscoveredCallback", deviceName);
-		listener.deviceDiscovered(RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName, paired), new DeviceClass(deviceClass));
+		listener.deviceDiscovered(RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired), new DeviceClass(deviceClass));
 	}
 
 	public native boolean cancelInquirympl();
@@ -225,15 +225,16 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 	 */
 
 	public void servicesFoundCallback(SearchServicesThread startedNotify, DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel, long recordHanlde) {
-		ServiceRecordImpl record = new ServiceRecordImpl(device, 0);
+		
+		ServiceRecordImpl record = new ServiceRecordImpl(this, device, 0);
 
 		UUID uuid = new UUID(Utils.UUIDByteArrayToString(uuidValue), false);
 
 		record.populateRFCOMMAttributes(recordHanlde, channel, uuid, serviceName, BluetoothConsts.obexUUIDs.contains(uuid));
 		DebugLog.debug("servicesFoundCallback", record);
 
-		RemoteDevice listedDevice = RemoteDeviceHelper.createRemoteDevice(device);
-		RemoteDeviceHelper.setStackAttributes(listedDevice, "RFCOMM_channel" + channel, uuid);
+		RemoteDevice listedDevice = RemoteDeviceHelper.createRemoteDevice(this, device);
+		RemoteDeviceHelper.setStackAttributes(this, listedDevice, "RFCOMM_channel" + channel, uuid);
 
 		ServiceRecord[] records = new ServiceRecordImpl[1];
 		records[0] = record;

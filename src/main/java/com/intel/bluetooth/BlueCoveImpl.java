@@ -24,6 +24,8 @@ package com.intel.bluetooth;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.bluetooth.BluetoothStateException;
+
 
 /**
  *
@@ -112,8 +114,8 @@ public class BlueCoveImpl {
 	}
 
     /**
-     * Allow default initialization.
-     * In Secure environment instance() should be called initialy from secure contex.
+     * Allow default initialisation.
+     * In Secure environment instance() should be called initially from secure context.
      */
     private static class SingletonHolder {
 
@@ -127,12 +129,51 @@ public class BlueCoveImpl {
 		}
 
 	}
+    
+	/**
+	 * Applications should not used this function.
+	 *
+	 * @return Instance of the class, getBluetoothStack() can be called.
+	 */
+    public static BlueCoveImpl instance() {
+    	SingletonHolder.init();
+		return SingletonHolder.instance;
+    }
 
 	private BlueCoveImpl() {
+		
+		// bluetoothStack.destroy(); May stuck in WIDCOMM forever. Exit JVM anyway.
+		final ShutdownHookThread shutdownHookThread = new ShutdownHookThread();
+		
+		shutdownHookThread.start();
 
+		Runnable r = new Runnable() {
+			public void run() {
+				synchronized (shutdownHookThread) {
+					shutdownHookThread.notifyAll();
+					try {
+						shutdownHookThread.wait(7000);
+					} catch (InterruptedException e) {
+					}
+				}
+			}
+		};
+
+		try {
+			// since Java 1.3
+			UtilsJavaSE.runtimeAddShutdownHook(new Thread(r));
+		} catch (Throwable java12) {
+		}
+	}
+
+	private void detectStack() throws BluetoothStateException {
+		
 		BluetoothStack detectorStack = null;
+		
 		String stackFirstDetector = getConfigProperty("bluecove.stack.first");
+		
 		String stackSelected = getConfigProperty("bluecove.stack");
+		
 		if ( stackFirstDetector == null) {
 			 stackFirstDetector = stackSelected;
 		}
@@ -140,13 +181,13 @@ public class BlueCoveImpl {
 		switch (NativeLibLoader.getOS()) {
 			case NativeLibLoader.OS_LINUX:
 				if (!NativeLibLoader.isAvailable(NATIVE_LIB_BLUEZ)) {
-					throw new Error("BlueCove not available");
+					throw new BluetoothStateException("BlueCove not available");
 				}
 				detectorStack = new BluetoothStackBlueZ();
 				break;
 			case NativeLibLoader.OS_MAC_OS_X:
 				if (!NativeLibLoader.isAvailable(NATIVE_LIB_OSX)) {
-					throw new Error("BlueCove not available");
+					throw new BluetoothStateException("BlueCove not available");
 				}
 				detectorStack = new BluetoothStackOSX();
 				break;
@@ -158,7 +199,7 @@ public class BlueCoveImpl {
 				}
 				break;
 			default:
-				throw new Error("BlueCove not available");
+				throw new BluetoothStateException("BlueCove not available");
 
 		}
 
@@ -180,35 +221,13 @@ public class BlueCoveImpl {
 				stackSelected = STACK_BLUESOLEIL;
 			} else {
 				DebugLog.fatal("BluetoothStack not detected");
-				throw new RuntimeException("BluetoothStack not detected");
+				throw new BluetoothStateException("BluetoothStack not detected");
 			}
 		} else {
 			DebugLog.debug("BluetoothStack selected", stackSelected);
 		}
 
 		stackSelected = setBluetoothStack(stackSelected, detectorStack);
-
-		// bluetoothStack.destroy(); May stuck in WIDCOMM forever. Exit JVM anyway.
-		final ShutdownHookThread shutdownHookThread = new ShutdownHookThread();
-		shutdownHookThread.start();
-
-		Runnable r = new Runnable() {
-			public void run() {
-				synchronized (shutdownHookThread) {
-					shutdownHookThread.notifyAll();
-					try {
-						shutdownHookThread.wait(7000);
-					} catch (InterruptedException e) {
-					}
-				}
-			}
-		};
-
-		try {
-			// since Java 1.3
-			UtilsJavaSE.runtimeAddShutdownHook(new Thread(r));
-		} catch (Throwable java12) {
-		}
 
 		copySystemProperty();
 		System.out.println("BlueCove version " + version + " on " + stackSelected);
@@ -294,19 +313,7 @@ public class BlueCoveImpl {
 
 	}
 
-	/**
-	 * Applications should not used this function.
-	 *
-	 * @return Instance of the class with initializaed stack variable. getBluetoothStack() can be called.
-	 * @throws RuntimeException when BluetoothStack not detected. If one connected the hardware later,
-     * BlueCove would be able to recover and start correctly
-	 */
-    public static BlueCoveImpl instance() throws RuntimeException {
-    	SingletonHolder.init();
-		return SingletonHolder.instance;
-    }
-
-    private BluetoothStack createDetectorOnWindows(String stackFirst) {
+    private BluetoothStack createDetectorOnWindows(String stackFirst) throws BluetoothStateException {
 		if (stackFirst != null) {
 			DebugLog.debug("detector stack", stackFirst);
 			if (STACK_WIDCOMM.equalsIgnoreCase(stackFirst)) {
@@ -322,7 +329,7 @@ public class BlueCoveImpl {
 					return new BluetoothStackMicrosoft();
 				}
 			} else {
-				throw new Error("Invalid BlueCove detector stack ["+ stackFirst+ "]");
+				throw new IllegalArgumentException("Invalid BlueCove detector stack ["+ stackFirst+ "]");
 			}
 		}
 		if (NativeLibLoader.isAvailable(NATIVE_LIB_MS)) {
@@ -330,7 +337,7 @@ public class BlueCoveImpl {
 		} else if (NativeLibLoader.isAvailable(NATIVE_LIB_WIDCOMM)) {
 			return new BluetoothStackWIDCOMM();
 		} else {
-			throw new Error("BlueCove not avalable");
+			throw new BluetoothStateException("BlueCove not avalable");
 		}
 	}
 
@@ -376,14 +383,18 @@ public class BlueCoveImpl {
     /**
      * Applications should not used this function.
      *
-     * @return curent BluetoothStack implementation
-     *
+     * @return current BluetoothStack implementation
+	 * @throws BluetoothStateException when BluetoothStack not detected. If one connected the hardware later,
+     * BlueCove would be able to recover and start correctly
      * @exception Error if called from outside of BlueCove internal code.
      */
-	public BluetoothStack getBluetoothStack() throws Error {
+	public BluetoothStack getBluetoothStack() throws BluetoothStateException {
 		Utils.isLegalAPICall(fqcnSet);
 		if (bluetoothStack == null) {
-			throw new Error("BlueCove not avalable");
+			detectStack();
+			if (bluetoothStack == null) {
+				throw new BluetoothStateException("BlueCove not avalable");
+			}
 		}
 		return bluetoothStack;
 	}

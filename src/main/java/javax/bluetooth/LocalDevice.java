@@ -30,6 +30,7 @@ import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
+import com.intel.bluetooth.BluetoothStack;
 import com.intel.bluetooth.RemoteDeviceHelper;
 import com.intel.bluetooth.ServiceRecordsRegistry;
 
@@ -49,6 +50,8 @@ public class LocalDevice {
 
 	private static LocalDevice localDevice;
 
+	private BluetoothStack bluetoothStack;
+	
 	private DiscoveryAgent discoveryAgent;
 
 	private String addressStr;
@@ -62,8 +65,9 @@ public class LocalDevice {
 	 * @see #getLocalDevice
 	 */
 	private LocalDevice() throws BluetoothStateException {
-		discoveryAgent = new DiscoveryAgent();
-		addressStr = RemoteDeviceHelper.getBluetoothAddress(BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceBluetoothAddress());
+		this.bluetoothStack = BlueCoveImpl.instance().getBluetoothStack();
+		discoveryAgent = new DiscoveryAgent(this.bluetoothStack);
+		addressStr = RemoteDeviceHelper.getBluetoothAddress(this.bluetoothStack.getLocalDeviceBluetoothAddress());
 	}
 
 	/**
@@ -104,7 +108,7 @@ public class LocalDevice {
 	 * name could not be retrieved
 	 */
 	public String getFriendlyName() {
-		return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceName();
+		return this.bluetoothStack.getLocalDeviceName();
 	}
 
 	/**
@@ -121,7 +125,7 @@ public class LocalDevice {
 	 *
 	 */
 	public DeviceClass getDeviceClass() {
-		return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceClass();
+		return this.bluetoothStack.getLocalDeviceClass();
 	}
 
 	/**
@@ -175,7 +179,7 @@ public class LocalDevice {
 				&& (mode < 0x9E8B00 || mode > 0x9E8B3F)) {
 			throw new IllegalArgumentException("Invalid discoverable mode");
 		}
-		return BlueCoveImpl.instance().getBluetoothStack().setLocalDeviceDiscoverable(mode);
+		return this.bluetoothStack.setLocalDeviceDiscoverable(mode);
 	}
 
 	/**
@@ -186,7 +190,11 @@ public class LocalDevice {
 	 *         <code>false</code> if the local Bluetooth device is off.
 	 */
 	public static boolean isPowerOn() {
-		return BlueCoveImpl.instance().getBluetoothStack().isLocalDevicePowerOn();
+		try {
+			return BlueCoveImpl.instance().getBluetoothStack().isLocalDevicePowerOn();
+		} catch (BluetoothStateException e) {
+			return false;
+		}
 	}
 
 	/**
@@ -203,7 +211,7 @@ public class LocalDevice {
 	 * @return the discoverable mode the device is presently in
 	 */
 	public int getDiscoverable() {
-		return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceDiscoverable();
+		return this.bluetoothStack.getLocalDeviceDiscoverable();
 	}
 
 	/**
@@ -256,16 +264,20 @@ public class LocalDevice {
 	 * the <code>property</code> is not defined
 	 */
 	public static String getProperty(String property) {
-		if ("bluetooth.api.version".equals(property)) {
-			return "1.1";
-		} else if ("bluecove".equals(property)) {
-			return BlueCoveImpl.version;
-		} else if ("bluecove.stack".equals(property)) {
-			return BlueCoveImpl.instance().getBluetoothStack().getStackID();
-		} else if ("bluecove.connections".equals(property)) {
-			return String.valueOf(RemoteDeviceHelper.openConnections());
+		try {
+			if ("bluetooth.api.version".equals(property)) {
+				return "1.1";
+			} else if ("bluecove".equals(property)) {
+				return BlueCoveImpl.version;
+			} else if ("bluecove.stack".equals(property)) {
+				return BlueCoveImpl.instance().getBluetoothStack().getStackID();
+			} else if ("bluecove.connections".equals(property)) {
+				return String.valueOf(RemoteDeviceHelper.openConnections());
+			}
+			return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceProperty(property);
+		} catch (BluetoothStateException e) {
+			throw new RuntimeException(e.getMessage());
 		}
-		return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceProperty(property);
 	}
 
 	/**

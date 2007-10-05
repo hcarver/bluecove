@@ -31,6 +31,8 @@ import javax.bluetooth.RemoteDevice;
  */
 abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothConnectionAccess {
 
+	protected BluetoothStack bluetoothStack;
+	
 	protected volatile long handle;
 	
 	protected int securityOpt;
@@ -39,7 +41,8 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 	
 	private boolean isClosed;
 	
-	protected BluetoothL2CAPConnection(long handle) {
+	protected BluetoothL2CAPConnection(BluetoothStack bluetoothStack, long handle) {
+		this.bluetoothStack = bluetoothStack;
 		this.handle = handle;
 		this.isClosed = false;
 	}
@@ -51,7 +54,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		if (isClosed) {
 			throw new IOException("Connection closed");
 		}
-		return BlueCoveImpl.instance().getBluetoothStack().l2RemoteAddress(handle);
+		return bluetoothStack.l2RemoteAddress(handle);
 	}
 
 	/* (non-Javadoc)
@@ -61,7 +64,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		if (isClosed) {
 			throw new IOException("Connection closed");
 		}
-		return BlueCoveImpl.instance().getBluetoothStack().l2GetReceiveMTU(handle);
+		return bluetoothStack.l2GetReceiveMTU(handle);
 	}
 
 	/* (non-Javadoc)
@@ -71,7 +74,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		if (isClosed) {
 			throw new IOException("Connection closed");
 		}
-		return BlueCoveImpl.instance().getBluetoothStack().l2GetTransmitMTU(handle);
+		return bluetoothStack.l2GetTransmitMTU(handle);
 	}
 
 	/* (non-Javadoc)
@@ -81,7 +84,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		if (isClosed) {
 			throw new IOException("Connection closed");
 		}
-		return BlueCoveImpl.instance().getBluetoothStack().l2Ready(handle);
+		return bluetoothStack.l2Ready(handle);
 	}
 
 	/* (non-Javadoc)
@@ -94,7 +97,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		if (inBuf == null) {
 			throw new NullPointerException ("inBuf is null");
 		}
-		return BlueCoveImpl.instance().getBluetoothStack().l2Receive(handle, inBuf);
+		return bluetoothStack.l2Receive(handle, inBuf);
 	}
 
 	/* (non-Javadoc)
@@ -107,7 +110,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		if (data == null) {
 			throw new NullPointerException ("data is null");
 		}
-		BlueCoveImpl.instance().getBluetoothStack().l2Send(handle, data);
+		bluetoothStack.l2Send(handle, data);
 	}
 
 	abstract void closeConnectionHandle(long handle) throws IOException;
@@ -141,16 +144,32 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
+	 */
 	public int getSecurityOpt() {
 		return this.securityOpt;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteDevice()
+	 */
 	public RemoteDevice getRemoteDevice() {
 		return this.remoteDevice;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#setRemoteDevice(javax.bluetooth.RemoteDevice)
+	 */
 	public void setRemoteDevice(RemoteDevice remoteDevice) {
 		this.remoteDevice = remoteDevice;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getBluetoothStack()
+	 */
+	public BluetoothStack getBluetoothStack() {
+		return bluetoothStack;
 	}
 
 }

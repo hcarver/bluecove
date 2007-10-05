@@ -44,6 +44,8 @@ import javax.microedition.io.StreamConnection;
  */
 abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothConnectionAccess {
 	
+	protected BluetoothStack bluetoothStack;
+	
 	protected volatile long handle;
 
 	private BluetoothRFCommInputStream in;
@@ -56,7 +58,8 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	
 	RemoteDevice remoteDevice;
 	
-	protected BluetoothRFCommConnection(long handle) {
+	protected BluetoothRFCommConnection(BluetoothStack bluetoothStack, long handle) {
+		this.bluetoothStack = bluetoothStack;
 		this.handle = handle;
 		this.isClosed = false;
 	}
@@ -239,7 +242,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 		if (isClosed) {
 			throw new IOException("Connection closed");
 		}
-		return BlueCoveImpl.instance().getBluetoothStack().getConnectionRfRemoteAddress(handle);
+		return bluetoothStack.getConnectionRfRemoteAddress(handle);
 	}
 	
 	/* (non-Javadoc)
@@ -254,5 +257,12 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	 */
 	public void setRemoteDevice(RemoteDevice remoteDevice) {
 		this.remoteDevice = remoteDevice;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getBluetoothStack()
+	 */
+	public BluetoothStack getBluetoothStack() {
+		return bluetoothStack;
 	}
 }

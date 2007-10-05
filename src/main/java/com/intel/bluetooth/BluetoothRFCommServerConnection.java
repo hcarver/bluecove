@@ -29,8 +29,8 @@ import java.io.IOException;
 class BluetoothRFCommServerConnection extends BluetoothRFCommConnection {
 
 	/** Construct BluetoothConnection with pre-existing socket */
-	protected BluetoothRFCommServerConnection(long handle, int securityOpt) throws IOException  {
-		super(handle);
+	protected BluetoothRFCommServerConnection(BluetoothStack bluetoothStack, long handle, int securityOpt) throws IOException  {
+		super(bluetoothStack, handle);
 		boolean initOK = false;
 		try {
 			this.securityOpt = securityOpt;
@@ -39,7 +39,7 @@ class BluetoothRFCommServerConnection extends BluetoothRFCommConnection {
 		} finally {
 			if (!initOK) {
 				try {
-				BlueCoveImpl.instance().getBluetoothStack().connectionRfCloseServerConnection(this.handle);
+					bluetoothStack.connectionRfCloseServerConnection(this.handle);
 				} catch (IOException e) {
 					DebugLog.error("close error", e);
 				}
@@ -49,7 +49,7 @@ class BluetoothRFCommServerConnection extends BluetoothRFCommConnection {
 	
 	void closeConnectionHandle(long handle) throws IOException {
 		RemoteDeviceHelper.disconnected(this);
-		BlueCoveImpl.instance().getBluetoothStack().connectionRfCloseServerConnection(handle);
+		bluetoothStack.connectionRfCloseServerConnection(handle);
 	}
 
 }

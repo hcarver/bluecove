@@ -36,10 +36,10 @@ class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase i
 
 	private int psm = -1;
 	
-	public BluetoothL2CAPConnectionNotifier(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU) throws IOException {
-		super(params);
+	public BluetoothL2CAPConnectionNotifier(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU) throws IOException {
+		super(bluetoothStack, params);
 		
-		this.handle = BlueCoveImpl.instance().getBluetoothStack().l2ServerOpen(params, receiveMTU, transmitMTU, serviceRecord);
+		this.handle = bluetoothStack.l2ServerOpen(params, receiveMTU, transmitMTU, serviceRecord);
 		
 		this.psm = serviceRecord.getChannel(BluetoothConsts.L2CAP_PROTOCOL_UUID);
 		
@@ -59,9 +59,9 @@ class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase i
 			updateServiceRecord(true);
 		}
 		try {
-			long clientHandle = BlueCoveImpl.instance().getBluetoothStack().l2ServerAcceptAndOpenServerConnection(handle);
-			int clientSecurityOpt = BlueCoveImpl.instance().getBluetoothStack().getSecurityOpt(clientHandle, this.securityOpt);
-			return new BluetoothL2CAPServerConnection(clientHandle, clientSecurityOpt);
+			long clientHandle = bluetoothStack.l2ServerAcceptAndOpenServerConnection(handle);
+			int clientSecurityOpt = bluetoothStack.getSecurityOpt(clientHandle, this.securityOpt);
+			return new BluetoothL2CAPServerConnection(bluetoothStack, clientHandle, clientSecurityOpt);
 		} catch (IOException e) {
 			if (closed) {
 				throw new InterruptedIOException("Notifier has been closed");
@@ -74,7 +74,7 @@ class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase i
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#closeStack(long)
 	 */
 	protected void closeStack(long handle) throws IOException {
-		BlueCoveImpl.instance().getBluetoothStack().l2ServerClose(handle, serviceRecord);
+		bluetoothStack.l2ServerClose(handle, serviceRecord);
 	}
 	
 	protected void validateServiceRecord(ServiceRecord srvRecord) {
@@ -88,7 +88,7 @@ class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase i
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#updateStackServiceRecord(com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
 	protected void updateStackServiceRecord(ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
-		BlueCoveImpl.instance().getBluetoothStack().l2ServerUpdateServiceRecord(handle, serviceRecord, acceptAndOpen);
+		bluetoothStack.l2ServerUpdateServiceRecord(handle, serviceRecord, acceptAndOpen);
 	}
 
 }

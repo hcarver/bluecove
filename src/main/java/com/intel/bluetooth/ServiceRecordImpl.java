@@ -36,6 +36,8 @@ import com.intel.bluetooth.BluetoothConsts.DeviceClassConsts;
 
 class ServiceRecordImpl implements ServiceRecord {
 
+	private BluetoothStack bluetoothStack;
+	
 	private RemoteDevice device;
 
 	private long handle;
@@ -44,7 +46,10 @@ class ServiceRecordImpl implements ServiceRecord {
 
 	protected boolean attributeUpdated;
 	
-	ServiceRecordImpl(RemoteDevice device, long handle) {
+	ServiceRecordImpl(BluetoothStack bluetoothStack, RemoteDevice device, long handle) {
+		
+		this.bluetoothStack = bluetoothStack;
+		
 		this.device = device;
 
 		this.handle = handle;
@@ -206,7 +211,7 @@ class ServiceRecordImpl implements ServiceRecord {
 		}
 		DebugLog.debug("query for ", sortIDs[sortIDs.length - 1]);
 
-		return BlueCoveImpl.instance().getBluetoothStack().populateServicesRecordAttributeValues(this, sortIDs);
+		return this.bluetoothStack.populateServicesRecordAttributeValues(this, sortIDs);
 	}
 
 	/*

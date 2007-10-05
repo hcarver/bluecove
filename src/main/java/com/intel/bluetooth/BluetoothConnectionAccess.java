@@ -32,6 +32,8 @@ import javax.bluetooth.RemoteDevice;
  */
 public interface BluetoothConnectionAccess {
 	
+	public BluetoothStack getBluetoothStack();
+	
 	public long getRemoteAddress() throws IOException;
 	
 	public int getSecurityOpt();

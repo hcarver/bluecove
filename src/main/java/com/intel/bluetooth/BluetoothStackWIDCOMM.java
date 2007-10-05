@@ -212,13 +212,13 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 			if (deviceAddrStr.equalsIgnoreCase(device.getBluetoothAddress())) {
 				if (Utils.isStringSet(deviceName)) {
 					// Update device name
-					RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName, paired);
+					RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
 				}
 				return;
 			}
 
 		}
-		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(deviceAddr, deviceName, paired);
+		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
 		reported.addElement(remoteDevice);
 		DeviceClass cod = new DeviceClass(deviceClass);
 		DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
@@ -326,7 +326,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 				Vector records = new Vector();
 				for (int i = 0; i < handles.length; i++) {
-					ServiceRecordImpl sr = new ServiceRecordImpl(device, handles[i]);
+					ServiceRecordImpl sr = new ServiceRecordImpl(this, device, handles[i]);
 					try {
 						sr.populateRecord(new int[] { BluetoothConsts.ServiceClassIDList, BluetoothConsts.ProtocolDescriptorList });
 						if ((uuidFiler != null)

@@ -26,7 +26,7 @@
  */
 package javax.bluetooth;
 
-import com.intel.bluetooth.BlueCoveImpl;
+import com.intel.bluetooth.BluetoothStack;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.RemoteDeviceHelper;
 import com.intel.bluetooth.SelectServiceHandler;
@@ -124,12 +124,18 @@ public class DiscoveryAgent {
 	 */
 	public static final int PREKNOWN = 0x01;
 
+	private BluetoothStack bluetoothStack;
+	
 	/**
 	 * Creates a <code>DiscoveryAgent</code> object.
 	 */
-	DiscoveryAgent() {
+	private DiscoveryAgent() {
 	}
 
+	DiscoveryAgent(BluetoothStack bluetoothStack) {
+		this.bluetoothStack = bluetoothStack;
+	}
+	
 	/**
 	 * Returns an array of Bluetooth devices that have either been found
 	 * by the local device during previous inquiry requests or been
@@ -196,7 +202,7 @@ public class DiscoveryAgent {
 		if ((accessCode != LIAC) && (accessCode != GIAC) && ((accessCode < 0x9E8B00) || (accessCode > 0x9E8B3F))) {
 			throw new IllegalArgumentException("Invalid accessCode " + accessCode);
 		}
-		return BlueCoveImpl.instance().getBluetoothStack().startInquiry(accessCode, listener);
+		return this.bluetoothStack.startInquiry(accessCode, listener);
 	}
 
 	/**
@@ -228,7 +234,7 @@ public class DiscoveryAgent {
 			throw new NullPointerException("DiscoveryListener is null");
 		}
 		DebugLog.debug("cancelInquiry");
-		return BlueCoveImpl.instance().getBluetoothStack().cancelInquiry(listener);
+		return this.bluetoothStack.cancelInquiry(listener);
 	}
 
 	/**
@@ -307,7 +313,7 @@ public class DiscoveryAgent {
 				throw new IllegalArgumentException("attrSet[" + i + "] not in range");
 			}
 		}
-		return BlueCoveImpl.instance().getBluetoothStack().searchServices(attrSet, uuidSet, btDev, discListener);
+		return this.bluetoothStack.searchServices(attrSet, uuidSet, btDev, discListener);
 	}
 
 	/**
@@ -329,7 +335,7 @@ public class DiscoveryAgent {
 	 */
 	public boolean cancelServiceSearch(int transID) {
 		DebugLog.debug("cancelServiceSearch", transID);
-		return BlueCoveImpl.instance().getBluetoothStack().cancelServiceSearch(transID);
+		return this.bluetoothStack.cancelServiceSearch(transID);
 	}
 
 	/**

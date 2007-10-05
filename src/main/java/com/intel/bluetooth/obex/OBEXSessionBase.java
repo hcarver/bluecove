@@ -32,6 +32,7 @@ import javax.obex.HeaderSet;
 import javax.obex.ServerRequestHandler;
 
 import com.intel.bluetooth.BluetoothConnectionAccess;
+import com.intel.bluetooth.BluetoothStack;
 import com.intel.bluetooth.DebugLog;
 
 /**
@@ -224,4 +225,11 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		((BluetoothConnectionAccess)conn).setRemoteDevice(remoteDevice);
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getBluetoothStack()
+	 */
+	public BluetoothStack getBluetoothStack() {
+		validateBluetoothConnection();
+		return ((BluetoothConnectionAccess)conn).getBluetoothStack();
+	}
 }

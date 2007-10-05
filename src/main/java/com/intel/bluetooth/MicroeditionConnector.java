@@ -175,6 +175,12 @@ public abstract class MicroeditionConnector {
 		boolean isL2CAP = scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP);
 		boolean isTCPOBEX = scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX);
 		
+		BluetoothStack bluetoothStack = null;
+		
+		if (schemeBluetooth) {
+			bluetoothStack = BlueCoveImpl.instance().getBluetoothStack();
+		}
+		
 		boolean isServer;
 		
 		int hostEnd = name.indexOf(':', scheme.length() + 3);
@@ -335,23 +341,23 @@ public abstract class MicroeditionConnector {
 		 */
 		if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM)) {
 			if (isServer) {
-				return new BluetoothStreamConnectionNotifier(notifierParams);
+				return new BluetoothStreamConnectionNotifier(bluetoothStack, notifierParams);
 			} else {
-				return new BluetoothRFCommClientConnection(connectionParams);
+				return new BluetoothRFCommClientConnection(bluetoothStack, connectionParams);
 			}
 		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX)) {
 			if (isServer) {
 				notifierParams.obex = true;
-				return new OBEXSessionNotifierImpl(new BluetoothStreamConnectionNotifier(notifierParams));
+				return new OBEXSessionNotifierImpl(new BluetoothStreamConnectionNotifier(bluetoothStack, notifierParams));
 			} else {
-				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(connectionParams)); 
+				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(bluetoothStack, connectionParams)); 
 			}
 		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)) {
 			if (isServer) {
-				return new BluetoothL2CAPConnectionNotifier(notifierParams,
+				return new BluetoothL2CAPConnectionNotifier(bluetoothStack, notifierParams,
 						paramL2CAPMTU(values, RECEIVE_MTU), paramL2CAPMTU(values, TRANSMIT_MTU));
 			} else {
-				return new BluetoothL2CAPClientConnection(connectionParams,
+				return new BluetoothL2CAPClientConnection(bluetoothStack, connectionParams,
 						paramL2CAPMTU(values, RECEIVE_MTU), paramL2CAPMTU(values, TRANSMIT_MTU)); 
 			}
 		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX)) {

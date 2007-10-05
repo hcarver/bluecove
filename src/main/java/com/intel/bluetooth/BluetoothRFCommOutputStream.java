@@ -47,7 +47,7 @@ class BluetoothRFCommOutputStream extends OutputStream {
 		if (conn == null) {
 			throw new IOException("Stream closed");
 		} else {
-			BlueCoveImpl.instance().getBluetoothStack().connectionRfWrite(conn.handle, b);
+			conn.bluetoothStack.connectionRfWrite(conn.handle, b);
 		}
 	}
 
@@ -78,7 +78,7 @@ class BluetoothRFCommOutputStream extends OutputStream {
 		if (conn == null) {
 			throw new IOException("Stream closed");
 		} else {
-			BlueCoveImpl.instance().getBluetoothStack().connectionRfWrite(conn.handle, b, off, len);
+			conn.bluetoothStack.connectionRfWrite(conn.handle, b, off, len);
 		}
 	}
 
@@ -87,7 +87,7 @@ class BluetoothRFCommOutputStream extends OutputStream {
 			throw new IOException("Stream closed");
 		} else {
 			super.flush();
-			BlueCoveImpl.instance().getBluetoothStack().connectionRfFlush(conn.handle);
+			conn.bluetoothStack.connectionRfFlush(conn.handle);
 		}
     }
 	
