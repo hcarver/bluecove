@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- @version $Id$ -->
+<signature>
+	<class extends="java.io.IOException" modifiers="public"
+		name="javax.bluetooth.BluetoothConnectionException">
+		<constructor modifiers="public">
+			<parameter type="int" />
+		</constructor>
+		<constructor modifiers="public">
+			<parameter type="int" />
+			<parameter type="java.lang.String" />
+		</constructor>
+		<method modifiers="public" name="getStatus" return="int" />
+		<field constant-value="1" modifiers="public static final"
+			name="UNKNOWN_PSM" type="int" />
+		<field constant-value="2" modifiers="public static final"
+			name="SECURITY_BLOCK" type="int" />
+		<field constant-value="3" modifiers="public static final"
+			name="NO_RESOURCES" type="int" />
+		<field constant-value="4" modifiers="public static final"
+			name="FAILED_NOINFO" type="int" />
+		<field constant-value="5" modifiers="public static final"
+			name="TIMEOUT" type="int" />
+		<field constant-value="6" modifiers="public static final"
+			name="UNACCEPTABLE_PARAMS" type="int" />
+	</class>
+	<class extends="java.io.IOException" modifiers="public"
+		name="javax.bluetooth.BluetoothStateException">
+		<constructor modifiers="public" />
+		<constructor modifiers="public">
+			<parameter type="java.lang.String" />
+		</constructor>
+	</class>
+	<class modifiers="public" name="javax.bluetooth.DataElement">
+		<constructor modifiers="public">
+			<parameter type="int" />
+		</constructor>
+		<constructor modifiers="public">
+			<parameter type="boolean" />
+		</constructor>
+		<constructor modifiers="public">
+			<parameter type="int" />
+			<parameter type="long" />
+		</constructor>
+		<constructor modifiers="public">
+			<parameter type="int" />
+			<parameter type="java.lang.Object" />
+		</constructor>
+		<method modifiers="public" name="addElement" return="void">
+			<parameter type="javax.bluetooth.DataElement" />
+		</method>
+		<method modifiers="public" name="insertElementAt"
+			return="void">
+			<parameter type="javax.bluetooth.DataElement" />
+			<parameter type="int" />
+		</method>
+		<method modifiers="public" name="getSize" return="int" />
+		<method modifiers="public" name="removeElement"
+			return="boolean">
+			<parameter type="javax.bluetooth.DataElement" />
+		</method>
+		<method modifiers="public" name="getDataType" return="int" />
+		<method modifiers="public" name="getLong" return="long" />
+		<method modifiers="public" name="getBoolean" return="boolean" />
+		<method modifiers="public" name="getValue"
+			return="java.lang.Object" />
+		<method modifiers="public" name="toString"
+			return="java.lang.String" />
+		<field constant-value="0" modifiers="public static final"
+			name="NULL" type="int" />
+		<field constant-value="8" modifiers="public static final"
+			name="U_INT_1" type="int" />
+		<field constant-value="9" modifiers="public static final"
+			name="U_INT_2" type="int" />
+		<field constant-value="10" modifiers="public static final"
+			name="U_INT_4" type="int" />
+		<field constant-value="11" modifiers="public static final"
+			name="U_INT_8" type="int" />
+		<field constant-value="12" modifiers="public static final"
+			name="U_INT_16" type="int" />
+		<field constant-value="16" modifiers="public static final"
+			name="INT_1" type="int" />
+		<field constant-value="17" modifiers="public static final"
+			name="INT_2" type="int" />
+		<field constant-value="18" modifiers="public static final"
+			name="INT_4" type="int" />
+		<field constant-value="19" modifiers="public static final"
+			name="INT_8" type="int" />
+		<field constant-value="20" modifiers="public static final"
+			name="INT_16" type="int" />
+		<field constant-value="64" modifiers="public static final"
+			name="URL" type="int" />
+		<field constant-value="24" modifiers="public static final"
+			name="UUID" type="int" />
+		<field constant-value="40" modifiers="public static final"
+			name="BOOL" type="int" />
+		<field constant-value="32" modifiers="public static final"
+			name="STRING" type="int" />
+		<field constant-value="48" modifiers="public static final"
+			name="DATSEQ" type="int" />
+		<field constant-value="56" modifiers="public static final"
+			name="DATALT" type="int" />
+	</class>
+	<class modifiers="public" name="javax.bluetooth.DeviceClass">
+		<constructor modifiers="public">
+			<parameter type="int" />
+		</constructor>
+		<method modifiers="public" name="getServiceClasses"
+			return="int" />
+		<method modifiers="public" name="getMajorDeviceClass"
+			return="int" />
+		<method modifiers="public" name="getMinorDeviceClass"
+			return="int" />
+		<method modifiers="public" name="toString"
+			return="java.lang.String" />
+	</class>
+	<class modifiers="public" name="javax.bluetooth.DiscoveryAgent">
+		<constructor />
+		<method modifiers="public" name="retrieveDevices"
+			return="javax.bluetooth.RemoteDevice[]">
+			<parameter type="int" />
+		</method>
+		<method modifiers="public" name="startInquiry"
+			return="boolean">
+			<exception name="javax.bluetooth.BluetoothStateException" />
+			<parameter type="int" />
+			<parameter type="javax.bluetooth.DiscoveryListener" />
+		</method>
+		<method modifiers="public" name="cancelInquiry"
+			return="boolean">
+			<parameter type="javax.bluetooth.DiscoveryListener" />
+		</method>
+		<method modifiers="public" name="searchServices" return="int">
+			<exception name="javax.bluetooth.BluetoothStateException" />
+			<parameter type="int[]" />
+			<parameter type="javax.bluetooth.UUID[]" />
+			<parameter type="javax.bluetooth.RemoteDevice" />
+			<parameter type="javax.bluetooth.DiscoveryListener" />
+		</method>
+		<method modifiers="public" name="cancelServiceSearch"
+			return="boolean">
+			<parameter type="int" />
+		</method>
+		<method modifiers="public" name="selectService"
+			return="java.lang.String">
+			<exception name="javax.bluetooth.BluetoothStateException" />
+			<parameter type="javax.bluetooth.UUID" />
+			<parameter type="int" />
+			<parameter type="boolean" />
+		</method>
+		<field constant-value="0" modifiers="public static final"
+			name="NOT_DISCOVERABLE" type="int" />
+		<field constant-value="10390323" modifiers="public static final"
+			name="GIAC" type="int" />
+		<field constant-value="10390272" modifiers="public static final"
+			name="LIAC" type="int" />
+		<field constant-value="0" modifiers="public static final"
+			name="CACHED" type="int" />
+		<field constant-value="1" modifiers="public static final"
+			name="PREKNOWN" type="int" />
+	</class>
+	<interface modifiers="public"
+		name="javax.bluetooth.DiscoveryListener">
+		<method modifiers="public abstract" name="deviceDiscovered"
+			return="void">
+			<parameter type="javax.bluetooth.RemoteDevice" />
+			<parameter type="javax.bluetooth.DeviceClass" />
+		</method>
+		<method modifiers="public abstract" name="servicesDiscovered"
+			return="void">
+			<parameter type="int" />
+			<parameter type="javax.bluetooth.ServiceRecord[]" />
+		</method>
+		<method modifiers="public abstract"
+			name="serviceSearchCompleted" return="void">
+			<parameter type="int" />
+			<parameter type="int" />
+		</method>
+		<method modifiers="public abstract" name="inquiryCompleted"
+			return="void">
+			<parameter type="int" />
+		</method>
+		<field constant-value="0" modifiers="public static final"
+			name="INQUIRY_COMPLETED" type="int" />
+		<field constant-value="5" modifiers="public static final"
+			name="INQUIRY_TERMINATED" type="int" />
+		<field constant-value="7" modifiers="public static final"
+			name="INQUIRY_ERROR" type="int" />
+		<field constant-value="1" modifiers="public static final"
+			name="SERVICE_SEARCH_COMPLETED" type="int" />
+		<field constant-value="2" modifiers="public static final"
+			name="SERVICE_SEARCH_TERMINATED" type="int" />
+		<field constant-value="3" modifiers="public static final"
+			name="SERVICE_SEARCH_ERROR" type="int" />
+		<field constant-value="4" modifiers="public static final"
+			name="SERVICE_SEARCH_NO_RECORDS" type="int" />
+		<field constant-value="6" modifiers="public static final"
+			name="SERVICE_SEARCH_DEVICE_NOT_REACHABLE" type="int" />
+	</interface>
+	<interface modifiers="public"
+		name="javax.bluetooth.L2CAPConnection">
+		<implements>
+			<interface name="javax.microedition.io.Connection" />
+		</implements>
+		<method modifiers="public abstract" name="getTransmitMTU"
+			return="int">
+			<exception name="java.io.IOException" />
+		</method>
+		<method modifiers="public abstract" name="getReceiveMTU"
+			return="int">
+			<exception name="java.io.IOException" />
+		</method>
+		<method modifiers="public abstract" name="send" return="void">
+			<exception name="java.io.IOException" />
+			<parameter type="byte[]" />
+		</method>
+		<method modifiers="public abstract" name="receive"
+			return="int">
+			<exception name="java.io.IOException" />
+			<parameter type="byte[]" />
+		</method>
+		<method modifiers="public abstract" name="ready"
+			return="boolean">
+			<exception name="java.io.IOException" />
+		</method>
+		<field constant-value="672" modifiers="public static final"
+			name="DEFAULT_MTU" type="int" />
+		<field constant-value="48" modifiers="public static final"
+			name="MINIMUM_MTU" type="int" />
+	</interface>
+	<interface modifiers="public"
+		name="javax.bluetooth.L2CAPConnectionNotifier">
+		<implements>
+			<interface name="javax.microedition.io.Connection" />
+		</implements>
+		<method modifiers="public abstract" name="acceptAndOpen"
+			return="javax.bluetooth.L2CAPConnection">
+			<exception name="java.io.IOException" />
+		</method>
+	</interface>
+	<class modifiers="public" name="javax.bluetooth.LocalDevice">
+		<method modifiers="public static" name="getLocalDevice"
+			return="javax.bluetooth.LocalDevice">
+			<exception name="javax.bluetooth.BluetoothStateException" />
+		</method>
+		<method modifiers="public" name="getDiscoveryAgent"
+			return="javax.bluetooth.DiscoveryAgent" />
+		<method modifiers="public" name="getFriendlyName"
+			return="java.lang.String" />
+		<method modifiers="public" name="getDeviceClass"
+			return="javax.bluetooth.DeviceClass" />
+		<method modifiers="public" name="setDiscoverable"
+			return="boolean">
+			<exception name="javax.bluetooth.BluetoothStateException" />
+			<parameter type="int" />
+		</method>
+		<method modifiers="public static" name="isPowerOn"
+			return="boolean" />
+		<method modifiers="public" name="getDiscoverable" return="int" />
+		<method modifiers="public static" name="getProperty"
+			return="java.lang.String">
+			<parameter type="java.lang.String" />
+		</method>
+		<method modifiers="public" name="getBluetoothAddress"
+			return="java.lang.String" />
+		<method modifiers="public" name="getRecord"
+			return="javax.bluetooth.ServiceRecord">
+			<parameter type="javax.microedition.io.Connection" />
+		</method>
+		<method modifiers="public" name="updateRecord" return="void">
+			<exception
+				name="javax.bluetooth.ServiceRegistrationException" />
+			<parameter type="javax.bluetooth.ServiceRecord" />
+		</method>
+	</class>
+	<class modifiers="public" name="javax.bluetooth.RemoteDevice">
+		<constructor modifiers="protected">
+			<parameter type="java.lang.String" />
+		</constructor>
+		<method modifiers="public" name="isTrustedDevice"
+			return="boolean" />
+		<method modifiers="public" name="getFriendlyName"
+			return="java.lang.String">
+			<exception name="java.io.IOException" />
+			<parameter type="boolean" />
+		</method>
+		<method modifiers="public final" name="getBluetoothAddress"
+			return="java.lang.String" />
+		<method modifiers="public" name="equals" return="boolean">
+			<parameter type="java.lang.Object" />
+		</method>
+		<method modifiers="public" name="hashCode" return="int" />
+		<method modifiers="public static" name="getRemoteDevice"
+			return="javax.bluetooth.RemoteDevice">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.microedition.io.Connection" />
+		</method>
+		<method modifiers="public" name="authenticate"
+			return="boolean">
+			<exception name="java.io.IOException" />
+		</method>
+		<method modifiers="public" name="authorize" return="boolean">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.microedition.io.Connection" />
+		</method>
+		<method modifiers="public" name="encrypt" return="boolean">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.microedition.io.Connection" />
+			<parameter type="boolean" />
+		</method>
+		<method modifiers="public" name="isAuthenticated"
+			return="boolean" />
+		<method modifiers="public" name="isAuthorized"
+			return="boolean">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.microedition.io.Connection" />
+		</method>
+		<method modifiers="public" name="isEncrypted" return="boolean" />
+	</class>
+	<interface modifiers="public"
+		name="javax.bluetooth.ServiceRecord">
+		<method modifiers="public abstract" name="getAttributeValue"
+			return="javax.bluetooth.DataElement">
+			<parameter type="int" />
+		</method>
+		<method modifiers="public abstract" name="getHostDevice"
+			return="javax.bluetooth.RemoteDevice" />
+		<method modifiers="public abstract" name="getAttributeIDs"
+			return="int[]" />
+		<method modifiers="public abstract" name="populateRecord"
+			return="boolean">
+			<exception name="java.io.IOException" />
+			<parameter type="int[]" />
+		</method>
+		<method modifiers="public abstract" name="getConnectionURL"
+			return="java.lang.String">
+			<parameter type="int" />
+			<parameter type="boolean" />
+		</method>
+		<method modifiers="public abstract"
+			name="setDeviceServiceClasses" return="void">
+			<parameter type="int" />
+		</method>
+		<method modifiers="public abstract" name="setAttributeValue"
+			return="boolean">
+			<parameter type="int" />
+			<parameter type="javax.bluetooth.DataElement" />
+		</method>
+		<field constant-value="0" modifiers="public static final"
+			name="NOAUTHENTICATE_NOENCRYPT" type="int" />
+		<field constant-value="1" modifiers="public static final"
+			name="AUTHENTICATE_NOENCRYPT" type="int" />
+		<field constant-value="2" modifiers="public static final"
+			name="AUTHENTICATE_ENCRYPT" type="int" />
+	</interface>
+	<class extends="java.io.IOException" modifiers="public"
+		name="javax.bluetooth.ServiceRegistrationException">
+		<constructor modifiers="public" />
+		<constructor modifiers="public">
+			<parameter type="java.lang.String" />
+		</constructor>
+	</class>
+	<class modifiers="public" name="javax.bluetooth.UUID">
+		<constructor modifiers="public">
+			<parameter type="long" />
+		</constructor>
+		<constructor modifiers="public">
+			<parameter type="java.lang.String" />
+			<parameter type="boolean" />
+		</constructor>
+		<method modifiers="public" name="toString"
+			return="java.lang.String" />
+		<method modifiers="public" name="equals" return="boolean">
+			<parameter type="java.lang.Object" />
+		</method>
+		<method modifiers="public" name="hashCode" return="int" />
+	</class>
+</signature>

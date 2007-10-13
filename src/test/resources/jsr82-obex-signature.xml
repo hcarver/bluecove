@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- @version $Id$ -->
+<signature>
+	<interface modifiers="public" name="javax.obex.Authenticator">
+		<method modifiers="public abstract"
+			name="onAuthenticationChallenge"
+			return="javax.obex.PasswordAuthentication">
+			<parameter type="java.lang.String" />
+			<parameter type="boolean" />
+			<parameter type="boolean" />
+		</method>
+		<method modifiers="public abstract"
+			name="onAuthenticationResponse" return="byte[]">
+			<parameter type="byte[]" />
+		</method>
+	</interface>
+	<interface modifiers="public" name="javax.obex.ClientSession">
+		<implements>
+			<interface name="javax.microedition.io.Connection" />
+		</implements>
+		<method modifiers="public abstract" name="setAuthenticator"
+			return="void">
+			<parameter type="javax.obex.Authenticator" />
+		</method>
+		<method modifiers="public abstract" name="createHeaderSet"
+			return="javax.obex.HeaderSet" />
+		<method modifiers="public abstract" name="setConnectionID"
+			return="void">
+			<parameter type="long" />
+		</method>
+		<method modifiers="public abstract" name="getConnectionID"
+			return="long" />
+		<method modifiers="public abstract" name="connect"
+			return="javax.obex.HeaderSet">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.obex.HeaderSet" />
+		</method>
+		<method modifiers="public abstract" name="disconnect"
+			return="javax.obex.HeaderSet">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.obex.HeaderSet" />
+		</method>
+		<method modifiers="public abstract" name="setPath"
+			return="javax.obex.HeaderSet">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.obex.HeaderSet" />
+			<parameter type="boolean" />
+			<parameter type="boolean" />
+		</method>
+		<method modifiers="public abstract" name="delete"
+			return="javax.obex.HeaderSet">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.obex.HeaderSet" />
+		</method>
+		<method modifiers="public abstract" name="get"
+			return="javax.obex.Operation">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.obex.HeaderSet" />
+		</method>
+		<method modifiers="public abstract" name="put"
+			return="javax.obex.Operation">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.obex.HeaderSet" />
+		</method>
+	</interface>
+	<interface modifiers="public" name="javax.obex.HeaderSet">
+		<method modifiers="public abstract" name="setHeader"
+			return="void">
+			<parameter type="int" />
+			<parameter type="java.lang.Object" />
+		</method>
+		<method modifiers="public abstract" name="getHeader"
+			return="java.lang.Object">
+			<exception name="java.io.IOException" />
+			<parameter type="int" />
+		</method>
+		<method modifiers="public abstract" name="getHeaderList"
+			return="int[]">
+			<exception name="java.io.IOException" />
+		</method>
+		<method modifiers="public abstract"
+			name="createAuthenticationChallenge" return="void">
+			<parameter type="java.lang.String" />
+			<parameter type="boolean" />
+			<parameter type="boolean" />
+		</method>
+		<method modifiers="public abstract" name="getResponseCode"
+			return="int">
+			<exception name="java.io.IOException" />
+		</method>
+		<field constant-value="192" modifiers="public static final"
+			name="COUNT" type="int" />
+		<field constant-value="1" modifiers="public static final"
+			name="NAME" type="int" />
+		<field constant-value="66" modifiers="public static final"
+			name="TYPE" type="int" />
+		<field constant-value="195" modifiers="public static final"
+			name="LENGTH" type="int" />
+		<field constant-value="68" modifiers="public static final"
+			name="TIME_ISO_8601" type="int" />
+		<field constant-value="196" modifiers="public static final"
+			name="TIME_4_BYTE" type="int" />
+		<field constant-value="5" modifiers="public static final"
+			name="DESCRIPTION" type="int" />
+		<field constant-value="70" modifiers="public static final"
+			name="TARGET" type="int" />
+		<field constant-value="71" modifiers="public static final"
+			name="HTTP" type="int" />
+		<field constant-value="74" modifiers="public static final"
+			name="WHO" type="int" />
+		<field constant-value="79" modifiers="public static final"
+			name="OBJECT_CLASS" type="int" />
+		<field constant-value="76" modifiers="public static final"
+			name="APPLICATION_PARAMETER" type="int" />
+	</interface>
+	<interface modifiers="public" name="javax.obex.Operation">
+		<implements>
+			<interface name="javax.microedition.io.ContentConnection" />
+		</implements>
+		<method modifiers="public abstract" name="abort"
+			return="void">
+			<exception name="java.io.IOException" />
+		</method>
+		<method modifiers="public abstract" name="getReceivedHeaders"
+			return="javax.obex.HeaderSet">
+			<exception name="java.io.IOException" />
+		</method>
+		<method modifiers="public abstract" name="sendHeaders"
+			return="void">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.obex.HeaderSet" />
+		</method>
+		<method modifiers="public abstract" name="getResponseCode"
+			return="int">
+			<exception name="java.io.IOException" />
+		</method>
+	</interface>
+	<class modifiers="public"
+		name="javax.obex.PasswordAuthentication">
+		<constructor modifiers="public">
+			<parameter type="byte[]" />
+			<parameter type="byte[]" />
+		</constructor>
+		<method modifiers="public" name="getUserName" return="byte[]" />
+		<method modifiers="public" name="getPassword" return="byte[]" />
+	</class>
+	<class modifiers="public" name="javax.obex.ResponseCodes">
+		<field constant-value="160" modifiers="public static final"
+			name="OBEX_HTTP_OK" type="int" />
+		<field constant-value="161" modifiers="public static final"
+			name="OBEX_HTTP_CREATED" type="int" />
+		<field constant-value="162" modifiers="public static final"
+			name="OBEX_HTTP_ACCEPTED" type="int" />
+		<field constant-value="163" modifiers="public static final"
+			name="OBEX_HTTP_NOT_AUTHORITATIVE" type="int" />
+		<field constant-value="164" modifiers="public static final"
+			name="OBEX_HTTP_NO_CONTENT" type="int" />
+		<field constant-value="165" modifiers="public static final"
+			name="OBEX_HTTP_RESET" type="int" />
+		<field constant-value="166" modifiers="public static final"
+			name="OBEX_HTTP_PARTIAL" type="int" />
+		<field constant-value="176" modifiers="public static final"
+			name="OBEX_HTTP_MULT_CHOICE" type="int" />
+		<field constant-value="177" modifiers="public static final"
+			name="OBEX_HTTP_MOVED_PERM" type="int" />
+		<field constant-value="178" modifiers="public static final"
+			name="OBEX_HTTP_MOVED_TEMP" type="int" />
+		<field constant-value="179" modifiers="public static final"
+			name="OBEX_HTTP_SEE_OTHER" type="int" />
+		<field constant-value="180" modifiers="public static final"
+			name="OBEX_HTTP_NOT_MODIFIED" type="int" />
+		<field constant-value="181" modifiers="public static final"
+			name="OBEX_HTTP_USE_PROXY" type="int" />
+		<field constant-value="192" modifiers="public static final"
+			name="OBEX_HTTP_BAD_REQUEST" type="int" />
+		<field constant-value="193" modifiers="public static final"
+			name="OBEX_HTTP_UNAUTHORIZED" type="int" />
+		<field constant-value="194" modifiers="public static final"
+			name="OBEX_HTTP_PAYMENT_REQUIRED" type="int" />
+		<field constant-value="195" modifiers="public static final"
+			name="OBEX_HTTP_FORBIDDEN" type="int" />
+		<field constant-value="196" modifiers="public static final"
+			name="OBEX_HTTP_NOT_FOUND" type="int" />
+		<field constant-value="197" modifiers="public static final"
+			name="OBEX_HTTP_BAD_METHOD" type="int" />
+		<field constant-value="198" modifiers="public static final"
+			name="OBEX_HTTP_NOT_ACCEPTABLE" type="int" />
+		<field constant-value="199" modifiers="public static final"
+			name="OBEX_HTTP_PROXY_AUTH" type="int" />
+		<field constant-value="200" modifiers="public static final"
+			name="OBEX_HTTP_TIMEOUT" type="int" />
+		<field constant-value="201" modifiers="public static final"
+			name="OBEX_HTTP_CONFLICT" type="int" />
+		<field constant-value="202" modifiers="public static final"
+			name="OBEX_HTTP_GONE" type="int" />
+		<field constant-value="203" modifiers="public static final"
+			name="OBEX_HTTP_LENGTH_REQUIRED" type="int" />
+		<field constant-value="204" modifiers="public static final"
+			name="OBEX_HTTP_PRECON_FAILED" type="int" />
+		<field constant-value="205" modifiers="public static final"
+			name="OBEX_HTTP_ENTITY_TOO_LARGE" type="int" />
+		<field constant-value="206" modifiers="public static final"
+			name="OBEX_HTTP_REQ_TOO_LARGE" type="int" />
+		<field constant-value="207" modifiers="public static final"
+			name="OBEX_HTTP_UNSUPPORTED_TYPE" type="int" />
+		<field constant-value="208" modifiers="public static final"
+			name="OBEX_HTTP_INTERNAL_ERROR" type="int" />
+		<field constant-value="209" modifiers="public static final"
+			name="OBEX_HTTP_NOT_IMPLEMENTED" type="int" />
+		<field constant-value="210" modifiers="public static final"
+			name="OBEX_HTTP_BAD_GATEWAY" type="int" />
+		<field constant-value="211" modifiers="public static final"
+			name="OBEX_HTTP_UNAVAILABLE" type="int" />
+		<field constant-value="212" modifiers="public static final"
+			name="OBEX_HTTP_GATEWAY_TIMEOUT" type="int" />
+		<field constant-value="213" modifiers="public static final"
+			name="OBEX_HTTP_VERSION" type="int" />
+		<field constant-value="224" modifiers="public static final"
+			name="OBEX_DATABASE_FULL" type="int" />
+		<field constant-value="225" modifiers="public static final"
+			name="OBEX_DATABASE_LOCKED" type="int" />
+	</class>
+	<class modifiers="public" name="javax.obex.ServerRequestHandler">
+		<constructor modifiers="protected" />
+		<method modifiers="public final" name="createHeaderSet"
+			return="javax.obex.HeaderSet" />
+		<method modifiers="public" name="setConnectionID"
+			return="void">
+			<parameter type="long" />
+		</method>
+		<method modifiers="public" name="getConnectionID" return="long" />
+		<method modifiers="public" name="onConnect" return="int">
+			<parameter type="javax.obex.HeaderSet" />
+			<parameter type="javax.obex.HeaderSet" />
+		</method>
+		<method modifiers="public" name="onDisconnect" return="void">
+			<parameter type="javax.obex.HeaderSet" />
+			<parameter type="javax.obex.HeaderSet" />
+		</method>
+		<method modifiers="public" name="onSetPath" return="int">
+			<parameter type="javax.obex.HeaderSet" />
+			<parameter type="javax.obex.HeaderSet" />
+			<parameter type="boolean" />
+			<parameter type="boolean" />
+		</method>
+		<method modifiers="public" name="onDelete" return="int">
+			<parameter type="javax.obex.HeaderSet" />
+			<parameter type="javax.obex.HeaderSet" />
+		</method>
+		<method modifiers="public" name="onPut" return="int">
+			<parameter type="javax.obex.Operation" />
+		</method>
+		<method modifiers="public" name="onGet" return="int">
+			<parameter type="javax.obex.Operation" />
+		</method>
+		<method modifiers="public" name="onAuthenticationFailure"
+			return="void">
+			<parameter type="byte[]" />
+		</method>
+	</class>
+	<interface modifiers="public" name="javax.obex.SessionNotifier">
+		<implements>
+			<interface name="javax.microedition.io.Connection" />
+		</implements>
+		<method modifiers="public abstract" name="acceptAndOpen"
+			return="javax.microedition.io.Connection">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.obex.ServerRequestHandler" />
+		</method>
+		<method modifiers="public abstract" name="acceptAndOpen"
+			return="javax.microedition.io.Connection">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.obex.ServerRequestHandler" />
+			<parameter type="javax.obex.Authenticator" />
+		</method>
+	</interface>
+</signature>

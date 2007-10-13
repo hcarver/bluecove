@@ -156,9 +156,17 @@
             </dependency>
 
             <dependency>
+                <groupId>net.sf.jour</groupId>
+                <artifactId>jour-instrument</artifactId>
+                <version>2.0.1-SNAPSHOT</version>
+                <scope>test</scope>
+                <optional>true</optional>
+            </dependency>
+
+            <dependency>
                 <groupId>jboss</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.3.ga</version>
+                <version>3.4.ga</version>
                 <scope>test</scope>
                 <optional>true</optional>
             </dependency>
