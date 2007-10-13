@@ -228,13 +228,6 @@
                         <include>**/*Test.*</include>
                         <include>**/*Tests.*</include>
                     </includes>
-                    <systemProperties>
-                        <!-- Used for APIDeclarations Tests -->
-                        <property>
-                            <name>WTK_HOME</name>
-                            <value>${env.WTK_HOME}</value>
-                        </property>
-                    </systemProperties>
                 </configuration>
             </plugin>
 
