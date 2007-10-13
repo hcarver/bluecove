@@ -115,7 +115,6 @@
 			return="java.lang.String" />
 	</class>
 	<class modifiers="public" name="javax.bluetooth.DiscoveryAgent">
-		<constructor />
 		<method modifiers="public" name="retrieveDevices"
 			return="javax.bluetooth.RemoteDevice[]">
 			<parameter type="int" />
