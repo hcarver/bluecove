@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- @version $Id$ -->
+<signature>
+	<interface modifiers="public"
+		name="javax.microedition.io.Connection">
+		<method modifiers="public abstract" name="close"
+			return="void">
+			<exception name="java.io.IOException" />
+		</method>
+	</interface>
+	<class extends="java.io.IOException" modifiers="public"
+		name="javax.microedition.io.ConnectionNotFoundException">
+		<constructor modifiers="public" />
+		<constructor modifiers="public">
+			<parameter type="java.lang.String" />
+		</constructor>
+	</class>
+	<class modifiers="public" name="javax.microedition.io.Connector">
+		<method modifiers="public static" name="open"
+			return="javax.microedition.io.Connection">
+			<exception name="java.io.IOException" />
+			<parameter type="java.lang.String" />
+		</method>
+		<method modifiers="public static" name="open"
+			return="javax.microedition.io.Connection">
+			<exception name="java.io.IOException" />
+			<parameter type="java.lang.String" />
+			<parameter type="int" />
+		</method>
+		<method modifiers="public static" name="open"
+			return="javax.microedition.io.Connection">
+			<exception name="java.io.IOException" />
+			<parameter type="java.lang.String" />
+			<parameter type="int" />
+			<parameter type="boolean" />
+		</method>
+		<method modifiers="public static" name="openDataInputStream"
+			return="java.io.DataInputStream">
+			<exception name="java.io.IOException" />
+			<parameter type="java.lang.String" />
+		</method>
+		<method modifiers="public static" name="openDataOutputStream"
+			return="java.io.DataOutputStream">
+			<exception name="java.io.IOException" />
+			<parameter type="java.lang.String" />
+		</method>
+		<method modifiers="public static" name="openInputStream"
+			return="java.io.InputStream">
+			<exception name="java.io.IOException" />
+			<parameter type="java.lang.String" />
+		</method>
+		<method modifiers="public static" name="openOutputStream"
+			return="java.io.OutputStream">
+			<exception name="java.io.IOException" />
+			<parameter type="java.lang.String" />
+		</method>
+		<field constant-value="1" modifiers="public static final"
+			name="READ" type="int" />
+		<field constant-value="2" modifiers="public static final"
+			name="WRITE" type="int" />
+		<field constant-value="3" modifiers="public static final"
+			name="READ_WRITE" type="int" />
+	</class>
+	<interface modifiers="public"
+		name="javax.microedition.io.ContentConnection">
+		<implements>
+			<interface name="javax.microedition.io.StreamConnection" />
+		</implements>
+		<method modifiers="public abstract" name="getType"
+			return="java.lang.String" />
+		<method modifiers="public abstract" name="getEncoding"
+			return="java.lang.String" />
+		<method modifiers="public abstract" name="getLength"
+			return="long" />
+	</interface>
+<!-- 	
+	<interface modifiers="public"
+		name="javax.microedition.io.Datagram">
+		<implements>
+			<interface name="java.io.DataInput" />
+			<interface name="java.io.DataOutput" />
+		</implements>
+		<method modifiers="public abstract" name="getAddress"
+			return="java.lang.String" />
+		<method modifiers="public abstract" name="getData"
+			return="byte[]" />
+		<method modifiers="public abstract" name="getLength"
+			return="int" />
+		<method modifiers="public abstract" name="getOffset"
+			return="int" />
+		<method modifiers="public abstract" name="setAddress"
+			return="void">
+			<exception name="java.io.IOException" />
+			<parameter type="java.lang.String" />
+		</method>
+		<method modifiers="public abstract" name="setAddress"
+			return="void">
+			<parameter type="javax.microedition.io.Datagram" />
+		</method>
+		<method modifiers="public abstract" name="setLength"
+			return="void">
+			<parameter type="int" />
+		</method>
+		<method modifiers="public abstract" name="setData"
+			return="void">
+			<parameter type="byte[]" />
+			<parameter type="int" />
+			<parameter type="int" />
+		</method>
+		<method modifiers="public abstract" name="reset" return="void" />
+	</interface>
+	<interface modifiers="public"
+		name="javax.microedition.io.DatagramConnection">
+		<implements>
+			<interface name="javax.microedition.io.Connection" />
+		</implements>
+		<method modifiers="public abstract" name="getMaximumLength"
+			return="int">
+			<exception name="java.io.IOException" />
+		</method>
+		<method modifiers="public abstract" name="getNominalLength"
+			return="int">
+			<exception name="java.io.IOException" />
+		</method>
+		<method modifiers="public abstract" name="send" return="void">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.microedition.io.Datagram" />
+		</method>
+		<method modifiers="public abstract" name="receive"
+			return="void">
+			<exception name="java.io.IOException" />
+			<parameter type="javax.microedition.io.Datagram" />
+		</method>
+		<method modifiers="public abstract" name="newDatagram"
+			return="javax.microedition.io.Datagram">
+			<exception name="java.io.IOException" />
+			<parameter type="int" />
+		</method>
+		<method modifiers="public abstract" name="newDatagram"
+			return="javax.microedition.io.Datagram">
+			<exception name="java.io.IOException" />
+			<parameter type="int" />
+			<parameter type="java.lang.String" />
+		</method>
+		<method modifiers="public abstract" name="newDatagram"
+			return="javax.microedition.io.Datagram">
+			<exception name="java.io.IOException" />
+			<parameter type="byte[]" />
+			<parameter type="int" />
+		</method>
+		<method modifiers="public abstract" name="newDatagram"
+			return="javax.microedition.io.Datagram">
+			<exception name="java.io.IOException" />
+			<parameter type="byte[]" />
+			<parameter type="int" />
+			<parameter type="java.lang.String" />
+		</method>
+	</interface>
+-->	
+	<interface modifiers="public"
+		name="javax.microedition.io.InputConnection">
+		<implements>
+			<interface name="javax.microedition.io.Connection" />
+		</implements>
+		<method modifiers="public abstract" name="openInputStream"
+			return="java.io.InputStream">
+			<exception name="java.io.IOException" />
+		</method>
+		<method modifiers="public abstract" name="openDataInputStream"
+			return="java.io.DataInputStream">
+			<exception name="java.io.IOException" />
+		</method>
+	</interface>
+	<interface modifiers="public"
+		name="javax.microedition.io.OutputConnection">
+		<implements>
+			<interface name="javax.microedition.io.Connection" />
+		</implements>
+		<method modifiers="public abstract" name="openOutputStream"
+			return="java.io.OutputStream">
+			<exception name="java.io.IOException" />
+		</method>
+		<method modifiers="public abstract" name="openDataOutputStream"
+			return="java.io.DataOutputStream">
+			<exception name="java.io.IOException" />
+		</method>
+	</interface>
+	<interface modifiers="public"
+		name="javax.microedition.io.StreamConnection">
+		<implements>
+			<interface name="javax.microedition.io.InputConnection" />
+			<interface name="javax.microedition.io.OutputConnection" />
+		</implements>
+	</interface>
+	<interface modifiers="public"
+		name="javax.microedition.io.StreamConnectionNotifier">
+		<implements>
+			<interface name="javax.microedition.io.Connection" />
+		</implements>
+		<method modifiers="public abstract" name="acceptAndOpen"
+			return="javax.microedition.io.StreamConnection">
+			<exception name="java.io.IOException" />
+		</method>
+	</interface>
+</signature>
