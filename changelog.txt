@@ -4,6 +4,7 @@
 
     2007-10-04
     * fixed initialization exceptions, e.g. BluetoothStateException when device is not ready or no stack found
+    * No need for WTK to run the build.
 
     2007-09-09
     * connection and stream close() functions will work according to specification.
