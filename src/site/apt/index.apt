@@ -7,7 +7,9 @@
 
 BlueCove
 
-    BlueCove is a Java library for Bluetooth (JSR-82 implementation) that currently interfaces with the WIDCOMM, BlueSoleil and Microsoft Bluetooth stack found in Windows XP SP2 or Windows Vista.
+    BlueCove is a Java library for Bluetooth (JSR-82 implementation) that currently interfaces with the WIDCOMM, BlueSoleil and Microsoft Bluetooth stack found in Windows XP SP2 or Windows Vista
+    and WIDCOMM and Microsoft Bluetooth stack on Windows Mobile.
+
     BlueCove can be used in  Java 2 Platform Standard Edition (J2SE).
 
     Main project website {{{http://code.google.com/p/bluecove/}http://code.google.com/p/bluecove/}}
@@ -18,3 +20,22 @@ BlueCove
 
     JSR 82 TCK test results {{{tck}here}}.
 
+* BlueCove examples
+
+    * BlueCove OBEX Push J2ME application installer {{{bluecove-examples/obex-install}here}}.
+
+    * MIDlet application {{{http://www.mgmaps.com/}Mobile GMaps}} created by Cristian Streng wil connect to GPS receiver over bluetooth. <<<{{{bluecove-examples/bluecove-webstart/open/wap.mgmaps.com/mgmaps.jnlp}\u00bbStart now}}>>>.
+
+    BlueCove provides an implementation of the JSR 82. Applications should use {{{apidocs/index.html}API defined in JSR-82}}.
+
+    We created a short (50 lines of code each) examples for you to get started with JSR-82 application development:
+
+    * {{{apidocs/overview-summary.html#DeviceDiscovery}Remote Device Discovery}}
+
+    * {{{apidocs/overview-summary.html#ServicesSearch}Services Search}}
+
+    * {{{apidocs/overview-summary.html#OBEXPutClient}OBEX Put Client}}
+
+    * {{{apidocs/overview-summary.html#OBEXPutServer}OBEX Put Server}}
+
+    []
