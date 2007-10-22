@@ -39,7 +39,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "BLUECOVE_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "$(JAVA_HOME)\include" /I "$(JAVA_HOME)\include\win32" /I "$(ProgramFiles)\Widcomm\BTW DK\SDK\Inc" /I "$(ProgramFiles)\IVT Corporation\BlueSoleil\api" /I "$(ProgramFiles)\Toshiba\Bluetooth Toshiba Stack\SDK\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "UNICODE" /D "BLUECOVE_EXPORTS" /D "_BTWLIB" /D "BLUECOVE_TOSHIBA" /FR /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "$(JAVA_HOME)\include" /I "$(JAVA_HOME)\include\win32" /I "$(ProgramFiles)\Widcomm\BTW DK\SDK\Inc" /I "$(ProgramFiles)\IVT Corporation\BlueSoleil\api" /I "$(ProgramFiles)\Toshiba\Bluetooth Toshiba Stack\SDK\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "UNICODE" /D "BLUECOVE_EXPORTS" /D "_BTWLIB" /D "xBLUECOVE_TOSHIBA" /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
