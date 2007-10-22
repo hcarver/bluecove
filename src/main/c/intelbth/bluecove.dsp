@@ -39,7 +39,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "BLUECOVE_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "$(JAVA_HOME)\include" /I "$(JAVA_HOME)\include\win32" /I "$(ProgramFiles)\Widcomm\BTW DK\SDK\Inc" /I "$(ProgramFiles)\IVT Corporation\BlueSoleil\api" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "UNICODE" /D "BLUECOVE_EXPORTS" /D "_BTWLIB" /FR /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "$(JAVA_HOME)\include" /I "$(JAVA_HOME)\include\win32" /I "$(ProgramFiles)\Widcomm\BTW DK\SDK\Inc" /I "$(ProgramFiles)\IVT Corporation\BlueSoleil\api" /I "$(ProgramFiles)\Toshiba\Bluetooth Toshiba Stack\SDK\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "UNICODE" /D "BLUECOVE_EXPORTS" /D "_BTWLIB" /D "BLUECOVE_TOSHIBA" /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -50,7 +50,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 ws2_32.lib version.lib advapi32.lib user32.lib winspool.lib ole32.lib /nologo /dll /machine:I386 /out:"..\..\resources\bluecove.dll" /libpath:"$(ProgramFiles)\Widcomm\BTW DK\SDK\Release" /libpath:"$(ProgramFiles)\IVT Corporation\BlueSoleil\api"
+# ADD LINK32 ws2_32.lib version.lib advapi32.lib user32.lib winspool.lib ole32.lib /nologo /dll /machine:I386 /out:"..\..\resources\bluecove.dll" /libpath:"$(ProgramFiles)\Widcomm\BTW DK\SDK\Release" /libpath:"$(ProgramFiles)\IVT Corporation\BlueSoleil\api" /libpath:"$(ProgramFiles)\Toshiba\Bluetooth Toshiba Stack\SDK\lib"
 # SUBTRACT LINK32 /pdb:none /incremental:yes
 # Begin Target
 
@@ -83,6 +83,10 @@ SOURCE=.\commonTest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ToshibaStack.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\WIDCOMMStack.cpp
 # End Source File
 # Begin Source File
@@ -103,6 +107,10 @@ SOURCE=.\com_intel_bluetooth_BluetoothStackBlueSoleil.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\com_intel_bluetooth_BluetoothStackToshiba.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\com_intel_bluetooth_BluetoothStackWIDCOMM.h
 # End Source File
 # Begin Source File
@@ -112,6 +120,10 @@ SOURCE=.\com_intel_bluetooth_NativeTestInterfaces.h
 # Begin Source File
 
 SOURCE=.\common.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ToshibaStack.h
 # End Source File
 # Begin Source File
 

@@ -213,11 +213,17 @@ BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer);
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid);
 void convertGUIDToUUIDBytes(GUID *uuid, jbyte *bytes);
 
+#define BLUECOVE_STACK_DETECT_MICROSOFT 1
+#define BLUECOVE_STACK_DETECT_WIDCOMM 2
+#define BLUECOVE_STACK_DETECT_BLUESOLEIL 4
+#define BLUECOVE_STACK_DETECT_TOSHIBA 8
+
 jint detectBluetoothStack(JNIEnv *env);
 jint blueCoveVersion();
 BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env);
 BOOL isWIDCOMMBluetoothStackPresent(JNIEnv *env);
 BOOL isBlueSoleilBluetoothStackPresent(JNIEnv *env);
+BOOL isToshibaBluetoothStackPresent(JNIEnv *env);
 
 #define cSTACK_CLOSED "Stack closed"
 #define cCONNECTION_CLOSED "Connection closed"

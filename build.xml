@@ -31,9 +31,11 @@
     <target name="jni-headers" depends="init"
         description="Create JNI headers" >
         <javah destdir="src/main/c/intelbth" classpath="${build}">
+            <class name="com.intel.bluetooth.NativeTestInterfaces"/>
             <class name="com.intel.bluetooth.BluetoothStackMicrosoft"/>
-            <class name="com.intel.bluetooth.BluetoothStackBlueSoleil"/>
             <class name="com.intel.bluetooth.BluetoothStackWIDCOMM"/>
+            <class name="com.intel.bluetooth.BluetoothStackBlueSoleil"/>
+            <class name="com.intel.bluetooth.BluetoothStackToshiba"/>
         </javah>
     </target>
 

@@ -266,14 +266,17 @@ jint detectBluetoothStack(JNIEnv *env) {
 	jint rc = 0;
 #ifndef VC6
 	if (isMicrosoftBluetoothStackPresent(env)) {
-		rc += 1;
+		rc += BLUECOVE_STACK_DETECT_MICROSOFT;
 	}
 #endif
 	if (isWIDCOMMBluetoothStackPresent(env)) {
-		rc += 2;
+		rc += BLUECOVE_STACK_DETECT_WIDCOMM;
 	}
 	if (isBlueSoleilBluetoothStackPresent(env)) {
-		rc += 4;
+		rc += BLUECOVE_STACK_DETECT_BLUESOLEIL;
+	}
+	if (isToshibaBluetoothStackPresent(env)) {
+		rc += BLUECOVE_STACK_DETECT_TOSHIBA;
 	}
 	return rc;
 }

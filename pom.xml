@@ -115,15 +115,6 @@
             <timezone>-5</timezone>
         </contributor>
 
-        <contributor>
-            <name>Hakan Lager</name>
-            <email>digiloo@gmail.com</email>
-            <roles>
-                <role>developer</role>
-                <role>developer-BlueZ</role>
-            </roles>
-        </contributor>
-
         <!--
         <contributor>
             <name></name>
@@ -202,6 +193,7 @@
                                 <className>com.intel.bluetooth.BluetoothStackMicrosoft</className>
                                 <className>com.intel.bluetooth.BluetoothStackWIDCOMM</className>
                                 <className>com.intel.bluetooth.BluetoothStackBlueSoleil</className>
+                                <className>com.intel.bluetooth.BluetoothStackToshiba</className>
                             </classNames>
                         </configuration>
                     </execution>

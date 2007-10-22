@@ -51,6 +51,10 @@ BlueSoleil:  intelbth.dll
 
     You don't need to have bluetooth BlueSoleil drivers installed to build the dll.
 
+Toshiba:
+    The Toshiba Bluetooth Stack SDK is free of charge, but requires a NDA with Toshiba. http://aps2.toshiba-tro.de/bluetooth/pages/faq/sdk.html
+    The Toshiba Bluetooth SDK should be installed in directory: $(ProgramFiles)\Toshiba\Bluetooth Toshiba Stack\SDK
+
 common.h
     Used instead of StdAfx.h
 

@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+# Visual C++ Express 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "intelbth", "intelbth.vcproj", "{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}"
 EndProject
 Global
@@ -10,6 +10,8 @@ Global
 		BlueSoleil|Win32 = BlueSoleil|Win32
 		Release|Pocket PC 2003 (ARMV4) = Release|Pocket PC 2003 (ARMV4)
 		Release|Win32 = Release|Win32
+		Toshiba|Pocket PC 2003 (ARMV4) = Toshiba|Pocket PC 2003 (ARMV4)
+		Toshiba|Win32 = Toshiba|Win32
 		WIDCOMM|Pocket PC 2003 (ARMV4) = WIDCOMM|Pocket PC 2003 (ARMV4)
 		WIDCOMM|Win32 = WIDCOMM|Win32
 		Winsock|Pocket PC 2003 (ARMV4) = Winsock|Pocket PC 2003 (ARMV4)
@@ -27,6 +29,9 @@ Global
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|Pocket PC 2003 (ARMV4).Build.0 = Release|Pocket PC 2003 (ARMV4)
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|Win32.ActiveCfg = Release|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|Win32.Build.0 = Release|Win32
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Toshiba|Pocket PC 2003 (ARMV4).ActiveCfg = Toshiba|Win32
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Toshiba|Win32.ActiveCfg = Toshiba|Win32
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Toshiba|Win32.Build.0 = Toshiba|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.WIDCOMM|Pocket PC 2003 (ARMV4).ActiveCfg = WIDCOMM|Pocket PC 2003 (ARMV4)
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.WIDCOMM|Pocket PC 2003 (ARMV4).Build.0 = WIDCOMM|Pocket PC 2003 (ARMV4)
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.WIDCOMM|Win32.ActiveCfg = WIDCOMM|Win32
