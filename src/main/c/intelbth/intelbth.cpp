@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "common.h"
 
-#include "com_intel_bluetooth_BluetoothPeer.h"
+#include "com_intel_bluetooth_BluetoothStackMicrosoft.h"
 
 #ifdef _WIN32_WCE
 #include <winsock2.h>
@@ -103,17 +103,17 @@ void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg) {
 	throwIOExceptionWinErrorMessage(env, msg, WSAGetLastError());
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getLibraryVersion
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getLibraryVersion
 (JNIEnv *, jobject) {
 	return blueCoveVersion();
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_detectBluetoothStack
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_detectBluetoothStack
 (JNIEnv *env, jobject) {
 	return detectBluetoothStack(env);
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_enableNativeDebug
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_enableNativeDebug
   (JNIEnv *env, jobject, jclass loggerClass, jboolean on) {
 	enableNativeDebug(env, loggerClass, on);
 }
@@ -152,7 +152,7 @@ BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env) {
 	return (btAddr.btAddr != 0);
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStatus(JNIEnv *env, jclass peerClass) {
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_initializationStatus(JNIEnv *env, jclass peerClass) {
 #ifdef _BTWINSOCKLIB
 	if (started) {
 #ifdef _WIN32_WCE
@@ -190,14 +190,14 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_initializationStat
 #endif // _BTWINSOCKLIB
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_uninitialize
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_uninitialize
 (JNIEnv *, jobject) {
 
 }
 
 #ifdef _BTWINSOCKLIB
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runDeviceInquiryImpl
 (JNIEnv *env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
 
     debug("->runDeviceInquiry");
@@ -391,7 +391,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_runDeviceInquiry
 	return result;
 }
 
-JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothPeer_cancelInquiry(JNIEnv *env, jobject peer) {
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_cancelInquiry(JNIEnv *env, jobject peer) {
 	debug("->cancelInquiry");
 	EnterCriticalSection(&csLookup);
 
@@ -412,7 +412,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothPeer_cancelInquiry(
 }
 
 
-JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServices
+JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runSearchServices
 (JNIEnv *env, jobject peer, jobjectArray uuidSet, jlong address)
 {
 	debug("->runSearchServices");
@@ -578,7 +578,7 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_runSearchServ
 	return result;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceAttributes(JNIEnv *env, jobject peer, jintArray attrIDs, jlong address, jint handle)
+JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getServiceAttributes(JNIEnv *env, jobject peer, jintArray attrIDs, jlong address, jint handle)
 {
     debug("->getServiceAttributes");
 #ifdef _WIN32_WCE
@@ -715,7 +715,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothPeer_getServiceAt
 	return result;
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_registerService(JNIEnv *env, jobject peer, jbyteArray record) {
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_registerService(JNIEnv *env, jobject peer, jbyteArray record) {
 	debug("->registerService");
 	int length = env->GetArrayLength(record);
 
@@ -777,7 +777,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_registerService(J
 }
 
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_unregisterService(JNIEnv *env, jobject peer, jlong handle) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_unregisterService(JNIEnv *env, jobject peer, jlong handle) {
 	debug("->unregisterService");
 	// build service set
 
@@ -822,7 +822,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_unregisterService(
 	}
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *env, jobject peer, jboolean authenticate, jboolean encrypt) {
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_socket(JNIEnv *env, jobject peer, jboolean authenticate, jboolean encrypt) {
     debug("->socket");
 	// create socket
 
@@ -862,7 +862,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_socket(JNIEnv *en
 
 /* This does not work: [10042] An unknown, invalid, or unsupported option or level was specified in a getsockopt or setsockopt call. */
 /*
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getSecurityOptImpl(JNIEnv * env, jobject peer, jlong socket) {
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getSecurityOptImpl(JNIEnv * env, jobject peer, jlong socket) {
 	ULONG authenticatedVal = FALSE;
 	int optLen = sizeof(ULONG);
 	if (getsockopt((SOCKET)socket, SOL_RFCOMM,  SO_BTH_AUTHENTICATE,  (char*)&authenticatedVal,  &optLen) == SOCKET_ERROR) {
@@ -887,7 +887,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getSecurityOptImpl
 }
 */
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockaddress(JNIEnv *env, jobject peer, jlong socket) {
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getsockaddress(JNIEnv *env, jobject peer, jlong socket) {
 	debug("->getsockaddress");
 	// get socket name
 
@@ -902,7 +902,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockaddress(JN
 	return addr.btAddr;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockchannel(JNIEnv *env, jobject peer, jlong socket) {
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getsockchannel(JNIEnv *env, jobject peer, jlong socket) {
 	debug("->getsockchannel");
 	// get socket name
 
@@ -917,7 +917,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getsockchannel(JNI
 	return addr.port;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_connect(JNIEnv *env, jobject peer, jlong socket, jlong address, jint channel) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_connect(JNIEnv *env, jobject peer, jlong socket, jlong address, jint channel) {
     debug("->connect");
 
 	SOCKADDR_BTH addr;
@@ -949,7 +949,7 @@ connectRety:
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_bind(JNIEnv *env, jobject peer, jlong socket) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_bind(JNIEnv *env, jobject peer, jlong socket) {
 	// bind socket
 	debug("->bind");
 
@@ -968,7 +968,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_bind(JNIEnv *env, 
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_listen(JNIEnv *env, jobject peer, jlong socket)
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_listen(JNIEnv *env, jobject peer, jlong socket)
 {
     debug("->listen");
 	if (listen((SOCKET)socket, 10)) {
@@ -976,7 +976,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_listen(JNIEnv *env
 	}
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_accept(JNIEnv *env, jobject peer, jlong socket) {
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_accept(JNIEnv *env, jobject peer, jlong socket) {
 	debug("->accept");
 	SOCKADDR_BTH addr;
 
@@ -1000,7 +1000,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_accept(JNIEnv *en
  * returns the amount of data that can be read in a single call to the recv function, which may not be the same as
  * the total amount of data queued on the socket.
  */
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recvAvailable(JNIEnv *env, jobject peer, jlong socket)
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recvAvailable(JNIEnv *env, jobject peer, jlong socket)
 {
 	unsigned long arg = 0;
 	if (ioctlsocket((SOCKET)socket, FIONREAD, &arg) != 0) {
@@ -1010,7 +1010,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recvAvailable(JNIE
 	return (jint)arg;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__J(JNIEnv *env, jobject peer, jlong socket) {
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J(JNIEnv *env, jobject peer, jlong socket) {
 	debug("->recv()");
 	unsigned char c;
 
@@ -1026,7 +1026,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__J(JNIEnv *en
 	return (int)c;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__J_3BII(JNIEnv *env, jobject peer, jlong socket, jbyteArray b, jint off, jint len) {
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J_3BII(JNIEnv *env, jobject peer, jlong socket, jbyteArray b, jint off, jint len) {
 	debug("->recv(byte[],int,int)");
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
@@ -1065,7 +1065,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_recv__J_3BII(JNIEn
 	return done;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__JI(JNIEnv *env, jobject peer, jlong socket, jint b) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_send__JI(JNIEnv *env, jobject peer, jlong socket, jint b) {
 	debug("->send(int,int)");
 	char c = (char)b;
 
@@ -1074,7 +1074,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__JI(JNIEnv *e
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__J_3BII(JNIEnv *env, jobject peer, jlong socket, jbyteArray b, jint off, jint len) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_send__J_3BII(JNIEnv *env, jobject peer, jlong socket, jbyteArray b, jint off, jint len) {
 	debug("->send(int,byte[],int,int)");
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
@@ -1094,7 +1094,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_send__J_3BII(JNIEn
 	env->ReleaseByteArrayElements(b, bytes, 0);
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_close(JNIEnv *env, jobject peer, jlong socket)
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_close(JNIEnv *env, jobject peer, jlong socket)
 {
 	debug("->close");
 	if (closesocket((SOCKET)socket)) {
@@ -1102,7 +1102,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_close(JNIEnv *env,
 	}
 }
 
-JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNIEnv *env, jobject peer, jlong addr)
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getpeername(JNIEnv *env, jobject peer, jlong addr)
 {
 #ifdef _WIN32_WCE
 	/*
@@ -1196,7 +1196,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeername(JNI
 }
 
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeeraddress(JNIEnv *env, jobject peer, jlong socket)
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getpeeraddress(JNIEnv *env, jobject peer, jlong socket)
 {
 	debug("->getpeeraddress");
 	SOCKADDR_BTH addr;
@@ -1208,7 +1208,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothPeer_getpeeraddress(JN
 	return addr.btAddr;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_storesockopt(JNIEnv * env, jobject peer, jlong socket) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_storesockopt(JNIEnv * env, jobject peer, jlong socket) {
 #ifndef _WIN32_WCE
 	int optVal;
 	int optLen = sizeof(int);
@@ -1259,7 +1259,7 @@ BOOL getBluetoothGetRadioInfo(jlong address, BLUETOOTH_RADIO_INFO* info)
 }
 #endif
 
-JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getradioname(JNIEnv *env, jobject peer, jlong address)
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getradioname(JNIEnv *env, jobject peer, jlong address)
 {
     debug("->getradioname");
 // Unsupported for _WIN32_WCE for the moment...
@@ -1272,7 +1272,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothPeer_getradioname(JN
 	return NULL;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceVersion(JNIEnv *env, jobject peer, jlong address)
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getDeviceVersion(JNIEnv *env, jobject peer, jlong address)
 {
 #ifndef _WIN32_WCE
 	BLUETOOTH_RADIO_INFO radioInfo;
@@ -1285,7 +1285,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceVersion(J
 #endif
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceManufacturer(JNIEnv *env, jobject peer, jlong address)
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getDeviceManufacturer(JNIEnv *env, jobject peer, jlong address)
 {
 #ifndef _WIN32_WCE
 	BLUETOOTH_RADIO_INFO radioInfo;
@@ -1303,7 +1303,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceManufactu
 #define COMPUTER_MINOR_HANDHELD 0x10
 #define PHONE_MINOR_SMARTPHONE 0x0c
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceClass(JNIEnv *env, jobject peer, jlong address)
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getDeviceClass(JNIEnv *env, jobject peer, jlong address)
 {
 #ifndef _WIN32_WCE
 	if (address == 0) {
@@ -1350,7 +1350,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getDeviceClass(JNI
 #define BTH_MODE_CONNECTABLE  2
 #define BTH_MODE_DISCOVERABLE 3
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getBluetoothRadioMode(JNIEnv *env, jobject peer)
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getBluetoothRadioMode(JNIEnv *env, jobject peer)
 {
 #ifndef _WIN32_WCE
 	if (BluetoothIsDiscoverable(NULL)) {
@@ -1378,7 +1378,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothPeer_getBluetoothRadioM
 	return 0;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothPeer_setDiscoverable(JNIEnv *env, jobject peer, jboolean on)
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_setDiscoverable(JNIEnv *env, jobject peer, jboolean on)
 {
 #ifndef _WIN32_WCE
 	BOOL enabled = FALSE;

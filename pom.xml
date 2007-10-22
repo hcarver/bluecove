@@ -198,7 +198,6 @@
                         <configuration>
                             <outputDirectory>src/main/c/intelbth</outputDirectory>
                             <classNames>
-                                <className>com.intel.bluetooth.BluetoothPeer</className>
                                 <className>com.intel.bluetooth.NativeTestInterfaces</className>
                                 <className>com.intel.bluetooth.BluetoothStackMicrosoft</className>
                                 <className>com.intel.bluetooth.BluetoothStackWIDCOMM</className>

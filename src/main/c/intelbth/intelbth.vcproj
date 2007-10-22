@@ -806,7 +806,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\target\classes\com\intel\bluetooth\BluetoothPeer.class"
+				RelativePath="..\..\..\..\target\classes\com\intel\bluetooth\BluetoothStackMicrosoft.class"
 				>
 				<FileConfiguration
 					Name="Winsock|Win32"
@@ -814,8 +814,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Generating Winsock JNI Header File"
-						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothPeer&#x0D;&#x0A;"
-						Outputs=".\com_intel_bluetooth_BluetoothPeer.h"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothStackMicrosoft&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_BluetoothStackMicrosoft.h"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -824,8 +824,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Generating Winsock JNI Header File"
-						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothPeer&#x0D;&#x0A;"
-						Outputs=".\com_intel_bluetooth_BluetoothPeer.h"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothStackMicrosoft&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_BluetoothStackMicrosoft.h"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -834,8 +834,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Generating Winsock JNI Header File"
-						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothPeer&#x0D;&#x0A;"
-						Outputs=".\com_intel_bluetooth_BluetoothPeer.h"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothStackMicrosoft&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_BluetoothStackMicrosoft.h"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -844,8 +844,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Generating Winsock JNI Header File"
-						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothPeer&#x0D;&#x0A;"
-						Outputs=".\com_intel_bluetooth_BluetoothPeer.h"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothStackMicrosoft&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_BluetoothStackMicrosoft.h"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -854,8 +854,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Generating Winsock JNI Header File"
-						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothPeer&#x0D;&#x0A;"
-						Outputs=".\com_intel_bluetooth_BluetoothPeer.h"
+						CommandLine="javah -jni -classpath ..\..\..\..\target\classes com.intel.bluetooth.BluetoothStackMicrosoft&#x0D;&#x0A;"
+						Outputs=".\com_intel_bluetooth_BluetoothStackMicrosoft.h"
 					/>
 				</FileConfiguration>
 			</File>
@@ -1016,7 +1016,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\com_intel_bluetooth_BluetoothPeer.h"
+				RelativePath=".\com_intel_bluetooth_BluetoothStackMicrosoft.h"
 				>
 			</File>
 			<File
