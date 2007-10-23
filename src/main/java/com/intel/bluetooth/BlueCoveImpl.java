@@ -21,6 +21,11 @@
  */
 package com.intel.bluetooth;
 
+import java.io.IOException;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -124,6 +129,9 @@ public class BlueCoveImpl {
 
 	private static final Vector fqcnSet = new Vector();
 
+	/* The context to be used when loading native DLL */
+	private Object accessControlContext;
+
 	static {
 		fqcnSet.addElement(FQCN);
 	}
@@ -156,7 +164,12 @@ public class BlueCoveImpl {
 	}
 
 	private BlueCoveImpl() {
-
+		try {
+			accessControlContext = AccessController.getContext();
+		} catch (Throwable javaME) {
+		}
+		// Initialization in WebStart.
+		DebugLog.isDebugEnabled();
 		// bluetoothStack.destroy(); May stuck in WIDCOMM forever. Exit JVM
 		// anyway.
 		final ShutdownHookThread shutdownHookThread = new ShutdownHookThread();
@@ -277,7 +290,10 @@ public class BlueCoveImpl {
 	static String getConfigProperty(String key) {
 		String value = (String) configProperty.get(key);
 		if (value == null) {
-			value = System.getProperty(key);
+			try {
+				value = System.getProperty(key);
+			} catch (SecurityException webstart) {
+			}
 		}
 		if (value == null) {
 			value = Utils.getResourceProperty(BlueCoveImpl.class, key);
@@ -414,12 +430,32 @@ public class BlueCoveImpl {
 	public BluetoothStack getBluetoothStack() throws BluetoothStateException {
 		Utils.isLegalAPICall(fqcnSet);
 		if (bluetoothStack == null) {
-			detectStack();
+			if (accessControlContext == null) {
+				detectStack();
+			} else {
+				detectStackPrivileged();
+			}
 			if (bluetoothStack == null) {
 				throw new BluetoothStateException("BlueCove not available");
 			}
 		}
 		return bluetoothStack;
+	}
+
+	private void detectStackPrivileged() throws BluetoothStateException {
+		try {
+			AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws BluetoothStateException {
+					detectStack();
+					return null;
+				}
+			}, (AccessControlContext) accessControlContext);
+		} catch (PrivilegedActionException e) {
+			if (e.getCause() instanceof IOException) {
+				throw (BluetoothStateException) e.getCause();
+			}
+			throw new BluetoothStateException(e.toString());
+		}
 	}
 
 }
