@@ -25,14 +25,17 @@
 #define CPP_FILE "ToshibaStack.cpp"
 #endif
 
+#ifndef _WIN32_WCE
 BOOL isToshibaBluetoothStackPresent(JNIEnv *env) {
 	//HMODULE h = LoadLibrary(TOSHIBA_DLL);
 	//if (h == NULL) {
 	//	return FALSE;
 	//}
 	//FreeLibrary(h);
-	return TRUE;
+	//return TRUE;
+	return FALSE;
 }
+#endif
 
 #ifdef BLUECOVE_TOSHIBA
 

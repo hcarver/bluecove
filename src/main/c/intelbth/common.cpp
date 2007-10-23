@@ -272,12 +272,14 @@ jint detectBluetoothStack(JNIEnv *env) {
 	if (isWIDCOMMBluetoothStackPresent(env)) {
 		rc += BLUECOVE_STACK_DETECT_WIDCOMM;
 	}
+#ifndef _WIN32_WCE
 	if (isBlueSoleilBluetoothStackPresent(env)) {
 		rc += BLUECOVE_STACK_DETECT_BLUESOLEIL;
 	}
 	if (isToshibaBluetoothStackPresent(env)) {
 		rc += BLUECOVE_STACK_DETECT_TOSHIBA;
 	}
+#endif
 	return rc;
 }
 

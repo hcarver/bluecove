@@ -25,6 +25,7 @@
 #define CPP_FILE "BlueSoleilStack.cpp"
 #endif
 
+#ifndef _WIN32_WCE
 BOOL isBlueSoleilBluetoothStackPresent(JNIEnv *env) {
     HMODULE h = LoadLibrary(BLUESOLEIL_DLL);
     if (h == NULL) {
@@ -33,6 +34,7 @@ BOOL isBlueSoleilBluetoothStackPresent(JNIEnv *env) {
     FreeLibrary(h);
     return TRUE;
 }
+#endif
 
 #ifdef _BLUESOLEIL
 
