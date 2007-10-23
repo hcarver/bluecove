@@ -59,6 +59,5 @@ copy src\main\resources\bluecove.dll target\classes\
     @cd "%DEFAULT_BUILD_HOME%"
 	@ENDLOCAL
 	echo Error in build
-	pause
 :endmark
 @ENDLOCAL

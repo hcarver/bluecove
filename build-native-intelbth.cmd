@@ -73,6 +73,5 @@ copy src\main\resources\intelbth.dll target\classes\
 :errormark
 	@ENDLOCAL
 	echo Error in build
-	pause
 :endmark
 @ENDLOCAL
