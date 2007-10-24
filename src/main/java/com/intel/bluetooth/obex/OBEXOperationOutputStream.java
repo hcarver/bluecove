@@ -27,25 +27,25 @@ class OBEXOperationOutputStream extends OutputStream {
 
 	private final OBEXOperationDelivery operation;
 
-	private byte[] buffer; 
-	
+	private byte[] buffer;
+
 	private int bufferLength;
-	
+
 	private Object lock = new Object();
-	
+
 	private boolean isClosed = false;
-	
+
 	OBEXOperationOutputStream(int mtu, OBEXOperationDelivery op) {
 		this.operation = op;
 		buffer = new byte[mtu - OBEXOperationCodes.OBEX_MTU_HEADER_RESERVE];
 		bufferLength = 0;
 	}
-	     
-    public void write(int i) throws IOException {
-		write(new byte[] {(byte)i}, 0, 1);
+
+	public void write(int i) throws IOException {
+		write(new byte[] { (byte) i }, 0, 1);
 	}
-    
-    public void write(byte b[], int off, int len) throws IOException {
+
+	public void write(byte b[], int off, int len) throws IOException {
 		if (this.operation.isClosed() || isClosed) {
 			throw new IOException("stream closed");
 		}
@@ -60,13 +60,13 @@ class OBEXOperationOutputStream extends OutputStream {
 		synchronized (lock) {
 			int written = 0;
 			while (written < len) {
-				int avalable = (buffer.length - bufferLength);
-				if ((len - written) < avalable) {
-					avalable = len - written;
+				int available = (buffer.length - bufferLength);
+				if ((len - written) < available) {
+					available = len - written;
 				}
-				System.arraycopy(b, off + written, buffer, bufferLength, avalable);
-				bufferLength += avalable;
-				written += avalable;
+				System.arraycopy(b, off + written, buffer, bufferLength, available);
+				bufferLength += available;
+				written += available;
 				if (bufferLength == buffer.length) {
 					this.operation.deliverPacket(false, buffer);
 					bufferLength = 0;
@@ -74,12 +74,12 @@ class OBEXOperationOutputStream extends OutputStream {
 			}
 		}
 	}
-    
-    public void flush() throws IOException {
+
+	public void flush() throws IOException {
 		deliverBuffer(false);
-    }
-    
-    void deliverBuffer(boolean finalPacket) throws IOException {
+	}
+
+	void deliverBuffer(boolean finalPacket) throws IOException {
 		synchronized (lock) {
 			byte[] b = new byte[bufferLength];
 			System.arraycopy(buffer, 0, b, 0, bufferLength);
@@ -88,12 +88,12 @@ class OBEXOperationOutputStream extends OutputStream {
 		}
 	}
 
-    void abort() {
-    	synchronized (lock) {
+	void abort() {
+		synchronized (lock) {
 			isClosed = true;
-    	}
-    }
-    
+		}
+	}
+
 	public void close() throws IOException {
 		if (!isClosed) {
 			synchronized (lock) {
@@ -104,5 +104,5 @@ class OBEXOperationOutputStream extends OutputStream {
 			}
 		}
 	}
-	
+
 }

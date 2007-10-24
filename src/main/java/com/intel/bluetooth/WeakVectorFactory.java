@@ -25,7 +25,7 @@ import java.util.WeakHashMap;
 
 /**
  * An entry in a WeakVector will automatically be removed when its key is no longer in ordinary use.
- * This class is wrapper above WeakHashMap when avalable. e.g. on J2SE 1.2 and above
+ * This class is wrapper above WeakHashMap when available. e.g. on J2SE 1.2 and above
  * For IBM J9 MIDP we will use Vector to make application work.
  * But connection can't be discarded by the garbage collector.
  * @author vlads
@@ -34,7 +34,7 @@ import java.util.WeakHashMap;
 class WeakVectorFactory {
 
 	public static interface WeakVector {
-		
+
 		public void addElement(Object obj);
 
 		public int size();
@@ -42,11 +42,11 @@ class WeakVectorFactory {
 		public boolean removeElement(Object obj);
 
 		public boolean contains(Object elem);
-		
+
 		public Object firstElement();
 
 	}
-	
+
 	public static WeakVector createWeakVector() {
 		try {
 			return new WeakVectorOnWeakHashMapImpl();
@@ -54,15 +54,15 @@ class WeakVectorFactory {
 			return new WeakVectorOnVectorImpl();
 		}
 	}
-	
+
 	private static class WeakVectorOnVectorImpl implements WeakVector {
 
 		private Vector vectorImpl;
-		
+
 		private WeakVectorOnVectorImpl() {
-			vectorImpl = new Vector(); 
+			vectorImpl = new Vector();
 		}
-		
+
 		public void addElement(Object obj) {
 			vectorImpl.addElement(obj);
 		}
@@ -82,21 +82,21 @@ class WeakVectorFactory {
 		public int size() {
 			return vectorImpl.size();
 		}
-		
+
 	}
-	
+
 	private static class WeakVectorOnWeakHashMapImpl implements WeakVector {
 
 		private WeakHashMap mapImpl;
-		
+
 		private WeakVectorOnWeakHashMapImpl() {
-			mapImpl = new WeakHashMap(); 
-			
+			mapImpl = new WeakHashMap();
+
 		}
-		
+
 		public void addElement(Object obj) {
 			mapImpl.put(obj, new Object());
-			
+
 		}
 
 		public boolean contains(Object elem) {
@@ -114,6 +114,6 @@ class WeakVectorFactory {
 		public int size() {
 			return mapImpl.size();
 		}
-		
+
 	}
 }
