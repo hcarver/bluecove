@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth.obex;
 
 import java.io.IOException;
@@ -42,44 +42,48 @@ import com.intel.bluetooth.Utils;
  * 
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- *
+ * 
  * @author vlads
  * 
  */
 public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
-	
+
 	private StreamConnectionNotifier notifier;
-	
+
+	private OBEXConnectionParams obexConnectionParams;
+
 	private static final String FQCN = OBEXSessionNotifierImpl.class.getName();
-	
-	private static final Vector fqcnSet = new Vector(); 
-	
+
+	private static final Vector fqcnSet = new Vector();
+
 	static {
 		fqcnSet.addElement(FQCN);
 	}
-	
-    /**
-     * Applications should not used this function.
-     * 
-     * @exception Error if called from outside of BlueCove internal code.
-     */
-	public OBEXSessionNotifierImpl(StreamConnectionNotifier notifier) throws IOException, Error {
+
+	/**
+	 * Applications should not used this function.
+	 * 
+	 * @exception Error
+	 *                if called from outside of BlueCove internal code.
+	 */
+	public OBEXSessionNotifierImpl(StreamConnectionNotifier notifier, OBEXConnectionParams obexConnectionParams)
+			throws IOException, Error {
 		Utils.isLegalAPICall(fqcnSet);
 		this.notifier = notifier;
 	}
-	
+
 	public Connection acceptAndOpen(ServerRequestHandler handler) throws IOException {
 		return acceptAndOpen(handler, null);
 	}
 
 	public Connection acceptAndOpen(ServerRequestHandler handler, Authenticator auth) throws IOException {
 		if (notifier == null) {
-            throw new IOException("Session closed");
+			throw new IOException("Session closed");
 		}
 		if (handler == null) {
 			throw new NullPointerException("handler is null");
 		}
-		return new OBEXServerSessionImpl(notifier.acceptAndOpen(), handler, auth);
+		return new OBEXServerSessionImpl(notifier.acceptAndOpen(), handler, auth, obexConnectionParams);
 	}
 
 	public void close() throws IOException {
@@ -90,12 +94,14 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#getServiceRecord()
 	 */
 	public ServiceRecord getServiceRecord() {
 		if (notifier instanceof ServerSocketConnection) {
-			return new OBEXTCPServiceRecordImpl((ServerSocketConnection)notifier);
+			return new OBEXTCPServiceRecordImpl((ServerSocketConnection) notifier);
 		}
 		if (!(notifier instanceof BluetoothConnectionNotifierServiceRecordAccess)) {
 			throw new IllegalArgumentException("connection is not a Bluetooth notifier");
@@ -103,7 +109,9 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 		return ((BluetoothConnectionNotifierServiceRecordAccess) notifier).getServiceRecord();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#updateServiceRecord(boolean)
 	 */
 	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {

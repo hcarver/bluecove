@@ -41,6 +41,7 @@ import javax.microedition.io.OutputConnection;
 import com.intel.bluetooth.gcf.socket.ServerSocketConnection;
 import com.intel.bluetooth.gcf.socket.SocketConnection;
 import com.intel.bluetooth.obex.OBEXClientSessionImpl;
+import com.intel.bluetooth.obex.OBEXConnectionParams;
 import com.intel.bluetooth.obex.OBEXSessionNotifierImpl;
 
 /**
@@ -351,6 +352,18 @@ public abstract class MicroeditionConnector {
 				}
 			}
 		}
+		OBEXConnectionParams obexConnectionParams = null;
+
+		if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX)
+				|| scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX)) {
+			obexConnectionParams = new OBEXConnectionParams();
+			obexConnectionParams.timeouts = timeouts;
+			String timeout = BlueCoveImpl.getConfigProperty("bluecove.obex.timeout");
+			if (timeout != null) {
+				obexConnectionParams.timeout = Integer.parseInt(timeout);
+			}
+		}
+
 		/*
 		 * create connection
 		 */
@@ -364,9 +377,10 @@ public abstract class MicroeditionConnector {
 			if (isServer) {
 				notifierParams.obex = true;
 				return new OBEXSessionNotifierImpl(
-						new BluetoothStreamConnectionNotifier(bluetoothStack, notifierParams));
+						new BluetoothStreamConnectionNotifier(bluetoothStack, notifierParams), obexConnectionParams);
 			} else {
-				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(bluetoothStack, connectionParams));
+				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(bluetoothStack, connectionParams),
+						obexConnectionParams);
 			}
 		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)) {
 			if (isServer) {
@@ -383,9 +397,9 @@ public abstract class MicroeditionConnector {
 				} catch (NumberFormatException e) {
 					throw new IllegalArgumentException("port " + portORuuid);
 				}
-				return new OBEXSessionNotifierImpl(new ServerSocketConnection(channel));
+				return new OBEXSessionNotifierImpl(new ServerSocketConnection(channel), obexConnectionParams);
 			} else {
-				return new OBEXClientSessionImpl(new SocketConnection(host, channel));
+				return new OBEXClientSessionImpl(new SocketConnection(host, channel), obexConnectionParams);
 			}
 		} else if (scheme.equals("socket")) {
 			if (isServer) {

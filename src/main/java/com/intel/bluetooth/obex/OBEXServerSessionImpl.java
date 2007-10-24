@@ -35,19 +35,20 @@ import com.intel.bluetooth.UtilsJavaSE;
 class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 
 	private ServerRequestHandler handler;
-	
+
 	private boolean isConnected = false;
-	
+
 	private OBEXServerOperation operation;
-	
+
 	private boolean closeRequested = false;
-	
+
 	private boolean delayClose = false;
-	
+
 	private Object canCloseEvent = new Object();
-	
-	OBEXServerSessionImpl(StreamConnection connection, ServerRequestHandler handler, Authenticator authenticator) throws IOException {
-		super(connection);
+
+	OBEXServerSessionImpl(StreamConnection connection, ServerRequestHandler handler, Authenticator authenticator,
+			OBEXConnectionParams obexConnectionParams) throws IOException {
+		super(connection, obexConnectionParams);
 		this.handler = handler;
 		this.authenticator = authenticator;
 		Thread t = new Thread(this);
@@ -77,7 +78,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 	public void close() throws IOException {
 		closeRequested = true;
 		while (delayClose) {
-			synchronized(canCloseEvent) {
+			synchronized (canCloseEvent) {
 				try {
 					if (delayClose) {
 						canCloseEvent.wait(700);
@@ -89,7 +90,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		}
 		if (!isClosed()) {
 			DebugLog.debug("OBEXServerSession close");
-			//(new Throwable()).printStackTrace();
+			// (new Throwable()).printStackTrace();
 			if (operation != null) {
 				operation.close();
 				operation = null;
@@ -97,7 +98,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		}
 		super.close();
 	}
-	
+
 	private boolean handleRequest() throws IOException {
 		DebugLog.debug("OBEXServerSession handleRequest");
 		delayClose = false;
@@ -117,7 +118,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 			int opcode = b[0] & 0xFF;
 			boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
 			if (finalPacket) {
-				DebugLog.debug("OBEXServerSession operation finalPacket");	
+				DebugLog.debug("OBEXServerSession operation finalPacket");
 			}
 			switch (opcode) {
 			case OBEXOperationCodes.CONNECT:
@@ -147,7 +148,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		} finally {
 			delayClose = false;
 		}
-		synchronized(canCloseEvent) {
+		synchronized (canCloseEvent) {
 			canCloseEvent.notifyAll();
 		}
 		return true;
@@ -156,7 +157,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 	private void processConnect(byte[] b) throws IOException {
 		DebugLog.debug("Connect operation");
 		if (b[3] != OBEXOperationCodes.OBEX_VERSION) {
-            throw new IOException("Unsupported client OBEX version " + b[3]);
+			throw new IOException("Unsupported client OBEX version " + b[3]);
 		}
 		if (b.length < 7) {
 			throw new IOException("Corrupted OBEX data");
@@ -167,11 +168,11 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		}
 		this.mtu = requestedMTU;
 		DebugLog.debug("mtu selected", this.mtu);
-		
+
 		OBEXHeaderSetImpl requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 7);
 		handleAuthenticationResponse(requestHeaders, handler);
 		HeaderSet replyHeaders = createOBEXHeaderSet();
-		handleAuthenticationChallenge(requestHeaders, (OBEXHeaderSetImpl)replyHeaders);
+		handleAuthenticationChallenge(requestHeaders, (OBEXHeaderSetImpl) replyHeaders);
 		int rc = ResponseCodes.OBEX_HTTP_INTERNAL_ERROR;
 		try {
 			rc = handler.onConnect(requestHeaders, replyHeaders);
@@ -196,7 +197,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		writeOperation(ResponseCodes.OBEX_HTTP_BAD_REQUEST, null);
 		return false;
 	}
-	
+
 	private void processDisconnect(byte[] b) throws IOException {
 		DebugLog.debug("Disconnect operation");
 		if (!validateConnection()) {
@@ -216,7 +217,8 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 	}
 
 	private boolean processDelete(HeaderSet requestHeaders) throws IOException {
-		if ((requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY) == null) && (requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END) == null)) {
+		if ((requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY) == null)
+				&& (requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END) == null)) {
 			DebugLog.debug("Delete operation");
 			HeaderSet replyHeaders = createOBEXHeaderSet();
 			int rc = ResponseCodes.OBEX_HTTP_OK;
@@ -231,7 +233,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		}
 		return false;
 	}
-	
+
 	private void processPut(byte[] b, boolean finalPacket) throws IOException {
 		DebugLog.debug("Put operation");
 		if (!validateConnection()) {
@@ -263,7 +265,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 			return;
 		}
 		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 3);
-		
+
 		try {
 			operation = new OBEXServerOperationGet(this, requestHeaders);
 			int rc = ResponseCodes.OBEX_HTTP_OK;
@@ -279,7 +281,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 			operation = null;
 		}
 	}
-	
+
 	private void processAbort() throws IOException {
 		DebugLog.debug("Abort operation");
 		if (!validateConnection()) {
@@ -291,7 +293,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		}
 		writeOperation(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);
 	}
-	
+
 	private void processSetPath(byte[] b, boolean finalPacket) throws IOException {
 		DebugLog.debug("SetPath operation");
 		if (!validateConnection()) {
@@ -301,13 +303,13 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 			throw new IOException("Corrupted OBEX data");
 		}
 		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 5);
-		//DebugLog.debug("setPath b[3]", b[3]);
-		//b[4] = (byte) ((backup?1:0) | (create?0:2));
+		// DebugLog.debug("setPath b[3]", b[3]);
+		// b[4] = (byte) ((backup?1:0) | (create?0:2));
 		boolean backup = ((b[3] & 1) != 0);
 		boolean create = ((b[3] & 2) == 0);
 		DebugLog.debug("setPath backup", backup);
 		DebugLog.debug("setPath create", create);
-		
+
 		HeaderSet replyHeaders = createOBEXHeaderSet();
 		int rc = ResponseCodes.OBEX_HTTP_OK;
 		try {

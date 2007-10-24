@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.UnsupportedEncodingException;
 
 import javax.obex.ResponseCodes;
@@ -32,20 +33,39 @@ import javax.obex.ResponseCodes;
  * OBEX IO Utils
  * 
  * @author vlads
- *
+ * 
  */
 abstract class OBEXUtils {
-	
-	static void readFully(InputStream is, byte[] b) throws IOException, EOFException {
-		readFully(is, b, 0, b.length);
+
+	static void readFully(InputStream is, OBEXConnectionParams obexConnectionParams, byte[] b) throws IOException,
+			EOFException {
+		readFully(is, obexConnectionParams, b, 0, b.length);
 	}
-	
-	static void readFully(InputStream is, byte[] b, int off, int len) throws IOException, EOFException {
+
+	static void readFully(InputStream is, OBEXConnectionParams obexConnectionParams, byte[] b, int off, int len)
+			throws IOException, EOFException {
 		if (len < 0) {
-		    throw new IndexOutOfBoundsException();
+			throw new IndexOutOfBoundsException();
 		}
 		int got = 0;
 		while (got < len) {
+			if (obexConnectionParams.timeouts) {
+				long endOfDellay = System.currentTimeMillis() + obexConnectionParams.timeout;
+				int available = 0;
+				do {
+					available = is.available();
+					if (available == 0) {
+						if (System.currentTimeMillis() > endOfDellay) {
+							throw new InterruptedIOException("OBEX read timeout");
+						}
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							throw new InterruptedIOException();
+						}
+					}
+				} while (available == 0);
+			}
 			int rc = is.read(b, off + got, len - got);
 			if (rc < 0) {
 				throw new EOFException();
@@ -53,27 +73,27 @@ abstract class OBEXUtils {
 			got += rc;
 		}
 	}
-	
+
 	static String newStringUTF16Simple(byte bytes[]) throws UnsupportedEncodingException {
-		StringBuffer buf = new StringBuffer(); 
-		for (int i = 0; i < bytes.length; i+=2) {
-			buf.append((char)bytesToShort(bytes[i], bytes[i + 1]));
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < bytes.length; i += 2) {
+			buf.append((char) bytesToShort(bytes[i], bytes[i + 1]));
 		}
 		return buf.toString();
 	}
-	
+
 	static String newStringUTF16(byte bytes[]) throws UnsupportedEncodingException {
-		 try {
+		try {
 			return new String(bytes, "UTF-16BE");
-		 } catch (IllegalArgumentException e) {
-			 // Java 1.1
-			 return newStringUTF16Simple(bytes);
-		 } catch (UnsupportedEncodingException e) {
-			 // IBM J9
+		} catch (IllegalArgumentException e) {
+			// Java 1.1
+			return newStringUTF16Simple(bytes);
+		} catch (UnsupportedEncodingException e) {
+			// IBM J9
 			return newStringUTF16Simple(bytes);
 		}
 	}
-	
+
 	static byte[] getUTF16BytesSimple(String str) throws UnsupportedEncodingException {
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
 		int len = str.length();
@@ -84,7 +104,7 @@ abstract class OBEXUtils {
 		}
 		return buf.toByteArray();
 	}
-	
+
 	static byte[] getUTF16Bytes(String str) throws UnsupportedEncodingException {
 		try {
 			return str.getBytes("UTF-16BE");
@@ -96,23 +116,23 @@ abstract class OBEXUtils {
 			return getUTF16BytesSimple(str);
 		}
 	}
-	
+
 	static byte hiByte(int value) {
-		return (byte)((value >> 8) & 0xFF);
+		return (byte) ((value >> 8) & 0xFF);
 	}
-	
+
 	static byte loByte(int value) {
-		return (byte)(0xFF & value);
+		return (byte) (0xFF & value);
 	}
 
 	static int bytesToShort(byte valueHi, byte valueLo) {
-		return ((((int)valueHi << 8) & 0xFF00) + (valueLo & 0xFF));
+		return ((((int) valueHi << 8) & 0xFF00) + (valueLo & 0xFF));
 	}
-	
+
 	public static String toStringObexResponseCodes(byte code) {
 		return toStringObexResponseCodes(code & 0xFF);
 	}
-	
+
 	public static String toStringObexResponseCodes(int code) {
 		switch (code) {
 		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:

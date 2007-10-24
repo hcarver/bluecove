@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth.obex;
 
 import java.io.IOException;
@@ -47,24 +47,26 @@ import com.intel.bluetooth.Utils;
 public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSession {
 
 	private boolean isConnected;
-	
+
 	private OBEXClientOperation operation;
-	
+
 	private static final String FQCN = OBEXClientSessionImpl.class.getName();
-	
-	private static final Vector fqcnSet = new Vector(); 
-	
+
+	private static final Vector fqcnSet = new Vector();
+
 	static {
 		fqcnSet.addElement(FQCN);
 	}
-	
-    /**
-     * Applications should not used this function.
-     * 
-     * @exception Error if called from outside of BlueCove internal code.
-     */
-	public OBEXClientSessionImpl(StreamConnection conn) throws IOException, Error {
-		super(conn);
+
+	/**
+	 * Applications should not used this function.
+	 * 
+	 * @exception Error
+	 *                if called from outside of BlueCove internal code.
+	 */
+	public OBEXClientSessionImpl(StreamConnection conn, OBEXConnectionParams obexConnectionParams) throws IOException,
+			Error {
+		super(conn, obexConnectionParams);
 		Utils.isLegalAPICall(fqcnSet);
 		this.isConnected = false;
 		this.operation = null;
@@ -74,17 +76,19 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		return OBEXSessionBase.createOBEXHeaderSet();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.obex.ClientSession#connect(javax.obex.HeaderSet)
 	 */
 	public HeaderSet connect(HeaderSet headers) throws IOException {
 		return connectImpl(headers, false);
 	}
-	
+
 	private HeaderSet connectImpl(HeaderSet headers, boolean retry) throws IOException {
 		validateCreatedHeaderSet(headers);
 		if (isConnected) {
-            throw new IOException("Session already connected");
+			throw new IOException("Session already connected");
 		}
 		byte[] connectRequest = new byte[4];
 		connectRequest[0] = OBEXOperationCodes.OBEX_VERSION;
@@ -92,7 +96,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		connectRequest[2] = OBEXUtils.hiByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
 		connectRequest[3] = OBEXUtils.loByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
 		writeOperation(OBEXOperationCodes.CONNECT, connectRequest, OBEXHeaderSetImpl.toByteArray(headers));
-		
+
 		byte[] b = readOperation();
 		if (b.length < 6) {
 			if (b.length == 3) {
@@ -108,20 +112,20 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 			this.mtu = serverMTU;
 		}
 		DebugLog.debug("mtu selected", this.mtu);
-		
+
 		OBEXHeaderSetImpl responseHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 7);
-		
+
 		Object connID = responseHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_CONNECTION);
 		if (connID != null) {
-			this.connectionID = ((Long)connID).longValue(); 
+			this.connectionID = ((Long) connID).longValue();
 		}
-		
-		validateAuthenticationResponse((OBEXHeaderSetImpl)headers, responseHeaders);
+
+		validateAuthenticationResponse((OBEXHeaderSetImpl) headers, responseHeaders);
 		if ((!retry) && (responseHeaders.getResponseCode() == ResponseCodes.OBEX_HTTP_UNAUTHORIZED)) {
 			HeaderSet replyHeaders = OBEXHeaderSetImpl.cloneHeaders(headers);
-			handleAuthenticationChallenge(responseHeaders, (OBEXHeaderSetImpl)replyHeaders);
+			handleAuthenticationChallenge(responseHeaders, (OBEXHeaderSetImpl) replyHeaders);
 			return connectImpl(replyHeaders, true);
-			
+
 		}
 		if (responseHeaders.getResponseCode() == ResponseCodes.OBEX_HTTP_OK) {
 			this.isConnected = true;
@@ -133,7 +137,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		validateCreatedHeaderSet(headers);
 		canStartOperation();
 		if (!isConnected) {
-            throw new IOException("Session not connected");
+			throw new IOException("Session not connected");
 		}
 		writeOperation(OBEXOperationCodes.DISCONNECT, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
@@ -151,14 +155,14 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		}
 		this.connectionID = id;
 	}
-	
+
 	public long getConnectionID() {
 		return this.connectionID;
 	}
 
-	private void canStartOperation()  throws IOException {
+	private void canStartOperation() throws IOException {
 		if (!isConnected) {
-            throw new IOException("Session not connected");
+			throw new IOException("Session not connected");
 		}
 		if (this.operation != null) {
 			if (!this.operation.isClosed()) {
@@ -167,16 +171,17 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 			this.operation = null;
 		}
 	}
-	
+
 	public HeaderSet setPath(HeaderSet headers, boolean backup, boolean create) throws IOException {
 		validateCreatedHeaderSet(headers);
 		canStartOperation();
 		byte[] request = new byte[2];
-		request[0] = (byte) ((backup?1:0) | (create?0:2));
+		request[0] = (byte) ((backup ? 1 : 0) | (create ? 0 : 2));
 		request[1] = 0;
-		//DebugLog.debug("setPath b[3]", request[0]);
-		writeOperation(OBEXOperationCodes.SETPATH | OBEXOperationCodes.FINAL_BIT, request, OBEXHeaderSetImpl.toByteArray(headers));
-		
+		// DebugLog.debug("setPath b[3]", request[0]);
+		writeOperation(OBEXOperationCodes.SETPATH | OBEXOperationCodes.FINAL_BIT, request, OBEXHeaderSetImpl
+				.toByteArray(headers));
+
 		byte[] b = readOperation();
 		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 	}
@@ -188,7 +193,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		byte[] b = readOperation();
 		HeaderSet replyHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 		DebugLog.debug0x("GET got reply", replyHeaders.getResponseCode());
-		
+
 		this.operation = new OBEXClientOperationGet(this, replyHeaders);
 		return this.operation;
 	}
@@ -211,7 +216,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		byte[] b = readOperation();
 		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 	}
-	
+
 	public void setAuthenticator(Authenticator auth) {
 		if (auth == null) {
 			throw new NullPointerException("auth is null");

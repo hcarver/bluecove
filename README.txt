@@ -101,6 +101,10 @@ Debug
 
     Bluecove log is redirected to log4j when log4j.jar is available in classpath. Debug can be enabled using log4j configuration. (Since v2.0.2)
 
+Configuration options
+
+    System property `bluecove.obex.timeout` time in milliseconds defaults to 2 minutes. (Since v2.0.2)
+
 == Compilation ==
 
 You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 and SDK for Windows Vista or Windows Server 2003 R2 Platform SDK.

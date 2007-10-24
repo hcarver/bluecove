@@ -2,6 +2,9 @@
 
 * 2.0.2 to be released 2007-10-??
 
+    2007-10-24
+    * OBEX read timeout. Throws InterruptedIOException when Connector.open(,,true) is used
+
     2007-10-04
     * fixed initialization exceptions, e.g. BluetoothStateException when device is not ready or no stack found
     * No need for WTK to run the build.
