@@ -22,17 +22,19 @@ package com.intel.bluetooth;
 
 /**
  * @author vlads
- *
+ * 
  */
 class BluetoothConnectionParams {
-	
-	long address; 
-	
-	int channel; 
-	
-	boolean authenticate;	
-	
+
+	long address;
+
+	int channel;
+
+	boolean authenticate;
+
 	boolean encrypt;
+
+	boolean timeouts;
 
 	public BluetoothConnectionParams(long address, int channel, boolean authenticate, boolean encrypt) {
 		super();

@@ -18,7 +18,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth;
 
 import java.io.DataInputStream;
@@ -68,47 +68,53 @@ public abstract class MicroeditionConnector {
 
 	public static final int READ_WRITE = Connector.READ_WRITE;
 
-	private static Hashtable/*<String, String>*/ suportScheme = new Hashtable();
-	
-	private static Hashtable/*<String, String>*/ srvParams = new Hashtable();
-	
-	private static Hashtable/*<String, String>*/ cliParams = new Hashtable();
-	
-	private static Hashtable/*<String, String>*/ cliParamsL2CAP = new Hashtable();
-	
-	private static Hashtable/*<String, String>*/ srvParamsL2CAP = new Hashtable();
-	
-	private static final String  AUTHENTICATE = "authenticate";
-	private static final String  AUTHORIZE = "authorize"; 
-	private static final String  ENCRYPT = "encrypt";
-	private static final String  MASTER = "master";
-	private static final String  NAME = "name";
-	private static final String  RECEIVE_MTU = "receivemtu"; 
-	private static final String  TRANSMIT_MTU = "transmitmtu";
-	
+	private static Hashtable/* <String, String> */suportScheme = new Hashtable();
+
+	private static Hashtable/* <String, String> */srvParams = new Hashtable();
+
+	private static Hashtable/* <String, String> */cliParams = new Hashtable();
+
+	private static Hashtable/* <String, String> */cliParamsL2CAP = new Hashtable();
+
+	private static Hashtable/* <String, String> */srvParamsL2CAP = new Hashtable();
+
+	private static final String AUTHENTICATE = "authenticate";
+
+	private static final String AUTHORIZE = "authorize";
+
+	private static final String ENCRYPT = "encrypt";
+
+	private static final String MASTER = "master";
+
+	private static final String NAME = "name";
+
+	private static final String RECEIVE_MTU = "receivemtu";
+
+	private static final String TRANSMIT_MTU = "transmitmtu";
+
 	static {
-	    //cliParams    ::== master | encrypt | authenticate
+		// cliParams ::== master | encrypt | authenticate
 		cliParams.put(AUTHENTICATE, AUTHENTICATE);
 		cliParams.put(ENCRYPT, ENCRYPT);
 		cliParams.put(MASTER, MASTER);
 
-		//srvParams    ::== name | master | encrypt | authorize | authenticate
+		// srvParams ::== name | master | encrypt | authorize | authenticate
 		copyAll(srvParams, cliParams);
 		srvParams.put(AUTHORIZE, AUTHORIZE);
 		srvParams.put(NAME, NAME);
-		
+
 		copyAll(cliParamsL2CAP, cliParams);
 
 		cliParamsL2CAP.put(RECEIVE_MTU, RECEIVE_MTU);
 		cliParamsL2CAP.put(TRANSMIT_MTU, TRANSMIT_MTU);
-		
+
 		copyAll(srvParamsL2CAP, cliParamsL2CAP);
 		srvParamsL2CAP.put(AUTHORIZE, AUTHORIZE);
 		srvParamsL2CAP.put(NAME, NAME);
-		
+
 		// "socket://" host ":" port
-		// no validation for socket, since this is internal connector 
-		
+		// no validation for socket, since this is internal connector
+
 		suportScheme.put(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM, Boolean.TRUE);
 		suportScheme.put(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX, Boolean.TRUE);
 		suportScheme.put(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX, Boolean.TRUE);
@@ -117,24 +123,24 @@ public abstract class MicroeditionConnector {
 	}
 
 	private MicroeditionConnector() {
-		
+
 	}
-	
+
 	static void copyAll(Hashtable dest, Hashtable src) {
-		for(Enumeration en = src.keys(); en.hasMoreElements(); ) {
+		for (Enumeration en = src.keys(); en.hasMoreElements();) {
 			Object key = en.nextElement();
 			dest.put(key, src.get(key));
 		}
 	}
-	
+
 	static String validParamName(Hashtable map, String paramName) {
-		String validName = (String)map.get(paramName.toLowerCase());
+		String validName = (String) map.get(paramName.toLowerCase());
 		if (validName != null) {
 			return validName;
 		}
 		return null;
 	}
-	
+
 	/*
 	 * Create and open a Connection. Parameters: name - The URL for the
 	 * connection. Returns: A new Connection object. Throws:
@@ -146,13 +152,13 @@ public abstract class MicroeditionConnector {
 	 */
 
 	public static Connection open(String name) throws IOException {
-		return openImpl(name, true);
+		return openImpl(name, READ_WRITE, false, true);
 	}
-	
-	private static Connection openImpl(String name, boolean allowServer) throws IOException {
-		
+
+	private static Connection openImpl(String name, int mode, boolean timeouts, boolean allowServer) throws IOException {
+
 		DebugLog.debug("connecting", name);
-		
+
 		/*
 		 * parse URL
 		 */
@@ -161,8 +167,8 @@ public abstract class MicroeditionConnector {
 		String portORuuid = null;
 
 		Hashtable values = new Hashtable();
-		
-		// scheme  : // host : port [;param=val]
+
+		// scheme : // host : port [;param=val]
 		int schemeEnd = name.indexOf("://");
 		if (schemeEnd == -1) {
 			throw new ConnectionNotFoundException(name);
@@ -171,24 +177,26 @@ public abstract class MicroeditionConnector {
 		if (!suportScheme.containsKey(scheme)) {
 			throw new ConnectionNotFoundException(scheme);
 		}
-		boolean schemeBluetooth = (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM)) || (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX) || (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)));
+		boolean schemeBluetooth = (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM))
+				|| (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX) || (scheme
+						.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)));
 		boolean isL2CAP = scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP);
 		boolean isTCPOBEX = scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX);
-		
+
 		BluetoothStack bluetoothStack = null;
-		
+
 		if (schemeBluetooth) {
 			bluetoothStack = BlueCoveImpl.instance().getBluetoothStack();
 		}
-		
+
 		boolean isServer;
-		
+
 		int hostEnd = name.indexOf(':', scheme.length() + 3);
-		
+
 		if (hostEnd > -1) {
 			host = name.substring(scheme.length() + 3, hostEnd);
 			isServer = host.equals("localhost");
-			
+
 			Hashtable params;
 			if (isTCPOBEX) {
 				params = new Hashtable();
@@ -206,7 +214,7 @@ public abstract class MicroeditionConnector {
 					params = cliParams;
 				}
 			}
-			
+
 			String paramsStr = name.substring(hostEnd + 1);
 			UtilsStringTokenizer tok = new UtilsStringTokenizer(paramsStr, ";");
 			if (tok.hasMoreTokens()) {
@@ -222,16 +230,16 @@ public abstract class MicroeditionConnector {
 					String value = t.substring(equals + 1);
 					String validName = validParamName(params, param);
 					if (validName != null) {
-						String hasValue = (String)values.get(validName);
+						String hasValue = (String) values.get(validName);
 						if ((hasValue != null) && (!hasValue.equals(value))) {
-							throw new IllegalArgumentException("duplicate param [" + param + "] value [" + value +"]");	
+							throw new IllegalArgumentException("duplicate param [" + param + "] value [" + value + "]");
 						}
 						values.put(validName, value);
 					} else {
-						throw new IllegalArgumentException("invalid param [" + param + "] value [" + value +"]");
+						throw new IllegalArgumentException("invalid param [" + param + "] value [" + value + "]");
 					}
 				} else {
-					throw new IllegalArgumentException("invalid param [" + t +"]");
+					throw new IllegalArgumentException("invalid param [" + t + "]");
 				}
 			}
 		} else if (isTCPOBEX) {
@@ -240,45 +248,48 @@ public abstract class MicroeditionConnector {
 		} else {
 			throw new IllegalArgumentException(name.substring(scheme.length() + 3));
 		}
-		
+
 		if (isTCPOBEX) {
 			if ((portORuuid == null) || (portORuuid.length() == 0)) {
 				portORuuid = String.valueOf(BluetoothConsts.TCP_OBEX_DEFAULT_PORT);
 			}
-//			else {
-//				try {
-//					int port = Integer.parseInt(portORuuid);
-//					if ((port < 1023) && (port != BluetoothConsts.TCP_OBEX_DEFAULT_PORT)) {
-//						throw new IllegalArgumentException("Port " + portORuuid + " can't be used; the 0-1023 range is reserved");
-//					}
-//				} catch (NumberFormatException e) {
-//					throw new IllegalArgumentException("port " + portORuuid);
-//				}
-//			}
+			// else {
+			// try {
+			// int port = Integer.parseInt(portORuuid);
+			// if ((port < 1023) && (port !=
+			// BluetoothConsts.TCP_OBEX_DEFAULT_PORT)) {
+			// throw new IllegalArgumentException("Port " + portORuuid + " can't
+			// be used; the 0-1023 range is reserved");
+			// }
+			// } catch (NumberFormatException e) {
+			// throw new IllegalArgumentException("port " + portORuuid);
+			// }
+			// }
 		}
 
 		if (host == null || portORuuid == null) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		BluetoothConnectionNotifierParams notifierParams = null;
 
 		BluetoothConnectionParams connectionParams = null;
-		
+
 		int channel = 0;
 		if (isServer) {
-           if (!allowServer) {
-        	   throw new IllegalArgumentException("Can't use server connection URL");
-           }
-           if (values.get(NAME) == null) {
-        	   values.put(NAME, "BlueCove");
-           } else if (schemeBluetooth) {
-        	   validateBluetoothServiceName((String)values.get(NAME));
-           }
-           if (schemeBluetooth) {
+			if (!allowServer) {
+				throw new IllegalArgumentException("Can't use server connection URL");
+			}
+			if (values.get(NAME) == null) {
+				values.put(NAME, "BlueCove");
+			} else if (schemeBluetooth) {
+				validateBluetoothServiceName((String) values.get(NAME));
+			}
+			if (schemeBluetooth) {
 				notifierParams = new BluetoothConnectionNotifierParams(new UUID(portORuuid, false), paramBoolean(
 						values, AUTHENTICATE), paramBoolean(values, ENCRYPT), paramBoolean(values, AUTHORIZE),
 						(String) values.get(NAME), paramBoolean(values, MASTER));
+				notifierParams.timeouts = timeouts;
 				if (notifierParams.encrypt && (!notifierParams.authenticate)) {
 					if (values.get(AUTHENTICATE) == null) {
 						notifierParams.authenticate = true;
@@ -298,7 +309,7 @@ public abstract class MicroeditionConnector {
 			}
 		} else { // (!isServer)
 			try {
-				channel = Integer.parseInt(portORuuid, isL2CAP?16:10);
+				channel = Integer.parseInt(portORuuid, isL2CAP ? 16 : 10);
 			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException("channel " + portORuuid);
 			}
@@ -307,12 +318,13 @@ public abstract class MicroeditionConnector {
 			}
 			if (schemeBluetooth) {
 				if (isL2CAP) {
-					// Valid PSM range: 0x0001-0x0019 (0x1001-0xFFFF dynamically assigned, 0x0019-0x0100 reserved for future use).
+					// Valid PSM range: 0x0001-0x0019 (0x1001-0xFFFF dynamically
+					// assigned, 0x0019-0x0100 reserved for future use).
 					if ((channel < BluetoothConsts.L2CAP_PSM_MIN) || (channel > BluetoothConsts.L2CAP_PSM_MAX)) {
 						// PSM 1 discovery, 3 RFCOMM
 						throw new IllegalArgumentException("PCM " + portORuuid);
 					}
-					//has the 9th bit (0x100) set to zero
+					// has the 9th bit (0x100) set to zero
 					if ((channel & 0x100) != 0) {
 						throw new IllegalArgumentException("9th bit set in PCM " + portORuuid);
 					}
@@ -320,18 +332,21 @@ public abstract class MicroeditionConnector {
 						throw new IllegalArgumentException("PSM value " + portORuuid + " should be odd");
 					}
 				} else {
-					if ((channel < BluetoothConsts.RFCOMM_CHANNEL_MIN) || (channel > BluetoothConsts.RFCOMM_CHANNEL_MAX)) {
+					if ((channel < BluetoothConsts.RFCOMM_CHANNEL_MIN)
+							|| (channel > BluetoothConsts.RFCOMM_CHANNEL_MAX)) {
 						throw new IllegalArgumentException("RFCOMM channel " + portORuuid);
 					}
 				}
-				
-				connectionParams = new BluetoothConnectionParams(RemoteDeviceHelper.getAddress(host), channel, 
-					paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
+
+				connectionParams = new BluetoothConnectionParams(RemoteDeviceHelper.getAddress(host), channel,
+						paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
+				connectionParams.timeouts = timeouts;
 				if (connectionParams.encrypt && (!connectionParams.authenticate)) {
 					if (values.get(AUTHENTICATE) == null) {
 						connectionParams.authenticate = true;
 					} else {
-						throw new BluetoothConnectionException(BluetoothConnectionException.UNACCEPTABLE_PARAMS, "encryption requires authentication");
+						throw new BluetoothConnectionException(BluetoothConnectionException.UNACCEPTABLE_PARAMS,
+								"encryption requires authentication");
 					}
 				}
 			}
@@ -348,17 +363,18 @@ public abstract class MicroeditionConnector {
 		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX)) {
 			if (isServer) {
 				notifierParams.obex = true;
-				return new OBEXSessionNotifierImpl(new BluetoothStreamConnectionNotifier(bluetoothStack, notifierParams));
+				return new OBEXSessionNotifierImpl(
+						new BluetoothStreamConnectionNotifier(bluetoothStack, notifierParams));
 			} else {
-				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(bluetoothStack, connectionParams)); 
+				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(bluetoothStack, connectionParams));
 			}
 		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)) {
 			if (isServer) {
-				return new BluetoothL2CAPConnectionNotifier(bluetoothStack, notifierParams,
-						paramL2CAPMTU(values, RECEIVE_MTU), paramL2CAPMTU(values, TRANSMIT_MTU));
+				return new BluetoothL2CAPConnectionNotifier(bluetoothStack, notifierParams, paramL2CAPMTU(values,
+						RECEIVE_MTU), paramL2CAPMTU(values, TRANSMIT_MTU));
 			} else {
-				return new BluetoothL2CAPClientConnection(bluetoothStack, connectionParams,
-						paramL2CAPMTU(values, RECEIVE_MTU), paramL2CAPMTU(values, TRANSMIT_MTU)); 
+				return new BluetoothL2CAPClientConnection(bluetoothStack, connectionParams, paramL2CAPMTU(values,
+						RECEIVE_MTU), paramL2CAPMTU(values, TRANSMIT_MTU));
 			}
 		} else if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX)) {
 			if (isServer) {
@@ -369,7 +385,7 @@ public abstract class MicroeditionConnector {
 				}
 				return new OBEXSessionNotifierImpl(new ServerSocketConnection(channel));
 			} else {
-				return new OBEXClientSessionImpl(new SocketConnection(host, channel)); 
+				return new OBEXClientSessionImpl(new SocketConnection(host, channel));
 			}
 		} else if (scheme.equals("socket")) {
 			if (isServer) {
@@ -386,23 +402,24 @@ public abstract class MicroeditionConnector {
 			throw new ConnectionNotFoundException(scheme);
 		}
 	}
-	
+
 	private static void validateBluetoothServiceName(String serviceName) {
-		 if(serviceName.length() == 0) {
-             throw new IllegalArgumentException("zero length service name");
-		 }
-		 final String allowNameCharactes = " -_";
-         for(int i = 0; i < serviceName.length(); i++) {
-             char c = serviceName.charAt(i);
-             if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || allowNameCharactes.indexOf(c) != -1) {
-            	 continue;
-             }
-             throw new IllegalArgumentException("Illegal character '" + c + "' in service name");
-         }
+		if (serviceName.length() == 0) {
+			throw new IllegalArgumentException("zero length service name");
+		}
+		final String allowNameCharactes = " -_";
+		for (int i = 0; i < serviceName.length(); i++) {
+			char c = serviceName.charAt(i);
+			if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
+					|| allowNameCharactes.indexOf(c) != -1) {
+				continue;
+			}
+			throw new IllegalArgumentException("Illegal character '" + c + "' in service name");
+		}
 	}
 
 	private static boolean paramBoolean(Hashtable values, String name) {
-		String v = (String)values.get(name);
+		String v = (String) values.get(name);
 		if (v == null) {
 			return false;
 		} else if ("true".equals(v)) {
@@ -413,11 +430,11 @@ public abstract class MicroeditionConnector {
 			throw new IllegalArgumentException("invalid param value " + name + "=" + v);
 		}
 	}
-	
+
 	private static int paramL2CAPMTU(Hashtable values, String name) {
 		String v = (String) values.get(name);
 		if (v == null) {
-			if (name.equals(TRANSMIT_MTU)){
+			if (name.equals(TRANSMIT_MTU)) {
 				// This will select RemoteMtu
 				return -1;
 			} else {
@@ -449,7 +466,7 @@ public abstract class MicroeditionConnector {
 	 */
 
 	public static Connection open(String name, int mode) throws IOException {
-		return open(name);
+		return openImpl(name, mode, false, true);
 	}
 
 	/*
@@ -463,9 +480,8 @@ public abstract class MicroeditionConnector {
 	 * handler is not permitted.
 	 */
 
-	public static Connection open(String name, int mode, boolean timeouts)
-			throws IOException {
-		return open(name);
+	public static Connection open(String name, int mode, boolean timeouts) throws IOException {
+		return openImpl(name, mode, timeouts, true);
 	}
 
 	/*
@@ -477,8 +493,7 @@ public abstract class MicroeditionConnector {
 	 * SecurityException - If access to the requested stream is not permitted.
 	 */
 
-	public static DataInputStream openDataInputStream(String name)
-			throws IOException {
+	public static DataInputStream openDataInputStream(String name) throws IOException {
 		return new DataInputStream(openInputStream(name));
 	}
 
@@ -491,8 +506,7 @@ public abstract class MicroeditionConnector {
 	 * SecurityException - If access to the requested stream is not permitted.
 	 */
 
-	public static DataOutputStream openDataOutputStream(String name)
-			throws IOException {
+	public static DataOutputStream openDataOutputStream(String name) throws IOException {
 		return new DataOutputStream(openOutputStream(name));
 	}
 
@@ -506,7 +520,12 @@ public abstract class MicroeditionConnector {
 	 */
 
 	public static InputStream openInputStream(String name) throws IOException {
-		return ((InputConnection)openImpl(name, false)).openInputStream();
+		InputConnection con = ((InputConnection) openImpl(name, READ, false, false));
+		try {
+			return con.openInputStream();
+		} finally {
+			con.close();
+		}
 	}
 
 	/*
@@ -519,7 +538,12 @@ public abstract class MicroeditionConnector {
 	 */
 
 	public static OutputStream openOutputStream(String name) throws IOException {
-		return ((OutputConnection)openImpl(name, false)).openOutputStream();
+		OutputConnection con = ((OutputConnection) openImpl(name, WRITE, false, false));
+		try {
+			return con.openOutputStream();
+		} finally {
+			con.close();
+		}
 	}
 
 }

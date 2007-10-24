@@ -24,25 +24,28 @@ import javax.bluetooth.UUID;
 
 /**
  * @author vlads
- *
+ * 
  */
 class BluetoothConnectionNotifierParams {
-	
+
 	UUID uuid;
-	
-	boolean authenticate; 
-	
-	boolean encrypt; 
-	
+
+	boolean authenticate;
+
+	boolean encrypt;
+
 	boolean authorize;
-	
-	String name; 
-	
+
+	String name;
+
 	boolean master;
 
 	boolean obex;
-	
-	public BluetoothConnectionNotifierParams(UUID uuid, boolean authenticate, boolean encrypt, boolean authorize, String name, boolean master) {
+
+	boolean timeouts;
+
+	public BluetoothConnectionNotifierParams(UUID uuid, boolean authenticate, boolean encrypt, boolean authorize,
+			String name, boolean master) {
 		super();
 		this.uuid = uuid;
 		this.authenticate = authenticate;
