@@ -10,7 +10,47 @@ BlueCove
     BlueCove is a Java library for Bluetooth (JSR-82 implementation) that currently interfaces with the WIDCOMM, BlueSoleil and Microsoft Bluetooth stack found in Windows XP SP2 or Windows Vista
     and WIDCOMM and Microsoft Bluetooth stack on Windows Mobile.
 
-    BlueCove can be used in  Java 2 Platform Standard Edition (J2SE).
+    BlueCove can be used in Java Standard Edition (J2SE) 1.1 or newer.
+
+    BlueCove has been tested on following JVM:
+
+    * SUN Java 1.1.8 on Windows XP/X86
+
+    * SUN Java 2 Platform Standard Edition 1.4.2 on Windows XP/X86
+
+    * SUN Java 2 Platform Standard Edition 5.0 on Windows XP/X86
+
+    * SUN Java 2 Platform Standard Edition 6.0 on Windows XP/X86
+
+    * WebSphere Everyplace Micro Environment 5.7.2, CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows XP/X86
+
+    * WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows XP/X86
+
+    * WebSphere Everyplace Micro Environment 5.7.2, CLDC 1.1, MIDP 2.0 on Windows XP/X86
+
+    * {{{http://www2s.biglobe.ne.jp/~dat/java/project/jvm/index_en.html}Mysaifu JVM}} - An open-source (GPL v.2 license) Java VM on Windows Mobile 2003 Second Edition.
+
+    []
+
+
+    BlueCove provides JSR-82 Java interface for following Bluetooth Profiles:
+
+    * SDAP - Service Discovery Application Profile
+
+    * RFCOMM - Serial Cable Emulation Protocol
+
+    * L2CAP - Logical Link Control and Adaptation Protocol
+
+    * OBEX - Generic Object Exchange Profile (GOEP) profile on top of RFCOMM and TCP
+
+    []
+
+
+* BlueCove Documentation
+
+    [http://code.google.com/p/bluecove/wiki/Documentation BlueCove Installation and configuration instructions]
+
+    API-Documentation for BlueCove [apidocs/index.html Java docs]. For application it is not recommended to use any classes or API other than defined in JSR-82.
 
     Main project website {{{http://code.google.com/p/bluecove/}http://code.google.com/p/bluecove/}}
 
