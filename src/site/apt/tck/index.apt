@@ -14,9 +14,9 @@ JSR 82 Technology Compatibility Kit
 
 * BlueCove Tests on windows
 
-    L2CAP connection can't be implemented on Microsoft stack this tests has been excluded from run on this stack to save time.
+    L2CAP connection can't be implemented on Microsoft stack. Because of this BlueCove JSR-82 implementation can't be certified on  Microsoft stack. L2CAP tests has been excluded from run on this stack to save time
 
-    Latest test reports for Bluetooth_1-1_006_TCK can be found {{{Bluetooth_1-1_006_TCK/}here}}.
+    Latest test reports for Bluetooth_1-1_006_TCK can be found {{{Bluetooth_1-1_006_TCK/}here}}. See Description of {{{#failures}failures}}.
 
     Latest test reports for OBEX_1-1_006_TCK can be found {{{OBEX_1-1_006_TCK/}here}}.
 
@@ -54,3 +54,14 @@ JSR 82 Technology Compatibility Kit
     java -cp microemulator.jar;bluecove.jar org.microemu.app.Main -Xautotest:http://localhost:8080/getNextApp.jad
 ---
 
+
+* Description of {failures}
+
+    * LocalDevice.DiscoverableTest: Failed because there are not API in WIDCOMM native stack to change device discoverable status.
+
+    * RemoteDevice.Security: RemoteDevice.authenticate() and RemoteDevice.authorize() Not implemented
+
+    * ServiceRecord.setDeviceServiceClassesTest: Function ServiceRecord.setDeviceServiceClasses not implemented because there are no such API in WIDCOMM native stack
+
+
+    []
