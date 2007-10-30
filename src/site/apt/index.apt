@@ -48,9 +48,9 @@ BlueCove
 
 * BlueCove Documentation
 
-    [http://code.google.com/p/bluecove/wiki/Documentation BlueCove Installation and configuration instructions]
+    {{{http://code.google.com/p/bluecove/wiki/Documentation}BlueCove Installation and configuration instructions}}
 
-    API-Documentation for BlueCove [apidocs/index.html Java docs]. For application it is not recommended to use any classes or API other than defined in JSR-82.
+    API-Documentation for BlueCove {{{apidocs/index.html}Java docs}}. For application it is not recommended to use any classes or API other than defined in JSR-82.
 
     Main project website {{{http://code.google.com/p/bluecove/}http://code.google.com/p/bluecove/}}
 
@@ -64,7 +64,7 @@ BlueCove
 
     * BlueCove OBEX Push J2ME application installer {{{bluecove-examples/obex-install}here}}.
 
-    * MIDlet application {{{http://www.mgmaps.com/}Mobile GMaps}} created by Cristian Streng wil connect to GPS receiver over bluetooth. <<<{{{bluecove-examples/bluecove-webstart/open/wap.mgmaps.com/mgmaps.jnlp}\u00bbStart now}}>>>.
+    * MIDlet application {{{http://www.mgmaps.com/}Mobile GMaps}} created by Cristian Streng will connect to GPS receiver over bluetooth. <<<{{{bluecove-examples/bluecove-webstart/open/wap.mgmaps.com/mgmaps.jnlp}\u00bbStart now}}>>>.
 
     BlueCove provides an implementation of the JSR 82. Applications should use {{{apidocs/index.html}API defined in JSR-82}}.
 
