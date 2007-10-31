@@ -355,7 +355,7 @@ public abstract class MicroeditionConnector {
 		OBEXConnectionParams obexConnectionParams = null;
 
 		if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX)
-				|| scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX)) {
+				|| scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX)) {
 			obexConnectionParams = new OBEXConnectionParams();
 			obexConnectionParams.timeouts = timeouts;
 			String timeout = BlueCoveImpl.getConfigProperty("bluecove.obex.timeout");

@@ -60,6 +60,9 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	protected OBEXConnectionParams obexConnectionParams;
 
 	public OBEXSessionBase(StreamConnection conn, OBEXConnectionParams obexConnectionParams) throws IOException {
+		if (obexConnectionParams == null) {
+			throw new NullPointerException("obexConnectionParams is null");
+		}
 		this.conn = conn;
 		this.obexConnectionParams = obexConnectionParams;
 		connectionID = -1;
