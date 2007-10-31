@@ -70,6 +70,7 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 			throws IOException, Error {
 		Utils.isLegalAPICall(fqcnSet);
 		this.notifier = notifier;
+		this.obexConnectionParams = obexConnectionParams;
 	}
 
 	public Connection acceptAndOpen(ServerRequestHandler handler) throws IOException {
