@@ -307,6 +307,20 @@ void convertGUIDToUUIDBytes(GUID *uuid, jbyte *bytes) {
 	}
 }
 
+jstring newMultiByteString(JNIEnv* env, char* str) {
+	jstring value = NULL;
+	int length =  (UINT32)strlen(str);
+	int length_mb = MultiByteToWideChar( CP_ACP, 0, (LPCSTR)str, length, NULL, 0);
+    unsigned short* buffer = (unsigned short*)malloc(length_mb * 2 + 1);
+	if (buffer != NULL) {
+		if (MultiByteToWideChar( CP_ACP, 0, (LPCSTR)str, length, (LPWSTR)buffer, length_mb) > 0 ) {
+			value = env->NewString((jchar*)buffer, length_mb );
+		}
+		free(buffer);
+	}
+	return value;
+}
+
 #define MAJOR_COMPUTER 0x0100
 #define MAJOR_PHONE 0x0200
 #define COMPUTER_MINOR_HANDHELD 0x10

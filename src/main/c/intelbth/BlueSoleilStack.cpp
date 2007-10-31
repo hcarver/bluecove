@@ -161,9 +161,10 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getL
         return NULL;
     }
     // For some reson devInfo.szName can't be used in call to JNI NewStringUTF
-    char name[MAX_DEVICE_NAME_LENGTH];
-    sprintf_s(name, MAX_DEVICE_NAME_LENGTH, "%s", devInfo.szName);
-    return env->NewStringUTF(name);
+    //char name[MAX_DEVICE_NAME_LENGTH];
+    //sprintf_s(name, MAX_DEVICE_NAME_LENGTH, "%s", devInfo.szName);
+    //return env->NewStringUTF(name);
+	return newMultiByteString(env, devInfo.szName);
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getDeviceVersion
@@ -266,7 +267,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 
         jint deviceClass = BsDeviceClassToInt(devInfo.classOfDevice);
 
-        env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, env->NewStringUTF((char*)(devInfo.szName)), paired);
+        env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, newMultiByteString(env, (char*)(devInfo.szName)), paired);
         if (ExceptionCheckCompatible(env)) {
            return INQUIRY_ERROR;
         }
