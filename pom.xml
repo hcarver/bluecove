@@ -187,6 +187,7 @@
                                 <className>com.intel.bluetooth.BluetoothStackWIDCOMM</className>
                                 <className>com.intel.bluetooth.BluetoothStackBlueSoleil</className>
                                 <className>com.intel.bluetooth.BluetoothStackToshiba</className>
+                                <className>com.intel.bluetooth.BluetoothStackOSX</className>
                             </classNames>
                         </configuration>
                     </execution>
