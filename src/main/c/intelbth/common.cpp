@@ -183,6 +183,7 @@ void throwRuntimeException(JNIEnv *env, const char *msg) {
 	throwException(env, "java/lang/RuntimeException", msg);
 }
 
+#ifdef WIN32
 WCHAR *getWinErrorMessage(DWORD last_error) {
 	static WCHAR errmsg[1024];
 	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
@@ -236,6 +237,8 @@ char* waitResultsString(DWORD rc) {
 	}
 }
 
+#endif
+
 BOOL ExceptionCheckCompatible(JNIEnv *env) {
 	if (env->GetVersion() > JNI_VERSION_1_1) {
 		return env->ExceptionCheck();
@@ -264,6 +267,7 @@ BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer) {
 
 jint detectBluetoothStack(JNIEnv *env) {
 	jint rc = 0;
+#ifdef WIN32
 #ifndef VC6
 	if (isMicrosoftBluetoothStackPresent(env)) {
 		rc += BLUECOVE_STACK_DETECT_MICROSOFT;
@@ -280,9 +284,11 @@ jint detectBluetoothStack(JNIEnv *env) {
 		rc += BLUECOVE_STACK_DETECT_TOSHIBA;
 	}
 #endif
+#endif
 	return rc;
 }
 
+#ifdef WIN32
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid) {
 	uuid->Data1 = bytes[0]<<24&0xff000000|bytes[1]<<16&0x00ff0000|bytes[2]<<8&0x0000ff00|bytes[3]&0x000000ff;
 	uuid->Data2 = bytes[4]<<8&0xff00|bytes[5]&0x00ff;
@@ -320,6 +326,7 @@ jstring newMultiByteString(JNIEnv* env, char* str) {
 	}
 	return value;
 }
+#endif
 
 #define MAJOR_COMPUTER 0x0100
 #define MAJOR_PHONE 0x0200
@@ -360,6 +367,21 @@ jint getDeviceClassByOS(JNIEnv *env) {
 	return MAJOR_COMPUTER;
 #endif
 }
+
+#ifndef WIN32
+void InitializeCriticalSection(CRITICAL_SECTION *criticalRegion) {
+    MPCreateCriticalRegion(criticalRegion);
+}
+void DeleteCriticalSection(CRITICAL_SECTION *criticalRegion) {
+    MPDeleteCriticalRegion(*criticalRegion);
+}
+void EnterCriticalSection(CRITICAL_SECTION *criticalRegion) {
+    MPEnterCriticalRegion(*criticalRegion, kDurationForever);
+}
+void LeaveCriticalSection(CRITICAL_SECTION *criticalRegion) {
+    MPExitCriticalRegion(*criticalRegion);
+}
+#endif
 
 ReceiveBuffer::ReceiveBuffer() {
 	safe = RECEIVE_BUFFER_SAFE;

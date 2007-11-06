@@ -1,0 +1,252 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D41C4FF60CDFEF6C00BF6B4D /* JavaVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D41C4FF50CDFEF6C00BF6B4D /* JavaVM.framework */; };
+		D41C500A0CDFEF9D00BF6B4D /* commonTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41C50090CDFEF9D00BF6B4D /* commonTest.cpp */; };
+		D41C500D0CDFEFC000BF6B4D /* common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41C500B0CDFEFC000BF6B4D /* common.cpp */; };
+		D41C500E0CDFEFC000BF6B4D /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = D41C500C0CDFEFC000BF6B4D /* common.h */; };
+		D41C50100CDFEFCC00BF6B4D /* com_intel_bluetooth_BluetoothStackOSX.h in Headers */ = {isa = PBXBuildFile; fileRef = D41C500F0CDFEFCC00BF6B4D /* com_intel_bluetooth_BluetoothStackOSX.h */; };
+		D41C503E0CDFFA9900BF6B4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D41C503D0CDFFA9900BF6B4D /* Carbon.framework */; };
+		D41C50650CE0030500BF6B4D /* OSXStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41C50630CE0030500BF6B4D /* OSXStack.cpp */; };
+		D41C50660CE0030500BF6B4D /* OSXStack.h in Headers */ = {isa = PBXBuildFile; fileRef = D41C50640CE0030500BF6B4D /* OSXStack.h */; };
+		D4EBD1DC0CE012CB00BFA44D /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4EBD1DB0CE012CB00BFA44D /* IOBluetooth.framework */; };
+		D4EBD1E20CE013E500BFA44D /* libbluecove.jnilib in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2AAC0630554660B00DB518D /* libbluecove.jnilib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D4EBD1E00CE0136B00BFA44D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = ./../../../../resources;
+			dstSubfolderSpec = 16;
+			files = (
+				D4EBD1E20CE013E500BFA44D /* libbluecove.jnilib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		D2AAC0630554660B00DB518D /* libbluecove.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libbluecove.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
+		D41C4FF50CDFEF6C00BF6B4D /* JavaVM.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaVM.framework; path = /System/Library/Frameworks/JavaVM.framework; sourceTree = "<absolute>"; };
+		D41C50090CDFEF9D00BF6B4D /* commonTest.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = commonTest.cpp; sourceTree = "<group>"; };
+		D41C500B0CDFEFC000BF6B4D /* common.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = common.cpp; sourceTree = "<group>"; };
+		D41C500C0CDFEFC000BF6B4D /* common.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		D41C500F0CDFEFCC00BF6B4D /* com_intel_bluetooth_BluetoothStackOSX.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = com_intel_bluetooth_BluetoothStackOSX.h; sourceTree = "<group>"; };
+		D41C503D0CDFFA9900BF6B4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		D41C50630CE0030500BF6B4D /* OSXStack.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = OSXStack.cpp; sourceTree = "<group>"; };
+		D41C50640CE0030500BF6B4D /* OSXStack.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OSXStack.h; sourceTree = "<group>"; };
+		D4EBD1DB0CE012CB00BFA44D /* IOBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOBluetooth.framework; path = /System/Library/Frameworks/IOBluetooth.framework; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D289988505E68E00004EDB86 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D41C4FF60CDFEF6C00BF6B4D /* JavaVM.framework in Frameworks */,
+				D41C503E0CDFFA9900BF6B4D /* Carbon.framework in Frameworks */,
+				D4EBD1DC0CE012CB00BFA44D /* IOBluetooth.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* bluecove */ = {
+			isa = PBXGroup;
+			children = (
+				D4EBD1DB0CE012CB00BFA44D /* IOBluetooth.framework */,
+				D41C503D0CDFFA9900BF6B4D /* Carbon.framework */,
+				D41C4FF50CDFEF6C00BF6B4D /* JavaVM.framework */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = bluecove;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				D41C50630CE0030500BF6B4D /* OSXStack.cpp */,
+				D41C50640CE0030500BF6B4D /* OSXStack.h */,
+				D41C500F0CDFEFCC00BF6B4D /* com_intel_bluetooth_BluetoothStackOSX.h */,
+				D41C500B0CDFEFC000BF6B4D /* common.cpp */,
+				D41C500C0CDFEFC000BF6B4D /* common.h */,
+				D41C50090CDFEF9D00BF6B4D /* commonTest.cpp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2AAC0630554660B00DB518D /* libbluecove.jnilib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D2AAC0600554660B00DB518D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D41C500E0CDFEFC000BF6B4D /* common.h in Headers */,
+				D41C50100CDFEFCC00BF6B4D /* com_intel_bluetooth_BluetoothStackOSX.h in Headers */,
+				D41C50660CE0030500BF6B4D /* OSXStack.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D2AAC0620554660B00DB518D /* bluecove */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB914A08733D8E0010E9CD /* Build configuration list for PBXNativeTarget "bluecove" */;
+			buildPhases = (
+				D2AAC0600554660B00DB518D /* Headers */,
+				D2AAC0610554660B00DB518D /* Sources */,
+				D289988505E68E00004EDB86 /* Frameworks */,
+				D4EBD1E00CE0136B00BFA44D /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = bluecove;
+			productName = bluecove;
+			productReference = D2AAC0630554660B00DB518D /* libbluecove.jnilib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB914E08733D8E0010E9CD /* Build configuration list for PBXProject "bluecove" */;
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* bluecove */;
+			projectDirPath = "";
+			targets = (
+				D2AAC0620554660B00DB518D /* bluecove */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2AAC0610554660B00DB518D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D41C500A0CDFEF9D00BF6B4D /* commonTest.cpp in Sources */,
+				D41C500D0CDFEFC000BF6B4D /* common.cpp in Sources */,
+				D41C50650CE0030500BF6B4D /* OSXStack.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB914B08733D8E0010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = bluecove;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		1DEB914C08733D8E0010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				EXECUTABLE_PREFIX = lib;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = bluecove;
+			};
+			name = Release;
+		};
+		1DEB914F08733D8E0010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				EXECUTABLE_EXTENSION = jnilib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SDKROOT)/System/Library/Frameworks/JavaVM.framework/Headers",
+					"$(inherited)",
+				);
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Debug;
+		};
+		1DEB915008733D8E0010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				EXECUTABLE_EXTENSION = jnilib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SDKROOT)/System/Library/Frameworks/JavaVM.framework/Headers",
+					"$(inherited)",
+				);
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB914A08733D8E0010E9CD /* Build configuration list for PBXNativeTarget "bluecove" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB914B08733D8E0010E9CD /* Debug */,
+				1DEB914C08733D8E0010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB914E08733D8E0010E9CD /* Build configuration list for PBXProject "bluecove" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB914F08733D8E0010E9CD /* Debug */,
+				1DEB915008733D8E0010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

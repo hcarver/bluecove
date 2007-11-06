@@ -27,6 +27,7 @@
 
 #include "com_intel_bluetooth_NativeTestInterfaces.h"
 
+#ifdef WIN32
 JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testUUIDConversion
 (JNIEnv *env, jclass, jbyteArray uuidValue) {
 	GUID g;
@@ -51,6 +52,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testU
 
 	return uuidValueConverted;
 }
+#endif
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testReceiveBufferCreate
 (JNIEnv *, jclass, jint size) {

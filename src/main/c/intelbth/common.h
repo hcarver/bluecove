@@ -88,12 +88,32 @@
 #else // _WIN32_WCE
 
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
+
+#ifdef WIN32
 // Windows Header Files:
 #include <windows.h>
 #include <tchar.h>
+#else
+
+// OS X
+#define BOOL bool
+#define TRUE true
+#define FALSE false
+#define DWORD unsigned int
+#define WCHAR wchar_t
+
+#define CRITICAL_SECTION MPCriticalRegionID
+#include <Carbon/Carbon.h>
+
+#define swprintf_s snwprintf
+#define sprintf_s snprintf
+#define _vsnprintf_s vsnprintf
+
+#endif
 
 // vc6 = 1200, vc7 = 1300, vc7.1 = 1310, vc8 = 1400
 
+#ifdef WIN32
 #if _MSC_VER > 1200
 #include <strsafe.h>
 #else
@@ -104,6 +124,8 @@
 #ifndef INT_MAX
 #define INT_MAX 2147483647
 #endif
+#endif
+
 #endif
 
 #endif // #else // _WIN32_WCE
@@ -194,6 +216,7 @@ void throwBluetoothConnectionExceptionExt(JNIEnv *env, int error, const char *fm
 void throwRuntimeException(JNIEnv *env, const char *msg);
 #define _throwRuntimeException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwRuntimeException(env, msg); }
 
+#ifdef WIN32
 void throwExceptionWinErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error);
 
 void throwIOExceptionWinErrorMessage(JNIEnv *env, const char *msg, DWORD last_error);
@@ -202,17 +225,22 @@ void throwBluetoothStateExceptionWinErrorMessage(JNIEnv *env, const char *msg, D
 
 void throwIOExceptionWinGetLastError(JNIEnv *env, const char *msg);
 
-WCHAR *getWinErrorMessage(DWORD last_error);
+WCHAR* getWinErrorMessage(DWORD last_error);
 
 char* waitResultsString(DWORD rc);
+
+#endif
+
 
 BOOL ExceptionCheckCompatible(JNIEnv *env);
 
 BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer);
 
+#ifdef WIN32
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid);
 void convertGUIDToUUIDBytes(GUID *uuid, jbyte *bytes);
 jstring newMultiByteString(JNIEnv* env, char* str);
+#endif
 
 #define BLUECOVE_STACK_DETECT_MICROSOFT 1
 #define BLUECOVE_STACK_DETECT_WIDCOMM 2
