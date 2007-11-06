@@ -26,25 +26,37 @@ import junit.framework.TestCase;
 
 /**
  * @author vlads
- *
+ * 
  */
 public class NativeDebugTest extends TestCase implements LoggerAppender {
-	
+
 	protected void setUp() throws Exception {
 		DebugLog.addAppender(this);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		DebugLog.removeAppender(this);
 	}
-	
+
+	protected boolean needDllWIDCOMM() {
+		return false;
+	}
+
 	String lastMessage;
-	
+
 	public void testDebug() {
-		BluetoothStack anyStack = new BluetoothStackMicrosoft();
+		BluetoothStack anyStack;
+		if (NativeLibLoader.getOS() == NativeLibLoader.OS_MAC_OS_X) {
+			anyStack = new BluetoothStackOSX();
+		} else if (needDllWIDCOMM()) {
+			anyStack = new BluetoothStackWIDCOMM();
+		} else {
+			anyStack = new BluetoothStackMicrosoft();
+		}
+
 		anyStack.enableNativeDebug(DebugLog.class, true);
 		DebugLog.setDebugEnabled(true);
-		
+
 		NativeTestInterfaces.testDebug("test-message");
 		assertNotNull("Debug recived", lastMessage);
 		assertTrue("Debug {" + lastMessage + "}", lastMessage.startsWith("message[test-message]"));
@@ -53,5 +65,5 @@ public class NativeDebugTest extends TestCase implements LoggerAppender {
 	public void appendLog(int level, String message, Throwable throwable) {
 		lastMessage = message;
 	}
-	
+
 }

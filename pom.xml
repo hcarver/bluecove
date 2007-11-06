@@ -506,8 +506,26 @@
                             <testFailureIgnore>false</testFailureIgnore>
                             <excludes>
                                 <exclude>**/*WIDCOMMTest.*</exclude>
+                                <exclude>**/NativeConversionTest.*</exclude>
                             </excludes>
                         </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile-bluecove-jnilib-on-osx</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${basedir}/build-native-osx.sh</executable>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
 
                 </plugins>
@@ -557,6 +575,7 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>hasBuildLabel</id>
             <activation>
@@ -568,6 +587,7 @@
                 <buildLabel>${label}</buildLabel>
             </properties>
         </profile>
+
     </profiles>
 
 </project>
