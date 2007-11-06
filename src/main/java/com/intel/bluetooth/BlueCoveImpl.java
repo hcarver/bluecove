@@ -117,11 +117,13 @@ public class BlueCoveImpl {
 
 	private static final int BLUECOVE_STACK_DETECT_MICROSOFT = 1;
 
-	private static final int BLUECOVE_STACK_DETECT_WIDCOMM = 2;
+	private static final int BLUECOVE_STACK_DETECT_WIDCOMM = 2 ^ 1;
 
-	private static final int BLUECOVE_STACK_DETECT_BLUESOLEIL = 4;
+	private static final int BLUECOVE_STACK_DETECT_BLUESOLEIL = 2 ^ 2;
 
-	private static final int BLUECOVE_STACK_DETECT_TOSHIBA = 8;
+	private static final int BLUECOVE_STACK_DETECT_TOSHIBA = 2 ^ 3;
+
+	private static final int BLUECOVE_STACK_DETECT_OSX = 2 ^ 4;
 
 	private static Hashtable configProperty = new Hashtable();
 
@@ -251,6 +253,8 @@ public class BlueCoveImpl {
 				stackSelected = STACK_BLUESOLEIL;
 			} else if ((aval & BLUECOVE_STACK_DETECT_TOSHIBA) != 0) {
 				stackSelected = STACK_TOSHIBA;
+			} else if ((aval & BLUECOVE_STACK_DETECT_OSX) != 0) {
+				stackSelected = STACK_OSX;
 			} else {
 				DebugLog.fatal("BluetoothStack not detected");
 				throw new BluetoothStateException("BluetoothStack not detected");
