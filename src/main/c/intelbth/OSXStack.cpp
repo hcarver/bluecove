@@ -37,7 +37,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLibraryVers
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_detectBluetoothStack
 (JNIEnv *env, jobject) {
-	return detectBluetoothStack(env);
+	return BLUECOVE_STACK_DETECT_OSX;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_enableNativeDebug
@@ -55,3 +55,25 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_destroyImpl
 }
 
 // --- LocalDevice
+
+void OSxAddrToString(char* addressString, BluetoothDeviceAddress* addr) {
+	snprintf(addressString, 14, "%02x%02x%02x%02x%02x%02x",
+			 addr->data[0],
+             addr->data[1],
+             addr->data[2],
+             addr->data[3],
+             addr->data[4],
+             addr->data[5]);
+}
+
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceBluetoothAddress
+(JNIEnv *env, jobject) {
+    BluetoothDeviceAddress localAddress;
+    if (IOBluetoothLocalDeviceReadAddress(&localAddress, NULL, NULL, NULL)) {
+        throwBluetoothStateException(env, "Bluetooth Device is not ready");
+		return NULL;
+    }
+    char addressString[14];
+    OSxAddrToString(addressString, &localAddress);
+    return env->NewStringUTF(addressString);
+}

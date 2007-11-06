@@ -23,6 +23,8 @@
 
 #include "com_intel_bluetooth_BluetoothStackOSX.h"
 
+#include <IOBluetooth/IOBluetoothUserLib.h>
+
 class OSXStack {
 public:
 	OSXStack();

@@ -100,6 +100,8 @@
 #define TRUE true
 #define FALSE false
 #define DWORD unsigned int
+
+#include <wchar.h>
 #define WCHAR wchar_t
 
 #define CRITICAL_SECTION MPCriticalRegionID
@@ -242,10 +244,11 @@ void convertGUIDToUUIDBytes(GUID *uuid, jbyte *bytes);
 jstring newMultiByteString(JNIEnv* env, char* str);
 #endif
 
-#define BLUECOVE_STACK_DETECT_MICROSOFT 1
-#define BLUECOVE_STACK_DETECT_WIDCOMM 2
-#define BLUECOVE_STACK_DETECT_BLUESOLEIL 4
-#define BLUECOVE_STACK_DETECT_TOSHIBA 8
+#define BLUECOVE_STACK_DETECT_MICROSOFT  1
+#define BLUECOVE_STACK_DETECT_WIDCOMM    (1<<1)
+#define BLUECOVE_STACK_DETECT_BLUESOLEIL (1<<2)
+#define BLUECOVE_STACK_DETECT_TOSHIBA    (1<<3)
+#define BLUECOVE_STACK_DETECT_OSX        (1<<4)
 
 jint detectBluetoothStack(JNIEnv *env);
 jint blueCoveVersion();

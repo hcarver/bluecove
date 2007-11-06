@@ -117,13 +117,13 @@ public class BlueCoveImpl {
 
 	private static final int BLUECOVE_STACK_DETECT_MICROSOFT = 1;
 
-	private static final int BLUECOVE_STACK_DETECT_WIDCOMM = 2 ^ 1;
+	private static final int BLUECOVE_STACK_DETECT_WIDCOMM = 1 << 1;
 
-	private static final int BLUECOVE_STACK_DETECT_BLUESOLEIL = 2 ^ 2;
+	private static final int BLUECOVE_STACK_DETECT_BLUESOLEIL = 1 << 2;
 
-	private static final int BLUECOVE_STACK_DETECT_TOSHIBA = 2 ^ 3;
+	private static final int BLUECOVE_STACK_DETECT_TOSHIBA = 1 << 3;
 
-	private static final int BLUECOVE_STACK_DETECT_OSX = 2 ^ 4;
+	private static final int BLUECOVE_STACK_DETECT_OSX = 1 << 4;
 
 	private static Hashtable configProperty = new Hashtable();
 
