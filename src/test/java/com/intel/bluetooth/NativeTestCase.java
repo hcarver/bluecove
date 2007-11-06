@@ -28,47 +28,55 @@ import junit.framework.TestCase;
  * Native Debug automatically enabled when running tests in Eclipse
  * 
  * @author vlads
- *
+ * 
  */
 public class NativeTestCase extends TestCase {
 
 	// Use this to debug tests
 	protected boolean debug = false;
-	
+
 	protected boolean debugOnInEclipse = true;
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
-		
+
 		boolean eclipse = isEclipse();
-		
+
 		// Use this to avoid project refresh in Eclipse after dll build in VC
 		if (eclipse) {
 			System.getProperties().put("bluecove.native.path", "./src/main/resources");
 		}
-		
+
 		if (eclipse && debugOnInEclipse) {
 			debug = true;
 		}
-		
+
 		// Use this to debug tests
 		if (debug) {
 			System.getProperties().put("bluecove.debug", "true");
 			BlueCoveImpl.instance().enableNativeDebug(true);
 		}
-		
-		if (needDllWIDCOMM()) {
-			NativeTestInterfaces.loadDllWIDCOMM();
+
+		if (NativeLibLoader.getOS() == NativeLibLoader.OS_MAC_OS_X) {
+			if (!NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_OSX)) {
+				throw new Error("Can't load DLL");
+			}
+		} else if (needDllWIDCOMM()) {
+			if (!NativeTestInterfaces.loadDllWIDCOMM()) {
+				throw new Error("Can't load DLL");
+			}
 		} else {
-			NativeTestInterfaces.loadDllMS();
+			if (!NativeTestInterfaces.loadDllMS()) {
+				throw new Error("Can't load DLL");
+			}
 		}
 	}
-	
+
 	boolean isEclipse() {
 		StackTraceElement[] ste = new Throwable().getStackTrace();
 		return (ste[ste.length - 1].getClassName().startsWith("org.eclipse.jdt"));
 	}
-	
+
 	protected boolean needDllWIDCOMM() {
 		return false;
 	}
