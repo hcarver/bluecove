@@ -68,6 +68,10 @@ void OSxAddrToString(char* addressString, BluetoothDeviceAddress* addr) {
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceBluetoothAddress
 (JNIEnv *env, jobject) {
+    if (!IOBluetoothLocalDeviceAvailable()) {
+        throwBluetoothStateException(env, "Bluetooth Device is not available");
+		return NULL;
+    }
     BluetoothDeviceAddress localAddress;
     if (IOBluetoothLocalDeviceReadAddress(&localAddress, NULL, NULL, NULL)) {
         throwBluetoothStateException(env, "Bluetooth Device is not ready");
@@ -76,4 +80,103 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
     char addressString[14];
     OSxAddrToString(addressString, &localAddress);
     return env->NewStringUTF(addressString);
+}
+
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceName
+(JNIEnv *env, jobject) {
+    BluetoothDeviceName localName;
+    if (IOBluetoothLocalDeviceReadName(&localName, NULL, NULL, NULL)) {
+		return NULL;
+    }
+    return env->NewStringUTF((char*)localName);
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getDeviceClassImpl
+(JNIEnv *env, jobject) {
+    BluetoothClassOfDevice cod;
+    if (IOBluetoothLocalDeviceReadClassOfDevice(&cod, NULL, NULL, NULL)) {
+        return 0;
+    }
+    return (jint)cod;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDevicePowerOn
+(JNIEnv *env, jobject) {
+    if (!IOBluetoothLocalDeviceAvailable()) {
+        return JNI_FALSE;
+    }
+    BluetoothHCIPowerState powerState;
+    if (IOBluetoothLocalDeviceReadClassOfDevice(&powerState)) {
+        return JNI_FALSE;
+    }
+    return (powerState == kBluetoothHCIPowerStateON)?JNI_TRUE:JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceDiscoverableImpl
+(JNIEnv *env, jobject) {
+    if (!IOBluetoothLocalDeviceAvailable()) {
+        return JNI_FALSE;
+    }
+    Boolean discoverableStatus;
+    if (IOBluetoothLocalDeviceGetDiscoverable(&discoverableStatus)) {
+        return JNI_FALSE;
+    }
+    return (discoverableStatus)?JNI_TRUE:JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDeviceFeatureSwitchRoles
+(JNIEnv *env, jobject) {
+    BluetoothHCISupportedFeatures features;
+    if (IOBluetoothLocalDeviceReadSupportedFeatures(&features, NULL, NULL, NULL)) {
+        return JNI_FALSE;
+    }
+    return (kBluetoothFeatureSwitchRoles & features.data[7])?JNI_TRUE:JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDeviceFeatureParkMode
+(JNIEnv *env, jobject) {
+    BluetoothHCISupportedFeatures features;
+    if (IOBluetoothLocalDeviceReadSupportedFeatures(&features, NULL, NULL, NULL)) {
+        return JNI_FALSE;
+    }
+    return (kBluetoothFeatureParkMode & features.data[6])?JNI_TRUE:JNI_FALSE;
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceL2CAPMTUMaximum
+(JNIEnv *env, jobject) {
+    return (jint)kBluetoothL2CAPMTUMaximum;
+}
+
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceSoftwareVersionInfo
+(JNIEnv *env, jobject) {
+    NumVersion btVersion;
+	char swVers[133];
+
+	if (IOBluetoothGetVersion( &btVersion, NULL )) {
+	    return NULL;
+	}
+	snprintf(swVers, 133, "%1d%1d.%1d.%1d rev %d", btVersion.majorRev >> 4, btVersion.majorRev & 0x0F,
+	                      btVersion.minorAndBugRev >> 4, btVersion.minorAndBugRev & 0x0F, btVersion.nonRelRev);
+    return env->NewStringUTF(swVers);
+}
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceManufacturer
+(JNIEnv *env, jobject) {
+    BluetoothHCIVersionInfo	hciVersion;
+	if (IOBluetoothGetVersion(NULL, &hciVersion )) {
+	    return 0;
+	}
+	return hciVersion.manufacturerName;
+}
+
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceVersion
+(JNIEnv *env, jobject) {
+    BluetoothHCIVersionInfo	hciVersion;
+	if (IOBluetoothGetVersion(NULL, &hciVersion )) {
+	    return 0;
+	}
+    char swVers[133];
+    snprintf(swVers, 133, "LMP Version: %d.%d, HCI Version: %d.%d", hciVersion.lmpVersion, hciVersion.lmpSubVersion,
+                          hciVersion.hciVersion, hciVersion.hciRevision);
+    return env->NewStringUTF(swVers);
 }

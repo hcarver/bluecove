@@ -25,12 +25,16 @@ import java.io.IOException;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
+import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
 class BluetoothStackOSX implements BluetoothStack {
+
+	// TODO what is the real number for Attributes retrivable ?
+	private final static int ATTR_RETRIEVABLE_MAX = 256;
 
 	// Used mainly in Unit Tests
 	static {
@@ -67,7 +71,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
 	 */
 	public boolean isCurrentThreadInterruptedCallback() {
@@ -78,42 +82,96 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	public native String getLocalDeviceBluetoothAddress() throws BluetoothStateException;
 
+	public native String getLocalDeviceName();
+
+	private native int getDeviceClassImpl();
+
 	public DeviceClass getLocalDeviceClass() {
-		// TODO Auto-generated method stub
-		return null;
+		return new DeviceClass(getDeviceClassImpl());
 	}
 
-	public String getLocalDeviceName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public native boolean isLocalDevicePowerOn();
 
-	public boolean isLocalDevicePowerOn() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	private native boolean isLocalDeviceFeatureSwitchRoles();
+
+	private native boolean isLocalDeviceFeatureParkMode();
+
+	private native int getLocalDeviceL2CAPMTUMaximum();
+
+	private native String getLocalDeviceSoftwareVersionInfo();
+
+	private native int getLocalDeviceManufacturer();
+
+	private native String getLocalDeviceVersion();
 
 	public String getLocalDeviceProperty(String property) {
-		// TODO Auto-generated method stub
+		final String TRUE = "true";
+		final String FALSE = "false";
+		if ("bluetooth.connected.devices.max".equals(property)) {
+			return isLocalDeviceFeatureParkMode() ? "255" : "7";
+		}
+		if ("bluetooth.sd.trans.max".equals(property)) {
+			return "1";
+		}
+		if ("bluetooth.connected.inquiry.scan".equals(property)) {
+			return TRUE;
+		}
+		if ("bluetooth.connected.page.scan".equals(property)) {
+			return TRUE;
+		}
+		if ("bluetooth.connected.inquiry".equals(property)) {
+			return TRUE;
+		}
+		if ("bluetooth.connected.page".equals(property)) {
+			return TRUE;
+		}
+
+		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
+			return String.valueOf(ATTR_RETRIEVABLE_MAX);
+		}
+		if ("bluetooth.master.switch".equals(property)) {
+			return isLocalDeviceFeatureSwitchRoles() ? TRUE : FALSE;
+		}
+		if ("bluetooth.l2cap.receiveMTU.max".equals(property)) {
+			return String.valueOf(getLocalDeviceL2CAPMTUMaximum());
+		}
+
+		if ("bluecove.radio.version".equals(property)) {
+			return getLocalDeviceVersion();
+		}
+		if ("bluecove.radio.manufacturer".equals(property)) {
+			return String.valueOf(getLocalDeviceManufacturer());
+		}
+		if ("bluecove.stack.version".equals(property)) {
+			return getLocalDeviceSoftwareVersionInfo();
+		}
+
 		return null;
 	}
 
+	private native boolean getLocalDeviceDiscoverableImpl();
+
 	public int getLocalDeviceDiscoverable() {
-		// TODO Auto-generated method stub
-		return 0;
+		if (getLocalDeviceDiscoverableImpl()) {
+			return DiscoveryAgent.GIAC;
+		} else {
+			return DiscoveryAgent.NOT_DISCOVERABLE;
+		}
 	}
 
+	/**
+	 * There are no functions to set OS X stack Discoverable status.
+	 */
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
-		// TODO Auto-generated method stub
 		return false;
 	}
+
+	// ---------------------- Device Inquiry ----------------------
 
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	// ---------------------- Device Inquiry ----------------------
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
@@ -246,7 +304,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams,
 	 *      int, int)
 	 */
@@ -258,7 +316,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
 	 */
 	public void l2CloseClientConnection(long handle) throws IOException {
@@ -267,7 +325,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams,
 	 *      int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
@@ -279,7 +337,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long,
 	 *      com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
@@ -290,7 +348,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection(long)
 	 */
 	public long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException {
@@ -300,7 +358,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseServerConnection(long)
 	 */
 	public void l2CloseServerConnection(long handle) throws IOException {
@@ -310,7 +368,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long,
 	 *      com.intel.bluetooth.ServiceRecordImpl)
 	 */
@@ -321,7 +379,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
 	 */
 	public boolean l2Ready(long handle) throws IOException {
@@ -331,7 +389,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
 	 */
 	public int l2Receive(long handle, byte[] inBuf) throws IOException {
@@ -341,7 +399,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
 	public void l2Send(long handle, byte[] data) throws IOException {
@@ -350,7 +408,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetReceiveMTU(long)
 	 */
 	public int l2GetReceiveMTU(long handle) throws IOException {
@@ -360,7 +418,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetTransmitMTU(long)
 	 */
 	public int l2GetTransmitMTU(long handle) throws IOException {
@@ -370,7 +428,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
 	 */
 	public long l2RemoteAddress(long handle) throws IOException {

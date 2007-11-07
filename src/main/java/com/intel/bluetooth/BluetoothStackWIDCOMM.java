@@ -40,11 +40,11 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	private boolean initialized = false;
 
-	private Vector deviceDiscoveryListeners = new Vector/*<DiscoveryListener>*/();
+	private Vector deviceDiscoveryListeners = new Vector/* <DiscoveryListener> */();
 
 	private Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
 
-	// TODO what is the real number for Attributes retrivable ?
+	// TODO what is the real number for Attributes retrievable ?
 	private final static int ATTR_RETRIEVABLE_MAX = 256;
 
 	private final static int RECEIVE_MTU_MAX = 1024;
@@ -65,7 +65,6 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	public native int detectBluetoothStack();
 
 	public native void enableNativeDebug(Class nativeDebugCallback, boolean on);
-
 
 	public void initialize() {
 		if (!initializeImpl()) {
@@ -94,8 +93,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public native String getLocalDeviceName();
 
-
-	public native int getDeviceClassImpl();
+	private native int getDeviceClassImpl();
 
 	/**
 	 * There are no functions to set WIDCOMM stack
@@ -118,6 +116,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 			throw new BluetoothStateException("Bluetooth Device is not ready");
 		}
 	}
+
 	/**
 	 * There are no functions to find WIDCOMM discoverable status.
 	 */
@@ -166,7 +165,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 			return FALSE;
 		}
 		if ("bluetooth.l2cap.receiveMTU.max".equals(property)) {
-			return  String.valueOf(RECEIVE_MTU_MAX);
+			return String.valueOf(RECEIVE_MTU_MAX);
 		}
 
 		if ("bluecove.radio.version".equals(property)) {
@@ -181,8 +180,10 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 		return null;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
 	 */
 	public boolean isCurrentThreadInterruptedCallback() {
@@ -197,7 +198,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
 	}
 
-	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
+	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
+			throws BluetoothStateException {
 		try {
 			return runDeviceInquiryImpl(startedNotify, accessCode, listener);
 		} finally {
@@ -206,11 +208,13 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		}
 	}
 
-	public native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
+	public native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
+			throws BluetoothStateException;
 
-	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
+			String deviceName, boolean paired) {
 		DebugLog.debug("deviceDiscoveredCallback deviceName", deviceName);
-		Vector reported = (Vector)deviceDiscoveryListenerReportedDevices.get(listener);
+		Vector reported = (Vector) deviceDiscoveryListenerReportedDevices.get(listener);
 		String deviceAddrStr = RemoteDeviceHelper.getBluetoothAddress(deviceAddr);
 		for (Enumeration iter = reported.elements(); iter.hasMoreElements();) {
 			RemoteDevice device = (RemoteDevice) iter.nextElement();
@@ -240,10 +244,13 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		return deviceInquiryCancelImpl();
 	}
 
-	native String getRemoteDeviceFriendlyName(long address, int majorDeviceClass, int minorDeviceClass) throws IOException;
+	native String getRemoteDeviceFriendlyName(long address, int majorDeviceClass, int minorDeviceClass)
+			throws IOException;
 
 	/**
-	 * get device name while discovery running. Device may not report its name first time while discovering.
+	 * get device name while discovery running. Device may not report its name
+	 * first time while discovering.
+	 * 
 	 * @param address
 	 * @return name
 	 */
@@ -267,7 +274,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	// --- Service search
 
-	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
+			throws BluetoothStateException {
 		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
 	}
 
@@ -284,7 +292,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		}
 	}
 
-	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, byte[] uuidValue, long address) throws BluetoothStateException, SearchServicesTerminatedException;
+	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, byte[] uuidValue, long address)
+			throws BluetoothStateException, SearchServicesTerminatedException;
 
 	private native byte[] getServiceAttribute(int attrID, long handle) throws IOException;
 
@@ -333,7 +342,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 				for (int i = 0; i < handles.length; i++) {
 					ServiceRecordImpl sr = new ServiceRecordImpl(this, device, handles[i]);
 					try {
-						sr.populateRecord(new int[] { BluetoothConsts.ServiceClassIDList, BluetoothConsts.ProtocolDescriptorList });
+						sr.populateRecord(new int[] { BluetoothConsts.ServiceClassIDList,
+								BluetoothConsts.ProtocolDescriptorList });
 						if ((uuidFiler != null)
 								&& !(sr.hasServiceClassUUID(uuidFiler) || sr.hasProtocolClassUUID(uuidFiler))) {
 							if (BluetoothStackWIDCOMMSDPInputStream.debug) {
@@ -350,7 +360,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 						records.addElement(sr);
 						sr.populateRecord(new int[] { BluetoothConsts.ServiceRecordHandle,
-								BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID});
+								BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID });
 						if (attrSet != null) {
 							sr.populateRecord(attrSet);
 						}
@@ -366,7 +376,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 				}
 				if (records.size() != 0) {
 					DebugLog.debug("SERVICE_SEARCH_COMPLETED");
-					ServiceRecord[] fileteredRecords = (ServiceRecord[])Utils.vector2toArray(records, new ServiceRecord[records.size()]);
+					ServiceRecord[] fileteredRecords = (ServiceRecord[]) Utils.vector2toArray(records,
+							new ServiceRecord[records.size()]);
 					listener.servicesDiscovered(startedNotify.getTransID(), fileteredRecords);
 					return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
 				}
@@ -376,8 +387,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		}
 	}
 
-
-	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
+	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs)
+			throws IOException {
 		if (attrIDs.length > ATTR_RETRIEVABLE_MAX) {
 			throw new IllegalArgumentException();
 		}
@@ -390,11 +401,13 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 					if (BluetoothStackWIDCOMMSDPInputStream.debug) {
 						DebugLog.debug("decode attribute " + id + " Ox" + Integer.toHexString(id));
 					}
-					DataElement element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(sdpStruct))).readElement();
+					DataElement element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(sdpStruct)))
+							.readElement();
 
-					// Do special case conversion for only one element in the list.
+					// Do special case conversion for only one element in the
+					// list.
 					if (id == BluetoothConsts.ProtocolDescriptorList) {
-						Enumeration protocolsSeqEnum = (Enumeration)element.getValue();
+						Enumeration protocolsSeqEnum = (Enumeration) element.getValue();
 						if (protocolsSeqEnum.hasMoreElements()) {
 							DataElement protocolElement = (DataElement) protocolsSeqEnum.nextElement();
 							if (protocolElement.getDataType() != DataElement.DATSEQ) {
@@ -421,14 +434,15 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		return anyRetrived;
 	}
 
-//	 --- Client RFCOMM connections
+	// --- Client RFCOMM connections
 
-	private native long connectionRfOpenClientConnectionImpl(long address, int channel, boolean authenticate, boolean encrypt) throws IOException;
+	private native long connectionRfOpenClientConnectionImpl(long address, int channel, boolean authenticate,
+			boolean encrypt) throws IOException;
 
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
 		verifyDeviceReady();
-		return connectionRfOpenClientConnectionImpl(params.address, params.channel, params.authenticate,params.encrypt);
-    }
+		return connectionRfOpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt);
+	}
 
 	public native void closeRfCommPort(long handle) throws IOException;
 
@@ -456,15 +470,18 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		return expected;
 	}
 
-	private native long rfServerOpenImpl(byte[] uuidValue, byte[] uuidValue2, boolean obexSrv, String name, boolean authenticate, boolean encrypt) throws IOException;
+	private native long rfServerOpenImpl(byte[] uuidValue, byte[] uuidValue2, boolean obexSrv, String name,
+			boolean authenticate, boolean encrypt) throws IOException;
 
 	private native int rfServerSCN(long handle) throws IOException;
 
-	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException {
+	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord)
+			throws IOException {
 		verifyDeviceReady();
 		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
-		byte[] uuidValue2 = params.obex?null:Utils.UUIDToByteArray(BluetoothConsts.SERIAL_PORT_UUID);
-		long handle = rfServerOpenImpl(uuidValue, uuidValue2, params.obex, params.name, params.authenticate, params.encrypt);
+		byte[] uuidValue2 = params.obex ? null : Utils.UUIDToByteArray(BluetoothConsts.SERIAL_PORT_UUID);
+		long handle = rfServerOpenImpl(uuidValue, uuidValue2, params.obex, params.name, params.authenticate,
+				params.encrypt);
 		int channel = rfServerSCN(handle);
 		DebugLog.debug("serverSCN", channel);
 		long serviceRecordHandle = handle;
@@ -474,9 +491,11 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		return handle;
 	}
 
-	private native void sdpServiceAddAttribute(long handle, char handleType, int attrID, short attrType, char[] value) throws ServiceRegistrationException;
+	private native void sdpServiceAddAttribute(long handle, char handleType, int attrID, short attrType, char[] value)
+			throws ServiceRegistrationException;
 
-	private void sdpServiceAddAttribute(long handle, char handleType, int attrID, short attrType, String value) throws ServiceRegistrationException {
+	private void sdpServiceAddAttribute(long handle, char handleType, int attrID, short attrType, String value)
+			throws ServiceRegistrationException {
 		char[] cvalue = value.toCharArray();
 		sdpServiceAddAttribute(handle, handleType, attrID, attrType, cvalue);
 	}
@@ -484,8 +503,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	private char[] long2char(long value, int len) {
 		char[] cvalue = new char[len];
 		long l = value;
-		for (int i = len -1; i >= 0; i --) {
-			cvalue[i] = (char)(l & 0xFF);
+		for (int i = len - 1; i >= 0; i--) {
+			cvalue[i] = (char) (l & 0xFF);
 			l >>= 8;
 		}
 		return cvalue;
@@ -493,17 +512,19 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	private char[] bytes2char(byte[] value, int len) {
 		char[] cvalue = new char[len];
-		for (int i = 0; i < len;  i ++) {
-			cvalue[i] = (char)value[i];
+		for (int i = 0; i < len; i++) {
+			cvalue[i] = (char) value[i];
 		}
 		return cvalue;
 	}
 
-	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
+	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
+			throws ServiceRegistrationException {
 		sdpServiceUpdateServiceRecord(handle, 'r', serviceRecord);
 	}
 
-	private void sdpServiceUpdateServiceRecord(long handle, char handleType, ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {	
+	private void sdpServiceUpdateServiceRecord(long handle, char handleType, ServiceRecordImpl serviceRecord)
+			throws ServiceRegistrationException {
 		int[] ids = serviceRecord.getAttributeIDs();
 		if ((ids == null) || (ids.length == 0)) {
 			return;
@@ -541,10 +562,10 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, long2char(d.getLong(), 4));
 				break;
 			case DataElement.U_INT_8:
-				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, bytes2char((byte[])d.getValue(), 8));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, bytes2char((byte[]) d.getValue(), 8));
 				break;
 			case DataElement.U_INT_16:
-				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, bytes2char((byte[])d.getValue(), 16));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, bytes2char((byte[]) d.getValue(), 16));
 				break;
 			case DataElement.INT_1:
 				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 1));
@@ -559,7 +580,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 8));
 				break;
 			case DataElement.INT_16:
-				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, bytes2char((byte[])d.getValue(), 16));
+				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, bytes2char(
+						(byte[]) d.getValue(), 16));
 				break;
 			case DataElement.URL:
 				sdpServiceAddAttribute(handle, handleType, id, URL_DESC_TYPE, d.getValue().toString());
@@ -571,10 +593,10 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 				sdpServiceAddAttribute(handle, handleType, id, NULL_DESC_TYPE, "");
 				break;
 			case DataElement.BOOL:
-				sdpServiceAddAttribute(handle, handleType, id, BOOLEAN_DESC_TYPE, d.getBoolean()?"TRUE":"FALSE");
+				sdpServiceAddAttribute(handle, handleType, id, BOOLEAN_DESC_TYPE, d.getBoolean() ? "TRUE" : "FALSE");
 				break;
 			case DataElement.UUID:
-				sdpServiceAddAttribute(handle, handleType, id, UUID_DESC_TYPE, ((UUID)d.getValue()).toString());
+				sdpServiceAddAttribute(handle, handleType, id, UUID_DESC_TYPE, ((UUID) d.getValue()).toString());
 				break;
 			case DataElement.DATSEQ:
 			case DataElement.DATALT:
@@ -591,113 +613,154 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		closeRfCommPort(handle);
 	}
 
-// ---------------------- Client and Server L2CAP connections ----------------------
+	// ---------------------- Client and Server L2CAP connections
+	// ----------------------
 
 	private void validateMTU(int receiveMTU, int transmitMTU) {
 		if (receiveMTU > RECEIVE_MTU_MAX) {
 			throw new IllegalArgumentException("invalid ReceiveMTU value " + receiveMTU);
 		}
-//		if (transmitMTU > RECEIVE_MTU_MAX) {
-//			throw new IllegalArgumentException("invalid TransmitMTU value " + transmitMTU);
-//		}
-//		int min = L2CAPConnection.DEFAULT_MTU;
-//		if ((receiveMTU > L2CAPConnection.MINIMUM_MTU) && (receiveMTU < min)) {
-//			min = receiveMTU;
-//		}
-//		if ((transmitMTU > L2CAPConnection.MINIMUM_MTU) && (transmitMTU < min)) {
-//			min = transmitMTU;
-//		}
-//		return min;
+		// if (transmitMTU > RECEIVE_MTU_MAX) {
+		// throw new IllegalArgumentException("invalid TransmitMTU value " +
+		// transmitMTU);
+		// }
+		// int min = L2CAPConnection.DEFAULT_MTU;
+		// if ((receiveMTU > L2CAPConnection.MINIMUM_MTU) && (receiveMTU < min))
+		// {
+		// min = receiveMTU;
+		// }
+		// if ((transmitMTU > L2CAPConnection.MINIMUM_MTU) && (transmitMTU <
+		// min)) {
+		// min = transmitMTU;
+		// }
+		// return min;
 	}
 
-	private native long l2OpenClientConnectionImpl(long address, int channel, boolean authenticate, boolean encrypt, int receiveMTU, int transmitMTU) throws IOException;
+	private native long l2OpenClientConnectionImpl(long address, int channel, boolean authenticate, boolean encrypt,
+			int receiveMTU, int transmitMTU) throws IOException;
 
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams, int, int)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams,
+	 *      int, int)
 	 */
-	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
+	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU)
+			throws IOException {
 		verifyDeviceReady();
 		validateMTU(receiveMTU, transmitMTU);
-		return l2OpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt, receiveMTU, transmitMTU);
+		return l2OpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt,
+				receiveMTU, transmitMTU);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
 	 */
 	public native void l2CloseClientConnection(long handle) throws IOException;
 
-	private native long l2ServerOpenImpl(byte[] uuidValue, boolean authenticate, boolean encrypt, String name, int receiveMTU, int transmitMTU) throws IOException;
+	private native long l2ServerOpenImpl(byte[] uuidValue, boolean authenticate, boolean encrypt, String name,
+			int receiveMTU, int transmitMTU) throws IOException;
 
 	public native int l2ServerPSM(long handle) throws IOException;
-	
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams, int, int, com.intel.bluetooth.ServiceRecordImpl)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams,
+	 *      int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
-	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
+	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU,
+			ServiceRecordImpl serviceRecord) throws IOException {
 		verifyDeviceReady();
 		validateMTU(receiveMTU, transmitMTU);
 		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
-		long handle = l2ServerOpenImpl(uuidValue, params.authenticate, params.encrypt, params.name, receiveMTU, transmitMTU);
-		
+		long handle = l2ServerOpenImpl(uuidValue, params.authenticate, params.encrypt, params.name, receiveMTU,
+				transmitMTU);
+
 		int channel = l2ServerPSM(handle);
-		
-		int serviceRecordHandle = (int)handle;
+
+		int serviceRecordHandle = (int) handle;
 
 		serviceRecord.populateL2CAPAttributes(serviceRecordHandle, channel, params.uuid, params.name);
-		
+
 		return handle;
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long, com.intel.bluetooth.ServiceRecordImpl, boolean)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long,
+	 *      com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
-	public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
+	public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
+			throws ServiceRegistrationException {
 		sdpServiceUpdateServiceRecord(handle, 'l', serviceRecord);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection(long)
 	 */
 	public native long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseServerConnection(long)
 	 */
 	public native void l2CloseServerConnection(long handle) throws IOException;
-	
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long, com.intel.bluetooth.ServiceRecordImpl)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long,
+	 *      com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
 		l2CloseClientConnection(handle);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetReceiveMTU(long)
 	 */
 	public native int l2GetReceiveMTU(long handle) throws IOException;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetTransmitMTU(long)
 	 */
 	public native int l2GetTransmitMTU(long handle) throws IOException;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
 	 */
 	public native boolean l2Ready(long handle) throws IOException;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
 	 */
 	public native int l2Receive(long handle, byte[] inBuf) throws IOException;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
 	public native void l2Send(long handle, byte[] data) throws IOException;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
 	 */
 	public native long l2RemoteAddress(long handle) throws IOException;
