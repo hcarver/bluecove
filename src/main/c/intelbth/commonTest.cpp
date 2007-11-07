@@ -20,6 +20,7 @@
  */
 
 #include "common.h"
+#include "commonObjects.h"
 
 #ifdef VC6
 #define CPP_FILE "commonTest.cpp"

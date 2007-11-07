@@ -96,16 +96,18 @@
 #else
 
 // OS X
+#include <CoreFoundation/CoreFoundation.h>
+#include <Carbon/Carbon.h>
+
 #define BOOL bool
-#define TRUE true
-#define FALSE false
+//#define TRUE true
+//#define FALSE false
 #define DWORD unsigned int
 
 #include <wchar.h>
 #define WCHAR wchar_t
 
 #define CRITICAL_SECTION MPCriticalRegionID
-#include <Carbon/Carbon.h>
 
 #define swprintf_s snwprintf
 #define sprintf_s snprintf
@@ -262,106 +264,3 @@ BOOL isToshibaBluetoothStackPresent(JNIEnv *env);
 #define cCONNECTION_IS_CLOSED "Connection is closed"
 
 jint getDeviceClassByOS(JNIEnv *env);
-
-#define MAGIC_1 0xBC1AA01
-#define MAGIC_2 0xBC2BB02
-
-#define RECEIVE_BUFFER_MAX 0x10000
-// This is extra precaution, may be unnecessary
-#define RECEIVE_BUFFER_SAFE TRUE
-/*
-* FIFO with no memory allocations in write, can be overflown but not with BT communication speed.
-*/
-class ReceiveBuffer {
-private:
-	BOOL safe;
-	CRITICAL_SECTION lock;
-
-	int size;
-
-	long magic1b;
-	long magic2b;
-	jbyte buffer[RECEIVE_BUFFER_MAX];
-	long magic1e;
-	long magic2e;
-
-	BOOL overflown;
-	BOOL full;
-	int rcv_idx;
-	int read_idx;
-
-	void incReadIdx(int count);
-public:
-	ReceiveBuffer();
-	ReceiveBuffer(int size);
-	~ReceiveBuffer();
-
-    void reset();
-	int write(void *p_data, int len);
-	int readByte();
-	int read(void *p_data, int len);
-	int skip(int n);
-	BOOL isOverflown();
-	void setOverflown();
-	int available();
-	BOOL isCorrupted();
-};
-
-//#define SAFE_OBJECT_DESTRUCTION
-
-class PoolableObject {
-public:
-	long magic1;
-	long magic2;
-
-	BOOL readyToFree;
-	int internalHandle;
-	char poolableObjectType;
-
-	long usedCount;
-
-	PoolableObject();
-	virtual ~PoolableObject();
-
-	// Used to enable safe object destruction, dellay destructor untill all threads entered are exited from Wait.
-	void tInc();
-	void tDec();
-
-	virtual BOOL isValidObject();
-	virtual BOOL isExternalHandle(jlong handle);
-};
-
-class ObjectPool {
-private:
-	CRITICAL_SECTION lock;
-
-	int size;
-
-	//each Handle type is different positive value range.
-	int handleOffset;
-
-	BOOL delayDelete;
-
-	// generate different handlers for each new object
-	int handleMove;
-
-	PoolableObject** objs;
-
-	jlong realIndex(jlong internalHandle);
-	jlong realIndex(PoolableObject* obj);
-
-public:
-
-	ObjectPool(int size, int handleOffset, BOOL delayDelete);
-	~ObjectPool();
-
-	PoolableObject* getObject(JNIEnv *env, jlong handle);
-	PoolableObject* getObject(JNIEnv *env, jlong handle, char poolableObjectType);
-
-	PoolableObject* getObjectByExternalHandle(jlong handle);
-
-	void removeObject(PoolableObject* obj);
-
-	BOOL addObject(PoolableObject* obj);
-	BOOL addObject(PoolableObject* obj, char poolableObjectType);
-};

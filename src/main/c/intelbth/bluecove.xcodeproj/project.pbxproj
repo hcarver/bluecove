@@ -15,6 +15,10 @@
 		D41C503E0CDFFA9900BF6B4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D41C503D0CDFFA9900BF6B4D /* Carbon.framework */; };
 		D41C50650CE0030500BF6B4D /* OSXStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41C50630CE0030500BF6B4D /* OSXStack.cpp */; };
 		D41C50660CE0030500BF6B4D /* OSXStack.h in Headers */ = {isa = PBXBuildFile; fileRef = D41C50640CE0030500BF6B4D /* OSXStack.h */; };
+		D4BAE7660CE2373C0025C976 /* OSXStackDiscovery.h in Headers */ = {isa = PBXBuildFile; fileRef = D4BAE7640CE2373C0025C976 /* OSXStackDiscovery.h */; };
+		D4BAE7670CE2373C0025C976 /* OSXStackDiscovery.mm in Sources */ = {isa = PBXBuildFile; fileRef = D4BAE7650CE2373C0025C976 /* OSXStackDiscovery.mm */; };
+		D4BAE7690CE241040025C976 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4BAE7680CE241040025C976 /* Cocoa.framework */; };
+		D4BAE76E0CE245800025C976 /* commonObjects.h in Headers */ = {isa = PBXBuildFile; fileRef = D4BAE76D0CE245800025C976 /* commonObjects.h */; };
 		D4EBD1DC0CE012CB00BFA44D /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4EBD1DB0CE012CB00BFA44D /* IOBluetooth.framework */; };
 		D4EBD1E20CE013E500BFA44D /* libbluecove.jnilib in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2AAC0630554660B00DB518D /* libbluecove.jnilib */; };
 /* End PBXBuildFile section */
@@ -42,6 +46,10 @@
 		D41C503D0CDFFA9900BF6B4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		D41C50630CE0030500BF6B4D /* OSXStack.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = OSXStack.cpp; sourceTree = "<group>"; };
 		D41C50640CE0030500BF6B4D /* OSXStack.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OSXStack.h; sourceTree = "<group>"; };
+		D4BAE7640CE2373C0025C976 /* OSXStackDiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSXStackDiscovery.h; sourceTree = "<group>"; };
+		D4BAE7650CE2373C0025C976 /* OSXStackDiscovery.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXStackDiscovery.mm; sourceTree = "<group>"; };
+		D4BAE7680CE241040025C976 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		D4BAE76D0CE245800025C976 /* commonObjects.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = commonObjects.h; sourceTree = "<group>"; };
 		D4EBD1DB0CE012CB00BFA44D /* IOBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOBluetooth.framework; path = /System/Library/Frameworks/IOBluetooth.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
@@ -53,6 +61,7 @@
 				D41C4FF60CDFEF6C00BF6B4D /* JavaVM.framework in Frameworks */,
 				D41C503E0CDFFA9900BF6B4D /* Carbon.framework in Frameworks */,
 				D4EBD1DC0CE012CB00BFA44D /* IOBluetooth.framework in Frameworks */,
+				D4BAE7690CE241040025C976 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,6 +71,7 @@
 		08FB7794FE84155DC02AAC07 /* bluecove */ = {
 			isa = PBXGroup;
 			children = (
+				D4BAE7680CE241040025C976 /* Cocoa.framework */,
 				D4EBD1DB0CE012CB00BFA44D /* IOBluetooth.framework */,
 				D41C503D0CDFFA9900BF6B4D /* Carbon.framework */,
 				D41C4FF50CDFEF6C00BF6B4D /* JavaVM.framework */,
@@ -74,12 +84,15 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				D4BAE76D0CE245800025C976 /* commonObjects.h */,
 				D41C50630CE0030500BF6B4D /* OSXStack.cpp */,
 				D41C50640CE0030500BF6B4D /* OSXStack.h */,
 				D41C500F0CDFEFCC00BF6B4D /* com_intel_bluetooth_BluetoothStackOSX.h */,
 				D41C500B0CDFEFC000BF6B4D /* common.cpp */,
 				D41C500C0CDFEFC000BF6B4D /* common.h */,
 				D41C50090CDFEF9D00BF6B4D /* commonTest.cpp */,
+				D4BAE7640CE2373C0025C976 /* OSXStackDiscovery.h */,
+				D4BAE7650CE2373C0025C976 /* OSXStackDiscovery.mm */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -102,6 +115,8 @@
 				D41C500E0CDFEFC000BF6B4D /* common.h in Headers */,
 				D41C50100CDFEFCC00BF6B4D /* com_intel_bluetooth_BluetoothStackOSX.h in Headers */,
 				D41C50660CE0030500BF6B4D /* OSXStack.h in Headers */,
+				D4BAE7660CE2373C0025C976 /* OSXStackDiscovery.h in Headers */,
+				D4BAE76E0CE245800025C976 /* commonObjects.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,6 +164,7 @@
 				D41C500A0CDFEF9D00BF6B4D /* commonTest.cpp in Sources */,
 				D41C500D0CDFEFC000BF6B4D /* common.cpp in Sources */,
 				D41C50650CE0030500BF6B4D /* OSXStack.cpp in Sources */,
+				D4BAE7670CE2373C0025C976 /* OSXStackDiscovery.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

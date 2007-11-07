@@ -177,20 +177,27 @@ class BluetoothStackOSX implements BluetoothStack {
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
 	}
 
+	public native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
+			throws BluetoothStateException;
+
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException {
-		// TODO Auto-generated method stub
-		return 0;
+		return runDeviceInquiryImpl(startedNotify, accessCode, listener);
 	}
 
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
 			String deviceName, boolean paired) {
-		// TODO Auto-generated method stub
+		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
+		DeviceClass cod = new DeviceClass(deviceClass);
+		DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
+		DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
+		listener.deviceDiscovered(remoteDevice, cod);
 	}
 
+	private native boolean deviceInquiryCancelImpl();
+
 	public boolean cancelInquiry(DiscoveryListener listener) {
-		// TODO Auto-generated method stub
-		return false;
+		return deviceInquiryCancelImpl();
 	}
 
 	// ---------------------- Service search ----------------------

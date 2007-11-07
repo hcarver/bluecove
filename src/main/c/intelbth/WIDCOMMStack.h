@@ -20,6 +20,7 @@
  */
 
 #include "common.h"
+#include "commonObjects.h"
 
 #ifdef _WIN32_WCE
 	#define WIDCOMM_CE30

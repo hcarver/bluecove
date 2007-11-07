@@ -19,7 +19,10 @@
  *  @version $Id$
  */
 
+#define EXT_DEBUG
+
 #include "common.h"
+#include "commonObjects.h"
 
 #include "com_intel_bluetooth_BluetoothStackOSX.h"
 
@@ -29,5 +32,16 @@ class OSXStack {
 public:
 	OSXStack();
 	~OSXStack();
+
+public:
+	BOOL deviceInquiryInProcess;
+	BOOL deviceInquiryTerminated;
 };
+
+
+void OSxAddrToString(char* addressString, const BluetoothDeviceAddress* addr);
+jlong OSxAddrToLong(const BluetoothDeviceAddress* addr);
+void LongToOSxBTAddr(jlong longAddr, BluetoothDeviceAddress* addr);
+
+extern OSXStack* stack;
 

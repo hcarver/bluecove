@@ -20,6 +20,7 @@
  */
 
 #include "common.h"
+#include "commonObjects.h"
 
 #ifdef VC6
 #define CPP_FILE "common.cpp"
@@ -709,4 +710,56 @@ void ObjectPool::removeObject(PoolableObject* obj) {
 	if ((idx >= 0) && (idx < size)) {
 		objs[idx] = NULL;
 	}
+}
+
+
+BOOL DeviceInquiryCallback::builDeviceInquiryCallbacks(JNIEnv * env, jobject peer, jobject startedNotify) {
+    jclass peerClass = env->GetObjectClass(peer);
+
+	if (peerClass == NULL) {
+		throwRuntimeException(env, "Fail to get Object Class");
+		return FALSE;
+	}
+
+	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
+	if (deviceDiscoveredCallbackMethod == NULL) {
+		throwRuntimeException(env, "Fail to get MethodID deviceDiscoveredCallback");
+		return FALSE;
+	}
+
+	jclass notifyClass = env->GetObjectClass(startedNotify);
+	if (notifyClass == NULL) {
+		throwRuntimeException(env, "Fail to get Object Class");
+		return FALSE;
+	}
+	jmethodID notifyMethod = env->GetMethodID(notifyClass, "deviceInquiryStartedCallback", "()V");
+	if (notifyMethod == NULL) {
+		throwRuntimeException(env, "Fail to get MethodID deviceInquiryStartedCallback");
+		return FALSE;
+	}
+
+    this->peer = peer;
+    this->deviceDiscoveredCallbackMethod = deviceDiscoveredCallbackMethod;
+    this->startedNotify = startedNotify;
+    this->startedNotifyNotifyMethod = notifyMethod;
+
+	return TRUE;
+}
+
+BOOL DeviceInquiryCallback::callDeviceInquiryStartedCallback(JNIEnv * env) {
+    env->CallVoidMethod(this->startedNotify, this->startedNotifyNotifyMethod);
+    if (ExceptionCheckCompatible(env)) {
+        return FALSE;
+    } else {
+        return TRUE;
+    }
+}
+
+BOOL DeviceInquiryCallback::callDeviceDiscovered(JNIEnv * env, jobject listener, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired) {
+    env->CallVoidMethod(peer, this->deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, name, paired);
+	if (ExceptionCheckCompatible(env)) {
+        return FALSE;
+    } else {
+        return TRUE;
+    }
 }
