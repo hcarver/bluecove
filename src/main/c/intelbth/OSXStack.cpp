@@ -85,7 +85,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceName
 (JNIEnv *env, jobject) {
     BluetoothDeviceName localName;
-    if (IOBluetoothLocalDeviceReadName(&localName, NULL, NULL, NULL)) {
+    if (IOBluetoothLocalDeviceReadName(localName, NULL, NULL, NULL)) {
 		return NULL;
     }
     return env->NewStringUTF((char*)localName);
@@ -106,7 +106,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDev
         return JNI_FALSE;
     }
     BluetoothHCIPowerState powerState;
-    if (IOBluetoothLocalDeviceReadClassOfDevice(&powerState)) {
+    if (IOBluetoothLocalDeviceGetPowerState(&powerState)) {
         return JNI_FALSE;
     }
     return (powerState == kBluetoothHCIPowerStateON)?JNI_TRUE:JNI_FALSE;
