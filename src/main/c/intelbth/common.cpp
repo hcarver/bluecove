@@ -22,7 +22,7 @@
 #include "common.h"
 #include "commonObjects.h"
 
-#ifdef VC6
+#ifndef CPP_FILE
 #define CPP_FILE "common.cpp"
 #endif
 
@@ -747,6 +747,9 @@ BOOL DeviceInquiryCallback::builDeviceInquiryCallbacks(JNIEnv * env, jobject pee
 }
 
 BOOL DeviceInquiryCallback::callDeviceInquiryStartedCallback(JNIEnv * env) {
+    if ((this->startedNotify == NULL) || (this->startedNotifyNotifyMethod == NULL)) {
+        return FALSE;
+    }
     env->CallVoidMethod(this->startedNotify, this->startedNotifyNotifyMethod);
     if (ExceptionCheckCompatible(env)) {
         return FALSE;
@@ -756,7 +759,10 @@ BOOL DeviceInquiryCallback::callDeviceInquiryStartedCallback(JNIEnv * env) {
 }
 
 BOOL DeviceInquiryCallback::callDeviceDiscovered(JNIEnv * env, jobject listener, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired) {
-    env->CallVoidMethod(peer, this->deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, name, paired);
+    if ((this->peer == NULL) || (this->deviceDiscoveredCallbackMethod == NULL)) {
+        return FALSE;
+    }
+    env->CallVoidMethod(this->peer, this->deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, name, paired);
 	if (ExceptionCheckCompatible(env)) {
         return FALSE;
     } else {

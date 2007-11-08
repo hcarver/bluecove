@@ -19,11 +19,13 @@
  *  @version $Id: OSXStack.cpp 1139 2007-11-07 02:41:25Z skarzhevskyy $
  */
 
-#import <IOBluetooth/objc/IOBluetoothDeviceInquiry.h>
+#import <Foundation/NSDictionary.h>
 #import <IOBluetooth/IOBluetoothUserLib.h>
-#import <IOBluetoothUI/IOBluetoothUIUserLib.h>
 
-#include "OSXStackDiscovery.h"
+#import "OSXStackDiscovery.h"
+
+
+#define CPP_FILE "OSXStackDiscovery.mm"
 
 @implementation OSXStackDiscovery
 
@@ -34,22 +36,27 @@
 -(BOOL) startSearch {
 	IOReturn	status;
 	[self	stopSearch];
+	int scanInterval = 15;
 
-	if (!_foundDevices) {
+	if (_foundDevices == NULL) {
 		_foundDevices = [[NSMutableArray alloc] initWithCapacity:1];
 		if (!_foundDevices) {
-		   return FALSE;
+		   return false;
         }
 		[_foundDevices retain];
 	}
 
+    _started = false;
 	_inquiry = [IOBluetoothDeviceInquiry inquiryWithDelegate:self];
+    if (!_inquiry) {
+	    return false;
+    }
+    [_inquiry setInquiryLength:scanInterval];
 
-	status = [_inquiry	start];
-	//status = kIOReturnSuccess;
+	status = [_inquiry start];
 
 	if (status == kIOReturnSuccess) {
-	    _busy = TRUE;
+	    _busy = true;
 		[_inquiry retain];
 		return true;
 	} else {
@@ -85,6 +92,10 @@
     return _busy;
 }
 
+-(BOOL) started {
+    return _started;
+}
+
 -(BOOL) aborted {
     return _aborted;
 }
@@ -94,7 +105,7 @@
 }
 
 -(IOBluetoothDevice*) getDeviceToReport {
-    if (!_foundDevices) {
+    if (_foundDevices == NULL) {
         return NULL;
     }
     if ([_foundDevices count] == 0) {
@@ -117,21 +128,25 @@
 // updateDeviceInfoInList
 //===========================================================================================================================
 
--(void) updateDeviceInfoInList:(IOBluetoothDevice *)inDevice {
+-(void) updateDeviceInfo:(IOBluetoothDevice *)inDevice {
+    [_foundDevices addObject:inDevice];
 }
+
+// IOBluetoothDeviceInquiryDelegate
 
 //===========================================================================================================================
 // deviceInquiryStarted
 //===========================================================================================================================
 
-- (void) deviceInquiryStarted:(IOBluetoothDeviceInquiry*)sender {
+-(void) deviceInquiryStarted:(IOBluetoothDeviceInquiry*)sender {
+    _started = true;
 }
 
 //===========================================================================================================================
 // deviceInquiryDeviceFound
 //===========================================================================================================================
 
-- (void) deviceInquiryDeviceFound:(IOBluetoothDeviceInquiry*)sender	device:(IOBluetoothDevice*)device {
+-(void) deviceInquiryDeviceFound:(IOBluetoothDeviceInquiry*)sender	device:(IOBluetoothDevice*)device {
 	[self addDeviceToList:device];
 }
 
@@ -139,29 +154,28 @@
 // deviceInquiryUpdatingDeviceNamesStarted
 //===========================================================================================================================
 
-- (void) deviceInquiryUpdatingDeviceNamesStarted:(IOBluetoothDeviceInquiry*)sender	devicesRemaining:(int)devicesRemaining {
+-(void) deviceInquiryUpdatingDeviceNamesStarted:(IOBluetoothDeviceInquiry*)sender	devicesRemaining:(int)devicesRemaining {
 }
 
 //===========================================================================================================================
 // deviceInquiryDeviceNameUpdated
 //===========================================================================================================================
 
-- (void) deviceInquiryDeviceNameUpdated:(IOBluetoothDeviceInquiry*)sender	device:(IOBluetoothDevice*)device devicesRemaining:(int)devicesRemaining {
-	[self updateDeviceInfoInList:device];
+-(void) deviceInquiryDeviceNameUpdated:(IOBluetoothDeviceInquiry*)sender	device:(IOBluetoothDevice*)device devicesRemaining:(int)devicesRemaining {
+	[self updateDeviceInfo:device];
 }
 
 //===========================================================================================================================
 // deviceInquiryComplete
 //===========================================================================================================================
 
-- (void) deviceInquiryComplete:(IOBluetoothDeviceInquiry*)sender	error:(IOReturn)error	aborted:(BOOL)aborted {
+-(void) deviceInquiryComplete:(IOBluetoothDeviceInquiry*)sender	error:(IOReturn)error	aborted:(BOOL)aborted {
 	_aborted = aborted;
 	_error = error;
-	_busy = FALSE;
+	_busy = false;
 }
 
 @end
-
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInquiryImpl
   (JNIEnv * env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
@@ -175,39 +189,49 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
 		throwIOException(env, cSTACK_CLOSED);
 		return INQUIRY_ERROR;
 	}
+	if (IOBluetoothLocalDeviceAvailable() == false) {
+	    throwBluetoothStateException(env, "LocalDevice not ready");
+		return INQUIRY_ERROR;
+	}
 	if (stack->deviceInquiryInProcess) {
 	    throwBluetoothStateException(env, "Another inquiry already running");
 	    return INQUIRY_ERROR;
 	}
-	stack->deviceInquiryInProcess = TRUE;
+	stack->deviceInquiryInProcess = true;
 
-    if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
-        stack->deviceInquiryInProcess = FALSE;
-        return INQUIRY_ERROR;
-    }
+    //if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
+    //    stack->deviceInquiryInProcess = false;
+    //    return INQUIRY_ERROR;
+    //}
 
     discovery = [OSXStackDiscovery new];
 
-    debug("deviceInquiry startSearch");
+    //debug("deviceInquiry startSearch");
     startStatus = [discovery startSearch];
 
     if (startStatus) {
 	    if (!callback.callDeviceInquiryStartedCallback(env)) {
 		    [discovery stopSearch];
 		    [discovery release];
-		    stack->deviceInquiryInProcess = FALSE;
+		    stack->deviceInquiryInProcess = false;
 		    return INQUIRY_ERROR;
 	    }
     } else {
         [discovery stopSearch];
 		[discovery release];
-		stack->deviceInquiryInProcess = FALSE;
+		stack->deviceInquiryInProcess = false;
 		return INQUIRY_ERROR;
     }
 
-    debug("deviceInquiry Started");
+    while ((stack != NULL) && (!stack->deviceInquiryTerminated)) {
+        if ([discovery started]) {
+            //debug("deviceInquiry Started");
+            break;
+        }
+    }
 
 	while ((stack != NULL) && (!stack->deviceInquiryTerminated)) {
+	    //debug("deviceInquiry get device");
 	    IOBluetoothDevice* d = [discovery getDeviceToReport];
 		if ((stack != NULL) && (d != NULL)) {
             debug("deviceInquiry device discovered");
@@ -215,18 +239,25 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
             jint deviceClass = (jint)[d getClassOfDevice];
             jstring name = OSxNewJString(env, [d getName]);
             jboolean paired = [d isPaired];
-			if (!callback.callDeviceDiscovered(env, listener, deviceAddr, deviceClass, name, paired)) {
-				[discovery stopSearch];
-                [discovery release];
-				stack->deviceInquiryInProcess = FALSE;
-				return INQUIRY_ERROR;
-			}
-		}
+			//if (!callback.callDeviceDiscovered(env, listener, deviceAddr, deviceClass, name, paired)) {
+			//	[discovery stopSearch];
+            //    [discovery release];
+			//	stack->deviceInquiryInProcess = false;
+			//	return INQUIRY_ERROR;
+			//}
+		} else {
+	        //debug("deviceInquiry no devices");
+	    }
+
 		// When deviceInquiryComplete look at the remainder of Responded devices. Do Not Wait
 		if ([discovery busy]) {
-		    //sleep(100);
+		    //debug("deviceInquiry sleep");
+		    sleep(1);
+	    } else if (d == NULL) {
+	        break;
 	    }
-	}
+    }
+    debug("deviceInquiry ends");
 
     BOOL aborted = [discovery aborted];
     IOReturn error = [discovery error];
@@ -235,12 +266,12 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
     [discovery release];
 
     if (stack != NULL) {
-        stack->deviceInquiryInProcess = FALSE;
+        stack->deviceInquiryInProcess = false;
     }
 
     if ((aborted) || (stack == NULL) || (stack->deviceInquiryTerminated)) {
 		return INQUIRY_TERMINATED;
-	} else if (error != 0) {
+	} else if (error != kIOReturnSuccess) {
 		return INQUIRY_ERROR;
 	} else {
 		return INQUIRY_COMPLETED;
@@ -251,9 +282,9 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_deviceInqu
 (JNIEnv *env, jobject peer) {
 	debug("StopInquiry");
 	if (stack != NULL) {
-		stack->deviceInquiryTerminated = TRUE;
+		stack->deviceInquiryTerminated = true;
 	}
-	return TRUE;
+	return true;
 }
 
 // TODO move to common Objective-C

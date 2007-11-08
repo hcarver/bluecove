@@ -12,7 +12,6 @@
 		D41C500D0CDFEFC000BF6B4D /* common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41C500B0CDFEFC000BF6B4D /* common.cpp */; };
 		D41C500E0CDFEFC000BF6B4D /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = D41C500C0CDFEFC000BF6B4D /* common.h */; };
 		D41C50100CDFEFCC00BF6B4D /* com_intel_bluetooth_BluetoothStackOSX.h in Headers */ = {isa = PBXBuildFile; fileRef = D41C500F0CDFEFCC00BF6B4D /* com_intel_bluetooth_BluetoothStackOSX.h */; };
-		D41C503E0CDFFA9900BF6B4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D41C503D0CDFFA9900BF6B4D /* Carbon.framework */; };
 		D41C50650CE0030500BF6B4D /* OSXStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41C50630CE0030500BF6B4D /* OSXStack.cpp */; };
 		D41C50660CE0030500BF6B4D /* OSXStack.h in Headers */ = {isa = PBXBuildFile; fileRef = D41C50640CE0030500BF6B4D /* OSXStack.h */; };
 		D4BAE7660CE2373C0025C976 /* OSXStackDiscovery.h in Headers */ = {isa = PBXBuildFile; fileRef = D4BAE7640CE2373C0025C976 /* OSXStackDiscovery.h */; };
@@ -46,6 +45,7 @@
 		D41C503D0CDFFA9900BF6B4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		D41C50630CE0030500BF6B4D /* OSXStack.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = OSXStack.cpp; sourceTree = "<group>"; };
 		D41C50640CE0030500BF6B4D /* OSXStack.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OSXStack.h; sourceTree = "<group>"; };
+		D44659E30CE2A5A0006C2782 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		D4BAE7640CE2373C0025C976 /* OSXStackDiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSXStackDiscovery.h; sourceTree = "<group>"; };
 		D4BAE7650CE2373C0025C976 /* OSXStackDiscovery.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXStackDiscovery.mm; sourceTree = "<group>"; };
 		D4BAE7680CE241040025C976 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -59,7 +59,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D41C4FF60CDFEF6C00BF6B4D /* JavaVM.framework in Frameworks */,
-				D41C503E0CDFFA9900BF6B4D /* Carbon.framework in Frameworks */,
 				D4EBD1DC0CE012CB00BFA44D /* IOBluetooth.framework in Frameworks */,
 				D4BAE7690CE241040025C976 /* Cocoa.framework in Frameworks */,
 			);
@@ -71,6 +70,7 @@
 		08FB7794FE84155DC02AAC07 /* bluecove */ = {
 			isa = PBXGroup;
 			children = (
+				D44659E30CE2A5A0006C2782 /* IOKit.framework */,
 				D4BAE7680CE241040025C976 /* Cocoa.framework */,
 				D4EBD1DB0CE012CB00BFA44D /* IOBluetooth.framework */,
 				D41C503D0CDFFA9900BF6B4D /* Carbon.framework */,
@@ -205,8 +205,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
-					ppc,
 					i386,
+					ppc,
 				);
 				EXECUTABLE_EXTENSION = jnilib;
 				EXECUTABLE_PREFIX = lib;
@@ -225,8 +225,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
-					ppc,
 					i386,
+					ppc,
 				);
 				EXECUTABLE_EXTENSION = jnilib;
 				EXECUTABLE_PREFIX = lib;

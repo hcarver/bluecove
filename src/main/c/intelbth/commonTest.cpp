@@ -22,7 +22,7 @@
 #include "common.h"
 #include "commonObjects.h"
 
-#ifdef VC6
+#ifndef CPP_FILE
 #define CPP_FILE "commonTest.cpp"
 #endif
 

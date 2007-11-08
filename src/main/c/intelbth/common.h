@@ -96,6 +96,7 @@
 #else
 
 // OS X
+#include <unistd.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <Carbon/Carbon.h>
 
@@ -158,8 +159,10 @@
 
 void enableNativeDebug(JNIEnv * env, jobject loggerClass, jboolean on);
 
+#ifdef WIN32
 #ifndef VC6
 #define CPP_FILE __FILE__
+#endif
 #endif
 
 //#define EXT_DEBUG

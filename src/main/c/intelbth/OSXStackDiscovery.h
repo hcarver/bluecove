@@ -23,14 +23,14 @@
 
 #import <IOBluetooth/IOBluetoothUserLib.h>
 #import <IOBluetooth/objc/IOBluetoothDevice.h>
+#import <IOBluetooth/objc/IOBluetoothDeviceInquiry.h>
 
 #include "OSXStack.h"
-
-@class IOBluetoothDeviceInquiry;
 
 @interface OSXStackDiscovery : NSObject {
 
     BOOL							_busy;
+    BOOL							_started;
     IOBluetoothDeviceInquiry *		_inquiry;
     NSMutableArray*					_foundDevices;
 
@@ -39,14 +39,21 @@
 
 }
 
+//IOBluetoothDeviceInquiryDelegate
+-(void) deviceInquiryStarted:(IOBluetoothDeviceInquiry*)sender;
+-(void) deviceInquiryComplete:(IOBluetoothDeviceInquiry*)sender error:(IOReturn)error aborted:(BOOL)aborted;
+-(void) deviceInquiryDeviceFound:(IOBluetoothDeviceInquiry*)sender device:(IOBluetoothDevice*)device;
+-(void) deviceInquiryDeviceNameUpdated:(IOBluetoothDeviceInquiry*)sender device:(IOBluetoothDevice*)device devicesRemaining:(int)devicesRemaining;
+
 -(void) addDeviceToList:(IOBluetoothDevice*)inDeviceRef;
--(void) updateDeviceInfoInList:(IOBluetoothDevice *)inDevice;
+-(void) updateDeviceInfo:(IOBluetoothDevice *)inDevice;
 
 -(void) stopSearch;
 -(BOOL) startSearch;
 
 //Accessor methods
 -(BOOL) busy;
+-(BOOL) started;
 -(BOOL) aborted;
 -(IOReturn) error;
 -(IOBluetoothDevice*)getDeviceToReport;

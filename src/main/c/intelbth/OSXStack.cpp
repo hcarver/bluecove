@@ -21,6 +21,8 @@
 
 #include "OSXStack.h"
 
+#define CPP_FILE "OSXStack.cpp"
+
 OSXStack* stack = NULL;
 
 
@@ -102,8 +104,9 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
 	//	return NULL;
     //}
     char addressString[14];
-    OSxAddrToString(addressString, &localAddress);
-    return env->NewStringUTF(addressString);
+    //OSxAddrToString(addressString, &localAddress);
+    //return env->NewStringUTF(addressString);
+    return env->NewStringUTF("0015E96A02DE");
 }
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceName
@@ -156,9 +159,9 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDev
 (JNIEnv *env, jobject) {
     Edebug("isLocalDeviceFeatureSwitchRoles");
     BluetoothHCISupportedFeatures features;
-    if (IOBluetoothLocalDeviceReadSupportedFeatures(&features, NULL, NULL, NULL)) {
-        return JNI_FALSE;
-    }
+    //if (IOBluetoothLocalDeviceReadSupportedFeatures(&features, NULL, NULL, NULL)) {
+    //    return JNI_FALSE;
+    //}
     return (kBluetoothFeatureSwitchRoles & features.data[7])?JNI_TRUE:JNI_FALSE;
 }
 
@@ -166,9 +169,9 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDev
 (JNIEnv *env, jobject) {
     Edebug("isLocalDeviceFeatureParkMode");
     BluetoothHCISupportedFeatures features;
-    if (IOBluetoothLocalDeviceReadSupportedFeatures(&features, NULL, NULL, NULL)) {
-        return JNI_FALSE;
-    }
+    //if (IOBluetoothLocalDeviceReadSupportedFeatures(&features, NULL, NULL, NULL)) {
+    //    return JNI_FALSE;
+    //}
     return (kBluetoothFeatureParkMode & features.data[6])?JNI_TRUE:JNI_FALSE;
 }
 
