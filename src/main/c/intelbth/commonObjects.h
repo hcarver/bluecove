@@ -131,6 +131,7 @@ private:
     jmethodID startedNotifyNotifyMethod;
 
 public:
+    DeviceInquiryCallback();
     BOOL builDeviceInquiryCallbacks(JNIEnv * env, jobject peer, jobject startedNotify);
     BOOL callDeviceInquiryStartedCallback(JNIEnv * env);
     BOOL callDeviceDiscovered(JNIEnv * env, jobject listener, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired);

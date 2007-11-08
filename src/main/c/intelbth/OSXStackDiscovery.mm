@@ -199,14 +199,14 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
 	}
 	stack->deviceInquiryInProcess = true;
 
-    //if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
-    //    stack->deviceInquiryInProcess = false;
-    //    return INQUIRY_ERROR;
-    //}
+    if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
+        stack->deviceInquiryInProcess = false;
+        return INQUIRY_ERROR;
+    }
 
     discovery = [OSXStackDiscovery new];
 
-    //debug("deviceInquiry startSearch");
+    debug("deviceInquiry startSearch");
     startStatus = [discovery startSearch];
 
     if (startStatus) {
@@ -225,7 +225,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
 
     while ((stack != NULL) && (!stack->deviceInquiryTerminated)) {
         if ([discovery started]) {
-            //debug("deviceInquiry Started");
+            debug("deviceInquiry Started");
             break;
         }
     }

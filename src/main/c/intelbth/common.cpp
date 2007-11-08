@@ -712,6 +712,12 @@ void ObjectPool::removeObject(PoolableObject* obj) {
 	}
 }
 
+DeviceInquiryCallback::DeviceInquiryCallback() {
+    this->peer = NULL;
+    this->deviceDiscoveredCallbackMethod = NULL;
+    this->startedNotify = NULL;
+    this->startedNotifyNotifyMethod = NULL;
+}
 
 BOOL DeviceInquiryCallback::builDeviceInquiryCallbacks(JNIEnv * env, jobject peer, jobject startedNotify) {
     jclass peerClass = env->GetObjectClass(peer);
@@ -748,6 +754,7 @@ BOOL DeviceInquiryCallback::builDeviceInquiryCallbacks(JNIEnv * env, jobject pee
 
 BOOL DeviceInquiryCallback::callDeviceInquiryStartedCallback(JNIEnv * env) {
     if ((this->startedNotify == NULL) || (this->startedNotifyNotifyMethod == NULL)) {
+        throwRuntimeException(env, "DeviceInquiryCallback not initialized");
         return FALSE;
     }
     env->CallVoidMethod(this->startedNotify, this->startedNotifyNotifyMethod);
@@ -760,6 +767,7 @@ BOOL DeviceInquiryCallback::callDeviceInquiryStartedCallback(JNIEnv * env) {
 
 BOOL DeviceInquiryCallback::callDeviceDiscovered(JNIEnv * env, jobject listener, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired) {
     if ((this->peer == NULL) || (this->deviceDiscoveredCallbackMethod == NULL)) {
+        throwRuntimeException(env, "DeviceInquiryCallback not initialized");
         return FALSE;
     }
     env->CallVoidMethod(this->peer, this->deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, name, paired);
