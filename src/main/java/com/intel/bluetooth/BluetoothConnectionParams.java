@@ -26,6 +26,8 @@ package com.intel.bluetooth;
  */
 class BluetoothConnectionParams {
 
+	public static final int DEFAULT_CONNECT_TIMEOUT = 2 * 60 * 1000;
+
 	long address;
 
 	int channel;
@@ -34,7 +36,22 @@ class BluetoothConnectionParams {
 
 	boolean encrypt;
 
+	/**
+	 * Enables timeouts.
+	 * 
+	 * @see javax.microedition.io.Connector#open(String,int,boolean)
+	 */
 	boolean timeouts;
+
+	/**
+	 * The amount of time in milliseconds for which the implementation will
+	 * attempt to establish connection RFCOMM or L2CAP before it throws
+	 * BluetoothConnectionException.
+	 * 
+	 * Java System property "bluecove.connect.timeout" can be used to define the
+	 * value.
+	 */
+	public int timeout = DEFAULT_CONNECT_TIMEOUT;
 
 	public BluetoothConnectionParams(long address, int channel, boolean authenticate, boolean encrypt) {
 		super();

@@ -1020,7 +1020,7 @@ void open_client_finally(WIDCOMMStackRfCommPort* rf) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfOpenClientConnectionImpl
-(JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt) {
+(JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint timeout) {
 	BD_ADDR bda;
 	LongToBcAddr(address, bda);
 
@@ -1089,7 +1089,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 				throwRuntimeException(env, "WaitForSingleObject");
 				open_client_return 0;
 			}
-			if ((GetTickCount() - waitStart)  > COMMPORTS_CONNECT_TIMEOUT) {
+			if ((timeout > 0) && ((GetTickCount() - waitStart)  > (DWORD)timeout)) {
 				throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout");
 				open_client_return 0;
 			}

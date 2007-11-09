@@ -81,8 +81,6 @@ typedef struct {
 // 7 for Server and 7 for Client, Bluetooth Can't have more
 #define COMMPORTS_POOL_MAX 14
 
-#define COMMPORTS_CONNECT_TIMEOUT 60000
-
 class WIDCOMMStackRfCommPort;
 class WIDCOMMStackL2CapConn;
 

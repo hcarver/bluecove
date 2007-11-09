@@ -437,11 +437,12 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	// --- Client RFCOMM connections
 
 	private native long connectionRfOpenClientConnectionImpl(long address, int channel, boolean authenticate,
-			boolean encrypt) throws IOException;
+			boolean encrypt, int timeout) throws IOException;
 
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
 		verifyDeviceReady();
-		return connectionRfOpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt);
+		return connectionRfOpenClientConnectionImpl(params.address, params.channel, params.authenticate,
+				params.encrypt, params.timeouts ? params.timeout : 0);
 	}
 
 	public native void closeRfCommPort(long handle) throws IOException;
@@ -614,7 +615,6 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	}
 
 	// ---------------------- Client and Server L2CAP connections
-	// ----------------------
 
 	private void validateMTU(int receiveMTU, int transmitMTU) {
 		if (receiveMTU > RECEIVE_MTU_MAX) {
@@ -637,7 +637,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	}
 
 	private native long l2OpenClientConnectionImpl(long address, int channel, boolean authenticate, boolean encrypt,
-			int receiveMTU, int transmitMTU) throws IOException;
+			int receiveMTU, int transmitMTU, int timeout) throws IOException;
 
 	/*
 	 * (non-Javadoc)
@@ -650,7 +650,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		verifyDeviceReady();
 		validateMTU(receiveMTU, transmitMTU);
 		return l2OpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt,
-				receiveMTU, transmitMTU);
+				receiveMTU, transmitMTU, params.timeouts ? params.timeout : 0);
 	}
 
 	/*

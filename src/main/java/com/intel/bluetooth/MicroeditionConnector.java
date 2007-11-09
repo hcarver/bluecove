@@ -350,6 +350,10 @@ public abstract class MicroeditionConnector {
 								"encryption requires authentication");
 					}
 				}
+				String timeout = BlueCoveImpl.getConfigProperty("bluecove.connect.timeout");
+				if (timeout != null) {
+					connectionParams.timeout = Integer.parseInt(timeout);
+				}
 			}
 		}
 		OBEXConnectionParams obexConnectionParams = null;

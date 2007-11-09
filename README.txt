@@ -103,7 +103,9 @@ Debug
 
 Configuration options
 
-    System property `bluecove.obex.timeout` time in milliseconds defaults to 2 minutes. (Since v2.0.2)
+    System properties:
+        # `bluecove.obex.timeout` time in milliseconds defaults to 2 minutes. (Since v2.0.2)
+        # `bluecove.connect.timeout` time in milliseconds defaults to 2 minutes. WIDCOMM only. (Since v2.0.2)
 
 == Compilation ==
 

@@ -32,19 +32,19 @@ WIDCOMMStackL2CapConn::WIDCOMMStackL2CapConn() {
 	isClientOpen = FALSE;
 	incomingConnectionCount = 0;
 	sdpService = NULL;
-	
+
 	hConnectionEvent = CreateEvent(
             NULL,     // no security attributes
             FALSE,     // auto-reset event
             FALSE,    // initial state is NOT signaled
             NULL);    // object not named
-    
+
 	hDataReceivedEvent = CreateEvent(
             NULL,     // no security attributes
             FALSE,     // auto-reset event
             FALSE,     // initial state is NOT signaled
             NULL);    // object not named
-	
+
 	memset(&service_guid, 0, sizeof(GUID));
 	service_name[0] = '\0';
 }
@@ -90,7 +90,7 @@ void WIDCOMMStackL2CapConn::closeServerConnection(JNIEnv *env) {
 }
 
 void WIDCOMMStackL2CapConn::OnIncomingConnection() {
-	incomingConnectionCount ++; 
+	incomingConnectionCount ++;
 	Accept(receiveMTU);
 }
 
@@ -118,7 +118,7 @@ void WIDCOMMStackL2CapConn::selectConnectionTransmitMTU(JNIEnv *env) {
 	#else // _WIN32_WCE
 	remoteMtu = m_RemoteMtu;
     #endif // #else // _WIN32_WCE
-	
+
 	if (transmitMTU == -1) {
 		connectionTransmitMTU = remoteMtu;
 	} else if (transmitMTU < remoteMtu) {
@@ -144,7 +144,7 @@ void open_l2client_finally(WIDCOMMStackL2CapConn* l2c) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenClientConnectionImpl
-(JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint receiveMTU, jint transmitMTU) { 
+(JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint receiveMTU, jint transmitMTU, jint timeout) {
 	BD_ADDR bda;
 	LongToBcAddr(address, bda);
 
@@ -213,7 +213,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 				_throwRuntimeException(env, "WaitForSingleObject");
 				open_l2client_return 0;
 			}
-			if ((GetTickCount() - waitStart)  > COMMPORTS_CONNECT_TIMEOUT) {
+			if ((timeout > 0) && ((GetTickCount() - waitStart)  > (DWORD)timeout)) {
 				throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout");
 				open_l2client_return 0;
 			}
@@ -504,7 +504,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 		_throwIOException(env, "Receive buffer overflown");
 		return 0;
 	}
-	
+
 	HANDLE hEvents[2];
 	hEvents[0] = l2c->hConnectionEvent;
 	hEvents[1] = l2c->hDataReceivedEvent;
@@ -560,7 +560,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 		_throwIOException(env, "Receive buffer corrupted (3)");
 	}
 	if (done < paketLength) {
-		// the rest will be discarded. 
+		// the rest will be discarded.
 		int skip = paketLength - done;
 		if (skip != l2c->receiveBuffer.skip(skip)) {
 			_throwIOException(env, "Receive buffer corrupted (4)");
@@ -585,7 +585,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Send
 	}
 	jbyte *bytes = env->GetByteArrayElements(data, 0);
 	UINT16 len = (UINT16)env->GetArrayLength(data);
-		
+
 	if (len > l2c->connectionTransmitMTU) {
 		len = l2c->connectionTransmitMTU;
 	}
