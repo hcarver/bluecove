@@ -20,6 +20,7 @@
  */
 
 #include "common.h"
+#include "commonObjects.h"
 
 #define BLUESOLEIL_DLL L"btfunc.dll"
 

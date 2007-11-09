@@ -214,7 +214,6 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
         return 0;
     }
     // We do Asynchronous call and there are no way to see when inquiry is started.
-    // TODO Create Thread here.
 
 //  DWORD dwResult = BT_RegisterCallback(EVENT_INQUIRY_DEVICE_REPORT, &BsOnDeviceResponded);
 //  if (dwResult != BTSTATUS_SUCCESS) {
@@ -222,15 +221,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
 //      return INQUIRY_ERROR;
 //  }
 
-    jclass peerClass = env->GetObjectClass(peer);
-    if (peerClass == NULL) {
-        throwRuntimeException(env, "Fail to get Object Class");
-        return INQUIRY_ERROR;
-    }
-
-    jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
-    if (deviceDiscoveredCallbackMethod == NULL) {
-        throwRuntimeException(env, "Fail to get MethodID deviceInquiryStartedCallback");
+    DeviceInquiryCallback callback;
+    if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
         return INQUIRY_ERROR;
     }
 
@@ -264,13 +256,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
         devInfo.szName[0] = '\0';
         BT_GetRemoteDeviceInfo(MASK_DEVICE_NAME | MASK_DEVICE_CLASS, &devInfo);
         jboolean paired = pDevice->bPaired;
-
         jint deviceClass = BsDeviceClassToInt(devInfo.classOfDevice);
-
-        env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, newMultiByteString(env, (char*)(devInfo.szName)), paired);
-        if (ExceptionCheckCompatible(env)) {
-           return INQUIRY_ERROR;
-        }
+        if (!callback.callDeviceDiscovered(env, listener, deviceAddr, deviceClass, newMultiByteString(env, (char*)(devInfo.szName)), paired)) {
+		    return INQUIRY_ERROR;
+		}
     }
 
     return INQUIRY_COMPLETED;

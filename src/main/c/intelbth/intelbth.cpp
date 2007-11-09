@@ -21,6 +21,7 @@
  */
 
 #include "common.h"
+#include "commonObjects.h"
 
 #include "com_intel_bluetooth_BluetoothStackMicrosoft.h"
 
@@ -201,27 +202,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runDevic
 
     debug("->runDeviceInquiry");
 
-	jclass peerClass = env->GetObjectClass(peer);
-	if (peerClass == NULL) {
-		_throwRuntimeException(env, "Fail to get Object Class");
-		return INQUIRY_ERROR;
-	}
-	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
-	if (deviceDiscoveredCallbackMethod == NULL) {
-		_throwRuntimeException(env, "Fail to get MethodID deviceDiscoveredCallback");
-		return INQUIRY_ERROR;
-	}
-
-	jclass notifyClass = env->GetObjectClass(startedNotify);
-	if (notifyClass == NULL) {
-		_throwRuntimeException(env, "Fail to get Object Class");
-		return INQUIRY_ERROR;
-	}
-	jmethodID notifyMethod = env->GetMethodID(notifyClass, "deviceInquiryStartedCallback", "()V");
-	if (notifyMethod == NULL) {
-		_throwRuntimeException(env, "Fail to get MethodID deviceInquiryStartedCallback");
-		return INQUIRY_ERROR;
-	}
+    DeviceInquiryCallback callback;
+    if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
+        return INQUIRY_ERROR;
+    }
 
 	// build device query
 
@@ -268,8 +252,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runDevic
 	}
 
 	// WSALookupServiceBegin Do not return for 10 seconds.
-	env->CallVoidMethod(startedNotify, notifyMethod);
-	if (ExceptionCheckCompatible(env)) {
+	if (!callback.callDeviceInquiryStartedCallback(env)) {
 		LeaveCriticalSection(&csLookup);
 		return INQUIRY_ERROR;
 	}
@@ -356,10 +339,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runDevic
         jboolean paired = JNI_FALSE;
 
 #ifdef _WIN32_WCE
-		int classOfDev = p_inqRes->cod;
+		int deviceClass = p_inqRes->cod;
 		bt_addr deviceAddr;
 #else
-		int classOfDev = p_inqRes->classOfDevice;
+		int deviceClass = p_inqRes->classOfDevice;
 		if (p_inqRes->flags & BDIF_PAIRED) {
 		    paired = JNI_TRUE;
 		}
@@ -369,8 +352,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runDevic
 
 		// notify listener
         debug("doInquiry, notify listener");
-		env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, deviceAddr, classOfDev, deviceName, paired);
-		if (ExceptionCheckCompatible(env)) {
+		if (!callback.callDeviceDiscovered(env, listener, deviceAddr, deviceClass, deviceName, paired)) {
 			debug("doInquiry, ExceptionOccurred");
 			result = INQUIRY_ERROR;
 		    break;

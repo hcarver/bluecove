@@ -452,32 +452,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
     memset(stack->deviceResponded, 0, sizeof(stack->deviceResponded));
  	stack->deviceRespondedIdx = -1;
 
-	jclass peerClass = env->GetObjectClass(peer);
-	if (peerClass == NULL) {
-		throwRuntimeException(env, "Fail to get Object Class");
-		stack->deviceInquiryInProcess = FALSE;
-		return INQUIRY_ERROR;
-	}
-
-	jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
-	if (deviceDiscoveredCallbackMethod == NULL) {
-		throwRuntimeException(env, "Fail to get MethodID deviceDiscoveredCallback");
-		stack->deviceInquiryInProcess = FALSE;
-		return INQUIRY_ERROR;
-	}
-
-	jclass notifyClass = env->GetObjectClass(startedNotify);
-	if (notifyClass == NULL) {
-		throwRuntimeException(env, "Fail to get Object Class");
-		stack->deviceInquiryInProcess = FALSE;
-		return INQUIRY_ERROR;
-	}
-	jmethodID notifyMethod = env->GetMethodID(notifyClass, "deviceInquiryStartedCallback", "()V");
-	if (notifyMethod == NULL) {
-		throwRuntimeException(env, "Fail to get MethodID deviceInquiryStartedCallback");
-		stack->deviceInquiryInProcess = FALSE;
-		return INQUIRY_ERROR;
-	}
+    DeviceInquiryCallback callback;
+    if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
+        stack->deviceInquiryInProcess = FALSE;
+        return INQUIRY_ERROR;
+    }
 
 	if (!stack->StartInquiry()) {
 		debug("deviceInquiryStart error");
@@ -487,8 +466,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 	}
 	debug("deviceInquiryStarted");
 
-	env->CallVoidMethod(startedNotify, notifyMethod);
-	if (ExceptionCheckCompatible(env)) {
+    if (!callback.callDeviceInquiryStartedCallback(env)) {
 		stack->StopInquiry();
 		stack->deviceInquiryInProcess = FALSE;
 		return INQUIRY_ERROR;
@@ -513,8 +491,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 			}
 			DeviceFound dev = stack->deviceResponded[reportedIdx];
 			jboolean paired = isDevicePaired(env, dev.deviceAddr, dev.devClass);
-			env->CallVoidMethod(peer, deviceDiscoveredCallbackMethod, listener, dev.deviceAddr, dev.deviceClass, env->NewStringUTF((char*)(dev.bdName)), paired);
-			if (ExceptionCheckCompatible(env)) {
+			if (!callback.callDeviceDiscovered(env, listener, dev.deviceAddr, dev.deviceClass, env->NewStringUTF((char*)(dev.bdName)), paired)) {
 				stack->StopInquiry();
 				stack->deviceInquiryInProcess = FALSE;
 				return INQUIRY_ERROR;
