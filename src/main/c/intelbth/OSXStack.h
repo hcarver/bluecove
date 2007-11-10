@@ -38,6 +38,36 @@ public:
 	BOOL deviceInquiryTerminated;
 };
 
+#define RUNNABLE_DATA_MAX 255
+
+class Runnable {
+public:
+    char* name;
+    int error;
+    char sData[RUNNABLE_DATA_MAX];
+    long lData;
+    bool bData;
+
+    Runnable();
+    virtual void run() = 0;
+};
+
+// parameterized macro to create class and its function run()
+
+#define RUNNABLE(className, nameString) \
+class className: public Runnable { \
+public: \
+    className(); \
+    virtual void run(); \
+};\
+className::className() { \
+    name = nameString;\
+} \
+void className::run()
+
+
+void synchronousBTOperation(Runnable* runnable);
+void ndebug(const char *fmt, ...);
 
 void OSxAddrToString(char* addressString, const BluetoothDeviceAddress* addr);
 jlong OSxAddrToLong(const BluetoothDeviceAddress* addr);
