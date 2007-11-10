@@ -286,20 +286,3 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_deviceInqu
 	}
 	return true;
 }
-
-// TODO move to common Objective-C
-
-jstring OSxNewJString(JNIEnv *env, NSString *nString) {
-    jsize buflength = [nString length];
-    unichar buffer[buflength];
-    [nString getCharacters:buffer];
-    return env->NewString((jchar *)buffer, buflength);
-}
-
-OSXJNIHelper::OSXJNIHelper() {
-    autoreleasepool = [[NSAutoreleasePool alloc] init];
-}
-
-OSXJNIHelper::~OSXJNIHelper() {
-    [autoreleasepool release];
-}

@@ -34,6 +34,48 @@ OSXStack::OSXStack() {
 OSXStack::~OSXStack() {
 }
 
+OSXJNIHelper::OSXJNIHelper() {
+    autoreleasepool = [[NSAutoreleasePool alloc] init];
+}
+
+OSXJNIHelper::~OSXJNIHelper() {
+    [autoreleasepool release];
+}
+
+jstring OSxNewJString(JNIEnv *env, NSString *nString) {
+    jsize buflength = [nString length];
+    unichar buffer[buflength];
+    [nString getCharacters:buffer];
+    return env->NewString((jchar *)buffer, buflength);
+}
+
+void OSxAddrToString(char* addressString, const BluetoothDeviceAddress* addr) {
+	snprintf(addressString, 14, "%02x%02x%02x%02x%02x%02x",
+			 addr->data[0],
+             addr->data[1],
+             addr->data[2],
+             addr->data[3],
+             addr->data[4],
+             addr->data[5]);
+}
+
+jlong OSxAddrToLong(const BluetoothDeviceAddress* addr) {
+	jlong l = 0;
+	for (int i = 0; i < 6; i++) {
+		l = (l << 8) + addr->data[i];
+	}
+	return l;
+}
+
+void LongToOSxBTAddr(jlong longAddr, BluetoothDeviceAddress* addr) {
+	for (int i = 6 - 1; i >= 0; i--) {
+		addr->data[i] = (UInt8)(longAddr & 0xFF);
+		longAddr >>= 8;
+	}
+}
+
+// --- JNI function
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLibraryVersion
 (JNIEnv *, jobject) {
 	return blueCoveVersion();
@@ -65,31 +107,6 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_destroyImpl
 }
 
 // --- LocalDevice
-
-void OSxAddrToString(char* addressString, const BluetoothDeviceAddress* addr) {
-	snprintf(addressString, 14, "%02x%02x%02x%02x%02x%02x",
-			 addr->data[0],
-             addr->data[1],
-             addr->data[2],
-             addr->data[3],
-             addr->data[4],
-             addr->data[5]);
-}
-
-jlong OSxAddrToLong(const BluetoothDeviceAddress* addr) {
-	jlong l = 0;
-	for (int i = 0; i < 6; i++) {
-		l = (l << 8) + addr->data[i];
-	}
-	return l;
-}
-
-void LongToOSxBTAddr(jlong longAddr, BluetoothDeviceAddress* addr) {
-	for (int i = 6 - 1; i >= 0; i--) {
-		addr->data[i] = (UInt8)(longAddr & 0xFF);
-		longAddr >>= 8;
-	}
-}
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceBluetoothAddress
 (JNIEnv *env, jobject) {

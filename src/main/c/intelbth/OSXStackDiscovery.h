@@ -60,14 +60,3 @@
 
 @end
 
-// TODO move to common Objective-C
-
-jstring OSxNewJString(JNIEnv *env, NSString *nString);
-
-class OSXJNIHelper{
-private:
-	NSAutoreleasePool *autoreleasepool;
-public:
-	OSXJNIHelper();
-	~OSXJNIHelper();
-};

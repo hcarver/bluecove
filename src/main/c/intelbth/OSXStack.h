@@ -43,5 +43,16 @@ void OSxAddrToString(char* addressString, const BluetoothDeviceAddress* addr);
 jlong OSxAddrToLong(const BluetoothDeviceAddress* addr);
 void LongToOSxBTAddr(jlong longAddr, BluetoothDeviceAddress* addr);
 
+jstring OSxNewJString(JNIEnv *env, NSString *nString);
+
+class OSXJNIHelper{
+private:
+	NSAutoreleasePool *autoreleasepool;
+public:
+	OSXJNIHelper();
+	~OSXJNIHelper();
+};
+
+
 extern OSXStack* stack;
 
