@@ -26,7 +26,7 @@
 #define CPP_FILE "common.cpp"
 #endif
 
-static BOOL nativeDebugCallback= false;
+BOOL nativeDebugCallbackEnabled = false;
 static jclass nativeDebugListenerClass;
 static jmethodID nativeDebugMethod = NULL;
 
@@ -40,24 +40,24 @@ jint blueCoveVersion() {
 }
 
 BOOL isDebugOn() {
-    return nativeDebugCallback;
+    return nativeDebugCallbackEnabled;
 }
 
 void enableNativeDebug(JNIEnv *env, jobject loggerClass, jboolean on) {
 	if (on) {
-		if (nativeDebugCallback) {
+		if (nativeDebugCallbackEnabled) {
 			return;
 		}
 		nativeDebugListenerClass = (jclass)env->NewGlobalRef(loggerClass);
 		if (nativeDebugListenerClass != NULL) {
 			nativeDebugMethod = env->GetStaticMethodID(nativeDebugListenerClass, "nativeDebugCallback", "(Ljava/lang/String;ILjava/lang/String;)V");
 			if (nativeDebugMethod != NULL) {
-				nativeDebugCallback = true;
+				nativeDebugCallbackEnabled = true;
 				debug("nativeDebugCallback ON");
 			}
 		}
 	} else {
-		nativeDebugCallback = false;
+		nativeDebugCallbackEnabled = false;
 	}
 }
 
@@ -65,7 +65,7 @@ void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char 
 	va_list ap;
 	va_start(ap, fmt);
 	{
-		if ((env != NULL) && (nativeDebugCallback)) {
+		if ((env != NULL) && (nativeDebugCallbackEnabled)) {
 			char msg[1064];
 			_vsnprintf_s(msg, 1064, fmt, ap);
 			env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, env->NewStringUTF(fileName), lineN, env->NewStringUTF(msg));

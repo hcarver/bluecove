@@ -165,6 +165,8 @@ void enableNativeDebug(JNIEnv * env, jobject loggerClass, jboolean on);
 #endif
 #endif
 
+extern BOOL nativeDebugCallbackEnabled;
+
 //#define EXT_DEBUG
 void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...);
 BOOL isDebugOn();

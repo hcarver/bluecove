@@ -177,11 +177,13 @@ void synchronousBTOperation(Runnable* runnable) {
 void ndebug(const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
-	fprintf(stderr, "NATIVE:");
-    vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
+	if (nativeDebugCallbackEnabled) {
+	    fprintf(stderr, "NATIVE:");
+        vfprintf(stderr, fmt, ap);
+        fprintf(stderr, "\n");
+        fflush(stderr);
+    }
     va_end(ap);
-	fflush(stderr);
 }
 
 // --- Helper functions
