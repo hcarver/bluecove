@@ -163,15 +163,15 @@ class BluetoothStackOSX implements BluetoothStack {
 	 * There are no functions to set OS X stack Discoverable status.
 	 */
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
+		if (getLocalDeviceDiscoverable() == mode) {
+			return true;
+		}
 		return false;
 	}
 
 	// ---------------------- Device Inquiry ----------------------
 
-	public String getRemoteDeviceFriendlyName(long address) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public native String getRemoteDeviceFriendlyName(long address) throws IOException;
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
