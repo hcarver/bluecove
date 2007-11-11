@@ -44,15 +44,21 @@ class Runnable {
 public:
     char* name;
     int error;
+
+    // Data passes and recived from thread
     char sData[RUNNABLE_DATA_MAX];
+    int iData;
     long lData;
     bool bData;
+    void* pData[RUNNABLE_DATA_MAX];
 
     Runnable();
     virtual void run() = 0;
 };
 
 // parameterized macro to create class and its function run()
+
+//TODO find a way to define a class with typed variables.
 
 #define RUNNABLE(className, nameString) \
 class className: public Runnable { \

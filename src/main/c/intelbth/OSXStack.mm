@@ -39,6 +39,9 @@ Runnable::Runnable() {
     sData[0] = '\0';
     error = 0;
     lData = 0;
+    for (int i = 0; i < RUNNABLE_DATA_MAX; i++) {
+		pData[i] = NULL;
+	}
 }
 
 // --- One Native Thread and RunLoop, An issue with the OS X BT implementation is all the calls need to come from the same thread.
@@ -266,7 +269,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
 RUNNABLE(GetLocalDeviceName, "GetLocalDeviceName") {
     BluetoothDeviceName localName;
     if (IOBluetoothLocalDeviceReadName(localName, NULL, NULL, NULL)) {
-		error = 0;
+		error = 1;
     } else {
         strncpy(sData, (char*)localName, RUNNABLE_DATA_MAX);
     }
@@ -285,7 +288,9 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
 
 RUNNABLE(GetDeviceClass, "GetDeviceClass") {
     BluetoothClassOfDevice cod;
-    if (!IOBluetoothLocalDeviceReadClassOfDevice(&cod, NULL, NULL, NULL)) {
+    if (IOBluetoothLocalDeviceReadClassOfDevice(&cod, NULL, NULL, NULL)) {
+        error = 1;
+    } else {
         lData = cod;
     }
 }
@@ -298,50 +303,83 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getDeviceClass
     return (jint)runnable.lData;
 }
 
-JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDevicePowerOn
-(JNIEnv *env, jobject) {
-    Edebug("isLocalDevicePowerOn");
+RUNNABLE(IsLocalDevicePowerOn, "IsLocalDevicePowerOn") {
     if (!IOBluetoothLocalDeviceAvailable()) {
-        return JNI_FALSE;
+        error = 1;
+        bData = false;
+        return;
     }
     BluetoothHCIPowerState powerState;
     if (IOBluetoothLocalDeviceGetPowerState(&powerState)) {
-        return JNI_FALSE;
+        error = 2;
+        bData = false;
+        return;
     }
-    return (powerState == kBluetoothHCIPowerStateON)?JNI_TRUE:JNI_FALSE;
+    bData = (powerState == kBluetoothHCIPowerStateON)?true:false;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDevicePowerOn
+(JNIEnv *env, jobject) {
+    Edebug("isLocalDevicePowerOn");
+   IsLocalDevicePowerOn runnable;
+    synchronousBTOperation(&runnable);
+    return (runnable.bData)?JNI_TRUE:JNI_FALSE;
+}
+
+RUNNABLE(IsLocalDeviceDiscoverable, "IsLocalDeviceDiscoverable") {
+    if (!IOBluetoothLocalDeviceAvailable()) {
+        error = 1;
+        bData = false;
+        return;
+    }
+    Boolean discoverableStatus;
+    if (IOBluetoothLocalDeviceGetDiscoverable(&discoverableStatus)) {
+        error = 1;
+        bData = false;
+        return;
+    }
+    bData = discoverableStatus;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceDiscoverableImpl
 (JNIEnv *env, jobject) {
     Edebug("getLocalDeviceDiscoverableImpl");
-    if (!IOBluetoothLocalDeviceAvailable()) {
-        return JNI_FALSE;
+    IsLocalDeviceDiscoverable runnable;
+    synchronousBTOperation(&runnable);
+    return (runnable.bData)?JNI_TRUE:JNI_FALSE;
+}
+
+RUNNABLE(GetBluetoothHCISupportedFeatures, "GetBluetoothHCISupportedFeatures") {
+    BluetoothHCISupportedFeatures features;
+    if (IOBluetoothLocalDeviceReadSupportedFeatures(&features, NULL, NULL, NULL)) {
+        error = 1;
+        return;
     }
-    Boolean discoverableStatus;
-    if (IOBluetoothLocalDeviceGetDiscoverable(&discoverableStatus)) {
-        return JNI_FALSE;
-    }
-    return (discoverableStatus)?JNI_TRUE:JNI_FALSE;
+    lData = features.data[iData];
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDeviceFeatureSwitchRoles
 (JNIEnv *env, jobject) {
     Edebug("isLocalDeviceFeatureSwitchRoles");
-    BluetoothHCISupportedFeatures features;
-    //if (IOBluetoothLocalDeviceReadSupportedFeatures(&features, NULL, NULL, NULL)) {
-    //    return JNI_FALSE;
-    //}
-    return (kBluetoothFeatureSwitchRoles & features.data[7])?JNI_TRUE:JNI_FALSE;
+    GetBluetoothHCISupportedFeatures runnable;
+    runnable.iData = 7;
+    synchronousBTOperation(&runnable);
+    if (runnable.error) {
+        return JNI_FALSE;
+    }
+    return (kBluetoothFeatureSwitchRoles & runnable.lData)?JNI_TRUE:JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDeviceFeatureParkMode
 (JNIEnv *env, jobject) {
     Edebug("isLocalDeviceFeatureParkMode");
-    BluetoothHCISupportedFeatures features;
-    //if (IOBluetoothLocalDeviceReadSupportedFeatures(&features, NULL, NULL, NULL)) {
-    //    return JNI_FALSE;
-    //}
-    return (kBluetoothFeatureParkMode & features.data[6])?JNI_TRUE:JNI_FALSE;
+    GetBluetoothHCISupportedFeatures runnable;
+    runnable.iData = 6;
+    synchronousBTOperation(&runnable);
+    if (runnable.error) {
+        return JNI_FALSE;
+    }
+    return (kBluetoothFeatureParkMode & runnable.lData)?JNI_TRUE:JNI_FALSE;
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceL2CAPMTUMaximum
@@ -349,15 +387,26 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDevice
     return (jint)kBluetoothL2CAPMTUMaximum;
 }
 
+RUNNABLE(GetLocalDeviceVersion, "GetLocalDeviceVersion") {
+    NumVersion* btVersion = (NumVersion*)pData[0];
+    BluetoothHCIVersionInfo* hciVersion = (BluetoothHCIVersionInfo*)pData[1];
+    if (IOBluetoothGetVersion(btVersion, hciVersion)) {
+        error = 1;
+    }
+}
+
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceSoftwareVersionInfo
 (JNIEnv *env, jobject) {
     Edebug("getLocalDeviceSoftwareVersionInfo");
     NumVersion btVersion;
 	char swVers[133];
+    GetLocalDeviceVersion runnable;
+    runnable.pData[0] = &btVersion;
+    synchronousBTOperation(&runnable);
+    if (runnable.error) {
+        return NULL;
+    }
 
-	if (IOBluetoothGetVersion( &btVersion, NULL )) {
-	    return NULL;
-	}
 	snprintf(swVers, 133, "%1d%1d.%1d.%1d rev %d", btVersion.majorRev >> 4, btVersion.majorRev & 0x0F,
 	                      btVersion.minorAndBugRev >> 4, btVersion.minorAndBugRev & 0x0F, btVersion.nonRelRev);
     return env->NewStringUTF(swVers);
@@ -367,9 +416,12 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDevice
 (JNIEnv *env, jobject) {
     Edebug("getLocalDeviceManufacturer");
     BluetoothHCIVersionInfo	hciVersion;
-	if (IOBluetoothGetVersion(NULL, &hciVersion )) {
-	    return 0;
-	}
+	GetLocalDeviceVersion runnable;
+    runnable.pData[1] = &hciVersion;
+    synchronousBTOperation(&runnable);
+    if (runnable.error) {
+        return 0;
+    }
 	return hciVersion.manufacturerName;
 }
 
@@ -377,9 +429,12 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
 (JNIEnv *env, jobject) {
     Edebug("getLocalDeviceVersion");
     BluetoothHCIVersionInfo	hciVersion;
-	if (IOBluetoothGetVersion(NULL, &hciVersion )) {
-	    return 0;
-	}
+	GetLocalDeviceVersion runnable;
+    runnable.pData[1] = &hciVersion;
+    synchronousBTOperation(&runnable);
+    if (runnable.error) {
+        return 0;
+    }
     char swVers[133];
     snprintf(swVers, 133, "LMP Version: %d.%d, HCI Version: %d.%d", hciVersion.lmpVersion, hciVersion.lmpSubVersion,
                           hciVersion.hciVersion, hciVersion.hciRevision);

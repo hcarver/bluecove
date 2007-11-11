@@ -36,14 +36,9 @@
 
     BOOL                            _aborted;
     IOReturn                        _error;
+    BOOL                            _finished;
 
 }
-
-//IOBluetoothDeviceInquiryDelegate
--(void) deviceInquiryStarted:(IOBluetoothDeviceInquiry*)sender;
--(void) deviceInquiryComplete:(IOBluetoothDeviceInquiry*)sender error:(IOReturn)error aborted:(BOOL)aborted;
--(void) deviceInquiryDeviceFound:(IOBluetoothDeviceInquiry*)sender device:(IOBluetoothDevice*)device;
--(void) deviceInquiryDeviceNameUpdated:(IOBluetoothDeviceInquiry*)sender device:(IOBluetoothDevice*)device devicesRemaining:(int)devicesRemaining;
 
 -(void) addDeviceToList:(IOBluetoothDevice*)inDeviceRef;
 -(void) updateDeviceInfo:(IOBluetoothDevice *)inDevice;
