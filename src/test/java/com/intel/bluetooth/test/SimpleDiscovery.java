@@ -20,6 +20,9 @@
 package com.intel.bluetooth.test;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
@@ -36,12 +39,12 @@ import com.intel.bluetooth.DebugLog;
  * 
  */
 public class SimpleDiscovery {
-    
+
 	public static void main(String[] args) {
-		
+
 		EnvSettings.setSystemProperties();
-		
-	    LocalDevice l;
+
+		LocalDevice l;
 		try {
 			l = LocalDevice.getLocalDevice();
 		} catch (BluetoothStateException e) {
@@ -49,10 +52,10 @@ public class SimpleDiscovery {
 			return;
 		}
 
-    	System.out.println("Local btaddr is " + l.getBluetoothAddress());
- 	    System.out.println("Local name is " + l.getFriendlyName());
- 	    
- 	    String bluecoveVersion = LocalDevice.getProperty("bluecove");
+		System.out.println("Local btaddr is " + l.getBluetoothAddress());
+		System.out.println("Local name is " + l.getFriendlyName());
+
+		String bluecoveVersion = LocalDevice.getProperty("bluecove");
 		if (bluecoveVersion != null) {
 			System.out.println("bluecove:" + bluecoveVersion);
 			System.out.println("stack:" + LocalDevice.getProperty("bluecove.stack"));
@@ -60,68 +63,84 @@ public class SimpleDiscovery {
 			System.out.println("radio manufacturer:" + LocalDevice.getProperty("bluecove.radio.manufacturer"));
 			System.out.println("radio version:" + LocalDevice.getProperty("bluecove.radio.version"));
 		}
-		
-	    BluetoothInquirer bi = new BluetoothInquirer();
-	    
-	    while(true) {
-	    	
-	        System.out.println("Starting inquiry");
 
-	        if (!bi.startInquiry()) {
-	        	System.out.println("Cannot start inquiry, Exit ...");
-	        	break;
-	        }
-	        while(bi.inquiring) {
-		        try {
-		            Thread.sleep(1000);
-		        } catch(Exception e) {
-		        }
-	        }
-	        try {
-	            Thread.sleep(1000);
-	        } catch(Exception e) {
-	        }
-	    }
+		BluetoothInquirer bi = new BluetoothInquirer();
+
+		while (true) {
+
+			System.out.println("Starting inquiry");
+
+			if (!bi.startInquiry()) {
+				System.out.println("Cannot start inquiry, Exit ...");
+				break;
+			}
+			while (bi.inquiring) {
+				try {
+					Thread.sleep(1000);
+				} catch (Exception e) {
+				}
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (Exception e) {
+			}
+
+			System.out.println("Testing getFriendlyName");
+			for (Iterator i = bi.devices.iterator(); i.hasNext();) {
+				RemoteDevice btDevice = (RemoteDevice) i.next();
+				try {
+					System.out.println("Found " + btDevice.getBluetoothAddress() + " : "
+							+ btDevice.getFriendlyName(true));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
-	
+
 	public static class BluetoothInquirer implements DiscoveryListener {
-	    
+
 		boolean inquiring;
 
-	    public boolean startInquiry() {
-	    	inquiring = false;
-	        try {
-	        	inquiring = LocalDevice.getLocalDevice().getDiscoveryAgent().startInquiry(DiscoveryAgent.GIAC,this);
-	        } catch (BluetoothStateException e) {
-		        System.err.println("Cannot start inquiry: " + e);
-		        return false;
-		    }
-	        return inquiring;
-	    }
-	    
-        public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
-        	DebugLog.debug("deviceDiscovered");
-            StringBuffer name;
-            try {
-            	DebugLog.debug("call getFriendlyName");
-                name= new StringBuffer(btDevice.getFriendlyName(false));
-            } catch(IOException ioe) {
-            	ioe.printStackTrace();
-                name=new StringBuffer();
-            }
-          	while(name.length() < 20) name.append(' ');
-            System.out.println("Found " + btDevice.getBluetoothAddress() + " : " + name + " : " + cod);
-        }
+		List devices;
 
-        public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
-        }
+		public boolean startInquiry() {
+			inquiring = false;
+			devices = new Vector();
+			try {
+				inquiring = LocalDevice.getLocalDevice().getDiscoveryAgent().startInquiry(DiscoveryAgent.GIAC, this);
+			} catch (BluetoothStateException e) {
+				System.err.println("Cannot start inquiry: " + e);
+				return false;
+			}
+			return inquiring;
+		}
 
-        public void serviceSearchCompleted(int transID, int respCode) {
-        }
+		public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
+			DebugLog.debug("deviceDiscovered");
+			devices.add(btDevice);
+			StringBuffer name;
+			try {
+				DebugLog.debug("call getFriendlyName");
+				name = new StringBuffer(btDevice.getFriendlyName(false));
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+				name = new StringBuffer();
+			}
+			while (name.length() < 20)
+				name.append(' ');
+			System.out.println("Found " + btDevice.getBluetoothAddress() + " : " + name + " : " + cod);
+		}
 
-        public void inquiryCompleted(int discType) {
-            inquiring=false;
-        }
-	    
+		public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
+		}
+
+		public void serviceSearchCompleted(int transID, int respCode) {
+		}
+
+		public void inquiryCompleted(int discType) {
+			inquiring = false;
+		}
+
 	}
 }
