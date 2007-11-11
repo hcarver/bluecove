@@ -16,7 +16,7 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  @version $Id: OSXStack.cpp 1139 2007-11-07 02:41:25Z skarzhevskyy $
+ *  @version $Id$
  */
 
 #import <Foundation/NSDictionary.h>
