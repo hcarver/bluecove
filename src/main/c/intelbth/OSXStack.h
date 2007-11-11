@@ -34,8 +34,12 @@ public:
 	~OSXStack();
 
 public:
+	pthread_mutex_t deviceInquiryInProcessMutex;
+	MPEventID deviceInquiryNotificationEvent;
 	BOOL deviceInquiryInProcess;
 	BOOL deviceInquiryTerminated;
+	BOOL deviceInquiryLock(JNIEnv* env);
+	BOOL deviceInquiryUnlock();
 };
 
 #define RUNNABLE_DATA_MAX 255
@@ -47,6 +51,7 @@ public:
 
     // Data passes and recived from thread
     char sData[RUNNABLE_DATA_MAX];
+    UniChar uData[RUNNABLE_DATA_MAX];
     int iData;
     long lData;
     bool bData;

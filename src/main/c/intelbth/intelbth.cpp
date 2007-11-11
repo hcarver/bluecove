@@ -247,7 +247,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runDevic
 
 	if (hDeviceLookup != NULL) {
 		LeaveCriticalSection(&csLookup);
-		_throwBluetoothStateException(env, "Another inquiry already running");
+		_throwBluetoothStateException(env, cINQUIRY_RUNNING);
 		return INQUIRY_ERROR;
 	}
 
@@ -1109,7 +1109,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getpe
 
 	if (hDeviceLookup != NULL) {
 		LeaveCriticalSection(&csLookup);
-		throwIOException(env, "Another inquiry already running");
+		throwIOException(env, cINQUIRY_RUNNING);
 		return NULL;
 	}
 

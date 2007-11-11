@@ -442,7 +442,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 		return 0;
 	}
 	if (stack->deviceInquiryInProcess) {
-	    throwBluetoothStateException(env, "Another inquiry already running");
+	    throwBluetoothStateException(env, cINQUIRY_RUNNING);
 	}
 	stack->deviceInquiryInProcess = TRUE;
 	debug("StartDeviceInquiry");

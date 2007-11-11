@@ -265,5 +265,6 @@ BOOL isToshibaBluetoothStackPresent(JNIEnv *env);
 #define cSTACK_CLOSED "Stack closed"
 #define cCONNECTION_CLOSED "Connection closed"
 #define cCONNECTION_IS_CLOSED "Connection is closed"
+#define cINQUIRY_RUNNING "Another inquiry already running"
 
 jint getDeviceClassByOS(JNIEnv *env);

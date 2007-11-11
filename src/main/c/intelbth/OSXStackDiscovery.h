@@ -34,6 +34,8 @@
     IOBluetoothDeviceInquiry *		_inquiry;
     NSMutableArray*					_foundDevices;
 
+    MPEventID*                      _notificationEvent;
+
     BOOL                            _aborted;
     IOReturn                        _error;
     BOOL                            _finished;
@@ -45,6 +47,8 @@
 
 -(void) stopSearch;
 -(BOOL) startSearch;
+
+-(BOOL) wait;
 
 //Accessor methods
 -(BOOL) busy;

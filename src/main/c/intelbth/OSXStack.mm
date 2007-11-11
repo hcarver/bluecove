@@ -29,9 +29,31 @@ OSXStack* stack = NULL;
 OSXStack::OSXStack() {
     deviceInquiryInProcess = FALSE;
     deviceInquiryTerminated = FALSE;
+    pthread_mutex_init(&deviceInquiryInProcessMutex, NULL);
+    MPCreateEvent(&deviceInquiryNotificationEvent);
 }
 
 OSXStack::~OSXStack() {
+    MPDeleteEvent(deviceInquiryNotificationEvent);
+    pthread_mutex_destroy(&deviceInquiryInProcessMutex);
+}
+
+BOOL OSXStack::deviceInquiryLock(JNIEnv* env) {
+    if (deviceInquiryInProcess) {
+	    throwBluetoothStateException(env, cINQUIRY_RUNNING);
+	    return false;
+	}
+	if (pthread_mutex_trylock(&deviceInquiryInProcessMutex) != 0) {
+	    throwBluetoothStateException(env, cINQUIRY_RUNNING);
+	    return false;
+	}
+	stack->deviceInquiryInProcess = true;
+	return true;
+}
+
+BOOL OSXStack::deviceInquiryUnlock() {
+    deviceInquiryInProcess = false;
+    return (pthread_mutex_unlock(&deviceInquiryInProcessMutex) == 0);
 }
 
 Runnable::Runnable() {
@@ -39,6 +61,7 @@ Runnable::Runnable() {
     sData[0] = '\0';
     error = 0;
     lData = 0;
+    bData = false;
     for (int i = 0; i < RUNNABLE_DATA_MAX; i++) {
 		pData[i] = NULL;
 	}

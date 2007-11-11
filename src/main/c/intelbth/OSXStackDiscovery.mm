@@ -38,6 +38,8 @@
 	[self	stopSearch];
 	int inquiryLength = 15;
 
+    _notificationEvent = &(stack->deviceInquiryNotificationEvent);
+
     _aborted = false;
     _error = kIOReturnSuccess;
 	_busy = false;
@@ -124,6 +126,14 @@
     return d;
 }
 
+-(BOOL) wait {
+    if (!_busy) {
+        return false;
+    }
+    MPEventFlags flags;
+    return (kMPTimeoutErr == MPWaitForEvent(*_notificationEvent, &flags, kDurationMillisecond * 500));
+}
+
 //===========================================================================================================================
 //	addDeviceToList
 //===========================================================================================================================
@@ -148,6 +158,7 @@
 
 -(void) deviceInquiryStarted:(IOBluetoothDeviceInquiry*)sender {
     _started = true;
+    MPSetEvent(*_notificationEvent, 0);
 }
 
 //===========================================================================================================================
@@ -159,6 +170,7 @@
 	    return;
 	}
 	[self addDeviceToList:device];
+	MPSetEvent(*_notificationEvent, 0);
 }
 
 //===========================================================================================================================
@@ -177,6 +189,7 @@
 	    return;
 	}
 	[self updateDeviceInfo:device];
+	MPSetEvent(*_notificationEvent, 0);
 }
 
 //===========================================================================================================================
@@ -188,6 +201,7 @@
 	_aborted = aborted;
 	_error = error;
 	_busy = false;
+	MPSetEvent(*_notificationEvent, 1);
 }
 
 @end
@@ -202,6 +216,7 @@ public:
 
     void stopAndRelease();
 
+    BOOL wait();
     BOOL busy();
     BOOL started();
     BOOL aborted();
@@ -215,6 +230,10 @@ DeviceInquiryStart::DeviceInquiryStart() {
 
 BOOL DeviceInquiryStart::busy() {
     return [discovery busy];
+}
+
+BOOL DeviceInquiryStart::wait() {
+    return [discovery wait];
 }
 
 BOOL DeviceInquiryStart::started() {
@@ -266,7 +285,7 @@ RUNNABLE(DeviceInquiryRelease, "DeviceInquiryRelease") {
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInquiryImpl
-  (JNIEnv * env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
+  (JNIEnv* env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
 
     OSXJNIHelper allocHelper;
 
@@ -279,15 +298,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
 		return INQUIRY_ERROR;
 	}
 
-	if (stack->deviceInquiryInProcess) {
-	    throwBluetoothStateException(env, "Another inquiry already running");
+	if (!stack->deviceInquiryLock(env)) {
 	    return INQUIRY_ERROR;
 	}
-	stack->deviceInquiryInProcess = true;
 	stack->deviceInquiryTerminated = false;
 
     if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
-        stack->deviceInquiryInProcess = false;
+        stack->deviceInquiryUnlock();
         return INQUIRY_ERROR;
     }
     discoveryRelease.pData[0] = &discovery;
@@ -297,7 +314,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
     if (discovery.startStatus) {
 	    if (!callback.callDeviceInquiryStartedCallback(env)) {
 		    synchronousBTOperation(&discoveryRelease);
-		    stack->deviceInquiryInProcess = false;
+		    stack->deviceInquiryUnlock();
 		    return INQUIRY_ERROR;
 	    }
     } else {
@@ -305,7 +322,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
             throwBluetoothStateException(env, "LocalDevice not ready");
         }
         synchronousBTOperation(&discoveryRelease);
-		stack->deviceInquiryInProcess = false;
+		stack->deviceInquiryUnlock();
 		return INQUIRY_ERROR;
     }
 
@@ -314,8 +331,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
             debug("deviceInquiry Started");
             break;
         }
-        //TODO use wait and signals
-        sleep(1);
+        discovery.wait();
     }
 
 	while ((stack != NULL) && (!stack->deviceInquiryTerminated)) {
@@ -329,7 +345,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
             jboolean paired = [d isPaired];
 			if (!callback.callDeviceDiscovered(env, listener, deviceAddr, deviceClass, name, paired)) {
 				synchronousBTOperation(&discoveryRelease);
-				stack->deviceInquiryInProcess = false;
+				stack->deviceInquiryUnlock();
 				return INQUIRY_ERROR;
 			}
 		} else {
@@ -339,8 +355,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
 		// When deviceInquiryComplete look at the remainder of Responded devices. Do Not Wait
 		if (discovery.busy()) {
 		    //debug("deviceInquiry sleep");
-		    //TODO use wait and signals
-		    sleep(1);
+		    discovery.wait();
 	    } else if (d == NULL) {
 	        break;
 	    }
@@ -353,7 +368,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
     synchronousBTOperation(&discoveryRelease);
 
     if (stack != NULL) {
-        stack->deviceInquiryInProcess = false;
+        stack->deviceInquiryUnlock();
     }
 
     if ((aborted) || (stack == NULL)) {
@@ -373,8 +388,69 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_deviceInqu
 	if ((stack != NULL) && (stack->deviceInquiryInProcess)) {
 	    // This will dellay termiantion untill loop in runDeviceInquiryImpl will detect this flag
 		stack->deviceInquiryTerminated = true;
+		MPSetEvent(stack->deviceInquiryNotificationEvent, 1);
 		return true;
 	} else {
 	    return false;
 	}
+}
+
+void remoteNameRequestResponse(void *userRefCon, IOBluetoothDeviceRef deviceRef, IOReturn status);
+
+RUNNABLE(GetRemoteDeviceFriendlyName, "GetRemoteDeviceFriendlyName") {
+    BluetoothDeviceAddress btAddress;
+    LongToOSxBTAddr(lData, &btAddress);
+    IOBluetoothDeviceRef dev = IOBluetoothDeviceCreateWithAddress(&btAddress);
+    if (kIOReturnSuccess != IOBluetoothDeviceRemoteNameRequest(dev, remoteNameRequestResponse, this, NULL)) {
+        error = 1;
+    }
+}
+
+void remoteNameRequestResponse(void *userRefCon, IOBluetoothDeviceRef deviceRef, IOReturn status ) {
+	GetRemoteDeviceFriendlyName* runnable = (GetRemoteDeviceFriendlyName*) userRefCon;
+	if (kIOReturnSuccess != status) {
+	    runnable->error = 1;
+	} else {
+	    CFStringRef name = IOBluetoothDeviceGetName(deviceRef);
+	    if (name == NULL) {
+	        runnable->error = 1;
+	    } else {
+            CFIndex buflength = CFStringGetLength(name);
+            CFRange range = {0};
+            range.length = MIN(RUNNABLE_DATA_MAX, buflength);
+            runnable->iData = range.length;
+            CFStringGetCharacters(name, range, runnable->uData);
+	        runnable->bData = true;
+	    }
+    }
+	MPSetEvent(stack->deviceInquiryNotificationEvent, 0);
+}
+
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getRemoteDeviceFriendlyName
+  (JNIEnv *env, jobject, jlong address) {
+    debug("getRemoteDeviceFriendlyName");
+    if (stack == NULL) {
+		throwIOException(env, cSTACK_CLOSED);
+		return NULL;
+	}
+
+	if (!stack->deviceInquiryLock(env)) {
+	    return NULL;
+	}
+	GetRemoteDeviceFriendlyName runnable;
+	runnable.lData = address;
+    synchronousBTOperation(&runnable);
+
+    while ((stack != NULL) && (runnable.error == 0) && (!runnable.bData)) {
+        MPEventFlags flags;
+        MPWaitForEvent(stack->deviceInquiryNotificationEvent, &flags, kDurationMillisecond * 500);
+    }
+	if (stack != NULL) {
+        stack->deviceInquiryUnlock();
+    }
+    if (runnable.error) {
+        throwIOException(env, "The remote device can not be contacted");
+        return NULL;
+    }
+    return env->NewString(runnable.uData, runnable.iData);
 }
