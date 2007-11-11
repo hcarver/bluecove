@@ -214,20 +214,15 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
 			String deviceName, boolean paired) {
 		DebugLog.debug("deviceDiscoveredCallback deviceName", deviceName);
-		Vector reported = (Vector) deviceDiscoveryListenerReportedDevices.get(listener);
-		String deviceAddrStr = RemoteDeviceHelper.getBluetoothAddress(deviceAddr);
-		for (Enumeration iter = reported.elements(); iter.hasMoreElements();) {
-			RemoteDevice device = (RemoteDevice) iter.nextElement();
-			if (deviceAddrStr.equalsIgnoreCase(device.getBluetoothAddress())) {
-				if (Utils.isStringSet(deviceName)) {
-					// Update device name
-					RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
-				}
-				return;
-			}
-
+		if (!deviceDiscoveryListeners.contains(listener)) {
+			return;
 		}
+		// Update name if name retrieved
 		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
+		Vector reported = (Vector) deviceDiscoveryListenerReportedDevices.get(listener);
+		if (reported == null || (reported.contains(remoteDevice))) {
+			return;
+		}
 		reported.addElement(remoteDevice);
 		DeviceClass cod = new DeviceClass(deviceClass);
 		DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
@@ -238,6 +233,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	private native boolean deviceInquiryCancelImpl();
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
+		// no further deviceDiscovered() events will occur for this inquiry
 		if (!deviceDiscoveryListeners.removeElement(listener)) {
 			return false;
 		}

@@ -35,6 +35,8 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 
 	private boolean initialized = false;
 
+	private DiscoveryListener currentDeviceDiscoveryListener;
+
 	static {
 		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_BLUESOLEIL);
 	}
@@ -144,12 +146,12 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 			return "0";
 		}
 
-//		if ("bluecove.radio.version".equals(property)) {
-//			return String.valueOf(getDeviceVersion());
-//		}
-//		if ("bluecove.radio.manufacturer".equals(property)) {
-//			return String.valueOf(getDeviceManufacturer());
-//		}
+		// if ("bluecove.radio.version".equals(property)) {
+		// return String.valueOf(getDeviceVersion());
+		// }
+		// if ("bluecove.radio.manufacturer".equals(property)) {
+		// return String.valueOf(getDeviceManufacturer());
+		// }
 		if ("bluecove.stack.version".equals(property)) {
 			return String.valueOf(getStackVersionInfo());
 		}
@@ -157,33 +159,56 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
 	 */
 	public boolean isCurrentThreadInterruptedCallback() {
 		return Thread.interrupted();
 	}
-// --- Device Inquiry
+
+	// --- Device Inquiry
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
+		if (currentDeviceDiscoveryListener != null) {
+			throw new BluetoothStateException("Another inquiry already running");
+		}
+		currentDeviceDiscoveryListener = listener;
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
 	}
 
-	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
-		startedNotify.deviceInquiryStartedCallback();
-		return runDeviceInquiryImpl(startedNotify, accessCode, listener);
+	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
+			throws BluetoothStateException {
+		try {
+			startedNotify.deviceInquiryStartedCallback();
+			return runDeviceInquiryImpl(startedNotify, accessCode, listener);
+		} finally {
+			currentDeviceDiscoveryListener = null;
+		}
 	}
 
-	public native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException;
+	public native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
+			throws BluetoothStateException;
 
-	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
+			String deviceName, boolean paired) {
 		DebugLog.debug("deviceDiscoveredCallback", deviceName);
-		listener.deviceDiscovered(RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired), new DeviceClass(deviceClass));
+		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
+		if ((currentDeviceDiscoveryListener == null) || (currentDeviceDiscoveryListener != listener)) {
+			return;
+		}
+		listener.deviceDiscovered(remoteDevice, new DeviceClass(deviceClass));
 	}
 
 	public native boolean cancelInquirympl();
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
+		if (currentDeviceDiscoveryListener != listener) {
+			return false;
+		}
+		// no further deviceDiscovered() events will occur for this inquiry
+		currentDeviceDiscoveryListener = null;
 		return cancelInquirympl();
 	}
 
@@ -192,9 +217,10 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 		return null;
 	}
 
-// --- Service search
+	// --- Service search
 
-	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
+			throws BluetoothStateException {
 		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
 	}
 
@@ -202,35 +228,35 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 		return false;
 	}
 
-	private native int runSearchServicesImpl(SearchServicesThread startedNotify, DiscoveryListener listener, byte[] uuidValue, long address, RemoteDevice device) throws BluetoothStateException;
+	private native int runSearchServicesImpl(SearchServicesThread startedNotify, DiscoveryListener listener,
+			byte[] uuidValue, long address, RemoteDevice device) throws BluetoothStateException;
 
-	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
+			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		startedNotify.searchServicesStartedCallback();
 		UUID uuid = null;
 		if ((uuidSet != null) && (uuidSet.length > 0)) {
 			uuid = uuidSet[uuidSet.length - 1];
 		}
-		return runSearchServicesImpl(startedNotify, listener, Utils.UUIDToByteArray(uuid), RemoteDeviceHelper.getAddress(device), device);
+		return runSearchServicesImpl(startedNotify, listener, Utils.UUIDToByteArray(uuid), RemoteDeviceHelper
+				.getAddress(device), device);
 	}
 
 	/*
-	This is all we have under the BlueSoleil.
-	struct SPPEX_SERVICE_INFO {
-		DWORD dwSize;
-		DWORD dwSDAPRecordHanlde;
-		UUID serviceClassUuid128;
-		CHAR szServiceName[MAX_SERVICE_NAME_LENGTH];
-		UCHAR ucServiceChannel;
-	}
+	 * This is all we have under the BlueSoleil. struct SPPEX_SERVICE_INFO {
+	 * DWORD dwSize; DWORD dwSDAPRecordHanlde; UUID serviceClassUuid128; CHAR
+	 * szServiceName[MAX_SERVICE_NAME_LENGTH]; UCHAR ucServiceChannel; }
 	 */
 
-	public void servicesFoundCallback(SearchServicesThread startedNotify, DiscoveryListener listener, RemoteDevice device, String serviceName, byte[] uuidValue, int channel, long recordHanlde) {
-		
+	public void servicesFoundCallback(SearchServicesThread startedNotify, DiscoveryListener listener,
+			RemoteDevice device, String serviceName, byte[] uuidValue, int channel, long recordHanlde) {
+
 		ServiceRecordImpl record = new ServiceRecordImpl(this, device, 0);
 
 		UUID uuid = new UUID(Utils.UUIDByteArrayToString(uuidValue), false);
 
-		record.populateRFCOMMAttributes(recordHanlde, channel, uuid, serviceName, BluetoothConsts.obexUUIDs.contains(uuid));
+		record.populateRFCOMMAttributes(recordHanlde, channel, uuid, serviceName, BluetoothConsts.obexUUIDs
+				.contains(uuid));
 		DebugLog.debug("servicesFoundCallback", record);
 
 		RemoteDevice listedDevice = RemoteDeviceHelper.createRemoteDevice(this, device);
@@ -241,11 +267,12 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 		listener.servicesDiscovered(startedNotify.getTransID(), records);
 	}
 
-	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
+	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs)
+			throws IOException {
 		return false;
 	}
 
-//	 --- Client RFCOMM connections
+	// --- Client RFCOMM connections
 
 	private native long connectionRfOpenImpl(long address, byte[] uuidValue) throws IOException;
 
@@ -257,7 +284,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 		if (listedDevice == null) {
 			throw new IOException("Device not discovered");
 		}
-		UUID uuid = (UUID)RemoteDeviceHelper.getStackAttributes(listedDevice, "RFCOMM_channel" + params.channel);
+		UUID uuid = (UUID) RemoteDeviceHelper.getStackAttributes(listedDevice, "RFCOMM_channel" + params.channel);
 		if (uuid == null) {
 			throw new IOException("Device service not discovered");
 		}
@@ -271,11 +298,13 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 		return expected;
 	}
 
-	private native long rfServerOpenImpl(byte[] uuidValue, String name, boolean authenticate, boolean encrypt) throws IOException;
+	private native long rfServerOpenImpl(byte[] uuidValue, String name, boolean authenticate, boolean encrypt)
+			throws IOException;
 
 	private native int rfServerSCN(long handle) throws IOException;
 
-	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException {
+	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord)
+			throws IOException {
 		if (params.authenticate || params.encrypt) {
 			throw new IOException("authenticate not supported on BlueSoleil");
 		}
@@ -283,14 +312,15 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 		long handle = rfServerOpenImpl(uuidValue, params.name, params.authenticate, params.encrypt);
 		int channel = rfServerSCN(handle);
 		DebugLog.debug("serverSCN", channel);
-		int serviceRecordHandle = (int)handle;
+		int serviceRecordHandle = (int) handle;
 
 		serviceRecord.populateRFCOMMAttributes(serviceRecordHandle, channel, params.uuid, params.name, false);
 
 		return handle;
 	}
 
-	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
+	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
+			throws ServiceRegistrationException {
 		if (!acceptAndOpen) {
 			throw new ServiceRegistrationException("Not Supported on " + getStackID());
 		}
@@ -318,93 +348,127 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 
 	public native void connectionRfFlush(long handle) throws IOException;
 
-	//	---------------------- Client and Server L2CAP connections ----------------------
+	// ---------------------- Client and Server L2CAP connections
+	// ----------------------
 
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams, int, int)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams,
+	 *      int, int)
 	 */
-	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
+	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU)
+			throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
 	 */
 	public void l2CloseClientConnection(long handle) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams, int, int, com.intel.bluetooth.ServiceRecordImpl)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams,
+	 *      int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
-	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
+	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU,
+			ServiceRecordImpl serviceRecord) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long, com.intel.bluetooth.ServiceRecordImpl, boolean)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long,
+	 *      com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
-	public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
+	public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
+			throws ServiceRegistrationException {
 		throw new ServiceRegistrationException("Not Supported on" + getStackID());
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection(long)
 	 */
 	public long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseServerConnection(long)
 	 */
 	public void l2CloseServerConnection(long handle) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long, com.intel.bluetooth.ServiceRecordImpl)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long,
+	 *      com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
 	 */
 	public boolean l2Ready(long handle) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
 	 */
 	public int l2Receive(long handle, byte[] inBuf) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
 	public void l2Send(long handle, byte[] data) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetReceiveMTU(long)
 	 */
 	public int l2GetReceiveMTU(long handle) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetTransmitMTU(long)
 	 */
 	public int l2GetTransmitMTU(long handle) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
 	 */
 	public long l2RemoteAddress(long handle) throws IOException {

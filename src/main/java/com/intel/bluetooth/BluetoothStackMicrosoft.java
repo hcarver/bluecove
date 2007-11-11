@@ -263,6 +263,9 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
 			String deviceName, boolean paired) {
 		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
+		if ((currentDeviceDiscoveryListener == null) || (currentDeviceDiscoveryListener != listener)) {
+			return;
+		}
 		DeviceClass cod = new DeviceClass(deviceClass);
 		DebugLog.debug("deviceDiscoveredCallback addtress", remoteDevice.getBluetoothAddress());
 		DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
@@ -272,7 +275,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		initialized();
 		if (currentDeviceDiscoveryListener != null) {
-			throw new BluetoothStateException();
+			throw new BluetoothStateException("Another inquiry already running");
 		}
 		currentDeviceDiscoveryListener = listener;
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
@@ -281,20 +284,22 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 	/*
 	 * cancel current inquiry (if any)
 	 */
-	native boolean cancelInquiry();
+	private native boolean cancelInquiry();
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
 		if (currentDeviceDiscoveryListener != listener) {
 			return false;
 		}
+		// no further deviceDiscovered() events will occur for this inquiry
+		currentDeviceDiscoveryListener = null;
 		return cancelInquiry();
 	}
 
 	/*
 	 * perform synchronous inquiry
 	 */
-	native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
-			throws BluetoothStateException;
+	private native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode,
+			DiscoveryListener listener) throws BluetoothStateException;
 
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException {

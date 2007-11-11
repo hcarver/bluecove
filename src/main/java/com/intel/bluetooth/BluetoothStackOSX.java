@@ -22,6 +22,8 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
@@ -35,6 +37,10 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	// TODO what is the real number for Attributes retrivable ?
 	private final static int ATTR_RETRIEVABLE_MAX = 256;
+
+	private Vector deviceDiscoveryListeners = new Vector/* <DiscoveryListener> */();
+
+	private Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
 
 	// Used mainly in Unit Tests
 	static {
@@ -174,6 +180,8 @@ class BluetoothStackOSX implements BluetoothStack {
 	public native String getRemoteDeviceFriendlyName(long address) throws IOException;
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
+		deviceDiscoveryListeners.addElement(listener);
+		deviceDiscoveryListenerReportedDevices.put(listener, new Vector());
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
 	}
 
@@ -182,12 +190,26 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException {
-		return runDeviceInquiryImpl(startedNotify, accessCode, listener);
+		try {
+			return runDeviceInquiryImpl(startedNotify, accessCode, listener);
+		} finally {
+			deviceDiscoveryListeners.removeElement(listener);
+			deviceDiscoveryListenerReportedDevices.remove(listener);
+		}
 	}
 
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
 			String deviceName, boolean paired) {
+		if (!deviceDiscoveryListeners.contains(listener)) {
+			return;
+		}
+		// Update name if name retrieved
 		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
+		Vector reported = (Vector) deviceDiscoveryListenerReportedDevices.get(listener);
+		if (reported == null || (reported.contains(remoteDevice))) {
+			return;
+		}
+		reported.addElement(remoteDevice);
 		DeviceClass cod = new DeviceClass(deviceClass);
 		DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
 		DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
@@ -197,6 +219,10 @@ class BluetoothStackOSX implements BluetoothStack {
 	private native boolean deviceInquiryCancelImpl();
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
+		// no further deviceDiscovered() events will occur for this inquiry
+		if (!deviceDiscoveryListeners.removeElement(listener)) {
+			return false;
+		}
 		return deviceInquiryCancelImpl();
 	}
 
