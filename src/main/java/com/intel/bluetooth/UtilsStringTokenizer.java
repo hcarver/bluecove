@@ -23,30 +23,29 @@ package com.intel.bluetooth;
 import java.util.NoSuchElementException;
 
 /**
- * Simple implemetation of java.util.StringTokenizer for J2ME
- * Taken from com.pyx4me.core.utils
- *
+ * Simple implementation of java.util.StringTokenizer for J2ME Taken from
+ * com.pyx4me.core.utils
+ * 
  * Created on 11-Jun-2006
- * Contributing Author(s):
- *   Vlad Skarzhevskyy <vlad at unilore.com> (Inital implementation)
- *
+ * 
  * @author vlads
- * @version $Revision$ ($Author$)  $Date$
+ * @version $Revision$ ($Author$) $Date: 2007-07-31
+ *          16:15:58 -0400 (Tue, 31 Jul 2007) $
  */
 class UtilsStringTokenizer {
-	
+
 	private int currentPosition;
-	
+
 	private int newPosition;
 
 	private String str;
 
 	private String delimiter;
-    
+
 	/**
-	 * Constructs a string tokenizer for the specified string. The characters in the delim argument
-	 * are the delimiters for separating tokens. Delimiter characters themselves will not be treated
-	 * as tokens.
+	 * Constructs a string tokenizer for the specified string. The characters in
+	 * the delim argument are the delimiters for separating tokens. Delimiter
+	 * characters themselves will not be treated as tokens.
 	 * 
 	 * @param str
 	 *            a string to be parsed
@@ -59,7 +58,7 @@ class UtilsStringTokenizer {
 		this.currentPosition = 0;
 		nextPosition();
 	}
-    
+
 	/**
 	 * @return True, if there is a token left
 	 */
@@ -72,16 +71,17 @@ class UtilsStringTokenizer {
 		if (this.newPosition == -1) {
 			this.newPosition = this.str.length();
 		} else if (this.newPosition == this.currentPosition) {
-			// Zero len  token 
+			// Zero len token
 			this.currentPosition += 1;
 			nextPosition();
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @return Next token
-	 * @throws NoSuchElementException If there is no token left
+	 * @throws NoSuchElementException
+	 *             If there is no token left
 	 */
 	public String nextToken() throws NoSuchElementException {
 		if (!hasMoreTokens()) {
