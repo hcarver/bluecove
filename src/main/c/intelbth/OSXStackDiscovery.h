@@ -27,26 +27,32 @@
 
 #include "OSXStack.h"
 
+/**
+ * OS x BUG. If discovery has been cancelled by stop. For next discovery deviceInquiryComplete function is called for previous Delegate Object, not for current
+ */
+#define BUG_Inquiry_stop TRUE
+
 @interface OSXStackDiscovery : NSObject {
 
-    BOOL							_busy;
-    BOOL							_started;
-    IOBluetoothDeviceInquiry *		_inquiry;
-    NSMutableArray*					_foundDevices;
+    int                             _count;
+    volatile BOOL                   _busy;
+    volatile BOOL                   _started;
+    IOBluetoothDeviceInquiry*       _inquiry;
+    NSMutableArray*                 _foundDevices;
 
     MPEventID*                      _notificationEvent;
 
-    BOOL                            _aborted;
-    IOReturn                        _error;
-    BOOL                            _finished;
+    volatile BOOL                   _aborted;
+    volatile IOReturn               _error;
+    volatile BOOL                   _finished;
 
 }
 
 -(void) addDeviceToList:(IOBluetoothDevice*)inDeviceRef;
 -(void) updateDeviceInfo:(IOBluetoothDevice *)inDevice;
 
+-(BOOL) startSearch:(int)count;
 -(void) stopSearch;
--(BOOL) startSearch;
 
 -(BOOL) wait;
 
