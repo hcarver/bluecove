@@ -165,8 +165,12 @@ void *oneNativeThreadMain(void *initializeCond) {
 void performBTOperationCallBack(void *info) {
     BTOperationParams* params = (BTOperationParams*)info;
     if (params->runnable != NULL) {
-        ndebug("execute BTOperation %s", params->runnable->name);
-        params->runnable->run();
+        if (params->runnable->isCorrupted()) {
+            ndebug("Error: execute BTOperation got corrupted runnable");
+        } else {
+            ndebug("execute BTOperation %s", params->runnable->name);
+            params->runnable->run();
+        }
     }
     pthread_cond_signal(&(params->callComplete));
 }
