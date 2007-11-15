@@ -315,7 +315,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 				boolean reqRFCOMM = false;
 				// boolean reqL2CAP = false;
 				UUID uuidFiler = null;
-				// If Search for sepcific service, select its UUID
+				// If Search for specific service, select its UUID
 				for (int u = 0; u < uuidSet.length; u++) {
 					if (uuidSet[u].equals(BluetoothConsts.L2CAP_PROTOCOL_UUID)) {
 						// reqL2CAP = true;
@@ -335,11 +335,14 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 				}
 
 				Vector records = new Vector();
+				int[] uuidFilerAttrIDs = new int[] { BluetoothConsts.ServiceClassIDList,
+						BluetoothConsts.ProtocolDescriptorList };
+				int[] requiredAttrIDs = new int[] { BluetoothConsts.ServiceRecordHandle,
+						BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID };
 				for (int i = 0; i < handles.length; i++) {
 					ServiceRecordImpl sr = new ServiceRecordImpl(this, device, handles[i]);
 					try {
-						sr.populateRecord(new int[] { BluetoothConsts.ServiceClassIDList,
-								BluetoothConsts.ProtocolDescriptorList });
+						sr.populateRecord(uuidFilerAttrIDs);
 						if ((uuidFiler != null)
 								&& !(sr.hasServiceClassUUID(uuidFiler) || sr.hasProtocolClassUUID(uuidFiler))) {
 							if (BluetoothStackWIDCOMMSDPInputStream.debug) {
@@ -355,8 +358,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 						}
 
 						records.addElement(sr);
-						sr.populateRecord(new int[] { BluetoothConsts.ServiceRecordHandle,
-								BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID });
+						sr.populateRecord(requiredAttrIDs);
 						if (attrSet != null) {
 							sr.populateRecord(attrSet);
 						}
