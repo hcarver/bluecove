@@ -21,7 +21,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import <IOBluetooth/IOBluetoothUserLib.h>
 #import <IOBluetooth/objc/IOBluetoothDevice.h>
 #import <IOBluetooth/objc/IOBluetoothDeviceInquiry.h>
 

@@ -30,10 +30,13 @@ import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
 class BluetoothStackOSX implements BluetoothStack {
+
+	public static final boolean debug = true;
 
 	// TODO what is the real number for Attributes retrivable ?
 	private final static int ATTR_RETRIEVABLE_MAX = 256;
@@ -228,20 +231,94 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	// ---------------------- Service search ----------------------
 
-	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
-			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
+			throws BluetoothStateException {
 		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
 	}
 
-	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
-			throws BluetoothStateException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	/**
+	 * 
+	 * @param address
+	 *            Bluetooth device address
+	 * @return number of service records found on device
+	 */
+	private native int runSearchServicesImpl(long address, int transID) throws BluetoothStateException,
+			SearchServicesException;
+
+	private native void cancelServiceSearchImpl(int transID);
 
 	public boolean cancelServiceSearch(int transID) {
-		// TODO Auto-generated method stub
-		return false;
+		SearchServicesThread sst = SearchServicesThread.getServiceSearchThread(transID);
+		if (sst != null) {
+			sst.setTerminated();
+			cancelServiceSearchImpl(transID);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
+			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		// Retrieve all Records, Filter here in Java
+		startedNotify.searchServicesStartedCallback();
+		int recordsSize;
+		try {
+			recordsSize = runSearchServicesImpl(RemoteDeviceHelper.getAddress(device), startedNotify.getTransID());
+		} catch (SearchServicesDeviceNotReachableException e) {
+			return DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
+		} catch (SearchServicesTerminatedException e) {
+			return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
+		} catch (SearchServicesException e) {
+			return DiscoveryListener.SERVICE_SEARCH_ERROR;
+		}
+		if (recordsSize == 0) {
+			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
+		}
+		Vector records = new Vector();
+		int[] uuidFilerAttrIDs = new int[] { BluetoothConsts.ServiceClassIDList, BluetoothConsts.ProtocolDescriptorList };
+		int[] requiredAttrIDs = new int[] { BluetoothConsts.ServiceRecordHandle, BluetoothConsts.ServiceRecordState,
+				BluetoothConsts.ServiceID };
+		nextRecord: for (int i = 0; i < recordsSize; i++) {
+			ServiceRecordImpl sr = new ServiceRecordImpl(this, device, i);
+			try {
+				sr.populateRecord(uuidFilerAttrIDs);
+				filterUUID: for (int u = 0; u < uuidSet.length; u++) {
+					if ((sr.hasServiceClassUUID(uuidSet[u]) || sr.hasProtocolClassUUID(uuidSet[u]))) {
+						break filterUUID;
+					}
+					if (debug) {
+						DebugLog.debug("filtered ServiceRecord (" + i + ")", sr);
+					}
+					continue nextRecord;
+				}
+				if (debug) {
+					DebugLog.debug("accepted ServiceRecord (" + i + ")", sr);
+				}
+				records.addElement(sr);
+				sr.populateRecord(requiredAttrIDs);
+				if (attrSet != null) {
+					sr.populateRecord(attrSet);
+				}
+				DebugLog.debug("ServiceRecord (" + i + ")", sr);
+			} catch (Exception e) {
+				DebugLog.debug("populateRecord error", e);
+			}
+
+			if (startedNotify.isTerminated()) {
+				DebugLog.debug("SERVICE_SEARCH_TERMINATED");
+				return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
+			}
+		}
+		if (records.size() != 0) {
+			DebugLog.debug("SERVICE_SEARCH_COMPLETED");
+			ServiceRecord[] fileteredRecords = (ServiceRecord[]) Utils.vector2toArray(records,
+					new ServiceRecord[records.size()]);
+			listener.servicesDiscovered(startedNotify.getTransID(), fileteredRecords);
+			return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
+		} else {
+			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
+		}
 	}
 
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs)

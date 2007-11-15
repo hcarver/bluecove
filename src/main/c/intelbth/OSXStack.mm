@@ -34,6 +34,7 @@ OSXStack::OSXStack() {
 }
 
 OSXStack::~OSXStack() {
+    MPSetEvent(deviceInquiryNotificationEvent, 0);
     MPDeleteEvent(deviceInquiryNotificationEvent);
     pthread_mutex_destroy(&deviceInquiryInProcessMutex);
 }

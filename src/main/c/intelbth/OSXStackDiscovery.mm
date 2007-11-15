@@ -19,11 +19,7 @@
  *  @version $Id$
  */
 
-#import <Foundation/NSDictionary.h>
-#import <IOBluetooth/IOBluetoothUserLib.h>
-
 #import "OSXStackDiscovery.h"
-
 
 #define CPP_FILE "OSXStackDiscovery.mm"
 
