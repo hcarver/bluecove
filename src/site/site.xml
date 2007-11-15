@@ -30,6 +30,7 @@
             <item name="Main Project" href="#remove#http://code.google.com/p/bluecove/" />
             <item name="sf.net" href="http://sourceforge.net/projects/bluecove/" />
             <item name="Introduction" href="index.html" />
+            <item name="JSR 82 TCK"  href="tck/index.html" />
 
             <item name="Download" href="#">
                 <item name="Releases" href="http://sourceforge.net/project/showfiles.php?group_id=114020"/>
