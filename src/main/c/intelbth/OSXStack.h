@@ -46,6 +46,8 @@ public:
 
 class Runnable {
 public:
+    long magic1b;
+	long magic2b;
     char* name;
     int error;
 
@@ -57,8 +59,14 @@ public:
     bool bData;
     void* pData[RUNNABLE_DATA_MAX];
 
+    long magic1e;
+	long magic2e;
+
     Runnable();
+    ~Runnable();
     virtual void run() = 0;
+
+    BOOL isCorrupted();
 };
 
 // parameterized macro to create class and its function run()

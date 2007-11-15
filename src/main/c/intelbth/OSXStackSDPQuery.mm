@@ -20,17 +20,19 @@
  */
 
 #import "OSXStackSDPQuery.h"
-//#import <driverkit/IODevice.h>
 
 #define CPP_FILE "OSXStackSDPQuery.mm"
 
 StackSDPQueryStart::StackSDPQueryStart() {
+    name = "StackSDPQueryStart";
     complete = FALSE;
     error = 0;
 }
 
 void callbackSDPQueryIsComplete(void* userRefCon, IOBluetoothDeviceRef deviceRef, IOReturn status) {
-    ((StackSDPQueryStart*)userRefCon)->sdpQueryComplete(deviceRef, status);
+    if (!((StackSDPQueryStart*)userRefCon)->isCorrupted()) {
+        ((StackSDPQueryStart*)userRefCon)->sdpQueryComplete(deviceRef, status);
+    }
 }
 
 void StackSDPQueryStart::run() {
@@ -85,8 +87,6 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServi
         if (runnable.status == kIOReturnNotFound) {
 			throwException(env, "com/intel/bluetooth/SearchServicesDeviceNotReachableException", "");
 		} else {
-		    //IOReturn status = runnable.status;
-		    //char *errStr = [IODevice stringFromReturn: status]
 		    debug1("SearchServices error 0x%08x", runnable.status);
             throwException(env, "com/intel/bluetooth/SearchServicesException", "");
         }

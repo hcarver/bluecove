@@ -58,6 +58,11 @@ BOOL OSXStack::deviceInquiryUnlock() {
 }
 
 Runnable::Runnable() {
+    magic1b = MAGIC_1;
+	magic2b = MAGIC_2;
+	magic1e = MAGIC_1;
+	magic2e = MAGIC_2;
+
     name = "n/a";
     sData[0] = '\0';
     error = 0;
@@ -66,6 +71,17 @@ Runnable::Runnable() {
     for (int i = 0; i < RUNNABLE_DATA_MAX; i++) {
 		pData[i] = NULL;
 	}
+}
+
+Runnable::~Runnable() {
+	magic1b = 0;
+	magic2b = 0;
+	magic1e = 0;
+	magic2e = 0;
+}
+
+BOOL Runnable::isCorrupted() {
+	return ((magic1b != MAGIC_1) || (magic2b != MAGIC_2) || (magic1e != MAGIC_1) || (magic2e != MAGIC_2));
 }
 
 // --- One Native Thread and RunLoop, An issue with the OS X BT implementation is all the calls need to come from the same thread.

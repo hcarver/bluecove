@@ -403,6 +403,10 @@ ReceiveBuffer::ReceiveBuffer(int size) {
 
 ReceiveBuffer::~ReceiveBuffer() {
 	if (safe) DeleteCriticalSection(&lock);
+	magic1b = 0;
+	magic2b = 0;
+	magic1e = 0;
+	magic2e = 0;
 }
 
 void ReceiveBuffer::reset() {
