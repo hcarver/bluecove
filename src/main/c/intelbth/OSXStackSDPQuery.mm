@@ -152,22 +152,6 @@ void GetAttributeDataElement::run() {
     getData(dataElementRef);
 }
 
-class SDPOutputStream {
-public:
-    CFMutableDataRef data;
-
-    SDPOutputStream();
-    ~SDPOutputStream();
-
-    void write(const UInt8 byte);
-    void write(const UInt8 *bytes, CFIndex length);
-    void writeLong(long l, int size);
-
-    BOOL writeElement(const IOBluetoothSDPDataElementRef dataElement);
-    int getLength(const IOBluetoothSDPDataElementRef dataElement);
-    void getBytes(int max, int*  dataLen, UInt8* buf);
-};
-
 void GetAttributeDataElement::getData(const IOBluetoothSDPDataElementRef dataElement) {
     if (dataElement == NULL) {
         return;
@@ -298,7 +282,7 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
 			    } else {
 				    CFNumberRef	number = IOBluetoothSDPDataElementGetNumberValue(dataElement);
 				    long l = 0LL;
-				    CFNumberGetValue (number, kCFNumberLongLongType, &l);
+				    CFNumberGetValue(number, kCFNumberLongLongType, &l);
 				    writeLong(l, sizeDescriptor);
 			    }
             }

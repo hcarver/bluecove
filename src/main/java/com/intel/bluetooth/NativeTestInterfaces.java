@@ -21,44 +21,45 @@
 package com.intel.bluetooth;
 
 /**
- * Connection to native test functions. 
+ * Connection to native test functions.
  * 
  * This functions are only executed during UnitTests.
  * 
  * @author vlads
  */
-public class NativeTestInterfaces {
+class NativeTestInterfaces {
 
-	public static boolean loadDllMS() {
+	static boolean loadDllMS() {
 		return NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_MS);
 	}
-	
-	public static boolean loadDllWIDCOMM() {
+
+	static boolean loadDllWIDCOMM() {
 		return NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WIDCOMM);
 	}
-	
-	public static native byte[] testUUIDConversion(byte[] uuidValue);
 
-	public static native long testReceiveBufferCreate(int size);
+	static native byte[] testUUIDConversion(byte[] uuidValue);
 
-	public static native void testReceiveBufferClose(long bufferHandler);
+	static native long testReceiveBufferCreate(int size);
 
-	public static native int testReceiveBufferWrite(long bufferHandler, byte[] send);
+	static native void testReceiveBufferClose(long bufferHandler);
 
-	public static native int testReceiveBufferRead(long bufferHandler, byte[] rcv);
+	static native int testReceiveBufferWrite(long bufferHandler, byte[] send);
 
-	public static native int testReceiveBufferRead(long bufferHandler);
+	static native int testReceiveBufferRead(long bufferHandler, byte[] rcv);
 
-	public static native int testReceiveBufferSkip(long bufferHandler, int size);
+	static native int testReceiveBufferRead(long bufferHandler);
 
-	public static native int testReceiveBufferAvailable(long bufferHandler);
+	static native int testReceiveBufferSkip(long bufferHandler, int size);
 
-	public static native boolean testReceiveBufferIsOverflown(long bufferHandler);
+	static native int testReceiveBufferAvailable(long bufferHandler);
 
-	public static native boolean testReceiveBufferIsCorrupted(long bufferHandler);
+	static native boolean testReceiveBufferIsOverflown(long bufferHandler);
 
-	public static native void testThrowException(int type) throws Exception;
+	static native boolean testReceiveBufferIsCorrupted(long bufferHandler);
 
-	public static native void testDebug(String message);
+	static native void testThrowException(int type) throws Exception;
 
+	static native void testDebug(String message);
+
+	static native byte[] testOsXDataElementConversion(int testType, int type, long ldata, byte[] bdata);
 }
