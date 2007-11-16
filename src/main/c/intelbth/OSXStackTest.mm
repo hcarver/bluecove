@@ -22,7 +22,23 @@
 #import "OSXStackSDPQuery.h"
 #include "com_intel_bluetooth_NativeTestInterfaces.h"
 
+#include <IOBluetooth/objc/IOBluetoothSDPDataElement.h>
+
 #define CPP_FILE "OSXStackTest.mm"
+
+#define TEST_DEBUG true
+
+void tdebug(const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	if (TEST_DEBUG) {
+	    fprintf(stderr, "NATIVE:");
+        vfprintf(stderr, fmt, ap);
+        fprintf(stderr, "\n");
+        fflush(stderr);
+    }
+    va_end(ap);
+}
 
 IOBluetoothSDPDataElementRef createTestDataElementSimple(jint type, jlong ldata, jbyte *bytes) {
     BluetoothSDPDataElementTypeDescriptor newType;
@@ -30,37 +46,38 @@ IOBluetoothSDPDataElementRef createTestDataElementSimple(jint type, jlong ldata,
     UInt32 newSize;
     NSObject* newValue;
 
-    switch (testType) {
+    switch (type) {
     case DATA_ELEMENT_TYPE_U_INT_1:
         newType = kBluetoothSDPDataElementTypeUnsignedInt;
         newSizeDescriptor = 0;
         newSize = 1;
-        newValue = CFNumberCreate(NULL, kCFNumberLongType, &ldata);
+        newValue = [NSNumber numberWithUnsignedInt:((unsigned int)ldata)];
         break;
     case DATA_ELEMENT_TYPE_U_INT_2:
         newType = kBluetoothSDPDataElementTypeUnsignedInt;
         newSizeDescriptor = 0;
         newSize = 2;
-        newValue = CFNumberCreate(NULL, kCFNumberLongType, &ldata);
+        newValue = [NSNumber numberWithUnsignedInt:((unsigned int)ldata)];
         break;
     case DATA_ELEMENT_TYPE_U_INT_4:
         newType = kBluetoothSDPDataElementTypeUnsignedInt;
         newSizeDescriptor = 0;
         newSize = 4;
-        newValue = CFNumberCreate(NULL, kCFNumberLongType, &ldata);
+        newValue = [NSNumber numberWithUnsignedLong:((unsigned long)ldata)];
         break;
     default:
             return NULL;
     }
-    IOBluetoothSDPDataElement de;
-    de = [IOBluetoothSDPDataElement initWithType: ];
+    [newValue retain];
+    IOBluetoothSDPDataElement* de = [IOBluetoothSDPDataElement withType:newType sizeDescriptor:newSizeDescriptor size:newSize value:newValue];
+    [de retain];
     return [de getSDPDataElementRef];
 }
 
 IOBluetoothSDPDataElementRef createTestDataElement(jint testType, jint type, jlong ldata, jbyte *bytes) {
     switch (testType) {
     case 0:
-            return createTestDataElementSimple(testType, ldata, );
+            return createTestDataElementSimple(type, ldata, bytes);
         default:
             return NULL;
     }
@@ -70,32 +87,38 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testO
   (JNIEnv* env, jclass, jint testType, jint type, jlong ldata, jbyteArray bdata) {
 
     OSXJNIHelper allocHelper;
+    tdebug("testOsXDataElementConversion %i %i", testType, type);
 
-	jbyte *bytes = NULL;
+	jbyte *inBytes = NULL;
 	if (bdata != NULL) {
-	    bytes = env->GetByteArrayElements(bdata, 0);
+	    inBytes = env->GetByteArrayElements(bdata, 0);
     }
 
-    const IOBluetoothSDPDataElementRef dataElement = createTestDataElement(testType, type, ldata, bytes);
+    const IOBluetoothSDPDataElementRef dataElement = createTestDataElement(testType, type, ldata, inBytes);
 
-    if (bdata != NULL) {
-        env->ReleaseByteArrayElements(bdata, bytes, 0);
-    }
+    tdebug("dataElement created");
 
     SDPOutputStream os;
-    int   dataLen;
+    int   dataLen = 0;
     UInt8 data[DATA_BLOB_MAX];
 
-    if (!os.writeElement(dataElement)) {
+    BOOL written = os.writeElement(dataElement);
+
+    if (bdata != NULL) {
+        //env->ReleaseByteArrayElements(bdata, inBytes, 0);
+    }
+
+    if (!written) {
         return NULL;
     } else {
+        tdebug("dataElement written");
         os.getBytes(DATA_BLOB_MAX, &dataLen, data);
     }
 
     // construct byte array to hold blob
 	jbyteArray result = env->NewByteArray(dataLen);
     jbyte *bytes = env->GetByteArrayElements(result, 0);
-	memcpy(bytes, runnable.data, dataLen);
+	memcpy(bytes, data, dataLen);
 	env->ReleaseByteArrayElements(result, bytes, 0);
 	return result;
 }

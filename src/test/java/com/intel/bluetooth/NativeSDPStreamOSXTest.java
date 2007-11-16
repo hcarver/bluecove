@@ -28,7 +28,7 @@ import javax.bluetooth.UUID;
 
 /**
  * @author vlads
- * 
+ *
  */
 public class NativeSDPStreamOSXTest extends NativeTestCase {
 
@@ -37,6 +37,7 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 		if (NativeLibLoader.getOS() != NativeLibLoader.OS_MAC_OS_X) {
 			throw new Error("This is OS X only test");
 		}
+		BlueCoveImpl.instance().getBluetoothStack();
 	}
 
 	private void validateConversion(DataElement elementExpect, int testType, int type, long ldata, byte[] bdata)
@@ -88,6 +89,7 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 	}
 
 	public void testInt() throws IOException {
+		validateConversion(new DataElement(DataElement.U_INT_1, 0));
 		validateConversion(new DataElement(DataElement.U_INT_1, 1));
 		validateConversion(new DataElement(DataElement.U_INT_2, 60));
 		validateConversion(new DataElement(DataElement.U_INT_4, 77839));

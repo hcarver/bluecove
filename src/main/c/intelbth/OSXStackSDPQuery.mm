@@ -190,6 +190,7 @@ void SDPOutputStream::writeLong(long l, int size) {
 void SDPOutputStream::getBytes(int max, int* dataLen, UInt8* buf) {
     CFIndex len = MIN(max, CFDataGetLength(data));
     CFDataGetBytes(data, CFRangeMake(0, len), buf);
+    (*dataLen) = len;
 }
 
 int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
@@ -256,6 +257,7 @@ int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
 BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElement) {
     BluetoothSDPDataElementTypeDescriptor typeDescrip = IOBluetoothSDPDataElementGetTypeDescriptor(dataElement);
     BluetoothSDPDataElementSizeDescriptor sizeDescriptor = IOBluetoothSDPDataElementGetSizeDescriptor(dataElement);
+    ndebug("sizeDescriptor %i", sizeDescriptor);
     BOOL isSeq = false;
     BOOL isURL = false;
     BOOL isUnsigned = false;
@@ -282,6 +284,7 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
 			    } else {
 				    CFNumberRef	number = IOBluetoothSDPDataElementGetNumberValue(dataElement);
 				    long l = 0LL;
+				    ndebug("number %l", l);
 				    CFNumberGetValue(number, kCFNumberLongLongType, &l);
 				    writeLong(l, sizeDescriptor);
 			    }
