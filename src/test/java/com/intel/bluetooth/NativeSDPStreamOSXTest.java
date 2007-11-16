@@ -28,7 +28,7 @@ import javax.bluetooth.UUID;
 
 /**
  * @author vlads
- *
+ * 
  */
 public class NativeSDPStreamOSXTest extends NativeTestCase {
 
@@ -45,7 +45,7 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 		byte[] blob = NativeTestInterfaces.testOsXDataElementConversion(testType, type, ldata, bdata);
 		assertNotNull("NULL blob", blob);
 		DataElement element = (new SDPInputStream(new ByteArrayInputStream(blob))).readElement();
-		assertTrue(SDPStreamTest.equals(element, elementExpect));
+		SDPStreamTest.assertEquals(elementExpect, element);
 	}
 
 	/**

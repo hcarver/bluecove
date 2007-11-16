@@ -35,67 +35,60 @@ import junit.framework.TestCase;
  */
 public class SDPStreamTest extends TestCase {
 
-	public static boolean equals(DataElement de1, DataElement de2) {
+	public static void assertEquals(DataElement de1, DataElement de2) {
 		if ((de1 == null) || (de2 == null)) {
-			return false;
+			fail("NULL elements");
 		}
-		try {
-			if (de1.getDataType() != de2.getDataType()) {
-				return false;
+		assertEquals("Type", de1.getDataType(), de2.getDataType());
+		switch (de1.getDataType()) {
+		case DataElement.U_INT_1:
+		case DataElement.U_INT_2:
+		case DataElement.U_INT_4:
+		case DataElement.INT_1:
+		case DataElement.INT_2:
+		case DataElement.INT_4:
+		case DataElement.INT_8:
+			assertEquals("long", de1.getLong(), de2.getLong());
+			return;
+		case DataElement.URL:
+		case DataElement.STRING:
+		case DataElement.UUID:
+			assertEquals("value", de1.getValue(), de2.getValue());
+			return;
+		case DataElement.INT_16:
+		case DataElement.U_INT_8:
+		case DataElement.U_INT_16:
+			byte[] byteAray1 = (byte[]) de1.getValue();
+			byte[] byteAray2 = (byte[]) de2.getValue();
+			assertEquals("length", byteAray1.length, byteAray2.length);
+			for (int k = 0; k < byteAray1.length; k++) {
+				assertEquals("byteAray[" + k + "]", byteAray1[k], byteAray2[k]);
 			}
-			switch (de1.getDataType()) {
-			case DataElement.U_INT_1:
-			case DataElement.U_INT_2:
-			case DataElement.U_INT_4:
-			case DataElement.INT_1:
-			case DataElement.INT_2:
-			case DataElement.INT_4:
-			case DataElement.INT_8:
-				return (de1.getLong() == de2.getLong());
-			case DataElement.URL:
-			case DataElement.STRING:
-			case DataElement.UUID:
-				return de1.getValue().equals(de2.getValue());
-			case DataElement.INT_16:
-			case DataElement.U_INT_8:
-			case DataElement.U_INT_16:
-				byte[] byteAray1 = (byte[]) de1.getValue();
-				byte[] byteAray2 = (byte[]) de2.getValue();
-				if (byteAray1.length != byteAray2.length) {
-					return false;
-				}
-				for (int k = 0; k < byteAray1.length; k++) {
-					if (byteAray1[k] != byteAray2[k]) {
-						return false;
-					}
-				}
-				return true;
-			case DataElement.NULL:
-				return true;
-			case DataElement.BOOL:
-				return (de1.getBoolean() == de2.getBoolean());
-			case DataElement.DATSEQ:
-			case DataElement.DATALT:
-				Enumeration en1 = (Enumeration) de1.getValue();
-				Enumeration en2 = (Enumeration) de2.getValue();
-				for (; en1.hasMoreElements() && en2.hasMoreElements();) {
-					DataElement d1 = (DataElement) en1.nextElement();
-					DataElement d2 = (DataElement) en2.nextElement();
-					if (!equals(d1, d2)) {
-						return false;
-					}
-				}
-				if (en1.hasMoreElements() || en2.hasMoreElements()) {
-					return false;
-				}
-				return true;
-			default:
-				return false;
+			return;
+		case DataElement.NULL:
+			return;
+		case DataElement.BOOL:
+			assertEquals("getBoolean", de1.getBoolean(), de2.getBoolean());
+			return;
+		case DataElement.DATSEQ:
+		case DataElement.DATALT:
+			int i = 0;
+			Enumeration en1 = (Enumeration) de1.getValue();
+			Enumeration en2 = (Enumeration) de2.getValue();
+			for (; en1.hasMoreElements() && en2.hasMoreElements();) {
+				DataElement d1 = (DataElement) en1.nextElement();
+				DataElement d2 = (DataElement) en2.nextElement();
+				assertEquals("DataElement[" + i + "]", d1, d2);
+				i++;
 			}
-		} catch (Throwable e) {
-			DebugLog.error("DataElement equals", e);
-			return false;
+			if (en1.hasMoreElements() || en2.hasMoreElements()) {
+				fail("unknown hasMoreElements");
+			}
+			return;
+		default:
+			fail("unknown type");
 		}
+
 	}
 
 	private DataElement doubleCovert(DataElement element) throws IOException {
@@ -107,7 +100,7 @@ public class SDPStreamTest extends TestCase {
 
 	private void validateConversion(DataElement element) throws IOException {
 		DataElement elementConverted = doubleCovert(element);
-		assertTrue(equals(element, elementConverted));
+		assertEquals(element, elementConverted);
 	}
 
 	public void testInt() throws IOException {
