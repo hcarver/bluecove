@@ -1,6 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
+ *  Copyright (C) 2007 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -37,3 +37,14 @@ public:
     void sdpQueryComplete(IOBluetoothDeviceRef deviceRef, IOReturn status);
 };
 
+class GetAttributeDataElement: public Runnable {
+public:
+    jlong address;
+    jlong serviceRecordIndex;
+    jint attrID;
+
+    IOBluetoothSDPDataElementRef dataElementRef;
+
+    GetAttributeDataElement();
+    virtual void run();
+};

@@ -26,6 +26,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
+import javax.bluetooth.DataElement;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
@@ -326,10 +327,37 @@ class BluetoothStackOSX implements BluetoothStack {
 		}
 	}
 
+	private native DataElement getServiceAttributeImpl(long address, long serviceRecordIndex, int attrID);
+
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs)
 			throws IOException {
-		// TODO Auto-generated method stub
-		return false;
+		if (attrIDs.length > ATTR_RETRIEVABLE_MAX) {
+			throw new IllegalArgumentException();
+		}
+		boolean anyRetrived = false;
+		long address = RemoteDeviceHelper.getAddress(serviceRecord.getHostDevice());
+		for (int i = 0; i < attrIDs.length; i++) {
+			int id = attrIDs[i];
+			try {
+				DataElement element = getServiceAttributeImpl(address, serviceRecord.getHandle(), id);
+				if (element != null) {
+					serviceRecord.populateAttributeValue(id, element);
+					anyRetrived = true;
+					if (debug) {
+						DebugLog.debug("data for attribute " + id + " Ox" + Integer.toHexString(id) + " " + element);
+					}
+				} else {
+					if (debug) {
+						DebugLog.debug("no data for attribute " + id + " Ox" + Integer.toHexString(id));
+					}
+				}
+			} catch (Throwable e) {
+				if (debug) {
+					DebugLog.error("error populate attribute " + id + " Ox" + Integer.toHexString(id), e);
+				}
+			}
+		}
+		return anyRetrived;
 	}
 
 	// ---------------------- Client RFCOMM connections ----------------------
