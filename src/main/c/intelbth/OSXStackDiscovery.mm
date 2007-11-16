@@ -45,7 +45,7 @@ int deviceInquiryCount = 0;
     _busy = FALSE;
 
     if (_foundDevices == NULL) {
-        _foundDevices = [[NSMutableArray alloc] initWithCapacity:1];
+        _foundDevices = [NSMutableArray arrayWithCapacity:15];
         if (!_foundDevices) {
            return FALSE;
         }
@@ -53,7 +53,7 @@ int deviceInquiryCount = 0;
     }
 
     _started = FALSE;
-    _inquiry = [IOBluetoothDeviceInquiry new];
+    _inquiry = [IOBluetoothDeviceInquiry inquiryWithDelegate:self];
     if (!_inquiry) {
         return FALSE;
     }
@@ -108,7 +108,7 @@ int deviceInquiryCount = 0;
 }
 
 -(BOOL) started {
-    return _started;
+   return _started;
 }
 
 -(BOOL) aborted {
