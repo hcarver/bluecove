@@ -1,7 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2007 Vlad Skarzhevskyy
- *  Copyright (C) 2007 Eric Wagner
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -94,7 +93,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServi
     while ((stack != NULL) && (runnable.error == 0) && (!runnable.complete)) {
         MPEventFlags flags;
         MPWaitForEvent(stack->deviceInquiryNotificationEvent, &flags, kDurationMillisecond * 500);
-        if (isSearchServicesTerminated(transID) {
+        if (isSearchServicesTerminated(transID)) {
             return 0;
         }
     }
@@ -103,13 +102,14 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServi
     }
     if (runnable.error) {
         if (runnable.status == kIOReturnNotFound) {
-			throwException(env, "com/intel/bluetooth/SearchServicesDeviceNotReachableException", "");
-		} else {
-		    debug1("SearchServices error 0x%08x", runnable.status);
+            throwException(env, "com/intel/bluetooth/SearchServicesDeviceNotReachableException", "");
+        } else {
+            debug1("SearchServices error 0x%08x", runnable.status);
             throwException(env, "com/intel/bluetooth/SearchServicesException", "");
         }
         return 0;
     }
+    Edebug1("runSearchServicesImpl found %i records", runnable.recordsSize);
     return runnable.recordsSize;
 }
 
@@ -127,7 +127,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_cancelServiceS
     }
 }
 
-GetAttributeDataElement:GetAttributeDataElement() {
+GetAttributeDataElement::GetAttributeDataElement() {
     name = "GetAttributeDataElement";
 }
 
@@ -140,19 +140,241 @@ void GetAttributeDataElement::run() {
         error = 1;
         return;
     }
-    if (CFArrayGetCount(services) <= serviceRecordIndex)) {
+    if (serviceRecordIndex >= CFArrayGetCount(services)) {
         error = 1;
         return;
     }
     IOBluetoothSDPServiceRecordRef serviceRef = (IOBluetoothSDPServiceRecordRef)CFArrayGetValueAtIndex(services, serviceRecordIndex);
-    dataElementRef = IOBluetoothSDPServiceRecordGetAttributeDataElement(serviceRef, attrID);
+    IOBluetoothSDPDataElementRef dataElementRef = IOBluetoothSDPServiceRecordGetAttributeDataElement(serviceRef, attrID);
     if (dataElementRef == NULL) {
         error = 1;
     }
+    getData(dataElementRef);
 }
-jobject buildJDataElement(JNIEnv *env, IOBluetoothSDPDataElementRef dataElement);
 
-JNIEXPORT jobject JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getServiceAttributeImpl
+class SDPOutputStream {
+public:
+    CFMutableDataRef data;
+
+    SDPOutputStream();
+    ~SDPOutputStream();
+
+    void write(const UInt8 byte);
+    void write(const UInt8 *bytes, CFIndex length);
+    void writeLong(long l, int size);
+
+    BOOL writeElement(const IOBluetoothSDPDataElementRef dataElement);
+    int getLength(const IOBluetoothSDPDataElementRef dataElement);
+    void getBytes(int max, int*  dataLen, UInt8* buf);
+};
+
+void GetAttributeDataElement::getData(const IOBluetoothSDPDataElementRef dataElement) {
+    if (dataElement == NULL) {
+        return;
+    }
+    SDPOutputStream os;
+    if (!os.writeElement(dataElement)) {
+        error = 1;
+    } else {
+        os.getBytes(DATA_BLOB_MAX, &dataLen, data);
+    }
+}
+
+SDPOutputStream::SDPOutputStream() {
+    data = CFDataCreateMutable(NULL, 0);
+}
+
+SDPOutputStream::~SDPOutputStream() {
+    CFRelease(data);
+}
+
+void SDPOutputStream::write(const UInt8 byte) {
+    CFDataAppendBytes(data, &byte, 1);
+}
+
+void SDPOutputStream::write(const UInt8* bytes, CFIndex length) {
+    CFDataAppendBytes(data, bytes, length);
+}
+
+void SDPOutputStream::writeLong(long l, int size) {
+	for (int i = 0; i < size; i++) {
+		write((UInt8) (l >> (size - 1 << 3)));
+		l <<= 8;
+	}
+}
+
+void SDPOutputStream::getBytes(int max, int* dataLen, UInt8* buf) {
+    CFIndex len = MIN(max, CFDataGetLength(data));
+    CFDataGetBytes(data, CFRangeMake(0, len), buf);
+}
+
+int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
+    BluetoothSDPDataElementTypeDescriptor typeDescrip = IOBluetoothSDPDataElementGetTypeDescriptor(dataElement);
+    BluetoothSDPDataElementSizeDescriptor sizeDescriptor = IOBluetoothSDPDataElementGetSizeDescriptor(dataElement);
+    switch (typeDescrip) {
+        case kBluetoothSDPDataElementTypeNil:
+            return 1;
+        case kBluetoothSDPDataElementTypeUnsignedInt:
+        case kBluetoothSDPDataElementTypeSignedInt: {
+                int length;
+                switch (sizeDescriptor) {
+                    case 0: length = 1; break;
+                    case 1: length = 2; break;
+                    case 2: length = 4; break;
+                    case 3: length = 8; break;
+                    case 4: length = 16; break;
+                }
+                return 1 + length;
+            }
+        case kBluetoothSDPDataElementTypeUUID: {
+                IOBluetoothSDPUUIDRef	aUUIDRef = IOBluetoothSDPDataElementGetUUIDValue(dataElement);
+				UInt8 length = IOBluetoothSDPUUIDGetLength(aUUIDRef);
+				if (length <= 2) {
+				    return 1 + 2;
+				} else if (length <= 4) {
+				    return 1 + 4;
+				} else {
+				    return 1 + 16;
+			    }
+            }
+        case kBluetoothSDPDataElementTypeURL:
+		case kBluetoothSDPDataElementTypeString: {
+		        CFStringRef str = IOBluetoothSDPDataElementGetStringValue(dataElement);
+		        CFIndex length = CFStringGetLength(str);
+		        CFRelease(str);
+		        if (length < 0x100) {
+				    return length + 2;
+			    } else if (length < 0x10000) {
+				    return length + 3;
+			    } else {
+				    return length + 5;
+			    }
+		    }
+		case kBluetoothSDPDataElementTypeBoolean:
+            return 2;
+        case kBluetoothSDPDataElementTypeDataElementSequence:
+        case kBluetoothSDPDataElementTypeDataElementAlternative: {
+            int len = 5;
+            CFArrayRef array = IOBluetoothSDPDataElementGetArrayValue(dataElement);
+            CFIndex count = CFArrayGetCount(array);
+            for(CFIndex i = 0; i < count; i++) {
+                const IOBluetoothSDPDataElementRef item = (IOBluetoothSDPDataElementRef)CFArrayGetValueAtIndex(array, i);
+                len += getLength(item);
+            }
+            return len;
+        }
+        default:
+            return 0;
+    }
+}
+
+// See com.intel.bluetooth.SDPOutputStream
+BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElement) {
+    BluetoothSDPDataElementTypeDescriptor typeDescrip = IOBluetoothSDPDataElementGetTypeDescriptor(dataElement);
+    BluetoothSDPDataElementSizeDescriptor sizeDescriptor = IOBluetoothSDPDataElementGetSizeDescriptor(dataElement);
+    BOOL isSeq = false;
+    BOOL isURL = false;
+    BOOL isUnsigned = false;
+    switch (typeDescrip) {
+        case kBluetoothSDPDataElementTypeNil:
+            write(0 | 0);
+            break;
+        case kBluetoothSDPDataElementTypeBoolean:
+            write(40 | 0);
+			CFNumberRef	aNumber = IOBluetoothSDPDataElementGetNumberValue(dataElement);
+            UInt8 aBool;
+			CFNumberGetValue(aNumber, kCFNumberCharType, &aBool);
+			write(aBool);
+            break;
+        case kBluetoothSDPDataElementTypeUnsignedInt:
+            isUnsigned = true;
+        case kBluetoothSDPDataElementTypeSignedInt: {
+                UInt8 type = isUnsigned ? 8: 16;
+                write(type | sizeDescriptor);
+                if (sizeDescriptor == 4) { /* 16 byte integer */
+				    CFDataRef bigData = IOBluetoothSDPDataElementGetDataValue(dataElement);
+				    const UInt8 *byteArray = CFDataGetBytePtr(bigData);
+				    write(byteArray, 16);
+			    } else {
+				    CFNumberRef	number = IOBluetoothSDPDataElementGetNumberValue(dataElement);
+				    long l = 0LL;
+				    CFNumberGetValue (number, kCFNumberLongLongType, &l);
+				    writeLong(l, sizeDescriptor);
+			    }
+            }
+            break;
+        case kBluetoothSDPDataElementTypeUUID: {
+                IOBluetoothSDPUUIDRef aUUIDRef = IOBluetoothSDPDataElementGetUUIDValue(dataElement);
+			    const UInt8* uuidBytes = (UInt8*)IOBluetoothSDPUUIDGetBytes(aUUIDRef);
+				UInt8 length = IOBluetoothSDPUUIDGetLength(aUUIDRef);
+				UInt8 size = 0;
+                if (length <= 2) {
+                    size = 2;
+                    write(24 | 1);
+				} else if (length <= 4) {
+				    size = 4;
+				    write(24 | 2);
+				} else if (length <= 16) {
+				    size = 16;
+				    write(24 | 4);
+			    } else {
+			        return FALSE;
+			    }
+			    for(int p = length; p < size; p ++) {
+			        // This should not happen anyway.
+			        write(0);
+			    }
+			    write(uuidBytes, length);
+			}
+            break;
+        case kBluetoothSDPDataElementTypeURL:
+            isURL = true;
+		case kBluetoothSDPDataElementTypeString: {
+		        UInt8 type = isURL ? 0x40: 0x20;
+		        CFStringRef str = IOBluetoothSDPDataElementGetStringValue(dataElement);
+		        CFIndex length = CFStringGetLength(str);
+		        if (length < 0x100) {
+				    write(type | 5);
+				    writeLong(length, 1);
+			    } else if (length < 0x10000) {
+				    write(type | 6);
+				    writeLong(length, 2);
+			    } else {
+				    write(type | 7);
+				    writeLong(length, 4);
+			    }
+
+			    UniChar* charBuf = (UniChar*)malloc(sizeof(UniChar)*length);
+			    CFStringGetCharacters(str, CFRangeMake(0, length), charBuf);
+		        CFRelease(str);
+		        write((UInt8*)charBuf, sizeof(UniChar)*length);
+		        free(charBuf);
+		    }
+            break;
+        case kBluetoothSDPDataElementTypeDataElementSequence:
+            isSeq = true;
+            write(48 | 7);
+        case kBluetoothSDPDataElementTypeDataElementAlternative: {
+                if (!isSeq) {
+                    write(56 | 7);
+                }
+                writeLong(getLength(dataElement) - 5, 4);
+                CFArrayRef array = IOBluetoothSDPDataElementGetArrayValue(dataElement);
+                CFIndex count = CFArrayGetCount(array);
+                for(CFIndex i = 0; i < count; i++) {
+                    const IOBluetoothSDPDataElementRef item = (IOBluetoothSDPDataElementRef)CFArrayGetValueAtIndex(array, i);
+                    if (!writeElement(item)) {
+                        return FALSE;
+                    }
+                }
+            }
+            break;
+    }
+    return TRUE;
+}
+
+
+JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getServiceAttributeImpl
 (JNIEnv* env, jobject, jlong address, jlong serviceRecordIndex, jint attrID) {
     GetAttributeDataElement runnable;
     runnable.address = address;
@@ -162,174 +384,10 @@ JNIEXPORT jobject JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getServiceA
     if (runnable.error) {
         return NULL;
     }
-    return buildJDataElement(runnable.dataElementRef);
-}
-
-#define JAVA_ENV_CHECK(x) (*env)->x; if ((*env)->ExceptionOccurred(env)) {(*env)->ExceptionDescribe(env); debug("Error exception Occurred"); return NULL;}
-
-jobject buildJDataElement(JNIEnv *env, IOBluetoothSDPDataElementRef dataElement) {
-
-	jclass									dataElementClass;
-	jobject									jDataElement;
-	jmethodID								constructor;
-	BluetoothSDPDataElementTypeDescriptor	typeDescrip;
-	BluetoothSDPDataElementSizeDescriptor	typeSize;
-	UInt32									byteSize;
-	jboolean								isUnsigned, isURL, isSequence;
-
-	if((*env)->ExceptionOccurred(env)) (*env)->ExceptionDescribe(env);
-	dataElementClass = (*env)->FindClass(env, "javax/bluetooth/DataElement");
-	typeDescrip = IOBluetoothSDPDataElementGetTypeDescriptor(dataElement);
-	typeSize = IOBluetoothSDPDataElementGetSizeDescriptor(dataElement);
-	byteSize = IOBluetoothSDPDataElementGetSize(dataElement);
-	isUnsigned = 0;
-	isURL = 0;
-	isSequence = 0;
-
-	switch(typeDescrip) {
-		case kBluetoothSDPDataElementTypeNil:
-				constructor = (*env)->GetMethodID(env, dataElementClass, "<init>", "(I)V");
-				jDataElement = (*env)->NewObject(env, dataElementClass, constructor, 0);
-				break;
-		case kBluetoothSDPDataElementTypeUnsignedInt:
-			isUnsigned = 1;
-		case kBluetoothSDPDataElementTypeSignedInt:
-			if(typeSize==4) { /* 16 byte integer */
-				CFDataRef			bigData;
-				const UInt8			*byteArray;
-				jbyteArray			aJByteArray;
-
-				constructor = (*env)->GetMethodID(env, dataElementClass, "<init>", "(ILjava/lang/Object;)V");
-				bigData = IOBluetoothSDPDataElementGetDataValue(dataElement);
-				byteArray = CFDataGetBytePtr(bigData);
-				aJByteArray = (*env)->NewByteArray(env, 16);
-				(*env)->SetByteArrayRegion(env, aJByteArray, 0, 16, (jbyte*)byteArray);
-				jDataElement = JAVA_ENV_CHECK(NewObject(env, dataElementClass, constructor, isUnsigned ? 0x0C : 0x14, aJByteArray));
-			} else {
-				CFNumberRef		aNumber;
-				jint			typeValue;
-				jlong			aBigInt = 0LL;
-
-				constructor = (*env)->GetMethodID(env, dataElementClass, "<init>", "(IJ)V");
-				typeValue = 0;
-				aBigInt = 0;
-				aNumber = IOBluetoothSDPDataElementGetNumberValue(dataElement);
-				CFNumberGetValue (aNumber, kCFNumberLongLongType, &aBigInt);
-				switch(typeSize) {
-					case 0: /* 1 byte int */
-						if(isUnsigned && (aBigInt < 0)) aBigInt += 0x100;
-						typeValue = (isUnsigned ? 0x08 : 0x10 );
-						break;
-					case 1: /* 2 byte int */
-						if(isUnsigned && (aBigInt < 0)) aBigInt += 0x10000;
-						typeValue = (isUnsigned ? 0x09 : 0x11 );
-						break;
-					case 2: /* 4 byte int */
-						if(isUnsigned && (aBigInt < 0)) aBigInt += 0x100000000;
-						typeValue	= (isUnsigned ? 0x0A : 0x12 );
-						break;
-					case 3: /* 8 byte int */
-						typeValue = (isUnsigned ? 0x0B : 0x13 );
-						break;
-					}
-				jDataElement = JAVA_ENV_CHECK(NewObject(env, dataElementClass, constructor, typeValue, aBigInt));
-			}
-			break;
-		case kBluetoothSDPDataElementTypeUUID:
-			{
-				IOBluetoothSDPUUIDRef	aUUIDRef;
-				const jbyte				*uuidBytes;
-				UInt8					length, k;
-				CFMutableStringRef		stringUUID;
-				jstring					jStringUUID;
-				UniChar					*charBuf;
-				CFRange					range;
-				jclass					jUUIDClass;
-				jmethodID				jUUIDConstructor;
-				jobject					jUUID;
-
-				constructor = JAVA_ENV_CHECK(GetMethodID(env, dataElementClass, "<init>", "(ILjava/lang/Object;)V"));
-				stringUUID = CFStringCreateMutable (NULL, 500);
-				aUUIDRef = IOBluetoothSDPDataElementGetUUIDValue(dataElement);
-				uuidBytes = IOBluetoothSDPUUIDGetBytes(aUUIDRef);
-				length =  IOBluetoothSDPUUIDGetLength(aUUIDRef);
-				for(k=0;k<length;k++) {
-					CFStringAppendFormat(stringUUID, NULL, CFSTR("%02x"), uuidBytes[k]);
-				}
-				range.location = 0;
-				range.length = CFStringGetLength(stringUUID);
-				charBuf = malloc(sizeof(UniChar) *range.length);
-				CFStringGetCharacters(stringUUID, range, charBuf);
-				jStringUUID = JAVA_ENV_CHECK(NewString(env, (jchar*)charBuf, (jsize)range.length));
-				free(charBuf);
-				jUUIDClass = JAVA_ENV_CHECK(FindClass(env, "javax/bluetooth/UUID"));
-				jUUIDConstructor = JAVA_ENV_CHECK(GetMethodID(env, jUUIDClass, "<init>", "(Ljava/lang/String;Z)V"));
-				jUUID = JAVA_ENV_CHECK(NewObject(env, jUUIDClass, jUUIDConstructor, jStringUUID, (range.length == 8) ? 0:1));
-
-				jDataElement = JAVA_ENV_CHECK(NewObject(env, dataElementClass, constructor, 0x18, jUUID));
-				CFRelease(stringUUID);
-			}
-			break;
-		case kBluetoothSDPDataElementTypeURL:
-			isURL = 1;
-		case kBluetoothSDPDataElementTypeString:
-			{
-				CFStringRef				aString;
-				jstring					jStringRef;
-				UniChar					*charBuf;
-				CFRange					range;
-
-				constructor = JAVA_ENV_CHECK(GetMethodID(env, dataElementClass, "<init>", "(ILjava/lang/Object;)V"));
-				aString = IOBluetoothSDPDataElementGetStringValue(dataElement);
-				range.location = 0;
-				range.length = CFStringGetLength(aString);
-				charBuf = malloc(sizeof(UniChar)*range.length);
-				CFStringGetCharacters(aString, range, charBuf);
-				jStringRef = JAVA_ENV_CHECK(NewString(env, (jchar*)charBuf, (jsize)range.length));
-				free(charBuf);
-				CFRelease(aString);
-				jDataElement = JAVA_ENV_CHECK(NewObject(env, dataElementClass, constructor, isURL ? 0x40: 0x20, jStringRef));
-			}
-			break;
-		case kBluetoothSDPDataElementTypeBoolean:
-			{
-				jboolean			aBool;
-				CFNumberRef			aNumber;
-
-				constructor = JAVA_ENV_CHECK(GetMethodID(env, dataElementClass, "<init>", "(Z)V"));
-				aNumber = IOBluetoothSDPDataElementGetNumberValue(dataElement);
-				CFNumberGetValue(aNumber, kCFNumberCharType, &aBool);
-				jDataElement = JAVA_ENV_CHECK(NewObject(env, dataElementClass, constructor, aBool));
-			}
-			break;
-		case kBluetoothSDPDataElementTypeDataElementSequence:
-			isSequence = 1;
-		case kBluetoothSDPDataElementTypeDataElementAlternative:
-			{
-				CFArrayRef			anArray;
-				CFIndex				m, count;
-				jmethodID			addElement;
-
-				addElement = JAVA_ENV_CHECK(GetMethodID(env, dataElementClass, "addElement", "(Ljavax/bluetooth/DataElement;)V"));
-				constructor = JAVA_ENV_CHECK(GetMethodID(env, dataElementClass, "<init>", "(I)V"));
-				jDataElement = JAVA_ENV_CHECK(NewObject(env, dataElementClass, constructor, isSequence ? 0x30 : 0x38));
-				anArray = IOBluetoothSDPDataElementGetArrayValue(dataElement);
-				count = CFArrayGetCount(anArray);
-				for(m=0;m<count;m++) {
-					const IOBluetoothSDPDataElementRef	anItem = (IOBluetoothSDPDataElementRef)CFArrayGetValueAtIndex (anArray, m);
-					jobject								ajElement;
-
-					ajElement = getjDataElement(env, anItem);
-					JAVA_ENV_CHECK(CallVoidMethod(env, jDataElement, addElement, ajElement));
-				}
-			}
-			break;
-		default:
-			debug1("getjDataElement: Unknown data element type encounterd! %i", typeDescrip);
-			jDataElement = NULL;
-			break;
-
-		}
-	return jDataElement;
-
+    // construct byte array to hold blob
+	jbyteArray result = env->NewByteArray(runnable.dataLen);
+    jbyte *bytes = env->GetByteArrayElements(result, 0);
+	memcpy(bytes, runnable.data, runnable.dataLen);
+	env->ReleaseByteArrayElements(result, bytes, 0);
+	return result;
 }

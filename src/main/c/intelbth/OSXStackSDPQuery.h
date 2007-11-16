@@ -37,14 +37,20 @@ public:
     void sdpQueryComplete(IOBluetoothDeviceRef deviceRef, IOReturn status);
 };
 
+#define DATA_BLOB_MAX  0x4000
+
 class GetAttributeDataElement: public Runnable {
 public:
     jlong address;
     jlong serviceRecordIndex;
     jint attrID;
 
-    IOBluetoothSDPDataElementRef dataElementRef;
+    // To avoid memory allocation problem we return standard BLOB to Java thread. See com.intel.bluetooth.SDPInputStream
+    int   dataLen;
+    UInt8 data[DATA_BLOB_MAX];
 
     GetAttributeDataElement();
     virtual void run();
+
+    void getData(const IOBluetoothSDPDataElementRef dataElement);
 };

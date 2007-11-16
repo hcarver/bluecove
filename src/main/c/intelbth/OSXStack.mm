@@ -168,8 +168,9 @@ void performBTOperationCallBack(void *info) {
         if (params->runnable->isCorrupted()) {
             ndebug("Error: execute BTOperation got corrupted runnable");
         } else {
-            ndebug("execute BTOperation %s", params->runnable->name);
+            ndebug(" execute  BTOperation %s", params->runnable->name);
             params->runnable->run();
+            ndebug(" finished BTOperation %s", params->runnable->name);
         }
     }
     pthread_cond_signal(&(params->callComplete));
@@ -186,13 +187,14 @@ void synchronousBTOperation(Runnable* runnable) {
     pthread_cond_init(&(params->callComplete), NULL);
 	pthread_mutex_lock(&btOperationInProgress);
 
-    ndebug("invoke BTOperation %s", params->runnable->name);
+    ndebug("invoke    BTOperation %s", params->runnable->name);
 	CFRunLoopSourceSignal(btOperationSource);
 	CFRunLoopWakeUp(mainRunLoop);
 
 	pthread_cond_wait(&(params->callComplete), &btOperationInProgress);
 	pthread_mutex_unlock(&btOperationInProgress);
 	pthread_cond_destroy(&params->callComplete);
+	ndebug("return    BTOperation %s", params->runnable->name);
 }
 
 void ndebug(const char *fmt, ...) {
