@@ -251,7 +251,9 @@ class BluetoothStackOSX implements BluetoothStack {
 		SearchServicesThread sst = SearchServicesThread.getServiceSearchThread(transID);
 		if (sst != null) {
 			sst.setTerminated();
-			cancelServiceSearchImpl(transID);
+			synchronized (this) {
+				cancelServiceSearchImpl(transID);
+			}
 			return true;
 		} else {
 			return false;
@@ -271,6 +273,9 @@ class BluetoothStackOSX implements BluetoothStack {
 			return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
 		} catch (SearchServicesException e) {
 			return DiscoveryListener.SERVICE_SEARCH_ERROR;
+		}
+		if (startedNotify.isTerminated()) {
+			return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
 		}
 		if (recordsSize == 0) {
 			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;

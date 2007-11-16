@@ -23,6 +23,10 @@
 
 #define CPP_FILE "OSXStackSDPQuery.mm"
 
+#define MAX_TERMINATE 10
+
+jint terminatedTansID[MAX_TERMINATE] = {0};
+
 StackSDPQueryStart::StackSDPQueryStart() {
     name = "StackSDPQueryStart";
     complete = FALSE;
@@ -71,6 +75,16 @@ void StackSDPQueryStart::sdpQueryComplete(IOBluetoothDeviceRef deviceRef, IORetu
     }
 }
 
+BOOL isSearchServicesTerminated(jint transID) {
+    for(int i = 0; i < MAX_TERMINATE; i ++) {
+        if (terminatedTansID[i] == transID) {
+            terminatedTansID[i] = 0;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServicesImpl
 (JNIEnv *env, jobject, jlong address, jint transID) {
     StackSDPQueryStart runnable;
@@ -79,6 +93,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServi
     while ((stack != NULL) && (runnable.error == 0) && (!runnable.complete)) {
         MPEventFlags flags;
         MPWaitForEvent(stack->deviceInquiryNotificationEvent, &flags, kDurationMillisecond * 500);
+        if (isSearchServicesTerminated(transID) {
+            return 0;
+        }
     }
     if (stack == NULL) {
         return 0;
@@ -97,4 +114,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServi
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_cancelServiceSearchImpl
 (JNIEnv* env, jobject, jint transID) {
+    // This function is synchronized in Java
+    for(int i = 0; i < MAX_TERMINATE; i ++) {
+        if (terminatedTansID[i] == 0) {
+            terminatedTansID[i] = transID;
+            break;
+        }
+    }
 }
