@@ -91,7 +91,34 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 	public void testInt() throws IOException {
 		validateConversion(new DataElement(DataElement.U_INT_1, 0));
 		validateConversion(new DataElement(DataElement.U_INT_1, 1));
+		validateConversion(new DataElement(DataElement.U_INT_1, 1));
 		validateConversion(new DataElement(DataElement.U_INT_2, 60));
 		validateConversion(new DataElement(DataElement.U_INT_4, 77839));
+
+		validateConversion(new DataElement(DataElement.INT_1, -7));
+		validateConversion(new DataElement(DataElement.INT_2, -5));
+		validateConversion(new DataElement(DataElement.INT_4, -25678));
+		validateConversion(new DataElement(DataElement.INT_8, -1));
+		validateConversion(new DataElement(DataElement.INT_8, 2497));
+		validateConversion(new DataElement(DataElement.INT_8, 998652497));
+
+		validateConversion(new DataElement(DataElement.U_INT_1, 0));
+		validateConversion(new DataElement(DataElement.U_INT_1, 0xBC));
+		validateConversion(new DataElement(DataElement.U_INT_2, 0));
+		validateConversion(new DataElement(DataElement.U_INT_2, 0xABCD));
+		validateConversion(new DataElement(DataElement.U_INT_4, 0));
+		validateConversion(new DataElement(DataElement.U_INT_4, 0xABCDEF40l));
+		validateConversion(new DataElement(DataElement.INT_1, 0));
+		validateConversion(new DataElement(DataElement.INT_1, 0x4C));
+		validateConversion(new DataElement(DataElement.INT_1, -0x1E));
+		validateConversion(new DataElement(DataElement.INT_2, 0));
+		validateConversion(new DataElement(DataElement.INT_2, 0x5BCD));
+		validateConversion(new DataElement(DataElement.INT_2, -0x7EFD));
+		validateConversion(new DataElement(DataElement.INT_4, 0));
+		validateConversion(new DataElement(DataElement.INT_4, 0x1BCDEF35l));
+		validateConversion(new DataElement(DataElement.INT_4, -0x2BC7EF35l));
+		validateConversion(new DataElement(DataElement.INT_8, 0));
+		validateConversion(new DataElement(DataElement.INT_8, 0x3eC6EF355892EA8Cl));
+		validateConversion(new DataElement(DataElement.INT_8, -0x7F893012AB39FB72l));
 	}
 }

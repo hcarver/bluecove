@@ -55,15 +55,39 @@ IOBluetoothSDPDataElementRef createTestDataElementSimple(jint type, jlong ldata,
         break;
     case DATA_ELEMENT_TYPE_U_INT_2:
         newType = kBluetoothSDPDataElementTypeUnsignedInt;
-        newSizeDescriptor = 0;
+        newSizeDescriptor = 1;
         newSize = 2;
         newValue = [NSNumber numberWithUnsignedInt:((unsigned int)ldata)];
         break;
     case DATA_ELEMENT_TYPE_U_INT_4:
         newType = kBluetoothSDPDataElementTypeUnsignedInt;
-        newSizeDescriptor = 0;
+        newSizeDescriptor = 2;
         newSize = 4;
         newValue = [NSNumber numberWithUnsignedLong:((unsigned long)ldata)];
+        break;
+    case DATA_ELEMENT_TYPE_INT_1:
+        newType = kBluetoothSDPDataElementTypeSignedInt;
+        newSizeDescriptor = 0;
+        newSize = 1;
+        newValue = [NSNumber numberWithInt:((int)ldata)];
+        break;
+    case DATA_ELEMENT_TYPE_INT_2:
+        newType = kBluetoothSDPDataElementTypeSignedInt;
+        newSizeDescriptor = 1;
+        newSize = 2;
+        newValue = [NSNumber numberWithInt:((int)ldata)];
+        break;
+    case DATA_ELEMENT_TYPE_INT_4:
+        newType = kBluetoothSDPDataElementTypeSignedInt;
+        newSizeDescriptor = 2;
+        newSize = 4;
+        newValue = [NSNumber numberWithLong:(ldata)];
+        break;
+    case DATA_ELEMENT_TYPE_INT_8:
+        newType = kBluetoothSDPDataElementTypeSignedInt;
+        newSizeDescriptor = 3;
+        newSize = 8;
+        newValue = [NSNumber numberWithLong:(ldata)];
         break;
     default:
             return NULL;

@@ -282,11 +282,19 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
 				    const UInt8 *byteArray = CFDataGetBytePtr(bigData);
 				    write(byteArray, 16);
 			    } else {
+			        int length;
+                    switch (sizeDescriptor) {
+                        case 0: length = 1; break;
+                        case 1: length = 2; break;
+                        case 2: length = 4; break;
+                        case 3: length = 8; break;
+                        case 4: length = 16; break;
+                    }
 				    CFNumberRef	number = IOBluetoothSDPDataElementGetNumberValue(dataElement);
 				    long l = 0LL;
 				    ndebug("number %l", l);
 				    CFNumberGetValue(number, kCFNumberLongLongType, &l);
-				    writeLong(l, sizeDescriptor);
+				    writeLong(l, length);
 			    }
             }
             break;
