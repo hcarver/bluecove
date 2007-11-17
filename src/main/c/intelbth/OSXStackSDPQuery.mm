@@ -180,10 +180,11 @@ void SDPOutputStream::write(const UInt8* bytes, CFIndex length) {
     CFDataAppendBytes(data, bytes, length);
 }
 
-void SDPOutputStream::writeLong(long l, int size) {
+void SDPOutputStream::writeLong(UInt64 l, int size) {
+	UInt64 v = l;
 	for (int i = 0; i < size; i++) {
-		write((UInt8) (l >> (size - 1 << 3)));
-		l <<= 8;
+		write((UInt8) (0xFFLL & (v >> (size - 1 << 3))));
+		v <<= 8;
 	}
 }
 
@@ -281,6 +282,10 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
 				    CFDataRef bigData = IOBluetoothSDPDataElementGetDataValue(dataElement);
 				    const UInt8 *byteArray = CFDataGetBytePtr(bigData);
 				    write(byteArray, 16);
+				} else if (isUnsigned && (sizeDescriptor == 3)) { /* 8 byte unsigned integer array */
+				    CFDataRef bigData = IOBluetoothSDPDataElementGetDataValue(dataElement);
+				    const UInt8 *byteArray = CFDataGetBytePtr(bigData);
+				    write(byteArray, 8);
 			    } else {
 			        int length;
                     switch (sizeDescriptor) {
@@ -288,12 +293,11 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
                         case 1: length = 2; break;
                         case 2: length = 4; break;
                         case 3: length = 8; break;
-                        case 4: length = 16; break;
                     }
 				    CFNumberRef	number = IOBluetoothSDPDataElementGetNumberValue(dataElement);
-				    long l = 0LL;
-				    ndebug("number %l", l);
-				    CFNumberGetValue(number, kCFNumberLongLongType, &l);
+				    SInt64 l = 0LL;
+				    CFNumberGetValue(number, kCFNumberSInt64Type, &l);
+				    ndebug("number len %i, %lli", length, l);
 				    writeLong(l, length);
 			    }
             }

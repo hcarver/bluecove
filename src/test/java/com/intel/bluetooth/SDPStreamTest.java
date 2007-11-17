@@ -26,12 +26,13 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 import javax.bluetooth.DataElement;
+import javax.bluetooth.UUID;
 
 import junit.framework.TestCase;
 
 /**
  * @author vlads
- * 
+ *
  */
 public class SDPStreamTest extends TestCase {
 
@@ -137,5 +138,9 @@ public class SDPStreamTest extends TestCase {
 				12, -13, 14, 15, 16 }));
 		validateConversion(new DataElement(DataElement.U_INT_16, new byte[] { 21, -32, 43, 54, -65, 76, 87, 98, 11,
 				-110, 111, 112, -113, 114, 115, 16 }));
+	}
+
+	public void testUUID() throws IOException {
+	    validateConversion(new DataElement(DataElement.UUID, new UUID("0100", true)));
 	}
 }

@@ -82,7 +82,7 @@ public:
 
     void write(const UInt8 byte);
     void write(const UInt8 *bytes, CFIndex length);
-    void writeLong(long l, int size);
+    void writeLong(UInt64 l, int size);
 
     BOOL writeElement(const IOBluetoothSDPDataElementRef dataElement);
     int getLength(const IOBluetoothSDPDataElementRef dataElement);

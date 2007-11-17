@@ -28,7 +28,7 @@ import javax.bluetooth.UUID;
 
 /**
  * @author vlads
- * 
+ *
  */
 public class NativeSDPStreamOSXTest extends NativeTestCase {
 
@@ -76,7 +76,7 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 			validateConversion(element, 0, type, 0, (byte[]) element.getValue());
 			break;
 		case DataElement.UUID:
-			validateConversion(element, 0, type, 0, (Utils.UUIDToByteArray((UUID) element.getValue())));
+			validateConversion(element, 0, type, 0, Utils.UUIDToByteArray((UUID) element.getValue()));
 			break;
 		case DataElement.STRING:
 		case DataElement.URL:
@@ -95,19 +95,18 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 		validateConversion(new DataElement(DataElement.U_INT_2, 60));
 		validateConversion(new DataElement(DataElement.U_INT_4, 77839));
 
-		validateConversion(new DataElement(DataElement.INT_1, -7));
-		validateConversion(new DataElement(DataElement.INT_2, -5));
-		validateConversion(new DataElement(DataElement.INT_4, -25678));
-		validateConversion(new DataElement(DataElement.INT_8, -1));
-		validateConversion(new DataElement(DataElement.INT_8, 2497));
-		validateConversion(new DataElement(DataElement.INT_8, 998652497));
-
 		validateConversion(new DataElement(DataElement.U_INT_1, 0));
 		validateConversion(new DataElement(DataElement.U_INT_1, 0xBC));
 		validateConversion(new DataElement(DataElement.U_INT_2, 0));
 		validateConversion(new DataElement(DataElement.U_INT_2, 0xABCD));
 		validateConversion(new DataElement(DataElement.U_INT_4, 0));
 		validateConversion(new DataElement(DataElement.U_INT_4, 0xABCDEF40l));
+
+		validateConversion(new DataElement(DataElement.INT_1, -7));
+		validateConversion(new DataElement(DataElement.INT_2, -5));
+		validateConversion(new DataElement(DataElement.INT_4, -25678));
+
+
 		validateConversion(new DataElement(DataElement.INT_1, 0));
 		validateConversion(new DataElement(DataElement.INT_1, 0x4C));
 		validateConversion(new DataElement(DataElement.INT_1, -0x1E));
@@ -117,8 +116,26 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 		validateConversion(new DataElement(DataElement.INT_4, 0));
 		validateConversion(new DataElement(DataElement.INT_4, 0x1BCDEF35l));
 		validateConversion(new DataElement(DataElement.INT_4, -0x2BC7EF35l));
+
 		validateConversion(new DataElement(DataElement.INT_8, 0));
+
+		validateConversion(new DataElement(DataElement.INT_8, 1));
+		validateConversion(new DataElement(DataElement.INT_8, 257));
+		validateConversion(new DataElement(DataElement.INT_8, 2497));
+		validateConversion(new DataElement(DataElement.INT_8, -1));
+		validateConversion(new DataElement(DataElement.INT_8, 998652497));
+
 		validateConversion(new DataElement(DataElement.INT_8, 0x3eC6EF355892EA8Cl));
 		validateConversion(new DataElement(DataElement.INT_8, -0x7F893012AB39FB72l));
+
+		validateConversion(new DataElement(DataElement.U_INT_8, new byte[] { 1, -2, 3, 4, -5, 6, 7, -8 }));
+		validateConversion(new DataElement(DataElement.INT_16, new byte[] { 11, -22, 33, 44, -5, 6, 77, 88, 9, -10, 11,
+				12, -13, 14, 15, 16 }));
+		validateConversion(new DataElement(DataElement.U_INT_16, new byte[] { 21, -32, 43, 54, -65, 76, 87, 98, 11,
+				-110, 111, 112, -113, 114, 115, 16 }));
+	}
+
+	public void testUUID() throws IOException {
+	    validateConversion(new DataElement(DataElement.UUID, new UUID("0100", true)));
 	}
 }
