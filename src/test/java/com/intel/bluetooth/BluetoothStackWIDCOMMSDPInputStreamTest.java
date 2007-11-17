@@ -32,7 +32,7 @@ import junit.framework.TestCase;
 
 /**
  * @author vlads
- *
+ * 
  */
 public class BluetoothStackWIDCOMMSDPInputStreamTest extends TestCase {
 
@@ -40,7 +40,7 @@ public class BluetoothStackWIDCOMMSDPInputStreamTest extends TestCase {
 		super.setUp();
 		System.getProperties().put("bluecove.debug", "true");
 	}
-	
+
 	public static boolean equals(DataElement de1, DataElement de2) {
 		if ((de1 == null) || (de2 == null)) {
 			return false;
@@ -103,35 +103,32 @@ public class BluetoothStackWIDCOMMSDPInputStreamTest extends TestCase {
 			return false;
 		}
 	}
-	
+
 	static public void assertEquals(String message, DataElement expected, DataElement actual) {
 		if (equals(expected, actual)) {
 			return;
 		}
-		fail(message + " expected:["+expected  + "] actual:"+ actual + "]");
+		fail(message + " expected:[" + expected + "] actual:" + actual + "]");
 	}
-	
+
 	static class BluetoothStackWIDCOMMSDPOutputStream extends ByteArrayOutputStream {
 
 		/*
-		private long readLong(int size) throws IOException {
-			long result = 0;
-			for (int i = 0; i < size; i++) {
-				result += ((long)read()) << (8 * i);
-			}
-			return result;
-		}*/
-		
+		 * private long readLong(int size) throws IOException { long result = 0;
+		 * for (int i = 0; i < size; i++) { result += ((long)read()) << (8 *
+		 * i); } return result; }
+		 */
+
 		public void writeLong(long value, int size) throws IOException {
 			long data = value;
 			byte[] b = new byte[size];
 			for (int i = 0; i < size; i++) {
-				b[i] = (byte)((data) & 0xFF);
+				b[i] = (byte) ((data) & 0xFF);
 				data >>>= 8;
 			}
 			write(b);
 		}
-		
+
 		public void writeInt(int i) throws IOException {
 			writeLong(i, 4);
 		}
@@ -141,75 +138,65 @@ public class BluetoothStackWIDCOMMSDPInputStreamTest extends TestCase {
 				write(0);
 			}
 		}
-		
+
 	}
-	
+
 	public void testServiceClassIDList() throws IOException {
 		/*
-DATSEQ {
-  UUID 0000110100001000800000805f9b34fb (SERIAL_PORT)
-}
-		*/
+		 * DATSEQ { UUID 0000110100001000800000805f9b34fb (SERIAL_PORT) }
+		 */
 		DataElement expect = new DataElement(DataElement.DATSEQ);
 		expect.addElement(new DataElement(DataElement.UUID, new UUID("1101", true)));
 
-		
 		BluetoothStackWIDCOMMSDPOutputStream bos = new BluetoothStackWIDCOMMSDPOutputStream();
-		
-		bos.writeInt(1); //num_elem
-		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); //type
-		bos.writeInt(2); //len
-		bos.writeInt(1); //start_of_seq
+		int valueSize = BluetoothStackWIDCOMMSDPInputStream.MAX_ATTR_LEN_OLD;
+		bos.writeInt(valueSize);
+
+		bos.writeInt(1); // num_elem
+		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); // type
+		bos.writeInt(2); // len
+		bos.writeInt(1); // start_of_seq
 		bos.writeLong(0x1101, 2);
 		bos.flush();
-		
-		DataElement element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(bos.toByteArray()))).readElement();
-		
+
+		DataElement element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(bos.toByteArray())))
+				.readElement();
+
 		assertEquals("Element stream 1 item", expect, element);
-		
+
 		/*
-		DATSEQ {
-		  UUID 0000110100001000800000805f9b34fb (SERIAL_PORT)
-		  UUID 0000120300001000800000805f9b34fb
-		}
+		 * DATSEQ { UUID 0000110100001000800000805f9b34fb (SERIAL_PORT) UUID
+		 * 0000120300001000800000805f9b34fb }
 		 */
 		expect.addElement(new DataElement(DataElement.UUID, new UUID("1203", true)));
-		
+
 		bos = new BluetoothStackWIDCOMMSDPOutputStream();
-		
-		bos.writeInt(2); //num_elem
-		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); //type
-		bos.writeInt(2); //len
-		bos.writeInt(1); //start_of_seq
+		bos.writeInt(valueSize);
+
+		bos.writeInt(2); // num_elem
+		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); // type
+		bos.writeInt(2); // len
+		bos.writeInt(1); // start_of_seq
 		bos.writeLong(0x1101, 2);
-		bos.write0(BluetoothStackWIDCOMMSDPInputStream.MAX_ATTR_LEN - 2);
-		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); //type
-		bos.writeInt(2); //len
-		bos.writeInt(0); //start_of_seq
+		bos.write0(valueSize - 2);
+		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); // type
+		bos.writeInt(2); // len
+		bos.writeInt(0); // start_of_seq
 		bos.writeLong(0x1203, 2);
 		bos.flush();
-		
+
 		element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(bos.toByteArray()))).readElement();
-		
+
 		assertEquals("Element stream 2 items", expect, element);
 	}
-	
+
 	public void testProtocolDescriptorList() throws IOException {
-/*
- DATSEQ {
-  DATSEQ {
-    UUID 0000010000001000800000805f9b34fb (L2CAP)
-  }
-  DATSEQ {
-    UUID 0000000300001000800000805f9b34fb (RFCOMM)
-    U_INT_1 0x9
-  }
-  DATSEQ {
-    UUID 0000000800001000800000805f9b34fb (OBEX)
-  }
- }
-*/
-		
+		/*
+		 * DATSEQ { DATSEQ { UUID 0000010000001000800000805f9b34fb (L2CAP) }
+		 * DATSEQ { UUID 0000000300001000800000805f9b34fb (RFCOMM) U_INT_1 0x9 }
+		 * DATSEQ { UUID 0000000800001000800000805f9b34fb (OBEX) } }
+		 */
+
 		DataElement expect = new DataElement(DataElement.DATSEQ);
 		DataElement e1 = new DataElement(DataElement.DATSEQ);
 		e1.addElement(new DataElement(DataElement.UUID, new UUID("0100", true)));
@@ -221,39 +208,43 @@ DATSEQ {
 		expect.addElement(e1);
 		expect.addElement(e2);
 		expect.addElement(e3);
-		
+
 		BluetoothStackWIDCOMMSDPOutputStream bos = new BluetoothStackWIDCOMMSDPOutputStream();
-		
-		bos.writeInt(4); //num_elem
-		
-		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); //type
-		bos.writeInt(2); //len
-		bos.writeInt(1); //start_of_seq
+
+		int valueSize = BluetoothStackWIDCOMMSDPInputStream.MAX_ATTR_LEN_OLD;
+		bos.writeInt(valueSize);
+
+		bos.writeInt(4); // num_elem
+
+		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); // type
+		bos.writeInt(2); // len
+		bos.writeInt(1); // start_of_seq
 		bos.writeLong(0x0100, 2);
-		bos.write0(BluetoothStackWIDCOMMSDPInputStream.MAX_ATTR_LEN - 2);
-		
-		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); //type
-		bos.writeInt(2); //len
-		bos.writeInt(1); //start_of_seq
+		bos.write0(valueSize - 2);
+
+		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); // type
+		bos.writeInt(2); // len
+		bos.writeInt(1); // start_of_seq
 		bos.writeLong(0x0003, 2);
-		bos.write0(BluetoothStackWIDCOMMSDPInputStream.MAX_ATTR_LEN - 2);
-		
-		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_INT); //type
-		bos.writeInt(1); //len
-		bos.writeInt(0); //start_of_seq
+		bos.write0(valueSize - 2);
+
+		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_INT); // type
+		bos.writeInt(1); // len
+		bos.writeInt(0); // start_of_seq
 		bos.writeLong(9, 1);
-		bos.write0(BluetoothStackWIDCOMMSDPInputStream.MAX_ATTR_LEN - 1);
-		
-		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); //type
-		bos.writeInt(2); //len
-		bos.writeInt(1); //start_of_seq
+		bos.write0(valueSize - 1);
+
+		bos.writeInt(BluetoothStackWIDCOMMSDPInputStream.ATTR_TYPE_UUID); // type
+		bos.writeInt(2); // len
+		bos.writeInt(1); // start_of_seq
 		bos.writeLong(0x0008, 2);
-		bos.write0(BluetoothStackWIDCOMMSDPInputStream.MAX_ATTR_LEN - 2);
-		
+		bos.write0(valueSize - 2);
+
 		bos.flush();
-		
-		DataElement element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(bos.toByteArray()))).readElement();
-		
+
+		DataElement element = (new BluetoothStackWIDCOMMSDPInputStream(new ByteArrayInputStream(bos.toByteArray())))
+				.readElement();
+
 		assertEquals("Element stream", expect, element);
 	}
 }

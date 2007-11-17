@@ -49,7 +49,7 @@
 #else // _WIN32_WCE
 	// BTW-5_1_0_3101
 	// #pragma comment(lib, "BtWdSdkLib.lib")
-	// BTW-5_0_1_902-SDK
+	// BTW-5_0_1_902-SDK and BTW-6_1_0_1501-SDK
 	#pragma comment(lib, "WidcommSdklib.lib")
 #endif // #else // _WIN32_WCE
 
@@ -57,6 +57,10 @@
 #include "BtIfDefinitions.h"
 #include "BtIfClasses.h"
 #include "com_intel_bluetooth_BluetoothStackWIDCOMM.h"
+
+#ifdef L2CAP_CONN_CFG_FAILED_NO_REASON
+    #define BTW_SDK_6_0_1_300
+#endif
 
 void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr);
 

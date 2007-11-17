@@ -23,6 +23,20 @@
 
 #ifdef VC6
 #define CPP_FILE "WIDCOMMStack.cpp"
+
+#ifdef BTW_SDK_6_0_1_300
+
+    // see http://support.microsoft.com/kb/130869
+    #define MDEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8)  \
+        EXTERN_C const GUID name = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
+
+    MDEFINE_GUID(GUID_BLUETOOTH_HCI_EVENT,               0xfc240062, 0x1541, 0x49be, 0xb4, 0x63, 0x84, 0xc4, 0xdc, 0xd7, 0xbf, 0x7f);
+    MDEFINE_GUID(GUID_BLUETOOTH_RADIO_IN_RANGE,          0xea3b5b82, 0x26ee, 0x450e, 0xb0, 0xd8, 0xd2, 0x6f, 0xe3, 0x0a, 0x38, 0x69);
+    MDEFINE_GUID(GUID_BLUETOOTH_RADIO_OUT_OF_RANGE,      0xe28867c9, 0xc2aa, 0x4ced, 0xb9, 0x69, 0x45, 0x70, 0x86, 0x60, 0x37, 0xc4);
+    MDEFINE_GUID(GUID_BLUETOOTH_PIN_REQUEST,             0xbd198b7c, 0x24ab, 0x4b9a, 0x8c, 0x0d, 0xa8, 0xea, 0x83, 0x49, 0xaa, 0x16);
+    MDEFINE_GUID(GUID_BLUETOOTH_L2CAP_EVENT,             0x7eae4030, 0xb709, 0x4aa8, 0xac, 0x55, 0xe9, 0x53, 0x82, 0x9c, 0x9d, 0xaa);
+#endif
+
 #endif
 
 BOOL isWIDCOMMBluetoothStackPresent(JNIEnv *env) {
@@ -836,6 +850,12 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isServ
 	return JNI_TRUE;
 }
 
+typedef struct {
+
+    int valueSize;
+
+} SDP_DISC_ATTTR_VAL_VERSION_INFO;
+
 JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getServiceAttribute
 (JNIEnv *env, jobject peer, jint attrID, jlong handle) {
 	CSdpDiscoveryRec* record = validDiscoveryRec(env, handle);
@@ -859,10 +879,13 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getS
 		}
 	}
 	*/
+	SDP_DISC_ATTTR_VAL_VERSION_INFO verInfo;
+    verInfo.valueSize = MAX_ATTR_LEN;
 
-	jbyteArray result = env->NewByteArray(sizeof(SDP_DISC_ATTTR_VAL));
+	jbyteArray result = env->NewByteArray(sizeof(SDP_DISC_ATTTR_VAL) + sizeof(SDP_DISC_ATTTR_VAL_VERSION_INFO));
 	jbyte *bytes = env->GetByteArrayElements(result, 0);
-	memcpy(bytes, pval, sizeof(SDP_DISC_ATTTR_VAL));
+	memcpy(bytes, &verInfo, sizeof(SDP_DISC_ATTTR_VAL_VERSION_INFO));
+	memcpy(bytes + sizeof(SDP_DISC_ATTTR_VAL_VERSION_INFO), pval, sizeof(SDP_DISC_ATTTR_VAL));
 	env->ReleaseByteArrayElements(result, bytes, 0);
 	delete pval;
 	return result;
@@ -1076,7 +1099,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 			if (rc == CRfCommPort::PEER_TIMEOUT) {
 				throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Failed to OpenClient");
 			} else {
-				throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to OpenClient");
+				throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to OpenClient [%i]", rc);
 			}
 			open_client_return 0;
 		}

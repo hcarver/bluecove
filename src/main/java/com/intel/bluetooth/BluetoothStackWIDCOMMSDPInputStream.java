@@ -37,8 +37,9 @@ class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 
 	private InputStream source;
 
-	protected BluetoothStackWIDCOMMSDPInputStream(InputStream in) {
+	protected BluetoothStackWIDCOMMSDPInputStream(InputStream in) throws IOException {
 		this.source = in;
+		readVersionInfo();
 	}
 
 	public int read() throws IOException {
@@ -86,33 +87,29 @@ class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 		return buf.toString();
 	}
 
-	/*
-	 * typedef struct { int num_elem; struct { #define ATTR_TYPE_INT 0 //
-	 * Attribute value is an integer #define ATTR_TYPE_TWO_COMP 1 // Attribute
-	 * value is an 2's complement integer #define ATTR_TYPE_UUID 2 // Attribute
-	 * value is a UUID #define ATTR_TYPE_BOOL 3 // Attribute value is a boolean
-	 * #define ATTR_TYPE_ARRAY 4 // Attribute value is an array of bytes int
-	 * type; int len; // Length of the attribute BOOL start_of_seq; // TRUE for
-	 * each start of sequence union { unsigned char u8; // 8-bit integer
-	 * unsigned short u16; // 16-bit integer unsigned long u32; // 32-bit
-	 * integer BOOL b; // Boolean unsigned char array[MAX_ATTR_LEN]; // Variable
-	 * length array } val; } elem [MAX_SEQ_ENTRIES]; } SDP_DISC_ATTTR_VAL;
-	 */
 	static final int ATTR_TYPE_INT = 0; // Attribute value is an integer
 
 	static final int ATTR_TYPE_TWO_COMP = 1; // Attribute value is an 2's
-												// complement integer
+
+	// complement integer
 
 	static final int ATTR_TYPE_UUID = 2; // Attribute value is a UUID
 
 	static final int ATTR_TYPE_BOOL = 3; // Attribute value is a boolean
 
 	static final int ATTR_TYPE_ARRAY = 4; // Attribute value is an array of
-											// bytes
+
+	// bytes
 
 	static final int MAX_SEQ_ENTRIES = 20;
 
-	static final int MAX_ATTR_LEN = 256;
+	static final int MAX_ATTR_LEN_OLD = 256;
+
+	private int valueSize = 0;
+
+	private void readVersionInfo() throws IOException {
+		valueSize = readInt();
+	}
 
 	public DataElement readElement() throws IOException {
 
@@ -138,7 +135,7 @@ class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 				DebugLog.debug("length", length);
 				DebugLog.debug("start_of_seq", start_of_seq);
 			}
-			if (length < 0 || MAX_ATTR_LEN < length) {
+			if (length < 0 || valueSize < length) {
 				throw new IOException("Unexpected length " + length);
 			}
 			DataElement dataElement;
@@ -242,7 +239,7 @@ class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 				result = dataElement;
 			}
 
-			if ((i < (elements - 1)) && (skip(MAX_ATTR_LEN - length) != (MAX_ATTR_LEN - length))) {
+			if ((i < (elements - 1)) && (skip(valueSize - length) != (valueSize - length))) {
 				throw new IOException("Unexpected end of data");
 			}
 		}
