@@ -490,29 +490,15 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		return handle;
 	}
 
-	private native void sdpServiceAddAttribute(long handle, char handleType, int attrID, short attrType, char[] value)
+	private native void sdpServiceAddAttribute(long handle, char handleType, int attrID, short attrType, byte[] value)
 			throws ServiceRegistrationException;
 
-	private void sdpServiceAddAttribute(long handle, char handleType, int attrID, short attrType, String value)
-			throws ServiceRegistrationException {
-		char[] cvalue = value.toCharArray();
-		sdpServiceAddAttribute(handle, handleType, attrID, attrType, cvalue);
-	}
-
-	private char[] long2char(long value, int len) {
-		char[] cvalue = new char[len];
+	private byte[] long2byte(long value, int len) {
+		byte[] cvalue = new byte[len];
 		long l = value;
 		for (int i = len - 1; i >= 0; i--) {
-			cvalue[i] = (char) (l & 0xFF);
+			cvalue[i] = (byte) (l & 0xFF);
 			l >>= 8;
-		}
-		return cvalue;
-	}
-
-	private char[] bytes2char(byte[] value, int len) {
-		char[] cvalue = new char[len];
-		for (int i = 0; i < len; i++) {
-			cvalue[i] = (char) value[i];
 		}
 		return cvalue;
 	}
@@ -552,54 +538,64 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 			DataElement d = serviceRecord.getAttributeValue(id);
 			switch (d.getDataType()) {
 			case DataElement.U_INT_1:
-				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, long2char(d.getLong(), 1));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, long2byte(d.getLong(), 1));
 				break;
 			case DataElement.U_INT_2:
-				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, long2char(d.getLong(), 2));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, long2byte(d.getLong(), 2));
 				break;
 			case DataElement.U_INT_4:
-				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, long2char(d.getLong(), 4));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, long2byte(d.getLong(), 4));
 				break;
 			case DataElement.U_INT_8:
-				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, bytes2char((byte[]) d.getValue(), 8));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, (byte[]) d.getValue());
 				break;
 			case DataElement.U_INT_16:
-				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, bytes2char((byte[]) d.getValue(), 16));
+				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, (byte[]) d.getValue());
 				break;
 			case DataElement.INT_1:
-				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 1));
+				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2byte(d.getLong(), 1));
 				break;
 			case DataElement.INT_2:
-				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 2));
+				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2byte(d.getLong(), 2));
 				break;
 			case DataElement.INT_4:
-				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 4));
+				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2byte(d.getLong(), 4));
 				break;
 			case DataElement.INT_8:
-				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2char(d.getLong(), 8));
+				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, long2byte(d.getLong(), 8));
 				break;
 			case DataElement.INT_16:
-				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, bytes2char(
-						(byte[]) d.getValue(), 16));
+				sdpServiceAddAttribute(handle, handleType, id, TWO_COMP_INT_DESC_TYPE, (byte[]) d.getValue());
 				break;
 			case DataElement.URL:
-				sdpServiceAddAttribute(handle, handleType, id, URL_DESC_TYPE, d.getValue().toString());
+				sdpServiceAddAttribute(handle, handleType, id, URL_DESC_TYPE, Utils.getASCIIBytes(d.getValue()
+						.toString()));
 				break;
 			case DataElement.STRING:
-				sdpServiceAddAttribute(handle, handleType, id, TEXT_STR_DESC_TYPE, d.getValue().toString());
+				sdpServiceAddAttribute(handle, handleType, id, TEXT_STR_DESC_TYPE, Utils.getUTF8Bytes(d.getValue()
+						.toString()));
 				break;
 			case DataElement.NULL:
-				sdpServiceAddAttribute(handle, handleType, id, NULL_DESC_TYPE, "");
+				sdpServiceAddAttribute(handle, handleType, id, NULL_DESC_TYPE, null);
 				break;
 			case DataElement.BOOL:
-				sdpServiceAddAttribute(handle, handleType, id, BOOLEAN_DESC_TYPE, d.getBoolean() ? "TRUE" : "FALSE");
+				// TODO support DataElement.BOOL
+				/*
+				 * sdpServiceAddAttribute(handle, handleType, id,
+				 * BOOLEAN_DESC_TYPE, new byte[] { (byte) (d.getBoolean() ? 1 :
+				 * 0)});
+				 */
+				// sdpServiceAddAttribute(handle, handleType, id,
+				// BOOLEAN_DESC_TYPE, Utils
+				// .getASCIIBytes(d.getBoolean() ? "TRUE" : "FALSE"));
 				break;
 			case DataElement.UUID:
-				sdpServiceAddAttribute(handle, handleType, id, UUID_DESC_TYPE, ((UUID) d.getValue()).toString());
+				sdpServiceAddAttribute(handle, handleType, id, UUID_DESC_TYPE, Utils
+						.getASCIIBytes(((UUID) d.getValue()).toString()));
 				break;
 			case DataElement.DATSEQ:
 			case DataElement.DATALT:
-				// TODO create Attribute sequence
+				// TODO create Attribute sequence DATSEQ and DATALT
 			}
 		}
 	}

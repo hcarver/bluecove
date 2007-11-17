@@ -32,9 +32,11 @@ import junit.framework.TestCase;
 
 /**
  * @author vlads
- *
+ * 
  */
 public class SDPStreamTest extends TestCase {
+
+	public static final String stringUTFData = "\u0413\u043E\u043B\u0443\u0431\u043E\u0439\u0417\u0443\u0431";
 
 	public static void assertEquals(DataElement de1, DataElement de2) {
 		if ((de1 == null) || (de2 == null)) {
@@ -141,6 +143,31 @@ public class SDPStreamTest extends TestCase {
 	}
 
 	public void testUUID() throws IOException {
-	    validateConversion(new DataElement(DataElement.UUID, new UUID("0100", true)));
+		validateConversion(new DataElement(DataElement.UUID, new UUID("0100", true)));
+		validateConversion(new DataElement(DataElement.UUID, new UUID("B10C0BE1111111111111111111110001", false)));
+
+		// This is the same UUIDs
+		validateConversion(new DataElement(DataElement.UUID, new UUID("0000110500001000800000805f9b34fb", false)));
+		validateConversion(new DataElement(DataElement.UUID, new UUID(0x1105)));
+	}
+
+	public void testString() throws IOException {
+		validateConversion(new DataElement(DataElement.STRING, ""));
+		validateConversion(new DataElement(DataElement.STRING, "12345"));
+		validateConversion(new DataElement(DataElement.STRING, stringUTFData));
+
+		StringBuffer b = new StringBuffer();
+		b.append("b");
+		for (int i = 0; i < 0x100; i++) {
+			b.append("Z");
+		}
+		b.append("e");
+		validateConversion(new DataElement(DataElement.STRING, b.toString()));
+	}
+
+	public void testOtherAttributes() throws IOException {
+		validateConversion(new DataElement(true));
+		validateConversion(new DataElement(false));
+		validateConversion(new DataElement(DataElement.NULL));
 	}
 }

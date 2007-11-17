@@ -2,11 +2,11 @@
 
 The list of functionality that can be implemented or investigation should be done if this is possible.
 
-* BlueZ Linux version (C++)  (Hakan is leader here)
+* WIDCOMM Service to publish attributes DataElement.DATSEQ and DataElement.DATALT
 
-* Java IBM J9 MIDP
-    System.setProperty
-    WeakVector implementation
+* WIDCOMM Service to accept multiple connections
+
+* BlueZ Linux version (C++)
 
 * OS X support. Some code exists in branches\osxPort\
 
@@ -17,11 +17,6 @@ The list of functionality that can be implemented or investigation should be don
 * Security (authenticate and encrypt). (C++/Java)  DONE 70%
 
 * Connection timeouts. (C++/Java)
-
-* DONE
-  redirection of Bluecove logs to log4j framework - same module.
-  Should be integrated in bluecove using DebugLog.LoggerAppender interface.
-  Main bluecove DebugLog will try to create a class "com.intel.bluetooth.DebugLog4jAppender" during intialization and use it if log4j available in classpath.
 
 * bluecove-jmx monitoring of connections and other stats using JMX - separate module.
   Interfaces should be created in Main bluecove

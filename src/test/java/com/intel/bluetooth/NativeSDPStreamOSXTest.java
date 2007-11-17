@@ -28,7 +28,7 @@ import javax.bluetooth.UUID;
 
 /**
  * @author vlads
- *
+ * 
  */
 public class NativeSDPStreamOSXTest extends NativeTestCase {
 
@@ -106,7 +106,6 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 		validateConversion(new DataElement(DataElement.INT_2, -5));
 		validateConversion(new DataElement(DataElement.INT_4, -25678));
 
-
 		validateConversion(new DataElement(DataElement.INT_1, 0));
 		validateConversion(new DataElement(DataElement.INT_1, 0x4C));
 		validateConversion(new DataElement(DataElement.INT_1, -0x1E));
@@ -136,6 +135,31 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 	}
 
 	public void testUUID() throws IOException {
-	    validateConversion(new DataElement(DataElement.UUID, new UUID("0100", true)));
+		validateConversion(new DataElement(DataElement.UUID, new UUID("0100", true)));
+		validateConversion(new DataElement(DataElement.UUID, new UUID("B10C0BE1111111111111111111110001", false)));
+
+		// This is the same UUIDs
+		validateConversion(new DataElement(DataElement.UUID, new UUID("0000110500001000800000805f9b34fb", false)));
+		validateConversion(new DataElement(DataElement.UUID, new UUID(0x1105)));
+	}
+
+	public void testString() throws IOException {
+		validateConversion(new DataElement(DataElement.STRING, ""));
+		validateConversion(new DataElement(DataElement.STRING, "12345"));
+		validateConversion(new DataElement(DataElement.STRING, SDPStreamTest.stringUTFData));
+
+		StringBuffer b = new StringBuffer();
+		b.append("b");
+		for (int i = 0; i < 0x100; i++) {
+			b.append("Z");
+		}
+		b.append("e");
+		validateConversion(new DataElement(DataElement.STRING, b.toString()));
+	}
+
+	public void testOtherAttributes() throws IOException {
+		validateConversion(new DataElement(true));
+		validateConversion(new DataElement(false));
+		validateConversion(new DataElement(DataElement.NULL));
 	}
 }

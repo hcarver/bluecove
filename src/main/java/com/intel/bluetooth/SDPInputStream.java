@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth;
 
 import java.io.IOException;
@@ -27,16 +27,16 @@ import javax.bluetooth.DataElement;
 import javax.bluetooth.UUID;
 
 class SDPInputStream extends InputStream {
-	
+
 	private InputStream source;
-	
+
 	private long pos;
 
 	public SDPInputStream(InputStream in) {
 		this.source = in;
 		pos = 0;
 	}
-	
+
 	public int read() throws IOException {
 		return source.read();
 	}
@@ -102,14 +102,11 @@ class SDPInputStream extends InputStream {
 		case 2: // INT
 			switch (size) {
 			case 0:
-				return new DataElement(DataElement.INT_1,
-						(long) (byte) readLong(1));
+				return new DataElement(DataElement.INT_1, (long) (byte) readLong(1));
 			case 1:
-				return new DataElement(DataElement.INT_2,
-						(long) (short) readLong(2));
+				return new DataElement(DataElement.INT_2, (long) (short) readLong(2));
 			case 2:
-				return new DataElement(DataElement.INT_4,
-						(long) (int) readLong(4));
+				return new DataElement(DataElement.INT_4, (long) (int) readLong(4));
 			case 3:
 				return new DataElement(DataElement.INT_8, readLong(8));
 			case 4:
@@ -155,8 +152,7 @@ class SDPInputStream extends InputStream {
 				throw new IOException();
 			}
 
-			return new DataElement(DataElement.STRING, new String(
-					readBytes(length)));
+			return new DataElement(DataElement.STRING, Utils.newStringUTF8(readBytes(length)));
 		}
 		case 5: // BOOL
 			return new DataElement(readLong(1) != 0);
@@ -228,8 +224,7 @@ class SDPInputStream extends InputStream {
 				throw new IOException();
 			}
 
-			return new DataElement(DataElement.URL, new String(
-					readBytes(length)));
+			return new DataElement(DataElement.URL, Utils.newStringASCII(readBytes(length)));
 		}
 		default:
 			throw new IOException();

@@ -1674,7 +1674,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpServiceAddAttribute
-(JNIEnv *env, jobject, jlong handle, jchar handleType, jint attrID, jshort attrType, jcharArray value) {
+(JNIEnv *env, jobject, jlong handle, jchar handleType, jint attrID, jshort attrType, jbyteArray value) {
 	CSdpService* sdpService;
 	if (handleType == 'r') {
 	    WIDCOMMStackRfCommPortServer* rf = (WIDCOMMStackRfCommPortServer*)validRfCommHandle(env, handle);
@@ -1694,22 +1694,24 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
 		return;
 	}
 
-	jchar *chars = env->GetCharArrayElements(value, 0);
-	UINT8 arrLen = (UINT8)env->GetArrayLength(value);
+	UINT8 arrLen = 0;
 	UINT8 *p_val = new UINT8[arrLen + 1];
-	for (UINT8 i = 0; i < arrLen; i++ ) {
-		p_val[i] = (UINT8)chars[i];
+
+	if (value != NULL) {
+        jbyte *inBytes = env->GetByteArrayElements(value, 0);
+	    arrLen = (UINT8)env->GetArrayLength(value);
+
+    	for (UINT8 i = 0; i < arrLen; i++ ) {
+	    	p_val[i] = (UINT8)inBytes[i];
+	    }
+	    env->ReleaseByteArrayElements(value, inBytes, 0);
 	}
 	p_val[arrLen] = '\0';
 
-	UINT8 attr_len = arrLen;
-
-	env->ReleaseCharArrayElements(value, chars, 0);
-
-	if (sdpService->AddAttribute((UINT16)attrID, (UINT8)attrType, attr_len, p_val) != SDP_OK) {
+	if (sdpService->AddAttribute((UINT16)attrID, (UINT8)attrType, arrLen, p_val) != SDP_OK) {
 		throwExceptionExt(env, "javax/bluetooth/ServiceRegistrationException", "Failed to AddAttribute %i", attrID);
 	} else {
-		debug4("attr set %i type=%i len=%i [%s]", attrID, attrType, attr_len, p_val);
+		debug4("attr set %i type=%i len=%i [%s]", attrID, attrType, arrLen, p_val);
 	}
 
 	delete p_val;

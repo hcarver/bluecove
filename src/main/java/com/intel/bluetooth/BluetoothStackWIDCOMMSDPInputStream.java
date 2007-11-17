@@ -34,21 +34,21 @@ import javax.bluetooth.UUID;
 class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 
 	public static final boolean debug = false;
-	
+
 	private InputStream source;
-	
+
 	protected BluetoothStackWIDCOMMSDPInputStream(InputStream in) {
 		this.source = in;
 	}
-	
+
 	public int read() throws IOException {
 		return source.read();
 	}
-	
+
 	private long readLong(int size) throws IOException {
 		long result = 0;
 		for (int i = 0; i < size; i++) {
-			result += ((long)read()) << (8 * i);
+			result += ((long) read()) << (8 * i);
 		}
 		return result;
 	}
@@ -60,15 +60,15 @@ class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 			if (debug) {
 				DebugLog.debug("readLong data[" + i + "]", data);
 			}
-			result += ((long)data) << (8 * i);
+			result += ((long) data) << (8 * i);
 		}
 		return result;
 	}
-	
+
 	private int readInt() throws IOException {
-		return (int)readLong(4);
+		return (int) readLong(4);
 	}
-	
+
 	private byte[] readBytes(int size) throws IOException {
 		byte[] result = new byte[size];
 		for (int i = 0; i < size; i++) {
@@ -76,7 +76,7 @@ class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 		}
 		return result;
 	}
-	
+
 	private String hexString(byte[] b) throws IOException {
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < b.length; i++) {
@@ -86,40 +86,36 @@ class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 		return buf.toString();
 	}
 
-/*
-typedef struct {
-    int     num_elem;
-    struct {
-        #define ATTR_TYPE_INT      0       // Attribute value is an integer
-        #define ATTR_TYPE_TWO_COMP 1       // Attribute value is an 2's complement integer
-        #define ATTR_TYPE_UUID     2       // Attribute value is a UUID
-        #define ATTR_TYPE_BOOL     3       // Attribute value is a boolean
-        #define ATTR_TYPE_ARRAY    4       // Attribute value is an array of bytes
-        int     type;
-        int     len;                        // Length of the attribute
-        BOOL    start_of_seq;               // TRUE for each start of sequence
-        union {
-            unsigned char  u8;                      // 8-bit integer
-            unsigned short u16;                     // 16-bit integer
-            unsigned long  u32;                     // 32-bit integer
-            BOOL           b;                       // Boolean
-            unsigned char  array[MAX_ATTR_LEN];     // Variable length array
-        } val;
-    } elem [MAX_SEQ_ENTRIES];
-} SDP_DISC_ATTTR_VAL;
- */
-	static final int ATTR_TYPE_INT      = 0; // Attribute value is an integer
-	static final int ATTR_TYPE_TWO_COMP = 1; // Attribute value is an 2's complement integer
-	static final int ATTR_TYPE_UUID     = 2; // Attribute value is a UUID
-	static final int ATTR_TYPE_BOOL     = 3; // Attribute value is a boolean
-	static final int ATTR_TYPE_ARRAY    = 4; // Attribute value is an array of bytes
-	
+	/*
+	 * typedef struct { int num_elem; struct { #define ATTR_TYPE_INT 0 //
+	 * Attribute value is an integer #define ATTR_TYPE_TWO_COMP 1 // Attribute
+	 * value is an 2's complement integer #define ATTR_TYPE_UUID 2 // Attribute
+	 * value is a UUID #define ATTR_TYPE_BOOL 3 // Attribute value is a boolean
+	 * #define ATTR_TYPE_ARRAY 4 // Attribute value is an array of bytes int
+	 * type; int len; // Length of the attribute BOOL start_of_seq; // TRUE for
+	 * each start of sequence union { unsigned char u8; // 8-bit integer
+	 * unsigned short u16; // 16-bit integer unsigned long u32; // 32-bit
+	 * integer BOOL b; // Boolean unsigned char array[MAX_ATTR_LEN]; // Variable
+	 * length array } val; } elem [MAX_SEQ_ENTRIES]; } SDP_DISC_ATTTR_VAL;
+	 */
+	static final int ATTR_TYPE_INT = 0; // Attribute value is an integer
+
+	static final int ATTR_TYPE_TWO_COMP = 1; // Attribute value is an 2's
+												// complement integer
+
+	static final int ATTR_TYPE_UUID = 2; // Attribute value is a UUID
+
+	static final int ATTR_TYPE_BOOL = 3; // Attribute value is a boolean
+
+	static final int ATTR_TYPE_ARRAY = 4; // Attribute value is an array of
+											// bytes
+
 	static final int MAX_SEQ_ENTRIES = 20;
+
 	static final int MAX_ATTR_LEN = 256;
-	
+
 	public DataElement readElement() throws IOException {
 
-		
 		DataElement result = null;
 		DataElement mainSeq = null;
 		DataElement currentSeq = null;
@@ -130,7 +126,7 @@ typedef struct {
 		if (debug) {
 			DebugLog.debug("elements", elements);
 		}
-		for(int i = 0; i < elements; i ++) {
+		for (int i = 0; i < elements; i++) {
 			if (debug) {
 				DebugLog.debug("element", i);
 			}
@@ -150,19 +146,19 @@ typedef struct {
 			case ATTR_TYPE_INT:
 				switch (length) {
 				case 1:
-					dataElement =  new DataElement(DataElement.U_INT_1, readLong(1));
+					dataElement = new DataElement(DataElement.U_INT_1, readLong(1));
 					break;
 				case 2:
-					dataElement =  new DataElement(DataElement.U_INT_2, readLong(2));
+					dataElement = new DataElement(DataElement.U_INT_2, readLong(2));
 					break;
 				case 4:
-					dataElement =  new DataElement(DataElement.U_INT_4, readLong(4));
+					dataElement = new DataElement(DataElement.U_INT_4, readLong(4));
 					break;
 				case 8:
-					dataElement =  new DataElement(DataElement.U_INT_8, readBytes(8));
+					dataElement = new DataElement(DataElement.U_INT_8, readBytes(8));
 					break;
 				case 16:
-					dataElement =  new DataElement(DataElement.U_INT_16, readBytes(16));
+					dataElement = new DataElement(DataElement.U_INT_16, readBytes(16));
 					break;
 				default:
 					throw new IOException("Unknown U_INT length " + length);
@@ -171,19 +167,19 @@ typedef struct {
 			case ATTR_TYPE_TWO_COMP:
 				switch (length) {
 				case 1:
-					dataElement =  new DataElement(DataElement.INT_1, (byte) readLong(1));
+					dataElement = new DataElement(DataElement.INT_1, (byte) readLong(1));
 					break;
 				case 2:
-					dataElement =  new DataElement(DataElement.INT_2, (short) readLong(2));
+					dataElement = new DataElement(DataElement.INT_2, (short) readLong(2));
 					break;
 				case 4:
-					dataElement =  new DataElement(DataElement.INT_4, (int) readLong(4));
+					dataElement = new DataElement(DataElement.INT_4, (int) readLong(4));
 					break;
 				case 8:
-					dataElement =  new DataElement(DataElement.INT_8, readLongDebug(8));
+					dataElement = new DataElement(DataElement.INT_8, readLongDebug(8));
 					break;
 				case 16:
-					dataElement =  new DataElement(DataElement.INT_16, readBytes(16));
+					dataElement = new DataElement(DataElement.INT_16, readBytes(16));
 					break;
 				default:
 					throw new IOException("Unknown INT length " + length);
@@ -210,16 +206,16 @@ typedef struct {
 				dataElement = new DataElement(readLong(length) != 0);
 				break;
 			case ATTR_TYPE_ARRAY:
-				dataElement = new DataElement(DataElement.STRING, new String(readBytes(length)));
+				dataElement = new DataElement(DataElement.STRING, Utils.newStringUTF8(readBytes(length)));
 				break;
 			default:
 				throw new IOException("Unknown data type " + type);
 			}
-			
+
 			if (debug) {
 				DebugLog.debug("dataElement " + dataElement);
 			}
-			
+
 			if (start_of_seq) {
 				DataElement newSeq = new DataElement(DataElement.DATSEQ);
 				newSeq.addElement(dataElement);
@@ -241,11 +237,11 @@ typedef struct {
 			} else if (currentSeq != null) {
 				currentSeq.addElement(dataElement);
 			}
-			
+
 			if (result == null) {
 				result = dataElement;
 			}
-			
+
 			if ((i < (elements - 1)) && (skip(MAX_ATTR_LEN - length) != (MAX_ATTR_LEN - length))) {
 				throw new IOException("Unexpected end of data");
 			}

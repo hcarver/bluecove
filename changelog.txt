@@ -1,6 +1,12 @@
 @version $Id$
 
-* 2.0.2 to be released 2007-10-??
+* 2.0.2 to be released 2007-12-??
+
+    2007-11-16
+    * Fixed Service Attributes STRING to be UTF8
+
+    2007-11-05
+    * Started OS X development base on Eric Wagner code and with consultation by Bea Lam
 
     2007-10-24
     * OBEX read timeout. Throws InterruptedIOException when Connector.open(,,true) is used

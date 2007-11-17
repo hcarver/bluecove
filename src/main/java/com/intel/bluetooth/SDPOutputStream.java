@@ -28,9 +28,9 @@ import javax.bluetooth.DataElement;
 import javax.bluetooth.UUID;
 
 class SDPOutputStream extends OutputStream {
-	
+
 	OutputStream dst;
-	
+
 	public SDPOutputStream(OutputStream out) {
 		this.dst = out;
 	}
@@ -38,7 +38,7 @@ class SDPOutputStream extends OutputStream {
 	public void write(int oneByte) throws IOException {
 		this.dst.write(oneByte);
 	}
-	
+
 	private void writeLong(long l, int size) throws IOException {
 		for (int i = 0; i < size; i++) {
 			write((int) (l >> (size - 1 << 3)));
@@ -57,32 +57,40 @@ class SDPOutputStream extends OutputStream {
 		case DataElement.NULL:
 			return 1;
 
-			
 		case DataElement.BOOL:
 		case DataElement.U_INT_1:
 		case DataElement.INT_1:
 			return 2;
-		
+
 		case DataElement.U_INT_2:
 		case DataElement.INT_2:
 			return 3;
-		
+
 		case DataElement.U_INT_4:
 		case DataElement.INT_4:
 			return 5;
-		
+
 		case DataElement.U_INT_8:
 		case DataElement.INT_8:
 			return 9;
-		
+
 		case DataElement.U_INT_16:
 		case DataElement.INT_16:
 		case DataElement.UUID:
 			return 17;
 
-		case DataElement.STRING:
+		case DataElement.STRING: {
+			byte[] b = Utils.getUTF8Bytes((String) d.getValue());
+
+			if (b.length < 0x100)
+				return b.length + 2;
+			else if (b.length < 0x10000)
+				return b.length + 3;
+			else
+				return b.length + 5;
+		}
 		case DataElement.URL: {
-			byte[] b = ((String) d.getValue()).getBytes();
+			byte[] b = Utils.getASCIIBytes((String) d.getValue());
 
 			if (b.length < 0x100)
 				return b.length + 2;
@@ -158,11 +166,11 @@ class SDPOutputStream extends OutputStream {
 
 		case DataElement.UUID:
 			write(24 | 4);
-			writeBytes(Utils.UUIDToByteArray((UUID)d.getValue()));
+			writeBytes(Utils.UUIDToByteArray((UUID) d.getValue()));
 			break;
 
 		case DataElement.STRING: {
-			byte[] b = ((String) d.getValue()).getBytes();
+			byte[] b = Utils.getUTF8Bytes((String) d.getValue());
 
 			if (b.length < 0x100) {
 				write(32 | 5);
@@ -204,7 +212,7 @@ class SDPOutputStream extends OutputStream {
 			break;
 
 		case DataElement.URL: {
-			byte[] b = ((String) d.getValue()).getBytes();
+			byte[] b = Utils.getASCIIBytes((String) d.getValue());
 
 			if (b.length < 0x100) {
 				write(64 | 5);

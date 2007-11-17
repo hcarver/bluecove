@@ -22,6 +22,7 @@ package com.intel.bluetooth;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
 import javax.bluetooth.ServiceRecord;
@@ -29,20 +30,20 @@ import javax.bluetooth.UUID;
 
 /**
  * Conversion and JVM compatibility functions.
- *  
+ * 
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- *   
+ * 
  * @author vlads
  */
 public abstract class Utils {
 
 	private static final String blueCoveImplPackage = getPackage(BlueCoveImpl.class.getName());
-	
+
 	private Utils() {
-		
+
 	}
-	
+
 	private static String getPackage(String className) {
 		int pStart = className.lastIndexOf('.');
 		if (pStart == -1) {
@@ -51,22 +52,22 @@ public abstract class Utils {
 			return className.substring(0, pStart);
 		}
 	}
-	
+
 	public static byte[] UUIDToByteArray(String uuidStringValue) {
 		byte[] uuidValue = new byte[16];
-		if(uuidStringValue.indexOf('-') != -1) {
-            throw new NumberFormatException("The '-' character is not allowed in UUID: " + uuidStringValue);
+		if (uuidStringValue.indexOf('-') != -1) {
+			throw new NumberFormatException("The '-' character is not allowed in UUID: " + uuidStringValue);
 		}
 		for (int i = 0; i < 16; i++) {
 			uuidValue[i] = (byte) Integer.parseInt(uuidStringValue.substring(i * 2, i * 2 + 2), 16);
 		}
 		return uuidValue;
 	}
-	
+
 	static byte[] UUIDToByteArray(final UUID uuid) {
 		return UUIDToByteArray(uuid.toString());
 	}
-	
+
 	public static String UUIDByteArrayToString(byte[] uuidValue) {
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < uuidValue.length; i++) {
@@ -75,7 +76,7 @@ public abstract class Utils {
 		}
 		return buf.toString();
 	}
-	
+
 	static int UUIDTo16Bit(UUID uuid) {
 		if (uuid == null) {
 			return -1;
@@ -88,12 +89,12 @@ public abstract class Utils {
 		}
 		return -1;
 	}
-	
+
 	static boolean is16Bit(UUID uuid) {
 		return (UUIDTo16Bit(uuid) != -1);
 	}
-	
-	static int securityOpt(boolean authenticate,	boolean encrypt) {
+
+	static int securityOpt(boolean authenticate, boolean encrypt) {
 		int security = ServiceRecord.NOAUTHENTICATE_NOENCRYPT;
 		if (authenticate) {
 			if (encrypt) {
@@ -106,19 +107,19 @@ public abstract class Utils {
 		}
 		return security;
 	}
-	
+
 	static boolean isStringSet(String str) {
-        return ((str != null) && (str.length() > 0));
+		return ((str != null) && (str.length() > 0));
 	}
-	
-	static String loadString(InputStream inputstream) {	
+
+	static String loadString(InputStream inputstream) {
 		if (inputstream == null) {
 			return null;
 		}
 		try {
 			byte[] buf = new byte[256];
 			int len = inputstream.read(buf);
-			return new String(buf,0, len);
+			return new String(buf, 0, len);
 		} catch (IOException e) {
 			return null;
 		} finally {
@@ -128,7 +129,7 @@ public abstract class Utils {
 			}
 		}
 	}
-	
+
 	static String getResourceProperty(Class owner, String resourceName) {
 		try {
 			String value = loadString(owner.getResourceAsStream("/" + resourceName));
@@ -143,9 +144,11 @@ public abstract class Utils {
 			return null;
 		}
 	}
-	
+
 	/**
-	 * Modifying the returned Object will not change the internal representation of the object.
+	 * Modifying the returned Object will not change the internal representation
+	 * of the object.
+	 * 
 	 * @param value
 	 * @return a clone of the array
 	 */
@@ -158,7 +161,47 @@ public abstract class Utils {
 		System.arraycopy(value, 0, bClone, 0, length);
 		return bClone;
 	}
-	
+
+	static String newStringUTF8(byte bytes[]) {
+		try {
+			return new String(bytes, "UTF-8");
+		} catch (IllegalArgumentException e) {
+			return new String(bytes);
+		} catch (UnsupportedEncodingException e) {
+			return new String(bytes);
+		}
+	}
+
+	static byte[] getUTF8Bytes(String str) {
+		try {
+			return str.getBytes("UTF-8");
+		} catch (IllegalArgumentException e) {
+			return str.getBytes();
+		} catch (UnsupportedEncodingException e) {
+			return str.getBytes();
+		}
+	}
+
+	static String newStringASCII(byte bytes[]) {
+		try {
+			return new String(bytes, "US-ASCII");
+		} catch (IllegalArgumentException e) {
+			return new String(bytes);
+		} catch (UnsupportedEncodingException e) {
+			return new String(bytes);
+		}
+	}
+
+	static byte[] getASCIIBytes(String str) {
+		try {
+			return str.getBytes("US-ASCII");
+		} catch (IllegalArgumentException e) {
+			return str.getBytes();
+		} catch (UnsupportedEncodingException e) {
+			return str.getBytes();
+		}
+	}
+
 	/**
 	 * J2ME/J9 compatibility instead of Vector.toArray
 	 * 
@@ -167,16 +210,16 @@ public abstract class Utils {
 		vector.copyInto(anArray);
 		return anArray;
 	}
-	
+
 	/**
 	 * J2ME/J9 compatibility instead of Long.toHexString
 	 * 
 	 */
 	public static String toHexString(long l) {
 		StringBuffer buf = new StringBuffer();
-		String lo = Integer.toHexString((int)l);
+		String lo = Integer.toHexString((int) l);
 		if (l > 0xffffffffl) {
-			String hi = Integer.toHexString((int)(l >> 32)); 
+			String hi = Integer.toHexString((int) (l >> 32));
 			buf.append(hi);
 			for (int i = lo.length(); i < 8; i++) {
 				buf.append('0');
@@ -185,25 +228,25 @@ public abstract class Utils {
 		buf.append(lo);
 		return buf.toString();
 	}
-	
+
 	static void j2meUsagePatternDellay() {
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 		}
 	}
-	
+
 	static class TimerThread extends Thread {
-		
-		long delay; 
-		
+
+		long delay;
+
 		Runnable run;
-		
+
 		public TimerThread(long delay, Runnable run) {
 			this.delay = delay;
 			this.run = run;
 		}
-		
+
 		public void run() {
 			try {
 				Thread.sleep(delay);
@@ -213,11 +256,15 @@ public abstract class Utils {
 		}
 
 	}
+
 	/**
-	 * Java 1.1 compatible. Schedules the specified task for execution after the specified delay.
+	 * Java 1.1 compatible. Schedules the specified task for execution after the
+	 * specified delay.
 	 * 
-	 * @param delay delay in milliseconds before task is to be executed.
-	 * @param run task to be scheduled.
+	 * @param delay
+	 *            delay in milliseconds before task is to be executed.
+	 * @param run
+	 *            task to be scheduled.
 	 */
 	static TimerThread schedule(final long delay, final Runnable run) {
 		TimerThread t = new TimerThread(delay, run);
@@ -225,7 +272,7 @@ public abstract class Utils {
 		t.start();
 		return t;
 	}
-	
+
 	public static void isLegalAPICall(Vector fqcnSet) throws Error {
 		UtilsJavaSE.StackTraceLocation ste = UtilsJavaSE.getLocation(fqcnSet);
 		if (ste != null) {
