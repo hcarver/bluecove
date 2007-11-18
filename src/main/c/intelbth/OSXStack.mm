@@ -90,7 +90,6 @@ CFRunLoopRef			mainRunLoop;
 CFRunLoopSourceRef		btOperationSource;
 
 typedef struct BTOperationParams {
-	pthread_cond_t callComplete;
 	Runnable* runnable;
 };
 
@@ -98,6 +97,7 @@ void *oneNativeThreadMain(void *initializeCond);
 
 void performBTOperationCallBack(void *info);
 pthread_mutex_t	btOperationInProgress;
+pthread_cond_t synchronousBTOperationCallComplete;
 
 JavaVM *s_vm;
 
@@ -140,6 +140,7 @@ void *oneNativeThreadMain(void *initializeCond) {
     mainRunLoop = CFRunLoopGetCurrent();
 
     pthread_mutex_init(&btOperationInProgress, NULL);
+    pthread_cond_init(&synchronousBTOperationCallComplete, NULL);
 
     // create event sources, i.e. requests from the java VM
     CFRunLoopSourceContext context = {0};
@@ -158,6 +159,7 @@ void *oneNativeThreadMain(void *initializeCond) {
 	CFRunLoopRun();
 	// should only reach this point when getting unloaded
 	pthread_mutex_destroy(&btOperationInProgress);
+	pthread_cond_destroy(&synchronousBTOperationCallComplete);
 	[autoreleasepool release];
 	return NULL;
 }
@@ -173,27 +175,24 @@ void performBTOperationCallBack(void *info) {
             ndebug(" finished BTOperation %s", params->runnable->name);
         }
     }
-    pthread_cond_signal(&(params->callComplete));
+    pthread_cond_signal(&synchronousBTOperationCallComplete);
 }
 
 void synchronousBTOperation(Runnable* runnable) {
 
-	CFRunLoopSourceContext	context={0};
+    pthread_mutex_lock(&btOperationInProgress);
 
+	CFRunLoopSourceContext	context={0};
 	CFRunLoopSourceGetContext(btOperationSource, &context);
 	BTOperationParams* params = (BTOperationParams*)context.info;
 	params->runnable = runnable;
-
-    pthread_cond_init(&(params->callComplete), NULL);
-	pthread_mutex_lock(&btOperationInProgress);
 
     ndebug("invoke    BTOperation %s", params->runnable->name);
 	CFRunLoopSourceSignal(btOperationSource);
 	CFRunLoopWakeUp(mainRunLoop);
 
-	pthread_cond_wait(&(params->callComplete), &btOperationInProgress);
+	pthread_cond_wait(&synchronousBTOperationCallComplete, &btOperationInProgress);
 	pthread_mutex_unlock(&btOperationInProgress);
-	pthread_cond_destroy(&params->callComplete);
 	ndebug("return    BTOperation %s", params->runnable->name);
 }
 
