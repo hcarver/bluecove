@@ -1,7 +1,7 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2004 Intel Corporation
- * 
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth;
 
 import java.io.ByteArrayOutputStream;
@@ -37,7 +37,7 @@ import com.intel.bluetooth.BluetoothConsts.DeviceClassConsts;
 class ServiceRecordImpl implements ServiceRecord {
 
 	private BluetoothStack bluetoothStack;
-	
+
 	private RemoteDevice device;
 
 	private long handle;
@@ -45,11 +45,11 @@ class ServiceRecordImpl implements ServiceRecord {
 	Hashtable attributes;
 
 	protected boolean attributeUpdated;
-	
+
 	ServiceRecordImpl(BluetoothStack bluetoothStack, RemoteDevice device, long handle) {
-		
+
 		this.bluetoothStack = bluetoothStack;
-		
+
 		this.device = device;
 
 		this.handle = handle;
@@ -184,11 +184,11 @@ class ServiceRecordImpl implements ServiceRecord {
 				throw new IllegalArgumentException();
 			}
 		}
-		
+
 		/*
 		 * copy and sort attrIDs (required by MS Bluetooth and for check for duplicates)
 		 */
-		
+
 		int[] sortIDs = new int[attrIDs.length];
 		System.arraycopy(attrIDs, 0, sortIDs, 0, attrIDs.length);
 		for (int i = 0; i < sortIDs.length; i++) {
@@ -207,9 +207,9 @@ class ServiceRecordImpl implements ServiceRecord {
 			if (sortIDs[i] == sortIDs[i + 1]) {
 				throw new IllegalArgumentException();
 			}
-			DebugLog.debug("query for ", sortIDs[i]);
+			DebugLog.debug0x("query for ", sortIDs[i]);
 		}
-		DebugLog.debug("query for ", sortIDs[sortIDs.length - 1]);
+		DebugLog.debug0x("query for ", sortIDs[sortIDs.length - 1]);
 
 		return this.bluetoothStack.populateServicesRecordAttributeValues(this, sortIDs);
 	}
@@ -227,7 +227,7 @@ class ServiceRecordImpl implements ServiceRecord {
 	 * ServiceRecord returned from LocalDevice.getRecord(), it will return the
 	 * connection string that a remote device will use to connect to this
 	 * service.
-	 * 
+	 *
 	 * Parameters: requiredSecurity - determines whether authentication or
 	 * encryption are required for a connection mustBeMaster - true indicates
 	 * that this device must play the role of master in connections to this
@@ -254,11 +254,11 @@ class ServiceRecordImpl implements ServiceRecord {
 		 * get RFCOMM Channel
 		 * ProtocolDescriptorList is DATSEQ of DATSEQ of UUID and optional parameters
 		 */
-		
+
 		boolean isL2CAP = false;
 		boolean isRFCOMM = false;
 		boolean isOBEX = false;
-		
+
 		for (Enumeration protocolsSeqEnum = (Enumeration) protocolDescriptor.getValue(); protocolsSeqEnum.hasMoreElements();) {
 			DataElement elementSeq = (DataElement) protocolsSeqEnum.nextElement();
 
@@ -288,7 +288,7 @@ class ServiceRecordImpl implements ServiceRecord {
 						case DataElement.INT_4:
 						case DataElement.INT_8:
 							long val = protocolPSMElement.getLong();
-							if ((val >= BluetoothConsts.RFCOMM_CHANNEL_MIN) && (val <= BluetoothConsts.RFCOMM_CHANNEL_MAX)) { 
+							if ((val >= BluetoothConsts.RFCOMM_CHANNEL_MIN) && (val <= BluetoothConsts.RFCOMM_CHANNEL_MAX)) {
 								commChannel = (int) val;
 								isRFCOMM = true;
 								isL2CAP = false;
@@ -307,7 +307,7 @@ class ServiceRecordImpl implements ServiceRecord {
 						case DataElement.INT_8:
 							long pcm = protocolPSMElement.getLong();
 							if ((pcm >= BluetoothConsts.L2CAP_PSM_MIN) && (pcm <= BluetoothConsts.L2CAP_PSM_MAX)) {
-								commChannel = (int)pcm; 
+								commChannel = (int)pcm;
 								isL2CAP = true;
 							}
 							break;
@@ -316,7 +316,7 @@ class ServiceRecordImpl implements ServiceRecord {
 				}
 			}
 		}
-		
+
 		if (commChannel == -1) {
 			return null;
 		}
@@ -335,7 +335,7 @@ class ServiceRecordImpl implements ServiceRecord {
 			return null;
 		}
 		buf.append("://");
-		
+
 		if (device == null) {
 			try {
 				buf.append(LocalDevice.getLocalDevice().getBluetoothAddress());
@@ -379,9 +379,9 @@ class ServiceRecordImpl implements ServiceRecord {
 
 		return buf.toString();
 	}
-	
+
 	int getChannel(UUID protocolUUID) {
-		
+
 		int channel = -1;
 
 		DataElement protocolDescriptor = getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
@@ -393,7 +393,7 @@ class ServiceRecordImpl implements ServiceRecord {
 		 * get RFCOMM Channel or L2CAP PSM
 		 * ProtocolDescriptorList is DATSEQ of DATSEQ of UUID and optional parameters
 		 */
-		
+
 		for (Enumeration protocolsSeqEnum = (Enumeration) protocolDescriptor.getValue(); protocolsSeqEnum.hasMoreElements();) {
 			DataElement elementSeq = (DataElement) protocolsSeqEnum.nextElement();
 
@@ -427,7 +427,7 @@ class ServiceRecordImpl implements ServiceRecord {
 		}
 		return channel;
 	}
-	
+
 	/*
 	 * Used by a server application to indicate the major service class bits
 	 * that should be activated in the server's DeviceClass when this
@@ -449,19 +449,19 @@ class ServiceRecordImpl implements ServiceRecord {
 	 * calling getDeviceClass() on the LocalDevice object. Likewise, a call to
 	 * LocalDevice.updateRecord() will cause the major service class bits to be
 	 * OR'ed with the current settings and updated.
-	 * 
+	 *
 	 * The documentation for DeviceClass gives examples of the integers that
 	 * describe each of the major service classes and provides a URL for the
 	 * complete list. These integers can be used individually or OR'ed together
 	 * to describe the appropriate value for classes.
-	 * 
+	 *
 	 * Later, when this ServiceRecord is removed from the SDDB, the
 	 * implementation will automatically deactivate the device bits that were
 	 * activated as a result of the call to setDeviceServiceClasses. The only
 	 * exception to this occurs if there is another ServiceRecord that is in the
 	 * SDDB and setDeviceServiceClasses has been sent to that other
 	 * ServiceRecord to request that some of the same bits be activated.
-	 * 
+	 *
 	 * Parameters: classes - an integer whose binary representation indicates
 	 * the major service class bits that should be activated Throws:
 	 * IllegalArgumentException - if classes is not an OR of one or more of the
@@ -483,7 +483,7 @@ class ServiceRecordImpl implements ServiceRecord {
 		if ((classes & (DeviceClassConsts.SERVICE_MASK)) != 0) {
 			throw new IllegalArgumentException();
 		}
-	
+
 		// TODO not yet implemented
 		throw new NotImplementedError();
 	}
@@ -503,10 +503,10 @@ class ServiceRecordImpl implements ServiceRecord {
 	 * ServiceRecord to the SDDB for the first time, or a call must be made to
 	 * the updateRecord() method of LocalDevice to modify the version of this
 	 * ServiceRecord that is already in the SDDB.
-	 * 
+	 *
 	 * This method prevents the ServiceRecordHandle from being modified by
 	 * throwing an IllegalArgumentException.
-	 * 
+	 *
 	 * Parameters: attrID - the service attribute ID attrValue - the DataElement
 	 * which is the value of the service attribute Returns: true if the service
 	 * attribute was successfully added, removed, or modified; false if
@@ -546,7 +546,7 @@ class ServiceRecordImpl implements ServiceRecord {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Internal implemenation function
 	 */
@@ -558,7 +558,7 @@ class ServiceRecordImpl implements ServiceRecord {
 	}
 
 	public String toString() {
-		
+
 		StringBuffer buf = new StringBuffer("{\n");
 
 		for (Enumeration e = attributes.keys(); e.hasMoreElements();) {
@@ -602,12 +602,12 @@ class ServiceRecordImpl implements ServiceRecord {
 			//DebugLog.debug("Bogus ServiceClassIDList");
 			return false;
 		}
-		
+
 		Object value = attrDataElement.getValue();
 		if ((value == null) || (!(value instanceof Enumeration))) {
 			DebugLog.debug("Bogus Value in DATSEQ");
 			if (value != null) {
-				DebugLog.error("DATSEQ class " + value.getClass().getName());				
+				DebugLog.error("DATSEQ class " + value.getClass().getName());
 			}
 			return false;
 		}
@@ -622,10 +622,10 @@ class ServiceRecordImpl implements ServiceRecord {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	boolean hasProtocolClassUUID(UUID uuid) {
 		DataElement protocolDescriptor = getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
 		if ((protocolDescriptor == null) || (protocolDescriptor.getDataType() != DataElement.DATSEQ)) {
@@ -651,10 +651,10 @@ class ServiceRecordImpl implements ServiceRecord {
 		}
 		return false;
 	}
-	
+
 	DataElement clone(DataElement de) {
 		DataElement c = null;
-		
+
 		switch (de.getDataType()) {
 		case DataElement.U_INT_1:
 		case DataElement.U_INT_2:
@@ -686,15 +686,15 @@ class ServiceRecordImpl implements ServiceRecord {
 				c.addElement(clone(dataElement));
 			}
 		}
-		
+
 		return c;
 	}
-	
+
 	/**
 	 * Internal implemenation function
 	 */
 	void populateRFCOMMAttributes(long handle, int channel, UUID uuid, String name, boolean obex) {
-		
+
 		this.populateAttributeValue(BluetoothConsts.ServiceRecordHandle, new DataElement(DataElement.U_INT_4, handle));
 
 		/*
@@ -723,7 +723,7 @@ class ServiceRecordImpl implements ServiceRecord {
 		RFCOMMDescriptor.addElement(new DataElement(DataElement.UUID, BluetoothConsts.RFCOMM_PROTOCOL_UUID));
 		RFCOMMDescriptor.addElement(new DataElement(DataElement.U_INT_1, channel));
 		protocolDescriptorList.addElement(RFCOMMDescriptor);
-		
+
 		if (obex) {
 			DataElement OBEXDescriptor = new DataElement(DataElement.DATSEQ);
 			OBEXDescriptor.addElement(new DataElement(DataElement.UUID, BluetoothConsts.OBEX_PROTOCOL_UUID));
@@ -736,9 +736,9 @@ class ServiceRecordImpl implements ServiceRecord {
 			this.populateAttributeValue(BluetoothConsts.AttributeIDServiceName, new DataElement(DataElement.STRING, name));
 		}
 	}
-	
+
 	void populateL2CAPAttributes(int handle, int channel, UUID uuid, String name) {
-		
+
 		this.populateAttributeValue(BluetoothConsts.ServiceRecordHandle, new DataElement(DataElement.U_INT_4, handle));
 
 		/*

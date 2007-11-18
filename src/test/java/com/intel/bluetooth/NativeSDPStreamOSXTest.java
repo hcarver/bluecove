@@ -28,7 +28,7 @@ import javax.bluetooth.UUID;
 
 /**
  * @author vlads
- * 
+ *
  */
 public class NativeSDPStreamOSXTest extends NativeTestCase {
 
@@ -58,8 +58,7 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 			validateConversion(element, 0, type, 0, null);
 			break;
 		case DataElement.BOOL:
-			validateConversion(element, 0, type, 0, null);
-			validateConversion(element, 0, type, 1, null);
+			validateConversion(element, 0, type, element.getBoolean() ? 1 : 0, null);
 			break;
 		case DataElement.U_INT_1:
 		case DataElement.INT_1:
@@ -79,9 +78,12 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 			validateConversion(element, 0, type, 0, Utils.UUIDToByteArray((UUID) element.getValue()));
 			break;
 		case DataElement.STRING:
+		    byte[] bs = Utils.getUTF8Bytes((String) element.getValue());
+			validateConversion(element, 0, type, 0, bs);
+			break;
 		case DataElement.URL:
-			byte[] b = ((String) element.getValue()).getBytes();
-			validateConversion(element, 0, type, 0, b);
+			byte[] bu = Utils.getASCIIBytes((String) element.getValue());
+			validateConversion(element, 0, type, 0, bu);
 			break;
 		default:
 			throw new IllegalArgumentException();
@@ -156,6 +158,20 @@ public class NativeSDPStreamOSXTest extends NativeTestCase {
 		b.append("e");
 		validateConversion(new DataElement(DataElement.STRING, b.toString()));
 	}
+
+    public void testURL() throws IOException {
+		validateConversion(new DataElement(DataElement.URL, ""));
+		validateConversion(new DataElement(DataElement.URL, "12345"));
+		validateConversion(new DataElement(DataElement.URL, "http://blueCove/"));
+
+        StringBuffer b = new StringBuffer();
+		b.append("b");
+		for (int i = 0; i < 0x100; i++) {
+			b.append("Z");
+		}
+		b.append("e");
+		validateConversion(new DataElement(DataElement.URL, b.toString()));
+    }
 
 	public void testOtherAttributes() throws IOException {
 		validateConversion(new DataElement(true));

@@ -22,8 +22,9 @@
 #import "OSXStackSDPQuery.h"
 #include "com_intel_bluetooth_NativeTestInterfaces.h"
 
-#include <IOBluetooth/objc/IOBluetoothSDPDataElement.h>
-#include <IOBluetooth/objc/IOBluetoothSDPUUID.h>
+#import <IOBluetooth/objc/IOBluetoothSDPDataElement.h>
+#import <IOBluetooth/objc/IOBluetoothSDPUUID.h>
+#import <Foundation/Foundation.h>
 
 #define CPP_FILE "OSXStackTest.mm"
 
@@ -46,7 +47,6 @@ IOBluetoothSDPDataElementRef createTestDataElementSimple(jint type, jlong ldata,
     BluetoothSDPDataElementSizeDescriptor newSizeDescriptor;
     UInt32 newSize;
     NSObject* newValue;
-
     switch (type) {
     case DATA_ELEMENT_TYPE_U_INT_1:
         newType = kBluetoothSDPDataElementTypeUnsignedInt;
@@ -109,18 +109,52 @@ IOBluetoothSDPDataElementRef createTestDataElementSimple(jint type, jlong ldata,
         newValue = [NSData dataWithBytes:bytes length:16];
         break;
 
+    case DATA_ELEMENT_TYPE_NULL:
+        newType = kBluetoothSDPDataElementTypeNil;
+        newSizeDescriptor = 0;
+        newSize = 0;
+        newValue = NULL;
+        break;
+    case DATA_ELEMENT_TYPE_BOOL:
+        newType = kBluetoothSDPDataElementTypeBoolean;
+        newSizeDescriptor = 0;
+        newSize = 1;
+        newValue = [NSNumber numberWithInt:((int)ldata)];
+        break;
     case DATA_ELEMENT_TYPE_UUID:
         newType = kBluetoothSDPDataElementTypeUUID;
         newSizeDescriptor = 4;
         newSize = inBytesLen;
         newValue = [IOBluetoothSDPUUID uuidWithBytes:(const void *)bytes length:(unsigned)inBytesLen];
         break;
+    case DATA_ELEMENT_TYPE_STRING:
+        newType = kBluetoothSDPDataElementTypeString;
+        tdebug("createTestDataElementSimple string %i", inBytesLen);
+        newValue = [[NSString alloc] initWithBytes:(const void *)bytes length:(unsigned long)inBytesLen encoding:NSUTF8StringEncoding];
+        IOBluetoothSDPDataElement* ds = [IOBluetoothSDPDataElement withElementValue:newValue];
+        return [ds getSDPDataElementRef];
+    case DATA_ELEMENT_TYPE_URL:
+        newType = kBluetoothSDPDataElementTypeURL;
+        tdebug("createTestDataElementSimple URL %i", inBytesLen);
+        // UTF8 is just encoding for test interface.
+        NSString* newStrValue = [[NSString alloc] initWithBytes:(const void *)bytes length:(unsigned long)inBytesLen encoding:NSNonLossyASCIIStringEncoding];
+        newValue = newStrValue;
+        newSize = [newStrValue length];
+        if (newSize < 0x100) {
+		    newSizeDescriptor  = 5;
+		} else if (newSize < 0x10000) {
+		    newSizeDescriptor  = 6;
+		} else {
+		    newSizeDescriptor  = 7;
+		}
+		//newSize + 1;
+        break;
     default:
-            return NULL;
+        return NULL;
     }
-    [newValue retain];
+    //[newValue retain];
     IOBluetoothSDPDataElement* de = [IOBluetoothSDPDataElement withType:newType sizeDescriptor:newSizeDescriptor size:newSize value:newValue];
-    [de retain];
+    //[de retain];
     tdebug("createTestDataElementSimple %i %i %i", newType, newSizeDescriptor, newSize);
     return [de getSDPDataElementRef];
 }

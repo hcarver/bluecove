@@ -295,12 +295,12 @@ void DeviceInquiryStart::run() {
     }
     if (BUG_Inquiry_stop) {
         if (discoveryOneInstance == NULL) {
-            discoveryOneInstance = [OSXStackDiscovery new];
+            discoveryOneInstance = [[OSXStackDiscovery alloc] init];
             [discoveryOneInstance retain];
         }
         discovery = discoveryOneInstance;
     } else {
-        discovery = [OSXStackDiscovery new];
+        discovery = [[OSXStackDiscovery alloc] init];
     }
     ndebug("deviceInquiry %i startSearch", count);
     startStatus = [discovery startSearch: count];

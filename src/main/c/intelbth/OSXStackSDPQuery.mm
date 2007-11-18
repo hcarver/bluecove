@@ -331,23 +331,24 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
 		case kBluetoothSDPDataElementTypeString: {
 		        UInt8 type = isURL ? 0x40: 0x20;
 		        CFStringRef str = IOBluetoothSDPDataElementGetStringValue(dataElement);
-		        CFIndex length = CFStringGetLength(str);
-		        if (length < 0x100) {
+		        CFIndex strLength = CFStringGetLength(str);
+		        CFIndex maxBufLen = 4* sizeof(UInt8)*strLength;
+		        UInt8* buffer = (UInt8*)malloc(maxBufLen);
+		        CFIndex usedBufLen = 0;
+		         CFStringEncoding encoding = isURL?kCFStringEncodingASCII:kCFStringEncodingUTF8;
+		        CFStringGetBytes(str, CFRangeMake(0, strLength), encoding, '?', true, buffer, maxBufLen, &usedBufLen);
+		        if (usedBufLen < 0x100) {
 				    write(type | 5);
-				    writeLong(length, 1);
-			    } else if (length < 0x10000) {
+				    writeLong(usedBufLen, 1);
+			    } else if (usedBufLen < 0x10000) {
 				    write(type | 6);
-				    writeLong(length, 2);
+				    writeLong(usedBufLen, 2);
 			    } else {
 				    write(type | 7);
-				    writeLong(length, 4);
+				    writeLong(usedBufLen, 4);
 			    }
-
-			    UniChar* charBuf = (UniChar*)malloc(sizeof(UniChar)*length);
-			    CFStringGetCharacters(str, CFRangeMake(0, length), charBuf);
-		        CFRelease(str);
-		        write((UInt8*)charBuf, sizeof(UniChar)*length);
-		        free(charBuf);
+		        write(buffer, usedBufLen);
+		        free(buffer);
 		    }
             break;
         case kBluetoothSDPDataElementTypeDataElementSequence:
