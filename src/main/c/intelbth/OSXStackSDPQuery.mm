@@ -277,13 +277,18 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
             isUnsigned = true;
         case kBluetoothSDPDataElementTypeSignedInt: {
                 UInt8 type = isUnsigned ? 8: 16;
+                ndebug("processing number %i", type);
                 write(type | sizeDescriptor);
                 if (sizeDescriptor == 4) { /* 16 byte integer */
 				    CFDataRef bigData = IOBluetoothSDPDataElementGetDataValue(dataElement);
 				    const UInt8 *byteArray = CFDataGetBytePtr(bigData);
 				    write(byteArray, 16);
 				} else if (isUnsigned && (sizeDescriptor == 3)) { /* 8 byte unsigned integer array */
+				    //TODO This may be not right!!!!
 				    CFDataRef bigData = IOBluetoothSDPDataElementGetDataValue(dataElement);
+				    if (bigData == NULL) {
+				        ndebug("ERROR: Can't get array");
+				    }
 				    const UInt8 *byteArray = CFDataGetBytePtr(bigData);
 				    write(byteArray, 8);
 			    } else {
