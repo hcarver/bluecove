@@ -39,11 +39,11 @@
     * `LocalDevice.setDiscoverable(...)` not supported.
     * `ServiceRecord.setDeviceServiceClasses(..)` not supported.
     * `ServiceRecord` attributes of `DataElement` types URL are discovered as STRING
-    * `ServiceRecord` attributes of `DataElement` types U_INT_8, INT_8, INT_16 and UINT_16 are not properly discovered (Bug submitted to Support@broadcom)
     * The discovery database is cumulative. It contains the results of all previous discoveries of the application or any other applications that are running or that have run.
       So ServiceSearch *may* return service even when it is down.
     * L2CAP unable to send and receive empty L2CAP packet
 
+    * Fixed (since !BlueCove v2.0.2) `ServiceRecord` attributes of `DataElement` types U_INT_8, INT_8, INT_16 and UINT_16 are not properly discovered (Bug submitted to Support@broadcom)
 
 == Winsock (Microsoft) ==
 

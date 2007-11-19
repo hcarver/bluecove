@@ -33,217 +33,221 @@ import javax.bluetooth.UUID;
  */
 class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 
-	public static final boolean debug = false;
+    public static final boolean debug = false;
 
-	private InputStream source;
+    private InputStream source;
 
-	protected BluetoothStackWIDCOMMSDPInputStream(InputStream in) throws IOException {
-		this.source = in;
-		readVersionInfo();
-	}
+    protected BluetoothStackWIDCOMMSDPInputStream(InputStream in) throws IOException {
+        this.source = in;
+        readVersionInfo();
+    }
 
-	public int read() throws IOException {
-		return source.read();
-	}
+    public int read() throws IOException {
+        return source.read();
+    }
 
-	private long readLong(int size) throws IOException {
-		long result = 0;
-		for (int i = 0; i < size; i++) {
-			result += ((long) read()) << (8 * i);
-		}
-		return result;
-	}
+    private long readLong(int size) throws IOException {
+        long result = 0;
+        for (int i = 0; i < size; i++) {
+            result += ((long) read()) << (8 * i);
+        }
+        return result;
+    }
 
-	private long readLongDebug(int size) throws IOException {
-		long result = 0;
-		for (int i = 0; i < size; i++) {
-			int data = read();
-			if (debug) {
-				DebugLog.debug("readLong data[" + i + "]", data);
-			}
-			result += ((long) data) << (8 * i);
-		}
-		return result;
-	}
+    private long readLongDebug(int size) throws IOException {
+        long result = 0;
+        for (int i = 0; i < size; i++) {
+            int data = read();
+            if (debug) {
+                DebugLog.debug("readLong data[" + i + "]", data);
+            }
+            result += ((long) data) << (8 * i);
+        }
+        return result;
+    }
 
-	private int readInt() throws IOException {
-		return (int) readLong(4);
-	}
+    private int readInt() throws IOException {
+        return (int) readLong(4);
+    }
 
-	private byte[] readBytes(int size) throws IOException {
-		byte[] result = new byte[size];
-		for (int i = 0; i < size; i++) {
-			result[i] = (byte) read();
-		}
-		return result;
-	}
+    private byte[] readBytes(int size) throws IOException {
+        byte[] result = new byte[size];
+        for (int i = 0; i < size; i++) {
+            result[i] = (byte) read();
+        }
+        return result;
+    }
 
-	private String hexString(byte[] b) throws IOException {
-		StringBuffer buf = new StringBuffer();
-		for (int i = 0; i < b.length; i++) {
-			buf.append(Integer.toHexString(b[i] >> 4 & 0xf));
-			buf.append(Integer.toHexString(b[i] & 0xf));
-		}
-		return buf.toString();
-	}
+    static String hexString(byte[] b) {
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < b.length; i++) {
+            buf.append(Integer.toHexString(b[i] >> 4 & 0xf));
+            buf.append(Integer.toHexString(b[i] & 0xf));
+        }
+        return buf.toString();
+    }
 
-	static final int ATTR_TYPE_INT = 0; // Attribute value is an integer
+    static byte[] getUUIDHexBytes(UUID uuid) {
+        return Utils.UUIDToByteArray(uuid);
+    }
 
-	static final int ATTR_TYPE_TWO_COMP = 1; // Attribute value is an 2's
+    static final int ATTR_TYPE_INT = 0; // Attribute value is an integer
 
-	// complement integer
+    static final int ATTR_TYPE_TWO_COMP = 1; // Attribute value is an 2's
 
-	static final int ATTR_TYPE_UUID = 2; // Attribute value is a UUID
+    // complement integer
 
-	static final int ATTR_TYPE_BOOL = 3; // Attribute value is a boolean
+    static final int ATTR_TYPE_UUID = 2; // Attribute value is a UUID
 
-	static final int ATTR_TYPE_ARRAY = 4; // Attribute value is an array of
+    static final int ATTR_TYPE_BOOL = 3; // Attribute value is a boolean
 
-	// bytes
+    static final int ATTR_TYPE_ARRAY = 4; // Attribute value is an array of
 
-	static final int MAX_SEQ_ENTRIES = 20;
+    // bytes
 
-	static final int MAX_ATTR_LEN_OLD = 256;
+    static final int MAX_SEQ_ENTRIES = 20;
 
-	private int valueSize = 0;
+    static final int MAX_ATTR_LEN_OLD = 256;
 
-	private void readVersionInfo() throws IOException {
-		valueSize = readInt();
-	}
+    private int valueSize = 0;
 
-	public DataElement readElement() throws IOException {
+    private void readVersionInfo() throws IOException {
+        valueSize = readInt();
+    }
 
-		DataElement result = null;
-		DataElement mainSeq = null;
-		DataElement currentSeq = null;
-		int elements = readInt();
-		if (elements < 0 || elements > MAX_SEQ_ENTRIES) {
-			throw new IOException("Unexpected number of elements " + elements);
-		}
-		if (debug) {
-			DebugLog.debug("elements", elements);
-		}
-		for (int i = 0; i < elements; i++) {
-			if (debug) {
-				DebugLog.debug("element", i);
-			}
-			int type = readInt();
-			int length = readInt();
-			boolean start_of_seq = (readInt() != 0);
-			if (debug) {
-				DebugLog.debug("type", type);
-				DebugLog.debug("length", length);
-				DebugLog.debug("start_of_seq", start_of_seq);
-			}
-			if (length < 0 || valueSize < length) {
-				throw new IOException("Unexpected length " + length);
-			}
-			DataElement dataElement;
-			switch (type) {
-			case ATTR_TYPE_INT:
-				switch (length) {
-				case 1:
-					dataElement = new DataElement(DataElement.U_INT_1, readLong(1));
-					break;
-				case 2:
-					dataElement = new DataElement(DataElement.U_INT_2, readLong(2));
-					break;
-				case 4:
-					dataElement = new DataElement(DataElement.U_INT_4, readLong(4));
-					break;
-				case 8:
-					dataElement = new DataElement(DataElement.U_INT_8, readBytes(8));
-					break;
-				case 16:
-					dataElement = new DataElement(DataElement.U_INT_16, readBytes(16));
-					break;
-				default:
-					throw new IOException("Unknown U_INT length " + length);
-				}
-				break;
-			case ATTR_TYPE_TWO_COMP:
-				switch (length) {
-				case 1:
-					dataElement = new DataElement(DataElement.INT_1, (byte) readLong(1));
-					break;
-				case 2:
-					dataElement = new DataElement(DataElement.INT_2, (short) readLong(2));
-					break;
-				case 4:
-					dataElement = new DataElement(DataElement.INT_4, (int) readLong(4));
-					break;
-				case 8:
-					dataElement = new DataElement(DataElement.INT_8, readLongDebug(8));
-					break;
-				case 16:
-					dataElement = new DataElement(DataElement.INT_16, readBytes(16));
-					break;
-				default:
-					throw new IOException("Unknown INT length " + length);
-				}
-				break;
-			case ATTR_TYPE_UUID:
-				UUID uuid = null;
-				switch (length) {
-				case 2:
-					uuid = new UUID(readLong(2));
-					break;
-				case 4:
-					uuid = new UUID(readLong(4));
-					break;
-				case 16:
-					uuid = new UUID(hexString(readBytes(16)), false);
-					break;
-				default:
-					throw new IOException("Unknown UUID length " + length);
-				}
-				dataElement = new DataElement(DataElement.UUID, uuid);
-				break;
-			case ATTR_TYPE_BOOL:
-				dataElement = new DataElement(readLong(length) != 0);
-				break;
-			case ATTR_TYPE_ARRAY:
-				dataElement = new DataElement(DataElement.STRING, Utils.newStringUTF8(readBytes(length)));
-				break;
-			default:
-				throw new IOException("Unknown data type " + type);
-			}
+    public DataElement readElement() throws IOException {
 
-			if (debug) {
-				DebugLog.debug("dataElement " + dataElement);
-			}
+        DataElement result = null;
+        DataElement mainSeq = null;
+        DataElement currentSeq = null;
+        int elements = readInt();
+        if (elements < 0 || elements > MAX_SEQ_ENTRIES) {
+            throw new IOException("Unexpected number of elements " + elements);
+        }
+        if (debug) {
+            DebugLog.debug("elements", elements);
+        }
+        for (int i = 0; i < elements; i++) {
+            if (debug) {
+                DebugLog.debug("element", i);
+            }
+            int type = readInt();
+            int length = readInt();
+            boolean start_of_seq = (readInt() != 0);
+            if (debug) {
+                DebugLog.debug("type", type);
+                DebugLog.debug("length", length);
+                DebugLog.debug("start_of_seq", start_of_seq);
+            }
+            if (length < 0 || valueSize < length) {
+                throw new IOException("Unexpected length " + length);
+            }
+            DataElement dataElement;
+            switch (type) {
+            case ATTR_TYPE_INT:
+                switch (length) {
+                case 1:
+                    dataElement = new DataElement(DataElement.U_INT_1, readLong(1));
+                    break;
+                case 2:
+                    dataElement = new DataElement(DataElement.U_INT_2, readLong(2));
+                    break;
+                case 4:
+                    dataElement = new DataElement(DataElement.U_INT_4, readLong(4));
+                    break;
+                case 8:
+                    dataElement = new DataElement(DataElement.U_INT_8, readBytes(8));
+                    break;
+                case 16:
+                    dataElement = new DataElement(DataElement.U_INT_16, readBytes(16));
+                    break;
+                default:
+                    throw new IOException("Unknown U_INT length " + length);
+                }
+                break;
+            case ATTR_TYPE_TWO_COMP:
+                switch (length) {
+                case 1:
+                    dataElement = new DataElement(DataElement.INT_1, (byte) readLong(1));
+                    break;
+                case 2:
+                    dataElement = new DataElement(DataElement.INT_2, (short) readLong(2));
+                    break;
+                case 4:
+                    dataElement = new DataElement(DataElement.INT_4, (int) readLong(4));
+                    break;
+                case 8:
+                    dataElement = new DataElement(DataElement.INT_8, readLongDebug(8));
+                    break;
+                case 16:
+                    dataElement = new DataElement(DataElement.INT_16, readBytes(16));
+                    break;
+                default:
+                    throw new IOException("Unknown INT length " + length);
+                }
+                break;
+            case ATTR_TYPE_UUID:
+                UUID uuid = null;
+                switch (length) {
+                case 2:
+                    uuid = new UUID(readLong(2));
+                    break;
+                case 4:
+                    uuid = new UUID(readLong(4));
+                    break;
+                case 16:
+                    uuid = new UUID(hexString(readBytes(16)), false);
+                    break;
+                default:
+                    throw new IOException("Unknown UUID length " + length);
+                }
+                dataElement = new DataElement(DataElement.UUID, uuid);
+                break;
+            case ATTR_TYPE_BOOL:
+                dataElement = new DataElement(readLong(length) != 0);
+                break;
+            case ATTR_TYPE_ARRAY:
+                dataElement = new DataElement(DataElement.STRING, Utils.newStringUTF8(readBytes(length)));
+                break;
+            default:
+                throw new IOException("Unknown data type " + type);
+            }
 
-			if (start_of_seq) {
-				DataElement newSeq = new DataElement(DataElement.DATSEQ);
-				newSeq.addElement(dataElement);
-				dataElement = newSeq;
+            if (debug) {
+                DebugLog.debug("dataElement " + dataElement);
+            }
 
-				if (i != 0) {
-					// Second or other sequence
-					if (mainSeq != null) {
-						mainSeq.addElement(newSeq);
-					} else {
-						// move first sequence to new main sequence
-						mainSeq = new DataElement(DataElement.DATSEQ);
-						result = mainSeq;
-						mainSeq.addElement(currentSeq);
-						mainSeq.addElement(newSeq);
-					}
-				}
-				currentSeq = newSeq;
-			} else if (currentSeq != null) {
-				currentSeq.addElement(dataElement);
-			}
+            if (start_of_seq) {
+                DataElement newSeq = new DataElement(DataElement.DATSEQ);
+                newSeq.addElement(dataElement);
+                dataElement = newSeq;
 
-			if (result == null) {
-				result = dataElement;
-			}
+                if (i != 0) {
+                    // Second or other sequence
+                    if (mainSeq != null) {
+                        mainSeq.addElement(newSeq);
+                    } else {
+                        // move first sequence to new main sequence
+                        mainSeq = new DataElement(DataElement.DATSEQ);
+                        result = mainSeq;
+                        mainSeq.addElement(currentSeq);
+                        mainSeq.addElement(newSeq);
+                    }
+                }
+                currentSeq = newSeq;
+            } else if (currentSeq != null) {
+                currentSeq.addElement(dataElement);
+            }
 
-			if ((i < (elements - 1)) && (skip(valueSize - length) != (valueSize - length))) {
-				throw new IOException("Unexpected end of data");
-			}
-		}
-		return result;
+            if (result == null) {
+                result = dataElement;
+            }
 
-	}
+            if ((i < (elements - 1)) && (skip(valueSize - length) != (valueSize - length))) {
+                throw new IOException("Unexpected end of data");
+            }
+        }
+        return result;
+
+    }
 }
