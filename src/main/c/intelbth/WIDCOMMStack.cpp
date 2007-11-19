@@ -1606,6 +1606,10 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 		return 0;
 	}
 
+	#ifdef BTW_SDK_6_0_1_300
+	rf->sdpService->CommitRecord();
+	#endif
+
 	if (rf->isClientOpen) {
 		debug("server waits for client prev connection to close");
 		while ((stack != NULL) && (rf->isClientOpen) && (rf->sdpService != NULL)) {
@@ -1717,27 +1721,35 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
 		return;
 	}
 
-	UINT8 arrLen = 0;
-	UINT8 *p_val = new UINT8[arrLen + 1];
+    #define ATTR_LEN_MAX 497
+	UINT32 arrLen = 0;
+	UINT8 *p_val;
+	UINT8 val[ATTR_LEN_MAX];
+
+	p_val = val;
+	// = new UINT8[2 * arrLen + 1];
 
 	if (value != NULL) {
         jbyte *inBytes = env->GetByteArrayElements(value, 0);
 	    arrLen = (UINT8)env->GetArrayLength(value);
 
-    	for (UINT8 i = 0; i < arrLen; i++ ) {
+    	for (UINT8 i = 0; ((i < arrLen) && (i < ATTR_LEN_MAX)); i++ ) {
 	    	p_val[i] = (UINT8)inBytes[i];
 	    }
 	    env->ReleaseByteArrayElements(value, inBytes, 0);
 	}
 	p_val[arrLen] = '\0';
 
+	//if (attrType == TEXT_STR_DESC_TYPE) {
+	//    arrLen ++;
+	//}
+
+    debug4("AddAttribute %i type=%i len=%i [%s]", attrID, attrType, arrLen, p_val);
 	if (sdpService->AddAttribute((UINT16)attrID, (UINT8)attrType, arrLen, p_val) != SDP_OK) {
 		throwExceptionExt(env, "javax/bluetooth/ServiceRegistrationException", "Failed to AddAttribute %i", attrID);
-	} else {
-		debug4("attr set %i type=%i len=%i [%s]", attrID, attrType, arrLen, p_val);
 	}
 
-	delete p_val;
+	//delete p_val;
 
 }
 

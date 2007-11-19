@@ -579,19 +579,12 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 				sdpServiceAddAttribute(handle, handleType, id, NULL_DESC_TYPE, null);
 				break;
 			case DataElement.BOOL:
-				// TODO support DataElement.BOOL
-				/*
-				 * sdpServiceAddAttribute(handle, handleType, id,
-				 * BOOLEAN_DESC_TYPE, new byte[] { (byte) (d.getBoolean() ? 1 :
-				 * 0)});
-				 */
-				// sdpServiceAddAttribute(handle, handleType, id,
-				// BOOLEAN_DESC_TYPE, Utils
-				// .getASCIIBytes(d.getBoolean() ? "TRUE" : "FALSE"));
+				sdpServiceAddAttribute(handle, handleType, id, BOOLEAN_DESC_TYPE,
+						new byte[] { (byte) (d.getBoolean() ? 1 : 0) });
 				break;
 			case DataElement.UUID:
-				sdpServiceAddAttribute(handle, handleType, id, UUID_DESC_TYPE, Utils
-						.getASCIIBytes(((UUID) d.getValue()).toString()));
+				sdpServiceAddAttribute(handle, handleType, id, UUID_DESC_TYPE, Utils.UUIDToByteArray((UUID) d
+						.getValue()));
 				break;
 			case DataElement.DATSEQ:
 			case DataElement.DATALT:

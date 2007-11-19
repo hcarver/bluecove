@@ -109,7 +109,7 @@ BSC32_SBRS= \
 <<
 
 LINK32=link.exe
-LINK32_FLAGS=ws2_32.lib version.lib advapi32.lib user32.lib winspool.lib ole32.lib /nologo /dll /incremental:no /pdb:"$(OUTDIR)\bluecove.pdb" /machine:I386 /out:"..\..\resources\bluecove.dll" /implib:"$(OUTDIR)\bluecove.lib" /libpath:"$(ProgramFiles)\Widcomm\BTW DK\SDK\Release" /libpath:"$(ProgramFiles)\IVT Corporation\BlueSoleil\api" /libpath:"$(ProgramFiles)\Toshiba\Bluetooth Toshiba Stack\SDK\lib"
+LINK32_FLAGS=ws2_32.lib version.lib advapi32.lib user32.lib winspool.lib ole32.lib oleaut32.lib /nologo /dll /incremental:no /pdb:"$(OUTDIR)\bluecove.pdb" /machine:I386 /out:"..\..\resources\bluecove.dll" /implib:"$(OUTDIR)\bluecove.lib" /libpath:"$(ProgramFiles)\Widcomm\BTW DK\SDK\Release" /libpath:"$(ProgramFiles)\IVT Corporation\BlueSoleil\api" /libpath:"$(ProgramFiles)\Toshiba\Bluetooth Toshiba Stack\SDK\lib"
 LINK32_OBJS= \
 	"$(INTDIR)\BlueSoleilStack.obj" \
 	"$(INTDIR)\common.obj" \
