@@ -2,6 +2,9 @@
 
 * 2.0.2 to be released 2007-12-??
 
+    2007-11-19
+    * WIDCOMM use BTW-6_1_0_1501-SDK, Fixed Service Attributes BOOLEAN, U_INT_8, INT_8, INT_16 and UINT_16
+
     2007-11-16
     * Fixed Service Attributes STRING to be UTF8
 
