@@ -91,11 +91,12 @@ IOBluetoothSDPDataElementRef createTestDataElementSimple(jint type, jlong ldata,
         newValue = [NSNumber numberWithLongLong:ldata];
         break;
     case DATA_ELEMENT_TYPE_U_INT_8:
-        //TODO This may be not right!!!!
         newType = kBluetoothSDPDataElementTypeUnsignedInt;
         newSizeDescriptor = 3;
         newSize = 8;
-        newValue = [NSData dataWithBytes:bytes length:8];
+        unsigned long long lvalue;
+        mempcy(&long, bytes, 8);
+        newValue = [NSNumber numberWithUnsignedLongLong:lvalue];
         break;
     case DATA_ELEMENT_TYPE_U_INT_16:
         newType = kBluetoothSDPDataElementTypeUnsignedInt;

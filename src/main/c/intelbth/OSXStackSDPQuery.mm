@@ -283,14 +283,6 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
 				    CFDataRef bigData = IOBluetoothSDPDataElementGetDataValue(dataElement);
 				    const UInt8 *byteArray = CFDataGetBytePtr(bigData);
 				    write(byteArray, 16);
-				} else if (isUnsigned && (sizeDescriptor == 3)) { /* 8 byte unsigned integer array */
-				    //TODO This may be not right!!!!
-				    CFDataRef bigData = IOBluetoothSDPDataElementGetDataValue(dataElement);
-				    if (bigData == NULL) {
-				        ndebug("ERROR: Can't get array");
-				    }
-				    const UInt8 *byteArray = CFDataGetBytePtr(bigData);
-				    write(byteArray, 8);
 			    } else {
 			        int length;
                     switch (sizeDescriptor) {
