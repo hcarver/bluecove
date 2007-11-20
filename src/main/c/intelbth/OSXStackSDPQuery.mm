@@ -197,6 +197,7 @@ void SDPOutputStream::getBytes(int max, int* dataLen, UInt8* buf) {
 int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
     BluetoothSDPDataElementTypeDescriptor typeDescrip = IOBluetoothSDPDataElementGetTypeDescriptor(dataElement);
     BluetoothSDPDataElementSizeDescriptor sizeDescriptor = IOBluetoothSDPDataElementGetSizeDescriptor(dataElement);
+    BOOL isURL = false;
     switch (typeDescrip) {
         case kBluetoothSDPDataElementTypeNil:
             return 1;
@@ -214,6 +215,9 @@ int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
             }
         case kBluetoothSDPDataElementTypeUUID: {
                 IOBluetoothSDPUUIDRef	aUUIDRef = IOBluetoothSDPDataElementGetUUIDValue(dataElement);
+                if (aUUIDRef == NULL) {
+                    return -1;
+                }
 				UInt8 length = IOBluetoothSDPUUIDGetLength(aUUIDRef);
 				if (length <= 2) {
 				    return 1 + 2;
@@ -224,16 +228,22 @@ int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
 			    }
             }
         case kBluetoothSDPDataElementTypeURL:
+            isURL = true;
 		case kBluetoothSDPDataElementTypeString: {
 		        CFStringRef str = IOBluetoothSDPDataElementGetStringValue(dataElement);
-		        CFIndex length = CFStringGetLength(str);
-		        CFRelease(str);
-		        if (length < 0x100) {
-				    return length + 2;
-			    } else if (length < 0x10000) {
-				    return length + 3;
+		        if (str == NULL) {
+                    return -1;
+                }
+                CFIndex strLength = CFStringGetLength(str);
+		        CFIndex usedBufLen = 0;
+		        CFStringEncoding encoding = isURL?kCFStringEncodingASCII:kCFStringEncodingUTF8;
+		        CFStringGetBytes(str, CFRangeMake(0, strLength), encoding, '?', true, NULL, 0, &usedBufLen);
+		        if (usedBufLen < 0x100) {
+				    return usedBufLen + 2;
+			    } else if (usedBufLen < 0x10000) {
+				    return usedBufLen + 3;
 			    } else {
-				    return length + 5;
+				    return usedBufLen + 5;
 			    }
 		    }
 		case kBluetoothSDPDataElementTypeBoolean:
@@ -242,6 +252,9 @@ int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
         case kBluetoothSDPDataElementTypeDataElementAlternative: {
             int len = 5;
             CFArrayRef array = IOBluetoothSDPDataElementGetArrayValue(dataElement);
+            if (array == NULL) {
+                return -1;
+            }
             CFIndex count = CFArrayGetCount(array);
             for(CFIndex i = 0; i < count; i++) {
                 const IOBluetoothSDPDataElementRef item = (IOBluetoothSDPDataElementRef)CFArrayGetValueAtIndex(array, i);
@@ -268,9 +281,12 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
             break;
         case kBluetoothSDPDataElementTypeBoolean:
             write(40 | 0);
-			CFNumberRef	aNumber = IOBluetoothSDPDataElementGetNumberValue(dataElement);
+			CFNumberRef	bNumber = IOBluetoothSDPDataElementGetNumberValue(dataElement);
+			if (bNumber == NULL) {
+			    return FALSE;
+			}
             UInt8 aBool;
-			CFNumberGetValue(aNumber, kCFNumberCharType, &aBool);
+			CFNumberGetValue(bNumber, kCFNumberCharType, &aBool);
 			write(aBool);
             break;
         case kBluetoothSDPDataElementTypeUnsignedInt:
@@ -281,6 +297,9 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
                 write(type | sizeDescriptor);
                 if (sizeDescriptor == 4) { /* 16 byte integer */
 				    CFDataRef bigData = IOBluetoothSDPDataElementGetDataValue(dataElement);
+				    if (bigData == NULL) {
+				        return FALSE;
+				    }
 				    const UInt8 *byteArray = CFDataGetBytePtr(bigData);
 				    write(byteArray, 16);
 			    } else {
@@ -292,6 +311,9 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
                         case 3: length = 8; break;
                     }
 				    CFNumberRef	number = IOBluetoothSDPDataElementGetNumberValue(dataElement);
+				    if (number == NULL) {
+				        return FALSE;
+				    }
 				    SInt64 l = 0LL;
 				    CFNumberGetValue(number, kCFNumberSInt64Type, &l);
 				    ndebug("number len %i, %lli", length, l);
@@ -301,6 +323,9 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
             break;
         case kBluetoothSDPDataElementTypeUUID: {
                 IOBluetoothSDPUUIDRef aUUIDRef = IOBluetoothSDPDataElementGetUUIDValue(dataElement);
+                if (aUUIDRef == NULL) {
+                    return FALSE;
+                }
 			    const UInt8* uuidBytes = (UInt8*)IOBluetoothSDPUUIDGetBytes(aUUIDRef);
 				UInt8 length = IOBluetoothSDPUUIDGetLength(aUUIDRef);
 				UInt8 size = 0;
@@ -328,12 +353,15 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
 		case kBluetoothSDPDataElementTypeString: {
 		        UInt8 type = isURL ? 0x40: 0x20;
 		        CFStringRef str = IOBluetoothSDPDataElementGetStringValue(dataElement);
+		        if (str == NULL) {
+		            return FALSE;
+		        }
 		        CFIndex strLength = CFStringGetLength(str);
 		        CFIndex maxBufLen = 4* sizeof(UInt8)*strLength;
 		        UInt8* buffer = (UInt8*)malloc(maxBufLen);
 		        CFIndex usedBufLen = 0;
-		         CFStringEncoding encoding = isURL?kCFStringEncodingASCII:kCFStringEncodingUTF8;
-		        CFStringGetBytes(str, CFRangeMake(0, strLength), encoding, '?', true, buffer, maxBufLen, &usedBufLen);
+		        CFStringEncoding encoding = isURL?kCFStringEncodingASCII:kCFStringEncodingUTF8;
+		        CFStringGetBytes(str, CFRangeMake(0, strLength), encoding, '?', false, buffer, maxBufLen, &usedBufLen);
 		        if (usedBufLen < 0x100) {
 				    write(type | 5);
 				    writeLong(usedBufLen, 1);
@@ -355,8 +383,15 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
                 if (!isSeq) {
                     write(56 | 7);
                 }
-                writeLong(getLength(dataElement) - 5, 4);
+                int len = getLength(dataElement);
+                if (len < 0) {
+		            return FALSE;
+		        }
+                writeLong(len - 5, 4);
                 CFArrayRef array = IOBluetoothSDPDataElementGetArrayValue(dataElement);
+                if (array == NULL) {
+		            return FALSE;
+		        }
                 CFIndex count = CFArrayGetCount(array);
                 for(CFIndex i = 0; i < count; i++) {
                     const IOBluetoothSDPDataElementRef item = (IOBluetoothSDPDataElementRef)CFArrayGetValueAtIndex(array, i);
