@@ -58,8 +58,30 @@
 #include "BtIfClasses.h"
 #include "com_intel_bluetooth_BluetoothStackWIDCOMM.h"
 
-#ifdef L2CAP_CONN_CFG_FAILED_NO_REASON
+// Have no idea how we can use BTWPRODUCTVERSION from btversinfo.h
+#ifdef ATTR_ID_FAX_1_OR_AUD_VOL_OR_DEV_NAME
     #define BTW_SDK_6_0_1_300
+#else
+    #ifdef L2CAP_CONN_CFG_FAILED_NO_REASON
+        #define BTW_SDK_5_1_0_3101
+    #else
+        #define BTW_SDK_5_0_1_902
+    #endif
+#endif
+
+#ifdef BTW_SDK_6_0_1_300
+    #define BWT_SINCE_SDK_5_0_1
+    #define BWT_SINCE_SDK_5_1_0
+    #define BWT_SINCE_SDK_6_0_1
+#endif
+
+#ifdef BTW_SDK_5_1_0_3101
+    #define BWT_SINCE_SDK_5_0_1
+    #define BWT_SINCE_SDK_5_1_0
+#endif
+
+#ifdef BTW_SDK_5_0_1_902
+    #define BWT_SINCE_SDK_5_0_1
 #endif
 
 void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr);

@@ -24,7 +24,7 @@
 #ifdef VC6
 #define CPP_FILE "WIDCOMMStack.cpp"
 
-#ifdef BTW_SDK_6_0_1_300
+#ifdef BWT_SINCE_SDK_6_0_1
 
     // see http://support.microsoft.com/kb/130869
     #define MDEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8)  \
@@ -303,9 +303,15 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getBTWV
 	}
 	#endif
 #else // _WIN32_WCE
-	if (!stack->GetBTWVersionInfo(p_version, 256)) {
+	BT_CHAR bwt_version[256];
+	BT_CHAR dk_version[256];
+	if (!stack->GetBTWVersionInfo(bwt_version, 256)) {
 		return NULL;
 	}
+	if (!stack->GetDKVersionInfo(dk_version, 256)) {
+		return NULL;
+	}
+	sprintf(p_version, "BWT %s, DK %s", bwt_version, dk_version);
 #endif // #else // _WIN32_WCE
 	return env->NewStringUTF((char*)p_version);
 }
@@ -1606,7 +1612,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 		return 0;
 	}
 
-	#ifdef BTW_SDK_6_0_1_300
+	#ifdef BWT_SINCE_SDK_6_0_1
 	rf->sdpService->CommitRecord();
 	#endif
 
