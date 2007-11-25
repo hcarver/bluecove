@@ -584,7 +584,7 @@ void PoolableObject::tDec() {
 }
 
 BOOL PoolableObject::isValidObject() {
-	return TRUE;
+	return ((magic1 == MAGIC_1) && (magic2 == MAGIC_2));
 }
 
 BOOL PoolableObject::isExternalHandle(jlong handle) {
