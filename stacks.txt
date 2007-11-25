@@ -43,7 +43,7 @@
       So ServiceSearch *may* return service even when it is down.
     * L2CAP unable to send and receive empty L2CAP packet
 
-    * Fixed (since !BlueCove v2.0.2) `ServiceRecord` attributes of `DataElement` types U_INT_8, INT_8, INT_16 and UINT_16 are not properly discovered (Bug submitted to Support@broadcom)
+    * `ServiceRecord` attributes of `DataElement` types U_INT_8, INT_8, INT_16 and UINT_16 are not properly discovered (fixed in BTW-6_1_0_1501-SDK, you should make your binaries)
 
 == Winsock (Microsoft) ==
 
@@ -57,8 +57,6 @@
 === Limitations ===
 
     * Microsoft Bluetooth stack only supporting RFCOMM connections
-    * `DiscoveryAgent.searchServices()` can't query for BOOL !DataElements
-    * `DiscoveryAgent.searchServices()` can't query for UUID !DataElements other than one in !ProtocolDescriptorList and !ServiceClassIDList
     * `DiscoveryListener.deviceDiscovered()` would be called for devices that a _paired_ with your Microsoft BT stack regardless if device ON or OFF
     * L2CAP not supported
 
