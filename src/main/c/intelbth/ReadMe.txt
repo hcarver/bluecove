@@ -30,9 +30,8 @@ intelbth.vcproj
 WIDCOMM:  bluecove.dll
     Get Broadcom development kits from:  http://www.broadcom.com/products/bluetooth_sdk.php
     You have to register at the Broadcom site to gain access to the downloads.
-    We are using BTW-6_1_0_1501-SDK!
+    We are using BTW-5_1_0_3101 for destribution. BTW-6_1_0_1501-SDK!
     Install it to default directory. e.g. "$(ProgramFiles)\Widcomm\BTW DK" for Win32
-    rem Since wbtapi.dll does not come with BTW-5_0_1_902-SDK you need to copy this DLL from "%systemroot%\system32" to "$(ProgramFiles)\Widcomm\BTW DK\SDK\Release"
     Make all the files read only if you will ever uninstall WIDCOMM drivers the SDK files should remain.
     You don't need to have bluetooth WIDCOMM drivers installed to build the dll.
 
