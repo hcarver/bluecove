@@ -24,6 +24,7 @@
 class RFCOMMChannel : public PoolableObject {
 public:
     MPEventID notificationEvent;
+	MPEventID writeCompleteNotificationEvent;
 	IOReturn closedStatus;
 
     BOOL isClosed;

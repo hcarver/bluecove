@@ -292,13 +292,12 @@ class BluetoothStackOSX implements BluetoothStack {
 			try {
 				sr.populateRecord(uuidFilerAttrIDs);
 				filterUUID: for (int u = 0; u < uuidSet.length; u++) {
-					if ((sr.hasServiceClassUUID(uuidSet[u]) || sr.hasProtocolClassUUID(uuidSet[u]))) {
-						break filterUUID;
+					if (!((sr.hasServiceClassUUID(uuidSet[u]) || sr.hasProtocolClassUUID(uuidSet[u])))) {
+                        if (debug) {
+						    DebugLog.debug("filtered ServiceRecord (" + i + ")", sr);
+					    }
+					    continue nextRecord;
 					}
-					if (debug) {
-						DebugLog.debug("filtered ServiceRecord (" + i + ")", sr);
-					}
-					continue nextRecord;
 				}
 				if (debug) {
 					DebugLog.debug("accepted ServiceRecord (" + i + ")", sr);
@@ -314,12 +313,12 @@ class BluetoothStackOSX implements BluetoothStack {
 			}
 
 			if (startedNotify.isTerminated()) {
-				DebugLog.debug("SERVICE_SEARCH_TERMINATED");
+				DebugLog.debug("SERVICE_SEARCH_TERMINATED " + startedNotify.getTransID());
 				return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
 			}
 		}
 		if (records.size() != 0) {
-			DebugLog.debug("SERVICE_SEARCH_COMPLETED");
+			DebugLog.debug("SERVICE_SEARCH_COMPLETED " + startedNotify.getTransID());
 			ServiceRecord[] fileteredRecords = (ServiceRecord[]) Utils.vector2toArray(records,
 					new ServiceRecord[records.size()]);
 			listener.servicesDiscovered(startedNotify.getTransID(), fileteredRecords);

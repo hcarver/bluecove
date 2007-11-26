@@ -30,11 +30,14 @@ RFCOMMChannel::RFCOMMChannel() {
     isClosed = false;
 	isConnected = false;
 	MPCreateEvent(&notificationEvent);
+	MPCreateEvent(&writeCompleteNotificationEvent);
 }
 
 RFCOMMChannel::~RFCOMMChannel() {
     MPSetEvent(notificationEvent, 0);
+    MPSetEvent(writeCompleteNotificationEvent, 0);
     MPDeleteEvent(notificationEvent);
+    MPDeleteEvent(writeCompleteNotificationEvent);
 }
 
 void RFCOMMChannel::rfcommEvent(IOBluetoothRFCOMMChannelRef rfcommChannelRef, IOBluetoothRFCOMMChannelEvent *event) {
@@ -44,6 +47,7 @@ void RFCOMMChannel::rfcommEvent(IOBluetoothRFCOMMChannelRef rfcommChannelRef, IO
             isClosed = true;
             closedStatus = event->status;
             MPSetEvent(notificationEvent, 0);
+            MPSetEvent(writeCompleteNotificationEvent, 0);
             break;
         case kIOBluetoothRFCOMMChannelEventTypeOpenComplete:
             ndebug("RFCOMMChannelEvent OpenComplete");
@@ -57,8 +61,9 @@ void RFCOMMChannel::rfcommEvent(IOBluetoothRFCOMMChannelRef rfcommChannelRef, IO
 		        MPSetEvent(notificationEvent, 1);
 	        }
             break;
+        case kIOBluetoothRFCOMMChannelEventTypeQueueSpaceAvailable:
         case kIOBluetoothRFCOMMChannelEventTypeWriteComplete:
-        MPSetEvent(notificationEvent, 2);
+            MPSetEvent(writeCompleteNotificationEvent, 1);
             break;
     }
 }
@@ -69,6 +74,7 @@ IOReturn RFCOMMChannel::close() {
         isClosed = true;
         rc = IOBluetoothRFCOMMChannelCloseChannel(rfcommChannel);
         MPSetEvent(notificationEvent, 0);
+        MPSetEvent(writeCompleteNotificationEvent, 0);
         IOBluetoothDeviceRef dev = IOBluetoothRFCOMMChannelGetDevice(rfcommChannel);
         if (dev != NULL) {
             IOBluetoothDeviceCloseConnection(dev);
@@ -415,7 +421,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
         }
         while ((stack != NULL) &&( comm->isConnected) && (!comm->isClosed)) {
             MPEventFlags flags;
-            OSStatus err = MPWaitForEvent(comm->notificationEvent, &flags, kDurationMillisecond * 500);
+            OSStatus err = MPWaitForEvent(comm->writeCompleteNotificationEvent, &flags, kDurationMillisecond * 500);
+            if (err == kMPTimeoutErr) {
+                continue;
+            }
 		    if ((err != kMPTimeoutErr) && (err != noErr)) {
 			    throwRuntimeException(env, "MPWaitForEvent");
 			    error = true;
@@ -426,9 +435,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 			    error = true;
 			    break;
 		    }
-		    if (flags & 2) {
-		        break;
-		    }
+	        break;
 		}
         done += writeLen;
 	}

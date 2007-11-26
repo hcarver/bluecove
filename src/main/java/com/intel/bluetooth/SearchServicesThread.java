@@ -28,33 +28,33 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.UUID;
 
 class SearchServicesThread extends Thread {
-	
+
 	private static int transIDGenerator = 0;
-	
+
 	private static Hashtable threads = new Hashtable();
-	
+
 	private BluetoothStack stack;
-	
+
 	private int transID;
-	
-	private int[] attrSet; 
-	
-	UUID[] uuidSet; 
-	
+
+	private int[] attrSet;
+
+	UUID[] uuidSet;
+
 	RemoteDevice device;
 
 	private DiscoveryListener listener;
 
 	private BluetoothStateException startException;
-	
+
 	private boolean started = false;
-	
+
 	private boolean finished = false;
-	
+
 	private boolean terminated = false;
-	
+
 	private Object serviceSearchStartedEvent = new Object();
-	
+
 	private SearchServicesThread(BluetoothStack stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
 		super("SearchServicesThread");
 		this.stack = stack;
@@ -89,15 +89,15 @@ class SearchServicesThread extends Thread {
 			threads.put(new Integer(t.getTransID()), t);
 			return t.getTransID();
 		} else {
-			// This is arguable accoding to JSR-82 we can probably return 0... 
+			// This is arguable accoding to JSR-82 we can probably return 0...
 			throw new BluetoothStateException();
 		}
 	}
-	
+
 	static SearchServicesThread getServiceSearchThread(int transID) {
 		return (SearchServicesThread)threads.get(new Integer(transID));
 	}
-	
+
 	public void run() {
 		int respCode = DiscoveryListener.SERVICE_SEARCH_ERROR;
 		try {
@@ -111,26 +111,26 @@ class SearchServicesThread extends Thread {
 			synchronized (serviceSearchStartedEvent) {
 				serviceSearchStartedEvent.notifyAll();
 			}
-			DebugLog.debug("runSearchServices ends");
+			DebugLog.debug("runSearchServices ends", getTransID());
 			if (started) {
 				Utils.j2meUsagePatternDellay();
 				listener.serviceSearchCompleted(getTransID(), respCode);
 			}
 		}
 	}
-	
+
 	public void searchServicesStartedCallback() {
-		DebugLog.debug("searchServicesStartedCallback");
+		DebugLog.debug("searchServicesStartedCallback", getTransID());
 		started = true;
 		synchronized (serviceSearchStartedEvent) {
 			serviceSearchStartedEvent.notifyAll();
 		}
 	}
-	
+
 	int getTransID() {
 		return this.transID;
 	}
-	
+
 	void setTerminated() {
 		terminated = true;
 		threads.remove(new Integer(getTransID()));

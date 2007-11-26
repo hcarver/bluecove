@@ -26,6 +26,7 @@
 #define MAX_TERMINATE 10
 
 jint terminatedTansID[MAX_TERMINATE] = {0};
+jint runningTansID[MAX_TERMINATE] = {0};
 
 StackSDPQueryStart::StackSDPQueryStart() {
     name = "StackSDPQueryStart";
@@ -83,14 +84,34 @@ BOOL isSearchServicesTerminated(jint transID) {
     for(int i = 0; i < MAX_TERMINATE; i ++) {
         if (terminatedTansID[i] == transID) {
             terminatedTansID[i] = 0;
+            runningTansID[i] = 0;
             return TRUE;
         }
     }
     return FALSE;
 }
 
+void setSearchServicesRunning(jint transID) {
+    for(int i = 0; i < MAX_TERMINATE; i ++) {
+        if (runningTansID[i] == 0) {
+            runningTansID[i] = transID;
+            break;
+        }
+    }
+}
+
+void setSearchServicesEnds(jint transID) {
+    for(int i = 0; i < MAX_TERMINATE; i ++) {
+        if (runningTansID[i] == transID) {
+            runningTansID[i] = 0;
+            break;
+        }
+    }
+}
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServicesImpl
 (JNIEnv *env, jobject, jlong address, jint transID) {
+    setSearchServicesRunning(transID);
     StackSDPQueryStart runnable;
     runnable.address = address;
     synchronousBTOperation(&runnable);
@@ -101,6 +122,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServi
             return 0;
         }
     }
+    setSearchServicesEnds(transID);
     if (stack == NULL) {
         return 0;
     }
@@ -113,7 +135,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServi
         }
         return 0;
     }
-    Edebug1("runSearchServicesImpl found %i records", runnable.recordsSize);
+    Edebug2("runSearchServicesImpl %i found %i records", transID, runnable.recordsSize);
     return runnable.recordsSize;
 }
 
@@ -121,7 +143,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_cancelServiceS
 (JNIEnv* env, jobject, jint transID) {
     // This function is synchronized in Java
     for(int i = 0; i < MAX_TERMINATE; i ++) {
-        if (terminatedTansID[i] == 0) {
+        if ((runningTansID[i] == transID) && (terminatedTansID[i] == 0)) {
             terminatedTansID[i] = transID;
             if (stack != NULL) {
                 MPSetEvent(stack->deviceInquiryNotificationEvent, 1);
