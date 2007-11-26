@@ -45,6 +45,10 @@ void StackSDPQueryStart::run() {
     BluetoothDeviceAddress btAddress;
     LongToOSxBTAddr(address, &btAddress);
     IOBluetoothDeviceRef deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
+    if (deviceRef == NULL) {
+        error = 1;
+        return;
+    }
     status = IOBluetoothDevicePerformSDPQuery(deviceRef, callbackSDPQueryIsComplete, this);
     if (kIOReturnSuccess != status) {
         error = 1;
@@ -135,6 +139,10 @@ void GetAttributeDataElement::run() {
     BluetoothDeviceAddress btAddress;
     LongToOSxBTAddr(address, &btAddress);
     IOBluetoothDeviceRef deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
+    if (deviceRef == NULL) {
+        error = 1;
+        return;
+    }
     CFArrayRef services = IOBluetoothDeviceGetServices(deviceRef);
     if (services == NULL) {
         error = 1;

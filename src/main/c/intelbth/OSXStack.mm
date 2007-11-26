@@ -31,9 +31,15 @@ OSXStack::OSXStack() {
     deviceInquiryTerminated = FALSE;
     pthread_mutex_init(&deviceInquiryInProcessMutex, NULL);
     MPCreateEvent(&deviceInquiryNotificationEvent);
+
+    commPool = new ObjectPool(100, 1, TRUE);
 }
 
 OSXStack::~OSXStack() {
+    if (commPool != NULL) {
+		delete commPool;
+		commPool = NULL;
+	}
     MPSetEvent(deviceInquiryNotificationEvent, 0);
     MPDeleteEvent(deviceInquiryNotificationEvent);
     pthread_mutex_destroy(&deviceInquiryInProcessMutex);

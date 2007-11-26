@@ -40,6 +40,7 @@ public:
 	BOOL deviceInquiryTerminated;
 	BOOL deviceInquiryLock(JNIEnv* env);
 	BOOL deviceInquiryUnlock();
+	ObjectPool* commPool;
 };
 
 #define RUNNABLE_DATA_MAX 255

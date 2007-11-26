@@ -1411,14 +1411,13 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		UINT16 written = 0;
 		CRfCommPort::PORT_RETURN_CODE rc = rf->Write((void*)(bytes + off + done), (UINT16)(len - done), &written);
 		if (rc != CRfCommPort::SUCCESS) {
-			env->ReleaseByteArrayElements(b, bytes, 0);
 			throwIOException(env, "Failed to write");
-			return;
+			break;
 		}
 		done += written;
 		if (isCurrentThreadInterrupted(env, peer)) {
 			debug("Interrupted while writing");
-			return;
+			break;
 		}
 	}
 

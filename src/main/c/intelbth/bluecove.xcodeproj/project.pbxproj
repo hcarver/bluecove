@@ -16,6 +16,8 @@
 		D41C50660CE0030500BF6B4D /* OSXStack.h in Headers */ = {isa = PBXBuildFile; fileRef = D41C50640CE0030500BF6B4D /* OSXStack.h */; };
 		D4850EF20CEE43B600C34419 /* com_intel_bluetooth_NativeTestInterfaces.h in Headers */ = {isa = PBXBuildFile; fileRef = D4850EF10CEE43B600C34419 /* com_intel_bluetooth_NativeTestInterfaces.h */; };
 		D4850EF40CEE43CC00C34419 /* OSXStackTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = D4850EF30CEE43CC00C34419 /* OSXStackTest.mm */; };
+		D48DFA490CFA130F00113512 /* OSXStackRFCOMM.h in Headers */ = {isa = PBXBuildFile; fileRef = D48DFA470CFA130F00113512 /* OSXStackRFCOMM.h */; };
+		D48DFA4A0CFA130F00113512 /* OSXStackRFCOMM.mm in Sources */ = {isa = PBXBuildFile; fileRef = D48DFA480CFA130F00113512 /* OSXStackRFCOMM.mm */; };
 		D4A3DE440CEC24F800D976AD /* OSXStackSDPQuery.h in Headers */ = {isa = PBXBuildFile; fileRef = D4A3DE420CEC24F800D976AD /* OSXStackSDPQuery.h */; };
 		D4A3DE450CEC24F800D976AD /* OSXStackSDPQuery.mm in Sources */ = {isa = PBXBuildFile; fileRef = D4A3DE430CEC24F800D976AD /* OSXStackSDPQuery.mm */; };
 		D4BAE7660CE2373C0025C976 /* OSXStackDiscovery.h in Headers */ = {isa = PBXBuildFile; fileRef = D4BAE7640CE2373C0025C976 /* OSXStackDiscovery.h */; };
@@ -52,6 +54,8 @@
 		D44659E30CE2A5A0006C2782 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		D4850EF10CEE43B600C34419 /* com_intel_bluetooth_NativeTestInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = com_intel_bluetooth_NativeTestInterfaces.h; sourceTree = "<group>"; };
 		D4850EF30CEE43CC00C34419 /* OSXStackTest.mm */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXStackTest.mm; sourceTree = "<group>"; };
+		D48DFA470CFA130F00113512 /* OSXStackRFCOMM.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OSXStackRFCOMM.h; sourceTree = "<group>"; };
+		D48DFA480CFA130F00113512 /* OSXStackRFCOMM.mm */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXStackRFCOMM.mm; sourceTree = "<group>"; };
 		D4A3DE420CEC24F800D976AD /* OSXStackSDPQuery.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OSXStackSDPQuery.h; sourceTree = "<group>"; };
 		D4A3DE430CEC24F800D976AD /* OSXStackSDPQuery.mm */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXStackSDPQuery.mm; sourceTree = "<group>"; };
 		D4BAE7640CE2373C0025C976 /* OSXStackDiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSXStackDiscovery.h; sourceTree = "<group>"; };
@@ -92,6 +96,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				D48DFA470CFA130F00113512 /* OSXStackRFCOMM.h */,
+				D48DFA480CFA130F00113512 /* OSXStackRFCOMM.mm */,
 				D4850EF30CEE43CC00C34419 /* OSXStackTest.mm */,
 				D4850EF10CEE43B600C34419 /* com_intel_bluetooth_NativeTestInterfaces.h */,
 				D4A3DE420CEC24F800D976AD /* OSXStackSDPQuery.h */,
@@ -131,6 +137,7 @@
 				D4BAE76E0CE245800025C976 /* commonObjects.h in Headers */,
 				D4A3DE440CEC24F800D976AD /* OSXStackSDPQuery.h in Headers */,
 				D4850EF20CEE43B600C34419 /* com_intel_bluetooth_NativeTestInterfaces.h in Headers */,
+				D48DFA490CFA130F00113512 /* OSXStackRFCOMM.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -181,6 +188,7 @@
 				D4BAE7670CE2373C0025C976 /* OSXStackDiscovery.mm in Sources */,
 				D4A3DE450CEC24F800D976AD /* OSXStackSDPQuery.mm in Sources */,
 				D4850EF40CEE43CC00C34419 /* OSXStackTest.mm in Sources */,
+				D48DFA4A0CFA130F00113512 /* OSXStackRFCOMM.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

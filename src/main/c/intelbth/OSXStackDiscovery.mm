@@ -447,8 +447,12 @@ void remoteNameRequestResponse(void *userRefCon, IOBluetoothDeviceRef deviceRef,
 RUNNABLE(GetRemoteDeviceFriendlyName, "GetRemoteDeviceFriendlyName") {
     BluetoothDeviceAddress btAddress;
     LongToOSxBTAddr(lData, &btAddress);
-    IOBluetoothDeviceRef dev = IOBluetoothDeviceCreateWithAddress(&btAddress);
-    if (kIOReturnSuccess != IOBluetoothDeviceRemoteNameRequest(dev, remoteNameRequestResponse, this, NULL)) {
+    IOBluetoothDeviceRef deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
+    if (deviceRef == NULL) {
+        error = 1;
+        return;
+    }
+    if (kIOReturnSuccess != IOBluetoothDeviceRemoteNameRequest(deviceRef, remoteNameRequestResponse, this, NULL)) {
         error = 1;
     }
 }

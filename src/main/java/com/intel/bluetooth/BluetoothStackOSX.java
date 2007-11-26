@@ -82,7 +82,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
 	 */
 	public boolean isCurrentThreadInterruptedCallback() {
@@ -239,7 +239,7 @@ class BluetoothStackOSX implements BluetoothStack {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param address
 	 *            Bluetooth device address
 	 * @return number of service records found on device
@@ -365,15 +365,15 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	// ---------------------- Client RFCOMM connections ----------------------
 
+    private native long connectionRfOpenClientConnectionImpl(long address, int channel, boolean authenticate,
+			boolean encrypt, int timeout) throws IOException;
+
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		return connectionRfOpenClientConnectionImpl(params.address, params.channel, params.authenticate,
+				params.encrypt, params.timeouts ? params.timeout : 0);
 	}
 
-	public void connectionRfCloseClientConnection(long handle) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
+	public native void connectionRfCloseClientConnection(long handle) throws IOException;
 
 	public int getSecurityOpt(long handle, int expected) throws IOException {
 		return expected;
@@ -412,45 +412,30 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	public void connectionRfFlush(long handle) throws IOException {
 		// TODO Auto-generated method stub
-
 	}
 
-	public int connectionRfRead(long handle) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	public native int connectionRfRead(long handle) throws IOException;
 
-	public int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	public native int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException;
 
-	public int connectionRfReadAvailable(long handle) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	public native int connectionRfReadAvailable(long handle) throws IOException;
 
 	public void connectionRfWrite(long handle, int b) throws IOException {
-		// TODO Auto-generated method stub
-
+		byte buf[] = new byte[1];
+		buf[0] = (byte)(b & 0xFF);
+		connectionRfWrite(handle, buf, 0, 1);
 	}
 
-	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException {
-		// TODO Auto-generated method stub
+	public native void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
 
-	}
-
-	public long getConnectionRfRemoteAddress(long handle) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	public native long getConnectionRfRemoteAddress(long handle) throws IOException;
 
 	// ---------------------- Client and Server L2CAP connections
 	// ----------------------
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams,
 	 *      int, int)
 	 */
@@ -462,7 +447,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
 	 */
 	public void l2CloseClientConnection(long handle) throws IOException {
@@ -471,7 +456,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams,
 	 *      int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
@@ -483,7 +468,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long,
 	 *      com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
@@ -494,7 +479,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection(long)
 	 */
 	public long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException {
@@ -504,7 +489,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseServerConnection(long)
 	 */
 	public void l2CloseServerConnection(long handle) throws IOException {
@@ -514,7 +499,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long,
 	 *      com.intel.bluetooth.ServiceRecordImpl)
 	 */
@@ -525,7 +510,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
 	 */
 	public boolean l2Ready(long handle) throws IOException {
@@ -535,7 +520,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
 	 */
 	public int l2Receive(long handle, byte[] inBuf) throws IOException {
@@ -545,7 +530,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
 	public void l2Send(long handle, byte[] data) throws IOException {
@@ -554,7 +539,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetReceiveMTU(long)
 	 */
 	public int l2GetReceiveMTU(long handle) throws IOException {
@@ -564,7 +549,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetTransmitMTU(long)
 	 */
 	public int l2GetTransmitMTU(long handle) throws IOException {
@@ -574,7 +559,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
 	 */
 	public long l2RemoteAddress(long handle) throws IOException {
