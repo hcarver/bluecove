@@ -21,26 +21,59 @@
 
 #include "OSXStack.h"
 
-class RFCOMMChannel : public PoolableObject {
+#define OBJC_VERSION
+
+#ifdef OBJC_VERSION
+
+#import <IOBluetooth/objc/IOBluetoothDevice.h>
+#import <IOBluetooth/objc/IOBluetoothRFCOMMChannel.h>
+
+@class IOBluetoothRFCOMMChannel;
+
+class RFCOMMChannelController;
+
+@interface RFCOMMChannelDelegate : NSObject <IOBluetoothRFCOMMChannelDelegate> {
+    RFCOMMChannelController* _controller;
+}
+- (id)initWithController:(RFCOMMChannelController*)controller;
+@end
+
+#endif
+
+class RFCOMMChannelController : public PoolableObject {
 public:
     MPEventID notificationEvent;
 	MPEventID writeCompleteNotificationEvent;
 	IOReturn closedStatus;
+    IOReturn openStatus;
 
     BOOL isClosed;
 	BOOL isConnected;
 	jlong address;
 
+#ifdef OBJC_VERSION
+    RFCOMMChannelDelegate* delegate;
+    IOBluetoothRFCOMMChannel* rfcommChannel;
+#else
     IOBluetoothRFCOMMChannelRef rfcommChannel;
+#endif
+
     BluetoothRFCOMMMTU	rfcommChannelMTU;
 
     ReceiveBuffer receiveBuffer;
 
 public:
-    RFCOMMChannel();
-    ~RFCOMMChannel();
+    RFCOMMChannelController();
+    ~RFCOMMChannelController();
 
+#ifdef OBJC_VERSION
+    void rfcommChannelOpenComplete(IOReturn error);
+    void rfcommChannelData(void*dataPointer, size_t dataLength);
+    void rfcommChannelClosed();
+    void rfcommChannelWriteComplete(void* refcon, IOReturn error);
+#else
     void rfcommEvent(IOBluetoothRFCOMMChannelRef rfcommChannelRef, IOBluetoothRFCOMMChannelEvent *event);
+#endif
 
     IOReturn close();
     BOOL waitForConnection(JNIEnv *env, jint timeout);
@@ -55,7 +88,7 @@ public:
     jboolean encrypt;
     jint timeout;
 
-    RFCOMMChannel* comm;
+    RFCOMMChannelController* comm;
     volatile IOReturn status;
 
     OpenRFCOMMConnection();
@@ -67,7 +100,7 @@ public:
     void *data;
     UInt16 length;
 
-    RFCOMMChannel* comm;
+    RFCOMMChannelController* comm;
     volatile IOReturn status;
 
     WriteRFCOMMConnection();
