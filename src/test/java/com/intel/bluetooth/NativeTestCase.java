@@ -24,13 +24,13 @@ import junit.framework.TestCase;
 
 /**
  * Base class for test cases that are calling native function.
- * 
+ *
  * Native Debug automatically enabled when running tests in Eclipse
- * 
+ *
  * @author vlads
- * 
+ *
  */
-public class NativeTestCase extends TestCase {
+public abstract class NativeTestCase extends TestCase {
 
 	// Use this to debug tests
 	protected boolean debug = false;

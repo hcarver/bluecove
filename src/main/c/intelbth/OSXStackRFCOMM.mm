@@ -144,6 +144,9 @@ void RFCOMMChannelController::rfcommChannelData(void* dataPointer, size_t dataLe
 }
 
 void RFCOMMChannelController::rfcommChannelWriteComplete(void* refcon, IOReturn error) {
+    if (refcon != NULL) {
+        ((RFCOMMConnectionWrite*)refcon)->rfcommChannelWriteComplete();
+    }
     MPSetEvent(writeCompleteNotificationEvent, 1);
 }
 
@@ -539,19 +542,26 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 
 RFCOMMConnectionWrite::RFCOMMConnectionWrite() {
     name = "RFCOMMConnectionWrite";
+    writeComplete = false;
 }
 
 void RFCOMMConnectionWrite::run() {
     IOReturn rc;
+    void* notify = NULL;
+    notify = this;
 #ifdef OBJC_VERSION
-    rc = [comm->rfcommChannel writeAsync:data length:length refcon:this];
+    rc = [comm->rfcommChannel writeAsync:data length:length refcon:notify];
 #else
-    rc = IOBluetoothRFCOMMChannelWriteAsync(comm->rfcommChannel, data, length, comm);
+    rc = IOBluetoothRFCOMMChannelWriteAsync(comm->rfcommChannel, data, length, notify);
 #endif // ifdef OBJC_VERSION
     lData = rc;
     if (rc != kIOReturnSuccess) {
         error = 1;
     }
+}
+
+void RFCOMMConnectionWrite::rfcommChannelWriteComplete() {
+    writeComplete = true;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWrite
@@ -578,6 +588,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 			break;
         }
         while ((stack != NULL) &&( comm->isConnected) && (!comm->isClosed)) {
+            // Already finished
+            if (runnable.writeComplete) {
+                break;
+            }
             MPEventFlags flags;
             OSStatus err = MPWaitForEvent(comm->writeCompleteNotificationEvent, &flags, kDurationMillisecond * 500);
             if (err == kMPTimeoutErr) {

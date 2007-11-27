@@ -99,6 +99,7 @@ public:
 
 class RFCOMMConnectionWrite: public Runnable {
 public:
+    BOOL writeComplete;
     void *data;
     UInt16 length;
 
@@ -107,4 +108,5 @@ public:
 
     RFCOMMConnectionWrite();
     virtual void run();
+    void rfcommChannelWriteComplete();
 };

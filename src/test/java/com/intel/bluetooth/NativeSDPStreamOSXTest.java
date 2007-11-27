@@ -28,17 +28,9 @@ import javax.bluetooth.UUID;
 
 /**
  * @author vlads
- * 
+ *
  */
-public class NativeSDPStreamOSXTest extends NativeTestCase {
-
-    protected void setUp() throws Exception {
-        super.setUp();
-        if (NativeLibLoader.getOS() != NativeLibLoader.OS_MAC_OS_X) {
-            throw new Error("This is OS X only test");
-        }
-        BlueCoveImpl.instance().getBluetoothStack();
-    }
+public class NativeSDPStreamOSXTest extends NativeOSXTestCase {
 
     private void validateConversion(DataElement elementExpect, int testType, int type, long ldata, byte[] bdata)
             throws IOException {

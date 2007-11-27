@@ -217,3 +217,20 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testO
 	env->ReleaseByteArrayElements(result, bytes, 0);
 	return result;
 }
+
+RUNNABLE(SimpleTestLoop, "SimpleTestLoop") {
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testOsXRunnableLoop
+  (JNIEnv *, jclass, jint testType, jint runLoops) {
+
+    for(int i = 0; i < runLoops; i++) {
+        switch (testType) {
+        case 0:
+            SimpleTestLoop runnable;
+            synchronousBTOperation(&runnable);
+		    break;
+        }
+    }
+
+}
