@@ -6,7 +6,7 @@
 == About ==
 
 BlueCove is a LGPL licensed JSR-82 implementation on Java Standard Edition (J2SE) that currently interfaces with
-the WIDCOMM, BlueSoleil and Microsoft Bluetooth stack. Originally developed by Intel Research and
+the Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack. Originally developed by Intel Research and
 currently maintained by volunteers. The LGPL license allow to link and distribute commercial software with !BlueCove.
 
  [http://bluecove.wiki.sourceforge.net/ BlueCove public contirbutions Wiki]
@@ -22,6 +22,7 @@ BlueCove provides an implementation of the JSR 82. Applications should use API d
   * WIDCOMM (Broadcom) BTW Stack software version 1.4.2.10 SP5 or above
   * BlueSoleil version 1.6.0 or above
   * Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer and Windows Mobile 2003 or newer)
+  * PowerPC- or Intel-based Mac OS X 10.4 (Bluetooth v1.2) or late
   * A Bluetooth device supported by the WIDCOMM, BlueSoleil or Microsoft bluetooth stack
   * Java 1.1 or newer for the binary execution, Java 1.4 or newer to compile.
   * Another Bluetooth device to communicate with. See [http://code.google.com/p/bluecove/wiki/phones Complete list of the JSR-82 compliant phones]
