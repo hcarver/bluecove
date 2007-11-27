@@ -648,7 +648,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	public native void l2CloseClientConnection(long handle) throws IOException;
 
 	private native long l2ServerOpenImpl(byte[] uuidValue, boolean authenticate, boolean encrypt, String name,
-			int receiveMTU, int transmitMTU) throws IOException;
+			int receiveMTU, int transmitMTU, int assignPsm) throws IOException;
 
 	public native int l2ServerPSM(long handle) throws IOException;
 
@@ -664,7 +664,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		validateMTU(receiveMTU, transmitMTU);
 		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
 		long handle = l2ServerOpenImpl(uuidValue, params.authenticate, params.encrypt, params.name, receiveMTU,
-				transmitMTU);
+				transmitMTU, params.bluecove_ext_psm);
 
 		int channel = l2ServerPSM(handle);
 

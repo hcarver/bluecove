@@ -93,6 +93,8 @@ public abstract class MicroeditionConnector {
 
 	private static final String TRANSMIT_MTU = "transmitmtu";
 
+	private static final String EXT_BLUECOVE_L2CAP_PSM = "bluecovepsm";
+
 	static {
 		// cliParams ::== master | encrypt | authenticate
 		cliParams.put(AUTHENTICATE, AUTHENTICATE);
@@ -112,6 +114,7 @@ public abstract class MicroeditionConnector {
 		copyAll(srvParamsL2CAP, cliParamsL2CAP);
 		srvParamsL2CAP.put(AUTHORIZE, AUTHORIZE);
 		srvParamsL2CAP.put(NAME, NAME);
+		srvParamsL2CAP.put(EXT_BLUECOVE_L2CAP_PSM, EXT_BLUECOVE_L2CAP_PSM);
 
 		// "socket://" host ":" port
 		// no validation for socket, since this is internal connector
@@ -307,6 +310,14 @@ public abstract class MicroeditionConnector {
 								"authorization requires authentication");
 					}
 				}
+				if (isL2CAP) {
+					String bluecove_ext_psm = (String) values.get(EXT_BLUECOVE_L2CAP_PSM);
+					if (bluecove_ext_psm != null) {
+						int psm = Integer.parseInt(bluecove_ext_psm, 16);
+						validateL2CAPPSM(psm, bluecove_ext_psm);
+						notifierParams.bluecove_ext_psm = psm;
+					}
+				}
 			}
 		} else { // (!isServer)
 			try {
@@ -319,19 +330,7 @@ public abstract class MicroeditionConnector {
 			}
 			if (schemeBluetooth) {
 				if (isL2CAP) {
-					// Valid PSM range: 0x0001-0x0019 (0x1001-0xFFFF dynamically
-					// assigned, 0x0019-0x0100 reserved for future use).
-					if ((channel < BluetoothConsts.L2CAP_PSM_MIN) || (channel > BluetoothConsts.L2CAP_PSM_MAX)) {
-						// PSM 1 discovery, 3 RFCOMM
-						throw new IllegalArgumentException("PCM " + portORuuid);
-					}
-					// has the 9th bit (0x100) set to zero
-					if ((channel & 0x100) != 0) {
-						throw new IllegalArgumentException("9th bit set in PCM " + portORuuid);
-					}
-					if ((channel % 2) == 0) {
-						throw new IllegalArgumentException("PSM value " + portORuuid + " should be odd");
-					}
+					validateL2CAPPSM(channel, portORuuid);
 				} else {
 					if ((channel < BluetoothConsts.RFCOMM_CHANNEL_MIN)
 							|| (channel > BluetoothConsts.RFCOMM_CHANNEL_MAX)) {
@@ -418,6 +417,22 @@ public abstract class MicroeditionConnector {
 			}
 		} else {
 			throw new ConnectionNotFoundException(scheme);
+		}
+	}
+
+	private static void validateL2CAPPSM(int channel, String channelAsString) throws IllegalArgumentException {
+		// Valid PSM range: 0x0001-0x0019 (0x1001-0xFFFF dynamically
+		// assigned, 0x0019-0x0100 reserved for future use).
+		if ((channel < BluetoothConsts.L2CAP_PSM_MIN) || (channel > BluetoothConsts.L2CAP_PSM_MAX)) {
+			// PSM 1 discovery, 3 RFCOMM
+			throw new IllegalArgumentException("PCM " + channelAsString);
+		}
+		// has the 9th bit (0x100) set to zero
+		if ((channel & 0x100) != 0) {
+			throw new IllegalArgumentException("9th bit set in PCM " + channelAsString);
+		}
+		if ((channel % 2) == 0) {
+			throw new IllegalArgumentException("PSM value " + channelAsString + " should be odd");
 		}
 	}
 

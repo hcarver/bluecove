@@ -44,6 +44,13 @@ class BluetoothConnectionNotifierParams {
 
 	boolean timeouts;
 
+	/**
+	 * Enables L2CAP server PSM selections. Usage:
+	 * btl2cap://localhost;name=test;bluecovepsm=11 where bluecovepsm is
+	 * 4*4(HEXDIG)
+	 */
+	int bluecove_ext_psm = 0;
+
 	public BluetoothConnectionNotifierParams(UUID uuid, boolean authenticate, boolean encrypt, boolean authorize,
 			String name, boolean master) {
 		super();

@@ -244,7 +244,7 @@ void open_l2server_finally(JNIEnv *env, WIDCOMMStackL2CapConn* l2c) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerOpenImpl
-(JNIEnv *env, jobject, jbyteArray uuidValue, jboolean authenticate, jboolean encrypt, jstring name, jint receiveMTU, jint transmitMTU) {
+(JNIEnv *env, jobject, jbyteArray uuidValue, jboolean authenticate, jboolean encrypt, jstring name, jint receiveMTU, jint transmitMTU, jint assignPsm) {
 	if (stack == NULL) {
 		throwIOException(env, cSTACK_CLOSED);
 		return 0;
@@ -272,7 +272,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerO
 		CL2CapIf *l2CapIf;
 		l2CapIf = &l2c->l2CapIf;
 
-		if (!l2CapIf->AssignPsmValue(&(l2c->service_guid))) {
+		if (!l2CapIf->AssignPsmValue(&(l2c->service_guid), (UINT16)assignPsm)) {
 			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_UNKNOWN_PSM, "failed to assign PSM");
 			open_l2server_return 0;
 		}
