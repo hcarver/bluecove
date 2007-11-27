@@ -19,7 +19,7 @@
  *  @version $Id$
  */
 
-#include "OSXStack.h"
+#import "OSXStackChannelController.h"
 
 #define OBJC_VERSION
 
@@ -41,16 +41,8 @@ class RFCOMMChannelController;
 
 #endif
 
-class RFCOMMChannelController : public PoolableObject {
+class RFCOMMChannelController : public ChannelController {
 public:
-    MPEventID notificationEvent;
-	MPEventID writeCompleteNotificationEvent;
-	IOReturn closedStatus;
-    IOReturn openStatus;
-
-    BOOL isClosed;
-	BOOL isConnected;
-	jlong address;
 
 #ifdef OBJC_VERSION
     RFCOMMChannelDelegate* delegate;
@@ -60,8 +52,6 @@ public:
 #endif
 
     BluetoothRFCOMMMTU	rfcommChannelMTU;
-
-    ReceiveBuffer receiveBuffer;
 
 public:
     RFCOMMChannelController();
@@ -78,7 +68,6 @@ public:
 #endif
 
     IOReturn close();
-    BOOL waitForConnection(JNIEnv *env, jint timeout);
 
 };
 

@@ -96,21 +96,10 @@ RFCOMMChannelController::RFCOMMChannelController() {
     delegate = NULL;
 #endif
     rfcommChannel = NULL;
-
-    openStatus = kIOReturnSuccess;
-    closedStatus = kIOReturnSuccess;
-    isClosed = false;
-	isConnected = false;
-	MPCreateEvent(&notificationEvent);
-	MPCreateEvent(&writeCompleteNotificationEvent);
 }
 
 RFCOMMChannelController::~RFCOMMChannelController() {
     ndebug("~RFCOMMChannelController");
-    MPSetEvent(notificationEvent, 0);
-    MPSetEvent(writeCompleteNotificationEvent, 0);
-    MPDeleteEvent(notificationEvent);
-    MPDeleteEvent(writeCompleteNotificationEvent);
 }
 
 #ifdef OBJC_VERSION
@@ -222,39 +211,6 @@ IOReturn RFCOMMChannelController::close() {
     }
 #endif // ifdef OBJC_VERSION
     return rc;
-}
-
-BOOL RFCOMMChannelController::waitForConnection(JNIEnv *env, jint timeout) {
-    CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent ();
-    while ((stack != NULL) && (!isClosed) && (!isConnected)) {
-        MPEventFlags flags;
-        MPWaitForEvent(notificationEvent, &flags, kDurationMillisecond * 500);
-        CFAbsoluteTime nowTime = CFAbsoluteTimeGetCurrent ();
-        if ((timeout > 0) && ((nowTime - startTime) * 1000  > timeout)) {
-			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout");
-        }
-    }
-    if (stack == NULL) {
-		throwIOException(env, cSTACK_CLOSED);
-		return false;
-	}
-    if (isClosed) {
-	    throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection [0x%08x]", closedStatus);
-	    return false;
-    }
-
-    if (openStatus != kIOReturnSuccess) {
-        isConnected = false;
-        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection [0x%08x]", openStatus);
-        return false;
-    }
-
-    if (isConnected) {
-        return true;
-    }
-
-    throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection");
-	return false;
 }
 
 RFCOMMConnectionOpen::RFCOMMConnectionOpen() {
