@@ -565,6 +565,7 @@
                                         <get src="http://bluecove.googlecode.com/svn/build/win-dlls/bluecove.dll" dest="${project.build.directory}/classes/bluecove.dll"/>
                                         <get src="http://bluecove.googlecode.com/svn/build/win-dlls/intelbth_ce.dll" dest="${project.build.directory}/classes/intelbth_ce.dll"/>
                                         <get src="http://bluecove.googlecode.com/svn/build/win-dlls/bluecove_ce.dll" dest="${project.build.directory}/classes/bluecove_ce.dll"/>
+                                        <get src="http://bluecove.googlecode.com/svn/build/osx-jnilib/libbluecove.jnilib" dest="${project.build.directory}/classes/libbluecove.jnilib"/>
                                     </tasks>
                                 </configuration>
                             </execution>
