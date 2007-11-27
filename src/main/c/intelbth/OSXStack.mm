@@ -210,10 +210,10 @@ void ndebug(const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
 	if (nativeDebugCallbackEnabled) {
-	    fprintf(stderr, "NATIVE:");
-        vfprintf(stderr, fmt, ap);
-        fprintf(stderr, "\n");
-        fflush(stderr);
+	    fprintf(stdout, "NATIVE:");
+        vfprintf(stdout, fmt, ap);
+        fprintf(stdout, "\n");
+        fflush(stdout);
     }
     va_end(ap);
 }

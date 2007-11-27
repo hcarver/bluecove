@@ -36,6 +36,7 @@ class RFCOMMChannelController;
     RFCOMMChannelController* _controller;
 }
 - (id)initWithController:(RFCOMMChannelController*)controller;
+- (void)close;
 @end
 
 #endif
@@ -67,6 +68,7 @@ public:
     ~RFCOMMChannelController();
 
 #ifdef OBJC_VERSION
+    void initDelegate();
     void rfcommChannelOpenComplete(IOReturn error);
     void rfcommChannelData(void*dataPointer, size_t dataLength);
     void rfcommChannelClosed();
@@ -80,7 +82,7 @@ public:
 
 };
 
-class OpenRFCOMMConnection: public Runnable {
+class RFCOMMConnectionOpen: public Runnable {
 public:
     jlong address;
     jint channel;
@@ -91,11 +93,11 @@ public:
     RFCOMMChannelController* comm;
     volatile IOReturn status;
 
-    OpenRFCOMMConnection();
+    RFCOMMConnectionOpen();
     virtual void run();
 };
 
-class WriteRFCOMMConnection: public Runnable {
+class RFCOMMConnectionWrite: public Runnable {
 public:
     void *data;
     UInt16 length;
@@ -103,6 +105,6 @@ public:
     RFCOMMChannelController* comm;
     volatile IOReturn status;
 
-    WriteRFCOMMConnection();
+    RFCOMMConnectionWrite();
     virtual void run();
 };

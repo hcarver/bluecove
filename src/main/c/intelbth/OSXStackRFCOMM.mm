@@ -23,6 +23,16 @@
 
 #define CPP_FILE "OSXStackRFCOMM.mm"
 
+BOOL isValidObject(RFCOMMChannelController* comm ) {
+    if (comm == NULL) {
+        return false;
+    }
+    if ((comm->magic1 != MAGIC_1) || (comm->magic2 != MAGIC_2)) {
+		return false;
+	}
+	return comm->isValidObject();
+}
+
 #ifndef OBJC_VERSION
 void rfcommEventListener(IOBluetoothRFCOMMChannelRef rfcommChannelRef, void *refCon, IOBluetoothRFCOMMChannelEvent *event);
 #else
@@ -33,8 +43,12 @@ void rfcommEventListener(IOBluetoothRFCOMMChannelRef rfcommChannelRef, void *ref
     return self;
 }
 
+- (void)close {
+    _controller = NULL;
+}
+
 - (void)rfcommChannelOpenComplete:(IOBluetoothRFCOMMChannel*)rfcommChannel status:(IOReturn)error {
-    if (_controller != NULL) {
+    if (isValidObject(_controller)) {
         _controller->rfcommChannelOpenComplete(error);
     }
 }
@@ -42,7 +56,7 @@ void rfcommEventListener(IOBluetoothRFCOMMChannelRef rfcommChannelRef, void *ref
 - (void)rfcommChannelData:(IOBluetoothRFCOMMChannel *)rfcommChannel
                      data:(void *)dataPointer
                    length:(size_t)dataLength {
-    if (_controller != NULL) {
+    if (isValidObject(_controller)) {
         _controller->rfcommChannelData(dataPointer, dataLength);
     }
 }
@@ -50,15 +64,17 @@ void rfcommEventListener(IOBluetoothRFCOMMChannelRef rfcommChannelRef, void *ref
 - (void)rfcommChannelWriteComplete:(IOBluetoothRFCOMMChannel*)rfcommChannel
                             refcon:(void*)refcon
                             status:(IOReturn)error {
-    if (_controller != NULL) {
+    if (isValidObject(_controller)) {
         _controller->rfcommChannelWriteComplete(refcon, error);
     }
 }
 
 - (void)rfcommChannelClosed:(IOBluetoothRFCOMMChannel *)rfcommChannel {
-    if (_controller != NULL) {
+    ndebug("d.rfcommChannelClosed->");
+    if (isValidObject(_controller)) {
         _controller->rfcommChannelClosed();
     }
+    ndebug("d.rfcommChannelClosed-<");
 }
 
 // Not used
@@ -77,7 +93,7 @@ void rfcommEventListener(IOBluetoothRFCOMMChannelRef rfcommChannelRef, void *ref
 
 RFCOMMChannelController::RFCOMMChannelController() {
 #ifdef OBJC_VERSION
-    delegate = [[RFCOMMChannelDelegate alloc] initWithController:this];
+    delegate = NULL;
 #endif
     rfcommChannel = NULL;
 
@@ -90,10 +106,7 @@ RFCOMMChannelController::RFCOMMChannelController() {
 }
 
 RFCOMMChannelController::~RFCOMMChannelController() {
-#ifdef OBJC_VERSION
-    //[delegate reset];
-#endif
-
+    ndebug("~RFCOMMChannelController");
     MPSetEvent(notificationEvent, 0);
     MPSetEvent(writeCompleteNotificationEvent, 0);
     MPDeleteEvent(notificationEvent);
@@ -101,6 +114,11 @@ RFCOMMChannelController::~RFCOMMChannelController() {
 }
 
 #ifdef OBJC_VERSION
+
+void RFCOMMChannelController::initDelegate() {
+    delegate = [[RFCOMMChannelDelegate alloc] initWithController:this];
+    [delegate retain];
+}
 
 void RFCOMMChannelController::rfcommChannelOpenComplete(IOReturn error) {
     ndebug("rfcommChannelOpenComplete");
@@ -118,6 +136,7 @@ void RFCOMMChannelController::rfcommChannelClosed() {
 }
 
 void RFCOMMChannelController::rfcommChannelData(void* dataPointer, size_t dataLength) {
+    ndebug("rfcommChannelData");
     if (isConnected && !isClosed) {
         receiveBuffer.write(dataPointer, dataLength);
 		MPSetEvent(notificationEvent, 1);
@@ -159,20 +178,33 @@ void RFCOMMChannelController::rfcommEvent(IOBluetoothRFCOMMChannelRef rfcommChan
     }
 }
 
-#endif // OBJC_VERSION
+#endif // ifdef OBJC_VERSION
 
 IOReturn RFCOMMChannelController::close() {
     IOReturn rc = kIOReturnSuccess;
 #ifdef OBJC_VERSION
+    if (delegate != NULL) {
+        [delegate close];
+    }
     if (rfcommChannel != NULL) {
         isClosed = true;
-        rc = [rfcommChannel closeChannel];
         MPSetEvent(notificationEvent, 0);
         MPSetEvent(writeCompleteNotificationEvent, 0);
+
+        IOBluetoothDevice *device = [rfcommChannel getDevice];
+        [rfcommChannel setDelegate:NULL];
+        rc = [rfcommChannel closeChannel];
+        if (device != NULL) {
+            [device closeConnection];
+        }
         [rfcommChannel release];
         rfcommChannel = NULL;
     }
-#else
+    if (delegate != NULL) {
+        [delegate release];
+        delegate = NULL;
+    }
+#else // ifdef OBJC_VERSION
     if (rfcommChannel != NULL) {
         isClosed = true;
         rc = IOBluetoothRFCOMMChannelCloseChannel(rfcommChannel);
@@ -185,7 +217,7 @@ IOReturn RFCOMMChannelController::close() {
         IOBluetoothObjectRelease(rfcommChannel);
         rfcommChannel = NULL;
     }
-#endif
+#endif // ifdef OBJC_VERSION
     return rc;
 }
 
@@ -222,11 +254,11 @@ BOOL RFCOMMChannelController::waitForConnection(JNIEnv *env, jint timeout) {
 	return false;
 }
 
-OpenRFCOMMConnection::OpenRFCOMMConnection() {
-    name = "OpenRFCOMMConnection";
+RFCOMMConnectionOpen::RFCOMMConnectionOpen() {
+    name = "RFCOMMConnectionOpen";
 }
 
-void OpenRFCOMMConnection::run() {
+void RFCOMMConnectionOpen::run() {
     BluetoothDeviceAddress btAddress;
     LongToOSxBTAddr(this->address, &btAddress);
     IOBluetoothDeviceRef deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
@@ -239,6 +271,7 @@ void OpenRFCOMMConnection::run() {
     BluetoothRFCOMMChannelID channelID = this->channel;
     IOReturn rc;
 #ifdef OBJC_VERSION
+    comm->initDelegate();
     IOBluetoothDevice* dev = [IOBluetoothDevice withDeviceRef:deviceRef];
     rc = [dev openRFCOMMChannelAsync:&(comm->rfcommChannel) withChannelID:channelID  delegate:comm->delegate];
     if ((rc != kIOReturnSuccess) || (comm->rfcommChannel == NULL)) {
@@ -247,6 +280,8 @@ void OpenRFCOMMConnection::run() {
         rc = [comm->rfcommChannel setDelegate:comm->delegate];
         if (rc != kIOReturnSuccess) {
             error = 1;
+        } else {
+            [comm->rfcommChannel retain];
         }
     }
 #else // OBJC_VERSION
@@ -261,16 +296,6 @@ void OpenRFCOMMConnection::run() {
     }
 #endif // OBJC_VERSION
     lData = rc;
-}
-
-BOOL isValidObject(RFCOMMChannelController* comm ) {
-    if (comm == NULL) {
-        return false;
-    }
-    if ((comm->magic1 != MAGIC_1) || (comm->magic2 != MAGIC_2)) {
-		return false;
-	}
-	return comm->isValidObject();
 }
 
 #ifndef OBJC_VERSION
@@ -306,7 +331,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfO
 		return 0;
 	}
 
-	OpenRFCOMMConnection runnable;
+	RFCOMMConnectionOpen runnable;
 	runnable.comm = comm;
     runnable.address = address;
     runnable.channel = channel;
@@ -512,11 +537,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 	return comm->receiveBuffer.available();
 }
 
-WriteRFCOMMConnection::WriteRFCOMMConnection() {
-    name = "WriteRFCOMMConnection";
+RFCOMMConnectionWrite::RFCOMMConnectionWrite() {
+    name = "RFCOMMConnectionWrite";
 }
 
-void WriteRFCOMMConnection::run() {
+void RFCOMMConnectionWrite::run() {
     IOReturn rc;
 #ifdef OBJC_VERSION
     rc = [comm->rfcommChannel writeAsync:data length:length refcon:this];
@@ -543,7 +568,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 	while ((stack != NULL) && (!error) && (done < len) && (comm->isConnected) && (!comm->isClosed)) {
 		UInt16 numBytesRemaining = len - done;
 		UInt16 writeLen = ( ( numBytesRemaining > comm->rfcommChannelMTU ) ? comm->rfcommChannelMTU :  numBytesRemaining );
-		WriteRFCOMMConnection runnable;
+		RFCOMMConnectionWrite runnable;
 	    runnable.comm = comm;
 	    runnable.data = (void*)(bytes + off + done);
 	    runnable.length = writeLen;
