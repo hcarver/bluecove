@@ -7,7 +7,7 @@
 
 BlueCove
 
-    BlueCove is a Java library for Bluetooth (JSR-82 implementation) that currently interfaces with the WIDCOMM, BlueSoleil and Microsoft Bluetooth stack found in Windows XP SP2 or Windows Vista
+    BlueCove is a Java library for Bluetooth (JSR-82 implementation) that currently interfaces with the Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack found in Windows XP SP2 or Windows Vista
     and WIDCOMM and Microsoft Bluetooth stack on Windows Mobile.
 
     BlueCove can be used in Java Standard Edition (J2SE) 1.1 or newer.
@@ -29,6 +29,8 @@ BlueCove
     * WebSphere Everyplace Micro Environment 5.7.2, CLDC 1.1, MIDP 2.0 on Windows XP/X86
 
     * {{{http://www2s.biglobe.ne.jp/~dat/java/project/jvm/index_en.html}Mysaifu JVM}} - An open-source (GPL v.2 license) Java VM on Windows Mobile 2003 Second Edition.
+
+    * Java for Mac OS X 10.4, Release 5 on PowerPC and Intel processors
 
     []
 
