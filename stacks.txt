@@ -2,7 +2,9 @@
 
 = BlueCove supported stacks =
 
-   WIDCOMM and BlueSoleil are added in BlueCove version 2.0.0.
+   On Windows WIDCOMM and BlueSoleil stacks are added in BlueCove version 2.0.0.
+
+   Support for Mac OS X added in BlueCove version 2.0.2.
 
    To determine which Bluetooth stack is installed on your Windows XP [http://bluecove.sourceforge.net/bluecove-examples/bluetooth-stack.html see this page]
 
@@ -84,3 +86,14 @@
 
 *N.B.* In our test lab when using fake ES-388 Bluetooth USB Adapter we can only make from 180 to 250 max connections in sequence. After this !BlueSoleil.exe needs to restart or Windows needs to be rebooted.
 This does not happen when we used dongle bought from [http://bluesoleil.com bluesoleil.com]
+
+
+== OS X ==
+
+=== Requirements ===
+
+    *  PowerPC- or Intel-based Mac OS X 10.4 (Bluetooth v1.2) or late
+
+=== JSR-82 Limitations ===
+
+    * `LocalDevice.setDiscoverable(...)` not supported.
