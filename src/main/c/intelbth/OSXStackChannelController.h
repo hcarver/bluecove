@@ -25,7 +25,6 @@ class ChannelController : public PoolableObject {
 public:
     MPEventID notificationEvent;
 	MPEventID writeCompleteNotificationEvent;
-	IOReturn closedStatus;
     IOReturn openStatus;
 
     BOOL isClosed;

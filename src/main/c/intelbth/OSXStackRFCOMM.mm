@@ -149,7 +149,6 @@ void RFCOMMChannelController::rfcommEvent(IOBluetoothRFCOMMChannelRef rfcommChan
         case kIOBluetoothRFCOMMChannelEventTypeClosed:
             ndebug("RFCOMMChannelEvent Closed");
             isClosed = true;
-            closedStatus = event->status;
             MPSetEvent(notificationEvent, 0);
             MPSetEvent(writeCompleteNotificationEvent, 0);
             break;
@@ -229,6 +228,7 @@ void RFCOMMConnectionOpen::run() {
         return;
     }
     comm->address = this->address;
+    comm->isClosed = false;
 
     BluetoothRFCOMMChannelID channelID = this->channel;
 #ifdef OBJC_VERSION
@@ -302,7 +302,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfO
 
     if (runnable.error != 0) {
         RFCOMMChannelCloseExec(comm);
-        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection [0x%08x]", runnable.status);
+        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection(1) [0x%08x]", runnable.status);
         return 0;
     }
 
@@ -310,7 +310,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfO
         RFCOMMChannelCloseExec(comm);
         return 0;
     }
-    debug("connected");
+    debug("rfcomm connected");
 	return comm->internalHandle;
 }
 

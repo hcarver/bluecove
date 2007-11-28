@@ -180,6 +180,7 @@ void L2CAPConnectionOpen::run() {
         return;
     }
     comm->address = this->address;
+    comm->isClosed = false;
 
     BluetoothL2CAPPSM psm = this->channel;
     comm->initDelegate();
@@ -232,7 +233,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2OpenClientC
 
     if (runnable.error != 0) {
         L2CAPChannelCloseExec(comm);
-        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection [0x%08x]", runnable.status);
+        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection(1) [0x%08x]", runnable.status);
         return 0;
     }
 
@@ -240,7 +241,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2OpenClientC
         L2CAPChannelCloseExec(comm);
         return 0;
     }
-    debug("connected");
+    debug("l2cap connected");
 	return comm->internalHandle;
 }
 

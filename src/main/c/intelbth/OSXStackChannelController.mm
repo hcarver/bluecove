@@ -25,7 +25,6 @@
 
 ChannelController::ChannelController() {
     openStatus = kIOReturnSuccess;
-    closedStatus = kIOReturnSuccess;
     isClosed = false;
 	isConnected = false;
 	MPCreateEvent(&notificationEvent);
@@ -53,15 +52,16 @@ BOOL ChannelController::waitForConnection(JNIEnv *env, jint timeout) {
 		throwIOException(env, cSTACK_CLOSED);
 		return false;
 	}
-    if (isClosed) {
-	    throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection [0x%08x]", closedStatus);
-	    return false;
-    }
 
     if (openStatus != kIOReturnSuccess) {
         isConnected = false;
-        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection [0x%08x]", openStatus);
+        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection(2) [0x%08x]", openStatus);
         return false;
+    }
+
+    if (isClosed) {
+	    throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection(3)");
+	    return false;
     }
 
     if (isConnected) {
