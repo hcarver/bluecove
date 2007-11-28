@@ -41,7 +41,7 @@ ChannelController::~ChannelController() {
 
 BOOL ChannelController::waitForConnection(JNIEnv *env, jint timeout) {
     CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent ();
-    while ((stack != NULL) && (!isClosed) && (!isConnected)) {
+    while ((stack != NULL) && (!isClosed) && (!isConnected) && (openStatus == kIOReturnSuccess)) {
         MPEventFlags flags;
         MPWaitForEvent(notificationEvent, &flags, kDurationMillisecond * 500);
         CFAbsoluteTime nowTime = CFAbsoluteTimeGetCurrent ();

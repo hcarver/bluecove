@@ -62,7 +62,7 @@ public:
     void rfcommChannelOpenComplete(IOReturn error);
     void rfcommChannelData(void*dataPointer, size_t dataLength);
     void rfcommChannelClosed();
-    void rfcommChannelWriteComplete(void* refcon, IOReturn error);
+    void rfcommChannelWriteComplete(void* refcon, IOReturn status);
 #else
     void rfcommEvent(IOBluetoothRFCOMMChannelRef rfcommChannelRef, IOBluetoothRFCOMMChannelEvent *event);
 #endif
@@ -91,11 +91,13 @@ public:
     BOOL writeComplete;
     void *data;
     UInt16 length;
+    IOReturn ioerror;
 
     RFCOMMChannelController* comm;
     volatile IOReturn status;
 
     RFCOMMConnectionWrite();
+
+    void rfcommChannelWriteComplete(IOReturn status);
     virtual void run();
-    void rfcommChannelWriteComplete();
 };

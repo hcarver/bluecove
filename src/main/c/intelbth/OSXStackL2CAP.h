@@ -46,8 +46,45 @@ public:
     L2CAPChannelController();
     ~L2CAPChannelController();
 
+    void initDelegate();
+
     void l2capChannelData(void* dataPointer, size_t dataLength);
     void l2capChannelOpenComplete(IOReturn error);
     void l2capChannelClosed();
-    void l2capChannelWriteComplete(void* refcon, IOReturn error);
+    void l2capChannelWriteComplete(void* refcon, IOReturn status);
+
+    IOReturn close();
+};
+
+class L2CAPConnectionOpen: public Runnable {
+public:
+    jlong address;
+    jint channel;
+    jboolean authenticate;
+    jboolean encrypt;
+    jint timeout;
+    jint receiveMTU;
+    jint transmitMTU;
+
+    L2CAPChannelController* comm;
+    volatile IOReturn status;
+
+    L2CAPConnectionOpen();
+    virtual void run();
+};
+
+class L2CAPConnectionWrite: public Runnable {
+public:
+    BOOL writeComplete;
+    void *data;
+    UInt16 length;
+    IOReturn ioerror;
+
+    L2CAPChannelController* comm;
+    volatile IOReturn status;
+
+    L2CAPConnectionWrite();
+
+    void l2capChannelWriteComplete(IOReturn status);
+    virtual void run();
 };

@@ -111,9 +111,12 @@ void RFCOMMChannelController::initDelegate() {
 
 void RFCOMMChannelController::rfcommChannelOpenComplete(IOReturn error) {
     ndebug("rfcommChannelOpenComplete");
-    rfcommChannelMTU = [rfcommChannel getMTU];
-    openStatus = error;
-    isConnected = true;
+    if (error == kIOReturnSuccess) {
+        isConnected = true;
+        rfcommChannelMTU = [rfcommChannel getMTU];
+    } else {
+        openStatus = error;
+    }
     MPSetEvent(notificationEvent, 1);
 }
 
@@ -134,7 +137,7 @@ void RFCOMMChannelController::rfcommChannelData(void* dataPointer, size_t dataLe
 
 void RFCOMMChannelController::rfcommChannelWriteComplete(void* refcon, IOReturn error) {
     if (refcon != NULL) {
-        ((RFCOMMConnectionWrite*)refcon)->rfcommChannelWriteComplete();
+        ((RFCOMMConnectionWrite*)refcon)->rfcommChannelWriteComplete(error);
     }
     MPSetEvent(writeCompleteNotificationEvent, 1);
 }
@@ -228,33 +231,31 @@ void RFCOMMConnectionOpen::run() {
     comm->address = this->address;
 
     BluetoothRFCOMMChannelID channelID = this->channel;
-    IOReturn rc;
 #ifdef OBJC_VERSION
     comm->initDelegate();
     IOBluetoothDevice* dev = [IOBluetoothDevice withDeviceRef:deviceRef];
-    rc = [dev openRFCOMMChannelAsync:&(comm->rfcommChannel) withChannelID:channelID  delegate:comm->delegate];
-    if ((rc != kIOReturnSuccess) || (comm->rfcommChannel == NULL)) {
+    status = [dev openRFCOMMChannelAsync:&(comm->rfcommChannel) withChannelID:channelID  delegate:comm->delegate];
+    if ((status != kIOReturnSuccess) || (comm->rfcommChannel == NULL)) {
         error = 1;
     } else {
-        rc = [comm->rfcommChannel setDelegate:comm->delegate];
-        if (rc != kIOReturnSuccess) {
+        status = [comm->rfcommChannel setDelegate:comm->delegate];
+        if (status != kIOReturnSuccess) {
             error = 1;
         } else {
             [comm->rfcommChannel retain];
         }
     }
 #else // OBJC_VERSION
-    rc = IOBluetoothDeviceOpenRFCOMMChannelAsync(deviceRef, &(comm->rfcommChannel), channelID, rfcommEventListener, comm);
-    if ((rc != kIOReturnSuccess) || (comm->rfcommChannel == NULL))  {
+    status = IOBluetoothDeviceOpenRFCOMMChannelAsync(deviceRef, &(comm->rfcommChannel), channelID, rfcommEventListener, comm);
+    if ((status != kIOReturnSuccess) || (comm->rfcommChannel == NULL))  {
         error = 1;
     } else {
-        rc = IOBluetoothRFCOMMChannelRegisterIncomingEventListener(comm->rfcommChannel, rfcommEventListener, comm);
-        if (rc != kIOReturnSuccess) {
+        status = IOBluetoothRFCOMMChannelRegisterIncomingEventListener(comm->rfcommChannel, rfcommEventListener, comm);
+        if (status != kIOReturnSuccess) {
             error = 1;
         }
     }
 #endif // OBJC_VERSION
-    lData = rc;
 }
 
 #ifndef OBJC_VERSION
@@ -301,7 +302,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfO
 
     if (runnable.error != 0) {
         RFCOMMChannelCloseExec(comm);
-        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection [0x%08x]", runnable.lData);
+        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection [0x%08x]", runnable.status);
         return 0;
     }
 
@@ -345,15 +346,29 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfCl
 	}
 }
 
-RUNNABLE(RFCOMMChannelIsOpen, "RFCOMMChannelIsOpen") {
+RUNNABLE(RFCOMMChannelRemoteAddress, "RFCOMMChannelRemoteAddress") {
     RFCOMMChannelController* comm = (RFCOMMChannelController*)pData[0];
     if (comm->rfcommChannel == NULL) {
-        bData = false;
+        error = 1;
     } else {
 #ifdef OBJC_VERSION
-        bData = [comm->rfcommChannel isOpen];
+        bool isOpen = [comm->rfcommChannel isOpen];
+        if (!isOpen) {
+            error = 1;
+            return;
+        }
+        IOBluetoothDevice* device = [comm->rfcommChannel getDevice];
+        if (device == NULL) {
+            error = 1;
+            return;
+        }
+        comm->address = OSxAddrToLong([device getAddress]);
 #else
-        bData = IOBluetoothRFCOMMChannelIsOpen(comm->rfcommChannel);
+        bool isOpen = IOBluetoothRFCOMMChannelIsOpen(comm->rfcommChannel);
+        if (!isOpen) {
+            error = 1;
+            return;
+        }
 #endif // ifdef OBJC_VERSION
     }
 }
@@ -364,10 +379,10 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getConnection
     if (comm == NULL) {
 		return 0;
 	}
-	RFCOMMChannelIsOpen runnable;
+	RFCOMMChannelRemoteAddress runnable;
 	runnable.pData[0] = comm;
     synchronousBTOperation(&runnable);
-	if (!runnable.bData) {
+	if (runnable.error) {
 		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return 0;
 	}
@@ -499,25 +514,28 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 RFCOMMConnectionWrite::RFCOMMConnectionWrite() {
     name = "RFCOMMConnectionWrite";
     writeComplete = false;
+    ioerror = kIOReturnSuccess;
+}
+
+void RFCOMMConnectionWrite::rfcommChannelWriteComplete(IOReturn status) {
+    ioerror = status;
+    if (ioerror != kIOReturnSuccess) {
+        error = 1;
+    }
+    writeComplete = true;
 }
 
 void RFCOMMConnectionWrite::run() {
-    IOReturn rc;
     void* notify = NULL;
     notify = this;
 #ifdef OBJC_VERSION
-    rc = [comm->rfcommChannel writeAsync:data length:length refcon:notify];
+    ioerror = [comm->rfcommChannel writeAsync:data length:length refcon:notify];
 #else
-    rc = IOBluetoothRFCOMMChannelWriteAsync(comm->rfcommChannel, data, length, notify);
+    ioerror = IOBluetoothRFCOMMChannelWriteAsync(comm->rfcommChannel, data, length, notify);
 #endif // ifdef OBJC_VERSION
-    lData = rc;
-    if (rc != kIOReturnSuccess) {
+    if (ioerror != kIOReturnSuccess) {
         error = 1;
     }
-}
-
-void RFCOMMConnectionWrite::rfcommChannelWriteComplete() {
-    writeComplete = true;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWrite
@@ -540,7 +558,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 	    runnable.length = writeLen;
         synchronousBTOperation(&runnable);
         if (runnable.error != 0) {
-            throwIOExceptionExt(env, "Failed to write [0x%08x]", runnable.lData);
+            throwIOExceptionExt(env, "Failed to write [0x%08x]", runnable.ioerror);
 			break;
         }
         while ((stack != NULL) &&( comm->isConnected) && (!comm->isClosed)) {
@@ -566,6 +584,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 	        break;
 		}
         done += writeLen;
+        if (runnable.error != 0) {
+            throwIOExceptionExt(env, "Failed to write [0x%08x]", runnable.ioerror);
+			break;
+        }
 	}
 
 	env->ReleaseByteArrayElements(b, bytes, 0);
