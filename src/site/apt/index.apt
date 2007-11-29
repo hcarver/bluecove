@@ -54,7 +54,7 @@ BlueCove
 
     API-Documentation for BlueCove {{{apidocs/index.html}Java docs}}. For application it is not recommended to use any classes or API other than defined in JSR-82.
 
-    Main project website {{{http://code.google.com/p/bluecove/}http://code.google.com/p/bluecove/}}
+    Main project website {{{http://bluecove.googlecode.com}http://bluecove.googlecode.com}}
 
 * BlueCove Tests on windows
 
