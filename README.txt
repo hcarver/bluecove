@@ -29,7 +29,7 @@ BlueCove provides an implementation of the JSR 82. Applications should use API d
 
 == Limitations ==
 
-  L2CAP support available only on WIDCOMM Stack.
+  L2CAP support available only on WIDCOMM and Mac OS X Stack.
 
   Due to the Microsoft Bluetooth stack only supporting RFCOMM connections,
 BlueCove also only supports RFCOMM connections on this stack. The operating system support is
