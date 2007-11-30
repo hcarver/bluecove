@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+    xmlns:codesearch="http://www.google.com/codesearch/schemas/sitemap/1.0">
    <url>
       <loc>http://bluecove.sourceforge.net/</loc>
       <changefreq>weekly</changefreq>
@@ -24,4 +25,33 @@
       <loc>http://sourceforge.net/project/showfiles.php?group_id=114020</loc>
       <changefreq>monthly</changefreq>
    </url>
+
+   <url>
+        <loc>http://bluecove.googlecode.com/svn/trunk/src/test/java/com/intel/bluetooth/javadoc/OBEXPutServer.java</loc>
+        <codesearch:codesearch>
+            <codesearch:filetype>java</codesearch:filetype>
+            <codesearch:license>LGPL</codesearch:license>
+        </codesearch:codesearch>
+    </url>
+    <url>
+        <loc>http://bluecove.googlecode.com/svn/trunk/src/test/java/com/intel/bluetooth/javadoc/ObexPutClient.java</loc>
+        <codesearch:codesearch>
+            <codesearch:filetype>java</codesearch:filetype>
+            <codesearch:license>LGPL</codesearch:license>
+        </codesearch:codesearch>
+    </url>
+    <url>
+        <loc>http://bluecove.googlecode.com/svn/trunk/src/test/java/com/intel/bluetooth/javadoc/RemoteDeviceDiscovery.java</loc>
+        <codesearch:codesearch>
+            <codesearch:filetype>java</codesearch:filetype>
+            <codesearch:license>LGPL</codesearch:license>
+        </codesearch:codesearch>
+    </url>
+    <url>
+        <loc>http://bluecove.googlecode.com/svn/trunk/src/test/java/com/intel/bluetooth/javadoc/ServicesSearch.java</loc>
+        <codesearch:codesearch>
+            <codesearch:filetype>java</codesearch:filetype>
+            <codesearch:license>LGPL</codesearch:license>
+        </codesearch:codesearch>
+    </url>
 </urlset>
