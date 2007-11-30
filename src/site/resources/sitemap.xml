@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+   <url>
+      <loc>http://bluecove.sourceforge.net/</loc>
+      <changefreq>weekly</changefreq>
+   </url>
+   <url>
+      <loc>http://code.google.com/p/bluecove/wiki/Documentation</loc>
+      <changefreq>weekly</changefreq>
+   </url>
+   <url>
+      <loc>http://snapshot-bluecove.pyx4j.com/apidocs/index.html</loc>
+      <changefreq>monthly</changefreq>
+   </url>
+   <url>
+      <loc>http://snapshot-bluecove.pyx4j.com/bluecove-examples/</loc>
+      <changefreq>weekly</changefreq>
+   </url>
+   <url>
+      <loc>http://bluecove.wiki.sourceforge.net/</loc>
+      <changefreq>weekly</changefreq>
+   </url>
+    <url>
+      <loc>http://sourceforge.net/project/showfiles.php?group_id=114020</loc>
+      <changefreq>monthly</changefreq>
+   </url>
+</urlset>
