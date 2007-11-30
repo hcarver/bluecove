@@ -213,6 +213,10 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 				_throwRuntimeException(env, "WaitForSingleObject");
 				open_l2client_return 0;
 			}
+			if (isCurrentThreadInterrupted(env, peer)) {
+			    debug("Interrupted while writing");
+			    open_l2client_return 0;
+		    }
 			if ((timeout > 0) && ((GetTickCount() - waitStart)  > (DWORD)timeout)) {
 				throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout");
 				open_l2client_return 0;
