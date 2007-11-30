@@ -17,7 +17,7 @@
 
     <name>bluecove</name>
 
-    <description>BlueCove is a LGPL licensed JSR-82 J2SE implementation that currently interfaces with the WIDCOMM, BlueSoleil and Microsoft Bluetooth stack</description>
+    <description>BlueCove is a LGPL licensed JSR-82 J2SE implementation that currently interfaces with the Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack</description>
 
 
     <organization>
