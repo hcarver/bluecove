@@ -38,11 +38,15 @@ ChannelController::~ChannelController() {
     MPDeleteEvent(writeCompleteNotificationEvent);
 }
 
-BOOL ChannelController::waitForConnection(JNIEnv *env, jint timeout) {
+BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, jint timeout) {
     CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent ();
     while ((stack != NULL) && (!isClosed) && (!isConnected) && (openStatus == kIOReturnSuccess)) {
         MPEventFlags flags;
         MPWaitForEvent(notificationEvent, &flags, kDurationMillisecond * 500);
+        if (isCurrentThreadInterrupted(env, peer)) {
+			debug("Interrupted while reading");
+			return false;
+		}
         CFAbsoluteTime nowTime = CFAbsoluteTimeGetCurrent ();
         if ((timeout > 0) && ((nowTime - startTime) * 1000  > timeout)) {
 			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout");

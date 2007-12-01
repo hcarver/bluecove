@@ -37,5 +37,5 @@ public:
     ChannelController();
     ~ChannelController();
 
-    BOOL waitForConnection(JNIEnv *env, jint timeout);
+    BOOL waitForConnection(JNIEnv *env, jobject peer, jint timeout);
 };

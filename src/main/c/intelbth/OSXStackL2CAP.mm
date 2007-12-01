@@ -185,17 +185,29 @@ void L2CAPConnectionOpen::run() {
     BluetoothL2CAPPSM psm = this->channel;
     comm->initDelegate();
     IOBluetoothDevice* dev = [IOBluetoothDevice withDeviceRef:deviceRef];
+    if (dev == NULL) {
+        error = 1;
+        return;
+    }
+
+    status = [dev openConnection];
+    if (status != kIOReturnSuccess) {
+        error = 1;
+        return;
+    }
+
     status = [dev openL2CAPChannelAsync:&(comm->l2capChannel) withPSM:psm  delegate:comm->delegate];
     if ((status != kIOReturnSuccess) || (comm->l2capChannel == NULL)) {
         error = 1;
-    } else {
-        status = [comm->l2capChannel setDelegate:comm->delegate];
-        if (status != kIOReturnSuccess) {
-            error = 1;
-        } else {
-            [comm->l2capChannel retain];
-        }
+        return;
     }
+
+    status = [comm->l2capChannel setDelegate:comm->delegate];
+    if (status != kIOReturnSuccess) {
+        error = 1;
+        return;
+    }
+    [comm->l2capChannel retain];
 }
 
 RUNNABLE(L2CAPChannelClose, "L2CAPChannelClose") {
@@ -212,7 +224,7 @@ long L2CAPChannelCloseExec(L2CAPChannelController* comm) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2OpenClientConnectionImpl
-  (JNIEnv *env, jobject, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint receiveMTU, jint transmitMTU, jint timeout) {
+  (JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint receiveMTU, jint transmitMTU, jint timeout) {
     L2CAPChannelController* comm = new L2CAPChannelController();
 	if (!stack->commPool->addObject(comm, 'l')) {
 		delete comm;
@@ -237,7 +249,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2OpenClientC
         return 0;
     }
 
-    if (!comm->waitForConnection(env, timeout)) {
+    if (!comm->waitForConnection(env, peer, timeout)) {
         L2CAPChannelCloseExec(comm);
         return 0;
     }

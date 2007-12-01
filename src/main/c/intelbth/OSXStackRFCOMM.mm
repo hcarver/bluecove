@@ -234,17 +234,27 @@ void RFCOMMConnectionOpen::run() {
 #ifdef OBJC_VERSION
     comm->initDelegate();
     IOBluetoothDevice* dev = [IOBluetoothDevice withDeviceRef:deviceRef];
+    if (dev == NULL) {
+        error = 1;
+        return;
+    }
+    status = [dev openConnection];
+    if (status != kIOReturnSuccess) {
+        error = 1;
+        return;
+    }
     status = [dev openRFCOMMChannelAsync:&(comm->rfcommChannel) withChannelID:channelID  delegate:comm->delegate];
     if ((status != kIOReturnSuccess) || (comm->rfcommChannel == NULL)) {
         error = 1;
-    } else {
-        status = [comm->rfcommChannel setDelegate:comm->delegate];
-        if (status != kIOReturnSuccess) {
-            error = 1;
-        } else {
-            [comm->rfcommChannel retain];
-        }
+        return;
     }
+    status = [comm->rfcommChannel setDelegate:comm->delegate];
+    if (status != kIOReturnSuccess) {
+        error = 1;
+    }
+
+    [comm->rfcommChannel retain];
+
 #else // OBJC_VERSION
     status = IOBluetoothDeviceOpenRFCOMMChannelAsync(deviceRef, &(comm->rfcommChannel), channelID, rfcommEventListener, comm);
     if ((status != kIOReturnSuccess) || (comm->rfcommChannel == NULL))  {
@@ -283,7 +293,7 @@ long RFCOMMChannelCloseExec(RFCOMMChannelController* comm) {
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfOpenClientConnectionImpl
-  (JNIEnv *env, jobject, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint timeout) {
+  (JNIEnv *env, jobject peer, jlong address, jint channel, jboolean authenticate, jboolean encrypt, jint timeout) {
     RFCOMMChannelController* comm = new RFCOMMChannelController();
 	if (!stack->commPool->addObject(comm, 'r')) {
 		delete comm;
@@ -306,7 +316,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfO
         return 0;
     }
 
-    if (!comm->waitForConnection(env, timeout)) {
+    if (!comm->waitForConnection(env, peer, timeout)) {
         RFCOMMChannelCloseExec(comm);
         return 0;
     }
