@@ -50,7 +50,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 
 	private Thread limitedDiscoverableTimer;
 
-	// TODO what is the real number for Attributes retrivable ?
+	// TODO what is the real number for Attributes retrievable ?
 	private final static int ATTR_RETRIEVABLE_MAX = 256;
 
 	static {
@@ -59,6 +59,8 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 
 	BluetoothStackMicrosoft() {
 	}
+
+	// ---------------------- Library initialization
 
 	public String getStackID() {
 		return BlueCoveImpl.STACK_WINSOCK;
@@ -99,6 +101,8 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 			throw new BluetoothStateException("Bluetooth system is unavailable");
 		}
 	}
+
+	// ---------------------- LocalDevice
 
 	private native int getDeviceClass(long address);
 
@@ -258,7 +262,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 		return Thread.interrupted();
 	}
 
-	// --- Device Inquiry
+	// ---------------------- Device Inquiry
 
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
 			String deviceName, boolean paired) {
@@ -310,7 +314,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 		}
 	}
 
-	// --- Service search
+	// ---------------------- Service search
 
 	/*
 	 * perform synchronous service discovery
@@ -422,15 +426,15 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 	/*
 	 * socket operations
 	 */
-	public native long socket(boolean authenticate, boolean encrypt) throws IOException;
+	private native long socket(boolean authenticate, boolean encrypt) throws IOException;
 
-	public native long getsockaddress(long socket) throws IOException;
+	private native long getsockaddress(long socket) throws IOException;
 
-	public native void storesockopt(long socket);
+	private native void storesockopt(long socket);
 
-	public native int getsockchannel(long socket) throws IOException;
+	private native int getsockchannel(long socket) throws IOException;
 
-	public native void connect(long socket, long address, int channel) throws IOException;
+	private native void connect(long socket, long address, int channel) throws IOException;
 
 	// public native int getSecurityOptImpl(long handle) throws IOException;
 	public int getSecurityOpt(long handle, int expected) throws IOException {
@@ -459,7 +463,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 
 	private native long getpeeraddress(long socket) throws IOException;
 
-	// --- Client RFCOMM connections
+	// ---------------------- Client RFCOMM connections
 
 	/*
 	 * (non-Javadoc)
@@ -469,11 +473,14 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 	 */
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
 		long socket = socket(params.authenticate, params.encrypt);
+		boolean success = false;
 		try {
 			connect(socket, params.address, params.channel);
-		} catch (IOException e) {
-			close(socket);
-			throw e;
+			success = true;
+		} finally {
+			if (!success) {
+				close(socket);
+			}
 		}
 		return socket;
 	}
@@ -488,8 +495,9 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 		 * open socket
 		 */
 		long socket = socket(params.authenticate, params.encrypt);
-
+		boolean success = false;
 		try {
+
 			bind(socket);
 			listen(socket);
 
@@ -504,23 +512,27 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 			 */
 			serviceRecord.setHandle(registerService(serviceRecord.toByteArray()));
 
-		} catch (IOException e) {
-			close(socket);
-			throw e;
+			success = true;
+		} finally {
+			if (!success) {
+				close(socket);
+			}
 		}
 		return socket;
 	}
 
 	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
-
-		/*
-		 * close socket
-		 */
-		close(handle);
-		/*
-		 * unregister service
-		 */
-		unregisterService(serviceRecord.getHandle());
+		try {
+			/*
+			 * close socket
+			 */
+			close(handle);
+		} finally {
+			/*
+			 * unregister service
+			 */
+			unregisterService(serviceRecord.getHandle());
+		}
 	}
 
 	/*
@@ -582,7 +594,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 		// TODO are there any flush
 	}
 
-	// --- Client and Server L2CAP connections
+	// ---------------------- Client and Server L2CAP connections
 
 	/*
 	 * (non-Javadoc)
