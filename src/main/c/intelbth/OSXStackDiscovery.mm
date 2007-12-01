@@ -35,7 +35,7 @@ int deviceInquiryCount = 0;
     IOReturn    status;
     _count = count;
     [self   stopSearch];
-    int inquiryLength = 15;
+    int inquiryLength = 11;
 
     ndebug("deviceInquiry %i startSearch", _count);
     _notificationEvent = &(stack->deviceInquiryNotificationEvent);
