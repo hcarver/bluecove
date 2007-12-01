@@ -30,6 +30,7 @@ public:
     CFDateRef startTime;
     volatile IOReturn status;
     volatile int recordsSize;
+    IOBluetoothDeviceRef deviceRef;
 
     StackSDPQueryStart();
     virtual void run();

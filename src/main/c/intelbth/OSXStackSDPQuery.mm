@@ -31,6 +31,7 @@ jint runningTansID[MAX_TERMINATE] = {0};
 StackSDPQueryStart::StackSDPQueryStart() {
     name = "StackSDPQueryStart";
     complete = FALSE;
+    deviceRef = NULL;
     error = 0;
 }
 
@@ -45,7 +46,7 @@ void StackSDPQueryStart::run() {
 
     BluetoothDeviceAddress btAddress;
     LongToOSxBTAddr(address, &btAddress);
-    IOBluetoothDeviceRef deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
+    deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
     if (deviceRef == NULL) {
         error = 1;
         return;
@@ -58,6 +59,10 @@ void StackSDPQueryStart::run() {
 
 void StackSDPQueryStart::sdpQueryComplete(IOBluetoothDeviceRef deviceRef, IOReturn status) {
     this->status = status;
+    // Apperantly connection to device is still open after SDP query for some time. This may affect other connections.
+    if (deviceRef != NULL) {
+        IOBluetoothDeviceCloseConnection(deviceRef);
+    }
     if (kIOReturnSuccess != status) {
         this->error = 1;
     } else {
