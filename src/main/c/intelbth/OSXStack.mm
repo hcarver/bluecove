@@ -378,7 +378,7 @@ RUNNABLE(IsLocalDevicePowerOn, "IsLocalDevicePowerOn") {
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDevicePowerOn
 (JNIEnv *env, jobject) {
     Edebug("isLocalDevicePowerOn");
-   IsLocalDevicePowerOn runnable;
+    IsLocalDevicePowerOn runnable;
     synchronousBTOperation(&runnable);
     return (runnable.bData)?JNI_TRUE:JNI_FALSE;
 }
