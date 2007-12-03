@@ -685,7 +685,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
     dwResult = BT_GetConnectInfo(dwConnectionHandle, &bIsOutGoing, &wClass, bdAddr, &dwLen, (BYTE*)&sppConnInfo);
     if (stack == NULL) {
 		throwIOException(env, cSTACK_CLOSED);
-		return NULL;
+		return 0;
 	}
     if (dwResult != BTSTATUS_SUCCESS)   {
         debugs("BT_GetConnectInfo return  [%s]", getBsAPIStatusString(dwResult));
@@ -700,6 +700,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
         stack->deleteCommPort(rf);
         LeaveCriticalSection(&stack->openingPortLock);
         throwIOExceptionExt(env, "Port# mismatch [%u] and [%u]", (unsigned int)(sppConnInfo.ucComPort), (unsigned int)(svcInfoSPPEx.ucComIndex));
+        return 0;
     }
 
     // To solve concurrent connections problem
@@ -713,7 +714,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
     if (!rf->openComPort(env, portN)) {
         if (stack == NULL) {
 		    throwIOException(env, cSTACK_CLOSED);
-		    return NULL;
+		    return 0;
 	    }
         stack->deleteCommPort(rf);
         BT_DisconnectSPPExService(dwConnectionHandle);
