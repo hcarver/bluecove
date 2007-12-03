@@ -34,6 +34,10 @@ public:
     MPEventID incomingChannelNotificationEvent;
     IOBluetoothUserNotificationRef incomingChannelNotification;
 
+    MPEventID acceptedEvent;
+    volatile BOOL openningClient;
+    RFCOMMChannelController* acceptClientComm;
+
 public:
     RFCOMMServerController();
     ~RFCOMMServerController();

@@ -26,6 +26,11 @@
 static NSString *kServiceItemKeyServiceClassIDList = @"0001 - ServiceClassIDList";
 static NSString *kServiceItemKeyServiceName = @"0100 - ServiceName*";
 static NSString *kServiceItemKeyProtocolDescriptorList = @"0004 - ProtocolDescriptorList";
+static NSString *kServiceItemKeyBrowseGroupList = @"0005 - BrowseGroupList*";
+
+static NSString *kDataElementSize = @"DataElementSize";
+static NSString *kDataElementType = @"DataElementType";
+static NSString *kDataElementValue = @"DataElementValue";
 
 RFCOMMServerController* validRFCOMMServerControllerHandle(JNIEnv *env, jlong handle) {
 	if (stack == NULL) {
@@ -40,14 +45,18 @@ RFCOMMServerController::RFCOMMServerController() {
     sdpEntries = NULL;
     sdpServiceRecordHandle = 0;
     rfcommChannelID = 0;
+    acceptClientComm = NULL;
     incomingChannelNotification = NULL;
     MPCreateEvent(&incomingChannelNotificationEvent);
+    MPCreateEvent(&acceptedEvent);
 }
 
 RFCOMMServerController::~RFCOMMServerController() {
     isClosed = true;
     MPSetEvent(incomingChannelNotificationEvent, 0);
     MPDeleteEvent(incomingChannelNotificationEvent);
+    MPSetEvent(acceptedEvent, 0);
+    MPDeleteEvent(acceptedEvent);
 }
 
 void RFCOMMServerController::init() {
@@ -102,20 +111,83 @@ RFCOMMServicePublish::RFCOMMServicePublish() {
     name = "RFCOMMServicePublish";
 }
 
+NSDictionary* createIntDataElement(int size, int type, int value) {
+    NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:3];
+    [dict setObject:[NSNumber numberWithInt:size] forKey:kDataElementSize];
+    [dict setObject:[NSNumber numberWithInt:type] forKey:kDataElementType];
+    [dict setObject:[NSNumber numberWithInt:value] forKey:kDataElementValue];
+    return dict;
+}
+
 void RFCOMMServicePublish::run() {
     comm->init();
 
     NSString* srvName = [NSString stringWithCharacters:(UniChar*)serviceName length:serviceNameLength];
     [comm->sdpEntries setObject:srvName forKey:kServiceItemKeyServiceName];
 
+/*
+0x0001 ServiceClassIDList:  DATSEQ {
+  UUID b10c0be1111111111111111111110001 (SERVICE UUID)
+  UUID 0000110100001000800000805f9b34fb (SERIAL_PORT)
+}
+*/
     NSMutableArray *currentServiceList = [comm->sdpEntries objectForKey:kServiceItemKeyServiceClassIDList];
 	if (currentServiceList == nil) {
 		currentServiceList = [NSMutableArray array];
 	}
 	[currentServiceList addObject:[NSData dataWithBytes:uuidValue length:uuidValueLength]];
+
+    if (!obexSrv) {
+	    IOBluetoothSDPUUID* serial_port_uuid = [IOBluetoothSDPUUID uuid16:0x1101];
+	    [currentServiceList addObject:serial_port_uuid];
+    }
+
 	// update dict
 	[comm->sdpEntries setObject:currentServiceList forKey:kServiceItemKeyServiceClassIDList];
 
+/*
+0x0004 ProtocolDescriptorList:  DATSEQ {
+  DATSEQ {
+    UUID 0000010000001000800000805f9b34fb (L2CAP)
+  }
+  DATSEQ {
+    UUID 0000000300001000800000805f9b34fb (RFCOMM)
+    U_INT_1 0x1
+  }
+}
+*/
+    NSMutableArray *protocolDescriptorList = [NSMutableArray array];
+    NSMutableArray *protocolDescriptorList1 = [NSMutableArray array];
+    [protocolDescriptorList addObject:protocolDescriptorList1];
+
+    IOBluetoothSDPUUID* l2cap_uuid = [IOBluetoothSDPUUID uuid16:0x0100];
+    [protocolDescriptorList1 addObject:l2cap_uuid];
+
+    NSMutableArray *protocolDescriptorList2 = [NSMutableArray array];
+    [protocolDescriptorList addObject:protocolDescriptorList2];
+
+    IOBluetoothSDPUUID* rfcomm_uuid = [IOBluetoothSDPUUID uuid16:0x0003];
+    [protocolDescriptorList2 addObject:rfcomm_uuid];
+    NSObject* channelID = createIntDataElement(1, 1, 1);
+    [protocolDescriptorList2 addObject:channelID];
+
+    if (obexSrv) {
+        NSMutableArray *protocolDescriptorList3 = [NSMutableArray array];
+        [protocolDescriptorList addObject:protocolDescriptorList3];
+
+        IOBluetoothSDPUUID* obex_uuid = [IOBluetoothSDPUUID uuid16:0x0008];
+        [protocolDescriptorList3 addObject:obex_uuid];
+    }
+
+    [comm->sdpEntries setObject:protocolDescriptorList forKey:kServiceItemKeyProtocolDescriptorList];
+
+
+/*
+0x0005 BrowseGroupList:  DATSEQ {
+  UUID 0000100200001000800000805f9b34fb (PUBLICBROWSE_GROUP)
+}
+*/
+//kServiceItemKeyBrowseGroupList
 
    	// publish the service
 	status = comm->publish();
@@ -188,9 +260,29 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerCloseI
 
 void rfcommServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNotificationRef inRef, IOBluetoothObjectRef objectRef ) {
     ndebug("rfcommServiceOpenNotificationCallback");
+    RFCOMMServerController* comm = (RFCOMMServerController*)userRefCon;
+    if (comm == NULL) {
+        return;
+    }
+    if ((comm->magic1 != MAGIC_1) || (comm->magic2 != MAGIC_2)) {
+		return;
+	}
+	IOBluetoothRFCOMMChannel *rfcommChannel = [IOBluetoothRFCOMMChannel withRFCOMMChannelRef:(IOBluetoothRFCOMMChannelRef)objectRef];
+	if (rfcommChannel == NULL) {
+	    ndebug("fail to get IOBluetoothRFCOMMChannel");
+	    return;
+	}
+	RFCOMMChannelController* client = comm->acceptClientComm;
+	if (client == NULL) {
+	    ndebug("drop incomming connection since AcceptAndOpen not running");
+	    return;
+	}
+	client->openIncomingChannel(rfcommChannel);
+	comm->openningClient = true;
+    MPSetEvent(comm->incomingChannelNotificationEvent, 0);
 }
 
-RUNNABLE(RFCOMMServiceAcceptAndOpen, "RFCOMMServiceAcceptAndOpen") {
+RUNNABLE(RFCOMMServiceRegisterForOpen, "RFCOMMServiceRegisterForOpen") {
     RFCOMMServerController* comm = (RFCOMMServerController*)pData[0];
     comm->incomingChannelNotification = IOBluetoothRegisterForFilteredRFCOMMChannelOpenNotifications(rfcommServiceOpenNotificationCallback, comm, comm->rfcommChannelID, kIOBluetoothUserNotificationChannelDirectionIncoming);
     if (comm->incomingChannelNotification == NULL) {
@@ -204,18 +296,9 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
     if (comm == NULL) {
 		return 0;
 	}
-    if (comm->incomingChannelNotification == NULL) {
-        RFCOMMServiceAcceptAndOpen runnable;
-	    runnable.pData[0] = comm;
-        synchronousBTOperation(&runnable);
-	    if (runnable.error) {
-		    throwIOException(env, "Failed to register for RFCOMMChannel Notifications");
-		    return 0;
-	    }
-	}
-	while ((stack != NULL) && (!comm->isClosed)) {
+	while ((stack != NULL) && (!comm->isClosed) && (comm->acceptClientComm != NULL)) {
 		MPEventFlags flags;
-        OSStatus err = MPWaitForEvent(comm->incomingChannelNotificationEvent, &flags, kDurationMillisecond * 500);
+        OSStatus err = MPWaitForEvent(comm->acceptedEvent, &flags, kDurationMillisecond * 500);
 		if ((err != kMPTimeoutErr) && (err != noErr)) {
 			throwRuntimeException(env, "MPWaitForEvent");
 			return 0;
@@ -225,9 +308,66 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
 			return 0;
 		}
 	}
-    return 0;
-}
+	if (stack == NULL) {
+	    throwIOException(env, cSTACK_CLOSED);
+	    return 0;
+	}
+    if (comm->isClosed) {
+        throwIOException(env, cCONNECTION_IS_CLOSED);
+        return 0;
+    }
+    if (comm->incomingChannelNotification == NULL) {
+        RFCOMMServiceRegisterForOpen runnable;
+	    runnable.pData[0] = comm;
+        synchronousBTOperation(&runnable);
+	    if (runnable.error) {
+		    throwIOException(env, "Failed to register for RFCOMMChannel Notifications");
+		    return 0;
+	    }
+	}
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfCloseServerConnection
-  (JNIEnv *env, jobject, jlong handle) {
+    debug("create ChannelController to accept incoming connection");
+	RFCOMMChannelController* clientComm = new RFCOMMChannelController();
+	if (!stack->commPool->addObject(clientComm, 'r')) {
+		delete clientComm;
+		throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
+		return 0;
+	}
+    comm->acceptClientComm = clientComm;
+    comm->openningClient = false;
+    BOOL error = false;
+	while ((stack != NULL) && (!comm->isClosed) && (comm->openningClient == false)) {
+		MPEventFlags flags;
+        OSStatus err = MPWaitForEvent(comm->incomingChannelNotificationEvent, &flags, kDurationMillisecond * 500);
+		if ((err != kMPTimeoutErr) && (err != noErr)) {
+			throwRuntimeException(env, "MPWaitForEvent");
+			error = true;
+			break;
+		}
+		if (isCurrentThreadInterrupted(env, peer)) {
+			debug("Interrupted while waiting for connections");
+			error = true;
+			break;
+		}
+	}
+	if ((stack != NULL) && (!comm->isClosed)) {
+	    comm->acceptClientComm = NULL;
+	    MPSetEvent(comm->acceptedEvent, 0);
+    }
+
+	if ((error) || (stack == NULL) || (comm->isClosed) || (!comm->openningClient)) {
+	    clientComm->readyToFree = TRUE;
+	    if (!error) {
+	        throwIOException(env, cCONNECTION_IS_CLOSED);
+	    }
+        return 0;
+	} else {
+	    int timeout = 120 * 1000;
+	    if (!clientComm->waitForConnection(env, peer, timeout)) {
+            RFCOMMChannelCloseExec(clientComm);
+            return 0;
+        }
+        debug("rfcomm client connected");
+        return clientComm->internalHandle;;
+    }
 }

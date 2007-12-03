@@ -67,6 +67,8 @@ public:
     void rfcommEvent(IOBluetoothRFCOMMChannelRef rfcommChannelRef, IOBluetoothRFCOMMChannelEvent *event);
 #endif
 
+    void openIncomingChannel(IOBluetoothRFCOMMChannel* newRfcommChannel);
+
     IOReturn close();
 
 };
@@ -85,6 +87,8 @@ public:
     RFCOMMConnectionOpen();
     virtual void run();
 };
+
+long RFCOMMChannelCloseExec(RFCOMMChannelController* comm);
 
 class RFCOMMConnectionWrite: public Runnable {
 public:

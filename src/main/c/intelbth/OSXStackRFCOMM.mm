@@ -120,6 +120,15 @@ void RFCOMMChannelController::rfcommChannelOpenComplete(IOReturn error) {
     MPSetEvent(notificationEvent, 1);
 }
 
+void RFCOMMChannelController::openIncomingChannel(IOBluetoothRFCOMMChannel* newRfcommChannel) {
+    initDelegate();
+    isConnected = false;
+    isClosed = false;
+    rfcommChannel = newRfcommChannel;
+    [rfcommChannel retain];
+    openStatus = [rfcommChannel setDelegate:delegate];
+}
+
 void RFCOMMChannelController::rfcommChannelClosed() {
     ndebug("rfcommChannelClosed");
     isClosed = true;
@@ -359,16 +368,19 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfCl
 RUNNABLE(RFCOMMChannelRemoteAddress, "RFCOMMChannelRemoteAddress") {
     RFCOMMChannelController* comm = (RFCOMMChannelController*)pData[0];
     if (comm->rfcommChannel == NULL) {
+        ndebug("rfcommChannel is NULL");
         error = 1;
     } else {
 #ifdef OBJC_VERSION
         bool isOpen = [comm->rfcommChannel isOpen];
         if (!isOpen) {
+            ndebug("rfcommChannel is NOT Open");
             error = 1;
             return;
         }
         IOBluetoothDevice* device = [comm->rfcommChannel getDevice];
         if (device == NULL) {
+            ndebug("rfcommChannel getDevice is NULL");
             error = 1;
             return;
         }

@@ -423,7 +423,9 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	public native long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
 
-	public native void connectionRfCloseServerConnection(long handle) throws IOException;
+	public void connectionRfCloseServerConnection(long handle) throws IOException {
+	    connectionRfCloseClientConnection(handle);
+	}
 
 	// ---------------------- Shared Client and Server RFCOMM connections
 
