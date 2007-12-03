@@ -697,10 +697,15 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
 
     if (sppConnInfo.ucComPort != svcInfoSPPEx.ucComIndex) {
         debug2("Port# mismatch [%u] and [%u]", (unsigned int)(sppConnInfo.ucComPort), (unsigned int)(svcInfoSPPEx.ucComIndex));
-        stack->deleteCommPort(rf);
-        LeaveCriticalSection(&stack->openingPortLock);
-        throwIOExceptionExt(env, "Port# mismatch [%u] and [%u]", (unsigned int)(sppConnInfo.ucComPort), (unsigned int)(svcInfoSPPEx.ucComIndex));
-        return 0;
+        if (sppConnInfo.ucComPort == 0) {
+            // Try to connect anyway to fix bluesoleil 5.0.5
+            sppConnInfo.ucComPort = svcInfoSPPEx.ucComIndex;
+        } else {
+            stack->deleteCommPort(rf);
+            LeaveCriticalSection(&stack->openingPortLock);
+            throwIOExceptionExt(env, "Port# mismatch [%u] and [%u]", (unsigned int)(sppConnInfo.ucComPort), (unsigned int)(svcInfoSPPEx.ucComIndex));
+            return 0;
+        }
     }
 
     // To solve concurrent connections problem
