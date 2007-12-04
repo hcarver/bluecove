@@ -81,6 +81,7 @@ IOReturn RFCOMMServerController::publish() {
 	    if (status != kIOReturnSuccess) {
 		    ndebug("failed to getRFCOMMChannelID");
 		} else {
+		    [rfcommChannelIDDataElement setObject:[NSNumber numberWithInt:rfcommChannelID] forKey:kDataElementValue];
 		    status = [serviceRecord getServiceRecordHandle:&sdpServiceRecordHandle];
 	    }
 	}
@@ -111,7 +112,7 @@ RFCOMMServicePublish::RFCOMMServicePublish() {
     name = "RFCOMMServicePublish";
 }
 
-NSDictionary* createIntDataElement(int size, int type, int value) {
+NSMutableDictionary* createIntDataElement(int size, int type, int value) {
     NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:3];
     [dict setObject:[NSNumber numberWithInt:size] forKey:kDataElementSize];
     [dict setObject:[NSNumber numberWithInt:type] forKey:kDataElementType];
@@ -168,8 +169,8 @@ void RFCOMMServicePublish::run() {
 
     IOBluetoothSDPUUID* rfcomm_uuid = [IOBluetoothSDPUUID uuid16:0x0003];
     [protocolDescriptorList2 addObject:rfcomm_uuid];
-    NSObject* channelID = createIntDataElement(1, 1, 1);
-    [protocolDescriptorList2 addObject:channelID];
+    comm->rfcommChannelIDDataElement = createIntDataElement(1, 1, 1);
+    [protocolDescriptorList2 addObject:(comm->rfcommChannelIDDataElement)];
 
     if (obexSrv) {
         NSMutableArray *protocolDescriptorList3 = [NSMutableArray array];

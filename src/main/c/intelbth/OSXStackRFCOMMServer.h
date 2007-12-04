@@ -38,6 +38,8 @@ public:
     volatile BOOL openningClient;
     RFCOMMChannelController* acceptClientComm;
 
+    NSMutableDictionary* rfcommChannelIDDataElement;
+
 public:
     RFCOMMServerController();
     ~RFCOMMServerController();
