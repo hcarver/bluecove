@@ -34,6 +34,7 @@ static const char* cIOException = "java/io/IOException";
 static const char* cInterruptedIOException = "java/io/InterruptedIOException";
 static const char* cBluetoothStateException = "javax/bluetooth/BluetoothStateException";
 static const char* cBluetoothConnectionException = "javax/bluetooth/BluetoothConnectionException";
+static const char* cServiceRegistrationException = "javax/bluetooth/ServiceRegistrationException";
 
 jint blueCoveVersion() {
 	return BLUECOVE_VERSION * 100 + BLUECOVE_BUILD;
@@ -123,6 +124,13 @@ void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
 	_vthrowExceptionExt(env, cIOException, fmt, ap);
+	va_end(ap);
+}
+
+void throwServiceRegistrationExceptionExt(JNIEnv *env, const char *fmt, ...) {
+    va_list ap;
+	va_start(ap, fmt);
+	_vthrowExceptionExt(env, cServiceRegistrationException, fmt, ap);
 	va_end(ap);
 }
 

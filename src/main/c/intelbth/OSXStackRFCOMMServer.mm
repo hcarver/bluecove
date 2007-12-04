@@ -28,10 +28,6 @@ static NSString *kServiceItemKeyServiceName = @"0100 - ServiceName*";
 static NSString *kServiceItemKeyProtocolDescriptorList = @"0004 - ProtocolDescriptorList";
 static NSString *kServiceItemKeyBrowseGroupList = @"0005 - BrowseGroupList*";
 
-static NSString *kDataElementSize = @"DataElementSize";
-static NSString *kDataElementType = @"DataElementType";
-static NSString *kDataElementValue = @"DataElementValue";
-
 RFCOMMServerController* validRFCOMMServerControllerHandle(JNIEnv *env, jlong handle) {
 	if (stack == NULL) {
 		throwIOException(env, cSTACK_CLOSED);
@@ -57,10 +53,6 @@ RFCOMMServerController::~RFCOMMServerController() {
     MPDeleteEvent(incomingChannelNotificationEvent);
     MPSetEvent(acceptedEvent, 0);
     MPDeleteEvent(acceptedEvent);
-}
-
-void RFCOMMServerController::init() {
-    sdpEntries = [NSMutableDictionary dictionaryWithCapacity:256];
 }
 
 IOReturn RFCOMMServerController::publish() {
@@ -90,6 +82,49 @@ IOReturn RFCOMMServerController::publish() {
 	IOBluetoothObjectRelease(serviceRecordRef);
 
 	return status;
+}
+
+IOReturn RFCOMMServerController::updateSDPServiceRecord() {
+    IOReturn status;
+    if (sdpServiceRecordHandle != 0) {
+        status = IOBluetoothRemoveServiceWithRecordHandle(sdpServiceRecordHandle);
+        sdpServiceRecordHandle = 0;
+        if (status != kIOReturnSuccess) {
+            return status;
+        }
+    }
+
+    IOBluetoothSDPServiceRecordRef serviceRecordRef;
+	status = IOBluetoothAddServiceDict((CFDictionaryRef)sdpEntries, &serviceRecordRef);
+    if (status != kIOReturnSuccess) {
+        ndebug("failed to IOBluetoothAddServiceDict");
+        return status;
+    }
+
+	IOBluetoothSDPServiceRecord *serviceRecord = [IOBluetoothSDPServiceRecord withSDPServiceRecordRef:serviceRecordRef];
+	if (serviceRecord == NULL) {
+	    ndebug("failed to create IOBluetoothSDPServiceRecord");
+	} else {
+	    // get service channel ID & service record handle
+	    BluetoothRFCOMMChannelID newRfcommChannelID;
+
+	    status = [serviceRecord getRFCOMMChannelID:&newRfcommChannelID];
+	    if (status != kIOReturnSuccess) {
+		    ndebug("failed to getRFCOMMChannelID");
+		} else {
+		    if (newRfcommChannelID != rfcommChannelID) {
+		        ndebug("Changed RFCOMMChannelID %d -> %d", rfcommChannelID, newRfcommChannelID);
+		        rfcommChannelID = newRfcommChannelID;
+		    }
+		    [rfcommChannelIDDataElement setObject:[NSNumber numberWithInt:rfcommChannelID] forKey:kDataElementValue];
+		    status = [serviceRecord getServiceRecordHandle:&sdpServiceRecordHandle];
+	    }
+	}
+
+    // cleanup
+	IOBluetoothObjectRelease(serviceRecordRef);
+
+    return kIOReturnSuccess;
 }
 
 void RFCOMMServerController::close() {

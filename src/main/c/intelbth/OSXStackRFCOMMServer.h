@@ -20,16 +20,14 @@
  */
 
 #import "OSXStackRFCOMM.h"
+#import "OSXStackSDPServer.h"
 
 #import <IOBluetooth/objc/IOBluetoothSDPServiceRecord.h>
 #import <IOBluetooth/objc/IOBluetoothSDPUUID.h>
 
-class RFCOMMServerController : public PoolableObject {
+class RFCOMMServerController : public ServerController {
 public:
-    BOOL isClosed;
 
-    NSMutableDictionary* sdpEntries;
-    BluetoothSDPServiceRecordHandle sdpServiceRecordHandle;
     BluetoothRFCOMMChannelID rfcommChannelID;
     MPEventID incomingChannelNotificationEvent;
     IOBluetoothUserNotificationRef incomingChannelNotification;
@@ -44,7 +42,7 @@ public:
     RFCOMMServerController();
     ~RFCOMMServerController();
 
-    void init();
+    virtual IOReturn updateSDPServiceRecord();
     IOReturn publish();
     void close();
 };

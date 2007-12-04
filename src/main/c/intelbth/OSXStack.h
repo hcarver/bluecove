@@ -19,6 +19,9 @@
  *  @version $Id$
  */
 
+#ifndef __OSXSTACK_H__
+#define __OSXSTACK_H__
+
 #define EXT_DEBUG
 
 #include "common.h"
@@ -106,3 +109,4 @@ public:
 
 extern OSXStack* stack;
 
+#endif // __OSXSTACK_H__

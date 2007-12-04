@@ -155,6 +155,24 @@
 #define GIAC 0x9E8B33
 #define LIAC 0x9E8B00
 
+#define DATA_ELEMENT_TYPE_NULL 0x0000
+#define DATA_ELEMENT_TYPE_U_INT_1 0x0008
+#define DATA_ELEMENT_TYPE_U_INT_2 0x0009
+#define DATA_ELEMENT_TYPE_U_INT_4 0x000A
+#define DATA_ELEMENT_TYPE_U_INT_8 0x000B
+#define DATA_ELEMENT_TYPE_U_INT_16 0x000C
+#define DATA_ELEMENT_TYPE_INT_1 0x0010
+#define DATA_ELEMENT_TYPE_INT_2 0x0011
+#define DATA_ELEMENT_TYPE_INT_4 0x0012
+#define DATA_ELEMENT_TYPE_INT_8 0x0013
+#define DATA_ELEMENT_TYPE_INT_16 0x0014
+#define DATA_ELEMENT_TYPE_URL 0x0040
+#define DATA_ELEMENT_TYPE_UUID 0x0018
+#define DATA_ELEMENT_TYPE_BOOL 0x0028
+#define DATA_ELEMENT_TYPE_STRING 0x0020
+#define DATA_ELEMENT_TYPE_DATSEQ 0x0030
+#define DATA_ELEMENT_TYPE_DATALT 0x0038
+
 #include <jni.h>
 
 void enableNativeDebug(JNIEnv * env, jobject loggerClass, jboolean on);
@@ -205,6 +223,8 @@ void throwInterruptedIOException(JNIEnv *env, const char *msg);
 #define _throwInterruptedIOException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwInterruptedIOException(env, msg); }
 
 void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...);
+
+void throwServiceRegistrationExceptionExt(JNIEnv *env, const char *fmt, ...);
 
 void throwBluetoothStateException(JNIEnv *env, const char *msg);
 #define _throwBluetoothStateException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwBluetoothStateException(env, msg); }

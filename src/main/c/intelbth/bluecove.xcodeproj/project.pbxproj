@@ -18,6 +18,8 @@
 		D4850EF40CEE43CC00C34419 /* OSXStackTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = D4850EF30CEE43CC00C34419 /* OSXStackTest.mm */; };
 		D48DFA490CFA130F00113512 /* OSXStackRFCOMM.h in Headers */ = {isa = PBXBuildFile; fileRef = D48DFA470CFA130F00113512 /* OSXStackRFCOMM.h */; };
 		D48DFA4A0CFA130F00113512 /* OSXStackRFCOMM.mm in Sources */ = {isa = PBXBuildFile; fileRef = D48DFA480CFA130F00113512 /* OSXStackRFCOMM.mm */; };
+		D48E624F0D05E2C4006E9BC2 /* OSXStackSDPServer.h in Headers */ = {isa = PBXBuildFile; fileRef = D48E624D0D05E2C4006E9BC2 /* OSXStackSDPServer.h */; };
+		D48E62500D05E2C4006E9BC2 /* OSXStackSDPServer.mm in Sources */ = {isa = PBXBuildFile; fileRef = D48E624E0D05E2C4006E9BC2 /* OSXStackSDPServer.mm */; };
 		D4A3DE440CEC24F800D976AD /* OSXStackSDPQuery.h in Headers */ = {isa = PBXBuildFile; fileRef = D4A3DE420CEC24F800D976AD /* OSXStackSDPQuery.h */; };
 		D4A3DE450CEC24F800D976AD /* OSXStackSDPQuery.mm in Sources */ = {isa = PBXBuildFile; fileRef = D4A3DE430CEC24F800D976AD /* OSXStackSDPQuery.mm */; };
 		D4BAE7660CE2373C0025C976 /* OSXStackDiscovery.h in Headers */ = {isa = PBXBuildFile; fileRef = D4BAE7640CE2373C0025C976 /* OSXStackDiscovery.h */; };
@@ -62,6 +64,8 @@
 		D4850EF30CEE43CC00C34419 /* OSXStackTest.mm */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXStackTest.mm; sourceTree = "<group>"; };
 		D48DFA470CFA130F00113512 /* OSXStackRFCOMM.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OSXStackRFCOMM.h; sourceTree = "<group>"; };
 		D48DFA480CFA130F00113512 /* OSXStackRFCOMM.mm */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXStackRFCOMM.mm; sourceTree = "<group>"; };
+		D48E624D0D05E2C4006E9BC2 /* OSXStackSDPServer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OSXStackSDPServer.h; sourceTree = "<group>"; };
+		D48E624E0D05E2C4006E9BC2 /* OSXStackSDPServer.mm */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXStackSDPServer.mm; sourceTree = "<group>"; };
 		D4A3DE420CEC24F800D976AD /* OSXStackSDPQuery.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OSXStackSDPQuery.h; sourceTree = "<group>"; };
 		D4A3DE430CEC24F800D976AD /* OSXStackSDPQuery.mm */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.objcpp; path = OSXStackSDPQuery.mm; sourceTree = "<group>"; };
 		D4BAE7640CE2373C0025C976 /* OSXStackDiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSXStackDiscovery.h; sourceTree = "<group>"; };
@@ -108,6 +112,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				D48E624D0D05E2C4006E9BC2 /* OSXStackSDPServer.h */,
+				D48E624E0D05E2C4006E9BC2 /* OSXStackSDPServer.mm */,
 				D4CBCF560D0223FB0087673A /* OSXStackRFCOMMServer.h */,
 				D4CBCF570D0223FB0087673A /* OSXStackRFCOMMServer.mm */,
 				D4FBF5FE0CFCAAEC0074C8F7 /* OSXStackChannelController.h */,
@@ -159,6 +165,7 @@
 				D4FBF5EA0CFC98DD0074C8F7 /* OSXStackL2CAP.h in Headers */,
 				D4FBF6000CFCAAEC0074C8F7 /* OSXStackChannelController.h in Headers */,
 				D4CBCF580D0223FB0087673A /* OSXStackRFCOMMServer.h in Headers */,
+				D48E624F0D05E2C4006E9BC2 /* OSXStackSDPServer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -213,6 +220,7 @@
 				D4FBF5EB0CFC98DD0074C8F7 /* OSXStackL2CAP.mm in Sources */,
 				D4FBF6010CFCAAEC0074C8F7 /* OSXStackChannelController.mm in Sources */,
 				D4CBCF590D0223FB0087673A /* OSXStackRFCOMMServer.mm in Sources */,
+				D48E62500D05E2C4006E9BC2 /* OSXStackSDPServer.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
