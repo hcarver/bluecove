@@ -12,8 +12,7 @@
     <version>2.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <url>http://bluecove.googlecode.com</url>
-    <!--url>http://bluecove.sourceforge.net/</url-->
+    <url>http://www.bluecove.org</url>
 
     <name>bluecove</name>
 
