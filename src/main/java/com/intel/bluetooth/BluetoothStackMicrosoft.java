@@ -171,18 +171,19 @@ class BluetoothStackMicrosoft implements BluetoothStack {
             cancelLimitedDiscoverableTimer();
             DebugLog.debug("setDiscoverable(false)");
             setDiscoverable(false);
-            break;
+            return (DiscoveryAgent.NOT_DISCOVERABLE == getLocalDeviceDiscoverable());
         case DiscoveryAgent.GIAC:
             cancelLimitedDiscoverableTimer();
             DebugLog.debug("setDiscoverable(true)");
             setDiscoverable(true);
-            break;
+            return (DiscoveryAgent.GIAC == getLocalDeviceDiscoverable());
         case DiscoveryAgent.LIAC:
-            if (limitedDiscoverableTimer != null) {
-                break;
-            }
+            cancelLimitedDiscoverableTimer();
             DebugLog.debug("setDiscoverable(LIAC)");
             setDiscoverable(true);
+            if (!(DiscoveryAgent.GIAC == getLocalDeviceDiscoverable())) {
+                return false;
+            }
             // Timer to turn it off
             limitedDiscoverableTimer = Utils.schedule(60 * 1000, new Runnable() {
                 public void run() {
@@ -195,9 +196,9 @@ class BluetoothStackMicrosoft implements BluetoothStack {
                     }
                 }
             });
-            break;
+            return true;
         }
-        return true;
+        return false;
     }
 
     public boolean isLocalDevicePowerOn() {
