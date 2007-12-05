@@ -41,9 +41,15 @@ public:
     int sdpSequenceDepthCurrent;
     NSMutableArray *sdpSequence[SDP_SEQUENCE_DEPTH_MAX];
 
+    MPEventID incomingChannelNotificationEvent;
+    IOBluetoothUserNotificationRef incomingChannelNotification;
+
+    MPEventID acceptedEvent;
+    volatile BOOL openningClient;
+
 public:
     ServerController();
-    ~ServerController();
+    virtual ~ServerController();
 
     char* addAttribute(SDPAttributeValue* value);
     char* addAttributeSequence(jint attrID, jint attrType);
@@ -52,6 +58,12 @@ public:
     void init();
     virtual IOReturn updateSDPServiceRecord() = 0;
 };
+
+NSMutableDictionary* createIntDataElement(int size, int type, int value);
+
+extern NSString *kServiceItemKeyServiceClassIDList;
+extern NSString *kServiceItemKeyServiceName;
+extern NSString *kServiceItemKeyProtocolDescriptorList;
 
 extern NSString *kDataElementSize;
 extern NSString *kDataElementType;

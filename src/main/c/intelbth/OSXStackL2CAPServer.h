@@ -19,43 +19,47 @@
  *  @version $Id$
  */
 
-#import "OSXStackRFCOMM.h"
+#import "OSXStackL2CAP.h"
 #import "OSXStackSDPServer.h"
 
 #import <IOBluetooth/objc/IOBluetoothSDPServiceRecord.h>
 #import <IOBluetooth/objc/IOBluetoothSDPUUID.h>
 
-class RFCOMMServerController : public ServerController {
+class L2CAPServerController : public ServerController {
 public:
 
-    BluetoothRFCOMMChannelID rfcommChannelID;
+    BluetoothL2CAPPSM l2capPSM;
 
-    RFCOMMChannelController* acceptClientComm;
+    L2CAPChannelController* acceptClientComm;
 
-    NSMutableDictionary* rfcommChannelIDDataElement;
+    NSMutableDictionary* l2capPSMDataElement;
 
 public:
-    RFCOMMServerController();
-    virtual ~RFCOMMServerController();
+    L2CAPServerController();
+    virtual ~L2CAPServerController();
 
+    void createPSMDataElement();
     virtual IOReturn updateSDPServiceRecord();
     IOReturn publish();
     void close();
 };
 
-class RFCOMMServicePublish: public Runnable {
+class L2CAPServicePublish: public Runnable {
 public:
     jbyte* uuidValue;
     int uuidValueLength;
-    jboolean obexSrv;
     jboolean authenticate;
     jboolean encrypt;
     const jchar *serviceName;
     int serviceNameLength;
 
-    RFCOMMServerController* comm;
+    jint receiveMTU;
+    jint transmitMTU;
+    jint assignPsm;
+
+    L2CAPServerController* comm;
     volatile IOReturn status;
 
-    RFCOMMServicePublish();
+    L2CAPServicePublish();
     virtual void run();
 };

@@ -19,27 +19,28 @@
  *  @version $Id$
  */
 
-#import "OSXStackRFCOMMServer.h"
+#import "OSXStackL2CAPServer.h"
 
-#define CPP_FILE "OSXStackRFCOMMServer.mm"
+#define CPP_FILE "OSXStackL2CAPServer.mm"
 
-RFCOMMServerController* validRFCOMMServerControllerHandle(JNIEnv *env, jlong handle) {
+L2CAPServerController* validL2CAPServerControllerHandle(JNIEnv *env, jlong handle) {
 	if (stack == NULL) {
 		throwIOException(env, cSTACK_CLOSED);
 		return NULL;
 	}
-	return (RFCOMMServerController*)stack->commPool->getObject(env, handle, 'R');
+	return (L2CAPServerController*)stack->commPool->getObject(env, handle, 'L');
 }
 
-RFCOMMServerController::RFCOMMServerController() {
-    rfcommChannelID = 0;
+L2CAPServerController::L2CAPServerController() {
+    l2capPSM = 0;
     acceptClientComm = NULL;
+    l2capPSMDataElement = NULL;
 }
 
-RFCOMMServerController::~RFCOMMServerController() {
+L2CAPServerController::~L2CAPServerController() {
 }
 
-IOReturn RFCOMMServerController::publish() {
+IOReturn L2CAPServerController::publish() {
     // publish the service
 	IOBluetoothSDPServiceRecordRef serviceRecordRef;
 	IOReturn status = IOBluetoothAddServiceDict((CFDictionaryRef)sdpEntries, &serviceRecordRef);
@@ -53,11 +54,12 @@ IOReturn RFCOMMServerController::publish() {
 	    ndebug("failed to create IOBluetoothSDPServiceRecord");
 	} else {
 	    // get service channel ID & service record handle
-	    status = [serviceRecord getRFCOMMChannelID:&rfcommChannelID];
+	    status = [serviceRecord getL2CAPPSM:&l2capPSM];
 	    if (status != kIOReturnSuccess) {
-		    ndebug("failed to getRFCOMMChannelID");
+		    ndebug("failed to getL2CAPPSM [0x%08x]", status);
 		} else {
-		    [rfcommChannelIDDataElement setObject:[NSNumber numberWithInt:rfcommChannelID] forKey:kDataElementValue];
+		    createPSMDataElement();
+		    [l2capPSMDataElement setObject:[NSNumber numberWithInt:l2capPSM] forKey:kDataElementValue];
 		    status = [serviceRecord getServiceRecordHandle:&sdpServiceRecordHandle];
 	    }
 	}
@@ -68,7 +70,7 @@ IOReturn RFCOMMServerController::publish() {
 	return status;
 }
 
-IOReturn RFCOMMServerController::updateSDPServiceRecord() {
+IOReturn L2CAPServerController::updateSDPServiceRecord() {
     IOReturn status;
     if (sdpServiceRecordHandle != 0) {
         status = IOBluetoothRemoveServiceWithRecordHandle(sdpServiceRecordHandle);
@@ -90,17 +92,18 @@ IOReturn RFCOMMServerController::updateSDPServiceRecord() {
 	    ndebug("failed to create IOBluetoothSDPServiceRecord updated");
 	} else {
 	    // get service channel ID & service record handle
-	    BluetoothRFCOMMChannelID newRfcommChannelID;
+	    BluetoothL2CAPPSM newL2capPSM;
 
-	    status = [serviceRecord getRFCOMMChannelID:&newRfcommChannelID];
+	    status = [serviceRecord getL2CAPPSM:&newL2capPSM];
 	    if (status != kIOReturnSuccess) {
-		    ndebug("failed to getRFCOMMChannelID updated");
+		    ndebug("failed to getL2CAPPSM updated [0x%08x]", status);
 		} else {
-		    if (newRfcommChannelID != rfcommChannelID) {
-		        ndebug("Changed RFCOMMChannelID %d -> %d", rfcommChannelID, newRfcommChannelID);
-		        rfcommChannelID = newRfcommChannelID;
+		    if (newL2capPSM != l2capPSM) {
+		        ndebug("Changed L2CAP PSM %d -> %d", l2capPSM, newL2capPSM);
+		        l2capPSM = newL2capPSM;
 		    }
-		    [rfcommChannelIDDataElement setObject:[NSNumber numberWithInt:rfcommChannelID] forKey:kDataElementValue];
+		    createPSMDataElement();
+		    [l2capPSMDataElement setObject:[NSNumber numberWithInt:l2capPSM] forKey:kDataElementValue];
 		    status = [serviceRecord getServiceRecordHandle:&sdpServiceRecordHandle];
 	    }
 	}
@@ -111,7 +114,7 @@ IOReturn RFCOMMServerController::updateSDPServiceRecord() {
     return kIOReturnSuccess;
 }
 
-void RFCOMMServerController::close() {
+void L2CAPServerController::close() {
     isClosed = true;
     MPSetEvent(incomingChannelNotificationEvent, 0);
 
@@ -127,11 +130,45 @@ void RFCOMMServerController::close() {
 	}
 }
 
-RFCOMMServicePublish::RFCOMMServicePublish() {
-    name = "RFCOMMServicePublish";
+void L2CAPServerController::createPSMDataElement() {
+    if (l2capPSMDataElement != NULL) {
+        return;
+    }
+
+    NSMutableArray *protocolDescriptorList = [sdpEntries objectForKey:kServiceItemKeyProtocolDescriptorList];
+	if (protocolDescriptorList == nil) {
+	    ndebug("create protocolDescriptorList");
+		protocolDescriptorList = [NSMutableArray array];
+		[sdpEntries setObject:protocolDescriptorList forKey:kServiceItemKeyProtocolDescriptorList];
+	}
+
+	NSMutableArray *protocolDescriptorList1 = [protocolDescriptorList objectAtIndex:0];
+	if (protocolDescriptorList1 == nil) {
+	    ndebug("create protocolDescriptorList1");
+	    protocolDescriptorList1 = [NSMutableArray array];
+
+	    IOBluetoothSDPUUID* l2cap_uuid = [IOBluetoothSDPUUID uuid16:0x0100];
+        [protocolDescriptorList1 addObject:l2cap_uuid];
+
+        [protocolDescriptorList addObject:protocolDescriptorList1];
+    }
+
+    //0x1001-0xFFFF dynamically assigned
+    int psm = 0x1001;
+
+    l2capPSMDataElement =  [protocolDescriptorList1 objectAtIndex:1];
+    if (l2capPSMDataElement == nil) {
+        ndebug("create l2capPSMDataElement");
+        l2capPSMDataElement = createIntDataElement(2, 1, psm);
+        [protocolDescriptorList1 addObject:l2capPSMDataElement];
+    }
 }
 
-void RFCOMMServicePublish::run() {
+L2CAPServicePublish::L2CAPServicePublish() {
+    name = "L2CAPServicePublish";
+}
+
+void L2CAPServicePublish::run() {
     comm->init();
 
     NSString* srvName = [NSString stringWithCharacters:(UniChar*)serviceName length:serviceNameLength];
@@ -139,8 +176,7 @@ void RFCOMMServicePublish::run() {
 
 /*
 0x0001 ServiceClassIDList:  DATSEQ {
-  UUID b10c0be1111111111111111111110001 (SERVICE UUID)
-  UUID 0000110100001000800000805f9b34fb (SERIAL_PORT)
+  UUID b10c0be1111111111111111111110002 (BlueCoveT L2CAP long)
 }
 */
     NSMutableArray *currentServiceList = [comm->sdpEntries objectForKey:kServiceItemKeyServiceClassIDList];
@@ -149,11 +185,6 @@ void RFCOMMServicePublish::run() {
 	}
 	[currentServiceList addObject:[NSData dataWithBytes:uuidValue length:uuidValueLength]];
 
-    if (!obexSrv) {
-	    IOBluetoothSDPUUID* serial_port_uuid = [IOBluetoothSDPUUID uuid16:0x1101];
-	    [currentServiceList addObject:serial_port_uuid];
-    }
-
 	// update dict
 	[comm->sdpEntries setObject:currentServiceList forKey:kServiceItemKeyServiceClassIDList];
 
@@ -161,37 +192,35 @@ void RFCOMMServicePublish::run() {
 0x0004 ProtocolDescriptorList:  DATSEQ {
   DATSEQ {
     UUID 0000010000001000800000805f9b34fb (L2CAP)
-  }
-  DATSEQ {
-    UUID 0000000300001000800000805f9b34fb (RFCOMM)
-    U_INT_1 0x1
+    U_INT_2 0x1001
   }
 }
 */
-    NSMutableArray *protocolDescriptorList = [NSMutableArray array];
-    NSMutableArray *protocolDescriptorList1 = [NSMutableArray array];
-    [protocolDescriptorList addObject:protocolDescriptorList1];
+    bool createProtocolDescriptorList = true;
+    if (createProtocolDescriptorList) {
+        NSMutableArray *protocolDescriptorList = [NSMutableArray array];
+        NSMutableArray *protocolDescriptorList1 = [NSMutableArray array];
+        [protocolDescriptorList addObject:protocolDescriptorList1];
 
-    IOBluetoothSDPUUID* l2cap_uuid = [IOBluetoothSDPUUID uuid16:0x0100];
-    [protocolDescriptorList1 addObject:l2cap_uuid];
+        IOBluetoothSDPUUID* l2cap_uuid = [IOBluetoothSDPUUID uuid16:0x0100];
+        [protocolDescriptorList1 addObject:l2cap_uuid];
 
-    NSMutableArray *protocolDescriptorList2 = [NSMutableArray array];
-    [protocolDescriptorList addObject:protocolDescriptorList2];
+        //0x1001-0xFFFF dynamically assigned
+        int psm = 0x1001;
+        if (assignPsm != 0) {
+            psm = assignPsm;
+        }
 
-    IOBluetoothSDPUUID* rfcomm_uuid = [IOBluetoothSDPUUID uuid16:0x0003];
-    [protocolDescriptorList2 addObject:rfcomm_uuid];
-    comm->rfcommChannelIDDataElement = createIntDataElement(1, 1, 1);
-    [protocolDescriptorList2 addObject:(comm->rfcommChannelIDDataElement)];
+        comm->l2capPSMDataElement = createIntDataElement(2, 1, psm);
+        [protocolDescriptorList1 addObject:comm->l2capPSMDataElement];
 
-    if (obexSrv) {
-        NSMutableArray *protocolDescriptorList3 = [NSMutableArray array];
-        [protocolDescriptorList addObject:protocolDescriptorList3];
-
-        IOBluetoothSDPUUID* obex_uuid = [IOBluetoothSDPUUID uuid16:0x0008];
-        [protocolDescriptorList3 addObject:obex_uuid];
+        [comm->sdpEntries setObject:protocolDescriptorList forKey:kServiceItemKeyProtocolDescriptorList];
+    } else {
+        if (assignPsm != 0) {
+            comm->createPSMDataElement();
+            [comm->l2capPSMDataElement setObject:[NSNumber numberWithInt:assignPsm] forKey:kDataElementValue];
+        }
     }
-
-    [comm->sdpEntries setObject:protocolDescriptorList forKey:kServiceItemKeyProtocolDescriptorList];
 
    	// publish the service
 	status = comm->publish();
@@ -201,102 +230,106 @@ void RFCOMMServicePublish::run() {
 	}
 }
 
-RUNNABLE(RFCOMMServiceClose, "RFCOMMServiceClose") {
-    RFCOMMServerController* comm = (RFCOMMServerController*)pData[0];
+RUNNABLE(L2CAPServiceClose, "L2CAPServiceClose") {
+    L2CAPServerController* comm = (L2CAPServerController*)pData[0];
     comm->close();
 }
 
-void RFCOMMServiceCloseExec(RFCOMMServerController* comm) {
-    RFCOMMServiceClose runnable;
+void L2CAPServiceCloseExec(L2CAPServerController* comm) {
+    L2CAPServiceClose runnable;
 	runnable.pData[0] = comm;
     synchronousBTOperation(&runnable);
 	comm->readyToFree = TRUE;
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerCreateImpl
-  (JNIEnv *env, jobject, jbyteArray uuidValue, jboolean obexSrv, jstring name, jboolean authenticate, jboolean encrypt) {
-    RFCOMMServerController* comm = new RFCOMMServerController();
-	if (!stack->commPool->addObject(comm, 'R')) {
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerOpenImpl
+  (JNIEnv *env, jobject, jbyteArray uuidValue, jboolean authenticate, jboolean encrypt, jstring name, jint receiveMTU, jint transmitMTU, jint assignPsm) {
+    L2CAPServerController* comm = new L2CAPServerController();
+	if (!stack->commPool->addObject(comm, 'L')) {
 		delete comm;
 		throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 		return 0;
 	}
-	RFCOMMServicePublish runnable;
+	L2CAPServicePublish runnable;
 	runnable.comm = comm;
 	runnable.uuidValue = env->GetByteArrayElements(uuidValue, 0);
 	runnable.uuidValueLength = env->GetArrayLength(uuidValue);
     runnable.serviceName = env->GetStringChars(name, 0);
     runnable.serviceNameLength = env->GetStringLength(name);
-    runnable.obexSrv = obexSrv;
     runnable.authenticate = authenticate;
     runnable.encrypt = encrypt;
+
+    runnable.receiveMTU = receiveMTU;
+    runnable.transmitMTU = transmitMTU;
+    runnable.assignPsm = assignPsm;
+
     synchronousBTOperation(&runnable);
 
     env->ReleaseByteArrayElements(uuidValue, runnable.uuidValue, 0);
     env->ReleaseStringChars(name, runnable.serviceName);
 
     if (runnable.error != 0) {
-        RFCOMMServiceCloseExec(comm);
-        throwIOExceptionExt(env, "Failed to create RFCOMM service [0x%08x]", runnable.status);
+        L2CAPServiceCloseExec(comm);
+        throwIOExceptionExt(env, "Failed to create L2CAP service [0x%08x]", runnable.status);
         return 0;
     }
-    debug1("RFCOMM server created, ChannelID %i", comm->rfcommChannelID);
+    debug1("L2CAP server created, PSM %x", comm->l2capPSM);
     return comm->internalHandle;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerGetChannelID
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerPSM
   (JNIEnv *env, jobject, jlong handle) {
-    RFCOMMServerController* comm = validRFCOMMServerControllerHandle(env, handle);
+    L2CAPServerController* comm = validL2CAPServerControllerHandle(env, handle);
     if (comm == NULL) {
 		return 0;
 	}
-    return comm->rfcommChannelID;
+    return comm->l2capPSM;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerCloseImpl
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerCloseImpl
   (JNIEnv *env, jobject, jlong handle) {
-    RFCOMMServerController* comm = validRFCOMMServerControllerHandle(env, handle);
+    L2CAPServerController* comm = validL2CAPServerControllerHandle(env, handle);
     if (comm == NULL) {
 		return;
 	}
-	RFCOMMServiceCloseExec(comm);
+	L2CAPServiceCloseExec(comm);
 }
 
-void rfcommServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNotificationRef inRef, IOBluetoothObjectRef objectRef ) {
-    ndebug("rfcommServiceOpenNotificationCallback");
-    RFCOMMServerController* comm = (RFCOMMServerController*)userRefCon;
+void l2capServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNotificationRef inRef, IOBluetoothObjectRef objectRef ) {
+    ndebug("l2capServiceOpenNotificationCallback");
+    L2CAPServerController* comm = (L2CAPServerController*)userRefCon;
     if (comm == NULL) {
         return;
     }
     if ((comm->magic1 != MAGIC_1) || (comm->magic2 != MAGIC_2)) {
 		return;
 	}
-	IOBluetoothRFCOMMChannel *rfcommChannel = [IOBluetoothRFCOMMChannel withRFCOMMChannelRef:(IOBluetoothRFCOMMChannelRef)objectRef];
-	if (rfcommChannel == NULL) {
-	    ndebug("fail to get IOBluetoothRFCOMMChannel");
+	IOBluetoothL2CAPChannel *l2capChannel = [IOBluetoothL2CAPChannel withL2CAPChannelRef:(IOBluetoothL2CAPChannelRef)objectRef];
+	if (l2capChannel == NULL) {
+	    ndebug("fail to get IOBluetoothL2CAPChannel");
 	    return;
 	}
-	RFCOMMChannelController* client = comm->acceptClientComm;
+	L2CAPChannelController* client = comm->acceptClientComm;
 	if (client == NULL) {
 	    ndebug("drop incomming connection since AcceptAndOpen not running");
 	    return;
 	}
-	client->openIncomingChannel(rfcommChannel);
+	client->openIncomingChannel(l2capChannel);
 	comm->openningClient = true;
     MPSetEvent(comm->incomingChannelNotificationEvent, 0);
 }
 
-RUNNABLE(RFCOMMServiceRegisterForOpen, "RFCOMMServiceRegisterForOpen") {
-    RFCOMMServerController* comm = (RFCOMMServerController*)pData[0];
-    comm->incomingChannelNotification = IOBluetoothRegisterForFilteredRFCOMMChannelOpenNotifications(rfcommServiceOpenNotificationCallback, comm, comm->rfcommChannelID, kIOBluetoothUserNotificationChannelDirectionIncoming);
+RUNNABLE(L2CAPServiceRegisterForOpen, "L2CAPServiceRegisterForOpen") {
+    L2CAPServerController* comm = (L2CAPServerController*)pData[0];
+    comm->incomingChannelNotification = IOBluetoothRegisterForFilteredL2CAPChannelOpenNotifications(l2capServiceOpenNotificationCallback, comm, comm->l2capPSM, kIOBluetoothUserNotificationChannelDirectionIncoming);
     if (comm->incomingChannelNotification == NULL) {
         error = 1;
     }
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAcceptAndOpenRfServerConnection
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAcceptAndOpenServerConnection
   (JNIEnv *env, jobject peer, jlong handle) {
-    RFCOMMServerController* comm = validRFCOMMServerControllerHandle(env, handle);
+    L2CAPServerController* comm = validL2CAPServerControllerHandle(env, handle);
     if (comm == NULL) {
 		return 0;
 	}
@@ -321,18 +354,18 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
         return 0;
     }
     if (comm->incomingChannelNotification == NULL) {
-        RFCOMMServiceRegisterForOpen runnable;
+        L2CAPServiceRegisterForOpen runnable;
 	    runnable.pData[0] = comm;
         synchronousBTOperation(&runnable);
-	    if (runnable.error) {
-		    throwIOException(env, "Failed to register for RFCOMMChannel Notifications");
+    if (runnable.error) {
+		    throwIOException(env, "Failed to register for L2CAPChannel Notifications");
 		    return 0;
 	    }
 	}
 
     debug("create ChannelController to accept incoming connection");
-	RFCOMMChannelController* clientComm = new RFCOMMChannelController();
-	if (!stack->commPool->addObject(clientComm, 'r')) {
+	L2CAPChannelController* clientComm = new L2CAPChannelController();
+	if (!stack->commPool->addObject(clientComm, 'l')) {
 		delete clientComm;
 		throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 		return 0;
@@ -368,10 +401,10 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
 	} else {
 	    int timeout = 120 * 1000;
 	    if (!clientComm->waitForConnection(env, peer, timeout)) {
-            RFCOMMChannelCloseExec(clientComm);
+            L2CAPChannelCloseExec(clientComm);
             return 0;
         }
-        debug("RFCOMM client connected");
+        debug("L2CAP client connected");
         return clientComm->internalHandle;;
     }
 }

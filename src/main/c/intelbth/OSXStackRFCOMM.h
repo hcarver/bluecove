@@ -55,7 +55,7 @@ public:
 
 public:
     RFCOMMChannelController();
-    ~RFCOMMChannelController();
+    virtual ~RFCOMMChannelController();
 
 #ifdef OBJC_VERSION
     void initDelegate();

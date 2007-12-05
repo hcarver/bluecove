@@ -24,6 +24,10 @@
 
 #define CPP_FILE "OSXStackSDPServer.mm"
 
+NSString *kServiceItemKeyServiceClassIDList = @"0001 - ServiceClassIDList";
+NSString *kServiceItemKeyServiceName = @"0100 - ServiceName*";
+NSString *kServiceItemKeyProtocolDescriptorList = @"0004 - ProtocolDescriptorList";
+
 NSString *kDataElementSize = @"DataElementSize";
 NSString *kDataElementType = @"DataElementType";
 NSString *kDataElementValue = @"DataElementValue";
@@ -36,9 +40,17 @@ ServerController::ServerController() {
     for(int i = 0; i < SDP_SEQUENCE_DEPTH_MAX; i ++) {
         sdpSequence[i] = NULL;
     }
+    incomingChannelNotification = NULL;
+    MPCreateEvent(&incomingChannelNotificationEvent);
+    MPCreateEvent(&acceptedEvent);
 }
 
 ServerController::~ServerController() {
+    isClosed = true;
+    MPSetEvent(incomingChannelNotificationEvent, 0);
+    MPDeleteEvent(incomingChannelNotificationEvent);
+    MPSetEvent(acceptedEvent, 0);
+    MPDeleteEvent(acceptedEvent);
 }
 
 void ServerController::init() {
@@ -74,6 +86,14 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceUpda
     if (runnable.error != 0) {
         throwServiceRegistrationExceptionExt(env, "Failed to publish service [0x%08x]", runnable.lData);
     }
+}
+
+NSMutableDictionary* createIntDataElement(int size, int type, int value) {
+    NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:3];
+    [dict setObject:[NSNumber numberWithInt:size] forKey:kDataElementSize];
+    [dict setObject:[NSNumber numberWithInt:type] forKey:kDataElementType];
+    [dict setObject:[NSNumber numberWithInt:value] forKey:kDataElementValue];
+    return dict;
 }
 
 NSMutableDictionary* createDataElement(BluetoothSDPDataElementTypeDescriptor type, UInt32 size, NSObject* value) {

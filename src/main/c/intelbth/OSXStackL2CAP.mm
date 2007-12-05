@@ -99,6 +99,15 @@ void L2CAPChannelController::l2capChannelOpenComplete(IOReturn error) {
     MPSetEvent(notificationEvent, 1);
 }
 
+void L2CAPChannelController::openIncomingChannel(IOBluetoothL2CAPChannel* newL2CAPChannel) {
+    initDelegate();
+    isConnected = false;
+    isClosed = false;
+    l2capChannel = newL2CAPChannel;
+    [l2capChannel retain];
+    openStatus = [l2capChannel setDelegate:delegate];
+}
+
 void L2CAPChannelController::l2capChannelClosed() {
     isClosed = true;
     isConnected = false;

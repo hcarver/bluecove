@@ -44,7 +44,7 @@ public:
 
 public:
     L2CAPChannelController();
-    ~L2CAPChannelController();
+    virtual ~L2CAPChannelController();
 
     void initDelegate();
 
@@ -52,6 +52,8 @@ public:
     void l2capChannelOpenComplete(IOReturn error);
     void l2capChannelClosed();
     void l2capChannelWriteComplete(void* refcon, IOReturn status);
+
+    void openIncomingChannel(IOBluetoothL2CAPChannel* newL2CAPChannel);
 
     IOReturn close();
 };
@@ -72,6 +74,8 @@ public:
     L2CAPConnectionOpen();
     virtual void run();
 };
+
+long L2CAPChannelCloseExec(L2CAPChannelController* comm);
 
 class L2CAPConnectionWrite: public Runnable {
 public:
