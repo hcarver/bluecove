@@ -61,6 +61,7 @@
     * Microsoft Bluetooth stack only supporting RFCOMM connections
     * `DiscoveryListener.deviceDiscovered()` would be called for devices that a _paired_ with your Microsoft BT stack regardless if device ON or OFF
     * L2CAP not supported
+    * `LocalDevice.setDiscoverable(NOT_DISCOVERABLE)` will not change the state if discoverable is enabled system wide in "Bluetooth Devices" "Options"
 
 == BlueSoleil (IVT Corporation) ==
 
