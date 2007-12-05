@@ -2,6 +2,9 @@
 
 * 2.0.2 to be released 2007-12-??
 
+    2007-12-05
+    * L2CAP, RFCOMM and OBEX server on Mac OS X
+
     2007-11-28
     * RFCOMM and L2CAP client on Mac OS X
 
