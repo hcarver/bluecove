@@ -215,7 +215,7 @@ int deviceInquiryCount = 0;
  * OS x BUG. If discovery has been cancelled by stop. For next discovery deviceInquiryComplete function is called for previous Delegate Object, not for current
  */
 -(void) deviceInquiryComplete:(IOBluetoothDeviceInquiry*)sender error:(IOReturn)error   aborted:(BOOL)aborted {
-    ndebug("deviceInquiry %i complete", _count);
+    ndebug("deviceInquiry %i complete, [0x%08x]", _count, error);
     if ((!BUG_Inquiry_stop) && (_inquiry != NULL)) {
         [_inquiry clearFoundDevices];
         [_inquiry release];
@@ -302,7 +302,7 @@ void DeviceInquiryStart::run() {
     } else {
         discovery = [[OSXStackDiscovery alloc] init];
     }
-    ndebug("deviceInquiry %i startSearch", count);
+    ndebug("deviceInquiry %i run", count);
     startStatus = [discovery startSearch: count];
     if (startStatus) {
         if (!BUG_Inquiry_stop) {
@@ -423,6 +423,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
     } else if (stack->deviceInquiryTerminated) {
         return INQUIRY_TERMINATED;
     } else if (error != kIOReturnSuccess) {
+        debug1("deviceInquiry error code [0x%08x]", error);
         return INQUIRY_ERROR;
     } else {
         return INQUIRY_COMPLETED;

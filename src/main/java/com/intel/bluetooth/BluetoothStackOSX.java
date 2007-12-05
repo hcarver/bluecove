@@ -50,6 +50,8 @@ class BluetoothStackOSX implements BluetoothStack {
 
     private int receive_mtu_max = -1;
 
+    private long lastDeviceDiscoveryTime = 0;
+
     // Used mainly in Unit Tests
     static {
         NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_OSX);
@@ -201,6 +203,17 @@ class BluetoothStackOSX implements BluetoothStack {
     public native String getRemoteDeviceFriendlyName(long address) throws IOException;
 
     public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
+        //Inquiries are throttled if they are called too quickly in succession.  e.g. JSR-82 TCK
+        long sinceDiscoveryLast = System.currentTimeMillis() - lastDeviceDiscoveryTime;
+        long acceptableInterval = 7 * 1000;
+        if (sinceDiscoveryLast < acceptableInterval) {
+            try {
+			    Thread.sleep(acceptableInterval - sinceDiscoveryLast);
+		    } catch (InterruptedException e) {
+		        throw new BluetoothStateException();
+		    }
+        }
+
         deviceDiscoveryListeners.addElement(listener);
         deviceDiscoveryListenerReportedDevices.put(listener, new Vector());
         return DeviceInquiryThread.startInquiry(this, accessCode, listener);
@@ -214,6 +227,7 @@ class BluetoothStackOSX implements BluetoothStack {
         try {
             return runDeviceInquiryImpl(startedNotify, accessCode, listener);
         } finally {
+            lastDeviceDiscoveryTime = System.currentTimeMillis();
             deviceDiscoveryListeners.removeElement(listener);
             deviceDiscoveryListenerReportedDevices.remove(listener);
         }
