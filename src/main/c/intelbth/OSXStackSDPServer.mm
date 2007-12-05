@@ -32,6 +32,10 @@ ServerController::ServerController() {
     isClosed = false;
     sdpEntries = NULL;
     sdpServiceRecordHandle = 0;
+    sdpSequenceDepthCurrent = -1;
+    for(int i = 0; i < SDP_SEQUENCE_DEPTH_MAX; i ++) {
+        sdpSequence[i] = NULL;
+    }
 }
 
 ServerController::~ServerController() {
@@ -84,19 +88,59 @@ NSMutableDictionary* createDataElement(BluetoothSDPDataElementTypeDescriptor typ
     return dict;
 }
 
-void ServerController::addDataElement(jint attrID, NSObject* value) {
-    NSString *keyName = [NSString stringWithFormat:@"%03x",  attrID];
-    [sdpEntries setObject:value forKey:keyName];
-}
-
-char* ServerController::addAttribute(SDPAttributeValue* value) {
-    if (value->attrID < 0) {
-        return NULL;
+char* ServerController::addAttributeSequence(jint attrID, jint attrType) {
+    if (attrType == -1) {
+        if (sdpSequenceDepthCurrent < 0) {
+            return "Sequence End overflow";
+        } else {
+            sdpSequence[sdpSequenceDepthCurrent] = NULL;
+            sdpSequenceDepthCurrent --;
+            return NULL;
+        }
+    }
+    if (sdpSequenceDepthCurrent >= SDP_SEQUENCE_DEPTH_MAX) {
+            return "Sequence Start overflow";
     }
 
     BluetoothSDPDataElementTypeDescriptor newType;
+    switch (attrType) {
+        case DATA_ELEMENT_TYPE_DATSEQ:
+            newType = kBluetoothSDPDataElementTypeDataElementSequence;
+            break;
+        case DATA_ELEMENT_TYPE_DATALT:
+            newType = kBluetoothSDPDataElementTypeDataElementAlternative;
+            break;
+        default:
+            return "Invalid sequence attribute type";
+    }
+    NSMutableArray *sequence = [NSMutableArray array];
+    addDataElement(attrID, createDataElement(newType, 0, sequence));
+
+    sdpSequenceDepthCurrent ++;
+    sdpSequence[sdpSequenceDepthCurrent] = sequence;
+
+    return NULL;
+}
+
+char* ServerController::addDataElement(jint attrID, NSObject* value) {
+    if ((attrID < 0) && (sdpSequenceDepthCurrent < 0)) {
+        return "sequence expected";
+    }
+    if (sdpSequenceDepthCurrent >= 0) {
+        [sdpSequence[sdpSequenceDepthCurrent] addObject:value];
+    } else {
+        NSString *keyName = [NSString stringWithFormat:@"%03x",  attrID];
+        [sdpEntries setObject:value forKey:keyName];
+    }
+    return NULL;
+}
+
+char* ServerController::addAttribute(SDPAttributeValue* value) {
+    BluetoothSDPDataElementTypeDescriptor newType;
     UInt32 newSize;
     NSObject* newValue;
+
+    char* rc = NULL;
 
     switch (value->attrType) {
     case DATA_ELEMENT_TYPE_U_INT_1:
@@ -104,51 +148,53 @@ char* ServerController::addAttribute(SDPAttributeValue* value) {
         //newSizeDescriptor = 0;
         newSize = 1;
         newValue = [NSNumber numberWithUnsignedInt:((unsigned int)value->numberValue)];
-        addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_U_INT_2:
         newType = kBluetoothSDPDataElementTypeUnsignedInt;
         //newSizeDescriptor = 1;
         newSize = 2;
         newValue = [NSNumber numberWithUnsignedInt:((unsigned int)value->numberValue)];
-        addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_U_INT_4:
         newType = kBluetoothSDPDataElementTypeUnsignedInt;
         //newSizeDescriptor = 2;
         newSize = 4;
         newValue = [NSNumber numberWithUnsignedLong:((unsigned long)value->numberValue)];
-        addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_INT_1:
         newType = kBluetoothSDPDataElementTypeSignedInt;
         //newSizeDescriptor = 0;
         newSize = 1;
         newValue = [NSNumber numberWithInt:((int)value->numberValue)];
-        addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_INT_2:
         newType = kBluetoothSDPDataElementTypeSignedInt;
         //newSizeDescriptor = 1;
         newSize = 2;
         newValue = [NSNumber numberWithInt:((int)value->numberValue)];
-        addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_INT_4:
         newType = kBluetoothSDPDataElementTypeSignedInt;
         //newSizeDescriptor = 2;
         newSize = 4;
         newValue = [NSNumber numberWithLong:value->numberValue];
-        addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_INT_8:
+        //TODO Not properly discovered!
         newType = kBluetoothSDPDataElementTypeSignedInt;
         //newSizeDescriptor = 3;
         newSize = 8;
         newValue = [NSNumber numberWithLongLong:value->numberValue];
-        addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_U_INT_8:
+        //TODO Not properly discovered!
         newType = kBluetoothSDPDataElementTypeUnsignedInt;
         //newSizeDescriptor = 3;
         newSize = 8;
@@ -160,7 +206,8 @@ char* ServerController::addAttribute(SDPAttributeValue* value) {
             unsigned long long lvalue = 0;
             memcpy(&lvalue, rbytes, 8);
             newValue = [NSNumber numberWithUnsignedLongLong:lvalue];
-            addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+            //newValue = [NSData dataWithBytes:(value->arrayValue) length:8];
+            rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         }
         break;
     case DATA_ELEMENT_TYPE_U_INT_16:
@@ -168,14 +215,14 @@ char* ServerController::addAttribute(SDPAttributeValue* value) {
         //newSizeDescriptor = 4;
         newSize = 16;
         newValue = [NSData dataWithBytes:(value->arrayValue) length:16];
-        addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_INT_16:
         newType = kBluetoothSDPDataElementTypeSignedInt;
         //newSizeDescriptor = 4;
         newSize = 16;
         newValue = [NSData dataWithBytes:(value->arrayValue) length:16];
-        addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
 
     case DATA_ELEMENT_TYPE_NULL:
@@ -183,40 +230,44 @@ char* ServerController::addAttribute(SDPAttributeValue* value) {
         //newSizeDescriptor = 0;
         newSize = 0;
         newValue = NULL;
-        addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_BOOL:
-        newType = kBluetoothSDPDataElementTypeBoolean;
+        // TODO
+        //newType = kBluetoothSDPDataElementTypeBoolean;
+        newType = kBluetoothSDPDataElementTypeUnsignedInt;
         //newSizeDescriptor = 0;
         newSize = 1;
         newValue = [NSNumber numberWithInt:((int)value->numberValue)];
-        //addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_UUID:
         newType = kBluetoothSDPDataElementTypeUUID;
         //newSizeDescriptor = 4;
         newSize = value->arrayLen;
         newValue = [IOBluetoothSDPUUID uuidWithBytes:(const void *)(value->arrayValue) length:(unsigned)(value->arrayLen)];
-        //addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_STRING:
         newType = kBluetoothSDPDataElementTypeString;
         newValue = [[NSString alloc] initWithBytes:(const void *)(value->arrayValue) length:(unsigned long)(value->arrayLen) encoding:NSUTF8StringEncoding];
-        //addDataElement(value->attrID, createDataElement(newType, 0, newValue));
+        newSize = 0;
+        rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     case DATA_ELEMENT_TYPE_URL:
-        newType = kBluetoothSDPDataElementTypeURL;
+        //TODO
+        //newType = kBluetoothSDPDataElementTypeURL;
+        newType = kBluetoothSDPDataElementTypeString;
         // UTF8 is just encoding for test interface.
-        NSString* newStrValue = [[NSString alloc] initWithBytes:(const void *)(value->arrayValue) length:(unsigned long)(value->arrayLen) encoding:NSNonLossyASCIIStringEncoding];
-        newValue = newStrValue;
-        newSize = [newStrValue length];
-		//addDataElement(value->attrID, createDataElement(newType, 0, newValue));
+        newValue = [[NSString alloc] initWithBytes:(const void *)(value->arrayValue) length:(unsigned long)(value->arrayLen) encoding:NSNonLossyASCIIStringEncoding];
+        newSize = 0;
+		rc = addDataElement(value->attrID, createDataElement(newType, newSize, newValue));
         break;
     default:
-        return NULL;
+        rc = "Invalid attribute type";
     }
 
-    return NULL;
+    return rc;
 }
 
 RUNNABLE(SDPServiceAddAttribute, "SDPServiceAddAttribute") {
@@ -258,12 +309,33 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceAddA
     }
 }
 
+RUNNABLE(SDPServiceAddAttributeSequence, "SDPServiceAddAttributeSequence") {
+    ServerController* comm = (ServerController*)pData[0];
+    pData[2] = comm->addAttributeSequence(((SDPAttributeValue*)pData[1])->attrID, ((SDPAttributeValue*)pData[1])->attrType);
+    if (pData[2] != NULL) {
+	    error = 1;
+	}
+}
+
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceSequenceAttributeStart
   (JNIEnv *env, jobject peer, jlong handle, jchar handleType, jint attrID, jint attrType) {
     ServerController* comm = validServerControllerHandle(env, handle, handleType);
     if (comm == NULL) {
 		return;
 	}
+	SDPServiceAddAttributeSequence runnable;
+	runnable.pData[0] = comm;
+
+	SDPAttributeValue value = {0};
+	runnable.pData[1] = &value;
+	value.attrID = attrID;
+    value.attrType = attrType;
+
+    synchronousBTOperation(&runnable);
+
+    if (runnable.error != 0) {
+        throwServiceRegistrationExceptionExt(env, "Failed to update service attribute %x [%s]", attrID, runnable.pData[2]);
+    }
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceSequenceAttributeEnd
@@ -272,4 +344,17 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceSequ
     if (comm == NULL) {
 		return;
 	}
+	SDPServiceAddAttributeSequence runnable;
+	runnable.pData[0] = comm;
+
+	SDPAttributeValue value = {0};
+	runnable.pData[1] = &value;
+	value.attrID = attrID;
+    value.attrType = -1;
+
+    synchronousBTOperation(&runnable);
+
+    if (runnable.error != 0) {
+        throwServiceRegistrationExceptionExt(env, "Failed to update service attribute %x [%s]", attrID, runnable.pData[2]);
+    }
 }

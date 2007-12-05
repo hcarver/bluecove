@@ -29,6 +29,8 @@ struct SDPAttributeValue {
 	int   arrayLen;
 };
 
+#define SDP_SEQUENCE_DEPTH_MAX 10
+
 class ServerController : public PoolableObject {
 public:
     BOOL isClosed;
@@ -36,12 +38,16 @@ public:
     NSMutableDictionary* sdpEntries;
     BluetoothSDPServiceRecordHandle sdpServiceRecordHandle;
 
+    int sdpSequenceDepthCurrent;
+    NSMutableArray *sdpSequence[SDP_SEQUENCE_DEPTH_MAX];
+
 public:
     ServerController();
     ~ServerController();
 
     char* addAttribute(SDPAttributeValue* value);
-    void addDataElement(jint attrID, NSObject* value);
+    char* addAttributeSequence(jint attrID, jint attrType);
+    char* addDataElement(jint attrID, NSObject* value);
 
     void init();
     virtual IOReturn updateSDPServiceRecord() = 0;
