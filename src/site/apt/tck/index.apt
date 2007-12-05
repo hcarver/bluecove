@@ -12,7 +12,7 @@ JSR 82 Technology Compatibility Kit
     JSR-82 project website {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.jsr82}https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.jsr82}}
 
 
-* BlueCove Tests on windows
+* BlueCove TCK Tests on Windows and Mac OS X
 
     L2CAP connection can't be implemented on Microsoft stack. Because of this BlueCove JSR-82 implementation can't be certified on  Microsoft stack. L2CAP tests has been excluded from run on this stack to save time
 
@@ -26,7 +26,9 @@ JSR 82 Technology Compatibility Kit
 
     * {{{http://www.microemu.org/}MicroEmulator}} v2.0.2-SNAPSHOT as MIDP container.
 
-    * BlueCove on WIDCOMM stack as TCK agent
+    * BlueCove on WIDCOMM stack as TCK agent for Microsoft stack Mac OS X tests
+
+    * BlueCove on Mac OS X as TCK agent for WIDCOMM stack tests
 
     * Cellphone Nokia 6265i (RFCOMM only) or Sony Ericson K790a as TCK agent
 
@@ -45,6 +47,8 @@ JSR 82 Technology Compatibility Kit
     * System 1 TCK Client, Intel Pentium M 1.7 GHz, RAM 1.25 GB, Microsoft Bluetooth stack, D-Link DBT-120
 
     * System 2 TCK Agent, Intel Pentium III 646 MHz, RAM 320 MB, WIDCOMM (Broadcom Bluetooth stack) v5.0.1.2800, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
+
+    * Mac OS X 10.4.8 i386, Java: Apple Computer Inc. 1.5.0_07, D-Link DBT-120
 
     []
 
