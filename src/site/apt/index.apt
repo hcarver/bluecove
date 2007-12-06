@@ -56,6 +56,8 @@ BlueCove
 
     Main project website {{{http://bluecove.googlecode.com}http://bluecove.googlecode.com}}
 
+[bluecove-examples/images/stack-diagram.png] JSR-82 and Bluetooth stack diagram
+
 * BlueCove Tests on windows
 
     You can help us to make BlueCove better or understand how we are testing it look {{{bluecove-examples/bluecove-tester}here}}.
