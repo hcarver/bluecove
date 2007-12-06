@@ -69,9 +69,9 @@ public:
     Runnable();
     ~Runnable();
     virtual void run() = 0;
-
-    BOOL isCorrupted();
 };
+
+BOOL isRunnableCorrupted(Runnable* );
 
 // parameterized macro to create class and its function run()
 

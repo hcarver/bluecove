@@ -86,8 +86,8 @@ Runnable::~Runnable() {
 	magic2e = 0;
 }
 
-BOOL Runnable::isCorrupted() {
-	return ((magic1b != MAGIC_1) || (magic2b != MAGIC_2) || (magic1e != MAGIC_1) || (magic2e != MAGIC_2));
+BOOL isRunnableCorrupted(Runnable* r) {
+    return ((r == NULL) || (r->magic1b != MAGIC_1) || (r->magic2b != MAGIC_2) || (r->magic1e != MAGIC_1) || (r->magic2e != MAGIC_2));
 }
 
 // --- One Native Thread and RunLoop, An issue with the OS X BT implementation is all the calls need to come from the same thread.
@@ -175,7 +175,7 @@ void *oneNativeThreadMain(void *initializeCond) {
 void performBTOperationCallBack(void *info) {
     BTOperationParams* params = (BTOperationParams*)info;
     if (params->runnable != NULL) {
-        if (params->runnable->isCorrupted()) {
+        if (isRunnableCorrupted(params->runnable)) {
             ndebug("Error: execute BTOperation got corrupted runnable");
         } else {
             ndebug(" execute  BTOperation %s", params->runnable->name);

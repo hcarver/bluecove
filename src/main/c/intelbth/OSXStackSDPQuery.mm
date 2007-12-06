@@ -27,6 +27,26 @@
 
 jint terminatedTansID[MAX_TERMINATE] = {0};
 jint runningTansID[MAX_TERMINATE] = {0};
+void* searchServicesIgnore[MAX_TERMINATE] = {0};
+
+void setSearchServicesIgnore(void* ptr) {
+    for(int i = 0; i < MAX_TERMINATE; i ++) {
+        if (searchServicesIgnore[i] == NULL) {
+            searchServicesIgnore[i] = ptr;
+            break;
+        }
+    }
+}
+
+BOOL isSearchServicesIgnore(void* ptr) {
+    for(int i = 0; i < MAX_TERMINATE; i ++) {
+        if (searchServicesIgnore[i] == ptr) {
+            searchServicesIgnore[i] = NULL;
+            return true;
+        }
+    }
+    return false;
+}
 
 StackSDPQueryStart::StackSDPQueryStart() {
     name = "StackSDPQueryStart";
@@ -36,13 +56,13 @@ StackSDPQueryStart::StackSDPQueryStart() {
 }
 
 void callbackSDPQueryIsComplete(void* userRefCon, IOBluetoothDeviceRef deviceRef, IOReturn status) {
-    if (!((StackSDPQueryStart*)userRefCon)->isCorrupted()) {
+    if ((!isSearchServicesIgnore(userRefCon)) && (!isRunnableCorrupted((StackSDPQueryStart*)userRefCon))) {
         ((StackSDPQueryStart*)userRefCon)->sdpQueryComplete(deviceRef, status);
     }
 }
 
 void StackSDPQueryStart::run() {
-    startTime = CFDateCreate(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent());
+    startTime = CFAbsoluteTimeGetCurrent();
 
     BluetoothDeviceAddress btAddress;
     LongToOSxBTAddr(address, &btAddress);
@@ -58,6 +78,7 @@ void StackSDPQueryStart::run() {
 }
 
 void StackSDPQueryStart::sdpQueryComplete(IOBluetoothDeviceRef deviceRef, IOReturn status) {
+    ndebug("sdpQueryComplete 0x%08x", status);
     this->status = status;
     // Apperantly connection to device is still open after SDP query for some time. This may affect other connections.
     if (deviceRef != NULL) {
@@ -69,16 +90,17 @@ void StackSDPQueryStart::sdpQueryComplete(IOBluetoothDeviceRef deviceRef, IORetu
         CFArrayRef services = IOBluetoothDeviceGetServices(deviceRef);
         if (services != NULL) {
             recordsSize = CFArrayGetCount(services);
+            CFDateRef startDate = CFDateCreate(kCFAllocatorDefault, startTime);
             CFDateRef updatedTime = IOBluetoothDeviceGetLastServicesUpdate(deviceRef);
-            if (CFDateGetTimeIntervalSinceDate(updatedTime, this->startTime) < 0) {
+            if (CFDateGetTimeIntervalSinceDate(updatedTime, startDate) < 0) {
                 this->status = kIOReturnNotFound;
                 this->error = 1;
             }
+            CFRelease(startDate);
         } else {
             recordsSize = 0;
         }
     }
-    CFRelease(this->startTime);
     this->complete = TRUE;
     if (stack != NULL) {
         MPSetEvent(stack->deviceInquiryNotificationEvent, 1);
@@ -124,10 +146,14 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServi
         MPEventFlags flags;
         MPWaitForEvent(stack->deviceInquiryNotificationEvent, &flags, kDurationMillisecond * 500);
         if (isSearchServicesTerminated(transID)) {
+            setSearchServicesIgnore(&runnable);
             return 0;
         }
     }
     setSearchServicesEnds(transID);
+    if (!runnable.complete) {
+        setSearchServicesIgnore(&runnable);
+    }
     if (stack == NULL) {
         return 0;
     }

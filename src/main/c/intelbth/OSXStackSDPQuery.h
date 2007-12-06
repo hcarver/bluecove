@@ -27,7 +27,7 @@ class StackSDPQueryStart: public Runnable {
 public:
     volatile BOOL complete;
     jlong address;
-    CFDateRef startTime;
+    CFAbsoluteTime startTime;
     volatile IOReturn status;
     volatile int recordsSize;
     IOBluetoothDeviceRef deviceRef;

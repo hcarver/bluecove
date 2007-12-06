@@ -460,7 +460,7 @@ RUNNABLE(GetRemoteDeviceFriendlyName, "GetRemoteDeviceFriendlyName") {
 
 void remoteNameRequestResponse(void *userRefCon, IOBluetoothDeviceRef deviceRef, IOReturn status ) {
     GetRemoteDeviceFriendlyName* runnable = (GetRemoteDeviceFriendlyName*) userRefCon;
-    if (runnable->isCorrupted()) {
+    if (isRunnableCorrupted(runnable)) {
         return;
     }
     if (kIOReturnSuccess != status) {
