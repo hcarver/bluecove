@@ -31,6 +31,7 @@ OSXStack::OSXStack() {
     deviceInquiryTerminated = FALSE;
     pthread_mutex_init(&deviceInquiryInProcessMutex, NULL);
     MPCreateEvent(&deviceInquiryNotificationEvent);
+    MPCreateEvent(&deviceInquiryFinishedEvent);
 
     commPool = new ObjectPool(100, 1, TRUE);
 }
@@ -42,10 +43,17 @@ OSXStack::~OSXStack() {
 	}
     MPSetEvent(deviceInquiryNotificationEvent, 0);
     MPDeleteEvent(deviceInquiryNotificationEvent);
+    MPDeleteEvent(deviceInquiryFinishedEvent);
     pthread_mutex_destroy(&deviceInquiryInProcessMutex);
 }
 
 BOOL OSXStack::deviceInquiryLock(JNIEnv* env) {
+    if (deviceInquiryInProcess && deviceInquiryTerminated) {
+        // Wait until it terminates
+        MPEventFlags flags;
+        MPWaitForEvent(deviceInquiryFinishedEvent, &flags, kDurationMillisecond * 1000 * 3);
+    }
+
     if (deviceInquiryInProcess) {
 	    throwBluetoothStateException(env, cINQUIRY_RUNNING);
 	    return false;
@@ -60,7 +68,9 @@ BOOL OSXStack::deviceInquiryLock(JNIEnv* env) {
 
 BOOL OSXStack::deviceInquiryUnlock() {
     deviceInquiryInProcess = false;
-    return (pthread_mutex_unlock(&deviceInquiryInProcessMutex) == 0);
+    BOOL rc = (pthread_mutex_unlock(&deviceInquiryInProcessMutex) == 0);
+    MPSetEvent(deviceInquiryFinishedEvent, 0);
+    return rc;
 }
 
 Runnable::Runnable() {

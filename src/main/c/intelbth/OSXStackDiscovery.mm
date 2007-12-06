@@ -412,6 +412,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
 
     BOOL aborted = discovery.aborted();
     IOReturn error = discovery.errorCode();
+    bool terminated = stack->deviceInquiryTerminated;
 
     synchronousBTOperation(&discoveryRelease);
 
@@ -425,7 +426,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
 
     if (stack == NULL) {
         return INQUIRY_TERMINATED;
-    } else if (stack->deviceInquiryTerminated) {
+    } else if (terminated) {
         debug("deviceInquiry terminated");
         return INQUIRY_TERMINATED;
     } else if (error != kIOReturnSuccess) {
