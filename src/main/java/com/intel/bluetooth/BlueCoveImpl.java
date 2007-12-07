@@ -179,7 +179,7 @@ public class BlueCoveImpl {
         }
     }
 
-    private synchronized void detectStack() throws BluetoothStateException {
+    private void detectStack() throws BluetoothStateException {
 
         BluetoothStack detectorStack = null;
 
@@ -363,7 +363,8 @@ public class BlueCoveImpl {
         return setBluetoothStack(stack, null);
     }
 
-    private String setBluetoothStack(String stack, BluetoothStack detectorStack) throws BluetoothStateException {
+    private synchronized String setBluetoothStack(String stack, BluetoothStack detectorStack)
+            throws BluetoothStateException {
         if (bluetoothStack != null) {
             bluetoothStack.destroy();
             bluetoothStack = null;
@@ -411,7 +412,7 @@ public class BlueCoveImpl {
      * @exception Error
      *                if called from outside of BlueCove internal code.
      */
-    public BluetoothStack getBluetoothStack() throws BluetoothStateException {
+    public synchronized BluetoothStack getBluetoothStack() throws BluetoothStateException {
         Utils.isLegalAPICall(fqcnSet);
         if (bluetoothStack == null) {
             if (accessControlContext == null) {
