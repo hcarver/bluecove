@@ -39,14 +39,23 @@
 
 #endif
 
+BOOL isWIDCOMMReady();
+
 BOOL isWIDCOMMBluetoothStackPresent(JNIEnv *env) {
 	HMODULE h = LoadLibrary(WIDCOMM_DLL);
 	if (h == NULL) {
 		return FALSE;
 	}
-	FreeLibrary(h);
-	return TRUE;
+    BOOL present = isWIDCOMMReady();
+    FreeLibrary(h);
+	return present;
 }
+
+#ifndef _BTWLIB
+BOOL isWIDCOMMReady() {
+    return TRUE;
+}
+#endif
 
 #ifdef _BTWLIB
 
@@ -102,6 +111,18 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_detectBlue
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_enableNativeDebug
   (JNIEnv *env, jobject, jclass loggerClass, jboolean on) {
 	enableNativeDebug(env, loggerClass, on);
+}
+
+BOOL isWIDCOMMReady() {
+    BOOL present = true;
+	#ifndef WIDCOMM_CE30
+	    CBtIf* s = new CBtIf();
+	    present = s->IsDeviceReady();
+	    delete s;
+	#else
+
+    #endif
+    return present;
 }
 
 WIDCOMMStack::WIDCOMMStack() {
