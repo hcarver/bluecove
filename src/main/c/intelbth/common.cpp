@@ -281,6 +281,10 @@ jint detectBluetoothStack(JNIEnv *env) {
 	if (isMicrosoftBluetoothStackPresent(env)) {
 		rc += BLUECOVE_STACK_DETECT_MICROSOFT;
 	}
+#else
+    if (isMicrosoftBluetoothStackPresentVC6(env)) {
+		rc += BLUECOVE_STACK_DETECT_MICROSOFT;
+	}
 #endif
 	if (isWIDCOMMBluetoothStackPresent(env)) {
 		rc += BLUECOVE_STACK_DETECT_WIDCOMM;

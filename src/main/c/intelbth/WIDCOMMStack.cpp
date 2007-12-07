@@ -125,6 +125,37 @@ BOOL isWIDCOMMReady() {
     return present;
 }
 
+#ifndef _WIN32_WCE
+#ifdef VC6
+#define AF_BTH          32
+#define BTHPROTO_RFCOMM  0x0003
+#endif // VC6
+#endif // _WIN32_WCE
+
+/**
+ * This is minimal MS detection under VC6. Compleate detection is done MS library anyway.
+ */
+BOOL isMicrosoftBluetoothStackPresentVC6(JNIEnv *env) {
+    debug("isMicrosoftBluetoothStackPresentVC6");
+    WSADATA data;
+    if (WSAStartup(MAKEWORD(2, 2), &data) != 0) {
+        int last_error = WSAGetLastError();
+		debug2("WSAStartup error [%d] %S", last_error, getWinErrorMessage(last_error));
+        return FALSE;
+    }
+
+	SOCKET s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
+	if (s == INVALID_SOCKET) {
+		int last_error = WSAGetLastError();
+		debug2("socket error [%d] %S", last_error, getWinErrorMessage(last_error));
+		WSACleanup();
+		return FALSE;
+	}
+	closesocket(s);
+	WSACleanup();
+	return TRUE;
+}
+
 WIDCOMMStack::WIDCOMMStack() {
 	hEvent = CreateEvent(
             NULL,     // no security attributes

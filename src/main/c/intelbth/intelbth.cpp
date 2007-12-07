@@ -118,6 +118,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_enableNa
 	enableNativeDebug(env, loggerClass, on);
 }
 
+//See same function for VC6 isMicrosoftBluetoothStackPresentVC6  in WIDCOMMStack.cpp
 BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env) {
 	SOCKET s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
 	if (s == INVALID_SOCKET) {

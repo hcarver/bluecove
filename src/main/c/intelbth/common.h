@@ -280,6 +280,7 @@ jstring newMultiByteString(JNIEnv* env, char* str);
 jint detectBluetoothStack(JNIEnv *env);
 jint blueCoveVersion();
 BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env);
+BOOL isMicrosoftBluetoothStackPresentVC6(JNIEnv *env);
 BOOL isWIDCOMMBluetoothStackPresent(JNIEnv *env);
 BOOL isBlueSoleilBluetoothStackPresent(JNIEnv *env);
 BOOL isToshibaBluetoothStackPresent(JNIEnv *env);
