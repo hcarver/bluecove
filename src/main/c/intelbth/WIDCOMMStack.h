@@ -52,8 +52,6 @@
 	// BTW-5_0_1_902-SDK and BTW-6_1_0_1501-SDK
 	#pragma comment(lib, "WidcommSdklib.lib")
 
-	// Used for MS stack detection
-	#include <winsock2.h>
 #endif // #else // _WIN32_WCE
 
 //#include "btwlib.h"
@@ -87,7 +85,8 @@
     #define BWT_SINCE_SDK_5_0_1
 #endif
 
-
+// Used for MS stack detection
+#include <winsock2.h>
 
 void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr);
 

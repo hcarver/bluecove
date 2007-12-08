@@ -130,6 +130,9 @@ BOOL isWIDCOMMReady() {
 #define AF_BTH          32
 #define BTHPROTO_RFCOMM  0x0003
 #endif // VC6
+#else
+#define AF_BTH          32
+#define BTHPROTO_RFCOMM  0x0003
 #endif // _WIN32_WCE
 
 /**

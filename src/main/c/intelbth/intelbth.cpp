@@ -51,6 +51,8 @@ static BTH_LOCAL_VERSION localBluetoothDeviceInfo;
 static BOOL initialBtIsDiscoverable;
 #endif
 
+BOOL microsoftBluetoothStackPresent;
+
 void dllCleanup();
 
 void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg);
@@ -150,10 +152,16 @@ BOOL isMicrosoftBluetoothStackPresent(JNIEnv *env) {
 	}
 	closesocket(s);
 	//return TRUE;
-	return (btAddr.btAddr != 0);
+	microsoftBluetoothStackPresent = (btAddr.btAddr != 0);
+	return microsoftBluetoothStackPresent;
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_initializationStatus(JNIEnv *env, jclass peerClass) {
+    if (!microsoftBluetoothStackPresent) {
+        if (!isMicrosoftBluetoothStackPresent(env)) {
+            throwBluetoothStateException(env, "BluetoothStack not detected");
+        }
+    }
 #ifdef _BTWINSOCKLIB
 	if (started) {
 #ifdef _WIN32_WCE
