@@ -37,7 +37,6 @@
 
 === JSR-82 Limitations ===
 
-    * RFCOMM Server can accept only one connection at a time
     * `LocalDevice.setDiscoverable(...)` not supported.
     * `ServiceRecord.setDeviceServiceClasses(..)` not supported.
     * `ServiceRecord` attributes of `DataElement` types URL are discovered as STRING
