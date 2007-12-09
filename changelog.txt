@@ -2,6 +2,9 @@
 
 * 2.0.2 to be released 2007-12-??
 
+    2007-12-09
+    * WIDCOMM RFCOMM Service accept multiple connections
+
     2007-12-05
     * L2CAP, RFCOMM and OBEX server on Mac OS X
 

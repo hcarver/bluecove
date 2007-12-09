@@ -4,8 +4,6 @@ The list of functionality that can be implemented or investigation should be don
 
 * WIDCOMM Service to publish attributes DataElement.DATSEQ and DataElement.DATALT
 
-* WIDCOMM Service to accept multiple connections
-
 * BlueZ Linux version (C++)
 
 * OS X support. Some code exists in branches\osxPort\

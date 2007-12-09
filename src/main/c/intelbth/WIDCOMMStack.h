@@ -110,8 +110,11 @@ typedef struct {
 #define SDP_DISCOVERY_RECORDS_HANDLE_OFFSET 1
 // 7 for Server and 7 for Client, Bluetooth Can't have more
 #define COMMPORTS_POOL_MAX 14
+#define OPEN_COMMPORTS_MAX 7
 
 class WIDCOMMStackRfCommPort;
+class WIDCOMMStackServerConnectionBase;
+class WIDCOMMStackRfCommPortServer;
 class WIDCOMMStackL2CapConn;
 
 class DiscoveryRecHolder {
@@ -160,8 +163,10 @@ public:
 
 	virtual void OnDiscoveryComplete();
 
-	WIDCOMMStackRfCommPort* createCommPort(BOOL server);
-	void deleteCommPort(WIDCOMMStackRfCommPort* commPort);
+	WIDCOMMStackRfCommPort* createCommPort();
+	void deleteCommPort(PoolableObject* object);
+
+	WIDCOMMStackRfCommPortServer* createCommServer();
 
 	WIDCOMMStackL2CapConn* createL2CapConn();
 	void deleteL2CapConn(WIDCOMMStackL2CapConn* conn);
@@ -171,18 +176,29 @@ extern WIDCOMMStack* stack;
 
 //	 --- Client RFCOMM connections
 
-class WIDCOMMStackRfCommPort : public CRfCommPort, public PoolableObject {
+class WIDCOMMStackConnectionBase : public PoolableObject {
 public:
-
-	GUID service_guid;
-	BT_CHAR service_name[BT_MAX_SERVICE_NAME_LEN + 1];
-
 	BOOL isClosing;
 	BOOL isConnected;
+	HANDLE hConnectionEvent;
+
+    GUID service_guid;
+	BT_CHAR service_name[BT_MAX_SERVICE_NAME_LEN + 1];
+
+    WIDCOMMStackServerConnectionBase* server;
+
+	WIDCOMMStackConnectionBase();
+	virtual ~WIDCOMMStackConnectionBase();
+
+	virtual void close(JNIEnv *env, BOOL allowExceptions) = 0;
+};
+
+class WIDCOMMStackRfCommPort : public CRfCommPort, public WIDCOMMStackConnectionBase {
+public:
+
 	int isConnectionErrorType;
 	BOOL isConnectionError;
 
-	HANDLE hConnectionEvent;
 	HANDLE hDataReceivedEvent;
 
 	UINT32 other_event_code;
@@ -195,24 +211,33 @@ public:
 	void readyForReuse();
 	void resetReceiveBuffer();
 
-	virtual void closeRfCommPort(JNIEnv *env);
+	virtual void close(JNIEnv *env, BOOL allowExceptions);
 
 	virtual void OnEventReceived(UINT32 event_code);
 	virtual void OnDataReceived(void *p_data, UINT16 len);
 };
 
-class WIDCOMMStackRfCommPortServer : public WIDCOMMStackRfCommPort {
+class WIDCOMMStackServerConnectionBase : public WIDCOMMStackConnectionBase {
+public:
+    CSdpService* sdpService;
+    WIDCOMMStackConnectionBase* conn[OPEN_COMMPORTS_MAX];
+
+    WIDCOMMStackServerConnectionBase();
+	virtual ~WIDCOMMStackServerConnectionBase();
+
+    void addClient(WIDCOMMStackConnectionBase* c);
+    void closeClient(JNIEnv *env, WIDCOMMStackConnectionBase* c);
+    virtual void close(JNIEnv *env, BOOL allowExceptions);
+};
+
+class WIDCOMMStackRfCommPortServer : public WIDCOMMStackServerConnectionBase {
 public:
 	UINT8 scn;
-	BOOL isClientOpen;
 
 	CRfCommIf rfCommIf;
-	CSdpService* sdpService;
 
 	WIDCOMMStackRfCommPortServer();
 	virtual ~WIDCOMMStackRfCommPortServer();
-
-	virtual void closeRfCommPort(JNIEnv *env);
 };
 
 //	 --- Client and Server L2CAP connections

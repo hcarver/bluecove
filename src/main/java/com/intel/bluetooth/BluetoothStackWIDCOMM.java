@@ -443,10 +443,10 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 				params.encrypt, params.timeouts ? params.timeout : 0);
 	}
 
-	private native void closeRfCommPort(long handle) throws IOException;
+	private native void closeRfCommPortImpl(long handle) throws IOException;
 
 	public void connectionRfCloseClientConnection(long handle) throws IOException {
-		closeRfCommPort(handle);
+		closeRfCommPortImpl(handle);
 	}
 
 	public native long getConnectionRfRemoteAddress(long handle) throws IOException;
@@ -597,8 +597,10 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	public native void connectionRfCloseServerConnection(long handle) throws IOException;
 
+	private native void rfServerCloseImpl(long handle) throws IOException;
+
 	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
-		closeRfCommPort(handle);
+		rfServerCloseImpl(handle);
 	}
 
 	// ---------------------- Client and Server L2CAP connections

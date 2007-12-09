@@ -955,15 +955,20 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getS
 //	 --- Client RFCOMM connections
 
 // Guarded by CriticalSection csCRfCommIf
-WIDCOMMStackRfCommPort* WIDCOMMStack::createCommPort(BOOL server) {
-	WIDCOMMStackRfCommPort* port;
-    if (server) {
-	    port = new WIDCOMMStackRfCommPortServer();
-    } else {
-        port = new WIDCOMMStackRfCommPort();
-    }
+WIDCOMMStackRfCommPort* WIDCOMMStack::createCommPort() {
+	WIDCOMMStackRfCommPort* port = new WIDCOMMStackRfCommPort();
 
 	if (!commPool->addObject(port, 'r')) {
+		delete port;
+		return NULL;
+	}
+	return port;
+}
+
+WIDCOMMStackRfCommPortServer* WIDCOMMStack::createCommServer() {
+	WIDCOMMStackRfCommPortServer* port = new WIDCOMMStackRfCommPortServer();
+
+	if (!commPool->addObject(port, 'R')) {
 		delete port;
 		return NULL;
 	}
@@ -978,11 +983,19 @@ WIDCOMMStackRfCommPort* validRfCommHandle(JNIEnv *env, jlong handle) {
 	return (WIDCOMMStackRfCommPort*)stack->commPool->getObject(env, handle, 'r');
 }
 
-void WIDCOMMStack::deleteCommPort(WIDCOMMStackRfCommPort* commPort) {
-	if (commPort == NULL) {
+WIDCOMMStackRfCommPortServer* validRfCommServerHandle(JNIEnv *env, jlong handle) {
+	if (stack == NULL) {
+		throwIOException(env, cSTACK_CLOSED);
+		return NULL;
+	}
+	return (WIDCOMMStackRfCommPortServer*)stack->commPool->getObject(env, handle, 'R');
+}
+
+void WIDCOMMStack::deleteCommPort(PoolableObject* object) {
+	if (object == NULL) {
 		return;
 	}
-	commPort->readyToFree = TRUE;
+	object->readyToFree = TRUE;
 }
 
 WIDCOMMStackL2CapConn* WIDCOMMStack::createL2CapConn() {
@@ -1009,17 +1022,31 @@ void WIDCOMMStack::deleteL2CapConn(WIDCOMMStackL2CapConn* conn) {
 	conn->readyToFree = TRUE;
 }
 
-WIDCOMMStackRfCommPort::WIDCOMMStackRfCommPort() {
+WIDCOMMStackConnectionBase::WIDCOMMStackConnectionBase() {
+	isConnected = FALSE;
+	isClosing = FALSE;
+	service_name[0] = '\0';
 
 	memset(&service_guid, 0, sizeof(GUID));
-
-	readyForReuse();
 
     hConnectionEvent = CreateEvent(
             NULL,     // no security attributes
             FALSE,     // auto-reset event
             FALSE,    // initial state is NOT signaled
             NULL);    // object not named
+}
+
+WIDCOMMStackConnectionBase::~WIDCOMMStackConnectionBase() {
+    isConnected = FALSE;
+	CloseHandle(hConnectionEvent);
+}
+
+WIDCOMMStackRfCommPort::WIDCOMMStackRfCommPort() {
+
+    server = NULL;
+
+	readyForReuse();
+
     hDataReceivedEvent = CreateEvent(
             NULL,     // no security attributes
             FALSE,     // auto-reset event
@@ -1053,7 +1080,6 @@ WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
 	isConnected = FALSE;
 
 	CloseHandle(hDataReceivedEvent);
-	CloseHandle(hConnectionEvent);
 	openConnections --;
 }
 
@@ -1112,7 +1138,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 	EnterCriticalSection(&stack->csCRfCommIf);
 	//vc6 __try {
 	    if (stack != NULL) {
-		    rf = stack->createCommPort(FALSE);
+		    rf = stack->createCommPort();
 	    }
 		if (rf == NULL) {
 			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
@@ -1205,15 +1231,18 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 	}*/
 }
 
-void WIDCOMMStackRfCommPort::closeRfCommPort(JNIEnv *env) {
+void WIDCOMMStackRfCommPort::close(JNIEnv *env, BOOL allowExceptions) {
 	isClosing = TRUE;
+	server = NULL;
 	SetEvent(hConnectionEvent);
 	debug2("closing RfCommPort [%i], Connected[%s]", internalHandle, bool2str(isConnected));
 	Purge(PORT_PURGE_TXCLEAR);
 	Purge(PORT_PURGE_RXCLEAR);
 	CRfCommPort::PORT_RETURN_CODE rc = Close();
 	if (rc != CRfCommPort::SUCCESS && rc != CRfCommPort::NOT_OPENED) {
-		throwIOException(env, "Failed to Close");
+		if (allowExceptions) {
+		    throwIOException(env, "Failed to Close");
+	    }
 	} else {
 		debug1("closed RfCommPort [%i]", internalHandle);
 	}
@@ -1226,7 +1255,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_closeRfCom
 		return;
 	}
 	//debug("CloseClientConnection");
-	rf->closeRfCommPort(env);
+	rf->close(env, true);
 	// Some worker thread is still trying to access this object, delete later
 	if (stack != NULL) {
 		stack->deleteCommPort(rf);
@@ -1483,31 +1512,65 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	env->ReleaseByteArrayElements(b, bytes, 0);
 }
 
+WIDCOMMStackServerConnectionBase::WIDCOMMStackServerConnectionBase() {
+    sdpService = new CSdpService();
+    for(int i = 0 ; i < OPEN_COMMPORTS_MAX; i ++) {
+		conn[i] = NULL;
+	}
+}
+
+WIDCOMMStackServerConnectionBase::~WIDCOMMStackServerConnectionBase() {
+    if (sdpService != NULL) {
+		delete sdpService;
+		sdpService = NULL;
+	}
+}
+
+void WIDCOMMStackServerConnectionBase::addClient(WIDCOMMStackConnectionBase* c) {
+    for(int i = 0 ; i < OPEN_COMMPORTS_MAX; i ++) {
+		if (conn[i] == NULL) {
+			conn[i] = c;
+			c->server = this;
+			break;
+		}
+	}
+}
+
+void WIDCOMMStackServerConnectionBase::closeClient(JNIEnv *env, WIDCOMMStackConnectionBase* c) {
+    for(int i = 0 ; i < OPEN_COMMPORTS_MAX; i ++) {
+		if (conn[i] == c) {
+			conn[i] = NULL;
+			break;
+		}
+	}
+    c->close(env, false);
+}
+
+void WIDCOMMStackServerConnectionBase::close(JNIEnv *env, BOOL allowExceptions) {
+	for(int i = 0 ; i < OPEN_COMMPORTS_MAX; i ++) {
+		if (conn[i] != NULL) {
+			conn[i]->close(env, false);
+			conn[i] = NULL;
+		}
+	}
+
+	if (sdpService != NULL) {
+		delete sdpService;
+		sdpService = NULL;
+	}
+}
+
 WIDCOMMStackRfCommPortServer::WIDCOMMStackRfCommPortServer() {
-	sdpService = new CSdpService();
-	isClientOpen = FALSE;
 }
 
 WIDCOMMStackRfCommPortServer::~WIDCOMMStackRfCommPortServer() {
-	if (sdpService != NULL) {
-		delete sdpService;
-		sdpService = NULL;
-	}
-}
-
-void WIDCOMMStackRfCommPortServer::closeRfCommPort(JNIEnv *env) {
-	WIDCOMMStackRfCommPort::closeRfCommPort(env);
-	if (sdpService != NULL) {
-		delete sdpService;
-		sdpService = NULL;
-	}
 }
 
 #define open_server_return  open_server_finally(env, rf); return
 
 void open_server_finally(JNIEnv *env, WIDCOMMStackRfCommPortServer* rf) {
 	if ((rf != NULL) && (stack != NULL)) {
-		rf->closeRfCommPort(env);
+		rf->close(env, false);
 		stack->deleteCommPort(rf);
 	}
 
@@ -1526,7 +1589,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 	WIDCOMMStackRfCommPortServer* rf = NULL;
 //VC6	__try {
 
-		rf = (WIDCOMMStackRfCommPortServer*)stack->createCommPort(TRUE);
+		rf = (WIDCOMMStackRfCommPortServer*)stack->createCommServer();
 		if (rf == NULL) {
 			throwIOException(env, "No free connections Objects in Pool");
 			open_server_return 0;
@@ -1659,116 +1722,130 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 */
 }
 
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerCloseImpl
+(JNIEnv *env, jobject peer, jlong handle) {
+	WIDCOMMStackRfCommPortServer* srv = validRfCommServerHandle(env, handle);
+	if (srv == NULL) {
+		return;
+	}
+	//debug("CloseClientConnection");
+	srv->close(env, true);
+	// Some worker thread is still trying to access this object, delete later
+	if (stack != NULL) {
+		stack->deleteCommPort(srv);
+	}
+	//debugs("connection handles %i", openConnections);
+}
+
+#define accept_server_return  accept_server_finally(env, rf); return
+
+void accept_server_finally(JNIEnv *env, WIDCOMMStackRfCommPort* rf) {
+	if ((rf != NULL) && (stack != NULL)) {
+		rf->close(env, false);
+		stack->deleteCommPort(rf);
+	}
+}
+
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerAcceptAndOpenRfServerConnection
 (JNIEnv *env, jobject peer, jlong handle) {
-	WIDCOMMStackRfCommPortServer* rf = (WIDCOMMStackRfCommPortServer*)validRfCommHandle(env, handle);
-	if (rf == NULL) {
+	WIDCOMMStackRfCommPortServer* srv = validRfCommServerHandle(env, handle);
+	if (srv == NULL) {
 		return 0;
 	}
-	if (rf->sdpService == NULL) {
+	if (srv->sdpService == NULL) {
 		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return 0;
 	}
 
 	#ifdef BWT_SINCE_SDK_6_0_1
-	rf->sdpService->CommitRecord();
+	srv->sdpService->CommitRecord();
 	#endif
 
-	if (rf->isClientOpen) {
-		debug("server waits for client prev connection to close");
-		while ((stack != NULL) && (rf->isClientOpen) && (rf->sdpService != NULL)) {
-			DWORD  rc = WaitForSingleObject(rf->hConnectionEvent, 500);
-			if (rc == WAIT_FAILED) {
-				throwRuntimeException(env, "WaitForSingleObject");
-				return 0;
-			}
-		}
-		if (stack == NULL) {
-			throwIOException(env, cSTACK_CLOSED);
-			return 0;
-		}
-		if (rf->sdpService == NULL) {
-			_throwInterruptedIOException(env, cCONNECTION_CLOSED);
-			return 0;
-		}
-		//Sleep(200);
+	EnterCriticalSection(&stack->csCRfCommIf);
+	if (stack == NULL) {
+		throwIOException(env, cSTACK_CLOSED);
 	}
 
-	rf->isConnected = FALSE;
-	rf->isConnectionError = FALSE;
-	rf->isClosing = FALSE;
-	rf->resetReceiveBuffer();
-
-	CRfCommPort::PORT_RETURN_CODE rc = rf->OpenServer(rf->scn);
-	if (rc != CRfCommPort::SUCCESS) {
-		throwIOException(env, "Failed to OpenServer");
+	WIDCOMMStackRfCommPort* rf = stack->createCommPort();
+	if (rf == NULL) {
+		throwIOException(env, "No free connections Objects in Pool");
 		return 0;
 	}
+    srv->addClient(rf);
+
+	CRfCommPort::PORT_RETURN_CODE rc = rf->OpenServer(srv->scn);
+	if (stack != NULL) {
+		LeaveCriticalSection(&stack->csCRfCommIf);
+	}
+
+	if (rc != CRfCommPort::SUCCESS) {
+		throwIOException(env, "Failed to OpenServer");
+		accept_server_return 0;
+	}
+
+	HANDLE hEvents[2];
+	hEvents[0] = rf->hConnectionEvent;
+	hEvents[1] = srv->hConnectionEvent;
+
 	debug("RFCOMM server waits for connection");
-	while ((stack != NULL) && (!rf->isClosing)  && (!rf->isConnected) && (!rf->isConnectionError) && (rf->sdpService != NULL)) {
-		DWORD  rc = WaitForSingleObject(rf->hConnectionEvent, 500);
+	while ((stack != NULL) && (!srv->isClosing)  && (!rf->isConnected) && (!rf->isConnectionError) && (srv->sdpService != NULL)) {
+		DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, 500);
 		if (rc == WAIT_FAILED) {
-			throwRuntimeException(env, "WaitForSingleObject");
-			return 0;
+			throwRuntimeException(env, "WaitForMultipleObjects");
+			accept_server_return 0;
 		}
 		if (isCurrentThreadInterrupted(env, peer)) {
 			debug("Interrupted while waiting for connections");
-			return 0;
+			accept_server_return 0;
 		}
 	}
 
-	if ((stack == NULL) || rf->isClosing || rf->isConnectionError || (rf->sdpService == NULL)) {
+	if ((stack == NULL) || srv->isClosing || rf->isConnectionError || (srv->sdpService == NULL)) {
 		if (stack == NULL) {
 			throwIOException(env, cSTACK_CLOSED);
-		} else if (rf->isClosing || (rf->sdpService == NULL)) {
+		} else if (srv->isClosing || (srv->sdpService == NULL)) {
 			_throwInterruptedIOException(env, cCONNECTION_CLOSED);
-			return 0;
 		} else if (rf->isConnectionError) {
 			throwIOException(env, "Connection error");
 		} else {
 			throwIOException(env, "Failed to connect");
 		}
-		return 0;
+		accept_server_return 0;
 	}
 	debug("RFCOMM server connection made");
-	rf->isClientOpen = TRUE;
 	return rf->internalHandle;
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerSCN
 (JNIEnv *env, jobject, jlong handle) {
-	WIDCOMMStackRfCommPortServer* rf = (WIDCOMMStackRfCommPortServer*)validRfCommHandle(env, handle);
-	if (rf == NULL) {
+	WIDCOMMStackRfCommPortServer* srv = validRfCommServerHandle(env, handle);
+	if (srv == NULL) {
 		return 0;
 	}
-	return rf->scn;
+	return srv->scn;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfCloseServerConnection
 (JNIEnv *env, jobject, jlong handle) {
-	WIDCOMMStackRfCommPortServer* rf = (WIDCOMMStackRfCommPortServer*)validRfCommHandle(env, handle);
-	if ((rf == NULL) || (!rf->isClientOpen)) {
+	WIDCOMMStackRfCommPort* rf = validRfCommHandle(env, handle);
+	if (rf == NULL) {
 		return;
 	}
-	rf->isClosing = TRUE;
-	SetEvent(rf->hConnectionEvent);
-	debugs("closing ServerConnection, Connected[%s]", bool2str(rf->isConnected));
-	CRfCommPort::PORT_RETURN_CODE rc = rf->Close();
-	if (rc != CRfCommPort::SUCCESS && rc != CRfCommPort::NOT_OPENED) {
-		throwIOException(env, "Failed to Close");
+	if (rf->server != NULL) {
+	    rf->server->closeClient(env, rf);
+	} else {
+	    rf->close(env, true);
+    }
+	if (stack != NULL) {
+		stack->deleteCommPort(rf);
 	}
-	rf->isConnected = FALSE;
-	rf->isConnectionError = FALSE;
-	rf->isClientOpen = FALSE;
-	debug("notify ServerConnection readers");
-	SetEvent(rf->hConnectionEvent);
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpServiceAddAttribute
 (JNIEnv *env, jobject, jlong handle, jchar handleType, jint attrID, jshort attrType, jbyteArray value) {
 	CSdpService* sdpService;
 	if (handleType == 'r') {
-	    WIDCOMMStackRfCommPortServer* rf = (WIDCOMMStackRfCommPortServer*)validRfCommHandle(env, handle);
+	    WIDCOMMStackRfCommPortServer* rf = validRfCommServerHandle(env, handle);
 	    if (rf == NULL) {
 		    return;
 	    }
@@ -1781,7 +1858,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
 	    sdpService = l2c->sdpService;
 	}
 	if (sdpService == NULL) {
-		throwException(env, "javax/bluetooth/ServiceRegistrationException", cCONNECTION_IS_CLOSED);
+		throwServiceRegistrationExceptionExt(env, cCONNECTION_IS_CLOSED);
 		return;
 	}
 
