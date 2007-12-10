@@ -1248,7 +1248,7 @@ void WIDCOMMStackRfCommPort::close(JNIEnv *env, BOOL allowExceptions) {
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_closeRfCommPort
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_closeRfCommPortImpl
 (JNIEnv *env, jobject peer, jlong handle) {
 	WIDCOMMStackRfCommPort* rf = validRfCommHandle(env, handle);
 	if (rf == NULL) {
