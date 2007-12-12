@@ -2,8 +2,6 @@
 
 The list of functionality that can be implemented or investigation should be done if this is possible.
 
-* WIDCOMM Service to publish attributes DataElement.DATSEQ and DataElement.DATALT
-
 * BlueZ Linux version (C++)
 
 * OS X support. Some code exists in branches\osxPort\

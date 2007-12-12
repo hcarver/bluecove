@@ -21,6 +21,7 @@
 package com.intel.bluetooth;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -508,6 +509,19 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		sdpServiceUpdateServiceRecord(handle, 'r', serviceRecord);
 	}
 
+	private byte[] sdpServiceSequenceAttribute(Enumeration en) throws ServiceRegistrationException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		SDPOutputStream sdpOut = new SDPOutputStream(out);
+		try {
+			for (; en.hasMoreElements();) {
+				sdpOut.writeElement((DataElement) en.nextElement());
+			}
+		} catch (IOException e) {
+			throw new ServiceRegistrationException(e.getMessage());
+		}
+		return out.toByteArray();
+	}
+
 	private void sdpServiceUpdateServiceRecord(long handle, char handleType, ServiceRecordImpl serviceRecord)
 			throws ServiceRegistrationException {
 		int[] ids = serviceRecord.getAttributeIDs();
@@ -587,8 +601,15 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 						.getUUIDHexBytes((UUID) d.getValue()));
 				break;
 			case DataElement.DATSEQ:
+				sdpServiceAddAttribute(handle, handleType, id, DATA_ELE_SEQ_DESC_TYPE,
+						sdpServiceSequenceAttribute((Enumeration) d.getValue()));
+				break;
 			case DataElement.DATALT:
-				// TODO create Attribute sequence DATSEQ and DATALT
+				sdpServiceAddAttribute(handle, handleType, id, DATA_ELE_ALT_DESC_TYPE,
+						sdpServiceSequenceAttribute((Enumeration) d.getValue()));
+				break;
+			default:
+				throw new ServiceRegistrationException("Invalid " + d.getDataType());
 			}
 		}
 	}
