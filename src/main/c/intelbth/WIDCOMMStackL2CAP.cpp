@@ -280,7 +280,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerO
 		UINT32 service_name_len;
 		#ifdef _WIN32_WCE
 			swprintf_s((wchar_t*)srv->service_name, BT_MAX_SERVICE_NAME_LEN, L"%s", cname);
-			service_name_len = wcslen((wchar_t*)l2c->service_name);
+			service_name_len = wcslen((wchar_t*)srv->service_name);
 		#else // _WIN32_WCE
 			sprintf_s(srv->service_name, BT_MAX_SERVICE_NAME_LEN, "%s", cname);
 			service_name_len = (UINT32)strlen(srv->service_name);
