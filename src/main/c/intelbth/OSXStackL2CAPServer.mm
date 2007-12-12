@@ -23,6 +23,8 @@
 
 #define CPP_FILE "OSXStackL2CAPServer.mm"
 
+#define DEFAULT_PSM 0x1001
+
 L2CAPServerController* validL2CAPServerControllerHandle(JNIEnv *env, jlong handle) {
 	if (stack == NULL) {
 		throwIOException(env, cSTACK_CLOSED);
@@ -154,7 +156,7 @@ void L2CAPServerController::createPSMDataElement() {
     }
 
     //0x1001-0xFFFF dynamically assigned
-    int psm = 0x1001;
+    int psm = DEFAULT_PSM;
 
     l2capPSMDataElement =  [protocolDescriptorList1 objectAtIndex:1];
     if (l2capPSMDataElement == nil) {
@@ -206,7 +208,7 @@ void L2CAPServicePublish::run() {
         [protocolDescriptorList1 addObject:l2cap_uuid];
 
         //0x1001-0xFFFF dynamically assigned
-        int psm = 0x1001;
+        int psm = DEFAULT_PSM;
         if (assignPsm != 0) {
             psm = assignPsm;
         }
