@@ -37,7 +37,7 @@ class BluetoothConnectionParams {
 	boolean encrypt;
 
 	/**
-	 * Enables timeouts.
+	 * Enables timeouts. Not used now, timeouts always enabled in connections
 	 * 
 	 * @see javax.microedition.io.Connector#open(String,int,boolean)
 	 */

@@ -88,6 +88,18 @@
 // Used for MS stack detection
 #include <winsock2.h>
 
+#ifndef _WIN32_WCE
+#ifdef VC6
+#define AF_BTH          32
+#define BTHPROTO_RFCOMM  0x0003
+#else
+#include <ws2bth.h>
+#endif // VC6
+#else
+#define AF_BTH          32
+#define BTHPROTO_RFCOMM  0x0003
+#endif // _WIN32_WCE
+
 void BcAddrToString(wchar_t* addressString, BD_ADDR bd_addr);
 
 jlong BcAddrToLong(BD_ADDR bd_addr);
@@ -116,6 +128,7 @@ class WIDCOMMStackRfCommPort;
 class WIDCOMMStackServerConnectionBase;
 class WIDCOMMStackRfCommPortServer;
 class WIDCOMMStackL2CapConn;
+class WIDCOMMStackL2CapServer;
 
 class DiscoveryRecHolder {
 public:
@@ -146,7 +159,7 @@ public:
 
 	ObjectPool* commPool;
 	// CRfCommIf shared by application, lock it when connection is made
-	CRITICAL_SECTION csCRfCommIf;
+	CRITICAL_SECTION csCommIf;
 	CRfCommIf rfCommIfClient;
 	//CRfCommIf rfCommIf;
 
@@ -163,13 +176,13 @@ public:
 
 	virtual void OnDiscoveryComplete();
 
-	WIDCOMMStackRfCommPort* createCommPort();
-	void deleteCommPort(PoolableObject* object);
+	void deleteConnection(PoolableObject* object);
 
+	WIDCOMMStackRfCommPort* createCommPort();
 	WIDCOMMStackRfCommPortServer* createCommServer();
 
 	WIDCOMMStackL2CapConn* createL2CapConn();
-	void deleteL2CapConn(WIDCOMMStackL2CapConn* conn);
+	WIDCOMMStackL2CapServer* createL2CapServer();
 };
 
 extern WIDCOMMStack* stack;
@@ -242,34 +255,26 @@ public:
 
 //	 --- Client and Server L2CAP connections
 
-WIDCOMMStackL2CapConn* validL2CapConnHandle(JNIEnv *env, jlong handle) ;
+WIDCOMMStackL2CapConn* validL2CapConnHandle(JNIEnv *env, jlong handle);
+WIDCOMMStackL2CapServer* validL2CapServerHandle(JNIEnv *env, jlong handle);
 
-class WIDCOMMStackL2CapConn : public CL2CapConn, public PoolableObject {
+class WIDCOMMStackL2CapConn : public CL2CapConn, public WIDCOMMStackConnectionBase {
 public:
-	BOOL isConnected;
-	BOOL isClientOpen;
+	CL2CapIf l2CapIf;
 
-	GUID service_guid;
-	BT_CHAR service_name[BT_MAX_SERVICE_NAME_LEN + 1];
-	CSdpService* sdpService;
+    BOOL isDisconnected;
 
 	UINT16 receiveMTU;
 	UINT16 transmitMTU;
 	UINT16 connectionTransmitMTU;
 
-	long incomingConnectionCount;
-
-	CL2CapIf l2CapIf;
-
-	HANDLE hConnectionEvent;
 	HANDLE hDataReceivedEvent;
 	ReceiveBuffer receiveBuffer;
 
 	WIDCOMMStackL2CapConn();
 	virtual ~WIDCOMMStackL2CapConn();
 
-	void closeConnection(JNIEnv *env);
-	void closeServerConnection(JNIEnv *env);
+	virtual void close(JNIEnv *env, BOOL allowExceptions);
 
 	void selectConnectionTransmitMTU(JNIEnv *env);
 
@@ -279,6 +284,19 @@ public:
 
 	//Server
 	virtual void OnIncomingConnection();
+};
+
+class WIDCOMMStackL2CapServer : public WIDCOMMStackServerConnectionBase {
+public:
+	CL2CapIf l2CapIf;
+
+	UINT16 receiveMTU;
+	UINT16 transmitMTU;
+
+	WIDCOMMStackL2CapServer();
+	virtual ~WIDCOMMStackL2CapServer();
+
+	virtual void close(JNIEnv *env, BOOL allowExceptions);
 };
 
 #endif //  _BTWLIB

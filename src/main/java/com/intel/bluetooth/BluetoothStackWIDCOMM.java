@@ -440,7 +440,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
 		verifyDeviceReady();
 		return connectionRfOpenClientConnectionImpl(params.address, params.channel, params.authenticate,
-				params.encrypt, params.timeouts ? params.timeout : 0);
+				params.encrypt, params.timeout);
 	}
 
 	private native void closeRfCommPortImpl(long handle) throws IOException;
@@ -639,7 +639,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		verifyDeviceReady();
 		validateMTU(receiveMTU, transmitMTU);
 		return l2OpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt,
-				receiveMTU, transmitMTU, params.timeouts ? params.timeout : 0);
+				receiveMTU, transmitMTU, params.timeout);
 	}
 
 	/*
@@ -702,6 +702,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	 */
 	public native void l2CloseServerConnection(long handle) throws IOException;
 
+	private native void l2ServerCloseImpl(long handle) throws IOException;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -709,7 +711,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	 *      com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
-		l2CloseClientConnection(handle);
+		l2ServerCloseImpl(handle);
 	}
 
 	/*

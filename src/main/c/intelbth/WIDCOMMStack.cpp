@@ -125,16 +125,6 @@ BOOL isWIDCOMMReady() {
     return present;
 }
 
-#ifndef _WIN32_WCE
-#ifdef VC6
-#define AF_BTH          32
-#define BTHPROTO_RFCOMM  0x0003
-#endif // VC6
-#else
-#define AF_BTH          32
-#define BTHPROTO_RFCOMM  0x0003
-#endif // _WIN32_WCE
-
 /**
  * This is minimal MS detection under VC6. Compleate detection is done MS library anyway.
  */
@@ -165,7 +155,7 @@ WIDCOMMStack::WIDCOMMStack() {
             FALSE,    // auto-reset event
             FALSE,    // initial state is NOT signaled
             NULL);    // object not named
-	InitializeCriticalSection(&csCRfCommIf);
+	InitializeCriticalSection(&csCommIf);
 
 	commPool = new ObjectPool(COMMPORTS_POOL_MAX, 1, TRUE);
 
@@ -203,7 +193,7 @@ WIDCOMMStack::~WIDCOMMStack() {
 	destroy(NULL);
 	deviceInquiryInProcess = FALSE;
 	CloseHandle(hEvent);
-	DeleteCriticalSection(&csCRfCommIf);
+	DeleteCriticalSection(&csCommIf);
 }
 
 void WIDCOMMStack::destroy(JNIEnv * env) {
@@ -954,7 +944,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getS
 
 //	 --- Client RFCOMM connections
 
-// Guarded by CriticalSection csCRfCommIf
+// Guarded by CriticalSection csCommIf
 WIDCOMMStackRfCommPort* WIDCOMMStack::createCommPort() {
 	WIDCOMMStackRfCommPort* port = new WIDCOMMStackRfCommPort();
 
@@ -991,7 +981,7 @@ WIDCOMMStackRfCommPortServer* validRfCommServerHandle(JNIEnv *env, jlong handle)
 	return (WIDCOMMStackRfCommPortServer*)stack->commPool->getObject(env, handle, 'R');
 }
 
-void WIDCOMMStack::deleteCommPort(PoolableObject* object) {
+void WIDCOMMStack::deleteConnection(PoolableObject* object) {
 	if (object == NULL) {
 		return;
 	}
@@ -1007,6 +997,15 @@ WIDCOMMStackL2CapConn* WIDCOMMStack::createL2CapConn() {
 	return conn;
 }
 
+WIDCOMMStackL2CapServer* WIDCOMMStack::createL2CapServer() {
+	WIDCOMMStackL2CapServer* conn = new WIDCOMMStackL2CapServer();
+	if (!commPool->addObject(conn, 'L')) {
+		delete conn;
+		return NULL;
+	}
+	return conn;
+}
+
 WIDCOMMStackL2CapConn* validL2CapConnHandle(JNIEnv *env, jlong handle) {
 	if (stack == NULL) {
 		throwIOException(env, cSTACK_CLOSED);
@@ -1015,11 +1014,12 @@ WIDCOMMStackL2CapConn* validL2CapConnHandle(JNIEnv *env, jlong handle) {
 	return (WIDCOMMStackL2CapConn*)stack->commPool->getObject(env, handle, 'l');
 }
 
-void WIDCOMMStack::deleteL2CapConn(WIDCOMMStackL2CapConn* conn) {
-	if (conn == NULL) {
-		return;
+WIDCOMMStackL2CapServer* validL2CapServerHandle(JNIEnv *env, jlong handle) {
+    if (stack == NULL) {
+		throwIOException(env, cSTACK_CLOSED);
+		return NULL;
 	}
-	conn->readyToFree = TRUE;
+	return (WIDCOMMStackL2CapServer*)stack->commPool->getObject(env, handle, 'L');
 }
 
 WIDCOMMStackConnectionBase::WIDCOMMStackConnectionBase() {
@@ -1122,10 +1122,10 @@ void open_client_finally(WIDCOMMStackRfCommPort* rf) {
 	if ((rf != NULL) && (stack != NULL)) {
 		// Just in case Close
 		rf->Close();
-		stack->deleteCommPort(rf);
+		stack->deleteConnection(rf);
 	}
 	if (stack != NULL) {
-		LeaveCriticalSection(&stack->csCRfCommIf);
+		LeaveCriticalSection(&stack->csCommIf);
 	}
 }
 
@@ -1135,7 +1135,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 	LongToBcAddr(address, bda);
 
 	WIDCOMMStackRfCommPort* rf = NULL;
-	EnterCriticalSection(&stack->csCRfCommIf);
+	EnterCriticalSection(&stack->csCommIf);
 	//vc6 __try {
 	    if (stack != NULL) {
 		    rf = stack->createCommPort();
@@ -1227,7 +1227,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 			rf->Close();
 			stack->deleteCommPort(rf);
 		}
-		LeaveCriticalSection(&stack->csCRfCommIf);
+		LeaveCriticalSection(&stack->csCommIf);
 	}*/
 }
 
@@ -1258,7 +1258,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_closeRfCom
 	rf->close(env, true);
 	// Some worker thread is still trying to access this object, delete later
 	if (stack != NULL) {
-		stack->deleteCommPort(rf);
+		stack->deleteConnection(rf);
 	}
 	//debugs("connection handles %i", openConnections);
 }
@@ -1558,6 +1558,9 @@ void WIDCOMMStackServerConnectionBase::close(JNIEnv *env, BOOL allowExceptions) 
 		delete sdpService;
 		sdpService = NULL;
 	}
+	isClosing = TRUE;
+	isConnected = FALSE;
+	SetEvent(hConnectionEvent);
 }
 
 WIDCOMMStackRfCommPortServer::WIDCOMMStackRfCommPortServer() {
@@ -1571,11 +1574,11 @@ WIDCOMMStackRfCommPortServer::~WIDCOMMStackRfCommPortServer() {
 void open_server_finally(JNIEnv *env, WIDCOMMStackRfCommPortServer* rf) {
 	if ((rf != NULL) && (stack != NULL)) {
 		rf->close(env, false);
-		stack->deleteCommPort(rf);
+		stack->deleteConnection(rf);
 	}
 
 	if (stack != NULL) {
-		LeaveCriticalSection(&stack->csCRfCommIf);
+		LeaveCriticalSection(&stack->csCommIf);
 	}
 }
 
@@ -1585,7 +1588,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 		throwIOException(env, cSTACK_CLOSED);
 		return 0;
 	}
-	EnterCriticalSection(&stack->csCRfCommIf);
+	EnterCriticalSection(&stack->csCommIf);
 	WIDCOMMStackRfCommPortServer* rf = NULL;
 //VC6	__try {
 
@@ -1717,7 +1720,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 			rf->closeRfCommPort(env);
 			stack->deleteCommPort(rf);
 		}
-		LeaveCriticalSection(&stack->csCRfCommIf);
+		LeaveCriticalSection(&stack->csCommIf);
 	}
 */
 }
@@ -1732,7 +1735,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerCl
 	srv->close(env, true);
 	// Some worker thread is still trying to access this object, delete later
 	if (stack != NULL) {
-		stack->deleteCommPort(srv);
+		stack->deleteConnection(srv);
 	}
 	//debugs("connection handles %i", openConnections);
 }
@@ -1742,7 +1745,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerCl
 void accept_server_finally(JNIEnv *env, WIDCOMMStackRfCommPort* rf) {
 	if ((rf != NULL) && (stack != NULL)) {
 		rf->close(env, false);
-		stack->deleteCommPort(rf);
+		stack->deleteConnection(rf);
 	}
 }
 
@@ -1761,7 +1764,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 	srv->sdpService->CommitRecord();
 	#endif
 
-	EnterCriticalSection(&stack->csCRfCommIf);
+	EnterCriticalSection(&stack->csCommIf);
 	if (stack == NULL) {
 		throwIOException(env, cSTACK_CLOSED);
 	}
@@ -1775,7 +1778,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 
 	CRfCommPort::PORT_RETURN_CODE rc = rf->OpenServer(srv->scn);
 	if (stack != NULL) {
-		LeaveCriticalSection(&stack->csCRfCommIf);
+		LeaveCriticalSection(&stack->csCommIf);
 	}
 
 	if (rc != CRfCommPort::SUCCESS) {
@@ -1837,7 +1840,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	    rf->close(env, true);
     }
 	if (stack != NULL) {
-		stack->deleteCommPort(rf);
+		stack->deleteConnection(rf);
 	}
 }
 
@@ -1851,7 +1854,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
 	    }
 	    sdpService = rf->sdpService;
     } else if (handleType == 'l') {
-	    WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
+	    WIDCOMMStackL2CapServer* l2c = validL2CapServerHandle(env, handle);
 	    if (l2c == NULL) {
 		    return;
 	    }
