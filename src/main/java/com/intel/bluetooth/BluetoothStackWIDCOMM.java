@@ -105,9 +105,19 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	/**
 	 * There are no functions to set WIDCOMM stack discoverable status.
+	 * 
+	 * @return <code>true</code> if the request succeeded, otherwise
+	 *         <code>false</code> if the request failed because the BCC denied
+	 *         the request; <code>false</code> if the Bluetooth system does
+	 *         not support the access mode specified in <code>mode</code>
 	 */
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
-		return true;
+		int curentMode = getLocalDeviceDiscoverable();
+		if (curentMode == mode) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private native boolean isStackServerUp();
