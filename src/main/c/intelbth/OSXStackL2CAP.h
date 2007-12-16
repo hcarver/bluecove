@@ -65,8 +65,6 @@ public:
     jboolean authenticate;
     jboolean encrypt;
     jint timeout;
-    jint receiveMTU;
-    jint transmitMTU;
 
     L2CAPChannelController* comm;
     volatile IOReturn status;

@@ -34,6 +34,9 @@ public:
 
     NSMutableDictionary* l2capPSMDataElement;
 
+    int receiveMTU;
+    int transmitMTU;
+
 public:
     L2CAPServerController();
     virtual ~L2CAPServerController();
@@ -53,8 +56,6 @@ public:
     const jchar *serviceName;
     int serviceNameLength;
 
-    jint receiveMTU;
-    jint transmitMTU;
     jint assignPsm;
 
     L2CAPServerController* comm;

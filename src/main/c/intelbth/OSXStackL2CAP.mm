@@ -93,8 +93,19 @@ void L2CAPChannelController::initDelegate() {
 void L2CAPChannelController::l2capChannelOpenComplete(IOReturn error) {
     if (error == kIOReturnSuccess) {
         isConnected = true;
-        receiveMTU = [l2capChannel getIncomingMTU];
-        transmitMTU = [l2capChannel getOutgoingMTU];
+        int incomingMTU = [l2capChannel getIncomingMTU];
+        if (receiveMTU > incomingMTU) {
+            receiveMTU = incomingMTU;
+        }
+
+        int remoteMtu = [l2capChannel getOutgoingMTU];
+	    if (transmitMTU == -1) {
+		    transmitMTU = remoteMtu;
+	    } else if (transmitMTU < remoteMtu) {
+		    //transmitMTU = transmitMTU;
+	    } else {
+		    transmitMTU = remoteMtu;
+	    }
     }
     MPSetEvent(notificationEvent, 1);
 }
@@ -248,8 +259,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2OpenClientC
     runnable.authenticate = authenticate;
     runnable.encrypt = encrypt;
     runnable.timeout = timeout;
-    runnable.receiveMTU = receiveMTU;
-    runnable.transmitMTU = transmitMTU;
+    comm->receiveMTU = receiveMTU;
+    comm->transmitMTU = transmitMTU;
     synchronousBTOperation(&runnable);
 
     if (runnable.error != 0) {

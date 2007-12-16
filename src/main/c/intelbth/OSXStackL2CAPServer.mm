@@ -261,8 +261,9 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerOpenI
     runnable.authenticate = authenticate;
     runnable.encrypt = encrypt;
 
-    runnable.receiveMTU = receiveMTU;
-    runnable.transmitMTU = transmitMTU;
+    comm->receiveMTU = receiveMTU;
+    comm->transmitMTU = transmitMTU;
+
     runnable.assignPsm = assignPsm;
 
     synchronousBTOperation(&runnable);
@@ -335,6 +336,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
     if (comm == NULL) {
 		return 0;
 	}
+	// Avoid more than once Accept at the same time
 	while ((stack != NULL) && (!comm->isClosed) && (comm->acceptClientComm != NULL)) {
 		MPEventFlags flags;
         OSStatus err = MPWaitForEvent(comm->acceptedEvent, &flags, kDurationMillisecond * 500);
@@ -346,7 +348,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
 			debug("Interrupted while waiting for connections");
 			return 0;
 		}
-	}
+}
 	if (stack == NULL) {
 	    throwIOException(env, cSTACK_CLOSED);
 	    return 0;
@@ -372,6 +374,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
 		throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 		return 0;
 	}
+	clientComm->receiveMTU = comm->receiveMTU;
+    clientComm->transmitMTU = comm->transmitMTU;
     comm->acceptClientComm = clientComm;
     comm->openningClient = false;
     BOOL error = false;
