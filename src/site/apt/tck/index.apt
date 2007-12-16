@@ -61,8 +61,6 @@ JSR 82 Technology Compatibility Kit
 
 * Description of {failures}
 
-    * LocalDevice.DiscoverableTest: Failed because there are not API in WIDCOMM native stack to change device discoverable status.
-
     * RemoteDevice.Security: RemoteDevice.authenticate() and RemoteDevice.authorize() Not implemented
 
     * ServiceRecord.setDeviceServiceClassesTest: Function ServiceRecord.setDeviceServiceClasses not implemented because there are no such API in WIDCOMM native stack
