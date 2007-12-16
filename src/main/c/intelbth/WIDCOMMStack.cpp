@@ -332,6 +332,32 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isStac
 	#endif
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isLocalDeviceDiscoverable
+ (JNIEnv *env, jobject) {
+
+    HKEY hkey;
+    REGSAM samDesired = KEY_READ;
+    DWORD dwAllowOthersToDiscover = 0;
+
+    HKEY hMainKey = HKEY_LOCAL_MACHINE;
+    #ifndef WIDCOMM_CE30
+    hMainKey = HKEY_CURRENT_USER;
+    #endif
+
+    if (RegOpenKeyEx(hMainKey, TEXT("Software\\Widcomm\\BtConfig\\Filters"), 0, samDesired, &hkey) == ERROR_SUCCESS) {
+        DWORD dwType, dwSize;
+        dwType = REG_DWORD;
+        dwSize = sizeof(DWORD);
+        if (RegQueryValueEx(hkey, TEXT("AllowOthersToDiscover"), NULL, &dwType, (PBYTE)&dwAllowOthersToDiscover, &dwSize) != ERROR_SUCCESS) {
+            debug("e.WIDCOMM AllowOthersToDiscover not found");
+        }
+        RegCloseKey(hkey);
+    } else {
+        debug("e.WIDCOMM BtConfig not found");
+    }
+    return (dwAllowOthersToDiscover)?JNI_TRUE:JNI_FALSE;
+}
+
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getBTWVersionInfo
 (JNIEnv *env, jobject peer) {
 	if (stack == NULL) {

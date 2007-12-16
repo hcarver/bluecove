@@ -128,11 +128,10 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		}
 	}
 
-	/**
-	 * There are no functions to find WIDCOMM discoverable status.
-	 */
+	public native boolean isLocalDeviceDiscoverable();
+
 	public int getLocalDeviceDiscoverable() {
-		if (isStackServerUp()) {
+		if (isStackServerUp() && isLocalDeviceDiscoverable()) {
 			return DiscoveryAgent.GIAC;
 		} else {
 			return DiscoveryAgent.NOT_DISCOVERABLE;
