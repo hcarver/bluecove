@@ -43,7 +43,7 @@ WIDCOMMStackL2CapConn::~WIDCOMMStackL2CapConn() {
 }
 
 void WIDCOMMStackL2CapConn::OnConnected() {
-	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2)) {
+	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || (!isValidStackObject(this))) {
 		return;
 	}
 	isConnected = TRUE;
@@ -69,7 +69,7 @@ void WIDCOMMStackL2CapConn::OnIncomingConnection() {
 }
 
 void WIDCOMMStackL2CapConn::OnDataReceived(void *p_data, UINT16 length) {
-	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || (!isConnected)) {
+	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || (!isConnected) || (!isValidStackObject(this))) {
 		return;
 	}
 	receiveBuffer.write(&length, sizeof(UINT16));
@@ -78,12 +78,12 @@ void WIDCOMMStackL2CapConn::OnDataReceived(void *p_data, UINT16 length) {
 }
 
 void WIDCOMMStackL2CapConn::OnRemoteDisconnected(UINT16 reason) {
-	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || (!isConnected)) {
+	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || (!isConnected) || (!isValidStackObject(this))) {
 		return;
 	}
 	isDisconnected = TRUE;
 	isConnected = FALSE;
-	SetEvent(hConnectionEvent);
+SetEvent(hConnectionEvent);
 }
 
 void WIDCOMMStackL2CapConn::selectConnectionTransmitMTU(JNIEnv *env) {

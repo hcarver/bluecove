@@ -91,7 +91,6 @@ void className::run()
 
 
 void synchronousBTOperation(Runnable* runnable);
-void ndebug(const char *fmt, ...);
 
 void OSxAddrToString(char* addressString, const BluetoothDeviceAddress* addr);
 jlong OSxAddrToLong(const BluetoothDeviceAddress* addr);

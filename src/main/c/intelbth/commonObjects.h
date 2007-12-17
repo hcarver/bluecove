@@ -120,6 +120,8 @@ public:
 
 	BOOL addObject(PoolableObject* obj);
 	BOOL addObject(PoolableObject* obj, char poolableObjectType);
+
+	BOOL hasObject(PoolableObject* obj);
 };
 
 class DeviceInquiryCallback {

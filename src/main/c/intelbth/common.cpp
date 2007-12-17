@@ -62,6 +62,18 @@ void enableNativeDebug(JNIEnv *env, jobject loggerClass, jboolean on) {
 	}
 }
 
+void ndebug(const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	if (nativeDebugCallbackEnabled) {
+	    fprintf(stdout, "NATIVE:");
+        vfprintf(stdout, fmt, ap);
+        fprintf(stdout, "\n");
+        fflush(stdout);
+    }
+    va_end(ap);
+}
+
 void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
@@ -666,6 +678,15 @@ BOOL ObjectPool::addObject(PoolableObject* obj) {
 		}
 	}
 	LeaveCriticalSection(&lock);
+	return FALSE;
+}
+
+BOOL ObjectPool::hasObject(PoolableObject* obj) {
+    for(int i = 0; i < size; i++) {
+		if (objs[i] == obj) {
+			return TRUE;
+		}
+	}
 	return FALSE;
 }
 

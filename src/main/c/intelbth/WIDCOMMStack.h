@@ -121,7 +121,7 @@ typedef struct {
 #define SDP_DISCOVERY_RECORDS_HOLDER_MARK 70000
 #define SDP_DISCOVERY_RECORDS_HANDLE_OFFSET 1
 // 7 for Server and 7 for Client, Bluetooth Can't have more
-#define COMMPORTS_POOL_MAX 14
+#define COMMPORTS_POOL_MAX 100
 #define OPEN_COMMPORTS_MAX 7
 
 class WIDCOMMStackRfCommPort;
@@ -184,6 +184,8 @@ public:
 	WIDCOMMStackL2CapConn* createL2CapConn();
 	WIDCOMMStackL2CapServer* createL2CapServer();
 };
+
+BOOL isValidStackObject(PoolableObject* object);
 
 extern WIDCOMMStack* stack;
 

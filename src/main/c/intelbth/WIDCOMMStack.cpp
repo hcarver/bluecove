@@ -970,6 +970,13 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getS
 
 //	 --- Client RFCOMM connections
 
+BOOL isValidStackObject(PoolableObject* object) {
+    if (stack == NULL) {
+        return FALSE;
+    }
+    return stack->commPool->hasObject(object);
+}
+
 // Guarded by CriticalSection csCommIf
 WIDCOMMStackRfCommPort* WIDCOMMStack::createCommPort() {
 	WIDCOMMStackRfCommPort* port = new WIDCOMMStackRfCommPort();
@@ -1012,6 +1019,7 @@ void WIDCOMMStack::deleteConnection(PoolableObject* object) {
 		return;
 	}
 	object->readyToFree = TRUE;
+	object->magic1 = 0;
 }
 
 WIDCOMMStackL2CapConn* WIDCOMMStack::createL2CapConn() {
@@ -1110,11 +1118,13 @@ WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
 }
 
 void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {
-	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || isClosing) {
+	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || isClosing || (!isValidStackObject(this))) {
+	    ndebug("e.OnEventReceived for invlaid object %i, event_code 0x%x", internalHandle, event_code);
 		return;
 	}
 	if (PORT_EV_CONNECTED & event_code) {
-        isConnected = TRUE;
+	    ndebug("OnEventReceived Connected %i", internalHandle);
+		isConnected = TRUE;
 		SetEvent(hConnectionEvent);
 	} else if (PORT_EV_CONNECT_ERR & event_code) {
 		isConnectionErrorType = 1;
@@ -1122,18 +1132,20 @@ void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {
 		isConnected = FALSE;
 		SetEvent(hConnectionEvent);
 	} else if (PORT_EV_OVERRUN & event_code) {
-	    isConnectionErrorType = 2;
+		isConnectionErrorType = 2;
 		isConnectionError = TRUE;
 		receiveBuffer.setOverflown();
 		SetEvent(hConnectionEvent);
 	} else {
+	    ndebug("e.OnEventReceived %i event_code 0x%x", internalHandle, event_code);
 		other_event_code = event_code;
 		SetEvent(hConnectionEvent);
 	}
 }
 
 void WIDCOMMStackRfCommPort::OnDataReceived(void *p_data, UINT16 len) {
-	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || isClosing) {
+	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || isClosing || (!isValidStackObject(this))) {
+	    ndebug("e.OnDataReceived for invlaid object %i", internalHandle);
 		return;
 	}
 	if (isConnected && !isClosing) {

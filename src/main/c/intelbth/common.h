@@ -210,6 +210,8 @@ BOOL isDebugOn();
 #define Edebug2(fmt, message1, message2)
 #endif
 
+void ndebug(const char *fmt, ...);
+
 char* bool2str(BOOL b);
 
 void throwException(JNIEnv *env, const char *name, const char *msg);

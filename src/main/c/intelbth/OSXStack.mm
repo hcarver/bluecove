@@ -216,18 +216,6 @@ void synchronousBTOperation(Runnable* runnable) {
 	ndebug("return    BTOperation %s", params->runnable->name);
 }
 
-void ndebug(const char *fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	if (nativeDebugCallbackEnabled) {
-	    fprintf(stdout, "NATIVE:");
-        vfprintf(stdout, fmt, ap);
-        fprintf(stdout, "\n");
-        fflush(stdout);
-    }
-    va_end(ap);
-}
-
 // --- Helper functions
 
 OSXJNIHelper::OSXJNIHelper() {
