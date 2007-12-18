@@ -18,6 +18,7 @@
                 <exclude>com/ibm/oti/connection/CreateConnection.class</exclude>
                 <exclude>com/ibm/oti/vm/**</exclude>
                 <exclude>com/sun/cdc/io/ConnectionBaseInterface.class</exclude>
+                <exclude>com/intel/bluetooth/BluetoothStackBlueZ.class</exclude>
             </excludes>
         </fileSet>
     </fileSets>

@@ -30,8 +30,8 @@ import com.ibm.oti.vm.VM;
 
 /**
  * Load native library from resources.
- *
- *
+ * 
+ * 
  * By default Native Library is extracted from from jar to temporary directory
  * `${java.io.tmpdir}/bluecove_${user.name}_N` and loaded from this location.
  * <p>
@@ -41,10 +41,10 @@ import com.ibm.oti.vm.VM;
  * If you wish to load library from default location in path e.g.
  * `%SystemRoot%\system32` or any other location in %PATH% use
  * `-Dbluecove.native.resource=false`
- *
- *
+ * 
+ * 
  * @author vlads
- *
+ * 
  */
 public abstract class NativeLibLoader {
 
@@ -143,6 +143,7 @@ public abstract class NativeLibLoader {
 			break;
 		case OS_LINUX:
 			libFileName = "lib" + libFileName + ".so";
+			break;
 		default:
 			DebugLog.fatal("Native Library " + name + " not available on platform " + sysName);
 			state.triedToLoadAlredy = true;

@@ -223,7 +223,20 @@ public class BlueCoveImpl {
 			if (!NativeLibLoader.isAvailable(NATIVE_LIB_BLUEZ)) {
 				throw new BluetoothStateException("BlueCove not available");
 			}
-			detectorStack = new BluetoothStackBlueZ();
+			String className = getConfigProperty("bluecove.bluez.class");
+			if (className == null) {
+				className = "com.intel.bluetooth.BluetoothStackBlueZ";
+			}
+			try {
+				Class c = Class.forName(className);
+				detectorStack = (BluetoothStack) c.newInstance();
+			} catch (ClassNotFoundException e) {
+				DebugLog.error(className, e);
+			} catch (InstantiationException e) {
+				DebugLog.error(className, e);
+			} catch (IllegalAccessException e) {
+				DebugLog.error(className, e);
+			}
 			stackSelected = detectorStack.getStackID();
 			break;
 		case NativeLibLoader.OS_MAC_OS_X:
