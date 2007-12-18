@@ -372,7 +372,7 @@ public abstract class MicroeditionConnector {
 		 */
 		if (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM)) {
 			if (isServer) {
-				return new BluetoothStreamConnectionNotifier(bluetoothStack, notifierParams);
+				return new BluetoothRFCommConnectionNotifier(bluetoothStack, notifierParams);
 			} else {
 				return new BluetoothRFCommClientConnection(bluetoothStack, connectionParams);
 			}
@@ -380,7 +380,7 @@ public abstract class MicroeditionConnector {
 			if (isServer) {
 				notifierParams.obex = true;
 				return new OBEXSessionNotifierImpl(
-						new BluetoothStreamConnectionNotifier(bluetoothStack, notifierParams), obexConnectionParams);
+						new BluetoothRFCommConnectionNotifier(bluetoothStack, notifierParams), obexConnectionParams);
 			} else {
 				return new OBEXClientSessionImpl(new BluetoothRFCommClientConnection(bluetoothStack, connectionParams),
 						obexConnectionParams);

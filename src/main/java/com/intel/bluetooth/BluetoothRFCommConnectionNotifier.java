@@ -28,11 +28,11 @@ import javax.bluetooth.ServiceRegistrationException;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
-class BluetoothStreamConnectionNotifier extends BluetoothConnectionNotifierBase implements StreamConnectionNotifier {
+class BluetoothRFCommConnectionNotifier extends BluetoothConnectionNotifierBase implements StreamConnectionNotifier {
 
 	private int rfcommChannel = -1;
 
-	public BluetoothStreamConnectionNotifier(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params) throws IOException {
+	public BluetoothRFCommConnectionNotifier(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params) throws IOException {
 		super(bluetoothStack, params);
 
 		this.handle = bluetoothStack.rfServerOpen(params, serviceRecord);
