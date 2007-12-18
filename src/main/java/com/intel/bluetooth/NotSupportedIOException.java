@@ -23,7 +23,7 @@ package com.intel.bluetooth;
 import java.io.IOException;
 
 /**
- * Thrown when current native implemenation can't implement the functionality.
+ * Thrown when current native implementation can't implement the functionality.
  *
  * @author vlads
  */
@@ -32,7 +32,7 @@ public class NotSupportedIOException extends IOException {
 	private static final long serialVersionUID = 1L;
 
 	public static final boolean enabled = NotImplementedError.enabled;
-	
+
 	public NotSupportedIOException() {
 		super("Not Supported");
 	}

@@ -548,7 +548,7 @@ class ServiceRecordImpl implements ServiceRecord {
 	}
 
 	/**
-	 * Internal implemenation function
+	 * Internal implementation function
 	 */
 	void populateAttributeValue(int attrID, DataElement attrValue) {
 		if (attrID < 0x0000 || attrID > 0xffff) {
@@ -580,21 +580,21 @@ class ServiceRecordImpl implements ServiceRecord {
 	}
 
 	/**
-	 * Internal implemenation function
+	 * Internal implementation function
 	 */
 	long getHandle() {
 		return this.handle;
 	}
 
 	/**
-	 * Internal implemenation function
+	 * Internal implementation function
 	 */
 	void setHandle(long handle) {
 		this.handle = handle;
 	}
 
 	/**
-	 * Internal implemenation function
+	 * Internal implementation function
 	 */
 	boolean hasServiceClassUUID(UUID uuid) {
 		DataElement attrDataElement = getAttributeValue(BluetoothConsts.ServiceClassIDList);
@@ -691,7 +691,7 @@ class ServiceRecordImpl implements ServiceRecord {
 	}
 
 	/**
-	 * Internal implemenation function
+	 * Internal implementation function
 	 */
 	void populateRFCOMMAttributes(long handle, int channel, UUID uuid, String name, boolean obex) {
 

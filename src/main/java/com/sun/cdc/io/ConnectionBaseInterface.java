@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.microedition.io.Connection;
 
 /*
- * This class is not distributed with BlueCove binary distrubution: bluecove.jar
+ * This class is not distributed with BlueCove binary distribution: bluecove.jar
  */
 
 public interface ConnectionBaseInterface {

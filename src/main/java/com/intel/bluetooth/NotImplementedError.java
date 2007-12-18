@@ -1,7 +1,7 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2004 Intel Corporation
- * 
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -17,21 +17,21 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth;
 
 /**
- * Thrown when current implemenation do not implement the functionality.
- * 
+ * Thrown when current implementation do not implement the functionality.
+ *
  * @author vlads
  *
  */
 public class NotImplementedError extends Error {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	public static final boolean enabled = true;
-	
+
 	public NotImplementedError() {
 		super("Not Implemented");
 	}
