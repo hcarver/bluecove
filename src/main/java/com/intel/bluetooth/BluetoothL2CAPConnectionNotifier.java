@@ -30,34 +30,35 @@ import javax.bluetooth.ServiceRegistrationException;
 
 /**
  * @author vlads
- *
+ * 
  */
-class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase implements L2CAPConnectionNotifier  {
+class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase implements L2CAPConnectionNotifier {
 
 	private int psm = -1;
-	
-	public BluetoothL2CAPConnectionNotifier(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU) throws IOException {
+
+	public BluetoothL2CAPConnectionNotifier(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params,
+			int receiveMTU, int transmitMTU) throws IOException {
 		super(bluetoothStack, params);
-		
+
 		this.handle = bluetoothStack.l2ServerOpen(params, receiveMTU, transmitMTU, serviceRecord);
-		
+
 		this.psm = serviceRecord.getChannel(BluetoothConsts.L2CAP_PROTOCOL_UUID);
-		
+
 		this.serviceRecord.attributeUpdated = false;
-		
+
 		this.securityOpt = Utils.securityOpt(params.authenticate, params.encrypt);
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.bluetooth.L2CAPConnectionNotifier#acceptAndOpen()
 	 */
 	public L2CAPConnection acceptAndOpen() throws IOException {
 		if (closed) {
 			throw new IOException("Notifier is closed");
 		}
-		if (((ServiceRecordImpl) serviceRecord).attributeUpdated) {
-			updateServiceRecord(true);
-		}
+		updateServiceRecord(true);
 		try {
 			long clientHandle = bluetoothStack.l2ServerAcceptAndOpenServerConnection(handle);
 			int clientSecurityOpt = bluetoothStack.getSecurityOpt(clientHandle, this.securityOpt);
@@ -70,24 +71,30 @@ class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase i
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#closeStack(long)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#stackServerClose(long)
 	 */
-	protected void closeStack(long handle) throws IOException {
+	protected void stackServerClose(long handle) throws IOException {
 		bluetoothStack.l2ServerClose(handle, serviceRecord);
 	}
-	
+
 	protected void validateServiceRecord(ServiceRecord srvRecord) {
 		if (this.psm != serviceRecord.getChannel(BluetoothConsts.L2CAP_PROTOCOL_UUID)) {
 			throw new IllegalArgumentException("Must not change the PSM");
 		}
 		super.validateServiceRecord(srvRecord);
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#updateStackServiceRecord(com.intel.bluetooth.ServiceRecordImpl, boolean)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#updateStackServiceRecord(com.intel.bluetooth.ServiceRecordImpl,
+	 *      boolean)
 	 */
-	protected void updateStackServiceRecord(ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
+	protected void updateStackServiceRecord(ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
+			throws ServiceRegistrationException {
 		bluetoothStack.l2ServerUpdateServiceRecord(handle, serviceRecord, acceptAndOpen);
 	}
 

@@ -32,7 +32,8 @@ class BluetoothRFCommConnectionNotifier extends BluetoothConnectionNotifierBase 
 
 	private int rfcommChannel = -1;
 
-	public BluetoothRFCommConnectionNotifier(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params) throws IOException {
+	public BluetoothRFCommConnectionNotifier(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params)
+			throws IOException {
 		super(bluetoothStack, params);
 
 		this.handle = bluetoothStack.rfServerOpen(params, serviceRecord);
@@ -43,14 +44,15 @@ class BluetoothRFCommConnectionNotifier extends BluetoothConnectionNotifierBase 
 
 		this.securityOpt = Utils.securityOpt(params.authenticate, params.encrypt);
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#closeStack(long)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#stackServerClose(long)
 	 */
-	protected void closeStack(long handle) throws IOException {
+	protected void stackServerClose(long handle) throws IOException {
 		bluetoothStack.rfServerClose(handle, serviceRecord);
 	}
-
 
 	/*
 	 * Returns a StreamConnection that represents a server side socket
@@ -62,9 +64,7 @@ class BluetoothRFCommConnectionNotifier extends BluetoothConnectionNotifierBase 
 		if (closed) {
 			throw new IOException("Notifier is closed");
 		}
-		if (((ServiceRecordImpl) serviceRecord).attributeUpdated) {
-			updateServiceRecord(true);
-		}
+		updateServiceRecord(true);
 		try {
 			long clientHandle = bluetoothStack.rfServerAcceptAndOpenRfServerConnection(handle);
 			int clientSecurityOpt = bluetoothStack.getSecurityOpt(clientHandle, this.securityOpt);
@@ -83,11 +83,15 @@ class BluetoothRFCommConnectionNotifier extends BluetoothConnectionNotifierBase 
 		}
 		super.validateServiceRecord(srvRecord);
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#updateStackServiceRecord(com.intel.bluetooth.ServiceRecordImpl, boolean)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#updateStackServiceRecord(com.intel.bluetooth.ServiceRecordImpl,
+	 *      boolean)
 	 */
-	protected void updateStackServiceRecord(ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
+	protected void updateStackServiceRecord(ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
+			throws ServiceRegistrationException {
 		bluetoothStack.rfServerUpdateServiceRecord(handle, serviceRecord, acceptAndOpen);
 	}
 

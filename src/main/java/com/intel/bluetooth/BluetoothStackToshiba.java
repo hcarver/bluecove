@@ -48,6 +48,15 @@ class BluetoothStackToshiba implements BluetoothStack {
 		return BlueCoveImpl.STACK_TOSHIBA;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
+	 */
+	public int getFeatureSet() {
+		return 0;
+	}
+
 	public native int getLibraryVersion();
 
 	public native int detectBluetoothStack();
@@ -89,6 +98,15 @@ class BluetoothStackToshiba implements BluetoothStack {
 	public DeviceClass getLocalDeviceClass() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#setLocalDeviceServiceClasses(int)
+	 */
+	public void setLocalDeviceServiceClasses(int classOfDevice) {
+		// TODO Auto-generated method stub
 	}
 
 	public String getLocalDeviceName() {

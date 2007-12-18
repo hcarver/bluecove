@@ -91,6 +91,15 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 		return new DeviceClass(getDeviceClassImpl());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#setLocalDeviceServiceClasses(int)
+	 */
+	public void setLocalDeviceServiceClasses(int classOfDevice) {
+		throw new NotSupportedRuntimeException(getStackID());
+	}
+
 	/**
 	 * There are no functions to set BlueSoleil stack discoverable status.
 	 */
@@ -122,6 +131,15 @@ class BluetoothStackBlueSoleil implements BluetoothStack {
 	native int getDeviceVersion();
 
 	native int getDeviceManufacturer();
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
+	 */
+	public int getFeatureSet() {
+		return 0;
+	}
 
 	public String getLocalDeviceProperty(String property) {
 		final String TRUE = "true";

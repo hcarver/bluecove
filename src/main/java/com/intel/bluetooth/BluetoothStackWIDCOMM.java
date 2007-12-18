@@ -61,6 +61,15 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		return BlueCoveImpl.STACK_WIDCOMM;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
+	 */
+	public int getFeatureSet() {
+		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP;
+	}
+
 	public native int getLibraryVersion();
 
 	public native int detectBluetoothStack();
@@ -101,6 +110,15 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 	 */
 	public DeviceClass getLocalDeviceClass() {
 		return new DeviceClass(getDeviceClassImpl());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#setLocalDeviceServiceClasses(int)
+	 */
+	public void setLocalDeviceServiceClasses(int classOfDevice) {
+		throw new NotSupportedRuntimeException(getStackID());
 	}
 
 	/**

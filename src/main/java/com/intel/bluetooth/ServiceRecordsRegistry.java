@@ -20,6 +20,7 @@
  */
 package com.intel.bluetooth;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import javax.bluetooth.ServiceRecord;
@@ -34,29 +35,41 @@ import javax.bluetooth.ServiceRegistrationException;
  * <b><u>Your application should not use this class directly.</u></b>
  * 
  * @author vlads
- *
+ * 
  */
 public abstract class ServiceRecordsRegistry {
-	
+
 	/**
-	 * Used to find ConnectionNotifier by ServiceRecord returned by LocalDevice.getRecord()
+	 * Used to find ConnectionNotifier by ServiceRecord returned by
+	 * LocalDevice.getRecord()
 	 */
-	private static Hashtable serviceRecordsMap = new Hashtable/*<ServiceRecord, BluetoothConnectionNotifierServiceRecordAccess>*/();
+	// <ServiceRecordImpl, BluetoothConnectionNotifierServiceRecordAccess>
+	private static Hashtable serviceRecordsMap = new Hashtable();
 
 	private ServiceRecordsRegistry() {
-		
+
 	}
-	
-	static void register(BluetoothConnectionNotifierServiceRecordAccess notifier, ServiceRecord serviceRecord) {
+
+	static void register(BluetoothConnectionNotifierServiceRecordAccess notifier, ServiceRecordImpl serviceRecord) {
 		serviceRecordsMap.put(serviceRecord, notifier);
 	}
-	
-	static void unregister(ServiceRecord serviceRecord) {
+
+	static void unregister(ServiceRecordImpl serviceRecord) {
 		serviceRecordsMap.remove(serviceRecord);
 	}
-	
+
+	static int getDeviceServiceClasses() {
+		int deviceServiceClasses = 0;
+		for (Enumeration en = serviceRecordsMap.keys(); en.hasMoreElements();) {
+			ServiceRecordImpl serviceRecord = (ServiceRecordImpl) en.nextElement();
+			deviceServiceClasses |= serviceRecord.deviceServiceClasses;
+		}
+		return deviceServiceClasses;
+	}
+
 	public static void updateServiceRecord(ServiceRecord srvRecord) throws ServiceRegistrationException {
-		BluetoothConnectionNotifierServiceRecordAccess owner = (BluetoothConnectionNotifierServiceRecordAccess)serviceRecordsMap.get(srvRecord);
+		BluetoothConnectionNotifierServiceRecordAccess owner = (BluetoothConnectionNotifierServiceRecordAccess) serviceRecordsMap
+				.get(srvRecord);
 		if (owner == null) {
 			throw new IllegalArgumentException("Service record is not registered");
 		}

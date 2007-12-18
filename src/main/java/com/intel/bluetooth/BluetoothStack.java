@@ -30,192 +30,209 @@ import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
 /**
- * New native stack support should ONLY implement this interface. No other classes should ideally be changed except
- * BlueCoveImpl where the instance of new class should be created.
+ * New native stack support should ONLY implement this interface. No other
+ * classes should ideally be changed except BlueCoveImpl where the instance of
+ * new class should be created.
  * 
  * @author vlads
  * 
  */
 public interface BluetoothStack {
 
-    // ---------------------- Library initialization
+	public static final int FEATURE_L2CAP = 1;
 
-    /**
-     * Used to verify native library version. versionMajor1 * 1000000 + versionMajor2 * 10000 + versionMinor * 100 +
-     * versionBuild
-     * 
-     * @return Version number in decimal presentation. e.g. 2030407 for version 2.3.4 build 7
-     */
-    public int getLibraryVersion();
+	public static final int FEATURE_SERVICE_ATTRIBUTES = 1 << 1;
 
-    /**
-     * Used if OS Supports multiple Bluetooth stacks 0x01 winsock; 0x02 widcomm; 0x04 bluesoleil; 0x08 BlueZ; 0x10 OS X
-     * stack;
-     * 
-     * @return stackID
-     */
-    public int detectBluetoothStack();
+	public static final int FEATURE_SET_DEVICE_SERVICE_CLASSES = 1 << 2;
 
-    /**
-     * 
-     * @param nativeDebugCallback
-     *            DebugLog.class
-     * @param on
-     */
-    public void enableNativeDebug(Class nativeDebugCallback, boolean on);
+	// ---------------------- Library initialization
 
-    /**
-     * Call is made when we want to use this stack.
-     */
-    public void initialize() throws BluetoothStateException;
+	/**
+	 * Used to verify native library version. versionMajor1 * 1000000 +
+	 * versionMajor2 * 10000 + versionMinor * 100 + versionBuild
+	 * 
+	 * @return Version number in decimal presentation. e.g. 2030407 for version
+	 *         2.3.4 build 7
+	 */
+	public int getLibraryVersion();
 
-    public void destroy();
+	/**
+	 * Used if OS Supports multiple Bluetooth stacks 0x01 winsock; 0x02 widcomm;
+	 * 0x04 bluesoleil; 0x08 BlueZ; 0x10 OS X stack;
+	 * 
+	 * @return stackID
+	 */
+	public int detectBluetoothStack();
 
-    public String getStackID();
+	/**
+	 * 
+	 * @param nativeDebugCallback
+	 *            DebugLog.class
+	 * @param on
+	 */
+	public void enableNativeDebug(Class nativeDebugCallback, boolean on);
 
-    public boolean isCurrentThreadInterruptedCallback();
+	/**
+	 * Call is made when we want to use this stack.
+	 */
+	public void initialize() throws BluetoothStateException;
 
-    // ---------------------- LocalDevice
+	public void destroy();
 
-    /**
-     * Retrieves the Bluetooth address of the local device.
-     */
-    public String getLocalDeviceBluetoothAddress() throws BluetoothStateException;
+	public String getStackID();
 
-    /**
-     * Retrieves the name of the local device.
-     */
-    public String getLocalDeviceName();
+	public boolean isCurrentThreadInterruptedCallback();
 
-    public String getRemoteDeviceFriendlyName(long address) throws IOException;
+	/**
+	 * @return implemented features, see FEATURE_* constants
+	 */
+	public int getFeatureSet();
 
-    public DeviceClass getLocalDeviceClass();
+	// ---------------------- LocalDevice
 
-    public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException;
+	/**
+	 * Retrieves the Bluetooth address of the local device.
+	 */
+	public String getLocalDeviceBluetoothAddress() throws BluetoothStateException;
 
-    public int getLocalDeviceDiscoverable();
+	/**
+	 * Retrieves the name of the local device.
+	 */
+	public String getLocalDeviceName();
 
-    public boolean isLocalDevicePowerOn();
+	public String getRemoteDeviceFriendlyName(long address) throws IOException;
 
-    public String getLocalDeviceProperty(String property);
+	public DeviceClass getLocalDeviceClass();
 
-    // ---------------------- Device Inquiry
+	public void setLocalDeviceServiceClasses(int classOfDevice);
 
-    /**
-     * called by JSR-82 code Device Inquiry
-     */
-    public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException;
+	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException;
 
-    /**
-     * called by JSR-82 code Device Inquiry
-     */
-    public boolean cancelInquiry(DiscoveryListener listener);
+	public int getLocalDeviceDiscoverable();
 
-    /**
-     * Common synchronous method called by DeviceInquiryThread. Should throw BluetoothStateException only if it can't
-     * start Inquiry
-     */
-    public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
-            throws BluetoothStateException;
+	public boolean isLocalDevicePowerOn();
 
-    public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
-            String deviceName, boolean paired);
+	public String getLocalDeviceProperty(String property);
 
-    // ---------------------- Service search
+	// ---------------------- Device Inquiry
 
-    /**
-     * called by JSR-82 code Service search
-     */
-    public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
-            throws BluetoothStateException;
+	/**
+	 * called by JSR-82 code Device Inquiry
+	 */
+	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
-    /**
-     * called by JSR-82 code Service search
-     */
-    public boolean cancelServiceSearch(int transID);
+	/**
+	 * called by JSR-82 code Device Inquiry
+	 */
+	public boolean cancelInquiry(DiscoveryListener listener);
 
-    /**
-     * Common synchronous method called by SearchServicesThread. Should throw BluetoothStateException only if it can't
-     * start Search
-     */
-    public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
-            RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException;
+	/**
+	 * Common synchronous method called by DeviceInquiryThread. Should throw
+	 * BluetoothStateException only if it can't start Inquiry
+	 */
+	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
+			throws BluetoothStateException;
 
-    /**
-     * Called by ServiceRecord.populateRecord(int[] attrIDs) during Service search
-     */
-    public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs)
-            throws IOException;
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
+			String deviceName, boolean paired);
 
-    // ---------------------- Client and Server RFCOMM connections
+	// ---------------------- Service search
 
-    public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException;
+	/**
+	 * called by JSR-82 code Service search
+	 */
+	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
+			throws BluetoothStateException;
 
-    /**
-     * @param handle
-     * @param expected
-     *            Value specified when connection was open ServiceRecord.xxAUTHENTICATE_xxENCRYPT
-     * @return expected if not implemented by stack
-     * @throws IOException
-     */
-    public int getSecurityOpt(long handle, int expected) throws IOException;
+	/**
+	 * called by JSR-82 code Service search
+	 */
+	public boolean cancelServiceSearch(int transID);
 
-    public void connectionRfCloseClientConnection(long handle) throws IOException;
+	/**
+	 * Common synchronous method called by SearchServicesThread. Should throw
+	 * BluetoothStateException only if it can't start Search
+	 */
+	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
+			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException;
 
-    public void connectionRfCloseServerConnection(long handle) throws IOException;
+	/**
+	 * Called by ServiceRecord.populateRecord(int[] attrIDs) during Service
+	 * search
+	 */
+	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs)
+			throws IOException;
 
-    public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord)
-            throws IOException;
+	// ---------------------- Client and Server RFCOMM connections
 
-    public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
-            throws ServiceRegistrationException;
+	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException;
 
-    public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
+	/**
+	 * @param handle
+	 * @param expected
+	 *            Value specified when connection was open
+	 *            ServiceRecord.xxAUTHENTICATE_xxENCRYPT
+	 * @return expected if not implemented by stack
+	 * @throws IOException
+	 */
+	public int getSecurityOpt(long handle, int expected) throws IOException;
 
-    public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
+	public void connectionRfCloseClientConnection(long handle) throws IOException;
 
-    public long getConnectionRfRemoteAddress(long handle) throws IOException;
+	public void connectionRfCloseServerConnection(long handle) throws IOException;
 
-    public int connectionRfRead(long handle) throws IOException;
+	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord)
+			throws IOException;
 
-    public int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException;
+	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
+			throws ServiceRegistrationException;
 
-    public int connectionRfReadAvailable(long handle) throws IOException;
+	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
 
-    public void connectionRfWrite(long handle, int b) throws IOException;
+	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
 
-    public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
+	public long getConnectionRfRemoteAddress(long handle) throws IOException;
 
-    public void connectionRfFlush(long handle) throws IOException;
+	public int connectionRfRead(long handle) throws IOException;
 
-    // ---------------------- Client and Server L2CAP connections
+	public int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException;
 
-    public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU)
-            throws IOException;
+	public int connectionRfReadAvailable(long handle) throws IOException;
 
-    public void l2CloseClientConnection(long handle) throws IOException;
+	public void connectionRfWrite(long handle, int b) throws IOException;
 
-    public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU,
-            ServiceRecordImpl serviceRecord) throws IOException;
+	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
 
-    public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
-            throws ServiceRegistrationException;
+	public void connectionRfFlush(long handle) throws IOException;
 
-    public long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException;
+	// ---------------------- Client and Server L2CAP connections
 
-    public void l2CloseServerConnection(long handle) throws IOException;
+	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU)
+			throws IOException;
 
-    public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
+	public void l2CloseClientConnection(long handle) throws IOException;
 
-    public int l2GetTransmitMTU(long handle) throws IOException;
+	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU,
+			ServiceRecordImpl serviceRecord) throws IOException;
 
-    public int l2GetReceiveMTU(long handle) throws IOException;
+	public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
+			throws ServiceRegistrationException;
 
-    public boolean l2Ready(long handle) throws IOException;
+	public long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException;
 
-    public int l2Receive(long handle, byte[] inBuf) throws IOException;
+	public void l2CloseServerConnection(long handle) throws IOException;
 
-    public void l2Send(long handle, byte[] data) throws IOException;
+	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
 
-    public long l2RemoteAddress(long handle) throws IOException;
+	public int l2GetTransmitMTU(long handle) throws IOException;
+
+	public int l2GetReceiveMTU(long handle) throws IOException;
+
+	public boolean l2Ready(long handle) throws IOException;
+
+	public int l2Receive(long handle, byte[] inBuf) throws IOException;
+
+	public void l2Send(long handle, byte[] data) throws IOException;
+
+	public long l2RemoteAddress(long handle) throws IOException;
 }

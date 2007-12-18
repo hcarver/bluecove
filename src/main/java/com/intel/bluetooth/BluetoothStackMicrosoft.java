@@ -117,6 +117,15 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
+	 */
+	public int getFeatureSet() {
+		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES;
+	}
+
 	// ---------------------- LocalDevice
 
 	private native int getDeviceClass(long address);
@@ -159,6 +168,17 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 
 	public DeviceClass getLocalDeviceClass() {
 		return new DeviceClass(getDeviceClass(localBluetoothAddress));
+	}
+
+	private native void setLocalDeviceServiceClasses(int classOfDevice, long address);
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#setLocalDeviceServiceClasses(int)
+	 */
+	public void setLocalDeviceServiceClasses(int classOfDevice) {
+		setLocalDeviceServiceClasses(classOfDevice, localBluetoothAddress);
 	}
 
 	private void cancelLimitedDiscoverableTimer() {

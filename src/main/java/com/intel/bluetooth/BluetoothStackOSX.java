@@ -67,6 +67,15 @@ class BluetoothStackOSX implements BluetoothStack {
 		return BlueCoveImpl.STACK_OSX;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
+	 */
+	public int getFeatureSet() {
+		return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES;
+	}
+
 	public native int getLibraryVersion();
 
 	public native int detectBluetoothStack();
@@ -104,6 +113,15 @@ class BluetoothStackOSX implements BluetoothStack {
 
 	public DeviceClass getLocalDeviceClass() {
 		return new DeviceClass(getDeviceClassImpl());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#setLocalDeviceServiceClasses(int)
+	 */
+	public void setLocalDeviceServiceClasses(int classOfDevice) {
+		throw new NotSupportedRuntimeException(getStackID());
 	}
 
 	public native boolean isLocalDevicePowerOn();

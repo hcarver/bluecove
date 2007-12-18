@@ -31,11 +31,11 @@ import javax.bluetooth.UUID;
 
 /**
  * This is empty stub to be implemented in bluecove-gpl project
- *
+ * 
  * This class is not distributed with BlueCove binary distribution: bluecove.jar
- *
+ * 
  * @author vlads
- *
+ * 
  */
 class BluetoothStackBlueZ implements BluetoothStack {
 
@@ -75,12 +75,21 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	public void enableNativeDebug(Class nativeDebugCallback, boolean on) {
 		// empty stub to be implemented in bluecove-gpl
-
 	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
+	 */
+	public int getFeatureSet() {
+		// empty stub to be implemented in bluecove-gpl
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
 	 */
 	public boolean isCurrentThreadInterruptedCallback() {
@@ -127,6 +136,15 @@ class BluetoothStackBlueZ implements BluetoothStack {
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
 		// empty stub to be implemented in bluecove-gpl
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#setLocalDeviceServiceClasses(int)
+	 */
+	public void setLocalDeviceServiceClasses(int classOfDevice) {
+		// empty stub to be implemented in bluecove-gpl
 	}
 
 	// ---------------------- Device Inquiry ----------------------
@@ -262,7 +280,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams,
 	 *      int, int)
 	 */
@@ -274,7 +292,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
 	 */
 	public void l2CloseClientConnection(long handle) throws IOException {
@@ -283,7 +301,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams,
 	 *      int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
@@ -295,7 +313,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long,
 	 *      com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
@@ -306,7 +324,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection(long)
 	 */
 	public long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException {
@@ -316,7 +334,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseServerConnection(long)
 	 */
 	public void l2CloseServerConnection(long handle) throws IOException {
@@ -326,7 +344,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long,
 	 *      com.intel.bluetooth.ServiceRecordImpl)
 	 */
@@ -337,7 +355,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
 	 */
 	public boolean l2Ready(long handle) throws IOException {
@@ -347,7 +365,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
 	 */
 	public int l2Receive(long handle, byte[] inBuf) throws IOException {
@@ -357,7 +375,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
 	public void l2Send(long handle, byte[] data) throws IOException {
@@ -366,7 +384,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetReceiveMTU(long)
 	 */
 	public int l2GetReceiveMTU(long handle) throws IOException {
@@ -376,7 +394,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetTransmitMTU(long)
 	 */
 	public int l2GetTransmitMTU(long handle) throws IOException {
@@ -386,7 +404,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
 	 */
 	public long l2RemoteAddress(long handle) throws IOException {

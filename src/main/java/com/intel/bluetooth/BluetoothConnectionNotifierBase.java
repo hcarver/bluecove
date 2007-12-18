@@ -31,23 +31,24 @@ import javax.microedition.io.Connection;
 
 /**
  * @author vlads
- *
+ * 
  */
 abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothConnectionNotifierServiceRecordAccess {
 
 	protected BluetoothStack bluetoothStack;
-	
+
 	protected volatile long handle;
 
 	protected ServiceRecordImpl serviceRecord;
-	
+
 	protected boolean closed;
-	
+
 	protected boolean closing;
-	
+
 	protected int securityOpt;
-	
-	protected BluetoothConnectionNotifierBase(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params) throws BluetoothStateException, Error {
+
+	protected BluetoothConnectionNotifierBase(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params)
+			throws BluetoothStateException, Error {
 		this.bluetoothStack = bluetoothStack;
 		this.closed = false;
 		this.closing = false;
@@ -60,8 +61,8 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 		this.serviceRecord = new ServiceRecordImpl(this.bluetoothStack, null, 0);
 	}
 
-	protected abstract void closeStack(long handle) throws IOException;
-	
+	protected abstract void stackServerClose(long handle) throws IOException;
+
 	/*
 	 * Close the connection. When a connection has been closed, access to any of
 	 * its methods except this close() will cause an an IOException to be
@@ -71,8 +72,10 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 	 * are closed. In this latter case access to the open streams is permitted,
 	 * but access to the connection is not.
 	 */
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {
@@ -84,8 +87,13 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 				closing = true;
 				DebugLog.debug("closing ConnectionNotifier");
 				try {
+					if ((serviceRecord.deviceServiceClasses != 0)
+							&& ((bluetoothStack.getFeatureSet() & BluetoothStack.FEATURE_SET_DEVICE_SERVICE_CLASSES) != 0)) {
+						bluetoothStack.setLocalDeviceServiceClasses(ServiceRecordsRegistry.getDeviceServiceClasses());
+					}
+
 					if (h != 0) {
-						closeStack(h);
+						stackServerClose(h);
 					}
 					closed = true;
 				} finally {
@@ -94,8 +102,10 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 			}
 		}
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#getServiceRecord()
 	 */
 	public ServiceRecord getServiceRecord() {
@@ -105,7 +115,7 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 		ServiceRecordsRegistry.register(this, serviceRecord);
 		return serviceRecord;
 	}
-	
+
 	protected void validateServiceRecord(ServiceRecord srvRecord) {
 		DataElement protocolDescriptor = srvRecord.getAttributeValue(BluetoothConsts.ProtocolDescriptorList);
 		if ((protocolDescriptor == null) || (protocolDescriptor.getDataType() != DataElement.DATSEQ)) {
@@ -113,18 +123,21 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 		}
 
 		DataElement serviceClassIDList = srvRecord.getAttributeValue(BluetoothConsts.ServiceClassIDList);
-		if ((serviceClassIDList == null) || (serviceClassIDList.getDataType() != DataElement.DATSEQ) || serviceClassIDList.getSize() == 0) {
+		if ((serviceClassIDList == null) || (serviceClassIDList.getDataType() != DataElement.DATSEQ)
+				|| serviceClassIDList.getSize() == 0) {
 			throw new IllegalArgumentException("ServiceClassIDList is mandatory");
 		}
 
 		boolean isL2CAPpresent = false;
-		for (Enumeration protocolsSeqEnum = (Enumeration) protocolDescriptor.getValue(); protocolsSeqEnum.hasMoreElements();) {
+		for (Enumeration protocolsSeqEnum = (Enumeration) protocolDescriptor.getValue(); protocolsSeqEnum
+				.hasMoreElements();) {
 			DataElement elementSeq = (DataElement) protocolsSeqEnum.nextElement();
 			if (elementSeq.getDataType() == DataElement.DATSEQ) {
 				Enumeration elementSeqEnum = (Enumeration) elementSeq.getValue();
 				if (elementSeqEnum.hasMoreElements()) {
 					DataElement protocolElement = (DataElement) elementSeqEnum.nextElement();
-					if ((protocolElement.getDataType() == DataElement.UUID) && (BluetoothConsts.L2CAP_PROTOCOL_UUID.equals(protocolElement.getValue()))) {
+					if ((protocolElement.getDataType() == DataElement.UUID)
+							&& (BluetoothConsts.L2CAP_PROTOCOL_UUID.equals(protocolElement.getValue()))) {
 						isL2CAPpresent = true;
 						break;
 					}
@@ -135,24 +148,35 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 			throw new IllegalArgumentException("L2CAP UUID is mandatory in ProtocolDescriptorList");
 		}
 	}
-	
-	protected abstract void updateStackServiceRecord(ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException;
-	
-	/* (non-Javadoc)
+
+	protected abstract void updateStackServiceRecord(ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
+			throws ServiceRegistrationException;
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#updateServiceRecord(boolean)
 	 */
 	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
-		try {
-			validateServiceRecord(this.serviceRecord);
-		} catch (IllegalArgumentException e) {
-			if (acceptAndOpen) {
-				throw new ServiceRegistrationException(e.getMessage());
-			} else {
-				throw e;
+		if (serviceRecord.attributeUpdated || (!acceptAndOpen)) {
+			try {
+				validateServiceRecord(this.serviceRecord);
+			} catch (IllegalArgumentException e) {
+				if (acceptAndOpen) {
+					throw new ServiceRegistrationException(e.getMessage());
+				} else {
+					throw e;
+				}
 			}
+			updateStackServiceRecord(serviceRecord, acceptAndOpen);
+			serviceRecord.attributeUpdated = false;
 		}
-		updateStackServiceRecord(serviceRecord, acceptAndOpen);
-		serviceRecord.attributeUpdated = false;
-	}
+		if ((serviceRecord.deviceServiceClasses != serviceRecord.deviceServiceClassesRegistered)
+				&& ((bluetoothStack.getFeatureSet() & BluetoothStack.FEATURE_SET_DEVICE_SERVICE_CLASSES) != 0)) {
 
+			bluetoothStack.setLocalDeviceServiceClasses(ServiceRecordsRegistry.getDeviceServiceClasses());
+
+			serviceRecord.deviceServiceClassesRegistered = serviceRecord.deviceServiceClasses;
+		}
+	}
 }
