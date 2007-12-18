@@ -220,8 +220,8 @@ class BluetoothStackOSX implements BluetoothStack {
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
 	}
 
-	public native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
-			throws BluetoothStateException;
+	private native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode,
+			DiscoveryListener listener) throws BluetoothStateException;
 
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException {
