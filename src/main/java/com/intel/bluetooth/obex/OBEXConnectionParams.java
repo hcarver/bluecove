@@ -50,5 +50,5 @@ public class OBEXConnectionParams {
 	 * 
 	 * Java System property "bluecove.obex.mtu" can be used to define the value.
 	 */
-	public int mtu = 10 * OBEXOperationCodes.OBEX_DEFAULT_MTU;
+	public int mtu = OBEXOperationCodes.OBEX_DEFAULT_MTU;
 }
