@@ -49,8 +49,6 @@ static DWORD initialBtMode;
 static BTH_LOCAL_VERSION localBluetoothDeviceInfo;
 #else
 static BOOL initialBtIsDiscoverable;
-static ULONG ulClassofLocalDevice = 0;
-static ULONG ulClassofLocalDeviceUpdated = 0;
 #endif
 
 BOOL microsoftBluetoothStackPresent;
@@ -1248,26 +1246,6 @@ BOOL getBluetoothGetRadioInfo(jlong address, BLUETOOTH_RADIO_INFO* info) {
 	}
 	return FALSE;
 }
-BOOL getBluetoothGetDeviceInfo(jlong address, BLUETOOTH_DEVICE_INFO* info) {
-	HANDLE hRadio;
-	BLUETOOTH_FIND_RADIO_PARAMS btfrp = { sizeof(btfrp) };
-	HBLUETOOTH_RADIO_FIND hFind = BluetoothFindFirstRadio( &btfrp, &hRadio );
-	if ( NULL != hFind ) {
-		do {
-			BLUETOOTH_DEVICE_INFO deviceInfo;
-			deviceInfo.dwSize = sizeof(deviceInfo);
-			if (ERROR_SUCCESS == BluetoothGetDeviceInfo(hRadio, &deviceInfo)) {
-				if (deviceInfo.Address.ullLong == address) {
-					BluetoothFindRadioClose(hFind);
-					memcpy(info, &deviceInfo, sizeof(BLUETOOTH_DEVICE_INFO));
-					return TRUE;
-				}
-			}
-		} while( BluetoothFindNextRadio( hFind, &hRadio ) );
-		BluetoothFindRadioClose( hFind );
-	}
-	return FALSE;
-}
 #endif
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getradioname(JNIEnv *env, jobject peer, jlong address)
@@ -1356,35 +1334,6 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getDevic
 		}
 	}
 	return MAJOR_COMPUTER;
-#endif
-}
-
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_setLocalDeviceServiceClasses
-(JNIEnv *env, jobject, jint classOfDevice, jlong address) {
-#ifndef _WIN32_WCE
-	if (address == 0) {
-		return;
-	}
-	BLUETOOTH_DEVICE_INFO deviceInfo;
-	if (getBluetoothGetDeviceInfo(address, &deviceInfo)) {
-        ULONG newClassofDevice = 0;
-	    if (ulClassofLocalDevice == 0) {
-	        ulClassofLocalDevice = deviceInfo.ulClassofDevice;
-	    }
-        newClassofDevice = classOfDevice | ulClassofLocalDevice | (deviceInfo.ulClassofDevice ^ ulClassofLocalDeviceUpdated);
-        if (deviceInfo.ulClassofDevice == newClassofDevice) {
-            ulClassofLocalDeviceUpdated = newClassofDevice;
-            return;
-        }
-        deviceInfo.ulClassofDevice = newClassofDevice;
-		if (BluetoothUpdateDeviceRecord(&deviceInfo)) {
-		    ulClassofLocalDeviceUpdated = newClassofDevice;
-	    } else {
-	        debug("e.can't update DeviceRecord");
-	    }
-	} else {
-	    debug("e.can't find DeviceInfo");
-	}
 #endif
 }
 
