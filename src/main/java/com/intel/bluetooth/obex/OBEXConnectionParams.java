@@ -44,4 +44,11 @@ public class OBEXConnectionParams {
 	 * value.
 	 */
 	public int timeout = DEFAULT_TIMEOUT;
+
+	/**
+	 * You can increase network speed by changing mtu to bigger value.
+	 * 
+	 * Java System property "bluecove.obex.mtu" can be used to define the value.
+	 */
+	public int mtu = 10 * OBEXOperationCodes.OBEX_DEFAULT_MTU;
 }

@@ -93,8 +93,8 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		byte[] connectRequest = new byte[4];
 		connectRequest[0] = OBEXOperationCodes.OBEX_VERSION;
 		connectRequest[1] = 0; /* Flags */
-		connectRequest[2] = OBEXUtils.hiByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
-		connectRequest[3] = OBEXUtils.loByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
+		connectRequest[2] = OBEXUtils.hiByte(obexConnectionParams.mtu);
+		connectRequest[3] = OBEXUtils.loByte(obexConnectionParams.mtu);
 		writeOperation(OBEXOperationCodes.CONNECT, connectRequest, OBEXHeaderSetImpl.toByteArray(headers));
 
 		byte[] b = readOperation();

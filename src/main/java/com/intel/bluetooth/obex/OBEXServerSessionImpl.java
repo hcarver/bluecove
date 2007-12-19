@@ -182,8 +182,8 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 		byte[] connectResponse = new byte[4];
 		connectResponse[0] = OBEXOperationCodes.OBEX_VERSION;
 		connectResponse[1] = 0; /* Flags */
-		connectResponse[2] = OBEXUtils.hiByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
-		connectResponse[3] = OBEXUtils.loByte(OBEXOperationCodes.OBEX_DEFAULT_MTU);
+		connectResponse[2] = OBEXUtils.hiByte(obexConnectionParams.mtu);
+		connectResponse[3] = OBEXUtils.loByte(obexConnectionParams.mtu);
 		writeOperation(rc, connectResponse, OBEXHeaderSetImpl.toByteArray(replyHeaders));
 		if (rc == ResponseCodes.OBEX_HTTP_OK) {
 			this.isConnected = true;

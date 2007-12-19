@@ -365,6 +365,10 @@ public abstract class MicroeditionConnector {
 			if (timeout != null) {
 				obexConnectionParams.timeout = Integer.parseInt(timeout);
 			}
+			String mtu = BlueCoveImpl.getConfigProperty("bluecove.obex.mtu");
+			if (mtu != null) {
+				obexConnectionParams.mtu = Integer.parseInt(mtu);
+			}
 		}
 
 		/*

@@ -65,6 +65,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		}
 		this.conn = conn;
 		this.obexConnectionParams = obexConnectionParams;
+		this.mtu = obexConnectionParams.mtu;
 		connectionID = -1;
 		boolean initOK = false;
 		try {
