@@ -43,9 +43,11 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 
 	private static final int BTH_MODE_DISCOVERABLE = 3;
 
-	boolean peerInitialized = false;
+	private boolean peerInitialized = false;
 
-	long localBluetoothAddress = 0;
+	private boolean windowsCE;
+
+	private long localBluetoothAddress = 0;
 
 	private DiscoveryListener currentDeviceDiscoveryListener;
 
@@ -84,9 +86,11 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 
 	public native void enableNativeDebug(Class nativeDebugCallback, boolean on);
 
-	static native int initializationStatus() throws IOException;
+	private static native int initializationStatus() throws IOException;
 
 	native void uninitialize();
+
+	private native boolean isWindowsCE();
 
 	public void initialize() throws BluetoothStateException {
 		try {
@@ -95,6 +99,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 			if (status == 1) {
 				peerInitialized = true;
 			}
+			windowsCE = isWindowsCE();
 		} catch (BluetoothStateException e) {
 			throw e;
 		} catch (IOException e) {
@@ -123,7 +128,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
 	 */
 	public int getFeatureSet() {
-		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES;
+		return FEATURE_SERVICE_ATTRIBUTES | (windowsCE ? 0 : FEATURE_SET_DEVICE_SERVICE_CLASSES);
 	}
 
 	// ---------------------- LocalDevice

@@ -57,10 +57,11 @@
 
 === Limitations ===
 
-    * Microsoft Bluetooth stack only supporting RFCOMM connections
-    * `DiscoveryListener.deviceDiscovered()` would be called for devices that a _paired_ with your Microsoft BT stack regardless if device ON or OFF
+    * Microsoft Bluetooth stack only support RFCOMM connections
     * L2CAP not supported
+    * `DiscoveryListener.deviceDiscovered()` would be called for devices that a _paired_ with your Microsoft BT stack regardless if device ON or OFF
     * `LocalDevice.setDiscoverable(NOT_DISCOVERABLE)` will not change the state if discoverable is enabled system wide in "Bluetooth Devices" "Options"
+    * setDeviceServiceClasses not supported on Windows Mobile
 
 == BlueSoleil (IVT Corporation) ==
 
@@ -82,6 +83,7 @@
     * Server can't close incoming connection. It will wait until connection is closed remotely. (Our implementation should be changed to restart Service(Server) each time connection is closed to fix this)
     * `searchServices` can't distinguish the service type (RFCOMM or OBEX). To solve this following UUIDs are always discoved as obex (btgoep://) connections
         * IR_MC_SYNC (0x1104), OBEX_OBJECT_PUSH (0x1105), OBEX_FILE_TRANSFER (0x1106), IR_MC_SYNC_COMMAND (0x1107), IMG_RESPONDER (0x111B)
+    * setDeviceServiceClasses not supported
 
 
 *N.B.* In our test lab when using fake ES-388 Bluetooth USB Adapter we can only make from 180 to 250 max connections in sequence. After this !BlueSoleil.exe needs to restart or Windows needs to be rebooted.

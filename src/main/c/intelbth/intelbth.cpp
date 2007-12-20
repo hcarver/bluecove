@@ -204,6 +204,15 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_uninitia
 
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_isWindowsCE
+(JNIEnv *, jobject) {
+#ifdef _WIN32_WCE
+    return JNI_TRUE;
+#else
+    return JNI_FALSE;
+#endif // _WIN32_WCE
+}
+
 #ifdef _BTWINSOCKLIB
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runDeviceInquiryImpl
@@ -723,11 +732,11 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_registe
 	BTH_SET_SERVICE *setservice = (BTH_SET_SERVICE *)malloc(sizeof(BTH_SET_SERVICE)+length-1);
 	memset(setservice, 0, sizeof(BTH_SET_SERVICE)-1);
 	setservice->pRecordHandle = &handle;
+    setservice->fCodService = GET_COD_SERVICE(classOfDevice);
 #endif
 
 	setservice->pSdpVersion = &version;
 	setservice->ulRecordLength = length;
-    setservice->fCodService = GET_COD_SERVICE(classOfDevice);
 
 	jbyte *bytes = env->GetByteArrayElements(record, 0);
 
