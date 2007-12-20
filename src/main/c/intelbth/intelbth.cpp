@@ -705,7 +705,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_ge
 	return result;
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_registerService(JNIEnv *env, jobject peer, jbyteArray record) {
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_registerService(JNIEnv *env, jobject peer, jbyteArray record, jint classOfDevice) {
 	debug("->registerService");
 	int length = env->GetArrayLength(record);
 
@@ -727,6 +727,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_registe
 
 	setservice->pSdpVersion = &version;
 	setservice->ulRecordLength = length;
+    setservice->fCodService = GET_COD_SERVICE(classOfDevice);
 
 	jbyte *bytes = env->GetByteArrayElements(record, 0);
 
@@ -758,8 +759,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_registe
 	// perform set
 
 	if (WSASetService(&queryset, RNRSERVICE_REGISTER, 0)) {
+		throwExceptionWinErrorMessage(env, cServiceRegistrationException, "Failed to register service", WSAGetLastError());
 		free(setservice);
-		throwException(env, "javax/bluetooth/ServiceRegistrationException", "Failed to register service");
 		return 0;
 	}
 	free(setservice);
@@ -808,7 +809,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_unregist
 	// perform set
 
 	if (WSASetService(&queryset, RNRSERVICE_DELETE, 0)) {
-		throwException(env, "javax/bluetooth/ServiceRegistrationException", "Failed to unregister service");
+		throwServiceRegistrationExceptionExt(env, "Failed to unregister service");
 	}
 }
 

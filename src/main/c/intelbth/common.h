@@ -214,6 +214,8 @@ void ndebug(const char *fmt, ...);
 
 char* bool2str(BOOL b);
 
+extern const char* cServiceRegistrationException;
+
 void throwException(JNIEnv *env, const char *name, const char *msg);
 
 void throwExceptionExt(JNIEnv *env, const char *name, const char *fmt, ...);

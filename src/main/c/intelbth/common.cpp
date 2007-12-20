@@ -30,11 +30,11 @@ BOOL nativeDebugCallbackEnabled = false;
 static jclass nativeDebugListenerClass;
 static jmethodID nativeDebugMethod = NULL;
 
-static const char* cIOException = "java/io/IOException";
-static const char* cInterruptedIOException = "java/io/InterruptedIOException";
-static const char* cBluetoothStateException = "javax/bluetooth/BluetoothStateException";
-static const char* cBluetoothConnectionException = "javax/bluetooth/BluetoothConnectionException";
-static const char* cServiceRegistrationException = "javax/bluetooth/ServiceRegistrationException";
+const char* cIOException = "java/io/IOException";
+const char* cInterruptedIOException = "java/io/InterruptedIOException";
+const char* cBluetoothStateException = "javax/bluetooth/BluetoothStateException";
+const char* cBluetoothConnectionException = "javax/bluetooth/BluetoothConnectionException";
+const char* cServiceRegistrationException = "javax/bluetooth/ServiceRegistrationException";
 
 jint blueCoveVersion() {
 	return BLUECOVE_VERSION * 100 + BLUECOVE_BUILD;

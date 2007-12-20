@@ -1928,7 +1928,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
 
     debug4("AddAttribute %i type=%i len=%i [%s]", attrID, attrType, arrLen, p_val);
 	if (sdpService->AddAttribute((UINT16)attrID, (UINT8)attrType, arrLen, p_val) != SDP_OK) {
-		throwExceptionExt(env, "javax/bluetooth/ServiceRegistrationException", "Failed to AddAttribute %i", attrID);
+		throwServiceRegistrationExceptionExt(env, "Failed to AddAttribute %i", attrID);
 	}
 
 	//delete p_val;

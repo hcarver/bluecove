@@ -123,7 +123,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
 	 */
 	public int getFeatureSet() {
-		return FEATURE_SERVICE_ATTRIBUTES;
+		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES;
 	}
 
 	// ---------------------- LocalDevice
@@ -176,7 +176,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 	 * @see com.intel.bluetooth.BluetoothStack#setLocalDeviceServiceClasses(int)
 	 */
 	public void setLocalDeviceServiceClasses(int classOfDevice) {
-		throw new NotSupportedRuntimeException(getStackID());
+		// Done in rfServerUpdateServiceRecord
 	}
 
 	private void cancelLimitedDiscoverableTimer() {
@@ -566,7 +566,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 			/*
 			 * register service
 			 */
-			serviceRecord.setHandle(registerService(serviceRecord.toByteArray()));
+			serviceRecord.setHandle(registerService(serviceRecord.toByteArray(), serviceRecord.deviceServiceClasses));
 
 			success = true;
 		} finally {
@@ -594,7 +594,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 	/*
 	 * register service
 	 */
-	private native long registerService(byte[] record) throws ServiceRegistrationException;
+	private native long registerService(byte[] record, int classOfDevice) throws ServiceRegistrationException;
 
 	/*
 	 * unregister service
@@ -614,7 +614,7 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 		} catch (IOException e) {
 			throw new ServiceRegistrationException(e.toString());
 		}
-		serviceRecord.setHandle(registerService(blob));
+		serviceRecord.setHandle(registerService(blob, serviceRecord.deviceServiceClasses));
 		DebugLog.debug("new serviceRecord", serviceRecord);
 	}
 
