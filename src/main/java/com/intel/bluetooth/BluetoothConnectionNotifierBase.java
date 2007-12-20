@@ -168,8 +168,11 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 					throw e;
 				}
 			}
-			updateStackServiceRecord(serviceRecord, acceptAndOpen);
-			serviceRecord.attributeUpdated = false;
+			try {
+				updateStackServiceRecord(serviceRecord, acceptAndOpen);
+			} finally {
+				serviceRecord.attributeUpdated = false;
+			}
 		}
 		if ((serviceRecord.deviceServiceClasses != serviceRecord.deviceServiceClassesRegistered)
 				&& ((bluetoothStack.getFeatureSet() & BluetoothStack.FEATURE_SET_DEVICE_SERVICE_CLASSES) != 0)) {
