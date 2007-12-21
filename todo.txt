@@ -2,7 +2,17 @@
 
 The list of functionality that can be implemented or investigation should be done if this is possible.
 
+* Add DiscoveryAgent.retrieveDevices to BluetoothStack interface and implement for OS X
+
+* implement RemoteDevice encrypt, authenticate, authorize, isAuthorized
+
+* Properly implement ServiceRecord.populateRecord by doing service search if necessary
+
 * Run native JUnit tests on WinCE
+
+* Fix RemoteDevice.getFriendlyName on WinCE
+
+* Document what is not implmented on WinCE
 
 * WIDCOMM - find a way to set DeviceServiceClasses
 
