@@ -2,9 +2,15 @@
 
 The list of functionality that can be implemented or investigation should be done if this is possible.
 
+* Run native JUnit tests on WinCE
+
+* WIDCOMM - find a way to set DeviceServiceClasses
+
 * BlueZ Linux version (C++)
 
-* OS X support. Some code exists in branches\osxPort\
+* OS X support.
+    Security
+    ServiceRecord.setDeviceServiceClasses
 
 * Bluetooth TOSHIBA Stack (C++)
 
