@@ -27,36 +27,44 @@ import javax.bluetooth.ServiceRecord;
 
 /**
  * @author vlads
- *
+ * 
  */
 class DiscoveryListenerAdapter implements DiscoveryListener {
 
-	/* (non-Javadoc)
-	 * @see javax.bluetooth.DiscoveryListener#deviceDiscovered(javax.bluetooth.RemoteDevice, javax.bluetooth.DeviceClass)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.bluetooth.DiscoveryListener#deviceDiscovered(javax.bluetooth.RemoteDevice,
+	 *      javax.bluetooth.DeviceClass)
 	 */
 	public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
-		// TODO Auto-generated method stub
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.bluetooth.DiscoveryListener#inquiryCompleted(int)
 	 */
 	public void inquiryCompleted(int discType) {
 		DebugLog.debug("inquiryCompleted", discType);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.bluetooth.DiscoveryListener#serviceSearchCompleted(int, int)
 	 */
 	public void serviceSearchCompleted(int transID, int respCode) {
 		DebugLog.debug("serviceSearchCompleted", respCode);
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.bluetooth.DiscoveryListener#servicesDiscovered(int, javax.bluetooth.ServiceRecord[])
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.bluetooth.DiscoveryListener#servicesDiscovered(int,
+	 *      javax.bluetooth.ServiceRecord[])
 	 */
 	public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
-		// TODO Auto-generated method stub
 	}
 
 }
