@@ -20,23 +20,17 @@
  */
 package com.intel.bluetooth;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import javax.bluetooth.DataElement;
-import javax.bluetooth.UUID;
-
 /**
  * @author vlads
- *
+ * 
  */
 public abstract class NativeOSXTestCase extends NativeTestCase {
 
-    protected void setUp() throws Exception {
-        super.setUp();
-        if (NativeLibLoader.getOS() != NativeLibLoader.OS_MAC_OS_X) {
-            throw new Error("This is OS X only test");
-        }
-        BlueCoveImpl.instance().getBluetoothStack();
-    }
+	protected void setUp() throws Exception {
+		super.setUp();
+		if (NativeLibLoader.getOS() != NativeLibLoader.OS_MAC_OS_X) {
+			throw new Error("This is OS X only test");
+		}
+		BlueCoveImpl.instance().getBluetoothStack();
+	}
 }
