@@ -313,7 +313,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 	public native void connectionRfCloseClientConnection(long handle) throws IOException;
 
 	public int getSecurityOpt(long handle, int expected) throws IOException {
-		return expected;
+		return ServiceRecord.NOAUTHENTICATE_NOENCRYPT;
 	}
 
 	private native long rfServerOpenImpl(byte[] uuidValue, String name, boolean authenticate, boolean encrypt)
