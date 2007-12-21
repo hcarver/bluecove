@@ -42,7 +42,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
 
 	private boolean closeRequested = false;
 
-	private boolean delayClose = false;
+	private volatile boolean delayClose = false;
 
 	private Object canCloseEvent = new Object();
 

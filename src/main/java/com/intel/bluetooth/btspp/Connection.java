@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth.btspp;
 
 import java.io.DataInputStream;
@@ -41,29 +41,33 @@ import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.MicroeditionConnector;
 
 /**
- * This class is Proxy for btspp (RFCOMM) Connection implementations for IBM J9 support
+ * This class is Proxy for btspp (RFCOMM) Connection implementations for IBM J9
+ * support
  * 
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
  * 
  * @author vlads
- *
+ * 
  */
-public class Connection extends BluetoothConnectionAccessAdapter implements CreateConnection, StreamConnection, StreamConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess, BluetoothConnectionAccess {
+public class Connection extends BluetoothConnectionAccessAdapter implements CreateConnection, StreamConnection,
+		StreamConnectionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
 
 	javax.microedition.io.Connection impl;
-	
+
 	public Connection() {
 		impl = null;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccessAdapter#getImpl()
 	 */
 	protected BluetoothConnectionAccess getImpl() {
-		return (BluetoothConnectionAccess)impl;
+		return (BluetoothConnectionAccess) impl;
 	}
-	
+
 	public void setParameters(String spec, int access, boolean timeout) throws IOException {
 		impl = MicroeditionConnector.open(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM + ":" + spec, access, timeout);
 	}
@@ -72,43 +76,47 @@ public class Connection extends BluetoothConnectionAccessAdapter implements Crea
 		setParameters(spec, access, timeout);
 		return this;
 	}
-	
+
 	public void close() throws IOException {
 		impl.close();
 	}
 
 	public DataInputStream openDataInputStream() throws IOException {
-		return ((InputConnection)impl).openDataInputStream();
+		return ((InputConnection) impl).openDataInputStream();
 	}
 
 	public InputStream openInputStream() throws IOException {
-		return ((InputConnection)impl).openInputStream();
+		return ((InputConnection) impl).openInputStream();
 	}
 
 	public DataOutputStream openDataOutputStream() throws IOException {
-		return ((OutputConnection)impl).openDataOutputStream();
+		return ((OutputConnection) impl).openDataOutputStream();
 	}
 
 	public OutputStream openOutputStream() throws IOException {
-		return ((OutputConnection)impl).openOutputStream();
+		return ((OutputConnection) impl).openOutputStream();
 	}
 
 	public StreamConnection acceptAndOpen() throws IOException {
-		return ((StreamConnectionNotifier)impl).acceptAndOpen();
+		return ((StreamConnectionNotifier) impl).acceptAndOpen();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#getServiceRecord()
 	 */
 	public ServiceRecord getServiceRecord() {
-		return ((BluetoothConnectionNotifierServiceRecordAccess)impl).getServiceRecord();
+		return ((BluetoothConnectionNotifierServiceRecordAccess) impl).getServiceRecord();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#updateServiceRecord(boolean)
 	 */
 	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
-		((BluetoothConnectionNotifierServiceRecordAccess)impl).updateServiceRecord(acceptAndOpen);
+		((BluetoothConnectionNotifierServiceRecordAccess) impl).updateServiceRecord(acceptAndOpen);
 	}
 
 }
