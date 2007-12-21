@@ -559,7 +559,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		SDPOutputStream sdpOut = new SDPOutputStream(out);
 		try {
-			for (; en.hasMoreElements();) {
+			while (en.hasMoreElements()) {
 				sdpOut.writeElement((DataElement) en.nextElement());
 			}
 		} catch (IOException e) {
