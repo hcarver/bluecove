@@ -29,7 +29,7 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
-class BluetoothStackToshiba implements BluetoothStack {
+class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
 
 	private boolean initialized = false;
 

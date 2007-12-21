@@ -35,7 +35,7 @@ import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
-class BluetoothStackMicrosoft implements BluetoothStack {
+class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
 
 	private static final int BTH_MODE_POWER_OFF = 1;
 

@@ -37,7 +37,7 @@ import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
-class BluetoothStackWIDCOMM implements BluetoothStack {
+class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
 
 	private boolean initialized = false;
 

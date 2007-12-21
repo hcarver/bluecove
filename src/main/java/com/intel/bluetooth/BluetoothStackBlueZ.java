@@ -37,7 +37,7 @@ import javax.bluetooth.UUID;
  * @author vlads
  * 
  */
-class BluetoothStackBlueZ implements BluetoothStack {
+class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
 
 	// Used mainly in Unit Tests
 	static {

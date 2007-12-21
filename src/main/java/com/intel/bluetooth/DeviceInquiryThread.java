@@ -25,25 +25,25 @@ import javax.bluetooth.DiscoveryListener;
 
 /**
  * This is Common class to solve JNI call backs problem
- *
+ * 
  */
 class DeviceInquiryThread extends Thread {
-	
-	private BluetoothStack stack;
-	
+
+	private DeviceInquiryRunnable stack;
+
 	private int accessCode;
 
 	private DiscoveryListener listener;
 
 	private BluetoothStateException startException;
-	
+
 	private boolean started = false;
-	
+
 	private boolean terminated = false;
-	
+
 	private Object inquiryStartedEvent = new Object();
-	
-	private DeviceInquiryThread(BluetoothStack stack, int accessCode, DiscoveryListener listener) {
+
+	private DeviceInquiryThread(DeviceInquiryRunnable stack, int accessCode, DiscoveryListener listener) {
 		super("DeviceInquiryThread");
 		this.stack = stack;
 		this.accessCode = accessCode;
@@ -51,9 +51,11 @@ class DeviceInquiryThread extends Thread {
 	}
 
 	/**
-	 * Start DeviceInquiry and wait for startException or deviceInquiryStartedCallback
+	 * Start DeviceInquiry and wait for startException or
+	 * deviceInquiryStartedCallback
 	 */
-	static boolean startInquiry(BluetoothStack stack, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
+	static boolean startInquiry(DeviceInquiryRunnable stack, int accessCode, DiscoveryListener listener)
+			throws BluetoothStateException {
 		DeviceInquiryThread t = (new DeviceInquiryThread(stack, accessCode, listener));
 		// In case the BTStack hangs, exit JVM anyway
 		UtilsJavaSE.threadSetDaemon(t);
@@ -73,7 +75,7 @@ class DeviceInquiryThread extends Thread {
 		DebugLog.debug("startInquiry return", t.started);
 		return t.started;
 	}
-	
+
 	public void run() {
 		int discType = DiscoveryListener.INQUIRY_ERROR;
 		try {
@@ -96,7 +98,7 @@ class DeviceInquiryThread extends Thread {
 			}
 		}
 	}
-	
+
 	public void deviceInquiryStartedCallback() {
 		DebugLog.debug("deviceInquiryStartedCallback");
 		started = true;
@@ -104,5 +106,5 @@ class DeviceInquiryThread extends Thread {
 			inquiryStartedEvent.notifyAll();
 		}
 	}
-	
+
 }

@@ -33,7 +33,7 @@ class SearchServicesThread extends Thread {
 
 	private static Hashtable threads = new Hashtable();
 
-	private BluetoothStack stack;
+	private SearchServicesRunnable stack;
 
 	private int transID;
 
@@ -55,7 +55,8 @@ class SearchServicesThread extends Thread {
 
 	private Object serviceSearchStartedEvent = new Object();
 
-	private SearchServicesThread(BluetoothStack stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
+	private SearchServicesThread(SearchServicesRunnable stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device,
+			DiscoveryListener listener) {
 		super("SearchServicesThread");
 		this.stack = stack;
 		this.transID = (++transIDGenerator);
@@ -66,11 +67,13 @@ class SearchServicesThread extends Thread {
 	}
 
 	/**
-	 * Start DeviceInquiry and wait for startException or deviceInquiryStartedCallback
+	 * Start Services Search and wait for startException or
+	 * searchServicesStartedCallback
 	 */
-	static int startSearchServices(BluetoothStack stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+	static int startSearchServices(SearchServicesRunnable stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device,
+			DiscoveryListener listener) throws BluetoothStateException {
 		SearchServicesThread t = (new SearchServicesThread(stack, attrSet, uuidSet, device, listener));
-		//In case the BTStack hangs, exit JVM anyway
+		// In case the BTStack hangs, exit JVM anyway
 		UtilsJavaSE.threadSetDaemon(t);
 		synchronized (t.serviceSearchStartedEvent) {
 			t.start();
@@ -95,7 +98,7 @@ class SearchServicesThread extends Thread {
 	}
 
 	static SearchServicesThread getServiceSearchThread(int transID) {
-		return (SearchServicesThread)threads.get(new Integer(transID));
+		return (SearchServicesThread) threads.get(new Integer(transID));
 	}
 
 	public void run() {

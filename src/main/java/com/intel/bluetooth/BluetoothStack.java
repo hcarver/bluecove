@@ -126,16 +126,6 @@ public interface BluetoothStack {
 	 */
 	public boolean cancelInquiry(DiscoveryListener listener);
 
-	/**
-	 * Common synchronous method called by DeviceInquiryThread. Should throw
-	 * BluetoothStateException only if it can't start Inquiry
-	 */
-	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
-			throws BluetoothStateException;
-
-	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
-			String deviceName, boolean paired);
-
 	// ---------------------- Service search
 
 	/**
@@ -148,13 +138,6 @@ public interface BluetoothStack {
 	 * called by JSR-82 code Service search
 	 */
 	public boolean cancelServiceSearch(int transID);
-
-	/**
-	 * Common synchronous method called by SearchServicesThread. Should throw
-	 * BluetoothStateException only if it can't start Search
-	 */
-	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
-			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException;
 
 	/**
 	 * Called by ServiceRecord.populateRecord(int[] attrIDs) during Service
