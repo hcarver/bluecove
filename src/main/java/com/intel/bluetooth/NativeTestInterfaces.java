@@ -22,9 +22,9 @@ package com.intel.bluetooth;
 
 /**
  * Connection to native test functions.
- *
+ * 
  * This functions are only executed during UnitTests.
- *
+ * 
  * @author vlads
  */
 class NativeTestInterfaces {
@@ -64,4 +64,6 @@ class NativeTestInterfaces {
 	static native byte[] testOsXDataElementConversion(int testType, int type, long ldata, byte[] bdata);
 
 	static native void testOsXRunnableLoop(int testType, int runLoops);
+
+	static native boolean testWIDCOMMConstants();
 }

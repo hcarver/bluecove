@@ -50,6 +50,25 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 
 	private final static int RECEIVE_MTU_MAX = 1024;
 
+	// from WIDCOMM BtIfDefinitions.h
+	final static short NULL_DESC_TYPE = 0;
+
+	final static short UINT_DESC_TYPE = 1;
+
+	final static short TWO_COMP_INT_DESC_TYPE = 2;
+
+	final static short UUID_DESC_TYPE = 3;
+
+	final static short TEXT_STR_DESC_TYPE = 4;
+
+	final static short BOOLEAN_DESC_TYPE = 5;
+
+	final static short DATA_ELE_SEQ_DESC_TYPE = 6;
+
+	final static short DATA_ELE_ALT_DESC_TYPE = 7;
+
+	final static short URL_DESC_TYPE = 8;
+
 	static {
 		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WIDCOMM);
 	}
@@ -555,16 +574,6 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 		if ((ids == null) || (ids.length == 0)) {
 			return;
 		}
-		// from WIDCOMM BtIfDefinitions.h
-		final short NULL_DESC_TYPE = 0;
-		final short UINT_DESC_TYPE = 1;
-		final short TWO_COMP_INT_DESC_TYPE = 2;
-		final short UUID_DESC_TYPE = 3;
-		final short TEXT_STR_DESC_TYPE = 4;
-		final short BOOLEAN_DESC_TYPE = 5;
-		final short DATA_ELE_SEQ_DESC_TYPE = 6;
-		final short DATA_ELE_ALT_DESC_TYPE = 7;
-		final short URL_DESC_TYPE = 8;
 
 		for (int i = 0; i < ids.length; i++) {
 			int id = ids[i];
@@ -588,8 +597,6 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
 				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, long2byte(d.getLong(), 4));
 				break;
 			case DataElement.U_INT_8:
-				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, (byte[]) d.getValue());
-				break;
 			case DataElement.U_INT_16:
 				sdpServiceAddAttribute(handle, handleType, id, UINT_DESC_TYPE, (byte[]) d.getValue());
 				break;

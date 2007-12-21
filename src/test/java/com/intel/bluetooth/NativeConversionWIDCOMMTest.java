@@ -22,12 +22,15 @@ package com.intel.bluetooth;
 
 /**
  * @author vlads
- *
+ * 
  */
 public class NativeConversionWIDCOMMTest extends NativeConversionTest {
-	
+
 	protected boolean needDllWIDCOMM() {
 		return true;
 	}
-	
+
+	public void testWIDCOMMConstants() {
+		assertTrue("Constants changed", NativeTestInterfaces.testWIDCOMMConstants());
+	}
 }

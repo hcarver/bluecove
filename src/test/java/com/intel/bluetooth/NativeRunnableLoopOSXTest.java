@@ -20,23 +20,17 @@
  */
 package com.intel.bluetooth;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import javax.bluetooth.DataElement;
-import javax.bluetooth.UUID;
-
 /**
  * @author vlads
- *
+ * 
  */
 public class NativeRunnableLoopOSXTest extends NativeOSXTestCase {
 
-    public void testPerfomance() {
-        int loops = 1000;
-        long start = System.currentTimeMillis();
-        NativeTestInterfaces.testOsXRunnableLoop(0, loops);
-        long duration = System.currentTimeMillis() - start;
-        System.out.println(((1000 * loops)/duration) + " loops/sec");
-    }
+	public void testPerfomance() {
+		int loops = 1000;
+		long start = System.currentTimeMillis();
+		NativeTestInterfaces.testOsXRunnableLoop(0, loops);
+		long duration = System.currentTimeMillis() - start;
+		System.out.println(((1000 * loops) / duration) + " loops/sec");
+	}
 }

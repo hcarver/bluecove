@@ -20,6 +20,7 @@
  */
 
 #include "WIDCOMMStack.h"
+#include "com_intel_bluetooth_NativeTestInterfaces.h"
 
 #ifdef VC6
 #define CPP_FILE "WIDCOMMStack.cpp"
@@ -1933,6 +1934,48 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
 
 	//delete p_val;
 
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testWIDCOMMConstants
+(JNIEnv *env, jclass) {
+
+    if (NULL_DESC_TYPE != com_intel_bluetooth_BluetoothStackWIDCOMM_NULL_DESC_TYPE) {
+        return JNI_FALSE;
+    }
+
+	if (UINT_DESC_TYPE != com_intel_bluetooth_BluetoothStackWIDCOMM_UINT_DESC_TYPE) {
+	    return JNI_FALSE;
+	}
+
+	if (TWO_COMP_INT_DESC_TYPE != com_intel_bluetooth_BluetoothStackWIDCOMM_TWO_COMP_INT_DESC_TYPE) {
+        return JNI_FALSE;
+    }
+
+	if (UUID_DESC_TYPE != com_intel_bluetooth_BluetoothStackWIDCOMM_UUID_DESC_TYPE) {
+        return JNI_FALSE;
+    }
+
+	if (TEXT_STR_DESC_TYPE != com_intel_bluetooth_BluetoothStackWIDCOMM_TEXT_STR_DESC_TYPE) {
+        return JNI_FALSE;
+    }
+
+	if (BOOLEAN_DESC_TYPE != com_intel_bluetooth_BluetoothStackWIDCOMM_BOOLEAN_DESC_TYPE) {
+        return JNI_FALSE;
+    }
+
+	if (DATA_ELE_SEQ_DESC_TYPE != com_intel_bluetooth_BluetoothStackWIDCOMM_DATA_ELE_SEQ_DESC_TYPE) {
+        return JNI_FALSE;
+    }
+
+	if (DATA_ELE_ALT_DESC_TYPE != com_intel_bluetooth_BluetoothStackWIDCOMM_DATA_ELE_ALT_DESC_TYPE) {
+        return JNI_FALSE;
+    }
+
+	if (URL_DESC_TYPE != com_intel_bluetooth_BluetoothStackWIDCOMM_URL_DESC_TYPE) {
+        return JNI_FALSE;
+    }
+
+    return JNI_TRUE;
 }
 
 #endif //  _BTWLIB
