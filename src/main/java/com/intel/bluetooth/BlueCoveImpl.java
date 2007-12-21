@@ -136,11 +136,66 @@ public class BlueCoveImpl {
 	/* The context to be used when loading native DLL */
 	private Object accessControlContext;
 
+	private boolean shutdownHookCreated;
+
+	private static BlueCoveImpl instance;
+
 	static {
 		fqcnSet.addElement(FQCN);
 	}
 
-	private static BlueCoveImpl instance;
+	/**
+	 * bluetoothStack.destroy(); May stuck forever. Exit JVM anyway after
+	 * timeout.
+	 */
+	private class AsynchronousShutdownThread extends Thread {
+
+		Object monitor = new Object();
+
+		AsynchronousShutdownThread() {
+			super("BluecoveAsynchronousShutdownThread");
+		}
+
+		public void run() {
+			synchronized (monitor) {
+				try {
+					monitor.wait();
+				} catch (InterruptedException e) {
+					return;
+				}
+			}
+			if (bluetoothStack != null) {
+				bluetoothStack.destroy();
+				bluetoothStack = null;
+			}
+			System.out.println("BlueCove stack shutdown completed");
+			synchronized (monitor) {
+				monitor.notifyAll();
+			}
+		}
+	}
+
+	private class ShutdownHookThread extends Thread {
+
+		private Object monitor;
+
+		ShutdownHookThread(Object monitor) {
+			super("BluecoveShutdownHookThread");
+			this.monitor = monitor;
+		}
+
+		public void run() {
+			synchronized (monitor) {
+				monitor.notifyAll();
+				if (bluetoothStack != null) {
+					try {
+						monitor.wait(7000);
+					} catch (InterruptedException e) {
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * Applications should not used this function. Allow default initialization.
@@ -163,27 +218,19 @@ public class BlueCoveImpl {
 		}
 		// Initialization in WebStart.
 		DebugLog.isDebugEnabled();
-		// bluetoothStack.destroy(); May stuck in WIDCOMM forever. Exit JVM
-		// anyway.
-		final ShutdownHookThread shutdownHookThread = new ShutdownHookThread();
+	}
 
+	private synchronized void createShutdownHook() {
+		if (shutdownHookCreated) {
+			return;
+		}
+		shutdownHookCreated = true;
+		AsynchronousShutdownThread shutdownHookThread = new AsynchronousShutdownThread();
+		UtilsJavaSE.threadSetDaemon(shutdownHookThread);
 		shutdownHookThread.start();
-
-		Runnable r = new Runnable() {
-			public void run() {
-				synchronized (shutdownHookThread) {
-					shutdownHookThread.notifyAll();
-					try {
-						shutdownHookThread.wait(7000);
-					} catch (InterruptedException e) {
-					}
-				}
-			}
-		};
-
 		try {
 			// since Java 1.3
-			UtilsJavaSE.runtimeAddShutdownHook(new Thread(r));
+			UtilsJavaSE.runtimeAddShutdownHook(new ShutdownHookThread(shutdownHookThread.monitor));
 		} catch (Throwable java12) {
 		}
 	}
@@ -346,33 +393,6 @@ public class BlueCoveImpl {
 		}
 	}
 
-	private class ShutdownHookThread extends Thread {
-
-		ShutdownHookThread() {
-			super("BluecoveShutdownHookThread");
-			UtilsJavaSE.threadSetDaemon(this);
-		}
-
-		public void run() {
-			synchronized (this) {
-				try {
-					this.wait();
-				} catch (InterruptedException e) {
-					return;
-				}
-			}
-			if (bluetoothStack != null) {
-				bluetoothStack.destroy();
-				bluetoothStack = null;
-			}
-			System.out.println("BlueCove stack shutdown completed");
-			synchronized (this) {
-				this.notifyAll();
-			}
-		}
-
-	}
-
 	private BluetoothStack createDetectorOnWindows(String stackFirst) throws BluetoothStateException {
 		if (stackFirst != null) {
 			DebugLog.debug("detector stack", stackFirst);
@@ -438,6 +458,7 @@ public class BlueCoveImpl {
 			newStack.enableNativeDebug(DebugLog.class, true);
 		}
 		newStack.initialize();
+		createShutdownHook();
 		bluetoothStack = newStack;
 		return bluetoothStack.getStackID();
 	}
