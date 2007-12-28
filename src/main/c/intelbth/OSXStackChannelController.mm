@@ -110,6 +110,12 @@ void BasebandConnectionOpen::run() {
         error = 1;
         return;
     }
+    if ([comm->bluetoothDevice isConnected]) {
+        ndebug("baseband connection to the device exists");
+        //comm->isBasebandConnected = true;
+        //return;
+    }
+
     id target = comm->getDelegate();
     BluetoothHCIPageTimeout pageTimeoutValue = this->timeout;
     BOOL authenticationRequired = this->authenticate;
