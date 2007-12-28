@@ -21,13 +21,18 @@
 
 #include "OSXStack.h"
 
+#import <IOBluetooth/objc/IOBluetoothDevice.h>
+
 class ChannelController : public PoolableObject {
 public:
     MPEventID notificationEvent;
 	MPEventID writeCompleteNotificationEvent;
     IOReturn openStatus;
 
+    IOBluetoothDevice* bluetoothDevice;
+
     BOOL isClosed;
+	BOOL isBasebandConnected;
 	BOOL isConnected;
 	jlong address;
 
@@ -37,5 +42,23 @@ public:
     ChannelController();
     virtual ~ChannelController();
 
-    BOOL waitForConnection(JNIEnv *env, jobject peer, jint timeout);
+    virtual void initDelegate() = 0;
+    virtual id getDelegate() = 0;
+
+    BOOL waitForConnection(JNIEnv *env, jobject peer, BOOL baseband, jint timeout);
+};
+
+class BasebandConnectionOpen: public Runnable {
+public:
+    jlong address;
+    jboolean authenticate;
+    jboolean encrypt;
+    jint timeout;
+
+    ChannelController* comm;
+
+    volatile IOReturn status;
+
+    BasebandConnectionOpen();
+    virtual void run();
 };

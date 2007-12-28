@@ -21,11 +21,6 @@
 
 #import "OSXStackChannelController.h"
 
-#define OBJC_VERSION
-
-#ifdef OBJC_VERSION
-
-#import <IOBluetooth/objc/IOBluetoothDevice.h>
 #import <IOBluetooth/objc/IOBluetoothRFCOMMChannel.h>
 
 @class IOBluetoothRFCOMMChannel;
@@ -36,20 +31,15 @@ class RFCOMMChannelController;
     RFCOMMChannelController* _controller;
 }
 - (id)initWithController:(RFCOMMChannelController*)controller;
+- (void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status;
 - (void)close;
 @end
-
-#endif
 
 class RFCOMMChannelController : public ChannelController {
 public:
 
-#ifdef OBJC_VERSION
     RFCOMMChannelDelegate* delegate;
     IOBluetoothRFCOMMChannel* rfcommChannel;
-#else
-    IOBluetoothRFCOMMChannelRef rfcommChannel;
-#endif
 
     BluetoothRFCOMMMTU	rfcommChannelMTU;
 
@@ -57,15 +47,14 @@ public:
     RFCOMMChannelController();
     virtual ~RFCOMMChannelController();
 
-#ifdef OBJC_VERSION
-    void initDelegate();
+    virtual void initDelegate();
+    virtual id getDelegate();
+
+    void connectionComplete(IOBluetoothDevice *device, IOReturn status);
     void rfcommChannelOpenComplete(IOReturn error);
     void rfcommChannelData(void*dataPointer, size_t dataLength);
     void rfcommChannelClosed();
     void rfcommChannelWriteComplete(void* refcon, IOReturn status);
-#else
-    void rfcommEvent(IOBluetoothRFCOMMChannelRef rfcommChannelRef, IOBluetoothRFCOMMChannelEvent *event);
-#endif
 
     void openIncomingChannel(IOBluetoothRFCOMMChannel* newRfcommChannel);
 

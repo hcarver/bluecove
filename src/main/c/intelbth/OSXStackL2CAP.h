@@ -21,7 +21,6 @@
 
 #import "OSXStackChannelController.h"
 
-#import <IOBluetooth/objc/IOBluetoothDevice.h>
 #import <IOBluetooth/objc/IOBluetoothL2CAPChannel.h>
 
 class L2CAPChannelController;
@@ -30,6 +29,7 @@ class L2CAPChannelController;
     L2CAPChannelController* _controller;
 }
 - (id)initWithController:(L2CAPChannelController*)controller;
+- (void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status;
 - (void)close;
 @end
 
@@ -46,8 +46,10 @@ public:
     L2CAPChannelController();
     virtual ~L2CAPChannelController();
 
-    void initDelegate();
+    virtual void initDelegate();
+    virtual id getDelegate();
 
+    void connectionComplete(IOBluetoothDevice *device, IOReturn status);
     void l2capChannelData(void* dataPointer, size_t dataLength);
     void l2capChannelOpenComplete(IOReturn error);
     void l2capChannelClosed();

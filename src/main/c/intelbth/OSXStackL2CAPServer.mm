@@ -406,7 +406,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
         return 0;
 	} else {
 	    int timeout = 120 * 1000;
-	    if (!clientComm->waitForConnection(env, peer, timeout)) {
+	    if (!clientComm->waitForConnection(env, peer, false, timeout)) {
             L2CAPChannelCloseExec(clientComm);
             return 0;
         }

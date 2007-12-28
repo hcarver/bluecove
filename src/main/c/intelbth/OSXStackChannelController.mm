@@ -26,7 +26,9 @@
 ChannelController::ChannelController() {
     openStatus = kIOReturnSuccess;
     isClosed = false;
+    isBasebandConnected = false;
 	isConnected = false;
+	bluetoothDevice = NULL;
 	MPCreateEvent(&notificationEvent);
 	MPCreateEvent(&writeCompleteNotificationEvent);
 }
@@ -38,9 +40,18 @@ ChannelController::~ChannelController() {
     MPDeleteEvent(writeCompleteNotificationEvent);
 }
 
-BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, jint timeout) {
+BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, BOOL baseband, jint timeout) {
     CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent ();
-    while ((stack != NULL) && (!isClosed) && (!isConnected) && (openStatus == kIOReturnSuccess)) {
+    char* name = "";
+    if (baseband) {
+        name = "baseband ";
+    }
+    while ((stack != NULL) && (!isClosed) && (openStatus == kIOReturnSuccess)) {
+        if (baseband && isBasebandConnected) {
+            break;
+        } else if (!baseband && isConnected) {
+            break;
+        }
         MPEventFlags flags;
         MPWaitForEvent(notificationEvent, &flags, kDurationMillisecond * 500);
         if (isCurrentThreadInterrupted(env, peer)) {
@@ -49,7 +60,7 @@ BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, jint timeou
 		}
         CFAbsoluteTime nowTime = CFAbsoluteTimeGetCurrent ();
         if ((timeout > 0) && ((nowTime - startTime) * 1000  > timeout)) {
-			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout");
+			throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_TIMEOUT, "%sconnection timeout", name);
         }
     }
     if (stack == NULL) {
@@ -59,19 +70,52 @@ BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, jint timeou
 
     if (openStatus != kIOReturnSuccess) {
         isConnected = false;
-        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection(2) [0x%08x]", openStatus);
+        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open %sconnection(2) [0x%08x]", name, openStatus);
         return false;
     }
 
     if (isClosed) {
-	    throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection(3)");
+	    throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open %sconnection(3)", name);
 	    return false;
     }
 
-    if (isConnected) {
+    if (baseband && isBasebandConnected) {
+        return true;
+    } else if (!baseband && isConnected) {
         return true;
     }
 
-    throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection");
+    throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open %sconnection", name);
 	return false;
+}
+
+BasebandConnectionOpen::BasebandConnectionOpen() {
+    name = "BasebandConnectionOpen";
+}
+
+void BasebandConnectionOpen::run() {
+    BluetoothDeviceAddress btAddress;
+    LongToOSxBTAddr(this->address, &btAddress);
+    IOBluetoothDeviceRef deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
+    if (deviceRef == NULL) {
+        error = 1;
+        return;
+    }
+    comm->address = this->address;
+    comm->isClosed = false;
+
+    comm->initDelegate();
+    comm->bluetoothDevice = [IOBluetoothDevice withDeviceRef:deviceRef];
+    if (comm->bluetoothDevice == NULL) {
+        error = 1;
+        return;
+    }
+    id target = comm->getDelegate();
+    BluetoothHCIPageTimeout pageTimeoutValue = this->timeout;
+    BOOL authenticationRequired = this->authenticate;
+    status = [comm->bluetoothDevice openConnection:target withPageTimeout:pageTimeoutValue authenticationRequired:authenticationRequired];
+    if (status != kIOReturnSuccess) {
+        error = 1;
+        return;
+    }
 }

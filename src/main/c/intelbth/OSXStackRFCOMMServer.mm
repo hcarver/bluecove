@@ -367,7 +367,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
         return 0;
 	} else {
 	    int timeout = 120 * 1000;
-	    if (!clientComm->waitForConnection(env, peer, timeout)) {
+	    if (!clientComm->waitForConnection(env, peer, false, timeout)) {
             RFCOMMChannelCloseExec(clientComm);
             return 0;
         }

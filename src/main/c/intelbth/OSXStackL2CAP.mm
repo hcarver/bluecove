@@ -44,6 +44,12 @@ BOOL isValidObject(L2CAPChannelController* comm ) {
     _controller = NULL;
 }
 
+- (void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status {
+    if (isValidObject(_controller)) {
+        _controller->connectionComplete(device, status);
+    }
+}
+
 - (void)l2capChannelOpenComplete:(IOBluetoothL2CAPChannel*)l2capChannel status:(IOReturn)error {
     if (isValidObject(_controller)) {
         _controller->l2capChannelOpenComplete(error);
@@ -88,6 +94,20 @@ L2CAPChannelController::~L2CAPChannelController() {
 void L2CAPChannelController::initDelegate() {
     delegate = [[L2CAPChannelDelegate alloc] initWithController:this];
     [delegate retain];
+}
+
+id L2CAPChannelController::getDelegate() {
+    return delegate;
+}
+
+void L2CAPChannelController::connectionComplete(IOBluetoothDevice *device, IOReturn status) {
+    ndebug("connectionComplete");
+    if (status == kIOReturnSuccess) {
+        isBasebandConnected = true;
+    } else {
+        openStatus = status;
+    }
+    MPSetEvent(notificationEvent, 1);
 }
 
 void L2CAPChannelController::l2capChannelOpenComplete(IOReturn error) {
@@ -192,31 +212,9 @@ L2CAPConnectionOpen::L2CAPConnectionOpen() {
 }
 
 void L2CAPConnectionOpen::run() {
-    BluetoothDeviceAddress btAddress;
-    LongToOSxBTAddr(this->address, &btAddress);
-    IOBluetoothDeviceRef deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
-    if (deviceRef == NULL) {
-        error = 1;
-        return;
-    }
-    comm->address = this->address;
-    comm->isClosed = false;
-
     BluetoothL2CAPPSM psm = this->channel;
-    comm->initDelegate();
-    IOBluetoothDevice* dev = [IOBluetoothDevice withDeviceRef:deviceRef];
-    if (dev == NULL) {
-        error = 1;
-        return;
-    }
 
-    status = [dev openConnection];
-    if (status != kIOReturnSuccess) {
-        error = 1;
-        return;
-    }
-
-    status = [dev openL2CAPChannelAsync:&(comm->l2capChannel) withPSM:psm  delegate:comm->delegate];
+    status = [comm->bluetoothDevice openL2CAPChannelAsync:&(comm->l2capChannel) withPSM:psm  delegate:comm->delegate];
     if ((status != kIOReturnSuccess) || (comm->l2capChannel == NULL)) {
         error = 1;
         return;
@@ -252,6 +250,25 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2OpenClientC
 		return 0;
 	}
 
+    BasebandConnectionOpen basebandOpen;
+	basebandOpen.comm = comm;
+    basebandOpen.address = address;
+    basebandOpen.authenticate = authenticate;
+    basebandOpen.encrypt = encrypt;
+    basebandOpen.timeout = timeout;
+    synchronousBTOperation(&basebandOpen);
+
+    if (basebandOpen.error != 0) {
+        L2CAPChannelCloseExec(comm);
+        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open baseband connection [0x%08x]", basebandOpen.status);
+        return 0;
+    }
+
+    if (!comm->waitForConnection(env, peer, true, timeout)) {
+        L2CAPChannelCloseExec(comm);
+        return 0;
+    }
+
 	L2CAPConnectionOpen runnable;
 	runnable.comm = comm;
     runnable.address = address;
@@ -269,7 +286,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2OpenClientC
         return 0;
     }
 
-    if (!comm->waitForConnection(env, peer, timeout)) {
+    if (!comm->waitForConnection(env, peer, false, timeout)) {
         L2CAPChannelCloseExec(comm);
         return 0;
     }
