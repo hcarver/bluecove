@@ -8,7 +8,7 @@
     <bannerLeft>
         <name>BlueCove</name>
         <src>logo.png</src>
-        <href>http://bluecove.sourceforge.net/</href>
+        <href>http://bluecove.org/</href>
     </bannerLeft>
 
     <bannerRight>
@@ -25,7 +25,7 @@
 -->
         <!--4snapshot-->
         <menu name="Ver #build#" inherit="top">
-            <item name="Release 2.0.1" href="http://bluecove.sourceforge.net/"/>
+            <item name="Release 2.0.1" href="http://bluecove.org/"/>
 
             <item name="Main Project" href="#remove#http://bluecove.googlecode.com" />
             <item name="sf.net" href="http://sourceforge.net/projects/bluecove/" />
