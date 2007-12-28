@@ -139,19 +139,21 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 		debugs("L2CapConn channel 0x%X", channel);
 		//debug("AssignPsmValue");
 
-		// What GUID do we need in call to CL2CapIf.AssignPsmValue() if we don't have any?
-		// NEED This for stack version 3.0.1.905
-		// TODO test on  v5.0.1.2800 and v4.0.1.2900
-		GUID any_client_service_guid = {2970356705 , 4369, 4369, {17 , 17, 17 , 17, 17, 17 , 0, 1}};
-		memcpy(&(l2c->service_guid), &any_client_service_guid, sizeof(GUID));
-
 		CL2CapIf *l2CapIf;
 		l2CapIf = &l2c->l2CapIf;
 		//l2CapIf = new CL2CapIf();
 
 		if (!l2CapIf->AssignPsmValue(&(l2c->service_guid), (UINT16)channel)) {
-			throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_UNKNOWN_PSM, "failed to assign PSM 0x%X", (UINT16)channel);
-			open_l2client_return 0;
+		    // What GUID do we need in call to CL2CapIf.AssignPsmValue() if we don't have any?
+		    // NEED This for stack version 3.0.1.905
+		    // TODO test on  v5.0.1.2800 and v4.0.1.2900
+		    GUID any_client_service_guid = {2970356705 , 4369, 4369, {17 , 17, 17 , 17, 17, 17 , 0, 1}};
+		    memcpy(&(l2c->service_guid), &any_client_service_guid, sizeof(GUID));
+
+			if (!l2CapIf->AssignPsmValue(&(l2c->service_guid), (UINT16)channel)) {
+			    throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_UNKNOWN_PSM, "failed to assign PSM 0x%X", (UINT16)channel);
+			    open_l2client_return 0;
+			}
 		}
 		l2CapIf->Register();
 
