@@ -593,7 +593,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 
 	if (stack != NULL) {
 		stack->StopInquiry();
-		stack->deviceInquiryInProcess = FALSE;
+		if (stack != NULL) {
+		    stack->deviceInquiryInProcess = FALSE;
+	    }
 	}
 
 	if (stack == NULL) {
