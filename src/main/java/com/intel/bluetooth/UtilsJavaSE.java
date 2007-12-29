@@ -29,39 +29,44 @@ import java.util.Vector;
  * 
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- *  
+ * 
  * @author vlads
  */
 public class UtilsJavaSE {
-	
+
 	static final boolean javaSECompiledOut = false;
-	
+
 	static class StackTraceLocation {
-		
+
 		public String className;
-		
+
 		public String methodName;
-		
+
 		public String fileName;
-		
+
 		public int lineNumber;
 	}
-	
+
 	static boolean java13 = false;
-	
+
 	static boolean java14 = false;
-	
+
 	static final boolean ibmJ9midp = detectJ9midp();
-	
+
 	private UtilsJavaSE() {
-		
+
 	}
-	
+
 	private static boolean detectJ9midp() {
-		String ibmJ9config = System.getProperty("com.ibm.oti.configuration");
-		return (ibmJ9config != null) &&  (ibmJ9config.indexOf("midp") != -1);
+		String ibmJ9config;
+		try {
+			ibmJ9config = System.getProperty("com.ibm.oti.configuration");
+		} catch (SecurityException webstart) {
+			return false;
+		}
+		return (ibmJ9config != null) && (ibmJ9config.indexOf("midp") != -1);
 	}
-	
+
 	static StackTraceLocation getLocation(Vector fqcnSet) {
 		if (java13 || ibmJ9midp) {
 			return null;
@@ -85,7 +90,7 @@ public class UtilsJavaSE {
 		}
 		return null;
 	}
-	
+
 	private static StackTraceLocation getLocationJava14(Vector fqcnSet) {
 		if (!UtilsJavaSE.javaSECompiledOut) {
 			StackTraceElement[] ste = new Throwable().getStackTrace();
@@ -109,13 +114,13 @@ public class UtilsJavaSE {
 		}
 		return null;
 	}
-	
-    /**
+
+	/**
 	 * Marks the thread as a daemon thread. The Java Virtual Machine exits when
-	 * the only threads running are all daemon threads. 
+	 * the only threads running are all daemon threads.
 	 * 
 	 * @see java.lang.Thread#setDaemon(boolean)
-	 */ 
+	 */
 	public static void threadSetDaemon(Thread thread) {
 		try {
 			if ((!javaSECompiledOut) && (!ibmJ9midp)) {
@@ -124,7 +129,7 @@ public class UtilsJavaSE {
 		} catch (Throwable javaJ9) {
 		}
 	}
-	
+
 	static void runtimeAddShutdownHook(Thread thread) {
 		try {
 			// since Java 1.3
@@ -134,7 +139,7 @@ public class UtilsJavaSE {
 		} catch (Throwable java12) {
 		}
 	}
-	
+
 	static void setSystemProperty(String propertyName, String propertyValue) {
 		if (ibmJ9midp) {
 			return;
