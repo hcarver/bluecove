@@ -27,13 +27,13 @@ class ChannelController : public PoolableObject {
 public:
     MPEventID notificationEvent;
 	MPEventID writeCompleteNotificationEvent;
-    IOReturn openStatus;
+    volatile IOReturn openStatus;
 
     IOBluetoothDevice* bluetoothDevice;
 
-    BOOL isClosed;
-	BOOL isBasebandConnected;
-	BOOL isConnected;
+    volatile BOOL isClosed;
+	volatile BOOL isBasebandConnected;
+	volatile BOOL isConnected;
 	jlong address;
 
     ReceiveBuffer receiveBuffer;

@@ -40,8 +40,8 @@ public:
 	pthread_mutex_t deviceInquiryInProcessMutex;
 	MPEventID deviceInquiryNotificationEvent;
 	MPEventID deviceInquiryFinishedEvent;
-	BOOL deviceInquiryInProcess;
-	BOOL deviceInquiryTerminated;
+	volatile BOOL deviceInquiryInProcess;
+	volatile BOOL deviceInquiryTerminated;
 	BOOL deviceInquiryLock(JNIEnv* env);
 	BOOL deviceInquiryUnlock();
 	ObjectPool* commPool;
