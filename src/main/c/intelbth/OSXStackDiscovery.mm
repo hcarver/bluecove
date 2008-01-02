@@ -452,7 +452,16 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_deviceInqu
 
 void remoteNameRequestResponse(void *userRefCon, IOBluetoothDeviceRef deviceRef, IOReturn status);
 
-RUNNABLE(GetRemoteDeviceFriendlyName, "GetRemoteDeviceFriendlyName") {
+GetRemoteDeviceFriendlyName::GetRemoteDeviceFriendlyName() {
+    name = "GetRemoteDeviceFriendlyName";
+    MPCreateEvent(&inquiryFinishedEvent);
+}
+
+GetRemoteDeviceFriendlyName::~GetRemoteDeviceFriendlyName() {
+    MPDeleteEvent(inquiryFinishedEvent);
+}
+
+void GetRemoteDeviceFriendlyName::run() {
     BluetoothDeviceAddress btAddress;
     LongToOSxBTAddr(lData, &btAddress);
     IOBluetoothDeviceRef deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
@@ -485,7 +494,7 @@ void remoteNameRequestResponse(void *userRefCon, IOBluetoothDeviceRef deviceRef,
             runnable->bData = TRUE;
         }
     }
-    MPSetEvent(stack->deviceInquiryNotificationEvent, 0);
+    MPSetEvent(runnable->inquiryFinishedEvent, 0);
 }
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getRemoteDeviceFriendlyName
@@ -495,21 +504,21 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getRemoteDe
         throwIOException(env, cSTACK_CLOSED);
         return NULL;
     }
-
-    if (!stack->deviceInquiryLock(env)) {
-        return NULL;
-    }
+    // Do not lock Inquiry it works fine anyway.
+    //if (!stack->deviceInquiryLock(env)) {
+    //    return NULL;
+    //}
     GetRemoteDeviceFriendlyName runnable;
     runnable.lData = address;
     synchronousBTOperation(&runnable);
 
     while ((stack != NULL) && (runnable.error == 0) && (!runnable.bData)) {
         MPEventFlags flags;
-        MPWaitForEvent(stack->deviceInquiryNotificationEvent, &flags, kDurationMillisecond * 500);
+        MPWaitForEvent(runnable.inquiryFinishedEvent, &flags, kDurationMillisecond * 500);
     }
-    if (stack != NULL) {
-        stack->deviceInquiryUnlock();
-    }
+    //if (stack != NULL) {
+    //  stack->deviceInquiryUnlock();
+    //}
     if (runnable.error) {
         throwIOException(env, "The remote device can not be contacted");
         return NULL;

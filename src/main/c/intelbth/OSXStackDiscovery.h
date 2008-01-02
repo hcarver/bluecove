@@ -64,3 +64,10 @@
 
 @end
 
+class GetRemoteDeviceFriendlyName: public Runnable {
+public:
+    MPEventID inquiryFinishedEvent;
+    GetRemoteDeviceFriendlyName();
+    virtual ~GetRemoteDeviceFriendlyName();
+    virtual void run();
+};
