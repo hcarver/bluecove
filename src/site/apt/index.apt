@@ -90,9 +90,9 @@ You may find many examples on the {{{http://www.google.com/search?q=JSR+82+tutor
 * Legal
 
   BlueCove is licensed under {{{http://www.gnu.org/licenses/lgpl.html}GNU Lesser General Public License}}.
-The LGPL license allow to link and distribute commercial software with BlueCove.
+The LGPL license allows linking and distributing commercial software with BlueCove.
 
   For various technical and legal reasons, BlueCove library is not legally referred to as an implementation of {{{http://jcp.org/en/jsr/detail?id=82}JSR-82}}.
 In order to legally refer to a piece of software as a JSR, it must pass the {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.jsr82}JSR-82 TCK}}
 or {{{http://java.sun.com/scholarship/}Sun TCK}}. Current BlueCove JSR-82 TCK compatibility status can be found {{{tck/index.html}here}}.
-Mainly there are some missing API in native stacks to implement full TCK compatibility.
+Mainly there are some missing APIs in native stacks to implement full TCK compatibility.
