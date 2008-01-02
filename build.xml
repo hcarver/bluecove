@@ -36,6 +36,7 @@
             <class name="com.intel.bluetooth.BluetoothStackWIDCOMM"/>
             <class name="com.intel.bluetooth.BluetoothStackBlueSoleil"/>
             <class name="com.intel.bluetooth.BluetoothStackToshiba"/>
+            <class name="com.intel.bluetooth.BluetoothStackOSX"/>
         </javah>
     </target>
 
