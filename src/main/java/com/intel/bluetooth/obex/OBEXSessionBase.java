@@ -20,6 +20,7 @@
  */
 package com.intel.bluetooth.obex;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -132,16 +133,18 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		if (len > mtu) {
 			throw new IOException("Can't sent more data than in MTU, len=" + len + ", mtu=" + mtu);
 		}
-		OBEXHeaderSetImpl.writeObexLen(os, commId, len);
+		ByteArrayOutputStream buf = new ByteArrayOutputStream();
+		OBEXHeaderSetImpl.writeObexLen(buf, commId, len);
 		if (this.connectionID != -1) {
-			OBEXHeaderSetImpl.writeObexInt(os, OBEXHeaderSetImpl.OBEX_HDR_CONNECTION, this.connectionID);
+			OBEXHeaderSetImpl.writeObexInt(buf, OBEXHeaderSetImpl.OBEX_HDR_CONNECTION, this.connectionID);
 		}
 		if (data1 != null) {
-			os.write(data1);
+			buf.write(data1);
 		}
 		if (data2 != null) {
-			os.write(data2, 0, data2.length);
+			buf.write(data2, 0, data2.length);
 		}
+		os.write(buf.toByteArray());
 		os.flush();
 		DebugLog.debug0x("obex sent", commId);
 		DebugLog.debug("obex sent len", len);
