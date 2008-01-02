@@ -67,7 +67,10 @@
 class GetRemoteDeviceFriendlyName: public Runnable {
 public:
     MPEventID inquiryFinishedEvent;
+    IOBluetoothDeviceRef deviceRef;
+
     GetRemoteDeviceFriendlyName();
     virtual ~GetRemoteDeviceFriendlyName();
+
     virtual void run();
 };

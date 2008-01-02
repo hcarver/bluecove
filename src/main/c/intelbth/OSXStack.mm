@@ -28,10 +28,19 @@ OSXStack* stack = NULL;
 
 OSXStack::OSXStack() {
     deviceInquiryInProcess = FALSE;
+    deviceInquiryBusy = FALSE;
     deviceInquiryTerminated = FALSE;
-    pthread_mutex_init(&deviceInquiryInProcessMutex, NULL);
+
+    pthread_mutexattr_t   mta;
+    // Create a default mutex attribute
+    pthread_mutexattr_init(&mta);
+    // If a thread attempts to relock a mutex that it has already locked, an error is returned.
+    pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_ERRORCHECK);
+    pthread_mutex_init(&deviceInquiryInProcessMutex, &mta);
+
     MPCreateEvent(&deviceInquiryNotificationEvent);
     MPCreateEvent(&deviceInquiryFinishedEvent);
+    MPCreateEvent(&deviceInquiryBusyEvent);
 
     commPool = new ObjectPool(100, 1, TRUE);
 }
@@ -44,6 +53,7 @@ OSXStack::~OSXStack() {
     MPSetEvent(deviceInquiryNotificationEvent, 0);
     MPDeleteEvent(deviceInquiryNotificationEvent);
     MPDeleteEvent(deviceInquiryFinishedEvent);
+    MPDeleteEvent(deviceInquiryBusyEvent);
     pthread_mutex_destroy(&deviceInquiryInProcessMutex);
 }
 
@@ -53,7 +63,6 @@ BOOL OSXStack::deviceInquiryLock(JNIEnv* env) {
         MPEventFlags flags;
         MPWaitForEvent(deviceInquiryFinishedEvent, &flags, kDurationMillisecond * 1000 * 3);
     }
-
     if (deviceInquiryInProcess) {
 	    throwBluetoothStateException(env, cINQUIRY_RUNNING);
 	    return false;
@@ -62,7 +71,8 @@ BOOL OSXStack::deviceInquiryLock(JNIEnv* env) {
 	    throwBluetoothStateException(env, cINQUIRY_RUNNING);
 	    return false;
 	}
-	stack->deviceInquiryInProcess = true;
+	deviceInquiryInProcess = true;
+	deviceInquiryBusy = true;
 	return true;
 }
 

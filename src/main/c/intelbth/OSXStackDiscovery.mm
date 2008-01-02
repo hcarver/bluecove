@@ -229,6 +229,10 @@ int deviceInquiryCount = 0;
         _aborted = aborted;
         _error = error;
         _busy = FALSE;
+        if (stack != NULL) {
+            stack->deviceInquiryBusy = false;
+            MPSetEvent(stack->deviceInquiryBusyEvent, 1);
+        }
     }
     MPSetEvent(*_notificationEvent, 1);
 }
@@ -464,13 +468,14 @@ GetRemoteDeviceFriendlyName::~GetRemoteDeviceFriendlyName() {
 void GetRemoteDeviceFriendlyName::run() {
     BluetoothDeviceAddress btAddress;
     LongToOSxBTAddr(lData, &btAddress);
-    IOBluetoothDeviceRef deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
+    deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
     if (deviceRef == NULL) {
         error = 1;
         return;
     }
     if (kIOReturnSuccess != IOBluetoothDeviceRemoteNameRequest(deviceRef, remoteNameRequestResponse, this, NULL)) {
         error = 1;
+        IOBluetoothObjectRelease(deviceRef);
     }
 }
 
@@ -494,6 +499,7 @@ void remoteNameRequestResponse(void *userRefCon, IOBluetoothDeviceRef deviceRef,
             runnable->bData = TRUE;
         }
     }
+    IOBluetoothObjectRelease(runnable->deviceRef);
     MPSetEvent(runnable->inquiryFinishedEvent, 0);
 }
 
@@ -504,7 +510,15 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getRemoteDe
         throwIOException(env, cSTACK_CLOSED);
         return NULL;
     }
-    // Do not lock Inquiry it works fine anyway.
+    // Need to have only one Inquiry otherwise it will ends prematurely.
+    if (stack->deviceInquiryBusy) {
+        debug("blocked until deviceInquiry ends");
+    }
+    while ((stack != NULL) && (stack->deviceInquiryBusy)) {
+        MPEventFlags flags;
+        MPWaitForEvent(stack->deviceInquiryBusyEvent, &flags, kDurationMillisecond * 500);
+    }
+    // Call from DeviceDiscovered callback deviceInquiryInProcessMutex already locked
     //if (!stack->deviceInquiryLock(env)) {
     //    return NULL;
     //}
