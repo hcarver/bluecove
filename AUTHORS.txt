@@ -10,3 +10,4 @@ Important bug fixes/reports and other suggestions from:
  Hakan Lager
  Eric Wagner (Initial OS X)
  Remco Poortinga
+ Sam Halliday (OS X distribution build)

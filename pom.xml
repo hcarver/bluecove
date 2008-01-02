@@ -98,6 +98,7 @@
                 <role>Build master</role>
                 <role>developer-Winsock</role>
                 <role>developer-WIDCOMM</role>
+                <role>developer-OSX</role>
             </roles>
             <timezone>-5</timezone>
         </developer>
@@ -109,9 +110,17 @@
             <email>gnuloki@gmail.com</email>
             <roles>
                 <role>developer</role>
-                <role>developer-OS-X</role>
+                <role>developer-OSX</role>
             </roles>
             <timezone>-5</timezone>
+        </contributor>
+
+        <contributor>
+            <name>Sam Halliday</name>
+            <email>sam.halliday@gmail.com</email>
+            <roles>
+                <role>OSX-distribution-build</role>
+            </roles>
         </contributor>
 
         <!--
