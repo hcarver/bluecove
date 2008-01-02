@@ -75,7 +75,7 @@ BlueCove
  BlueCove provides an implementation of the JSR 82. Applications should use {{{apidocs/index.html}API defined in JSR-82}}.
 You may find many examples on the {{{http://www.google.com/search?q=JSR+82+tutorial}internet}} describing the usage of JSR 82.
 
- We created a short (50 lines of code each) examples for you to get started with JSR-82 application development:
+ We created short (50 lines of code each) examples for you to get started with JSR-82 application development:
 
     * {{{apidocs/overview-summary.html#DeviceDiscovery}Remote Device Discovery}}
 
