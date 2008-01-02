@@ -14,6 +14,8 @@ BlueCove
 
     BlueCove has been tested on following JVM:
 
+    * {{{http://harmony.apache.org/}Apache Harmony - Open Source Java SE}} 5.0M4 on Win XP 32 bit
+
     * SUN Java 1.1.8 on Windows XP/X86
 
     * SUN Java 2 Platform Standard Edition 1.4.2 on Windows XP/X86
