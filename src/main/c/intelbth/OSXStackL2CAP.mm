@@ -46,31 +46,44 @@ BOOL isValidObject(L2CAPChannelController* comm ) {
 
 - (void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status {
     if (isValidObject(_controller)) {
-        _controller->connectionComplete(device, status);
+        if (_controller->bluetoothDevice && [_controller->bluetoothDevice isEqual:device]) {
+            _controller->connectionComplete(device, status);
+        } else {
+            ndebug("ignore connectionComplete");
+        }
     }
 }
 
 - (void)l2capChannelOpenComplete:(IOBluetoothL2CAPChannel*)l2capChannel status:(IOReturn)error {
     if (isValidObject(_controller)) {
-        _controller->l2capChannelOpenComplete(error);
+        if (_controller->l2capChannel == l2capChannel) {
+            _controller->l2capChannelOpenComplete(error);
+        }
     }
 }
 
 - (void)l2capChannelClosed:(IOBluetoothL2CAPChannel*)l2capChannel {
     if (isValidObject(_controller)) {
-        _controller->l2capChannelClosed();
+        if (_controller->l2capChannel == l2capChannel) {
+            ndebug("l2capChannelClosed");
+            _controller->l2capChannelClosed();
+        }
     }
 }
 
 - (void)l2capChannelData:(IOBluetoothL2CAPChannel*)l2capChannel data:(void *)dataPointer length:(size_t)dataLength {
     if (isValidObject(_controller)) {
-        _controller->l2capChannelData(dataPointer, dataLength);
+        if (_controller->l2capChannel == l2capChannel) {
+            _controller->l2capChannelData(dataPointer, dataLength);
+        }
     }
 }
 
 - (void)l2capChannelWriteComplete:(IOBluetoothL2CAPChannel*)l2capChannel refcon:(void*)refcon status:(IOReturn)error {
     if (isValidObject(_controller)) {
-        _controller->l2capChannelWriteComplete(refcon, error);
+        if (_controller->l2capChannel == l2capChannel) {
+            _controller->l2capChannelWriteComplete(refcon, error);
+        }
     }
 }
 
@@ -126,6 +139,9 @@ void L2CAPChannelController::l2capChannelOpenComplete(IOReturn error) {
 	    } else {
 		    transmitMTU = remoteMtu;
 	    }
+	    //[l2capChannel requestRemoteMTU:transmitMTU];
+    } else {
+        openStatus = error;
     }
     MPSetEvent(notificationEvent, 1);
 }
@@ -162,6 +178,7 @@ void L2CAPChannelController::l2capChannelWriteComplete(void* refcon, IOReturn er
 }
 
 IOReturn L2CAPChannelController::close() {
+    ndebug("L2CAPChannelController::close");
     IOReturn rc = kIOReturnSuccess;
     if (delegate != NULL) {
         [delegate close];
@@ -200,7 +217,11 @@ L2CAPChannelController*  validOpenL2CAPChannelHandle(JNIEnv *env, jlong handle) 
     if (comm == NULL) {
 		return NULL;
 	}
-	if (!comm->isConnected || comm->isClosed) {
+	if (!comm->isConnected) {
+		throwIOException(env, cCONNECTION_CLOSED);
+		return NULL;
+	}
+	if (comm->isClosed) {
 		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return NULL;
 	}
@@ -228,6 +249,15 @@ void L2CAPConnectionOpen::run() {
     [comm->l2capChannel retain];
 }
 
+RUNNABLE(L2CAPRegisterDataListener, "L2CAPRegisterDataListener") {
+    L2CAPChannelController* comm = (L2CAPChannelController*)pData[0];
+    IOReturn status = [comm->l2capChannel setDelegate:comm->delegate];
+    if (status != kIOReturnSuccess) {
+        error = status;
+        return;
+    }
+}
+
 RUNNABLE(L2CAPChannelClose, "L2CAPChannelClose") {
     L2CAPChannelController* comm = (L2CAPChannelController*)pData[0];
     iData = comm->close();
@@ -249,6 +279,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2OpenClientC
 		throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 		return 0;
 	}
+	debug("l2cap OpenClientConnection");
 
     BasebandConnectionOpen basebandOpen;
 	basebandOpen.comm = comm;
@@ -290,6 +321,16 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2OpenClientC
         L2CAPChannelCloseExec(comm);
         return 0;
     }
+
+    L2CAPRegisterDataListener reg;
+    reg.pData[0] = comm;
+    synchronousBTOperation(&reg);
+    if (reg.error != 0) {
+        L2CAPChannelCloseExec(comm);
+        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection(4) [0x%08x]", reg.error);
+        return 0;
+    }
+
     debug("l2cap connected");
 	return comm->internalHandle;
 }
@@ -300,6 +341,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2CloseClientC
 	if (comm == NULL) {
 		return;
 	}
+	debug("l2CloseClientConnection");
 	long rc = L2CAPChannelCloseExec(comm);
 	if (rc != kIOReturnSuccess) {
 	    throwIOExceptionExt(env, "Failed to close L@CAP channel [0x%08x]", rc);

@@ -212,6 +212,8 @@ BOOL isDebugOn();
 
 void ndebug(const char *fmt, ...);
 
+void log_info(const char *fmt, ...);
+
 char* bool2str(BOOL b);
 
 extern const char* cServiceRegistrationException;

@@ -74,6 +74,16 @@ void ndebug(const char *fmt, ...) {
     va_end(ap);
 }
 
+void log_info(const char *fmt, ...) {
+    va_list ap;
+	va_start(ap, fmt);
+    fprintf(stdout, "BlueCove-INFO:");
+    vfprintf(stdout, fmt, ap);
+    fprintf(stdout, "\n");
+    fflush(stdout);
+    va_end(ap);
+}
+
 void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);

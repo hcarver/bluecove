@@ -46,13 +46,19 @@ BOOL isValidObject(RFCOMMChannelController* comm ) {
 
 - (void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status {
     if (isValidObject(_controller)) {
-        _controller->connectionComplete(device, status);
+        if (_controller->bluetoothDevice && [_controller->bluetoothDevice isEqual:device]) {
+            _controller->connectionComplete(device, status);
+        } else {
+            ndebug("ignore connectionComplete");
+        }
     }
 }
 
 - (void)rfcommChannelOpenComplete:(IOBluetoothRFCOMMChannel*)rfcommChannel status:(IOReturn)error {
     if (isValidObject(_controller)) {
-        _controller->rfcommChannelOpenComplete(error);
+        if (_controller->rfcommChannel == rfcommChannel) {
+            _controller->rfcommChannelOpenComplete(error);
+        }
     }
 }
 
@@ -60,7 +66,9 @@ BOOL isValidObject(RFCOMMChannelController* comm ) {
                      data:(void *)dataPointer
                    length:(size_t)dataLength {
     if (isValidObject(_controller)) {
-        _controller->rfcommChannelData(dataPointer, dataLength);
+        if (_controller->rfcommChannel == rfcommChannel) {
+            _controller->rfcommChannelData(dataPointer, dataLength);
+        }
     }
 }
 
@@ -68,16 +76,20 @@ BOOL isValidObject(RFCOMMChannelController* comm ) {
                             refcon:(void*)refcon
                             status:(IOReturn)error {
     if (isValidObject(_controller)) {
-        _controller->rfcommChannelWriteComplete(refcon, error);
+        if (_controller->rfcommChannel == rfcommChannel) {
+            _controller->rfcommChannelWriteComplete(refcon, error);
+        }
     }
 }
 
 - (void)rfcommChannelClosed:(IOBluetoothRFCOMMChannel *)rfcommChannel {
-    ndebug("d.rfcommChannelClosed->");
+    ndebug("rfcommChannelClosed->");
     if (isValidObject(_controller)) {
-        _controller->rfcommChannelClosed();
+        if (_controller->rfcommChannel == rfcommChannel) {
+            ndebug("rfcommChannelClosed");
+            _controller->rfcommChannelClosed();
+        }
     }
-    ndebug("d.rfcommChannelClosed-<");
 }
 
 // Not used
