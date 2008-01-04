@@ -38,6 +38,17 @@
     MDEFINE_GUID(GUID_BLUETOOTH_L2CAP_EVENT,             0x7eae4030, 0xb709, 0x4aa8, 0xac, 0x55, 0xe9, 0x53, 0x82, 0x9c, 0x9d, 0xaa);
 #endif
 
+void WIDCOMMCleanup();
+
+BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
+	switch(ul_reason_for_call) {
+	case DLL_PROCESS_DETACH:
+		WIDCOMMCleanup();
+		break;
+	}
+	return TRUE;
+}
+
 #endif
 
 BOOL isWIDCOMMReady();
@@ -264,6 +275,15 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_uninitiali
 	}
 }
 
+void WIDCOMMCleanup() {
+    if (stack != NULL) {
+        ///log_info("WIDCOMMCleanup");
+		WIDCOMMStack* stackTmp = stack;
+		stack = NULL;
+		stackTmp->destroy(NULL);
+		delete stackTmp;
+	}
+}
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLocalDeviceBluetoothAddress
 (JNIEnv *env, jobject peer) {
