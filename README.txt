@@ -113,7 +113,9 @@ Configuration options
 
 == Compilation ==
 
-You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 and SDK for Windows Vista or Windows Server 2003 R2 Platform SDK.
+On Windows
+
+ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 and SDK for Windows Vista or Windows Server 2003 R2 Platform SDK.
  VC++ and Windows SDK are available for free download from microsoft.com.
  We are using for Windows Vista SDK for binary distribution:
     Make sure you have
@@ -128,6 +130,11 @@ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 a
  Visual C++ 6.0 SP6 used to build bluecove.dll for WIDCOMM
  Visual Visual C++ 2005 used to build intelbth.dll for winsock and BlueSoleil
  More detail on building native code `src\main\c\intelbth\ReadMe.txt`
+
+On Mac OS X
+
+  Xcode 2.5 or later can be used duirng build on Mac.
+  We use Xcode 3.0 on OSX 2.5.1 to build distribution.
 
  Ant or maven2 are used as the build tool for java.
 

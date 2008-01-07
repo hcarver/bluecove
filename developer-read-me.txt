@@ -17,6 +17,8 @@
 
    build-native-bluecove.cmd and build-native-intelbth.cmd can be used to build dlls on windows.
 
+   build-native-osx.sh can be used to build  jnilib on Mac OS X
+
 * Building Release
 
     * Test locally
@@ -55,7 +57,7 @@
         mvn clean --fail-never -P build|scm:update -P build|clean deploy site-deploy -P build
 
     cruisecontrol runs only on Unix now
-      windows dll are taken from SVN http://bluecove.googlecode.com/svn/build/win-dlls/
+      windows and OS X dll are taken from SVN http://bluecove.googlecode.com/svn/build/win-dlls/
 
       If you made modification to C/C++ code place compiled library in SVN
 

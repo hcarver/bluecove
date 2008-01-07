@@ -1,6 +1,6 @@
 @version $Id$
 
-* 2.0.2 to be released 2007-12-??
+* 2.0.2 released 2008-01-07
 
     2007-12-12
     * WIDCOMM RFCOMM and L2CAP Service can accept multiple connections
