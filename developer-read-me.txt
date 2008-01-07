@@ -12,6 +12,9 @@
    To run build without tests:
      mvn -Dmaven.test.skip=true
 
+   To run build without building native code:
+     mvn -Dnative.build.skip=true
+
    build-native-bluecove.cmd and build-native-intelbth.cmd can be used to build dlls on windows.
 
 * Building Release

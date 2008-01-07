@@ -422,6 +422,7 @@
 
     <properties>
         <buildLabel>${version}</buildLabel>
+        <native.build.skip>false</native.build.skip>
     </properties>
 
     <profiles>
@@ -453,6 +454,9 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
+                        <configuration>
+                            <skip>${native.build.skip}</skip>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>compile-intelbth-dll-on-windows</id>
@@ -533,6 +537,9 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
+                        <configuration>
+                            <skip>${native.build.skip}</skip>
+                       </configuration>
                         <executions>
                             <execution>
                                 <id>compile-bluecove-jnilib-on-osx</id>
