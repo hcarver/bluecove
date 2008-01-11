@@ -91,6 +91,8 @@ public class BlueCoveImpl {
 
 	public static final String STACK_OSX = "mac";
 
+	public static final String STACK_EMULATOR = "emulator";
+
 	// We can't use the same DLL on windows for all implementations.
 	// Since WIDCOMM need to be compile /MD using VC6 and winsock /MT using
 	// VC2005
@@ -126,6 +128,8 @@ public class BlueCoveImpl {
 	private static final int BLUECOVE_STACK_DETECT_OSX = 1 << 4;
 
 	private static final int BLUECOVE_STACK_DETECT_BLUEZ = 1 << 5;
+
+	private static final int BLUECOVE_STACK_DETECT_EMULATOR = 1 << 6;
 
 	private static Hashtable configProperty = new Hashtable();
 
@@ -248,9 +252,30 @@ public class BlueCoveImpl {
 			return BLUECOVE_STACK_DETECT_BLUEZ;
 		} else if (STACK_WINSOCK.equalsIgnoreCase(stack)) {
 			return BLUECOVE_STACK_DETECT_OSX;
+		} else if (STACK_EMULATOR.equalsIgnoreCase(stack)) {
+			return BLUECOVE_STACK_DETECT_EMULATOR;
 		} else {
 			return 0;
 		}
+	}
+
+	private BluetoothStack loadStackClass(String classPropertyName, String classNameDefault)
+			throws BluetoothStateException {
+		String className = getConfigProperty(classPropertyName);
+		if (className == null) {
+			className = classNameDefault;
+		}
+		try {
+			Class c = Class.forName(className);
+			return (BluetoothStack) c.newInstance();
+		} catch (ClassNotFoundException e) {
+			DebugLog.error(className, e);
+		} catch (InstantiationException e) {
+			DebugLog.error(className, e);
+		} catch (IllegalAccessException e) {
+			DebugLog.error(className, e);
+		}
+		throw new BluetoothStateException("BlueCove " + className + " not available");
 	}
 
 	private void detectStack() throws BluetoothStateException {
@@ -264,45 +289,35 @@ public class BlueCoveImpl {
 		if (stackFirstDetector == null) {
 			stackFirstDetector = stackSelected;
 		}
-
-		switch (NativeLibLoader.getOS()) {
-		case NativeLibLoader.OS_LINUX:
-			if (!NativeLibLoader.isAvailable(NATIVE_LIB_BLUEZ)) {
+		if (STACK_EMULATOR.equals(stackSelected)) {
+			detectorStack = loadStackClass("bluecove.emulator.class", "com.intel.bluetooth.BluetoothEmulator");
+		} else {
+			switch (NativeLibLoader.getOS()) {
+			case NativeLibLoader.OS_LINUX:
+				if (!NativeLibLoader.isAvailable(NATIVE_LIB_BLUEZ)) {
+					throw new BluetoothStateException("BlueCove not available");
+				}
+				detectorStack = loadStackClass("bluecove.bluez.class", "com.intel.bluetooth.BluetoothStackBlueZ");
+				stackSelected = detectorStack.getStackID();
+				break;
+			case NativeLibLoader.OS_MAC_OS_X:
+				if (!NativeLibLoader.isAvailable(NATIVE_LIB_OSX)) {
+					throw new BluetoothStateException("BlueCove not available");
+				}
+				detectorStack = new BluetoothStackOSX();
+				stackSelected = detectorStack.getStackID();
+				break;
+			case NativeLibLoader.OS_WINDOWS:
+			case NativeLibLoader.OS_WINDOWS_CE:
+				detectorStack = createDetectorOnWindows(stackFirstDetector);
+				if (DebugLog.isDebugEnabled()) {
+					detectorStack.enableNativeDebug(DebugLog.class, true);
+				}
+				break;
+			default:
 				throw new BluetoothStateException("BlueCove not available");
-			}
-			String className = getConfigProperty("bluecove.bluez.class");
-			if (className == null) {
-				className = "com.intel.bluetooth.BluetoothStackBlueZ";
-			}
-			try {
-				Class c = Class.forName(className);
-				detectorStack = (BluetoothStack) c.newInstance();
-			} catch (ClassNotFoundException e) {
-				DebugLog.error(className, e);
-			} catch (InstantiationException e) {
-				DebugLog.error(className, e);
-			} catch (IllegalAccessException e) {
-				DebugLog.error(className, e);
-			}
-			stackSelected = detectorStack.getStackID();
-			break;
-		case NativeLibLoader.OS_MAC_OS_X:
-			if (!NativeLibLoader.isAvailable(NATIVE_LIB_OSX)) {
-				throw new BluetoothStateException("BlueCove not available");
-			}
-			detectorStack = new BluetoothStackOSX();
-			stackSelected = detectorStack.getStackID();
-			break;
-		case NativeLibLoader.OS_WINDOWS:
-		case NativeLibLoader.OS_WINDOWS_CE:
-			detectorStack = createDetectorOnWindows(stackFirstDetector);
-			if (DebugLog.isDebugEnabled()) {
-				detectorStack.enableNativeDebug(DebugLog.class, true);
-			}
-			break;
-		default:
-			throw new BluetoothStateException("BlueCove not available");
 
+			}
 		}
 
 		int libraryVersion = detectorStack.getLibraryVersion();
