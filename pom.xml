@@ -214,6 +214,7 @@
                 </configuration>
             </plugin>
 
+            <!-- need 2.2 version
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -223,10 +224,21 @@
                             <Description>BlueCove JSR-82 implementation</Description>
                             <License>GNU Library or Lesser General Public License (LGPL)</License>
                             <Implementation-Version>${pom.version}</Implementation-Version>
+                            <Implementation-Build>${buildLabel}</Implementation-Build>
                         </manifestEntries>
                     </archive>
+                    <excludes>
+                        <exclude>**/*.log</exclude>
+                        <exclude>**/.*</exclude>
+                        <exclude>**/Thumbs.db</exclude>
+                        <exclude>com/ibm/oti/connection/CreateConnection.class</exclude>
+                        <exclude>com/ibm/oti/vm/**</exclude>
+                        <exclude>com/sun/cdc/io/ConnectionBaseInterface.class</exclude>
+                        <exclude>com/intel/bluetooth/BluetoothStackBlueZ.class</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
+            -->
 
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -242,11 +254,14 @@
                                <descriptor>assembly.xml</descriptor>
                            </descriptors>
                            <archive>
+                               <manifestFile>${project.build.directory}/assembly.manifest</manifestFile>
+                               <!-- this does not work, bug http://jira.codehaus.org/browse/MASSEMBLY-188
                                <manifestEntries>
                                    <Description>BlueCove JSR-82 implementation</Description>
                                    <License>GNU Library or Lesser General Public License (LGPL)</License>
                                    <Implementation-Version>${pom.version}</Implementation-Version>
                                </manifestEntries>
+                               -->
                            </archive>
                        </configuration>
                    </execution>
@@ -271,9 +286,32 @@
                     <outputEncoding>UTF-8</outputEncoding>
                 </configuration>
             </plugin>
+
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
+                    <execution>
+                        <id>site-fix-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <copy file="${basedir}/assembly.manifest" todir="${project.build.directory}" overwrite="true"/>
+                                <tstamp><format property="TODAY" pattern="yyyy-MM-dd hh:mm:ss" /></tstamp>
+                                <echo>pom.xml: timestamp ${TODAY}</echo>
+                                <!-- Set build number -->
+                                <replace dir="${project.build.directory}">
+                                    <include name="assembly.manifest"/>
+                                    <replacefilter token="#build#" value="${buildLabel}"/>
+                                    <replacefilter token="#version#" value="${version}"/>
+                                    <replacefilter token="#user.name#" value="${user.name}"/>
+                                    <replacefilter token="#today#" value="${TODAY}"/>
+                                </replace>
+                            </tasks>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>site-fix-css</id>
                         <phase>site</phase>

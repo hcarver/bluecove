@@ -1,0 +1,10 @@
+License: GNU Library or Lesser General Public License (LGPL)
+Description: BlueCove JSR-82 implementation
+Implementation-URL: http://www.bluecove.org/
+Specification-Title: JSR-82
+Specification-Version: 1.1
+Specification-Vendor: JCP
+Implementation-Version: #version#
+Implementation-Build: #build#
+Built-By: #user.name#
+Build-Date: #today#

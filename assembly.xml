@@ -22,4 +22,10 @@
             </excludes>
         </fileSet>
     </fileSets>
+    <files>
+        <file>
+            <source>${basedir}/build.version</source>
+            <destName>${artifactId}-${buildLabel}.version</destName>
+        </file>
+   </files>
 </assembly>
