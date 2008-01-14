@@ -105,6 +105,10 @@ public abstract class NativeLibLoader {
 	}
 
 	static boolean isAvailable(String name) {
+		return isAvailable(name, null);
+	}
+
+	static boolean isAvailable(String name, Class stackClass) {
 		LibState state = (LibState) libsState.get(name);
 		if (state == null) {
 			state = new LibState();
@@ -168,7 +172,7 @@ public abstract class NativeLibLoader {
 		}
 
 		if ((!state.libraryAvailable) && (useResource) && (!UtilsJavaSE.ibmJ9midp)) {
-			state.libraryAvailable = loadAsSystemResource(libFileName);
+			state.libraryAvailable = loadAsSystemResource(libFileName, stackClass);
 		}
 		if (!state.libraryAvailable) {
 			if (!UtilsJavaSE.ibmJ9midp) {
@@ -235,12 +239,16 @@ public abstract class NativeLibLoader {
 		return true;
 	}
 
-	private static boolean loadAsSystemResource(String libFileName) {
+	private static boolean loadAsSystemResource(String libFileName, Class stackClass) {
 		InputStream is = null;
 		try {
 			ClassLoader clo = null;
 			try {
-				clo = NativeLibLoader.class.getClassLoader();
+				if (stackClass != null) {
+					clo = stackClass.getClassLoader();
+				} else {
+					clo = NativeLibLoader.class.getClassLoader();
+				}
 			} catch (Throwable j9) {
 			}
 			if (clo == null) {

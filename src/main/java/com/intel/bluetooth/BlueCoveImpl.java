@@ -76,8 +76,8 @@ public class BlueCoveImpl {
 	public static final String version = String.valueOf(versionMajor1) + "." + String.valueOf(versionMajor2) + "."
 			+ String.valueOf(versionMinor) + versionSufix;
 
-	private static final int nativeLibraryVersionExpected = versionMajor1 * 1000000 + versionMajor2 * 10000
-			+ versionMinor * 100 + versionBuild;
+	static final int nativeLibraryVersionExpected = versionMajor1 * 1000000 + versionMajor2 * 10000 + versionMinor
+			* 100 + versionBuild;
 
 	public static final String STACK_WINSOCK = "winsock";
 
@@ -259,23 +259,35 @@ public class BlueCoveImpl {
 		}
 	}
 
-	private BluetoothStack loadStackClass(String classPropertyName, String classNameDefault)
-			throws BluetoothStateException {
+	private Class loadStackClass(String classPropertyName, String classNameDefault) throws BluetoothStateException {
 		String className = getConfigProperty(classPropertyName);
 		if (className == null) {
 			className = classNameDefault;
 		}
 		try {
 			Class c = Class.forName(className);
-			return (BluetoothStack) c.newInstance();
+			return Class.forName(className);
 		} catch (ClassNotFoundException e) {
 			DebugLog.error(className, e);
+		}
+		throw new BluetoothStateException("BlueCove " + className + " not available");
+	}
+
+	private BluetoothStack newStackInstance(Class ctackClass) throws BluetoothStateException {
+		String className = ctackClass.getName();
+		;
+		try {
+			return (BluetoothStack) ctackClass.newInstance();
 		} catch (InstantiationException e) {
 			DebugLog.error(className, e);
 		} catch (IllegalAccessException e) {
 			DebugLog.error(className, e);
 		}
 		throw new BluetoothStateException("BlueCove " + className + " not available");
+	}
+
+	private BluetoothStack loadStack(String classPropertyName, String classNameDefault) throws BluetoothStateException {
+		return newStackInstance(loadStackClass(classPropertyName, classNameDefault));
 	}
 
 	private void detectStack() throws BluetoothStateException {
@@ -290,14 +302,15 @@ public class BlueCoveImpl {
 			stackFirstDetector = stackSelected;
 		}
 		if (STACK_EMULATOR.equals(stackSelected)) {
-			detectorStack = loadStackClass("bluecove.emulator.class", "com.intel.bluetooth.BluetoothEmulator");
+			detectorStack = loadStack("bluecove.emulator.class", "com.intel.bluetooth.BluetoothEmulator");
 		} else {
 			switch (NativeLibLoader.getOS()) {
 			case NativeLibLoader.OS_LINUX:
-				if (!NativeLibLoader.isAvailable(NATIVE_LIB_BLUEZ)) {
+				Class stackClass = loadStackClass("bluecove.bluez.class", "com.intel.bluetooth.BluetoothStackBlueZ");
+				if (!NativeLibLoader.isAvailable(NATIVE_LIB_BLUEZ, stackClass)) {
 					throw new BluetoothStateException("BlueCove not available");
 				}
-				detectorStack = loadStackClass("bluecove.bluez.class", "com.intel.bluetooth.BluetoothStackBlueZ");
+				detectorStack = newStackInstance(stackClass);
 				stackSelected = detectorStack.getStackID();
 				break;
 			case NativeLibLoader.OS_MAC_OS_X:
