@@ -286,6 +286,7 @@ public abstract class NativeLibLoader {
 			System.load(fd.getAbsolutePath());
 			DebugLog.debug("Library loaded from", fd);
 		} catch (Throwable e) {
+			DebugLog.error("Can't load library file ", e);
 			return false;
 		}
 		return true;
