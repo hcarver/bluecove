@@ -27,7 +27,7 @@
         <menu name="Ver #build#" inherit="top">
             <item name="Release 2.0.2" href="http://bluecove.org/"/>
 
-            <item name="Main Project" href="#remove#http://bluecove.googlecode.com" />
+            <item name="Project site" href="#remove#http://bluecove.googlecode.com" />
             <item name="sf.net" href="http://sourceforge.net/projects/bluecove/" />
             <item name="Introduction" href="index.html" />
             <item name="JSR 82 TCK"  href="tck/index.html" />
