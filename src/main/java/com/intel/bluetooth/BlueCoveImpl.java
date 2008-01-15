@@ -337,7 +337,7 @@ public class BlueCoveImpl {
 		if (nativeLibraryVersionExpected != libraryVersion) {
 			DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected "
 					+ nativeLibraryVersionExpected);
-			return;
+			throw new BluetoothStateException("BlueCove native library version mismatch");
 		}
 
 		if (stackSelected == null) {
@@ -479,7 +479,7 @@ public class BlueCoveImpl {
 		if (nativeLibraryVersionExpected != libraryVersion) {
 			DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected "
 					+ nativeLibraryVersionExpected);
-			return null;
+			throw new BluetoothStateException("BlueCove native library version mismatch");
 		}
 
 		if (DebugLog.isDebugEnabled()) {

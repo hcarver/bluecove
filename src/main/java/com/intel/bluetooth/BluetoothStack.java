@@ -54,7 +54,7 @@ public interface BluetoothStack {
 	 * @return Version number in decimal presentation. e.g. 2030407 for version
 	 *         2.3.4 build 7
 	 */
-	public int getLibraryVersion();
+	public int getLibraryVersion() throws BluetoothStateException;
 
 	/**
 	 * Used if OS Supports multiple Bluetooth stacks 0x01 winsock; 0x02 widcomm;
