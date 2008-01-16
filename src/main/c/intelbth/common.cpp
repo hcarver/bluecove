@@ -30,6 +30,7 @@ BOOL nativeDebugCallbackEnabled = false;
 static jclass nativeDebugListenerClass;
 static jmethodID nativeDebugMethod = NULL;
 
+const char* cRuntimeException = "java/lang/RuntimeException";
 const char* cIOException = "java/io/IOException";
 const char* cInterruptedIOException = "java/io/InterruptedIOException";
 const char* cBluetoothStateException = "javax/bluetooth/BluetoothStateException";
@@ -39,6 +40,8 @@ const char* cServiceRegistrationException = "javax/bluetooth/ServiceRegistration
 jint blueCoveVersion() {
 	return BLUECOVE_VERSION * 100 + BLUECOVE_BUILD;
 }
+
+// --- Debug
 
 BOOL isDebugOn() {
     return nativeDebugCallbackEnabled;
@@ -109,10 +112,14 @@ char* bool2str(BOOL b) {
 	}
 }
 
-void throwException(JNIEnv *env, const char *name, const char *msg) {
-	if (env == NULL) {
+// --- Error handling
+
+void vthrowException(JNIEnv *env, const char *name, const char *fmt, va_list ap) {
+	char msg[1064];
+    if (env == NULL) {
 		return;
 	}
+	_vsnprintf_s(msg, 1064, fmt, ap);
 	if (ExceptionCheckCompatible(env)) {
 		debug(("ERROR: can't throw second exception %s(%s)", name, msg));
 		return;
@@ -121,68 +128,70 @@ void throwException(JNIEnv *env, const char *name, const char *msg) {
     /* if cls is NULL, an exception has already been thrown */
     if (cls != NULL) {
         env->ThrowNew(cls, msg);
+        /* free the local ref */
+        env->DeleteLocalRef(cls);
 	} else {
 	    debug(("Can't find Exception %s", name));
 		env->FatalError(name);
 	}
-    /* free the local ref */
-    env->DeleteLocalRef(cls);
 }
 
-void _vthrowExceptionExt(JNIEnv *env, const char *name, const char *fmt, va_list ap) {
-	char msg[1064];
-	_vsnprintf_s(msg, 1064, fmt, ap);
-	throwException(env, name, msg);
-}
-
-void throwExceptionExt(JNIEnv *env, const char *name, const char *fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	_vthrowExceptionExt(env, name, fmt, ap);
-	va_end(ap);
-}
-
-void throwIOException(JNIEnv *env, const char *msg) {
-	throwException(env, cIOException, msg);
-}
-
-void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	_vthrowExceptionExt(env, cIOException, fmt, ap);
-	va_end(ap);
-}
-
-void throwServiceRegistrationExceptionExt(JNIEnv *env, const char *fmt, ...) {
+void throwException(JNIEnv *env, const char *name, const char *fmt, ...) {
     va_list ap;
 	va_start(ap, fmt);
-	_vthrowExceptionExt(env, cServiceRegistrationException, fmt, ap);
+	vthrowException(env, name, fmt, ap);
 	va_end(ap);
 }
 
-void throwInterruptedIOException(JNIEnv *env, const char *msg) {
-	throwException(env, cInterruptedIOException, msg);
+void throwRuntimeException(JNIEnv *env, const char *fmt, ...) {
+    va_list ap;
+	va_start(ap, fmt);
+	vthrowException(env, cRuntimeException, fmt, ap);
+	va_end(ap);
 }
 
-void throwBluetoothStateException(JNIEnv *env, const char *msg) {
-	throwException(env, cBluetoothStateException, msg);
-}
-
-void throwBluetoothStateExceptionExt(JNIEnv *env, const char *fmt, ...) {
+void throwIOException(JNIEnv *env, const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
-	_vthrowExceptionExt(env, cBluetoothStateException, fmt, ap);
+	vthrowException(env, cIOException, fmt, ap);
 	va_end(ap);
 }
 
-void throwBluetoothConnectionException(JNIEnv *env, int error, const char *msg) {
+void throwInterruptedIOException(JNIEnv *env, const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	vthrowException(env, cInterruptedIOException, fmt, ap);
+	va_end(ap);
+}
+
+void throwServiceRegistrationException(JNIEnv *env, const char *fmt, ...) {
+    va_list ap;
+	va_start(ap, fmt);
+	vthrowException(env, cServiceRegistrationException, fmt, ap);
+	va_end(ap);
+}
+
+void throwBluetoothStateException(JNIEnv *env, const char *fmt, ...) {
+    va_list ap;
+	va_start(ap, fmt);
+	vthrowException(env, cBluetoothStateException, fmt, ap);
+	va_end(ap);
+}
+
+void throwBluetoothConnectionException(JNIEnv *env, int error, const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	char msg[1064];
 	if (env == NULL) {
 		return;
 	}
+	_vsnprintf_s(msg, 1064, fmt, ap);
+
 	if (ExceptionCheckCompatible(env)) {
 		debug(("ERROR: can't throw second exception %s(%s)", cBluetoothConnectionException, msg));
 		return;
 	}
+
 	jclass cls = env->FindClass(cBluetoothConnectionException);
     /* if cls is NULL, an exception has already been thrown */
     if (cls != NULL) {
@@ -198,24 +207,13 @@ void throwBluetoothConnectionException(JNIEnv *env, int error, const char *msg) 
 				env->FatalError("Fail to create new Exception");
 			}
 		}
+		/* free the local ref */
+        env->DeleteLocalRef(cls);
 	} else {
 		env->FatalError(cBluetoothConnectionException);
 	}
-    /* free the local ref */
-    env->DeleteLocalRef(cls);
-}
 
-void throwBluetoothConnectionExceptionExt(JNIEnv *env, int error, const char *fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	char msg[1064];
-	_vsnprintf_s(msg, 1064, fmt, ap);
-	throwBluetoothConnectionException(env, error, msg);
-	va_end(ap);
-}
-
-void throwRuntimeException(JNIEnv *env, const char *msg) {
-	throwException(env, "java/lang/RuntimeException", msg);
+    va_end(ap);
 }
 
 #ifdef WIN32
@@ -294,7 +292,7 @@ BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer) {
 		return TRUE;
 	}
 	if (env->CallBooleanMethod(peer, aMethod)) {
-		throwException(env, cInterruptedIOException, "thread interrupted");
+		throwInterruptedIOException(env, "thread interrupted");
 		return TRUE;
 	}
 	return ExceptionCheckCompatible(env);
@@ -711,25 +709,25 @@ BOOL ObjectPool::addObject(PoolableObject* obj, char poolableObjectType) {
 
 PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle) {
 	if (handle <= 0) {
-		throwIOExceptionExt(env, "Invalid handle %i", handle);
+		throwIOException(env, "Invalid handle %i", handle);
 		return NULL;
 	}
 	jlong idx = realIndex(handle);
 	if ((idx < 0) || (idx >= size)) {
-		throwIOExceptionExt(env, "Obsolete handle %i", handle);
+		throwIOException(env, "Obsolete handle %i", handle);
 		return NULL;
 	}
 	PoolableObject* o = objs[idx];
 	if (o == NULL) {
-		throwIOExceptionExt(env, "Destroyed handle %i", handle);
+		throwIOException(env, "Destroyed handle %i", handle);
 		return NULL;
 	}
 	if ((o->magic1 != MAGIC_1) || (o->magic2 != MAGIC_2)) {
-		throwIOExceptionExt(env, "Corrupted object %i", handle);
+		throwIOException(env, "Corrupted object %i", handle);
 		return NULL;
 	}
 	if ((o->internalHandle != handle) || (!o->isValidObject())) {
-		throwIOExceptionExt(env, "Corrupted handle %i", handle);
+		throwIOException(env, "Corrupted handle %i", handle);
 		return NULL;
 	}
 	return o;
@@ -738,7 +736,7 @@ PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle) {
 PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle, char poolableObjectType) {
 	PoolableObject* o = getObject(env, handle);
 	if ((o != NULL) && (o->poolableObjectType != poolableObjectType)) {
-		throwIOExceptionExt(env, "Invalid handle type %i", handle);
+		throwIOException(env, "Invalid handle type %i", handle);
 		return NULL;
 	}
 	return o;

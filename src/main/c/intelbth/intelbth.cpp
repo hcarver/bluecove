@@ -818,7 +818,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_unregist
 	// perform set
 
 	if (WSASetService(&queryset, RNRSERVICE_DELETE, 0)) {
-		throwServiceRegistrationExceptionExt(env, "Failed to unregister service");
+		throwServiceRegistrationException(env, "Failed to unregister service");
 	}
 }
 

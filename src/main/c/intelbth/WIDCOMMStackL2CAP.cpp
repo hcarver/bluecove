@@ -151,7 +151,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 		    memcpy(&(l2c->service_guid), &any_client_service_guid, sizeof(GUID));
 
 			if (!l2CapIf->AssignPsmValue(&(l2c->service_guid), (UINT16)channel)) {
-			    throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_UNKNOWN_PSM, "failed to assign PSM 0x%X", (UINT16)channel);
+			    throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_UNKNOWN_PSM, "failed to assign PSM 0x%X", (UINT16)channel);
 			    open_l2client_return 0;
 			}
 		}
@@ -636,7 +636,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Send
 	debug(("sent %i", written));
 	if (written < len) {
 		debug(("throw"));
-		throwIOExceptionExt(env, "Failed to write all data, send %i from %i", written, len);
+		throwIOException(env, "Failed to write all data, send %i from %i", written, len);
 	}
 
 	env->ReleaseByteArrayElements(data, bytes, 0);

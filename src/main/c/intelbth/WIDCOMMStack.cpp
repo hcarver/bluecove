@@ -241,7 +241,7 @@ void WIDCOMMStack::throwExtendedBluetoothStateException(JNIEnv * env) {
 	msg = WBtRcToString(er);
 #endif //! _WIN32_WCE
 	if (msg != NULL) {
-		throwBluetoothStateExceptionExt(env, "WIDCOMM error[%s]", msg);
+		throwBluetoothStateException(env, "WIDCOMM error[%s]", msg);
 	} else {
 		throwBluetoothStateException(env, "No WIDCOMM error code");
 	}
@@ -893,7 +893,7 @@ CSdpDiscoveryRec* validDiscoveryRec(JNIEnv *env, jlong handle) {
 	}
 	if ((offset < SDP_DISCOVERY_RECORDS_HANDLE_OFFSET)
 		|| (offset > SDP_DISCOVERY_RECORDS_USED_MAX + SDP_DISCOVERY_RECORDS_HANDLE_OFFSET)) {
-		throwIOExceptionExt(env, "Invalid DiscoveryRec handle [%i]", offset);
+		throwIOException(env, "Invalid DiscoveryRec handle [%i]", offset);
 		return NULL;
 	}
 	Edebug(("DiscoveryRecHolder used %p", discoveryRecHolder));
@@ -1217,7 +1217,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 		// What GUID do we need in call to CRfCommIf.AssignScnValue() if we don't have any?
 		//memcpy(&(rf->service_guid), &test_client_service_guid, sizeof(GUID));
 		if (!rfCommIf->AssignScnValue(&(rf->service_guid), (UINT8)channel)) {
-			throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_UNKNOWN_PSM, "failed to assign SCN %i", (UINT8)channel);
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_UNKNOWN_PSM, "failed to assign SCN %i", (UINT8)channel);
 			open_client_return 0;
 		}
 		//debug(("SetSecurityLevel");
@@ -1247,7 +1247,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 			if (rc == CRfCommPort::PEER_TIMEOUT) {
 				throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Failed to OpenClient");
 			} else {
-				throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to OpenClient [%i]", rc);
+				throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to OpenClient [%i]", rc);
 			}
 			open_client_return 0;
 		}
@@ -1922,7 +1922,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
 	    sdpService = l2c->sdpService;
 	}
 	if (sdpService == NULL) {
-		throwServiceRegistrationExceptionExt(env, cCONNECTION_IS_CLOSED);
+		throwServiceRegistrationException(env, cCONNECTION_IS_CLOSED);
 		return;
 	}
 
@@ -1951,7 +1951,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
 
     debug(("AddAttribute %i type=%i len=%i [%s]", attrID, attrType, arrLen, p_val));
 	if (sdpService->AddAttribute((UINT16)attrID, (UINT8)attrType, arrLen, p_val) != SDP_OK) {
-		throwServiceRegistrationExceptionExt(env, "Failed to AddAttribute %i", attrID);
+		throwServiceRegistrationException(env, "Failed to AddAttribute %i", attrID);
 	}
 
 	//delete p_val;

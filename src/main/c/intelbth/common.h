@@ -175,6 +175,8 @@
 
 #include <jni.h>
 
+// --- Debug
+
 void enableNativeDebug(JNIEnv * env, jobject loggerClass, jboolean on);
 
 #ifdef WIN32
@@ -212,23 +214,16 @@ void log_info(const char *fmt, ...);
 
 char* bool2str(BOOL b);
 
+// --- Error handling
+
 extern const char* cServiceRegistrationException;
 
-void throwException(JNIEnv *env, const char *name, const char *msg);
-
-void throwExceptionExt(JNIEnv *env, const char *name, const char *fmt, ...);
-
-void throwIOException(JNIEnv *env, const char *msg);
-
-void throwInterruptedIOException(JNIEnv *env, const char *msg);
-
-void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...);
-
-void throwServiceRegistrationExceptionExt(JNIEnv *env, const char *fmt, ...);
-
-void throwBluetoothStateException(JNIEnv *env, const char *msg);
-
-void throwBluetoothStateExceptionExt(JNIEnv *env, const char *fmt, ...);
+void throwException(JNIEnv *env, const char *name, const char *fmt, ...);
+void throwRuntimeException(JNIEnv *env, const char *fmt, ...);
+void throwIOException(JNIEnv *env, const char *fmt, ...);
+void throwInterruptedIOException(JNIEnv *env, const char *fmt, ...);
+void throwServiceRegistrationException(JNIEnv *env, const char *fmt, ...);
+void throwBluetoothStateException(JNIEnv *env, const char *fmt, ...);
 
 #define BT_CONNECTION_ERROR_UNKNOWN_PSM  1
 #define BT_CONNECTION_ERROR_SECURITY_BLOCK 2
@@ -237,12 +232,7 @@ void throwBluetoothStateExceptionExt(JNIEnv *env, const char *fmt, ...);
 #define BT_CONNECTION_ERROR_TIMEOUT 5
 #define BT_CONNECTION_ERROR_UNACCEPTABLE_PARAMS 6
 
-void throwBluetoothConnectionException(JNIEnv *env, int error, const char *msg);
-
-void throwBluetoothConnectionExceptionExt(JNIEnv *env, int error, const char *fmt, ...);
-
-void throwRuntimeException(JNIEnv *env, const char *msg);
-#define _throwRuntimeException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwRuntimeException(env, msg); }
+void throwBluetoothConnectionException(JNIEnv *env, int error, const char *fmt, ...);
 
 #ifdef WIN32
 void throwExceptionWinErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error);

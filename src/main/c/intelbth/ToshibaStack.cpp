@@ -64,7 +64,7 @@ char *getTsAPIStatusString(LONG lSts) {
 }
 
 void tsThrowBluetoothStateException(JNIEnv * env, LONG lSts) {
-	throwBluetoothStateExceptionExt(env, "Toshiba error# %i", lSts);
+	throwBluetoothStateException(env, "Toshiba error# %i", lSts);
 }
 
 ToshibaStack::ToshibaStack() {

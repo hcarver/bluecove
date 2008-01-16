@@ -664,7 +664,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
         debug(("BT_ConnectSPPExService return  [%s]", getBsAPIStatusString(dwResult)));
         stack->deleteCommPort(rf);
         LeaveCriticalSection(&stack->openingPortLock);
-        throwIOExceptionExt(env, "Can't connect [%s]", getBsAPIStatusString(dwResult));
+        throwIOException(env, "Can't connect [%s]", getBsAPIStatusString(dwResult));
         return 0;
     }
     if (dwConnectionHandle == 0) {
@@ -691,7 +691,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
         debug(("BT_GetConnectInfo return  [%s]", getBsAPIStatusString(dwResult)));
         stack->deleteCommPort(rf);
         LeaveCriticalSection(&stack->openingPortLock);
-        throwIOExceptionExt(env, "Can't get SPP info [%s]", getBsAPIStatusString(dwResult));
+        throwIOException(env, "Can't get SPP info [%s]", getBsAPIStatusString(dwResult));
         return 0;
     }
 
@@ -703,7 +703,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connec
         } else {
             stack->deleteCommPort(rf);
             LeaveCriticalSection(&stack->openingPortLock);
-            throwIOExceptionExt(env, "Port# mismatch [%u] and [%u]", (unsigned int)(sppConnInfo.ucComPort), (unsigned int)(svcInfoSPPEx.ucComIndex));
+            throwIOException(env, "Port# mismatch [%u] and [%u]", (unsigned int)(sppConnInfo.ucComPort), (unsigned int)(svcInfoSPPEx.ucComIndex));
             return 0;
         }
     }
@@ -821,7 +821,7 @@ void BlueSoleilCOMPort::close(JNIEnv *env) {
             return;
         }
         if ((dwResult != BTSTATUS_SUCCESS) && (dwResult != BTSTATUS_CONNECTION_NOT_EXIST))  {
-            throwIOExceptionExt(env, "Can't disconnect SPP [%s]", getBsAPIStatusString(dwResult));
+            throwIOException(env, "Can't disconnect SPP [%s]", getBsAPIStatusString(dwResult));
             return;
         }
     }
@@ -1399,7 +1399,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
     DWORD dwResult = BT_StartSPPExService(&(srv->serviceInfo), &(srv->wdServerHandle));
     if (dwResult != BTSTATUS_SUCCESS) {
         debug(("BT_StartSPPExService return  [%s]", getBsAPIStatusString(dwResult)));
-        throwIOExceptionExt(env, "Can't create Service [%s]", getBsAPIStatusString(dwResult));
+        throwIOException(env, "Can't create Service [%s]", getBsAPIStatusString(dwResult));
         return 0;
     }
 
@@ -1449,7 +1449,7 @@ void BlueSoleilSPPExService::close(JNIEnv *env) {
         hCloseEvent = NULL;
     }
     if (dwResult != BTSTATUS_SUCCESS){
-        throwIOExceptionExt(env, "Can't Stop SPP service [%s]", getBsAPIStatusString(dwResult));
+        throwIOException(env, "Can't Stop SPP service [%s]", getBsAPIStatusString(dwResult));
         return;
     }
 }
@@ -1572,7 +1572,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
     DWORD dwResult = BT_GetConnectInfo(srv->dwConnectedConnetionHandle, &bIsOutGoing, &wClass, bdAddr, &dwLen, (BYTE*)&sppConnInfo);
     if (dwResult != BTSTATUS_SUCCESS)   {
         debug(("BT_GetConnectInfo return  [%s]", getBsAPIStatusString(dwResult));
-        throwIOExceptionExt(env, "Can't get SPP info [%s]", getBsAPIStatusString(dwResult));
+        throwIOException(env, "Can't get SPP info [%s]", getBsAPIStatusString(dwResult));
         return 0;
     }
     */

@@ -118,14 +118,14 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testThrowEx
 (JNIEnv *env, jclass, jint extype) {
 	switch (extype) {
 		case 0: throwException(env, "java/lang/Exception", "0"); break;
-		case 1: throwExceptionExt(env, "java/lang/Exception", "1[%s]", "str"); break;
+		case 1: throwException(env, "java/lang/Exception", "1[%s]", "str"); break;
 		case 2: throwIOException(env, "2"); break;
-		case 3: throwIOExceptionExt(env, "3[%s]", "str"); break;
+		case 3: throwIOException(env, "3[%s]", "str"); break;
 	    case 4: throwBluetoothStateException(env, "4"); break;
-		case 5: throwBluetoothStateExceptionExt(env, "5[%s]", "str"); break;
+		case 5: throwBluetoothStateException(env, "5[%s]", "str"); break;
 		case 6: throwRuntimeException(env, "6"); break;
 		case 7: throwBluetoothConnectionException(env, 1, "7"); break;
-		case 8: throwBluetoothConnectionExceptionExt(env, 2, "8[%s]", "str"); break;
+		case 8: throwBluetoothConnectionException(env, 2, "8[%s]", "str"); break;
 
 		case 22:
 			// Throw Exception two times in a row. Second Exception ignored
