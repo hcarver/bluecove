@@ -240,7 +240,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerCreat
         throwIOExceptionExt(env, "Failed to create RFCOMM service [0x%08x]", runnable.status);
         return 0;
     }
-    debug1("RFCOMM server created, ChannelID %i", comm->rfcommChannelID);
+    debug(("RFCOMM server created, ChannelID %i", comm->rfcommChannelID));
     return comm->internalHandle;
 }
 
@@ -308,7 +308,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
 			return 0;
 		}
 		if (isCurrentThreadInterrupted(env, peer)) {
-			debug("Interrupted while waiting for connections");
+			debug(("Interrupted while waiting for connections"));
 			return 0;
 		}
 	}
@@ -330,7 +330,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
 	    }
 	}
 
-    debug("create ChannelController to accept incoming connection");
+    debug(("create ChannelController to accept incoming connection"));
 	RFCOMMChannelController* clientComm = new RFCOMMChannelController();
 	if (!stack->commPool->addObject(clientComm, 'r')) {
 		delete clientComm;
@@ -349,7 +349,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
 			break;
 		}
 		if (isCurrentThreadInterrupted(env, peer)) {
-			debug("Interrupted while waiting for connections");
+			debug(("Interrupted while waiting for connections"));
 			error = true;
 			break;
 		}
@@ -371,7 +371,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
             RFCOMMChannelCloseExec(clientComm);
             return 0;
         }
-        debug("RFCOMM client connected");
+        debug(("RFCOMM client connected"));
         return clientComm->internalHandle;;
     }
 }

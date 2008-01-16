@@ -276,7 +276,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerOpenI
         throwIOExceptionExt(env, "Failed to create L2CAP service [0x%08x]", runnable.status);
         return 0;
     }
-    debug1("L2CAP server created, PSM %x", comm->l2capPSM);
+    debug(("L2CAP server created, PSM %x", comm->l2capPSM));
     return comm->internalHandle;
 }
 
@@ -345,7 +345,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
 			return 0;
 		}
 		if (isCurrentThreadInterrupted(env, peer)) {
-			debug("Interrupted while waiting for connections");
+			debug(("Interrupted while waiting for connections"));
 			return 0;
 		}
 }
@@ -388,7 +388,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
 			break;
 		}
 		if (isCurrentThreadInterrupted(env, peer)) {
-			debug("Interrupted while waiting for connections");
+			debug(("Interrupted while waiting for connections"));
 			error = true;
 			break;
 		}
@@ -410,7 +410,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
             L2CAPChannelCloseExec(clientComm);
             return 0;
         }
-        debug("L2CAP client connected");
+        debug(("L2CAP client connected"));
         return clientComm->internalHandle;;
     }
 }

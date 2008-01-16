@@ -186,28 +186,24 @@ void enableNativeDebug(JNIEnv * env, jobject loggerClass, jboolean on);
 extern BOOL nativeDebugCallbackEnabled;
 
 //#define EXT_DEBUG
-void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...);
 BOOL isDebugOn();
-#define debug(fmt) callDebugListener(env, CPP_FILE, __LINE__, fmt);
-#define debugs(fmt, message) callDebugListener(env, CPP_FILE, __LINE__, fmt, message);
-#define debug1(fmt, message) callDebugListener(env, CPP_FILE, __LINE__, fmt, message);
-#define debugss(fmt, message1, message2) callDebugListener(env, CPP_FILE, __LINE__, fmt, message1, message2);
-#define debug2(fmt, message1, message2) callDebugListener(env, CPP_FILE, __LINE__, fmt, message1, message2);
-#define debug3(fmt, message1, message2, message3) callDebugListener(env, CPP_FILE, __LINE__, fmt, message1, message2, message3);
-#define debug4(fmt, message1, message2, message3, message4) callDebugListener(env, CPP_FILE, __LINE__, fmt, message1, message2, message3, message4);
+
+class DebugMessage {
+private:
+    char msg[1064];
+public:
+    void printf(const char *fmt, ...);
+	void callDebugListener(JNIEnv *env, const char* fileName, int lineN);
+};
+
+// This can be used in JNI functions. The message would be sent to java code. Usage example debug(("", args));
+// To support VC6 we can't use  ... and __VA_ARGS__
+#define debug(args) {DebugMessage dm; dm.printf args; dm.callDebugListener(env, CPP_FILE, __LINE__);}
 
 #ifdef EXT_DEBUG
-#define Edebug(fmt)  debug(fmt)
-#define Edebugs(fmt, message) debugs(fmt, message)
-#define Edebugss(fmt, message1, message2) debugss(fmt, message1, message2)
-#define Edebug1(fmt, message) debugs(fmt, message)
-#define Edebug2(fmt, message1, message2) debugss(fmt, message1, message2)
+#define Edebug(args) {DebugMessage dm; dm.printf args; dm.callDebugListener(env, CPP_FILE, __LINE__);}
 #else
-#define Edebug(fmt)
-#define Edebugs(fmt, message)
-#define Edebugss(fmt, message1, message2)
-#define Edebug1(fmt, message)
-#define Edebug2(fmt, message1, message2)
+#define Edebug(args)
 #endif
 
 void ndebug(const char *fmt, ...);
@@ -223,17 +219,14 @@ void throwException(JNIEnv *env, const char *name, const char *msg);
 void throwExceptionExt(JNIEnv *env, const char *name, const char *fmt, ...);
 
 void throwIOException(JNIEnv *env, const char *msg);
-#define _throwIOException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwIOException(env, msg); }
 
 void throwInterruptedIOException(JNIEnv *env, const char *msg);
-#define _throwInterruptedIOException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwInterruptedIOException(env, msg); }
 
 void throwIOExceptionExt(JNIEnv *env, const char *fmt, ...);
 
 void throwServiceRegistrationExceptionExt(JNIEnv *env, const char *fmt, ...);
 
 void throwBluetoothStateException(JNIEnv *env, const char *msg);
-#define _throwBluetoothStateException(env, msg) { callDebugListener(env, CPP_FILE, __LINE__, "throw"); throwBluetoothStateException(env, msg); }
 
 void throwBluetoothStateExceptionExt(JNIEnv *env, const char *fmt, ...);
 

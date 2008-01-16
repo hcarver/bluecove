@@ -380,17 +380,17 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
 
     while ((stack != NULL) && (!stack->deviceInquiryTerminated)) {
         if (discovery.started()) {
-            debug("deviceInquiry Started");
+            debug(("deviceInquiry Started"));
             break;
         }
         discovery.wait();
     }
 
     while ((stack != NULL) && (!stack->deviceInquiryTerminated)) {
-        Edebug("deviceInquiry get device");
+        Edebug(("deviceInquiry get device"));
         IOBluetoothDevice* d = discovery.getDeviceToReport();
         if ((stack != NULL) && (d != NULL)) {
-            debug("deviceInquiry device discovered");
+            debug(("deviceInquiry device discovered"));
             jlong deviceAddr = OSxAddrToLong([d getAddress]);
             jint deviceClass = (jint)[d getClassOfDevice];
             jstring name = OSxNewJString(env, [d getName]);
@@ -401,18 +401,18 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
                 return INQUIRY_ERROR;
             }
         } else {
-            Edebug("deviceInquiry no devices");
+            Edebug(("deviceInquiry no devices"));
         }
 
         // When deviceInquiryComplete look at the remainder of Responded devices. Do Not Wait
         if (discovery.busy()) {
-            Edebug("deviceInquiry sleep");
+            Edebug(("deviceInquiry sleep"));
             discovery.wait();
         } else if (d == NULL) {
             break;
         }
     }
-    debug("deviceInquiry ends");
+    debug(("deviceInquiry ends"));
 
     BOOL aborted = discovery.aborted();
     IOReturn error = discovery.errorCode();
@@ -425,16 +425,16 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
     }
 
     if (aborted) {
-       debug("deviceInquiry aborted");
+       debug(("deviceInquiry aborted"));
     }
 
     if (stack == NULL) {
         return INQUIRY_TERMINATED;
     } else if (terminated) {
-        debug("deviceInquiry terminated");
+        debug(("deviceInquiry terminated"));
         return INQUIRY_TERMINATED;
     } else if (error != kIOReturnSuccess) {
-        debug1("deviceInquiry error code [0x%08x]", error);
+        debug(("deviceInquiry error code [0x%08x]", error));
         return INQUIRY_ERROR;
     } else {
         return INQUIRY_COMPLETED;
@@ -443,7 +443,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_deviceInquiryCancelImpl
 (JNIEnv *env, jobject peer) {
-    debug("StopInquiry");
+    debug(("StopInquiry"));
     if ((stack != NULL) && (stack->deviceInquiryInProcess)) {
         // This will dellay termiantion untill loop in runDeviceInquiryImpl will detect this flag
         stack->deviceInquiryTerminated = TRUE;
@@ -505,14 +505,14 @@ void remoteNameRequestResponse(void *userRefCon, IOBluetoothDeviceRef deviceRef,
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getRemoteDeviceFriendlyName
   (JNIEnv *env, jobject, jlong address) {
-    debug("getRemoteDeviceFriendlyName");
+    debug(("getRemoteDeviceFriendlyName"));
     if (stack == NULL) {
         throwIOException(env, cSTACK_CLOSED);
         return NULL;
     }
     // Need to have only one Inquiry otherwise it will ends prematurely.
     if (stack->deviceInquiryBusy) {
-        debug("blocked until deviceInquiry ends");
+        debug(("blocked until deviceInquiry ends"));
     }
     while ((stack != NULL) && (stack->deviceInquiryBusy)) {
         MPEventFlags flags;

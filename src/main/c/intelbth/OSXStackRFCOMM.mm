@@ -283,7 +283,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfO
         RFCOMMChannelCloseExec(comm);
         return 0;
     }
-    debug("rfcomm connected");
+    debug(("rfcomm connected"));
 	return comm->internalHandle;
 }
 
@@ -364,7 +364,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
     if (comm == NULL) {
 		return -1;
 	}
-	Edebug("->read()");
+	Edebug(("->read()"));
 	if (comm->isClosed) {
 		return -1;
 	}
@@ -380,7 +380,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 			return 0;
 		}
 		if (isCurrentThreadInterrupted(env, peer)) {
-			debug("Interrupted while reading");
+			debug(("Interrupted while reading"));
 			return 0;
 		}
 	}
@@ -397,7 +397,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
     if (comm == NULL) {
 		return -1;
 	}
-	Edebugs("->read(byte[%i])", len);
+	Edebug(("->read(byte[%i])", len));
 	if (comm->isClosed) {
 		return -1;
 	}
@@ -417,7 +417,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 			    return 0;
 		    }
 			if (isCurrentThreadInterrupted(env, peer)) {
-				debug("Interrupted while reading");
+				debug(("Interrupted while reading"));
 				return 0;
 			}
 		}
@@ -427,7 +427,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 		}
 		int count = comm->receiveBuffer.available();
 		if (count > 0) {
-			if (count > len - done) {
+		if (count > len - done) {
 				count = len - done;
 			}
 			done += comm->receiveBuffer.read(bytes + off + done, count);
@@ -436,11 +436,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 		    // Don't do readFully!
 		    break;
 		}
-		debug1("read([]) received %i", count);
+		debug(("read([]) received %i", count));
 	}
 
 	if (!comm->isConnected) {
-		debug("read([]) not connected");
+		debug(("read([]) not connected"));
 	}
 	// Read from not Connected
 	int count = comm->receiveBuffer.available();
@@ -449,18 +449,18 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 			count = len - done;
 		}
 		done += comm->receiveBuffer.read(bytes + off + done, count);
-		debug1("read[] available %i", done);
+		debug(("read[] available %i", done));
 	}
 
 	if ((stack == NULL) || (comm->isClosed) || (!comm->isConnected && done == 0)) {
 		if (done == 0) {
-			debug("read([]) no data");
+			debug(("read([]) no data"));
 		}
 		// See InputStream.read();
-		debug("read([]) return EOF");
+		debug(("read([]) return EOF"));
 		done = -1;
 	} else {
-		debugs("read([]) return %i", done);
+		debug(("read([]) return %i", done));
 	}
 	env->ReleaseByteArrayElements(b, bytes, 0);
 	return done;
@@ -541,7 +541,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 			    break;
 		    }
             if (isCurrentThreadInterrupted(env, peer)) {
-			    debug("Interrupted while writing");
+			    debug(("Interrupted while writing"));
 			    error = true;
 			    break;
 		    }

@@ -114,7 +114,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_initia
 (JNIEnv *env, jobject) {
 	LONG	lSts;
 	HWND hMainWindow = getAPPMainWindow();
-	debug1("hMainWindow %i", hMainWindow);
+	debug(("hMainWindow %i", hMainWindow);
 	if (BtOpenAPI(hMainWindow, szAppName, &lSts) == FALSE) {
 		tsThrowBluetoothStateException(env, lSts);
 		return JNI_FALSE;

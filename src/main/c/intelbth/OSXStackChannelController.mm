@@ -55,7 +55,7 @@ BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, BOOL baseba
         MPEventFlags flags;
         MPWaitForEvent(notificationEvent, &flags, kDurationMillisecond * 500);
         if (isCurrentThreadInterrupted(env, peer)) {
-			debug("Interrupted while reading");
+			debug(("Interrupted while reading"));
 			return false;
 		}
         CFAbsoluteTime nowTime = CFAbsoluteTimeGetCurrent ();

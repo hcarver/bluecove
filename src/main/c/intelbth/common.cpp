@@ -54,7 +54,7 @@ void enableNativeDebug(JNIEnv *env, jobject loggerClass, jboolean on) {
 			nativeDebugMethod = env->GetStaticMethodID(nativeDebugListenerClass, "nativeDebugCallback", "(Ljava/lang/String;ILjava/lang/String;)V");
 			if (nativeDebugMethod != NULL) {
 				nativeDebugCallbackEnabled = true;
-				debug("nativeDebugCallback ON");
+				debug(("nativeDebugCallback ON"));
 			}
 		}
 	} else {
@@ -84,17 +84,21 @@ void log_info(const char *fmt, ...) {
     va_end(ap);
 }
 
-void callDebugListener(JNIEnv *env, const char* fileName, int lineN, const char *fmt, ...) {
-	va_list ap;
+void DebugMessage::printf(const char *fmt, ...) {
+    va_list ap;
 	va_start(ap, fmt);
 	{
-		if ((env != NULL) && (nativeDebugCallbackEnabled)) {
-			char msg[1064];
+		if (nativeDebugCallbackEnabled) {
 			_vsnprintf_s(msg, 1064, fmt, ap);
-			env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, env->NewStringUTF(fileName), lineN, env->NewStringUTF(msg));
 		}
 	}
 	va_end(ap);
+}
+
+void DebugMessage::callDebugListener(JNIEnv *env, const char* fileName, int lineN) {
+	if ((env != NULL) && (nativeDebugCallbackEnabled)) {
+		env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, env->NewStringUTF(fileName), lineN, env->NewStringUTF(msg));
+	}
 }
 
 char* bool2str(BOOL b) {
@@ -110,7 +114,7 @@ void throwException(JNIEnv *env, const char *name, const char *msg) {
 		return;
 	}
 	if (ExceptionCheckCompatible(env)) {
-		debugss("ERROR: can't throw second exception %s(%s)", name, msg);
+		debug(("ERROR: can't throw second exception %s(%s)", name, msg));
 		return;
 	}
 	jclass cls = env->FindClass(name);
@@ -118,7 +122,7 @@ void throwException(JNIEnv *env, const char *name, const char *msg) {
     if (cls != NULL) {
         env->ThrowNew(cls, msg);
 	} else {
-	    debug1("Can't find Exception %s", name);
+	    debug(("Can't find Exception %s", name));
 		env->FatalError(name);
 	}
     /* free the local ref */
@@ -176,7 +180,7 @@ void throwBluetoothConnectionException(JNIEnv *env, int error, const char *msg) 
 		return;
 	}
 	if (ExceptionCheckCompatible(env)) {
-		debugss("ERROR: can't throw second exception %s(%s)", cBluetoothConnectionException, msg);
+		debug(("ERROR: can't throw second exception %s(%s)", cBluetoothConnectionException, msg));
 		return;
 	}
 	jclass cls = env->FindClass(cBluetoothConnectionException);
@@ -391,7 +395,7 @@ jint getDeviceClassByOS(JNIEnv *env) {
         {
 			return MAJOR_COMPUTER & COMPUTER_MINOR_HANDHELD;
 		}
-		debugs("PLATFORMTYPE %S", szPlatform);
+		debug(("PLATFORMTYPE %S", szPlatform));
 		if (0 == lstrcmpi(szPlatform, TEXT("Smartphone")))  {
 			return MAJOR_PHONE | PHONE_MINOR_SMARTPHONE;
 		}

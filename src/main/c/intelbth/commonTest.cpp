@@ -42,7 +42,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testU
 	char m[1064];
 	unsigned char* d = g.Data4;
 	sprintf_s(m, 1064, "{%u , %u, %u, {%u , %u, %u , %u, %u, %u , %u, %u}}", g.Data1, g.Data2, g.Data3, d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7]);
-	debugs("UUID = %s", m);
+	debug(("UUID = %s", m));
 
 	jbyteArray uuidValueConverted = env->NewByteArray(16);
 	jbyte *bytesConverted = env->GetByteArrayElements(uuidValueConverted, 0);
@@ -138,6 +138,6 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testThrowEx
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testDebug
 (JNIEnv *env, jclass, jstring message) {
 	const char *c = env->GetStringUTFChars(message, 0);
-	debugs("message[%s]", c);
+	debug(("message[%s]", c));
 	env->ReleaseStringUTFChars(message, c);
 }

@@ -279,7 +279,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2OpenClientC
 		throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 		return 0;
 	}
-	debug("l2cap OpenClientConnection");
+	debug(("l2cap OpenClientConnection"));
 
     BasebandConnectionOpen basebandOpen;
 	basebandOpen.comm = comm;
@@ -331,7 +331,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2OpenClientC
         return 0;
     }
 
-    debug("l2cap connected");
+    debug(("l2cap connected"));
 	return comm->internalHandle;
 }
 
@@ -341,7 +341,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2CloseClientC
 	if (comm == NULL) {
 		return;
 	}
-	debug("l2CloseClientConnection");
+	debug(("l2CloseClientConnection"));
 	long rc = L2CAPChannelCloseExec(comm);
 	if (rc != kIOReturnSuccess) {
 	    throwIOExceptionExt(env, "Failed to close L@CAP channel [0x%08x]", rc);
@@ -358,7 +358,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Ready
 		return JNI_TRUE;
 	}
 	if (!comm->isConnected) {
-		_throwIOException(env, cCONNECTION_IS_CLOSED);
+		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return JNI_FALSE;
 	}
 	return JNI_FALSE;
@@ -371,18 +371,18 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Receive
 		return 0;
 	}
 	if ((!comm->isConnected ) && (comm->receiveBuffer.available() < sizeof(size_t))) {
-		_throwIOException(env, cCONNECTION_IS_CLOSED);
+		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return 0;
 	}
 	if (comm->receiveBuffer.isOverflown()) {
-		_throwIOException(env, "Receive buffer overflown");
+		throwIOException(env, "Receive buffer overflown");
 		return 0;
 	}
 
 	int paketLengthSize = sizeof(size_t);
 
 	while ((stack != NULL) && comm->isConnected  && (comm->receiveBuffer.available() <= paketLengthSize)) {
-		Edebug("receive[] waits for data");
+		Edebug(("receive[] waits for data"));
 		MPEventFlags flags;
         OSStatus err = MPWaitForEvent(comm->notificationEvent, &flags, kDurationMillisecond * 500);
 		if ((err != kMPTimeoutErr) && (err != noErr)) {
@@ -390,24 +390,24 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Receive
 			return 0;
 		}
 		if (isCurrentThreadInterrupted(env, peer)) {
-			debug("Interrupted while reading");
+			debug(("Interrupted while reading"));
 			return 0;
 		}
 	}
 	if ((stack == NULL) || ((!comm->isConnected) && (comm->receiveBuffer.available() <= paketLengthSize)) ) {
-		_throwIOException(env, cCONNECTION_CLOSED);
+		throwIOException(env, cCONNECTION_CLOSED);
 		return 0;
 	}
 
 	int count = comm->receiveBuffer.available();
 	if (count < paketLengthSize) {
-		_throwIOException(env, "Receive buffer corrupted (1)");
+		throwIOException(env, "Receive buffer corrupted (1)");
 		return 0;
 	}
 	size_t paketLength = 0;
 	int done = comm->receiveBuffer.read(&paketLength, paketLengthSize);
 	if ((done != paketLengthSize) || (paketLength > (count - paketLengthSize))) {
-		_throwIOException(env, "Receive buffer corrupted (2)");
+		throwIOException(env, "Receive buffer corrupted (2)");
 		return 0;
 	}
 	if (paketLength == 0) {
@@ -427,18 +427,18 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Receive
 
 	done = comm->receiveBuffer.read(bytes, readLen);
 	if (done != readLen) {
-		_throwIOException(env, "Receive buffer corrupted (3)");
+		throwIOException(env, "Receive buffer corrupted (3)");
 	}
 	if (done < paketLength) {
 		// the rest will be discarded.
 		int skip = paketLength - done;
 		if (skip != comm->receiveBuffer.skip(skip)) {
-			_throwIOException(env, "Receive buffer corrupted (4)");
+			throwIOException(env, "Receive buffer corrupted (4)");
 		}
 	}
 
 	env->ReleaseByteArrayElements(inBuf, bytes, 0);
-	debug1("receive[] returns %i", done);
+	debug(("receive[] returns %i", done));
 	return done;
 }
 
@@ -500,7 +500,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Send
 			    break;
 		    }
             if (isCurrentThreadInterrupted(env, peer)) {
-			    debug("Interrupted while writing");
+			    debug(("Interrupted while writing"));
 			    break;
 		    }
 		    break;

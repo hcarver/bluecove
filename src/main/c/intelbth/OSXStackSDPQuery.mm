@@ -161,12 +161,12 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServi
         if (runnable.status == kIOReturnNotFound) {
             throwException(env, "com/intel/bluetooth/SearchServicesDeviceNotReachableException", "");
         } else {
-            debug1("SearchServices error 0x%08x", runnable.status);
+            debug(("SearchServices error 0x%08x", runnable.status));
             throwException(env, "com/intel/bluetooth/SearchServicesException", "");
         }
         return 0;
     }
-    Edebug2("runSearchServicesImpl %i found %i records", transID, runnable.recordsSize);
+    Edebug(("runSearchServicesImpl %i found %i records", transID, runnable.recordsSize));
     return runnable.recordsSize;
 }
 
