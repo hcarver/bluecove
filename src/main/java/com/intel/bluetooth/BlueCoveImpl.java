@@ -117,19 +117,19 @@ public class BlueCoveImpl {
 
 	private BluetoothStack bluetoothStack;
 
-	private static final int BLUECOVE_STACK_DETECT_MICROSOFT = 1;
+	static final int BLUECOVE_STACK_DETECT_MICROSOFT = 1;
 
-	private static final int BLUECOVE_STACK_DETECT_WIDCOMM = 1 << 1;
+	static final int BLUECOVE_STACK_DETECT_WIDCOMM = 1 << 1;
 
-	private static final int BLUECOVE_STACK_DETECT_BLUESOLEIL = 1 << 2;
+	static final int BLUECOVE_STACK_DETECT_BLUESOLEIL = 1 << 2;
 
-	private static final int BLUECOVE_STACK_DETECT_TOSHIBA = 1 << 3;
+	static final int BLUECOVE_STACK_DETECT_TOSHIBA = 1 << 3;
 
-	private static final int BLUECOVE_STACK_DETECT_OSX = 1 << 4;
+	static final int BLUECOVE_STACK_DETECT_OSX = 1 << 4;
 
-	private static final int BLUECOVE_STACK_DETECT_BLUEZ = 1 << 5;
+	static final int BLUECOVE_STACK_DETECT_BLUEZ = 1 << 5;
 
-	private static final int BLUECOVE_STACK_DETECT_EMULATOR = 1 << 6;
+	static final int BLUECOVE_STACK_DETECT_EMULATOR = 1 << 6;
 
 	private static Hashtable configProperty = new Hashtable();
 
