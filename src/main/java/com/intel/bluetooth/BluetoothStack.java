@@ -100,8 +100,6 @@ public interface BluetoothStack {
 	 */
 	public String getLocalDeviceName();
 
-	public String getRemoteDeviceFriendlyName(long address) throws IOException;
-
 	public DeviceClass getLocalDeviceClass();
 
 	public void setLocalDeviceServiceClasses(int classOfDevice);
@@ -125,6 +123,8 @@ public interface BluetoothStack {
 	 * called by JSR-82 code Device Inquiry
 	 */
 	public boolean cancelInquiry(DiscoveryListener listener);
+
+	public String getRemoteDeviceFriendlyName(long address) throws IOException;
 
 	// ---------------------- Service search
 
