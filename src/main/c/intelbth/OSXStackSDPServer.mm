@@ -84,7 +84,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceUpda
     synchronousBTOperation(&runnable);
 
     if (runnable.error != 0) {
-        throwServiceRegistrationExceptionExt(env, "Failed to publish service [0x%08x]", runnable.lData);
+        throwServiceRegistrationException(env, "Failed to publish service [0x%08x]", runnable.lData);
     }
 }
 
@@ -325,7 +325,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceAddA
     }
 
     if (runnable.error != 0) {
-        throwServiceRegistrationExceptionExt(env, "Failed to update service attribute %x [%s]", attrID, runnable.pData[2]);
+        throwServiceRegistrationException(env, "Failed to update service attribute %x [%s]", attrID, runnable.pData[2]);
     }
 }
 
@@ -354,7 +354,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceSequ
     synchronousBTOperation(&runnable);
 
     if (runnable.error != 0) {
-        throwServiceRegistrationExceptionExt(env, "Failed to update service attribute %x [%s]", attrID, runnable.pData[2]);
+        throwServiceRegistrationException(env, "Failed to update service attribute %x [%s]", attrID, runnable.pData[2]);
     }
 }
 
@@ -375,6 +375,6 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceSequ
     synchronousBTOperation(&runnable);
 
     if (runnable.error != 0) {
-        throwServiceRegistrationExceptionExt(env, "Failed to update service attribute %x [%s]", attrID, runnable.pData[2]);
+        throwServiceRegistrationException(env, "Failed to update service attribute %x [%s]", attrID, runnable.pData[2]);
     }
 }

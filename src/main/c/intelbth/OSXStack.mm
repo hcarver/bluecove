@@ -317,7 +317,7 @@ RUNNABLE(GetLocalDeviceBluetoothAddress, "GetLocalDeviceBluetoothAddress") {
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceBluetoothAddress
 (JNIEnv *env, jobject) {
-    Edebug("getLocalDeviceBluetoothAddress");
+    Edebug(("getLocalDeviceBluetoothAddress"));
     GetLocalDeviceBluetoothAddress runnable;
     synchronousBTOperation(&runnable);
     switch (runnable.error) {
@@ -342,7 +342,7 @@ RUNNABLE(GetLocalDeviceName, "GetLocalDeviceName") {
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceName
 (JNIEnv *env, jobject) {
-    Edebug("getLocalDeviceName");
+    Edebug(("getLocalDeviceName"));
     GetLocalDeviceName runnable;
     synchronousBTOperation(&runnable);
     if (runnable.error) {
@@ -362,7 +362,7 @@ RUNNABLE(GetDeviceClass, "GetDeviceClass") {
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getDeviceClassImpl
 (JNIEnv *env, jobject) {
-    Edebug("getDeviceClassImpl");
+    Edebug(("getDeviceClassImpl"));
     GetDeviceClass runnable;
     synchronousBTOperation(&runnable);
     return (jint)runnable.lData;
@@ -385,7 +385,7 @@ RUNNABLE(IsLocalDevicePowerOn, "IsLocalDevicePowerOn") {
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDevicePowerOn
 (JNIEnv *env, jobject) {
-    Edebug("isLocalDevicePowerOn");
+    Edebug(("isLocalDevicePowerOn"));
     IsLocalDevicePowerOn runnable;
     synchronousBTOperation(&runnable);
     return (runnable.bData)?JNI_TRUE:JNI_FALSE;
@@ -408,7 +408,7 @@ RUNNABLE(IsLocalDeviceDiscoverable, "IsLocalDeviceDiscoverable") {
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceDiscoverableImpl
 (JNIEnv *env, jobject) {
-    Edebug("getLocalDeviceDiscoverableImpl");
+    Edebug(("getLocalDeviceDiscoverableImpl"));
     IsLocalDeviceDiscoverable runnable;
     synchronousBTOperation(&runnable);
     return (runnable.bData)?JNI_TRUE:JNI_FALSE;
@@ -425,7 +425,7 @@ RUNNABLE(GetBluetoothHCISupportedFeatures, "GetBluetoothHCISupportedFeatures") {
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDeviceFeatureSwitchRoles
 (JNIEnv *env, jobject) {
-    Edebug("isLocalDeviceFeatureSwitchRoles");
+    Edebug(("isLocalDeviceFeatureSwitchRoles"));
     GetBluetoothHCISupportedFeatures runnable;
     runnable.iData = 7;
     synchronousBTOperation(&runnable);
@@ -437,7 +437,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDev
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDeviceFeatureParkMode
 (JNIEnv *env, jobject) {
-    Edebug("isLocalDeviceFeatureParkMode");
+    Edebug(("isLocalDeviceFeatureParkMode"));
     GetBluetoothHCISupportedFeatures runnable;
     runnable.iData = 6;
     synchronousBTOperation(&runnable);
@@ -462,7 +462,7 @@ RUNNABLE(GetLocalDeviceVersion, "GetLocalDeviceVersion") {
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceSoftwareVersionInfo
 (JNIEnv *env, jobject) {
-    Edebug("getLocalDeviceSoftwareVersionInfo");
+    Edebug(("getLocalDeviceSoftwareVersionInfo"));
     NumVersion btVersion;
 	char swVers[133];
     GetLocalDeviceVersion runnable;
@@ -479,7 +479,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceManufacturer
 (JNIEnv *env, jobject) {
-    Edebug("getLocalDeviceManufacturer");
+    Edebug(("getLocalDeviceManufacturer"));
     BluetoothHCIVersionInfo	hciVersion;
 	GetLocalDeviceVersion runnable;
     runnable.pData[1] = &hciVersion;
@@ -492,7 +492,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDevice
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceVersion
 (JNIEnv *env, jobject) {
-    Edebug("getLocalDeviceVersion");
+    Edebug(("getLocalDeviceVersion"));
     BluetoothHCIVersionInfo	hciVersion;
 	GetLocalDeviceVersion runnable;
     runnable.pData[1] = &hciVersion;

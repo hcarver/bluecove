@@ -237,7 +237,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerCreat
 
     if (runnable.error != 0) {
         RFCOMMServiceCloseExec(comm);
-        throwIOExceptionExt(env, "Failed to create RFCOMM service [0x%08x]", runnable.status);
+        throwIOException(env, "Failed to create RFCOMM service [0x%08x]", runnable.status);
         return 0;
     }
     debug(("RFCOMM server created, ChannelID %i", comm->rfcommChannelID));

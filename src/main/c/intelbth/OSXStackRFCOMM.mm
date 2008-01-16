@@ -255,7 +255,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfO
 
     if (basebandOpen.error != 0) {
         RFCOMMChannelCloseExec(comm);
-        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open baseband connection [0x%08x]", basebandOpen.status);
+        throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open baseband connection [0x%08x]", basebandOpen.status);
         return 0;
     }
 
@@ -275,7 +275,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfO
 
     if (rfcommOpen.error != 0) {
         RFCOMMChannelCloseExec(comm);
-        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection(1) [0x%08x]", rfcommOpen.status);
+        throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open connection(1) [0x%08x]", rfcommOpen.status);
         return 0;
     }
 
@@ -315,7 +315,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfCl
 	}
 	long rc = RFCOMMChannelCloseExec(comm);
 	if (rc != kIOReturnSuccess) {
-	    throwIOExceptionExt(env, "Failed to close RFCOMM channel [0x%08x]", rc);
+	    throwIOException(env, "Failed to close RFCOMM channel [0x%08x]", rc);
 	}
 }
 
@@ -353,7 +353,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getConnection
 	if (runnable.error) {
 		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return 0;
-	}
+}
 
     return comm->address;
 }
@@ -522,7 +522,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 	    runnable.length = writeLen;
         synchronousBTOperation(&runnable);
         if (runnable.error != 0) {
-            throwIOExceptionExt(env, "Failed to write [0x%08x]", runnable.ioerror);
+            throwIOException(env, "Failed to write [0x%08x]", runnable.ioerror);
 			break;
         }
         while ((stack != NULL) &&( comm->isConnected) && (!comm->isClosed)) {
@@ -549,7 +549,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 		}
         done += writeLen;
         if (runnable.error != 0) {
-            throwIOExceptionExt(env, "Failed to write [0x%08x]", runnable.ioerror);
+            throwIOException(env, "Failed to write [0x%08x]", runnable.ioerror);
 			break;
         }
 	}

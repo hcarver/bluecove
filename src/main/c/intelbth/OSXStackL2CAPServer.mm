@@ -273,7 +273,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerOpenI
 
     if (runnable.error != 0) {
         L2CAPServiceCloseExec(comm);
-        throwIOExceptionExt(env, "Failed to create L2CAP service [0x%08x]", runnable.status);
+        throwIOException(env, "Failed to create L2CAP service [0x%08x]", runnable.status);
         return 0;
     }
     debug(("L2CAP server created, PSM %x", comm->l2capPSM));
@@ -367,7 +367,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
 	    }
 	}
 
-    debug("create ChannelController to accept incoming connection");
+    debug(("create ChannelController to accept incoming connection"));
 	L2CAPChannelController* clientComm = new L2CAPChannelController();
 	if (!stack->commPool->addObject(clientComm, 'l')) {
 		delete clientComm;

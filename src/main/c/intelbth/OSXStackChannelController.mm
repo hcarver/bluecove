@@ -60,7 +60,7 @@ BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, BOOL baseba
 		}
         CFAbsoluteTime nowTime = CFAbsoluteTimeGetCurrent ();
         if ((timeout > 0) && ((nowTime - startTime) * 1000  > timeout)) {
-			throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_TIMEOUT, "%sconnection timeout", name);
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "%sconnection timeout", name);
         }
     }
     if (stack == NULL) {
@@ -70,12 +70,12 @@ BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, BOOL baseba
 
     if (openStatus != kIOReturnSuccess) {
         isConnected = false;
-        throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open %sconnection(2) [0x%08x]", name, openStatus);
+        throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open %sconnection(2) [0x%08x]", name, openStatus);
         return false;
     }
 
     if (isClosed) {
-	    throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open %sconnection(3)", name);
+	    throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open %sconnection(3)", name);
 	    return false;
     }
 
@@ -85,7 +85,7 @@ BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, BOOL baseba
         return true;
     }
 
-    throwBluetoothConnectionExceptionExt(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open %sconnection", name);
+    throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to open %sconnection", name);
 	return false;
 }
 
