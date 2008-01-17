@@ -322,17 +322,23 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
 	}
 
+	/**
+	 * Only one concurrent ServiceSearch supported
+	 */
 	private native void cancelServiceSearchImpl();
 
 	public boolean cancelServiceSearch(int transID) {
 		SearchServicesThread sst = SearchServicesThread.getServiceSearchThread(transID);
 		if (sst != null) {
-			sst.setTerminated();
-			cancelServiceSearchImpl();
-			return true;
-		} else {
-			return false;
+			synchronized (this) {
+				if (!sst.isTerminated()) {
+					sst.setTerminated();
+					cancelServiceSearchImpl();
+					return true;
+				}
+			}
 		}
+		return false;
 	}
 
 	private native long[] runSearchServicesImpl(SearchServicesThread startedNotify, byte[] uuidValue, long address)

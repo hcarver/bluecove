@@ -428,8 +428,7 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	public boolean cancelServiceSearch(int transID) {
 		SearchServicesThread sst = SearchServicesThread.getServiceSearchThread(transID);
 		if (sst != null) {
-			sst.setTerminated();
-			return true;
+			return sst.setTerminated();
 		} else {
 			return false;
 		}

@@ -21,10 +21,12 @@
 package com.intel.bluetooth;
 
 import java.util.Hashtable;
+import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
 class SearchServicesThread extends Thread {
@@ -39,9 +41,11 @@ class SearchServicesThread extends Thread {
 
 	private int[] attrSet;
 
+	private Vector servicesRecords = new Vector();
+
 	UUID[] uuidSet;
 
-	RemoteDevice device;
+	private RemoteDevice device;
 
 	private DiscoveryListener listener;
 
@@ -134,13 +138,66 @@ class SearchServicesThread extends Thread {
 		return this.transID;
 	}
 
-	void setTerminated() {
+	boolean setTerminated() {
+		if (isTerminated()) {
+			return false;
+		}
 		terminated = true;
 		threads.remove(new Integer(getTransID()));
+		return true;
 	}
 
 	boolean isTerminated() {
 		return terminated;
+	}
+
+	RemoteDevice getDevice() {
+		return this.device;
+	}
+
+	DiscoveryListener getListener() {
+		return this.listener;
+	}
+
+	void addServicesRecords(ServiceRecord servRecord) {
+		this.servicesRecords.add(servRecord);
+	}
+
+	Vector getServicesRecords() {
+		return this.servicesRecords;
+	}
+
+	public int[] getAttrSet() {
+		final int[] requiredAttrIDs = new int[] { BluetoothConsts.ServiceRecordHandle,
+				BluetoothConsts.ServiceClassIDList, BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID,
+				BluetoothConsts.ProtocolDescriptorList };
+		if (this.attrSet == null) {
+			return requiredAttrIDs;
+		}
+		// Append unique attributes from attrSet
+		int len = requiredAttrIDs.length + this.attrSet.length;
+		for (int i = 0; i < this.attrSet.length; i++) {
+			for (int k = 0; k < requiredAttrIDs.length; k++) {
+				if (requiredAttrIDs[k] == this.attrSet[i]) {
+					len--;
+					break;
+				}
+			}
+		}
+
+		int[] allIDs = new int[len];
+		System.arraycopy(requiredAttrIDs, 0, allIDs, 0, requiredAttrIDs.length);
+		int appendPosition = requiredAttrIDs.length;
+		nextAttribute: for (int i = 0; i < this.attrSet.length; i++) {
+			for (int k = 0; k < requiredAttrIDs.length; k++) {
+				if (requiredAttrIDs[k] == this.attrSet[i]) {
+					continue nextAttribute;
+				}
+			}
+			allIDs[appendPosition] = this.attrSet[i];
+			appendPosition++;
+		}
+		return allIDs;
 	}
 
 }
