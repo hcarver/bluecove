@@ -23,7 +23,7 @@ package com.intel.bluetooth;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Vector;
+import java.util.Hashtable;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DataElement;
@@ -56,16 +56,7 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	// TODO what is the real number for Attributes retrievable ?
 	private final static int ATTR_RETRIEVABLE_MAX = 256;
 
-	private final static boolean postponeDeviceDiscoveryReport = true;
-
-	private Vector deviceDiscoveryReportedDevices = new Vector/* <ReportedDevice> */();
-
-	private static class ReportedDevice {
-
-		RemoteDevice remoteDevice;
-
-		DeviceClass deviceClass;
-	}
+	private Hashtable deviceDiscoveryDevices;
 
 	static {
 		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_MS);
@@ -303,30 +294,6 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 
 	// ---------------------- Device Inquiry
 
-	/**
-	 * This is called when all device discoved by stack. To avoid problems with
-	 * getpeername we will postpone the calls to User deviceDiscovered function
-	 * until runDeviceInquiry is finished.
-	 */
-	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
-			String deviceName, boolean paired) {
-		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
-		if ((currentDeviceDiscoveryListener == null) || (currentDeviceDiscoveryListener != listener)) {
-			return;
-		}
-		DeviceClass cod = new DeviceClass(deviceClass);
-		DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
-		DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
-		if (postponeDeviceDiscoveryReport) {
-			ReportedDevice rd = new ReportedDevice();
-			rd.deviceClass = cod;
-			rd.remoteDevice = remoteDevice;
-			deviceDiscoveryReportedDevices.addElement(rd);
-		} else {
-			listener.deviceDiscovered(remoteDevice, cod);
-		}
-	}
-
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		initialized();
 		if (currentDeviceDiscoveryListener != null) {
@@ -359,20 +326,42 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException {
 		try {
-			if (postponeDeviceDiscoveryReport) {
-				deviceDiscoveryReportedDevices.removeAllElements();
-			}
+			deviceDiscoveryDevices = new Hashtable();
 			int discType = runDeviceInquiryImpl(startedNotify, accessCode, listener);
-			if ((discType == DiscoveryListener.INQUIRY_COMPLETED) && (postponeDeviceDiscoveryReport)) {
-				for (Enumeration en = deviceDiscoveryReportedDevices.elements(); en.hasMoreElements();) {
-					ReportedDevice rd = (ReportedDevice) en.nextElement();
-					listener.deviceDiscovered(rd.remoteDevice, rd.deviceClass);
+			if (discType == DiscoveryListener.INQUIRY_COMPLETED) {
+				for (Enumeration en = deviceDiscoveryDevices.keys(); en.hasMoreElements();) {
+					RemoteDevice remoteDevice = (RemoteDevice) en.nextElement();
+					DeviceClass deviceClass = (DeviceClass) deviceDiscoveryDevices.get(remoteDevice);
+					listener.deviceDiscovered(remoteDevice, deviceClass);
+					// If cancelInquiry has been called
+					if (currentDeviceDiscoveryListener == null) {
+						return DiscoveryListener.INQUIRY_TERMINATED;
+					}
 				}
 			}
 			return discType;
 		} finally {
+			deviceDiscoveryDevices = null;
 			currentDeviceDiscoveryListener = null;
 		}
+	}
+
+	/**
+	 * This is called when all device discoved by stack. To avoid problems with
+	 * getpeername we will postpone the calls to User deviceDiscovered function
+	 * until runDeviceInquiry is finished.
+	 */
+	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
+			String deviceName, boolean paired) {
+		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
+		if ((currentDeviceDiscoveryListener == null) || (deviceDiscoveryDevices == null)
+				|| (currentDeviceDiscoveryListener != listener)) {
+			return;
+		}
+		DeviceClass cod = new DeviceClass(deviceClass);
+		DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
+		DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
+		deviceDiscoveryDevices.put(remoteDevice, cod);
 	}
 
 	// ---------------------- Service search
