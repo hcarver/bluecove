@@ -59,7 +59,7 @@ class NativeTestInterfaces {
 
 	static native void testThrowException(int type) throws Exception;
 
-	static native void testDebug(String message);
+	static native void testDebug(int argc, String message);
 
 	static native byte[] testOsXDataElementConversion(int testType, int type, long ldata, byte[] bdata);
 

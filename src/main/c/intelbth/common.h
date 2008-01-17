@@ -187,20 +187,34 @@ void enableNativeDebug(JNIEnv * env, jobject loggerClass, jboolean on);
 
 extern BOOL nativeDebugCallbackEnabled;
 
+#define STD_DEBUG
 //#define EXT_DEBUG
 BOOL isDebugOn();
 
+#define DEBUG_MESSAGE_MAX 1024
+
 class DebugMessage {
 private:
-    char msg[1064];
+    char msg[DEBUG_MESSAGE_MAX+1];
 public:
     void printf(const char *fmt, ...);
 	void callDebugListener(JNIEnv *env, const char* fileName, int lineN);
 };
 
+void callDebugListener(JNIEnv *env, const char* fileName, int lineN, ...);
+
 // This can be used in JNI functions. The message would be sent to java code. Usage example debug(("", args));
 // To support VC6 we can't use  ... and __VA_ARGS__
+#ifdef STD_DEBUG
+#ifdef VC6
 #define debug(args) {DebugMessage dm; dm.printf args; dm.callDebugListener(env, CPP_FILE, __LINE__);}
+#else
+#define debugVA(...) callDebugListener(env, CPP_FILE, __LINE__, __VA_ARGS__)
+#define debug(...) debugVA __VA_ARGS__
+#endif
+#else
+#define debug(args)
+#endif
 
 #ifdef EXT_DEBUG
 #define Edebug(args) {DebugMessage dm; dm.printf args; dm.callDebugListener(env, CPP_FILE, __LINE__);}

@@ -92,7 +92,7 @@ void DebugMessage::printf(const char *fmt, ...) {
 	va_start(ap, fmt);
 	{
 		if (nativeDebugCallbackEnabled) {
-			_vsnprintf_s(msg, 1064, fmt, ap);
+			_vsnprintf_s(msg, DEBUG_MESSAGE_MAX, fmt, ap);
 		}
 	}
 	va_end(ap);
@@ -102,6 +102,20 @@ void DebugMessage::callDebugListener(JNIEnv *env, const char* fileName, int line
 	if ((env != NULL) && (nativeDebugCallbackEnabled)) {
 		env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, env->NewStringUTF(fileName), lineN, env->NewStringUTF(msg));
 	}
+}
+
+void callDebugListener(JNIEnv *env, const char* fileName, int lineN, ...) {
+    va_list ap;
+	va_start(ap, lineN);
+	{
+		if ((env != NULL) && (nativeDebugCallbackEnabled)) {
+		    char msg[DEBUG_MESSAGE_MAX+1];
+		    char *fmt = va_arg(ap, char*);
+			_vsnprintf_s(msg, DEBUG_MESSAGE_MAX, fmt, ap);
+			env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, env->NewStringUTF(fileName), lineN, env->NewStringUTF(msg));
+		}
+	}
+	va_end(ap);
 }
 
 char* bool2str(BOOL b) {
@@ -115,11 +129,11 @@ char* bool2str(BOOL b) {
 // --- Error handling
 
 void vthrowException(JNIEnv *env, const char *name, const char *fmt, va_list ap) {
-	char msg[1064];
+	char msg[DEBUG_MESSAGE_MAX+1];
     if (env == NULL) {
 		return;
 	}
-	_vsnprintf_s(msg, 1064, fmt, ap);
+	_vsnprintf_s(msg, DEBUG_MESSAGE_MAX, fmt, ap);
 	if (ExceptionCheckCompatible(env)) {
 		debug(("ERROR: can't throw second exception %s(%s)", name, msg));
 		return;
@@ -181,11 +195,11 @@ void throwBluetoothStateException(JNIEnv *env, const char *fmt, ...) {
 void throwBluetoothConnectionException(JNIEnv *env, int error, const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
-	char msg[1064];
+	char msg[DEBUG_MESSAGE_MAX+1];
 	if (env == NULL) {
 		return;
 	}
-	_vsnprintf_s(msg, 1064, fmt, ap);
+	_vsnprintf_s(msg, DEBUG_MESSAGE_MAX, fmt, ap);
 
 	if (ExceptionCheckCompatible(env)) {
 		debug(("ERROR: can't throw second exception %s(%s)", cBluetoothConnectionException, msg));
@@ -218,7 +232,7 @@ void throwBluetoothConnectionException(JNIEnv *env, int error, const char *fmt, 
 
 #ifdef WIN32
 WCHAR *getWinErrorMessage(DWORD last_error) {
-	static WCHAR errmsg[1024];
+	static WCHAR errmsg[DEBUG_MESSAGE_MAX+1];
 	if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
 		0,
 		last_error,
@@ -227,7 +241,7 @@ WCHAR *getWinErrorMessage(DWORD last_error) {
 		511,
 		NULL))
 	{
-		swprintf_s(errmsg, 1024, L"No error message for code %lu", last_error);
+		swprintf_s(errmsg, DEBUG_MESSAGE_MAX, L"No error message for code %lu", last_error);
 		return errmsg;
 	}
 	size_t last = wcslen(errmsg) - 1;
@@ -239,8 +253,8 @@ WCHAR *getWinErrorMessage(DWORD last_error) {
 }
 
 void throwExceptionWinErrorMessage(JNIEnv *env, const char *name, const char *msg, DWORD last_error) {
-	char errmsg[1064];
-	sprintf_s(errmsg, 1064, "%s; [%lu] %S", msg, last_error, getWinErrorMessage(last_error));
+	char errmsg[DEBUG_MESSAGE_MAX+1];
+	sprintf_s(errmsg, DEBUG_MESSAGE_MAX, "%s; [%lu] %S", msg, last_error, getWinErrorMessage(last_error));
 	throwException(env, name, errmsg);
 }
 

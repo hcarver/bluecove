@@ -1222,10 +1222,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_storesoc
 	int optVal;
 	int optLen = sizeof(int);
 	if (getsockopt(socket, SOL_RFCOMM,  SO_BTH_GET_RECV_BUFFER,  (char*)&optVal,  &optLen) != SOCKET_ERROR) {
-		debug(("receive buffer %i", optVal);
+		debug(("receive buffer %i", optVal));
 	}
 	if (getsockopt(socket, SOL_RFCOMM,  SO_BTH_GET_SEND_BUFFER,  (char*)&optVal,  &optLen) != SOCKET_ERROR) {
-		debug(("send buffer %i", optVal);
+		debug(("send buffer %i", optVal));
 	}
 	optLen = sizeof(BTH_LOCAL_VERSION);
 	if (getsockopt(socket, SOL_RFCOMM,  SO_BTH_GET_SEND_BUFFER,  (char*)&localBluetoothDeviceInfo,  &optLen) != SOCKET_ERROR) {

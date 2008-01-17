@@ -57,9 +57,23 @@ public class NativeDebugTest extends TestCase implements LoggerAppender {
 		anyStack.enableNativeDebug(DebugLog.class, true);
 		DebugLog.setDebugEnabled(true);
 
-		NativeTestInterfaces.testDebug("test-message");
+		NativeTestInterfaces.testDebug(0, null);
+		assertNotNull("Debug recived", lastMessage);
+		assertTrue("Debug {" + lastMessage + "}", lastMessage.startsWith("message"));
+
+		NativeTestInterfaces.testDebug(1, "test-message");
 		assertNotNull("Debug recived", lastMessage);
 		assertTrue("Debug {" + lastMessage + "}", lastMessage.startsWith("message[test-message]"));
+		lastMessage = null;
+
+		NativeTestInterfaces.testDebug(2, "test-message");
+		assertNotNull("Debug recived", lastMessage);
+		assertTrue("Debug {" + lastMessage + "}", lastMessage.startsWith("message[test-message],[test-message]"));
+		lastMessage = null;
+
+		NativeTestInterfaces.testDebug(3, "test-message");
+		assertNotNull("Debug recived", lastMessage);
+		assertTrue("Debug {" + lastMessage + "}", lastMessage.startsWith("message[test-message],[test-message],[3]"));
 	}
 
 	public void appendLog(int level, String message, Throwable throwable) {

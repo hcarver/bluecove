@@ -136,8 +136,16 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testThrowEx
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testDebug
-(JNIEnv *env, jclass, jstring message) {
+(JNIEnv *env, jclass, jint argc, jstring message) {
+	if ((argc == 0) || (message == NULL)) {
+	    debug(("message"));
+	    return;
+	}
 	const char *c = env->GetStringUTFChars(message, 0);
-	debug(("message[%s]", c));
+	switch (argc) {
+		case 1: debug(("message[%s]", c)); break;
+		case 2: debug(("message[%s],[%s]", c, c)); break;
+		case 3: debug(("message[%s],[%s],[%i]", c, c, argc)); break;
+	}
 	env->ReleaseStringUTFChars(message, c);
 }
