@@ -24,11 +24,12 @@ import junit.framework.TestCase;
 
 /**
  * @author vlads
- *
+ * 
  */
 public class UUIDTest extends TestCase {
 
 	public void testUUIDConstructor() {
 		assertEquals("obex UUID", new UUID("0000110500001000800000805f9b34fb", false), new UUID(0x1105));
+		assertEquals("UUID32", new UUID("2130110700001000800000805f9b34fb", false), new UUID(0x21301107));
 	}
 }
