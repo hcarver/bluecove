@@ -1,5 +1,13 @@
 @version $Id$
 
+* 2.0.3 to released 2008-02-XX
+
+    2008-01-19 Vlad Skarzhevskyy
+    *  bluecove-gpl: RFCOMM and L2CAP client on Linux BlueZ
+
+    2008-01-12 Mina Shokry
+    *  bluecove-gpl: Service discovery on Linux
+
 * 2.0.2 released 2008-01-07
 
     2007-12-12
