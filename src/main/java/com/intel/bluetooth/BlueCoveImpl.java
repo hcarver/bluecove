@@ -275,7 +275,6 @@ public class BlueCoveImpl {
 
 	private BluetoothStack newStackInstance(Class ctackClass) throws BluetoothStateException {
 		String className = ctackClass.getName();
-		;
 		try {
 			return (BluetoothStack) ctackClass.newInstance();
 		} catch (InstantiationException e) {
@@ -283,7 +282,7 @@ public class BlueCoveImpl {
 		} catch (IllegalAccessException e) {
 			DebugLog.error(className, e);
 		}
-		throw new BluetoothStateException("BlueCove " + className + " not available");
+		throw new BluetoothStateException("BlueCove " + className + " can't instantiate");
 	}
 
 	private BluetoothStack loadStack(String classPropertyName, String classNameDefault) throws BluetoothStateException {
