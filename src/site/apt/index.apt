@@ -10,6 +10,8 @@ BlueCove
     BlueCove is a Java library for Bluetooth (JSR-82 implementation) that currently interfaces with the Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack found in Windows XP SP2 or Windows Vista
     and WIDCOMM and Microsoft Bluetooth stack on Windows Mobile.
 
+    {{{bluecove-gpl}BlueCove-GPL}} is additional GPL licensed module to support BlueCove runtime on Linux BlueZ.
+
     BlueCove can be used in Java Standard Edition (J2SE) 1.1 or newer.
 
     BlueCove has been tested on following JVM:
@@ -33,6 +35,8 @@ BlueCove
     * {{{http://www2s.biglobe.ne.jp/~dat/java/project/jvm/index_en.html}Mysaifu JVM}} - An open-source (GPL v.2 license) Java VM on Windows Mobile 2003 Second Edition.
 
     * Java for Mac OS X 10.4, Release 5 on PowerPC and Intel processors
+
+    * SUN Java 2 SE 5.0 on Linux Fedora 6 i386 BlueZ 3.7, Fedora 7 i386 BlueZ 3.9
 
     []
 
@@ -91,6 +95,8 @@ You may find many examples on the {{{http://www.google.com/search?q=JSR+82+tutor
 
   BlueCove is licensed under {{{http://www.gnu.org/licenses/lgpl.html}GNU Lesser General Public License}}.
 The LGPL license allows linking and distributing commercial software with BlueCove.
+
+  BlueCove BlueZ module is licensed under {{{http://www.gnu.org/licenses/gpl.html}GNU General Public License}}.
 
   For various technical and legal reasons, BlueCove library is not legally referred to as an implementation of {{{http://jcp.org/en/jsr/detail?id=82}JSR-82}}.
 In order to legally refer to a piece of software as a JSR, it must pass the {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.jsr82}JSR-82 TCK}}
