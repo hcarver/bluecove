@@ -76,7 +76,7 @@ public class BlueCoveImpl {
 	public static final String version = String.valueOf(versionMajor1) + "." + String.valueOf(versionMajor2) + "."
 			+ String.valueOf(versionMinor) + versionSufix;
 
-	private static final int nativeLibraryVersionExpected = versionMajor1 * 1000000 + versionMajor2 * 10000
+	public static final int nativeLibraryVersionExpected = versionMajor1 * 1000000 + versionMajor2 * 10000
 			+ versionMinor * 100 + versionBuild;
 
 	public static final String STACK_WINSOCK = "winsock";
