@@ -127,7 +127,7 @@ public class BlueCoveImpl {
 
 	static final int BLUECOVE_STACK_DETECT_OSX = 1 << 4;
 
-	static final int BLUECOVE_STACK_DETECT_BLUEZ = 1 << 5;
+	public static final int BLUECOVE_STACK_DETECT_BLUEZ = 1 << 5;
 
 	static final int BLUECOVE_STACK_DETECT_EMULATOR = 1 << 6;
 
