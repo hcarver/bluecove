@@ -67,7 +67,7 @@ class BluetoothRFCommConnectionNotifier extends BluetoothConnectionNotifierBase 
 		updateServiceRecord(true);
 		try {
 			long clientHandle = bluetoothStack.rfServerAcceptAndOpenRfServerConnection(handle);
-			int clientSecurityOpt = bluetoothStack.getSecurityOpt(clientHandle, this.securityOpt);
+			int clientSecurityOpt = bluetoothStack.rfGetSecurityOpt(clientHandle, this.securityOpt);
 			return new BluetoothRFCommServerConnection(bluetoothStack, clientHandle, clientSecurityOpt);
 		} catch (IOException e) {
 			if (closed || closing) {

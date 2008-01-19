@@ -312,7 +312,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	public native void connectionRfCloseClientConnection(long handle) throws IOException;
 
-	public int getSecurityOpt(long handle, int expected) throws IOException {
+	public int rfGetSecurityOpt(long handle, int expected) throws IOException {
 		return ServiceRecord.NOAUTHENTICATE_NOENCRYPT;
 	}
 
@@ -436,6 +436,15 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 	 *      com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
+		throw new NotSupportedIOException(getStackID());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2GetSecurityOpt(long, int)
+	 */
+	public int l2GetSecurityOpt(long handle, int expected) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 

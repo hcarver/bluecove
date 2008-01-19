@@ -158,7 +158,7 @@ public interface BluetoothStack {
 	 * @return expected if not implemented by stack
 	 * @throws IOException
 	 */
-	public int getSecurityOpt(long handle, int expected) throws IOException;
+	public int rfGetSecurityOpt(long handle, int expected) throws IOException;
 
 	public void connectionRfCloseClientConnection(long handle) throws IOException;
 
@@ -206,6 +206,8 @@ public interface BluetoothStack {
 	public void l2CloseServerConnection(long handle) throws IOException;
 
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
+
+	public int l2GetSecurityOpt(long handle, int expected) throws IOException;
 
 	public int l2GetTransmitMTU(long handle) throws IOException;
 

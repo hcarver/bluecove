@@ -197,7 +197,7 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	}
 
-	public int getSecurityOpt(long handle, int expected) throws IOException {
+	public int rfGetSecurityOpt(long handle, int expected) throws IOException {
 		return expected;
 	}
 
@@ -343,6 +343,10 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
 		// TODO Auto-generated method stub
 
+	}
+
+	public int l2GetSecurityOpt(long handle, int expected) throws IOException {
+		return expected;
 	}
 
 	/*

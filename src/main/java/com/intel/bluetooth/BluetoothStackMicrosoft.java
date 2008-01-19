@@ -486,7 +486,7 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	private native void connect(long socket, long address, int channel) throws IOException;
 
 	// public native int getSecurityOptImpl(long handle) throws IOException;
-	public int getSecurityOpt(long handle, int expected) throws IOException {
+	public int rfGetSecurityOpt(long handle, int expected) throws IOException {
 		return expected;
 	}
 
@@ -718,6 +718,15 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2GetSecurityOpt(long, int)
+	 */
+	public int l2GetSecurityOpt(long handle, int expected) throws IOException {
+		throw new NotSupportedIOException(getStackID());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
 	 */
 	public boolean l2Ready(long handle) throws IOException {
@@ -768,4 +777,5 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	public long l2RemoteAddress(long handle) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
+
 }

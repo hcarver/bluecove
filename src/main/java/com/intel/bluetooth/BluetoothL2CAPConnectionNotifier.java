@@ -61,7 +61,7 @@ class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase i
 		updateServiceRecord(true);
 		try {
 			long clientHandle = bluetoothStack.l2ServerAcceptAndOpenServerConnection(handle);
-			int clientSecurityOpt = bluetoothStack.getSecurityOpt(clientHandle, this.securityOpt);
+			int clientSecurityOpt = bluetoothStack.l2GetSecurityOpt(clientHandle, this.securityOpt);
 			return new BluetoothL2CAPServerConnection(bluetoothStack, clientHandle, clientSecurityOpt);
 		} catch (IOException e) {
 			if (closed) {

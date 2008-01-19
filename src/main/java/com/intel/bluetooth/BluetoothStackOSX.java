@@ -429,7 +429,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	public native void connectionRfCloseClientConnection(long handle) throws IOException;
 
-	public int getSecurityOpt(long handle, int expected) throws IOException {
+	public int rfGetSecurityOpt(long handle, int expected) throws IOException {
 		return expected;
 	}
 
@@ -678,6 +678,15 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 	 */
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
 		l2ServerCloseImpl(handle);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2GetSecurityOpt(long, int)
+	 */
+	public int l2GetSecurityOpt(long handle, int expected) throws IOException {
+		return expected;
 	}
 
 	/*
