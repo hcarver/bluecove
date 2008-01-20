@@ -38,7 +38,7 @@ import javax.bluetooth.UUID;
  */
 public abstract class Utils {
 
-	private static final String blueCoveImplPackage = getPackage(BlueCoveImpl.class.getName());
+	private static final String blueCoveImplPackage = getPackage(MicroeditionConnector.class.getName());
 
 	private Utils() {
 
