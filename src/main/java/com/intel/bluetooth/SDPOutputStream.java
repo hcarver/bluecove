@@ -76,9 +76,17 @@ class SDPOutputStream extends OutputStream {
 
 		case DataElement.U_INT_16:
 		case DataElement.INT_16:
-		case DataElement.UUID:
 			return 17;
 
+		case DataElement.UUID:
+			long uuid = Utils.UUIDTo32Bit((UUID) d.getValue());
+			if (uuid == -1) {
+				return 1 + 16;
+			} else if (uuid <= 0xFFFF) {
+				return 1 + 2;
+			} else {
+				return 1 + 4;
+			}
 		case DataElement.STRING: {
 			byte[] b = Utils.getUTF8Bytes((String) d.getValue());
 
@@ -165,8 +173,17 @@ class SDPOutputStream extends OutputStream {
 			break;
 
 		case DataElement.UUID:
-			write(24 | 4);
-			writeBytes(Utils.UUIDToByteArray((UUID) d.getValue()));
+			long uuid = Utils.UUIDTo32Bit((UUID) d.getValue());
+			if (uuid == -1) {
+				write(24 | 4);
+				writeBytes(Utils.UUIDToByteArray((UUID) d.getValue()));
+			} else if (uuid <= 0xFFFF) {
+				write(24 | 1);
+				writeLong(uuid, 2);
+			} else {
+				write(24 | 2);
+				writeLong(uuid, 4);
+			}
 			break;
 
 		case DataElement.STRING: {

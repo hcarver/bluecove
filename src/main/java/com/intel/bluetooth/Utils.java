@@ -77,21 +77,21 @@ public abstract class Utils {
 		return buf.toString();
 	}
 
-	static int UUIDTo16Bit(UUID uuid) {
+	static long UUIDTo32Bit(UUID uuid) {
 		if (uuid == null) {
 			return -1;
 		}
 		String str = uuid.toString().toUpperCase();
 		int shortIdx = str.indexOf(BluetoothConsts.SHORT_UUID_BASE);
 		if ((shortIdx != -1) && (shortIdx + BluetoothConsts.SHORT_UUID_BASE.length() == str.length())) {
-			// This is short 16-bit UUID
-			return Integer.parseInt(str.substring(0, shortIdx), 16);
+			// This is short 16-bit or 32-bit UUID
+			return Long.parseLong(str.substring(0, shortIdx), 16);
 		}
 		return -1;
 	}
 
-	static boolean is16Bit(UUID uuid) {
-		return (UUIDTo16Bit(uuid) != -1);
+	static boolean is32Bit(UUID uuid) {
+		return (UUIDTo32Bit(uuid) != -1);
 	}
 
 	static int securityOpt(boolean authenticate, boolean encrypt) {
