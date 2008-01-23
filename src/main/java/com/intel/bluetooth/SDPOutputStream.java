@@ -52,7 +52,7 @@ class SDPOutputStream extends OutputStream {
 		}
 	}
 
-	private int getLength(DataElement d) {
+	static int getLength(DataElement d) {
 		switch (d.getDataType()) {
 		case DataElement.NULL:
 			return 1;
@@ -110,10 +110,17 @@ class SDPOutputStream extends OutputStream {
 
 		case DataElement.DATSEQ:
 		case DataElement.DATALT: {
-			int result = 5;
+			int result = 1;
 
 			for (Enumeration e = (Enumeration) d.getValue(); e.hasMoreElements();) {
 				result += getLength((DataElement) e.nextElement());
+			}
+			if (result < 0xff) {
+				result += 1;
+			} else if (result < 0xFFFF) {
+				result += 2;
+			} else {
+				result += 4;
 			}
 
 			return result;
@@ -209,25 +216,53 @@ class SDPOutputStream extends OutputStream {
 			writeLong(d.getBoolean() ? 1 : 0, 1);
 			break;
 
-		case DataElement.DATSEQ:
-			write(48 | 7);
-			writeLong(getLength(d) - 5, 4);
+		case DataElement.DATSEQ: {
+			int sizeDescriptor;
+			int len = getLength(d);
+			int lenSize;
+			if (len < (0xff + 2)) {
+				sizeDescriptor = 5;
+				lenSize = 1;
+			} else if (len < (0xFFFF + 3)) {
+				sizeDescriptor = 6;
+				lenSize = 2;
+			} else {
+				sizeDescriptor = 7;
+				lenSize = 4;
+			}
+			len -= (1 + lenSize);
+			write(48 | sizeDescriptor);
+			writeLong(len, lenSize);
 
 			for (Enumeration e = (Enumeration) d.getValue(); e.hasMoreElements();) {
 				writeElement((DataElement) e.nextElement());
 			}
 
 			break;
-		case DataElement.DATALT:
-			write(56 | 7);
-			writeLong(getLength(d) - 5, 4);
+		}
+		case DataElement.DATALT: {
+			int sizeDescriptor;
+			int len = getLength(d) - 5;
+			int lenSize;
+			if (len < 0xff) {
+				sizeDescriptor = 5;
+				lenSize = 1;
+			} else if (len < 0xFFFF) {
+				sizeDescriptor = 6;
+				lenSize = 2;
+			} else {
+				sizeDescriptor = 7;
+				lenSize = 4;
+			}
+			write(56 | sizeDescriptor);
+			writeLong(len, lenSize);
 
 			for (Enumeration e = (Enumeration) d.getValue(); e.hasMoreElements();) {
 				writeElement((DataElement) e.nextElement());
 			}
 
 			break;
-
+		}
 		case DataElement.URL: {
 			byte[] b = Utils.getASCIIBytes((String) d.getValue());
 

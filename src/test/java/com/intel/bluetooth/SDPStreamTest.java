@@ -103,7 +103,16 @@ public class SDPStreamTest extends TestCase {
 
 	private void validateConversion(DataElement element) throws IOException {
 		DataElement elementConverted = doubleCovert(element);
-		assertEquals("", element, elementConverted);
+		boolean passed = false;
+		try {
+			assertEquals("", element, elementConverted);
+			passed = true;
+		} finally {
+			if (!passed) {
+				System.out.println("in  " + ((Object) element).toString());
+				System.out.println("out " + ((Object) element).toString());
+			}
+		}
 	}
 
 	public void testInt() throws IOException {
@@ -194,6 +203,31 @@ public class SDPStreamTest extends TestCase {
 		seq1.addElement(seq3);
 		seq1.addElement(new DataElement(DataElement.INT_4, 0x1BCDEF35l));
 		validateConversion(seq1);
+	}
+
+	public void testDATSEQ16() throws IOException {
+		DataElement seq = new DataElement(DataElement.DATSEQ);
+		// INT_8 = 9 bytes;
+		int nElements = (0xFF / 9) + 1;
+		for (int i = 0; i < nElements; i++) {
+			seq.addElement(new DataElement(DataElement.INT_8, i));
+		}
+		int l = SDPOutputStream.getLength(seq);
+		assertTrue("DATSEQ16 len(" + l + ")>0xFF", l > 0xFF);
+		assertTrue("DATSEQ16 len(" + l + ")<0xFFFF", l < 0xFFFF);
+		validateConversion(seq);
+	}
+
+	public void testDATSEQ32() throws IOException {
+		DataElement seq = new DataElement(DataElement.DATSEQ);
+		// INT_8 = 9 bytes;
+		int nElements = (0xFFFF / 9) + 1;
+		for (int i = 0; i < nElements; i++) {
+			seq.addElement(new DataElement(DataElement.INT_8, i));
+		}
+		int l = SDPOutputStream.getLength(seq);
+		assertTrue("DATSEQ32 len(" + l + ")>0xFFFF", l > 0xFFFF);
+		validateConversion(seq);
 	}
 
 	public void testOtherAttributes() throws IOException {
