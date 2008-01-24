@@ -20,6 +20,7 @@
  */
 package com.intel.bluetooth;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -75,6 +76,7 @@ class ServiceRecordImpl implements ServiceRecord {
 				sortIDs[k] = key.intValue();
 				k++;
 			}
+			// DebugLog.debug("b4 sort", sortIDs);
 			// Sort
 			for (int i = 0; i < sortIDs.length; i++) {
 				for (int j = 0; j < sortIDs.length - i - 1; j++) {
@@ -85,7 +87,9 @@ class ServiceRecordImpl implements ServiceRecord {
 					}
 				}
 			}
-			for (int i = 0; i < sortIDs.length - 1; i++) {
+			// DebugLog.debug("sorted", sortIDs);
+
+			for (int i = 0; i < sortIDs.length; i++) {
 				element.addElement(new DataElement(DataElement.U_INT_2, sortIDs[i]));
 				element.addElement(getAttributeValue(sortIDs[i]));
 			}
@@ -103,6 +107,22 @@ class ServiceRecordImpl implements ServiceRecord {
 		(new SDPOutputStream(out)).writeElement(element);
 
 		return out.toByteArray();
+	}
+
+	void loadByteArray(byte data[]) throws IOException {
+		DataElement element = (new SDPInputStream(new ByteArrayInputStream(data))).readElement();
+		if (element.getDataType() != DataElement.DATSEQ) {
+			throw new IOException("DATSEQ expected instead of " + element.getDataType());
+		}
+		Enumeration en = (Enumeration) element.getValue();
+		for (; en.hasMoreElements();) {
+			DataElement id = (DataElement) en.nextElement();
+			if (id.getDataType() != DataElement.U_INT_2) {
+				throw new IOException("U_INT_2 expected instead of " + id.getDataType());
+			}
+			DataElement value = (DataElement) en.nextElement();
+			this.populateAttributeValue((int) id.getLong(), value);
+		}
 	}
 
 	/*

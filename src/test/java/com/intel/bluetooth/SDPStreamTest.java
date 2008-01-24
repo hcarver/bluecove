@@ -27,6 +27,7 @@ import java.util.Enumeration;
 
 import javax.bluetooth.DataElement;
 import javax.bluetooth.UUID;
+import javax.bluetooth.ServiceRecord;
 
 import junit.framework.TestCase;
 
@@ -37,6 +38,11 @@ import junit.framework.TestCase;
 public class SDPStreamTest extends TestCase {
 
 	public static final String stringUTFData = "\u0413\u043E\u043B\u0443\u0431\u043E\u0439\u0417\u0443\u0431";
+
+	protected void setUp() throws Exception {
+		super.setUp();
+		// System.getProperties().put("bluecove.debug", "true");
+	}
 
 	public static void assertEquals(String message, DataElement de1, DataElement de2) {
 		if ((de1 == null) || (de2 == null)) {
@@ -91,7 +97,21 @@ public class SDPStreamTest extends TestCase {
 		default:
 			fail(message + "unknown type");
 		}
+	}
 
+	public static void assertEquals(String message, ServiceRecord sr1, ServiceRecord sr2) {
+		int[] ids1 = sr1.getAttributeIDs();
+		int[] ids2 = sr2.getAttributeIDs();
+		if ((ids1 == null) || (ids2 == null)) {
+			return;
+		}
+		assertNotNull(message + "sr1.getAttributeIDs", ids1);
+		assertNotNull(message + "sr2.getAttributeIDs", ids2);
+		assertEquals(message + "AttributeIDs length", ids1.length, ids2.length);
+
+		for (int i = 0; i < ids1.length; i++) {
+			assertEquals(message + " attr " + ids1[i], sr1.getAttributeValue(ids1[i]), sr2.getAttributeValue(ids1[i]));
+		}
 	}
 
 	private DataElement doubleCovert(DataElement element) throws IOException {
@@ -236,4 +256,20 @@ public class SDPStreamTest extends TestCase {
 		validateConversion(new DataElement(DataElement.NULL));
 	}
 
+	public void validateServiceRecordConvert(String message, ServiceRecordImpl serviceRecord) throws IOException {
+		byte[] data = serviceRecord.toByteArray();
+		ServiceRecordImpl serviceRecord2 = new ServiceRecordImpl(null, null, 0);
+		serviceRecord2.loadByteArray(data);
+		assertEquals(message, serviceRecord, serviceRecord2);
+	}
+
+	public void testServiceRecordConvertion() throws IOException {
+		ServiceRecordImpl serviceRecord = new ServiceRecordImpl(null, null, 0);
+		serviceRecord.populateL2CAPAttributes(1, 2, new UUID(3), "BBBB");
+		validateServiceRecordConvert("L2CAP", serviceRecord);
+
+		ServiceRecordImpl serviceRecord2 = new ServiceRecordImpl(null, null, 0);
+		serviceRecord2.populateRFCOMMAttributes(1, 2, new UUID(3), "BBBB", true);
+		validateServiceRecordConvert("RFCOMM", serviceRecord2);
+	}
 }
