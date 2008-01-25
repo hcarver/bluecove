@@ -224,6 +224,9 @@ public abstract class RemoteDeviceHelper {
 		return name;
 	}
 
+	/**
+	 * @see javax.bluetooth.RemoteDevice#getRemoteDevice(Connection)
+	 */
 	public static RemoteDevice getRemoteDevice(Connection conn) throws IOException {
 		if (!(conn instanceof BluetoothConnectionAccess)) {
 			throw new IllegalArgumentException("Not a Bluetooth connection " + conn.getClass().getName());
@@ -232,7 +235,7 @@ public abstract class RemoteDeviceHelper {
 				((BluetoothConnectionAccess) conn).getRemoteAddress(), null, false);
 	}
 
-	/*
+	/**
 	 * (non-Javadoc)
 	 * 
 	 * @see javax.bluetooth.DiscoveryAgent#retrieveDevices(int)
