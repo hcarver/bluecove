@@ -128,6 +128,13 @@ public abstract class NativeLibLoader {
 
 		String sysName = System.getProperty("os.name");
 
+		String sysArch = System.getProperty("os.arch");
+		if (sysArch != null) {
+			sysArch = sysArch.toLowerCase();
+		} else {
+			sysArch = "";
+		}
+
 		switch (getOS()) {
 		case OS_UNSUPPORTED:
 			DebugLog.fatal("Native Library " + name + " not available on [" + sysName + "] platform");
@@ -140,12 +147,25 @@ public abstract class NativeLibLoader {
 			libFileName = libFileName + ".dll";
 			break;
 		case OS_WINDOWS:
+			if ((sysArch.indexOf("amd64") != -1) || (sysArch.indexOf("x86_64") != -1)) {
+				libName += "_x64";
+				libFileName = libName;
+			}
 			libFileName = libFileName + ".dll";
 			break;
 		case OS_MAC_OS_X:
 			libFileName = "lib" + libFileName + ".jnilib";
 			break;
 		case OS_LINUX:
+			if ((sysArch.indexOf("i386") != -1) || (sysArch.length() == 0)) {
+				// regular Intel
+			} else if ((sysArch.indexOf("amd64") != -1) || (sysArch.indexOf("x86_64") != -1)) {
+				libName += "_x64";
+			} else {
+				// Any other system
+				libName += "_" + sysArch;
+			}
+			libFileName = libName;
 			libFileName = "lib" + libFileName + ".so";
 			break;
 		default:
