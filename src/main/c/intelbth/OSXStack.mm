@@ -47,9 +47,9 @@ OSXStack::OSXStack() {
 
 OSXStack::~OSXStack() {
     if (commPool != NULL) {
-		delete commPool;
-		commPool = NULL;
-	}
+        delete commPool;
+        commPool = NULL;
+    }
     MPSetEvent(deviceInquiryNotificationEvent, 0);
     MPDeleteEvent(deviceInquiryNotificationEvent);
     MPDeleteEvent(deviceInquiryFinishedEvent);
@@ -64,16 +64,16 @@ BOOL OSXStack::deviceInquiryLock(JNIEnv* env) {
         MPWaitForEvent(deviceInquiryFinishedEvent, &flags, kDurationMillisecond * 1000 * 3);
     }
     if (deviceInquiryInProcess) {
-	    throwBluetoothStateException(env, cINQUIRY_RUNNING);
-	    return false;
-	}
-	if (pthread_mutex_trylock(&deviceInquiryInProcessMutex) != 0) {
-	    throwBluetoothStateException(env, cINQUIRY_RUNNING);
-	    return false;
-	}
-	deviceInquiryInProcess = true;
-	deviceInquiryBusy = true;
-	return true;
+        throwBluetoothStateException(env, cINQUIRY_RUNNING);
+        return false;
+    }
+    if (pthread_mutex_trylock(&deviceInquiryInProcessMutex) != 0) {
+        throwBluetoothStateException(env, cINQUIRY_RUNNING);
+        return false;
+    }
+    deviceInquiryInProcess = true;
+    deviceInquiryBusy = true;
+    return true;
 }
 
 BOOL OSXStack::deviceInquiryUnlock() {
@@ -85,9 +85,9 @@ BOOL OSXStack::deviceInquiryUnlock() {
 
 Runnable::Runnable() {
     magic1b = MAGIC_1;
-	magic2b = MAGIC_2;
-	magic1e = MAGIC_1;
-	magic2e = MAGIC_2;
+    magic2b = MAGIC_2;
+    magic1e = MAGIC_1;
+    magic2e = MAGIC_2;
 
     name = "n/a";
     sData[0] = '\0';
@@ -95,15 +95,15 @@ Runnable::Runnable() {
     lData = 0;
     bData = false;
     for (int i = 0; i < RUNNABLE_DATA_MAX; i++) {
-		pData[i] = NULL;
-	}
+        pData[i] = NULL;
+    }
 }
 
 Runnable::~Runnable() {
-	magic1b = 0;
-	magic2b = 0;
-	magic1e = 0;
-	magic2e = 0;
+    magic1b = 0;
+    magic2b = 0;
+    magic1e = 0;
+    magic2e = 0;
 }
 
 BOOL isRunnableCorrupted(Runnable* r) {
@@ -112,53 +112,67 @@ BOOL isRunnableCorrupted(Runnable* r) {
 
 // --- One Native Thread and RunLoop, An issue with the OS X BT implementation is all the calls need to come from the same thread.
 
-CFRunLoopRef			mainRunLoop;
-CFRunLoopSourceRef		btOperationSource;
+CFRunLoopRef            mainRunLoop = NULL;
+CFRunLoopSourceRef      btOperationSource;
 
 typedef struct BTOperationParams {
-	Runnable* runnable;
+    Runnable* runnable;
 };
 
-void *oneNativeThreadMain(void *initializeCond);
+void *oneNativeThreadMain(void *pThreadParams);
 
 void performBTOperationCallBack(void *info);
-pthread_mutex_t	btOperationInProgress;
+pthread_mutex_t btOperationInProgress;
 MPEventID synchronousBTOperationCallComplete;
 
-JavaVM *s_vm;
+typedef struct NativeThreadParams {
+    JavaVM *vm;
+    MPEventID initializedNotificationEvent;
+};
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
     pthread_t thread;
-	pthread_mutex_t initializeMutex;
-	pthread_cond_t  initializeCond;
+    NativeThreadParams threadParams;
+    threadParams.vm = vm;
+    MPCreateEvent(&(threadParams.initializedNotificationEvent));
 
-	pthread_cond_init(&initializeCond, NULL);
-	pthread_mutex_init(&initializeMutex, NULL);
+    // Starting the OS X init and run thread
+    pthread_create(&thread, NULL, oneNativeThreadMain, (void*) &threadParams);
+    // Test for race condition
+    //sleep(3);
 
-	pthread_mutex_lock(&initializeMutex);
-	s_vm = vm;
-	// Starting the OS X init and run thread
-	pthread_create(&thread, NULL, oneNativeThreadMain, (void*) &initializeCond);
-	// wait until the OS X thread has initialized before returning
-	pthread_cond_wait(&initializeCond, &initializeMutex);
+    // wait until the OS X thread has initialized before returning
+    MPEventFlags flags;
+    OSStatus status = MPWaitForEvent(threadParams.initializedNotificationEvent, &flags, kDurationMillisecond * 1000 * 10);
 
-	// clean up
-	pthread_cond_destroy(&initializeCond);
-	pthread_mutex_unlock(&initializeMutex);
-	pthread_mutex_destroy(&initializeMutex);
+    // clean up
+    MPDeleteEvent(threadParams.initializedNotificationEvent);
+
+    if (status == kMPTimeoutErr) {
+        return -1;
+    }
 
     return JNI_VERSION_1_2;
 }
 
-void *oneNativeThreadMain(void *initializeCond) {
+void JNI_OnUnload(JavaVM *vm, void *reserved) {
+    if (mainRunLoop != NULL) {
+        CFRunLoopStop(mainRunLoop);
+        mainRunLoop = NULL;
+    }
+}
+
+void *oneNativeThreadMain(void * pThreadParams) {
+
+    NativeThreadParams* threadParams = (NativeThreadParams*)pThreadParams;
 
     JavaVMAttachArgs args;
     args.version = JNI_VERSION_1_2;
-	args.name = "OS X Bluetooth CFRunLoop";
-	args.group = NULL;
-	JNIEnv	*env;
-	s_vm->AttachCurrentThreadAsDaemon((void**)&env, &args);
+    args.name = "OS X Bluetooth CFRunLoop";
+    args.group = NULL;
+    JNIEnv  *env;
+    threadParams->vm->AttachCurrentThreadAsDaemon((void**)&env, &args);
 
     // setup OS X managed memory environment
     NSAutoreleasePool *autoreleasepool = [[NSAutoreleasePool alloc] init];
@@ -170,26 +184,26 @@ void *oneNativeThreadMain(void *initializeCond) {
 
     // create event sources, i.e. requests from the java VM
     CFRunLoopSourceContext context = {0};
-    BTOperationParams params = {0};
+    BTOperationParams operationParams = {0};
     // An arbitrary pointer to program-defined data, which can be associated with the CFRunLoopSource at creation time. This pointer is passed to callbacks.
-    context.info = &params;
-	context.perform = performBTOperationCallBack;
-	btOperationSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &context);
-	CFRunLoopAddSource(mainRunLoop, btOperationSource, kCFRunLoopDefaultMode);
+    context.info = &operationParams;
+    context.perform = performBTOperationCallBack;
+    btOperationSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &context);
+    CFRunLoopAddSource(mainRunLoop, btOperationSource, kCFRunLoopDefaultMode);
 
     // Init complete, releasing the library load thread
-    pthread_cond_signal((pthread_cond_t*)initializeCond);
+    MPSetEvent(threadParams->initializedNotificationEvent, 1);
 
     ndebug("Starting the CFRunLoop");
-	// Starting the CFRunLoop
-	CFRunLoopRun();
-	// should only reach this point when getting unloaded
-	pthread_mutex_destroy(&btOperationInProgress);
-	MPSetEvent(synchronousBTOperationCallComplete, 0);
+    // Starting the CFRunLoop
+    CFRunLoopRun();
+    // should only reach this point when getting unloaded
+    pthread_mutex_destroy(&btOperationInProgress);
+    MPSetEvent(synchronousBTOperationCallComplete, 0);
     MPDeleteEvent(synchronousBTOperationCallComplete);
 
-	[autoreleasepool release];
-	return NULL;
+    [autoreleasepool release];
+    return NULL;
 }
 
 void performBTOperationCallBack(void *info) {
@@ -210,20 +224,20 @@ void synchronousBTOperation(Runnable* runnable) {
 
     pthread_mutex_lock(&btOperationInProgress);
 
-	CFRunLoopSourceContext	context={0};
-	CFRunLoopSourceGetContext(btOperationSource, &context);
-	BTOperationParams* params = (BTOperationParams*)context.info;
-	params->runnable = runnable;
+    CFRunLoopSourceContext  context={0};
+    CFRunLoopSourceGetContext(btOperationSource, &context);
+    BTOperationParams* params = (BTOperationParams*)context.info;
+    params->runnable = runnable;
 
     ndebug("invoke    BTOperation %s", params->runnable->name);
-	CFRunLoopSourceSignal(btOperationSource);
-	CFRunLoopWakeUp(mainRunLoop);
+    CFRunLoopSourceSignal(btOperationSource);
+    CFRunLoopWakeUp(mainRunLoop);
 
-	MPEventFlags flags;
+    MPEventFlags flags;
     MPWaitForEvent(synchronousBTOperationCallComplete, &flags, kDurationForever);
 
-	pthread_mutex_unlock(&btOperationInProgress);
-	ndebug("return    BTOperation %s", params->runnable->name);
+    pthread_mutex_unlock(&btOperationInProgress);
+    ndebug("return    BTOperation %s", params->runnable->name);
 }
 
 // --- Helper functions
@@ -244,8 +258,8 @@ jstring OSxNewJString(JNIEnv *env, NSString *nString) {
 }
 
 void OSxAddrToString(char* addressString, const BluetoothDeviceAddress* addr) {
-	snprintf(addressString, 14, "%02x%02x%02x%02x%02x%02x",
-			 addr->data[0],
+    snprintf(addressString, 14, "%02x%02x%02x%02x%02x%02x",
+             addr->data[0],
              addr->data[1],
              addr->data[2],
              addr->data[3],
@@ -254,63 +268,63 @@ void OSxAddrToString(char* addressString, const BluetoothDeviceAddress* addr) {
 }
 
 jlong OSxAddrToLong(const BluetoothDeviceAddress* addr) {
-	jlong l = 0;
-	for (int i = 0; i < 6; i++) {
-		l = (l << 8) + addr->data[i];
-	}
-	return l;
+    jlong l = 0;
+    for (int i = 0; i < 6; i++) {
+        l = (l << 8) + addr->data[i];
+    }
+    return l;
 }
 
 void LongToOSxBTAddr(jlong longAddr, BluetoothDeviceAddress* addr) {
-	for (int i = 6 - 1; i >= 0; i--) {
-		addr->data[i] = (UInt8)(longAddr & 0xFF);
-		longAddr >>= 8;
-	}
+    for (int i = 6 - 1; i >= 0; i--) {
+        addr->data[i] = (UInt8)(longAddr & 0xFF);
+        longAddr >>= 8;
+    }
 }
 
 // --- JNI function
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLibraryVersion
 (JNIEnv *, jobject) {
-	return blueCoveVersion();
+    return blueCoveVersion();
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_detectBluetoothStack
 (JNIEnv *env, jobject) {
-	return BLUECOVE_STACK_DETECT_OSX;
+    return BLUECOVE_STACK_DETECT_OSX;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_enableNativeDebug
 (JNIEnv *env, jobject, jclass loggerClass, jboolean on) {
-	enableNativeDebug(env, loggerClass, on);
+    enableNativeDebug(env, loggerClass, on);
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_initializeImpl
 (JNIEnv *env, jobject) {
     stack = new OSXStack();
-	return JNI_TRUE;
+    return JNI_TRUE;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_destroyImpl
 (JNIEnv *env, jobject) {
     if (stack != NULL) {
-		OSXStack* stackTmp = stack;
-		stack = NULL;
-		delete stackTmp;
-	}
+        OSXStack* stackTmp = stack;
+        stack = NULL;
+        delete stackTmp;
+    }
 }
 
 // --- LocalDevice
 
 RUNNABLE(GetLocalDeviceBluetoothAddress, "GetLocalDeviceBluetoothAddress") {
     if (!IOBluetoothLocalDeviceAvailable()) {
-		error = 1;
-		return;
+        error = 1;
+        return;
     }
     BluetoothDeviceAddress localAddress;
     if (IOBluetoothLocalDeviceReadAddress(&localAddress, NULL, NULL, NULL)) {
         error = 2;
-		return;
+        return;
     }
     OSxAddrToString(sData, &localAddress);
 }
@@ -323,10 +337,10 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
     switch (runnable.error) {
         case 1:
             throwBluetoothStateException(env, "Bluetooth Device is not available");
-		    return NULL;
+            return NULL;
         case 2:
             throwBluetoothStateException(env, "Bluetooth Device is not ready");
-	        return NULL;
+            return NULL;
     }
     return env->NewStringUTF(runnable.sData);
 }
@@ -334,7 +348,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
 RUNNABLE(GetLocalDeviceName, "GetLocalDeviceName") {
     BluetoothDeviceName localName;
     if (IOBluetoothLocalDeviceReadName(localName, NULL, NULL, NULL)) {
-		error = 1;
+        error = 1;
     } else {
         strncpy(sData, (char*)localName, RUNNABLE_DATA_MAX);
     }
@@ -464,7 +478,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
 (JNIEnv *env, jobject) {
     Edebug(("getLocalDeviceSoftwareVersionInfo"));
     NumVersion btVersion;
-	char swVers[133];
+    char swVers[133];
     GetLocalDeviceVersion runnable;
     runnable.pData[0] = &btVersion;
     synchronousBTOperation(&runnable);
@@ -472,29 +486,29 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
         return NULL;
     }
 
-	snprintf(swVers, 133, "%1d%1d.%1d.%1d rev %d", btVersion.majorRev >> 4, btVersion.majorRev & 0x0F,
-	                      btVersion.minorAndBugRev >> 4, btVersion.minorAndBugRev & 0x0F, btVersion.nonRelRev);
+    snprintf(swVers, 133, "%1d%1d.%1d.%1d rev %d", btVersion.majorRev >> 4, btVersion.majorRev & 0x0F,
+                          btVersion.minorAndBugRev >> 4, btVersion.minorAndBugRev & 0x0F, btVersion.nonRelRev);
     return env->NewStringUTF(swVers);
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceManufacturer
 (JNIEnv *env, jobject) {
     Edebug(("getLocalDeviceManufacturer"));
-    BluetoothHCIVersionInfo	hciVersion;
-	GetLocalDeviceVersion runnable;
+    BluetoothHCIVersionInfo hciVersion;
+    GetLocalDeviceVersion runnable;
     runnable.pData[1] = &hciVersion;
     synchronousBTOperation(&runnable);
     if (runnable.error) {
         return 0;
     }
-	return hciVersion.manufacturerName;
+    return hciVersion.manufacturerName;
 }
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceVersion
 (JNIEnv *env, jobject) {
     Edebug(("getLocalDeviceVersion"));
-    BluetoothHCIVersionInfo	hciVersion;
-	GetLocalDeviceVersion runnable;
+    BluetoothHCIVersionInfo hciVersion;
+    GetLocalDeviceVersion runnable;
     runnable.pData[1] = &hciVersion;
     synchronousBTOperation(&runnable);
     if (runnable.error) {
