@@ -50,15 +50,16 @@ public abstract class ServiceRecordsRegistry {
 
 	}
 
-	static void register(BluetoothConnectionNotifierServiceRecordAccess notifier, ServiceRecordImpl serviceRecord) {
+	static synchronized void register(BluetoothConnectionNotifierServiceRecordAccess notifier,
+			ServiceRecordImpl serviceRecord) {
 		serviceRecordsMap.put(serviceRecord, notifier);
 	}
 
-	static void unregister(ServiceRecordImpl serviceRecord) {
+	static synchronized void unregister(ServiceRecordImpl serviceRecord) {
 		serviceRecordsMap.remove(serviceRecord);
 	}
 
-	static int getDeviceServiceClasses() {
+	static synchronized int getDeviceServiceClasses() {
 		int deviceServiceClasses = 0;
 		for (Enumeration en = serviceRecordsMap.keys(); en.hasMoreElements();) {
 			ServiceRecordImpl serviceRecord = (ServiceRecordImpl) en.nextElement();
@@ -68,8 +69,10 @@ public abstract class ServiceRecordsRegistry {
 	}
 
 	public static void updateServiceRecord(ServiceRecord srvRecord) throws ServiceRegistrationException {
-		BluetoothConnectionNotifierServiceRecordAccess owner = (BluetoothConnectionNotifierServiceRecordAccess) serviceRecordsMap
-				.get(srvRecord);
+		BluetoothConnectionNotifierServiceRecordAccess owner;
+		synchronized (ServiceRecordsRegistry.class) {
+			owner = (BluetoothConnectionNotifierServiceRecordAccess) serviceRecordsMap.get(srvRecord);
+		}
 		if (owner == null) {
 			throw new IllegalArgumentException("Service record is not registered");
 		}
