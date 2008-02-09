@@ -156,7 +156,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     return JNI_VERSION_1_2;
 }
 
-void JNI_OnUnload(JavaVM *vm, void *reserved) {
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     if (mainRunLoop != NULL) {
         CFRunLoopStop(mainRunLoop);
         mainRunLoop = NULL;

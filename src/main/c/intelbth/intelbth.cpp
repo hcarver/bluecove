@@ -85,6 +85,11 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	return TRUE;
 }
 
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
+    dllCleanup();
+}
+
+
 void dllCleanup() {
 	if (started) {
 		if (restoreBtMode) {
@@ -95,6 +100,7 @@ void dllCleanup() {
 			BluetoothEnableDiscovery(NULL, initialBtIsDiscoverable);
 #endif // _WIN32_WCE
 #endif // _BTWINSOCKLIB
+            restoreBtMode = false;
 		}
 		WSACleanup();
 	}

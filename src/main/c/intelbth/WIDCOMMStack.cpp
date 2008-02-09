@@ -49,6 +49,10 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	return TRUE;
 }
 
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
+    WIDCOMMCleanup();
+}
+
 #endif
 
 BOOL isWIDCOMMReady();
