@@ -47,6 +47,7 @@ private:
 	int read_idx;
 
 	void incReadIdx(int count);
+	int write_buffer(void *p_data, int len);
 public:
 	ReceiveBuffer();
 	ReceiveBuffer(int size);
@@ -54,7 +55,10 @@ public:
 
     void reset();
 	int write(void *p_data, int len);
+	int write_with_len(void *p_data, int len);
+	int sizeof_len();
 	int readByte();
+	int read_len(int* len);
 	int read(void *p_data, int len);
 	int skip(int n);
 	BOOL isOverflown();

@@ -482,11 +482,10 @@ void ReceiveBuffer::setOverflown() {
 	overflown = TRUE;
 }
 
-int ReceiveBuffer::write(void *p_data, int len) {
+int ReceiveBuffer::write_buffer(void *p_data, int len) {
 	if (overflown) {
 		return 0;
 	}
-	if (safe) EnterCriticalSection(&lock);
 	int accept;
 	int _read_idx = read_idx;
 
@@ -526,9 +525,30 @@ int ReceiveBuffer::write(void *p_data, int len) {
 			full = TRUE;
 		}
 	}
+	return accept;
+}
+
+int ReceiveBuffer::write(void *p_data, int len) {
+    if (overflown) {
+		return 0;
+	}
+	if (safe) EnterCriticalSection(&lock);
+	int accept = write_buffer(p_data, len);
 	if (safe) LeaveCriticalSection(&lock);
 	return accept;
 }
+
+int ReceiveBuffer::write_with_len(void *p_data, int len) {
+    if (overflown) {
+		return 0;
+	}
+	if (safe) EnterCriticalSection(&lock);
+	int accept = write_buffer(&len, sizeof(int));
+	accept += write_buffer(p_data, len);
+	if (safe) LeaveCriticalSection(&lock);
+	return accept;
+}
+
 
 void ReceiveBuffer::incReadIdx(int count) {
 	int next_read_idx = read_idx + count;
@@ -548,6 +568,14 @@ int ReceiveBuffer::readByte() {
 	incReadIdx(1);
 	if (safe) LeaveCriticalSection(&lock);
 	return result;
+}
+
+int ReceiveBuffer::sizeof_len() {
+    return sizeof(int);
+}
+
+int ReceiveBuffer::read_len(int* len) {
+    return read(len, sizeof(int));
 }
 
 int ReceiveBuffer::read(void *p_data, int len) {

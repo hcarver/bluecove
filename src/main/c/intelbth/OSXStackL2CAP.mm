@@ -164,8 +164,7 @@ void L2CAPChannelController::l2capChannelClosed() {
 
 void L2CAPChannelController::l2capChannelData(void* dataPointer, size_t dataLength) {
     if (isConnected && !isClosed) {
-        receiveBuffer.write(&dataLength, sizeof(size_t));
-	    receiveBuffer.write(dataPointer, dataLength);
+	    receiveBuffer.write_with_len(dataPointer, dataLength);
 		MPSetEvent(notificationEvent, 1);
     }
 }
@@ -354,7 +353,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Ready
 	if (comm == NULL) {
 		return JNI_FALSE;
 	}
-	if (comm->receiveBuffer.available() > sizeof(size_t)) {
+	if (comm->receiveBuffer.available() > comm->receiveBuffer.sizeof_len()) {
 		return JNI_TRUE;
 	}
 	if (!comm->isConnected) {
@@ -370,7 +369,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Receive
 	if (comm == NULL) {
 		return 0;
 	}
-	if ((!comm->isConnected ) && (comm->receiveBuffer.available() < sizeof(size_t))) {
+	if ((!comm->isConnected ) && (comm->receiveBuffer.available() < comm->receiveBuffer.sizeof_len())) {
 		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return 0;
 	}
@@ -379,7 +378,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Receive
 		return 0;
 	}
 
-	int paketLengthSize = sizeof(size_t);
+	int paketLengthSize = comm->receiveBuffer.sizeof_len();
 
 	while ((stack != NULL) && comm->isConnected  && (comm->receiveBuffer.available() <= paketLengthSize)) {
 		Edebug(("receive[] waits for data"));
@@ -404,8 +403,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Receive
 		throwIOException(env, "Receive buffer corrupted (1)");
 		return 0;
 	}
-	size_t paketLength = 0;
-	int done = comm->receiveBuffer.read(&paketLength, paketLengthSize);
+	int paketLength = 0;
+	int done = comm->receiveBuffer.read_len(&paketLength);
 	if ((done != paketLengthSize) || (paketLength > (count - paketLengthSize))) {
 		throwIOException(env, "Receive buffer corrupted (2)");
 		return 0;

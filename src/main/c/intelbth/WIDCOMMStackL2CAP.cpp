@@ -72,8 +72,7 @@ void WIDCOMMStackL2CapConn::OnDataReceived(void *p_data, UINT16 length) {
 	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || (!isConnected) || (!isValidStackObject(this))) {
 		return;
 	}
-	receiveBuffer.write(&length, sizeof(UINT16));
-	receiveBuffer.write(p_data, length);
+	receiveBuffer.write_with_len(p_data, length);
 	SetEvent(hDataReceivedEvent);
 }
 
@@ -83,7 +82,7 @@ void WIDCOMMStackL2CapConn::OnRemoteDisconnected(UINT16 reason) {
 	}
 	isDisconnected = TRUE;
 	isConnected = FALSE;
-SetEvent(hConnectionEvent);
+    SetEvent(hConnectionEvent);
 }
 
 void WIDCOMMStackL2CapConn::selectConnectionTransmitMTU(JNIEnv *env) {
@@ -513,7 +512,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Read
 	if (l2c == NULL) {
 		return JNI_FALSE;
 	}
-	if (l2c->receiveBuffer.available() > sizeof(UINT16)) {
+	if (l2c->receiveBuffer.available() > l2c->receiveBuffer.sizeof_len()) {
 		return JNI_TRUE;
 	}
 	if (!l2c->isConnected) {
@@ -545,7 +544,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 	hEvents[0] = l2c->hConnectionEvent;
 	hEvents[1] = l2c->hDataReceivedEvent;
 
-	int paketLengthSize = sizeof(UINT16);
+	int paketLengthSize = l2c->receiveBuffer.sizeof_len();
 
 	while ((stack != NULL) && l2c->isConnected  && (l2c->receiveBuffer.available() <= paketLengthSize)) {
 		debug(("receive[] waits for data"));
@@ -570,8 +569,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 		throwIOException(env, "Receive buffer corrupted (1)");
 		return 0;
 	}
-	UINT16 paketLength = 0;
-	int done = l2c->receiveBuffer.read(&paketLength, paketLengthSize);
+	int paketLength = 0;
+	int done = l2c->receiveBuffer.read_len(&paketLength);
 	if ((done != paketLengthSize) || (paketLength > (count - paketLengthSize))) {
 		throwIOException(env, "Receive buffer corrupted (2)");
 		return 0;
