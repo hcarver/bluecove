@@ -33,7 +33,7 @@
 
 @interface OSXStackDiscovery : NSObject {
 
-    int                             _count;
+    int                             _logID;
     volatile BOOL                   _busy;
     volatile BOOL                   _started;
     IOBluetoothDeviceInquiry*       _inquiry;
@@ -50,7 +50,8 @@
 -(void) addDeviceToList:(IOBluetoothDevice*)inDeviceRef;
 -(void) updateDeviceInfo:(IOBluetoothDevice *)inDevice;
 
--(BOOL) startSearch:(int)count;
+-(BOOL) startSearch:(int)logID inquiryLength:(int)inquiryLength;
+
 -(void) stopSearch;
 
 -(BOOL) wait;
