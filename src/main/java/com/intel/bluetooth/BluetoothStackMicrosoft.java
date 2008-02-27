@@ -320,14 +320,15 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	/*
 	 * perform synchronous inquiry
 	 */
-	private native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode,
+	private native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, int duration,
 			DiscoveryListener listener) throws BluetoothStateException;
 
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException {
 		try {
 			deviceDiscoveryDevices = new Hashtable();
-			int discType = runDeviceInquiryImpl(startedNotify, accessCode, listener);
+			int discType = runDeviceInquiryImpl(startedNotify, accessCode, DeviceInquiryThread
+					.getConfigDeviceInquiryDuration(), listener);
 			if (discType == DiscoveryListener.INQUIRY_COMPLETED) {
 				for (Enumeration en = deviceDiscoveryDevices.keys(); en.hasMoreElements();) {
 					RemoteDevice remoteDevice = (RemoteDevice) en.nextElement();

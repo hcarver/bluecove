@@ -110,6 +110,8 @@ Configuration options
         # `bluecove.connect.timeout` time in milliseconds defaults to 2 minutes. WIDCOMM and OS X only.
         # `bluecove.obex.mtu` You can increase transfer speed by changing mtu to bigger value. Default is 1024
         # `bluecove.bluez.class` defaults to com.intel.bluetooth.BluetoothStackBlueZ. Use reflection to start Linux version.
+    (Since v2.0.3)
+        # `bluecove.inquiry.duration` Device Inquiry time in seconds defaults to 11 seconds. MS Stack and OS X only.
 
 == Compilation ==
 

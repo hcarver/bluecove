@@ -76,6 +76,16 @@ class DeviceInquiryThread extends Thread {
 		return t.started;
 	}
 
+	public static int getConfigDeviceInquiryDuration() {
+		final int DEFAULT_DURATION = 11;
+		String duration = BlueCoveImpl.getConfigProperty("bluecove.inquiry.duration");
+		if (duration != null) {
+			return Integer.parseInt(duration);
+		} else {
+			return DEFAULT_DURATION;
+		}
+	}
+
 	public void run() {
 		int discType = DiscoveryListener.INQUIRY_ERROR;
 		try {

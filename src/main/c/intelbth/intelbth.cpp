@@ -222,9 +222,9 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_isWi
 #ifdef _BTWINSOCKLIB
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runDeviceInquiryImpl
-(JNIEnv *env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
+(JNIEnv *env, jobject peer, jobject startedNotify, jint accessCode, jint duration, jobject listener) {
 
-    debug(("->runDeviceInquiry"));
+    debug(("->runDeviceInquiry, duration=%i", duration));
 
     DeviceInquiryCallback callback;
     if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
@@ -241,7 +241,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runDevic
 	query.LAP = accessCode;
 	query.num_responses = 10;
 #endif
-	query.length = 11;
+	query.length = (unsigned char)duration;
 
 	// build BLOB pointing to device query
 
