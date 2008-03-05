@@ -239,7 +239,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
 			throws BluetoothStateException {
-		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
+		return SearchServicesThread.startSearchServices(this, this, attrSet, uuidSet, device, listener);
 	}
 
 	public boolean cancelServiceSearch(int transID) {

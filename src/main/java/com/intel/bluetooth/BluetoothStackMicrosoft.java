@@ -249,7 +249,7 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 			return "7";
 		}
 		if ("bluetooth.sd.trans.max".equals(property)) {
-			return "1";
+			return "7";
 		}
 		if ("bluetooth.connected.inquiry.scan".equals(property)) {
 			return TRUE;
@@ -379,7 +379,7 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
 			throws BluetoothStateException {
-		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
+		return SearchServicesThread.startSearchServices(this, this, attrSet, uuidSet, device, listener);
 	}
 
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,

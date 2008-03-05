@@ -165,7 +165,7 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
 			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
-		return SearchServicesThread.startSearchServices(this, attrSet, uuidSet, device, listener);
+		return SearchServicesThread.startSearchServices(this, this, attrSet, uuidSet, device, listener);
 	}
 
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)

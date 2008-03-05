@@ -20,6 +20,7 @@
  */
 package com.intel.bluetooth;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -35,7 +36,9 @@ class SearchServicesThread extends Thread {
 
 	private static Hashtable threads = new Hashtable();
 
-	private SearchServicesRunnable stack;
+	private BluetoothStack stack;
+
+	private SearchServicesRunnable serachRunnable;
 
 	private int transID;
 
@@ -59,10 +62,11 @@ class SearchServicesThread extends Thread {
 
 	private Object serviceSearchStartedEvent = new Object();
 
-	private SearchServicesThread(SearchServicesRunnable stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device,
-			DiscoveryListener listener) {
+	private SearchServicesThread(BluetoothStack stack, SearchServicesRunnable serachRunnable, int[] attrSet,
+			UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
 		super("SearchServicesThread");
 		this.stack = stack;
+		this.serachRunnable = serachRunnable;
 		this.transID = (++transIDGenerator);
 		this.attrSet = attrSet;
 		this.listener = listener;
@@ -74,9 +78,18 @@ class SearchServicesThread extends Thread {
 	 * Start Services Search and wait for startException or
 	 * searchServicesStartedCallback
 	 */
-	static int startSearchServices(SearchServicesRunnable stack, int[] attrSet, UUID[] uuidSet, RemoteDevice device,
-			DiscoveryListener listener) throws BluetoothStateException {
-		SearchServicesThread t = (new SearchServicesThread(stack, attrSet, uuidSet, device, listener));
+	static int startSearchServices(BluetoothStack stack, SearchServicesRunnable serachRunnable, int[] attrSet,
+			UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
+		SearchServicesThread t;
+		synchronized (threads) {
+			int runningCount = countRunningSearchServicesThreads(stack);
+			int concurrentAllow = Integer.valueOf(stack.getLocalDeviceProperty("bluetooth.sd.trans.max")).intValue();
+			if (runningCount >= concurrentAllow) {
+				throw new BluetoothStateException("Already running " + runningCount + " service discovery transactions");
+			}
+			t = (new SearchServicesThread(stack, serachRunnable, attrSet, uuidSet, device, listener));
+			threads.put(new Integer(t.getTransID()), t);
+		}
 		// In case the BTStack hangs, exit JVM anyway
 		UtilsJavaSE.threadSetDaemon(t);
 		synchronized (t.serviceSearchStartedEvent) {
@@ -93,12 +106,22 @@ class SearchServicesThread extends Thread {
 			}
 		}
 		if (t.started) {
-			threads.put(new Integer(t.getTransID()), t);
 			return t.getTransID();
 		} else {
-			// This is arguable accoding to JSR-82 we can probably return 0...
+			// This is arguable according to JSR-82 we can probably return 0...
 			throw new BluetoothStateException();
 		}
+	}
+
+	private static int countRunningSearchServicesThreads(BluetoothStack stack) {
+		int count = 0;
+		for (Enumeration en = threads.elements(); en.hasMoreElements();) {
+			SearchServicesThread t = (SearchServicesThread) en.nextElement();
+			if (t.stack == stack) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	static SearchServicesThread getServiceSearchThread(int transID) {
@@ -108,13 +131,13 @@ class SearchServicesThread extends Thread {
 	public void run() {
 		int respCode = DiscoveryListener.SERVICE_SEARCH_ERROR;
 		try {
-			respCode = stack.runSearchServices(this, attrSet, uuidSet, device, listener);
+			respCode = serachRunnable.runSearchServices(this, attrSet, uuidSet, device, listener);
 		} catch (BluetoothStateException e) {
 			startException = e;
 			return;
 		} finally {
 			finished = true;
-			threads.remove(new Integer(getTransID()));
+			unregisterThread();
 			synchronized (serviceSearchStartedEvent) {
 				serviceSearchStartedEvent.notifyAll();
 			}
@@ -123,6 +146,12 @@ class SearchServicesThread extends Thread {
 				Utils.j2meUsagePatternDellay();
 				listener.serviceSearchCompleted(getTransID(), respCode);
 			}
+		}
+	}
+
+	private void unregisterThread() {
+		synchronized (threads) {
+			threads.remove(new Integer(getTransID()));
 		}
 	}
 
@@ -143,7 +172,7 @@ class SearchServicesThread extends Thread {
 			return false;
 		}
 		terminated = true;
-		threads.remove(new Integer(getTransID()));
+		unregisterThread();
 		return true;
 	}
 
