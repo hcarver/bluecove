@@ -190,7 +190,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 			return "7";
 		}
 		if ("bluetooth.sd.trans.max".equals(property)) {
-			return "7";
+			return "1";
 		}
 		if ("bluetooth.connected.inquiry.scan".equals(property)) {
 			return TRUE;
