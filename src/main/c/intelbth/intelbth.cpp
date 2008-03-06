@@ -1033,7 +1033,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J(
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J_3BII(JNIEnv *env, jobject peer, jlong socket, jbyteArray b, jint off, jint len) {
-	debug(("->recv(byte[],int,int)"));
+	debug(("->recv(byte[],int,int=%i)", len));
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
 	int done = 0;
@@ -1081,7 +1081,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_send__JI
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_send__J_3BII(JNIEnv *env, jobject peer, jlong socket, jbyteArray b, jint off, jint len) {
-	debug(("->send(int,byte[],int,int)"));
+	debug(("->send(int,byte[],int,int=%i)", len));
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
 	int done = 0;
