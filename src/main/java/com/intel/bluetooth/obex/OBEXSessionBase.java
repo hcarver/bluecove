@@ -160,7 +160,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 			return header;
 		}
 		if ((lenght < 3) || (lenght > OBEXOperationCodes.OBEX_MAX_PACKET_LEN)) {
-			throw new IOException("Invalid packet lenght");
+			throw new IOException("Invalid packet length " + lenght);
 		}
 		byte[] data = new byte[lenght];
 		System.arraycopy(header, 0, data, 0, header.length);
