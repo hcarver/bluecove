@@ -36,103 +36,107 @@ import com.intel.bluetooth.DebugLog;
 
 class OBEXHeaderSetImpl implements HeaderSet {
 
-	 /** Number of objects (used by connect) (0xC0)*/
+	/** Number of objects (used by connect) (0xC0) */
 	static final int OBEX_HDR_COUNT = HeaderSet.COUNT;
 
 	/** Name of the object (0x01) */
 	static final int OBEX_HDR_NAME = HeaderSet.NAME;
 
-	/** Type of the object (0x42)*/
+	/** Type of the object (0x42) */
 	static final int OBEX_HDR_TYPE = HeaderSet.TYPE;
 
-	/** Total lenght of object (0xC3)*/
+	/** Total lenght of object (0xC3) */
 	static final int OBEX_HDR_LENGTH = HeaderSet.LENGTH;
 
-	/** Last modification time of (ISO8601) (0x44)*/
+	/** Last modification time of (ISO8601) (0x44) */
 	static final int OBEX_HDR_TIME = HeaderSet.TIME_ISO_8601;
 
-	/** Deprecated use HDR_TIME instead (0xC4)*/
+	/** Deprecated use HDR_TIME instead (0xC4) */
 	static final int OBEX_HDR_TIME2 = HeaderSet.TIME_4_BYTE;
 
-	/** Description of object (0x05)*/
+	/** Description of object (0x05) */
 	static final int OBEX_HDR_DESCRIPTION = HeaderSet.DESCRIPTION;
 
-	/** name of service that operation is targeted to (0x46)*/
+	/** name of service that operation is targeted to (0x46) */
 	static final int OBEX_HDR_TARGET = HeaderSet.TARGET;
 
-	/** An HTTP 1.x header (0x47)*/
+	/** An HTTP 1.x header (0x47) */
 	static final int OBEX_HDR_HTTP = HeaderSet.HTTP;
 
-	/** Data part of the object (0x48)*/
+	/** Data part of the object (0x48) */
 	static final int OBEX_HDR_BODY = 0x48;
 
-	/** Last data part of the object (0x49)*/
+	/** Last data part of the object (0x49) */
 	static final int OBEX_HDR_BODY_END = 0x49;
 
-	/** Identifies the sender of the object (0x4A)*/
+	/** Identifies the sender of the object (0x4A) */
 	static final int OBEX_HDR_WHO = HeaderSet.WHO;
 
-	/** Connection identifier used for OBEX connection multiplexing (0xCB)*/
+	/** Connection identifier used for OBEX connection multiplexing (0xCB) */
 	static final int OBEX_HDR_CONNECTION = 0xCB;
 
-	/** Application parameters (0x4C)*/
+	/** Application parameters (0x4C) */
 	static final int OBEX_HDR_APP_PARAM = HeaderSet.APPLICATION_PARAMETER;
 
-	/** Authentication digest-challenge (0x4D)*/
+	/** Authentication digest-challenge (0x4D) */
 	static final int OBEX_HDR_AUTH_CHALLENGE = 0x4D;
 
-	/** Authentication digest-response (0x4E)*/
+	/** Authentication digest-response (0x4E) */
 	static final int OBEX_HDR_AUTH_RESPONSE = 0x4E;
 
-	/** OBEX Object class of object (0x51)*/
+	/** OBEX Object class of object (0x51) */
 	static final int OBEX_HDR_OBJECTCLASS = HeaderSet.OBJECT_CLASS;
-	
-	/** indicates the creator of an object (0xCF)*/
+
+	/** indicates the creator of an object (0xCF) */
 	static final int OBEX_HDR_CREATOR = 0xCF;
 
-	/** uniquely identifies the network client (OBEX server) (0x50)*/
+	/** uniquely identifies the network client (OBEX server) (0x50) */
 	static final int OBEX_HDR_WANUUID = 0x50;
 
-	///** OBEX Object class of object (0x51)*/
-	//static final int OBEX_HDR_OBJECTCLASS = 0x51;
+	// /** OBEX Object class of object (0x51)*/
+	// static final int OBEX_HDR_OBJECTCLASS = 0x51;
 
-	/** Parameters used in sessioncommands/responses (0x52)*/
+	/** Parameters used in sessioncommands/responses (0x52) */
 	static final int OBEX_HDR_SESSIONPARAM = 0x52;
 
-	/** Sequence number used in each OBEX packet for reliability (0x93)*/
+	/** Sequence number used in each OBEX packet for reliability (0x93) */
 	static final int OBEX_HDR_SESSIONSEQ = 0x93;
-    
-	// 0x30 to 0x3F user defined - this range includes all combinations of the upper 2 bits
+
+	// 0x30 to 0x3F user defined - this range includes all combinations of the
+	// upper 2 bits
 	static final int OBEX_HDR_USER = 0x30;
-	
+
 	static final int OBEX_HDR_HI_MASK = 0xC0;
-	
+
 	static final int OBEX_HDR_ID_MASK = 0x3F;
-	
-	/** null terminated Unicode text, length prefixed with 2 byte unsigned integer */
+
+	/**
+	 * null terminated Unicode text, length prefixed with 2 byte unsigned
+	 * integer
+	 */
 	static final int OBEX_STRING = 0x00;
-	
+
 	/** byte sequence, length prefixed with 2 byte unsigned integer */
 	static final int OBEX_BYTE_STREAM = 0x40;
-	
+
 	/** 1 byte quantity */
 	static final int OBEX_BYTE = 0x80;
-	
+
 	/** 4 byte quantity – transmitted in network byte order (high byte first) */
 	static final int OBEX_INT = 0xC0;
-	
+
 	private static final int OBEX_MAX_FIELD_LEN = 0xFF;
-	
+
 	private int responseCode;
-	
+
 	private Hashtable headerValues;
-	
+
 	private Vector authResponses;
-	
+
 	private Vector authChallenges;
 
 	private static final int NO_RESPONSE_CODE = Integer.MIN_VALUE;
-	
+
 	OBEXHeaderSetImpl() {
 		this(NO_RESPONSE_CODE);
 	}
@@ -143,7 +147,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		this.authResponses = new Vector();
 		this.authChallenges = new Vector();
 	}
-	
+
 	static void validateCreatedHeaderSet(HeaderSet headers) {
 		if (headers == null) {
 			return;
@@ -151,11 +155,11 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		if (!(headers instanceof OBEXHeaderSetImpl)) {
 			throw new IllegalArgumentException("Illegal HeaderSet type");
 		}
-		if (((OBEXHeaderSetImpl)headers).responseCode != NO_RESPONSE_CODE) {
+		if (((OBEXHeaderSetImpl) headers).responseCode != NO_RESPONSE_CODE) {
 			throw new IllegalArgumentException("Illegal HeaderSet");
 		}
 	}
-	
+
 	private void validateHeaderID(int headerID) throws IllegalArgumentException {
 		if (headerID < 0 || headerID > 0xff) {
 			throw new IllegalArgumentException("Expected header ID in range 0 to 255");
@@ -165,7 +169,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 			throw new IllegalArgumentException("Reserved header ID");
 		}
 	}
-	
+
 	public void setHeader(int headerID, Object headerValue) {
 		validateHeaderID(headerID);
 		if (headerValue == null) {
@@ -201,7 +205,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 					if (!(headerValue instanceof Long)) {
 						throw new IllegalArgumentException("Expected java.lang.Long");
 					}
-					long v = ((Long)headerValue).longValue();
+					long v = ((Long) headerValue).longValue();
 					if (v < 0 || v > 0xffffffffl) {
 						throw new IllegalArgumentException("Expected long in range 0 to 2^32-1");
 					}
@@ -219,7 +223,9 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		return headerValues.get(new Integer(headerID));
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.obex.HeaderSet#getHeaderList()
 	 */
 	public int[] getHeaderList() throws IOException {
@@ -241,7 +247,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		}
 		return this.responseCode;
 	}
-	
+
 	static HeaderSet cloneHeaders(HeaderSet headers) throws IOException {
 		if (headers == null) {
 			return null;
@@ -249,12 +255,12 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		if (!(headers instanceof OBEXHeaderSetImpl)) {
 			throw new IllegalArgumentException("Illegal HeaderSet type");
 		}
-		HeaderSet hs = new OBEXHeaderSetImpl(((OBEXHeaderSetImpl)headers).responseCode);
-		
+		HeaderSet hs = new OBEXHeaderSetImpl(((OBEXHeaderSetImpl) headers).responseCode);
+
 		int[] headerIDArray = headers.getHeaderList();
 		for (int i = 0; (headerIDArray != null) && (i < headerIDArray.length); i++) {
 			int headerID = headerIDArray[i];
-			hs.setHeader(headerID,  headers.getHeader(headerID));
+			hs.setHeader(headerID, headers.getHeader(headerID));
 		}
 		return hs;
 	}
@@ -262,28 +268,28 @@ class OBEXHeaderSetImpl implements HeaderSet {
 	public void createAuthenticationChallenge(String realm, boolean userID, boolean access) {
 		authChallenges.addElement(OBEXAuthentication.createChallenge(realm, userID, access));
 	}
-	
+
 	void addAuthenticationResponse(byte[] authResponse) {
 		authResponses.addElement(authResponse);
 	}
-	
+
 	boolean hasAuthenticationChallenge() {
 		return !authChallenges.isEmpty();
 	}
-	
+
 	Enumeration getAuthenticationChallenges() {
 		return authChallenges.elements();
 	}
-	
+
 	boolean hasAuthenticationResponse() {
 		return !authResponses.isEmpty();
 	}
-	
+
 	Enumeration getAuthenticationResponses() {
 		return authResponses.elements();
 	}
-	
-    static long readObexInt(byte[] data, int off) throws IOException {
+
+	static long readObexInt(byte[] data, int off) throws IOException {
 		long l = 0;
 		for (int i = 0; i < 4; i++) {
 			l = l << 8;
@@ -291,38 +297,40 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		}
 		return l;
 	}
-	
+
 	static void writeObexInt(OutputStream out, int headerID, long data) throws IOException {
 		byte[] b = new byte[5];
-		b[0] = (byte)headerID;
-		b[1] = (byte)((data >>> 24) & 0xFF);
-        b[2] = (byte)((data >>> 16) & 0xFF);
-        b[3] = (byte)((data >>>  8) & 0xFF);
-        b[4] = (byte)((data >>>  0) & 0xFF);
-        out.write(b);
-    }
-	
+		b[0] = (byte) headerID;
+		b[1] = (byte) ((data >>> 24) & 0xFF);
+		b[2] = (byte) ((data >>> 16) & 0xFF);
+		b[3] = (byte) ((data >>> 8) & 0xFF);
+		b[4] = (byte) ((data >>> 0) & 0xFF);
+		out.write(b);
+	}
+
 	static void writeObexLen(OutputStream out, int headerID, int len) throws IOException {
 		byte[] b = new byte[3];
-		b[0] = (byte)headerID;
+		b[0] = (byte) headerID;
 		if ((len < 0) || len > 0xFFFF) {
 			throw new IOException("very large data" + len);
 		}
 		b[1] = OBEXUtils.hiByte(len);
 		b[2] = OBEXUtils.loByte(len);
-        out.write(b);
-    }
-	
+		out.write(b);
+	}
+
 	static void writeObexASCII(OutputStream out, int headerID, String value) throws IOException {
 		writeObexLen(out, headerID, 3 + value.length() + 1);
 		out.write(value.getBytes("iso-8859-1"));
 		out.write(0);
 	}
-	
+
 	static void writeObexUnicode(OutputStream out, int headerID, String value) throws IOException {
-		// null terminated Unicode text, length prefixed with 2 byte unsigned integer
+		// null terminated Unicode text, length prefixed with 2 byte unsigned
+		// integer
 		// the length field includes the 2 bytes of the null
-		// terminator (0x00, 0x00). Therefore the length of the string ”Jumar” would be 12 bytes; 5 visible
+		// terminator (0x00, 0x00). Therefore the length of the string ”Jumar”
+		// would be 12 bytes; 5 visible
 		// characters plus the null terminator, each two bytes in length.
 		if (value.length() == 0) {
 			writeObexLen(out, headerID, 3);
@@ -331,9 +339,9 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		byte[] b = OBEXUtils.getUTF16Bytes(value);
 		writeObexLen(out, headerID, 3 + b.length + 2);
 		out.write(b);
-		out.write(new byte[]{0, 0});
+		out.write(new byte[] { 0, 0 });
 	}
-	
+
 	static byte[] toByteArray(HeaderSet headers) throws IOException {
 		if (headers == null) {
 			return new byte[0];
@@ -350,21 +358,21 @@ class OBEXHeaderSetImpl implements HeaderSet {
 				Calendar c = (Calendar) headers.getHeader(hi);
 				writeObexInt(buf, hi, c.getTime().getTime() / 1000);
 			} else if (hi == OBEX_HDR_TYPE) {
-				//ASCII string
-				writeObexASCII(buf, hi, (String)headers.getHeader(hi));
+				// ASCII string
+				writeObexASCII(buf, hi, (String) headers.getHeader(hi));
 			} else {
 				switch (hi & OBEX_HDR_HI_MASK) {
 				case OBEX_STRING:
-					writeObexUnicode(buf, hi, (String)headers.getHeader(hi));
+					writeObexUnicode(buf, hi, (String) headers.getHeader(hi));
 					break;
 				case OBEX_BYTE_STREAM:
-					byte data[] = (byte[])headers.getHeader(hi);
+					byte data[] = (byte[]) headers.getHeader(hi);
 					writeObexLen(buf, hi, 3 + data.length);
 					buf.write(data);
 					break;
 				case OBEX_BYTE:
 					buf.write(hi);
-					buf.write(((Byte)headers.getHeader(hi)).byteValue());
+					buf.write(((Byte) headers.getHeader(hi)).byteValue());
 					break;
 				case OBEX_INT:
 					writeObexInt(buf, hi, ((Long) headers.getHeader(hi)).longValue());
@@ -377,13 +385,13 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		if ((headerIDArray != null) && (headerIDArray.length != 0)) {
 			DebugLog.debug("written headers", headerIDArray.length);
 		}
-		for (Enumeration iter = ((OBEXHeaderSetImpl)headers).authChallenges.elements(); iter.hasMoreElements();) {
+		for (Enumeration iter = ((OBEXHeaderSetImpl) headers).authChallenges.elements(); iter.hasMoreElements();) {
 			byte[] authChallenge = (byte[]) iter.nextElement();
 			writeObexLen(buf, OBEX_HDR_AUTH_CHALLENGE, 3 + authChallenge.length);
 			buf.write(authChallenge);
 			DebugLog.debug("written AUTH_CHALLENGE");
 		}
-		for (Enumeration iter = ((OBEXHeaderSetImpl)headers).authResponses.elements(); iter.hasMoreElements();) {
+		for (Enumeration iter = ((OBEXHeaderSetImpl) headers).authResponses.elements(); iter.hasMoreElements();) {
 			byte[] authResponse = (byte[]) iter.nextElement();
 			writeObexLen(buf, OBEX_HDR_AUTH_RESPONSE, 3 + authResponse.length);
 			buf.write(authResponse);
@@ -391,18 +399,18 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		}
 		return buf.toByteArray();
 	}
-	
+
 	/*
-	 * Read by server 
+	 * Read by server
 	 */
 	static OBEXHeaderSetImpl readHeaders(byte[] buf, int off) throws IOException {
 		return readHeaders(new OBEXHeaderSetImpl(NO_RESPONSE_CODE), buf, off);
 	}
-	
+
 	static OBEXHeaderSetImpl readHeaders(byte responseCode, byte[] buf, int off) throws IOException {
 		return readHeaders(new OBEXHeaderSetImpl(0xFF & responseCode), buf, off);
 	}
-	
+
 	private static OBEXHeaderSetImpl readHeaders(OBEXHeaderSetImpl hs, byte[] buf, int off) throws IOException {
 		int count = 0;
 		while (off < buf.length) {
@@ -432,10 +440,10 @@ class OBEXHeaderSetImpl implements HeaderSet {
 				} else if (hi == OBEX_HDR_TIME) {
 					hs.setHeader(hi, readTimeISO8601(data));
 				} else if (hi == OBEX_HDR_AUTH_CHALLENGE) {
-					((OBEXHeaderSetImpl)hs).authChallenges.addElement(data);
+					((OBEXHeaderSetImpl) hs).authChallenges.addElement(data);
 					DebugLog.debug("received AUTH_CHALLENGE");
 				} else if (hi == OBEX_HDR_AUTH_RESPONSE) {
-					((OBEXHeaderSetImpl)hs).authResponses.addElement(data);
+					((OBEXHeaderSetImpl) hs).authResponses.addElement(data);
 					DebugLog.debug("received AUTH_RESPONSE");
 				} else {
 					hs.setHeader(hi, data);
@@ -460,29 +468,29 @@ class OBEXHeaderSetImpl implements HeaderSet {
 				throw new IOException("Unsupported encoding " + (hi & OBEX_HDR_HI_MASK));
 			}
 			off += len;
-			count ++;
+			count++;
 		}
 		if (count != 0) {
 			DebugLog.debug("read headers", count);
 		}
 		return hs;
 	}
-	
+
 	private static byte[] d4(int i) {
 		byte[] b = new byte[4];
 		int d = 1000;
-		for (int k = 0; k < 4; k ++) {
-		    b[k] =  (byte)(i / d + '0');
-		    i %= d;
-		    d /=10;
+		for (int k = 0; k < 4; k++) {
+			b[k] = (byte) (i / d + '0');
+			i %= d;
+			d /= 10;
 		}
 		return b;
 	}
-	
+
 	private static byte[] d2(int i) {
 		byte[] b = new byte[2];
-		b[0] =  (byte)(i / 10 + '0');
-		b[1] =  (byte)(i % 10 + '0');
+		b[0] = (byte) (i / 10 + '0');
+		b[1] = (byte) (i % 10 + '0');
 		return b;
 	}
 
@@ -501,15 +509,24 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		out.write(d2(cal.get(Calendar.SECOND)));
 		out.write('Z');
 	}
-	
+
 	/**
-	 * ISO-8601 UTC YYYYMMDDTHHMMSSZ
+	 * ISO-8601 UTC YYYYMMDDTHHMMSS(Z) Z for UTC time
 	 */
-	static Calendar readTimeISO8601(byte data[]) throws IOException  {
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-		if ((data.length != 16) || (data[8] != 'T') || (data[15] != 'Z')) {
+	static Calendar readTimeISO8601(byte data[]) throws IOException {
+		boolean utc = false;
+		if ((data.length != 16) && (data.length != 15)) {
+			throw new IOException("Invalid ISO-8601 date length " + new String(data) + " length " + data.length);
+		} else if (data[8] != 'T') {
 			throw new IOException("Invalid ISO-8601 date " + new String(data));
+		} else if (data.length == 16) {
+			if (data[15] != 'Z') {
+				throw new IOException("Invalid ISO-8601 date " + new String(data));
+			} else {
+				utc = true;
+			}
 		}
+		Calendar cal = utc ? Calendar.getInstance(TimeZone.getTimeZone("UTC")) : Calendar.getInstance();
 		cal.set(Calendar.YEAR, Integer.valueOf(new String(data, 0, 4)).intValue());
 		cal.set(Calendar.MONTH, Integer.valueOf(new String(data, 4, 2)).intValue() - 1);
 		cal.set(Calendar.DAY_OF_MONTH, Integer.valueOf(new String(data, 6, 2)).intValue());
