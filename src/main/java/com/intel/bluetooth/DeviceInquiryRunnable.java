@@ -51,6 +51,9 @@ public interface DeviceInquiryRunnable {
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException;
 
+	/**
+	 * Convenience method called from native code
+	 */
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
 			String deviceName, boolean paired);
 }
