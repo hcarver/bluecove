@@ -34,9 +34,9 @@ BlueCove
 
     * {{{http://www2s.biglobe.ne.jp/~dat/java/project/jvm/index_en.html}Mysaifu JVM}} - An open-source (GPL v.2 license) Java VM on Windows Mobile 2003 Second Edition.
 
-    * Java for Mac OS X 10.4, Release 5 on PowerPC and Intel processors
+    * Java for Mac OS X 10.4 and 10.5, Release 5 on PowerPC and Intel processors
 
-    * SUN Java 2 SE 5.0 on Linux Fedora 6 i386 BlueZ 3.7, Fedora 7 i386 BlueZ 3.9
+    * SUN Java 2 SE 5.0 on Linux Fedora 6 i386 BlueZ 3.7, Fedora 7 i386 BlueZ 3.9, (Also tested on Ubuntu and OpenSUSE)
 
     * GNU libgcj 4.1.2 on Fedora 7 i386 BlueZ 3.9
 
