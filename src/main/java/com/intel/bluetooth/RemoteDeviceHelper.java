@@ -293,7 +293,7 @@ public abstract class RemoteDeviceHelper {
 		return "000000000000".substring(s.length()) + s;
 	}
 
-	static String getBluetoothAddress(long address) {
+	public static String getBluetoothAddress(long address) {
 		return formatBluetoothAddress(Utils.toHexString(address));
 	}
 
