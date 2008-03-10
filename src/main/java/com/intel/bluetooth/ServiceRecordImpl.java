@@ -612,7 +612,11 @@ class ServiceRecordImpl implements ServiceRecord {
 		if (attrID < 0x0000 || attrID > 0xffff) {
 			throw new IllegalArgumentException();
 		}
-		attributes.put(new Integer(attrID), attrValue);
+		if (attrValue == null) {
+			attributes.remove(new Integer(attrID));
+		} else {
+			attributes.put(new Integer(attrID), attrValue);
+		}
 	}
 
 	public String toString() {
