@@ -424,6 +424,12 @@ public class BlueCoveImpl {
 		}
 	}
 
+	public String getLocalDeviceFeature(int featureID) throws BluetoothStateException {
+		final String TRUE = "true";
+		final String FALSE = "false";
+		return ((getBluetoothStack().getFeatureSet() & featureID) != 0) ? TRUE : FALSE;
+	}
+
 	private BluetoothStack createDetectorOnWindows(String stackFirst) throws BluetoothStateException {
 		if (stackFirst != null) {
 			DebugLog.debug("detector stack", stackFirst);

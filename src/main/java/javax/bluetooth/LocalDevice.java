@@ -294,6 +294,14 @@ public class LocalDevice {
 	 * <TD>bluecove.stack</TD>
 	 * <TD>The Bluetooth Stack: "winsock", "widcomm" or "bluesoleil"</TD>
 	 * </TR>
+	 * <TR>
+	 * <TD>bluecove.feature.l2cap</TD>
+	 * <TD>Does the Bluetooth Stack support L2CAP: "true" or "false"</TD>
+	 * </TR>
+	 * <TR>
+	 * <TD>bluecove.connections</TD>
+	 * <TD>The number of open connections</TD>
+	 * </TR>
 	 * </TABLE>
 	 * 
 	 * @param property
@@ -306,10 +314,18 @@ public class LocalDevice {
 		try {
 			if ("bluetooth.api.version".equals(property)) {
 				return "1.1";
+			} else if ("obex.api.version".equals(property)) {
+				return "1.1";
 			} else if ("bluecove".equals(property)) {
 				return BlueCoveImpl.version;
 			} else if ("bluecove.stack".equals(property)) {
 				return BlueCoveImpl.instance().getBluetoothStack().getStackID();
+			} else if ("bluecove.feature.l2cap".equals(property)) {
+				return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_L2CAP);
+			} else if ("bluecove.feature.service_attributes".equals(property)) {
+				return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_SERVICE_ATTRIBUTES);
+			} else if ("bluecove.feature.set_device_service_classes".equals(property)) {
+				return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_SET_DEVICE_SERVICE_CLASSES);
 			} else if ("bluecove.connections".equals(property)) {
 				return String.valueOf(RemoteDeviceHelper.openConnections());
 			}
