@@ -532,7 +532,7 @@ class ServiceRecordImpl implements ServiceRecord {
 		if (device != null) {
 			throw new RuntimeException("Service record obtained from a remote device");
 		}
-		if ((classes & (0xff000000 | DeviceClassConsts.LIMITED_DISCOVERY_SERVICE)) != 0) {
+		if ((classes & (0xff000000 | DeviceClassConsts.LIMITED_DISCOVERY_SERVICE | DeviceClassConsts.FORMAT_VERSION_MASK)) != 0) {
 			throw new IllegalArgumentException();
 		}
 		if ((classes & (DeviceClassConsts.MAJOR_MASK | DeviceClassConsts.MINOR_MASK)) != 0) {

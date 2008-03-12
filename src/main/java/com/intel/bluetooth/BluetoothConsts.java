@@ -29,49 +29,49 @@ import javax.bluetooth.UUID;
  * Constants defined by Bluetooth and JSR-82 specifications
  * 
  * @author vlads
- *
+ * 
  */
 public abstract class BluetoothConsts {
 
 	public static final String SHORT_UUID_BASE = "00001000800000805F9B34FB";
-	
+
 	public static final String PROTOCOL_SCHEME_L2CAP = "btl2cap";
-	
+
 	public static final String PROTOCOL_SCHEME_RFCOMM = "btspp";
-	
+
 	public static final String PROTOCOL_SCHEME_BT_OBEX = "btgoep";
-	
+
 	public static final String PROTOCOL_SCHEME_TCP_OBEX = "tcpobex";
-	
+
 	public static final UUID L2CAP_PROTOCOL_UUID = new UUID(0x0100);
 
 	public static final UUID RFCOMM_PROTOCOL_UUID = new UUID(0x0003);
 
 	public static final UUID OBEX_PROTOCOL_UUID = new UUID(0x0008);
-	
+
 	public static final UUID OBEXFileTransferServiceClass_UUID = new UUID(0x1106);
 
-	public static final  int RFCOMM_CHANNEL_MIN = 1;
-	
-	public static final  int RFCOMM_CHANNEL_MAX = 30;
-	
-	public static final  int L2CAP_PSM_MIN = 5;
-	
-	public static final  int L2CAP_PSM_MAX = 0xFFFF;
-	
+	public static final int RFCOMM_CHANNEL_MIN = 1;
+
+	public static final int RFCOMM_CHANNEL_MAX = 30;
+
+	public static final int L2CAP_PSM_MIN = 5;
+
+	public static final int L2CAP_PSM_MAX = 0xFFFF;
+
 	public static final int TCP_OBEX_DEFAULT_PORT = 650;
-	
+
 	static Hashtable obexUUIDs = new Hashtable();
-	
+
 	private BluetoothConsts() {
-		
+
 	}
-	
+
 	private static void addObex(int uuid) {
 		UUID u = new UUID(uuid);
 		obexUUIDs.put(u, u);
 	}
-	
+
 	static {
 		addObex(0x1104);// IR_MC_SYNC
 		addObex(0x1105);// OBEX_OBJECT_PUSH
@@ -79,9 +79,9 @@ public abstract class BluetoothConsts {
 		addObex(0x1107);// IR_MC_SYNC_COMMAND
 		addObex(0x111B);// IMG_RESPONDER
 	}
-	
+
 	public static final UUID SERIAL_PORT_UUID = new UUID(0x1101);
-	
+
 	public static final int BluetoothProfileDescriptorList = 0x0009;
 
 	public static final int BrowseGroupList = 0x0005;
@@ -111,7 +111,7 @@ public abstract class BluetoothConsts {
 	public static final int ServiceInfoTimeToLive = 0x0007;
 
 	public static final int AttributeIDServiceName = 0x0100;
-	
+
 	public static final int ServiceName = 0x0000;
 
 	public static final int ServiceRecordHandle = 0x0000;
@@ -119,18 +119,20 @@ public abstract class BluetoothConsts {
 	public static final int ServiceRecordState = 0x0002;
 
 	public static final int VersionNumberList = 0x0200;
-	
+
 	public static String toString(DeviceClass dc) {
 		return DeviceClassConsts.toString(dc);
 	}
-	
+
 	static class DeviceClassConsts {
-		
+
 		public static final int SERVICE_MASK = 0xffe000;
 
 		public static final int MAJOR_MASK = 0x001f00;
 
 		public static final int MINOR_MASK = 0x0000fc;
+
+		public static final int FORMAT_VERSION_MASK = 0x3;
 
 		/*
 		 * service classes
@@ -296,7 +298,6 @@ public abstract class BluetoothConsts {
 		public static final int IMAGING_MINOR_SCANNER_MASK = 0x40;
 
 		public static final int IMAGING_MINOR_PRINTER_MASK = 0x80;
-
 
 		private static boolean append(StringBuffer buf, String str, boolean comma) {
 			if (comma) {
@@ -486,8 +487,7 @@ public abstract class BluetoothConsts {
 
 				int minor = dc.getMinorDeviceClass();
 
-				switch (minor
-						& (PERIPHERAL_MINOR_KEYBOARD_MASK | PERIPHERAL_MINOR_POINTER_MASK)) {
+				switch (minor & (PERIPHERAL_MINOR_KEYBOARD_MASK | PERIPHERAL_MINOR_POINTER_MASK)) {
 				case 0:
 					buf.append("/()");
 					break;
@@ -562,9 +562,9 @@ public abstract class BluetoothConsts {
 			buf.append("/(");
 
 			boolean comma = false;
-			
+
 			int record = dc.getServiceClasses();
-			
+
 			if ((record & LIMITED_DISCOVERY_SERVICE) != 0)
 				comma = append(buf, "Limited Discovery", comma);
 			if ((record & POSITIONING_SERVICE) != 0)
