@@ -292,6 +292,10 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 		return Thread.interrupted();
 	}
 
+	public boolean authenticateRemoteDevice(long address) throws IOException {
+		return false;
+	}
+
 	// ---------------------- Device Inquiry
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {

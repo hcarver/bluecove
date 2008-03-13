@@ -20,16 +20,20 @@
  */
 package com.intel.bluetooth;
 
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
 /**
- * An entry in a WeakVector will automatically be removed when its key is no longer in ordinary use.
- * This class is wrapper above WeakHashMap when available. e.g. on J2SE 1.2 and above
- * For IBM J9 MIDP we will use Vector to make application work.
- * But connection can't be discarded by the garbage collector.
+ * An entry in a WeakVector will automatically be removed when its key is no
+ * longer in ordinary use. This class is wrapper above WeakHashMap when
+ * available. e.g. on J2SE 1.2 and above For IBM J9 MIDP we will use Vector to
+ * make application work. But connection can't be discarded by the garbage
+ * collector.
+ * 
  * @author vlads
- *
+ * 
  */
 class WeakVectorFactory {
 
@@ -44,6 +48,8 @@ class WeakVectorFactory {
 		public boolean contains(Object elem);
 
 		public Object firstElement();
+
+		public Enumeration elements();
 
 	}
 
@@ -75,6 +81,10 @@ class WeakVectorFactory {
 			return vectorImpl.firstElement();
 		}
 
+		public Enumeration elements() {
+			return vectorImpl.elements();
+		}
+
 		public boolean removeElement(Object obj) {
 			return vectorImpl.removeElement(obj);
 		}
@@ -88,6 +98,24 @@ class WeakVectorFactory {
 	private static class WeakVectorOnWeakHashMapImpl implements WeakVector {
 
 		private WeakHashMap mapImpl;
+
+		private static class EnumerationAdapter implements Enumeration {
+
+			Iterator iterator;
+
+			public EnumerationAdapter(Iterator iterator) {
+				this.iterator = iterator;
+			}
+
+			public boolean hasMoreElements() {
+				return this.iterator.hasNext();
+			}
+
+			public Object nextElement() {
+				return this.iterator.next();
+			}
+
+		}
 
 		private WeakVectorOnWeakHashMapImpl() {
 			mapImpl = new WeakHashMap();
@@ -105,6 +133,10 @@ class WeakVectorFactory {
 
 		public Object firstElement() {
 			return mapImpl.keySet().iterator().next();
+		}
+
+		public Enumeration elements() {
+			return new EnumerationAdapter(mapImpl.keySet().iterator());
 		}
 
 		public boolean removeElement(Object obj) {

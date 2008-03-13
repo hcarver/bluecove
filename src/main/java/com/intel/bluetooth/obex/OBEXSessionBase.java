@@ -240,6 +240,16 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#encrypt(boolean)
+	 */
+	public boolean encrypt(boolean on) {
+		validateBluetoothConnection();
+		return ((BluetoothConnectionAccess) conn).encrypt(on);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#setRemoteDevice(javax.bluetooth.RemoteDevice)
 	 */
 	public void setRemoteDevice(RemoteDevice remoteDevice) {

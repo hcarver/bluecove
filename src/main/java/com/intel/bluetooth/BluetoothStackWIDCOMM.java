@@ -237,6 +237,12 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 		return Thread.interrupted();
 	}
 
+	// ---------------------- Remote Device authentication
+
+	public boolean authenticateRemoteDevice(long address) throws IOException {
+		return false;
+	}
+
 	// --- Device Inquiry
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {

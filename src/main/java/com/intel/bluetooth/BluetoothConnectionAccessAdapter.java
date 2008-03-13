@@ -17,39 +17,56 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth;
 
 import java.io.IOException;
 
 import javax.bluetooth.RemoteDevice;
 
-public abstract class BluetoothConnectionAccessAdapter implements  BluetoothConnectionAccess {
+public abstract class BluetoothConnectionAccessAdapter implements BluetoothConnectionAccess {
 
 	protected abstract BluetoothConnectionAccess getImpl();
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
 	 */
 	public long getRemoteAddress() throws IOException {
 		return getImpl().getRemoteAddress();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteDevice()
 	 */
 	public RemoteDevice getRemoteDevice() {
 		return getImpl().getRemoteDevice();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
 	 */
 	public int getSecurityOpt() {
 		return getImpl().getSecurityOpt();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#encrypt(boolean)
+	 */
+	public boolean encrypt(boolean on) {
+		return getImpl().encrypt(on);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#setRemoteDevice(javax.bluetooth.RemoteDevice)
 	 */
 	public void setRemoteDevice(RemoteDevice remoteDevice) {

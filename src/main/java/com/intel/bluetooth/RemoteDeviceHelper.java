@@ -71,19 +71,25 @@ public abstract class RemoteDeviceHelper {
 		}
 
 		private void addConnection(Object connection) {
-			if (connections == null) {
-				connections = WeakVectorFactory.createWeakVector();
+			synchronized (this) {
+				if (connections == null) {
+					connections = WeakVectorFactory.createWeakVector();
+				}
 			}
-			connections.addElement(connection);
-			DebugLog.debug("connection open, open now", connections.size());
+			synchronized (connections) {
+				connections.addElement(connection);
+				DebugLog.debug("connection open, open now", connections.size());
+			}
 		}
 
 		private void removeConnection(Object connection) {
 			if (connections == null) {
 				return;
 			}
-			connections.removeElement(connection);
-			DebugLog.debug("connection closed, open now", connections.size());
+			synchronized (connections) {
+				connections.removeElement(connection);
+				DebugLog.debug("connection closed, open now", connections.size());
+			}
 		}
 
 		private void setStackAttributes(Object key, Object value) {
@@ -119,6 +125,28 @@ public abstract class RemoteDeviceHelper {
 			return (connectionsCount() != 0);
 		}
 
+		/**
+		 * @see javax.bluetooth.RemoteDevice#authenticate()
+		 */
+		public boolean authenticate() throws IOException {
+			if (!hasConnections()) {
+				throw new IOException("No open connections to this RemoteDevice");
+			}
+			if (this.isAuthenticated()) {
+				// has previously been authenticated
+				return true;
+			}
+			boolean authenticated = bluetoothStack.authenticateRemoteDevice(addressLong);
+			if (authenticated) {
+				updateConnectionSecurityOpt(ServiceRecord.AUTHENTICATE_NOENCRYPT);
+			}
+			return authenticated;
+		}
+
+		private void updateConnectionSecurityOpt(int options) {
+
+		}
+
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -129,7 +157,16 @@ public abstract class RemoteDeviceHelper {
 				DebugLog.debug("no connections, Authenticated = false");
 				return false;
 			}
-			return (((BluetoothConnectionAccess) connections.firstElement()).getSecurityOpt() != ServiceRecord.NOAUTHENTICATE_NOENCRYPT);
+			synchronized (connections) {
+				// Find first authenticated connection
+				for (Enumeration en = connections.elements(); en.hasMoreElements();) {
+					BluetoothConnectionAccess c = (BluetoothConnectionAccess) en.nextElement();
+					if (c.getSecurityOpt() != ServiceRecord.NOAUTHENTICATE_NOENCRYPT) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		/*
@@ -141,7 +178,16 @@ public abstract class RemoteDeviceHelper {
 			if (!hasConnections()) {
 				return false;
 			}
-			return (((BluetoothConnectionAccess) connections.firstElement()).getSecurityOpt() == ServiceRecord.AUTHENTICATE_ENCRYPT);
+			synchronized (connections) {
+				// Find first encrypted connection
+				for (Enumeration en = connections.elements(); en.hasMoreElements();) {
+					BluetoothConnectionAccess c = (BluetoothConnectionAccess) en.nextElement();
+					if (c.getSecurityOpt() == ServiceRecord.AUTHENTICATE_ENCRYPT) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		/*
@@ -348,6 +394,16 @@ public abstract class RemoteDeviceHelper {
 			((RemoteDeviceWithExtendedInfo) d).removeConnection(connection);
 			connection.setRemoteDevice(null);
 		}
+	}
+
+	/**
+	 * Attempts to authenticate RemoteDevice. Return <code>false</code> if the
+	 * stack does not support authentication.
+	 * 
+	 * @see javax.bluetooth.RemoteDevice#authenticate()
+	 */
+	public static boolean authenticate(RemoteDevice device) throws IOException {
+		return remoteDeviceImpl(device).authenticate();
 	}
 
 	/**

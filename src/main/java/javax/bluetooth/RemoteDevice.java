@@ -227,11 +227,7 @@ public class RemoteDevice {
 	 *                and this <code>RemoteDevice</code>
 	 */
 	public boolean authenticate() throws IOException {
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedIOException();
-		} else {
-			return false;
-		}
+		return RemoteDeviceHelper.authenticate(this);
 	}
 
 	/**

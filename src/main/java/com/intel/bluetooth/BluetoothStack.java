@@ -147,6 +147,16 @@ public interface BluetoothStack {
 	 */
 	public String getLocalDeviceProperty(String property);
 
+	// ---------------------- Remote Device authentication
+
+	/**
+	 * Attempts to authenticate RemoteDevice. Return <code>false</code> if the
+	 * stack does not support authentication.
+	 * 
+	 * @see javax.bluetooth.RemoteDevice#authenticate()
+	 */
+	public boolean authenticateRemoteDevice(long address) throws IOException;
+
 	// ---------------------- Device Inquiry
 
 	/**

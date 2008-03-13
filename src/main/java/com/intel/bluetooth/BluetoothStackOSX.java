@@ -219,6 +219,12 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 		}
 	}
 
+	// ---------------------- Remote Device authentication
+
+	public boolean authenticateRemoteDevice(long address) throws IOException {
+		return false;
+	}
+
 	// ---------------------- Device Inquiry
 
 	public native String getRemoteDeviceFriendlyName(long address) throws IOException;

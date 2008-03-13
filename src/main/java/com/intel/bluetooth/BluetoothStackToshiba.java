@@ -139,6 +139,12 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		return null;
 	}
 
+	// ---------------------- Remote Device authentication
+
+	public boolean authenticateRemoteDevice(long address) throws IOException {
+		return false;
+	}
+
 	// ---------------------- Device Inquiry ----------------------
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {

@@ -27,27 +27,29 @@ import javax.bluetooth.RemoteDevice;
 
 /**
  * @author vlads
- *
+ * 
  */
 abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothConnectionAccess {
 
 	protected BluetoothStack bluetoothStack;
-	
+
 	protected volatile long handle;
-	
+
 	protected int securityOpt;
-	
+
 	private RemoteDevice remoteDevice;
-	
+
 	private boolean isClosed;
-	
+
 	protected BluetoothL2CAPConnection(BluetoothStack bluetoothStack, long handle) {
 		this.bluetoothStack = bluetoothStack;
 		this.handle = handle;
 		this.isClosed = false;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
 	 */
 	public long getRemoteAddress() throws IOException {
@@ -57,7 +59,9 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		return bluetoothStack.l2RemoteAddress(handle);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.bluetooth.L2CAPConnection#getReceiveMTU()
 	 */
 	public int getReceiveMTU() throws IOException {
@@ -67,7 +71,9 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		return bluetoothStack.l2GetReceiveMTU(handle);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.bluetooth.L2CAPConnection#getTransmitMTU()
 	 */
 	public int getTransmitMTU() throws IOException {
@@ -77,7 +83,9 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		return bluetoothStack.l2GetTransmitMTU(handle);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.bluetooth.L2CAPConnection#ready()
 	 */
 	public boolean ready() throws IOException {
@@ -87,7 +95,9 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		return bluetoothStack.l2Ready(handle);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.bluetooth.L2CAPConnection#receive(byte[])
 	 */
 	public int receive(byte[] inBuf) throws IOException {
@@ -95,12 +105,14 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 			throw new IOException("Connection closed");
 		}
 		if (inBuf == null) {
-			throw new NullPointerException ("inBuf is null");
+			throw new NullPointerException("inBuf is null");
 		}
 		return bluetoothStack.l2Receive(handle, inBuf);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.bluetooth.L2CAPConnection#send(byte[])
 	 */
 	public void send(byte[] data) throws IOException {
@@ -108,14 +120,16 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 			throw new IOException("Connection closed");
 		}
 		if (data == null) {
-			throw new NullPointerException ("data is null");
+			throw new NullPointerException("data is null");
 		}
 		bluetoothStack.l2Send(handle, data);
 	}
 
 	abstract void closeConnectionHandle(long handle) throws IOException;
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {
@@ -125,8 +139,8 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 		isClosed = true;
 		DebugLog.debug("closing L2CAP Connection");
-		
-		// close() can be called safely in another thread 
+
+		// close() can be called safely in another thread
 		long synchronizedHandle;
 		synchronized (this) {
 			synchronizedHandle = handle;
@@ -136,36 +150,54 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 			closeConnectionHandle(synchronizedHandle);
 		}
 	}
-	
+
 	protected void finalize() {
 		try {
 			close();
 		} catch (IOException e) {
 		}
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
 	 */
 	public int getSecurityOpt() {
 		return this.securityOpt;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#encrypt(boolean)
+	 * @see javax.bluetooth.RemoteDevice#encrypt(Connection , boolean)
+	 */
+	public boolean encrypt(boolean on) {
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteDevice()
 	 */
 	public RemoteDevice getRemoteDevice() {
 		return this.remoteDevice;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#setRemoteDevice(javax.bluetooth.RemoteDevice)
 	 */
 	public void setRemoteDevice(RemoteDevice remoteDevice) {
 		this.remoteDevice = remoteDevice;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getBluetoothStack()
 	 */
 	public BluetoothStack getBluetoothStack() {

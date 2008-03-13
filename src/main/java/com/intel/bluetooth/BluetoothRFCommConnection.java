@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth;
 
 import java.io.DataInputStream;
@@ -43,9 +43,9 @@ import javax.microedition.io.StreamConnection;
  * 
  */
 abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothConnectionAccess {
-	
+
 	protected BluetoothStack bluetoothStack;
-	
+
 	protected volatile long handle;
 
 	private BluetoothRFCommInputStream in;
@@ -55,9 +55,9 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	private boolean isClosed;
 
 	protected int securityOpt;
-	
+
 	RemoteDevice remoteDevice;
-	
+
 	protected BluetoothRFCommConnection(BluetoothStack bluetoothStack, long handle) {
 		this.bluetoothStack = bluetoothStack;
 		this.handle = handle;
@@ -65,14 +65,14 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	}
 
 	abstract void closeConnectionHandle(long handle) throws IOException;
-	
+
 	/**
 	 * Close the connection.
-	 * <p> 
-	 * Streams derived from the connection may be open when close() method is called.
-	 * Any open streams will cause the connection to be held open until they
-	 * themselves are closed. In this latter case access to the open streams is
-	 * permitted, but access to the connection is not.
+	 * <p>
+	 * Streams derived from the connection may be open when close() method is
+	 * called. Any open streams will cause the connection to be held open until
+	 * they themselves are closed. In this latter case access to the open
+	 * streams is permitted, but access to the connection is not.
 	 * 
 	 * @throws IOException
 	 *             If an I/O error occurs
@@ -82,16 +82,16 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 		if (!isClosed) {
 			return;
 		}
-		
+
 		// Any open streams will cause the connection to be held open
 		if ((in != null) && (!in.isClosed())) {
 			return;
 		}
-		
+
 		if ((out != null) && (!out.isClosed())) {
 			return;
 		}
-		
+
 		if (handle != 0) {
 			DebugLog.debug("closing RFCOMM Connection");
 			// close() can be called safely in another thread
@@ -105,8 +105,8 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 			}
 		}
 	}
-	
-    /**
+
+	/**
 	 * Open and return an input stream for a connection.
 	 * <p>
 	 * Trying to open another InputStream or OutputStream causes an IOException.
@@ -134,7 +134,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 		}
 	}
 
-    /**
+	/**
 	 * Open and return an data input stream for a connection.
 	 * <p>
 	 * Opening a DataInputStream counts as opening an InputStream
@@ -153,7 +153,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 		return new DataInputStream(openInputStream());
 	}
 
-    /**
+	/**
 	 * Open and return an output stream for a connection.
 	 * <p>
 	 * Trying to open another InputStream or OutputStream causes an IOException.
@@ -181,7 +181,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 		}
 	}
 
-    /**
+	/**
 	 * Open and return an data output stream for a connection.
 	 * <p>
 	 * Opening a DataOutputStream counts as opening an OutputStream
@@ -201,17 +201,18 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	}
 
 	/**
-	 * Close the connection. 
+	 * Close the connection.
 	 * <p>
-	 * When a connection has been closed, access to any of
-	 * its methods except this close() will cause an an IOException to be
-	 * thrown. Closing an already closed connection has no effect. Streams
-	 * derived from the connection may be open when method is called. Any open
-	 * streams will cause the connection to be held open until they themselves
-	 * are closed. In this latter case access to the open streams is permitted,
-	 * but access to the connection is not.
+	 * When a connection has been closed, access to any of its methods except
+	 * this close() will cause an an IOException to be thrown. Closing an
+	 * already closed connection has no effect. Streams derived from the
+	 * connection may be open when method is called. Any open streams will cause
+	 * the connection to be held open until they themselves are closed. In this
+	 * latter case access to the open streams is permitted, but access to the
+	 * connection is not.
 	 * 
-	 * @throws IOException If an I/O error occurs
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
 	public void close() throws IOException {
 		if (isClosed) {
@@ -228,14 +229,27 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
 	 */
 	public int getSecurityOpt() {
 		return this.securityOpt;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#encrypt(boolean)
+	 */
+	public boolean encrypt(boolean on) {
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
 	 */
 	public long getRemoteAddress() throws IOException {
@@ -244,22 +258,28 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 		}
 		return bluetoothStack.getConnectionRfRemoteAddress(handle);
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteDevice()
 	 */
 	public RemoteDevice getRemoteDevice() {
 		return this.remoteDevice;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#setRemoteDevice(javax.bluetooth.RemoteDevice)
 	 */
 	public void setRemoteDevice(RemoteDevice remoteDevice) {
 		this.remoteDevice = remoteDevice;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getBluetoothStack()
 	 */
 	public BluetoothStack getBluetoothStack() {
