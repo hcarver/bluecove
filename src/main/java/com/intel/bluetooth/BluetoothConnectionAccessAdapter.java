@@ -60,8 +60,8 @@ public abstract class BluetoothConnectionAccessAdapter implements BluetoothConne
 	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#encrypt(boolean)
 	 */
-	public boolean encrypt(boolean on) {
-		return getImpl().encrypt(on);
+	public boolean encrypt(long address, boolean on) throws IOException {
+		return getImpl().encrypt(address, on);
 	}
 
 	/*

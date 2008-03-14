@@ -373,11 +373,7 @@ public class RemoteDevice {
 	 *                connection to this <code>RemoteDevice</code>
 	 */
 	public boolean encrypt(javax.microedition.io.Connection conn, boolean on) throws IOException {
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedIOException();
-		} else {
-			return false;
-		}
+		return RemoteDeviceHelper.encrypt(this, conn, on);
 	}
 
 	/**

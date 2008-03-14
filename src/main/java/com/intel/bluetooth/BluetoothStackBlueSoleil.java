@@ -316,10 +316,6 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	public native void connectionRfCloseClientConnection(long handle) throws IOException;
 
-	public int rfGetSecurityOpt(long handle, int expected) throws IOException {
-		return ServiceRecord.NOAUTHENTICATE_NOENCRYPT;
-	}
-
 	private native long rfServerOpenImpl(byte[] uuidValue, String name, boolean authenticate, boolean encrypt)
 			throws IOException;
 
@@ -370,8 +366,20 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	public native void connectionRfFlush(long handle) throws IOException;
 
+	public int rfGetSecurityOpt(long handle, int expected) throws IOException {
+		return ServiceRecord.NOAUTHENTICATE_NOENCRYPT;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
+	 */
+	public boolean rfEncrypt(long address, long handle, boolean on) throws IOException {
+		return false;
+	}
+
 	// ---------------------- Client and Server L2CAP connections
-	// ----------------------
 
 	/*
 	 * (non-Javadoc)
@@ -506,4 +514,12 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 		throw new NotSupportedIOException(getStackID());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
+	 */
+	public boolean l2Encrypt(long address, long handle, boolean on) throws IOException {
+		throw new NotSupportedIOException(getStackID());
+	}
 }

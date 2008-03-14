@@ -44,7 +44,7 @@ public interface BluetoothConnectionAccess {
 	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection ,
 	 *      boolean)
 	 */
-	public boolean encrypt(boolean on);
+	public boolean encrypt(long address, boolean on) throws IOException;
 
 	public RemoteDevice getRemoteDevice();
 

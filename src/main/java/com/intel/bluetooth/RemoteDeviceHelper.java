@@ -147,6 +147,25 @@ public abstract class RemoteDeviceHelper {
 
 		}
 
+		/**
+		 * Attempts to turn encryption on or off for an existing connection.
+		 * 
+		 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection,
+		 *      boolean)
+		 */
+		public boolean encrypt(Connection conn, boolean on) throws IOException {
+			if (!(conn instanceof BluetoothConnectionAccess)) {
+				throw new IllegalArgumentException("Connection is not a Bluetooth connection");
+			}
+			if (((BluetoothConnectionAccess) conn).getRemoteAddress() != this.addressLong) {
+				throw new IllegalArgumentException("Connection is not to this device");
+			}
+			if ((((BluetoothConnectionAccess) conn).getSecurityOpt() == ServiceRecord.AUTHENTICATE_ENCRYPT) == on) {
+				return true;
+			}
+			return ((BluetoothConnectionAccess) conn).encrypt(this.addressLong, on);
+		}
+
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -404,6 +423,16 @@ public abstract class RemoteDeviceHelper {
 	 */
 	public static boolean authenticate(RemoteDevice device) throws IOException {
 		return remoteDeviceImpl(device).authenticate();
+	}
+
+	/**
+	 * Attempts to turn encryption on or off for an existing connection.
+	 * 
+	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection,
+	 *      boolean)
+	 */
+	public static boolean encrypt(RemoteDevice device, Connection conn, boolean on) throws IOException {
+		return remoteDeviceImpl(device).encrypt(conn, on);
 	}
 
 	/**

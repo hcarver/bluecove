@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRecord;
 import javax.microedition.io.Connection;
 import javax.microedition.io.StreamConnection;
 import javax.obex.Authenticator;
@@ -172,7 +173,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	}
 
 	private void validateBluetoothConnection() {
-		if (!(conn instanceof BluetoothConnectionAccess)) {
+		if ((conn != null) && !(conn instanceof BluetoothConnectionAccess)) {
 			throw new IllegalArgumentException("Not a Bluetooth connection " + conn.getClass().getName());
 		}
 	}
@@ -214,6 +215,9 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	 */
 	public long getRemoteAddress() throws IOException {
 		validateBluetoothConnection();
+		if (conn == null) {
+			throw new IOException("Connection closed");
+		}
 		return ((BluetoothConnectionAccess) conn).getRemoteAddress();
 	}
 
@@ -224,6 +228,9 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	 */
 	public RemoteDevice getRemoteDevice() {
 		validateBluetoothConnection();
+		if (conn == null) {
+			return null;
+		}
 		return ((BluetoothConnectionAccess) conn).getRemoteDevice();
 	}
 
@@ -234,7 +241,11 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	 */
 	public int getSecurityOpt() {
 		validateBluetoothConnection();
-		return ((BluetoothConnectionAccess) conn).getSecurityOpt();
+		if (conn == null) {
+			return ServiceRecord.NOAUTHENTICATE_NOENCRYPT;
+		} else {
+			return ((BluetoothConnectionAccess) conn).getSecurityOpt();
+		}
 	}
 
 	/*
@@ -242,9 +253,12 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#encrypt(boolean)
 	 */
-	public boolean encrypt(boolean on) {
+	public boolean encrypt(long address, boolean on) throws IOException {
 		validateBluetoothConnection();
-		return ((BluetoothConnectionAccess) conn).encrypt(on);
+		if (conn == null) {
+			throw new IOException("Connection closed");
+		}
+		return ((BluetoothConnectionAccess) conn).encrypt(address, on);
 	}
 
 	/*
@@ -254,7 +268,9 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	 */
 	public void setRemoteDevice(RemoteDevice remoteDevice) {
 		validateBluetoothConnection();
-		((BluetoothConnectionAccess) conn).setRemoteDevice(remoteDevice);
+		if (conn != null) {
+			((BluetoothConnectionAccess) conn).setRemoteDevice(remoteDevice);
+		}
 	}
 
 	/*
@@ -264,6 +280,9 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	 */
 	public BluetoothStack getBluetoothStack() {
 		validateBluetoothConnection();
+		if (conn == null) {
+			return null;
+		}
 		return ((BluetoothConnectionAccess) conn).getBluetoothStack();
 	}
 }

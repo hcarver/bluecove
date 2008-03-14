@@ -173,8 +173,11 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#encrypt(boolean)
 	 * @see javax.bluetooth.RemoteDevice#encrypt(Connection , boolean)
 	 */
-	public boolean encrypt(boolean on) {
-		return false;
+	public boolean encrypt(long address, boolean on) throws IOException {
+		if (isClosed) {
+			throw new IOException("L2CAP Connection is already closed");
+		}
+		return bluetoothStack.l2Encrypt(address, this.handle, on);
 	}
 
 	/*

@@ -440,6 +440,15 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 		return expected;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
+	 */
+	public boolean rfEncrypt(long address, long handle, boolean on) throws IOException {
+		return false;
+	}
+
 	// ---------------------- Server RFCOMM connections
 
 	private native long rfServerCreateImpl(byte[] uuidValue, boolean obexSrv, String name, boolean authenticate,
@@ -737,4 +746,13 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
 	 */
 	public native long l2RemoteAddress(long handle) throws IOException;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
+	 */
+	public boolean l2Encrypt(long address, long handle, boolean on) throws IOException {
+		return false;
+	}
 }

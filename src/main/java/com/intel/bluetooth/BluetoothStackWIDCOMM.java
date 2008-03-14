@@ -528,6 +528,15 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 		return expected;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
+	 */
+	public boolean rfEncrypt(long address, long handle, boolean on) throws IOException {
+		return false;
+	}
+
 	private native long rfServerOpenImpl(byte[] uuidValue, byte[] uuidValue2, boolean obexSrv, String name,
 			boolean authenticate, boolean encrypt) throws IOException;
 
@@ -831,4 +840,13 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
 	 */
 	public native long l2RemoteAddress(long handle) throws IOException;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
+	 */
+	public boolean l2Encrypt(long address, long handle, boolean on) throws IOException {
+		return false;
+	}
 }

@@ -243,8 +243,11 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#encrypt(boolean)
 	 */
-	public boolean encrypt(boolean on) {
-		return false;
+	public boolean encrypt(long address, boolean on) throws IOException {
+		if (isClosed) {
+			throw new IOException("RFCOMM Connection is already closed");
+		}
+		return bluetoothStack.rfEncrypt(address, this.handle, on);
 	}
 
 	/*

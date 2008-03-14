@@ -279,6 +279,12 @@ public interface BluetoothStack {
 	public long getConnectionRfRemoteAddress(long handle) throws IOException;
 
 	/**
+	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection,
+	 *      boolean)
+	 */
+	public boolean rfEncrypt(long address, long handle, boolean on) throws IOException;
+
+	/**
 	 * @see java.io.InputStream#read()
 	 * @see BluetoothRFCommInputStream#read()
 	 */
@@ -395,4 +401,10 @@ public interface BluetoothStack {
 	 * @see javax.bluetooth.RemoteDevice#getRemoteDevice(Connection)
 	 */
 	public long l2RemoteAddress(long handle) throws IOException;
+
+	/**
+	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection,
+	 *      boolean)
+	 */
+	public boolean l2Encrypt(long address, long handle, boolean on) throws IOException;
 }

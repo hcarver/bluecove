@@ -42,7 +42,7 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	}
 
-	// ---------------------- Library initialization ----------------------
+	// ---------------------- Library initialization
 
 	public String getStackID() {
 		return BlueCoveImpl.STACK_TOSHIBA;
@@ -91,7 +91,7 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		return Thread.interrupted();
 	}
 
-	// ---------------------- LocalDevice ----------------------
+	// ---------------------- LocalDevice
 
 	public native String getLocalDeviceBluetoothAddress() throws BluetoothStateException;
 
@@ -145,7 +145,7 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		return false;
 	}
 
-	// ---------------------- Device Inquiry ----------------------
+	// ---------------------- Device Inquiry
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
@@ -167,7 +167,7 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		return false;
 	}
 
-	// ---------------------- Service search ----------------------
+	// ---------------------- Service search
 
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
 			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
@@ -191,7 +191,7 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		return false;
 	}
 
-	// ---------------------- Client RFCOMM connections ----------------------
+	// ---------------------- Client RFCOMM connections
 
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
 		// TODO Auto-generated method stub
@@ -207,7 +207,16 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		return expected;
 	}
 
-	// ---------------------- Server RFCOMM connections ----------------------
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
+	 */
+	public boolean rfEncrypt(long address, long handle, boolean on) throws IOException {
+		return false;
+	}
+
+	// ---------------------- Server RFCOMM connections
 
 	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord)
 			throws IOException {
@@ -236,7 +245,6 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	}
 
 	// ---------------------- Shared Client and Server RFCOMM connections
-	// ----------------------
 
 	public void connectionRfFlush(long handle) throws IOException {
 		// TODO Auto-generated method stub
@@ -274,7 +282,6 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	}
 
 	// ---------------------- Client and Server L2CAP connections
-	// ----------------------
 
 	/*
 	 * (non-Javadoc)
@@ -414,4 +421,13 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
+	 */
+	public boolean l2Encrypt(long address, long handle, boolean on) throws IOException {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
