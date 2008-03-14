@@ -21,6 +21,7 @@
 
 #import "OSXStackSDPServer.h"
 #import <IOBluetooth/objc/IOBluetoothSDPUUID.h>
+#import <IOBluetooth/objc/IOBluetoothHostController.h>
 
 #define CPP_FILE "OSXStackSDPServer.mm"
 
@@ -377,4 +378,56 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceSequ
     if (runnable.error != 0) {
         throwServiceRegistrationException(env, "Failed to update service attribute %x [%s]", attrID, runnable.pData[2]);
     }
+}
+
+BluetoothClassOfDevice _classOfDevice;
+MaintainClassOfDevice* _classOfDeviceMaintainer = NULL;
+long _classOfDeviceUpdateCount = 0;
+
+@implementation MaintainClassOfDevice
+
+- (id)initWithClassOfDevice:(BluetoothClassOfDevice)classOfDevice {
+    _classOfDevice = classOfDevice;
+    return self;
+}
+
+- (void) controllerClassOfDeviceReverted:(id)sender {
+    IOBluetoothHostController* controller = sender;
+
+    NSTimeInterval seconds = 120;
+    IOReturn status = [controller setClassOfDevice:_classOfDevice forTimeInterval:seconds];
+    _classOfDeviceUpdateCount ++;
+    ndebug("_classOfDeviceUpdateCount %i [0x%08x]", _classOfDeviceUpdateCount, status);
+}
+@end
+
+
+RUNNABLE(SetDeviceClass, "SetDeviceClass") {
+    IOBluetoothHostController* controller = [IOBluetoothHostController defaultController];
+
+    BluetoothClassOfDevice classOfDevice = [controller classOfDevice];
+    _classOfDevice = classOfDevice | lData;
+    if (NULL == _classOfDeviceMaintainer) {
+        _classOfDeviceMaintainer = [MaintainClassOfDevice init];
+        [controller setDelegate:_classOfDeviceMaintainer];
+    }
+
+    NSTimeInterval seconds = 120;
+
+    IOReturn status = [controller setClassOfDevice:_classOfDevice forTimeInterval:seconds];
+    if (status != kIOReturnSuccess) {
+        error = 1;
+        lData = status;
+    }
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_setLocalDeviceServiceClassesImpl
+ (JNIEnv *env, jobject peer, jint classOfDevice) {
+    SetDeviceClass runnable;
+    runnable.lData = classOfDevice;
+    synchronousBTOperation(&runnable);
+    if (runnable.error) {
+        debug(("setClassOfDevice [0x%08x]", runnable.lData));
+    }
+    return true;
 }

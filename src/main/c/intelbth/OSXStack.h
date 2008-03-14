@@ -27,6 +27,8 @@
 #include "common.h"
 #include "commonObjects.h"
 
+#define BLUETOOTH_VERSION_USE_CURRENT
+
 #include "com_intel_bluetooth_BluetoothStackOSX.h"
 
 #include <IOBluetooth/IOBluetoothUserLib.h>
