@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRecord;
 import javax.microedition.io.StreamConnection;
 
 /**
@@ -232,9 +233,33 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#isClosed()
+	 */
+	public boolean isClosed() {
+		return isClosed;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#markAuthenticated()
+	 */
+	public void markAuthenticated() {
+		if (this.securityOpt == ServiceRecord.NOAUTHENTICATE_NOENCRYPT) {
+			this.securityOpt = ServiceRecord.AUTHENTICATE_NOENCRYPT;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
 	 */
 	public int getSecurityOpt() {
+		try {
+			this.securityOpt = bluetoothStack.rfGetSecurityOpt(this.handle, this.securityOpt);
+		} catch (IOException notChanged) {
+		}
 		return this.securityOpt;
 	}
 
@@ -247,7 +272,15 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 		if (isClosed) {
 			throw new IOException("RFCOMM Connection is already closed");
 		}
-		return bluetoothStack.rfEncrypt(address, this.handle, on);
+		boolean changed = bluetoothStack.rfEncrypt(address, this.handle, on);
+		if (changed) {
+			if (on) {
+				this.securityOpt = ServiceRecord.AUTHENTICATE_ENCRYPT;
+			} else {
+				this.securityOpt = ServiceRecord.AUTHENTICATE_NOENCRYPT;
+			}
+		}
+		return changed;
 	}
 
 	/*

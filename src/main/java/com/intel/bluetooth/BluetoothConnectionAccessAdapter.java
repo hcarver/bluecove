@@ -49,6 +49,24 @@ public abstract class BluetoothConnectionAccessAdapter implements BluetoothConne
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#isClosed()
+	 */
+	public boolean isClosed() {
+		return getImpl().isClosed();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#markAuthenticated()
+	 */
+	public void markAuthenticated() {
+		getImpl().markAuthenticated();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
 	 */
 	public int getSecurityOpt() {

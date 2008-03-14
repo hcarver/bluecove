@@ -24,15 +24,16 @@ import java.io.IOException;
 
 /**
  * @author vlads
- *
+ * 
  */
-class BluetoothL2CAPServerConnection extends BluetoothL2CAPConnection {
+class BluetoothL2CAPServerConnection extends BluetoothL2CAPConnection implements BluetoothServerConnection {
 
 	/**
 	 * @param handle
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	protected BluetoothL2CAPServerConnection(BluetoothStack bluetoothStack, long handle, int securityOpt) throws IOException {
+	protected BluetoothL2CAPServerConnection(BluetoothStack bluetoothStack, long handle, int securityOpt)
+			throws IOException {
 		super(bluetoothStack, handle);
 		boolean initOK = false;
 		try {
@@ -50,7 +51,9 @@ class BluetoothL2CAPServerConnection extends BluetoothL2CAPConnection {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothL2CAPConnection#closeConnectionHandle(long)
 	 */
 	void closeConnectionHandle(long handle) throws IOException {

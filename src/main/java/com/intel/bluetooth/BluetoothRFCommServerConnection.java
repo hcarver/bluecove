@@ -24,12 +24,13 @@ import java.io.IOException;
 
 /**
  * @author vlads
- *
+ * 
  */
-class BluetoothRFCommServerConnection extends BluetoothRFCommConnection {
+class BluetoothRFCommServerConnection extends BluetoothRFCommConnection implements BluetoothServerConnection {
 
 	/** Construct BluetoothConnection with pre-existing socket */
-	protected BluetoothRFCommServerConnection(BluetoothStack bluetoothStack, long handle, int securityOpt) throws IOException  {
+	protected BluetoothRFCommServerConnection(BluetoothStack bluetoothStack, long handle, int securityOpt)
+			throws IOException {
 		super(bluetoothStack, handle);
 		boolean initOK = false;
 		try {
@@ -46,7 +47,7 @@ class BluetoothRFCommServerConnection extends BluetoothRFCommConnection {
 			}
 		}
 	}
-	
+
 	void closeConnectionHandle(long handle) throws IOException {
 		RemoteDeviceHelper.disconnected(this);
 		bluetoothStack.connectionRfCloseServerConnection(handle);

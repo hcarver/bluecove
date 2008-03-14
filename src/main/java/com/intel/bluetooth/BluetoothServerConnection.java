@@ -1,6 +1,5 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2004 Intel Corporation
  *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or
@@ -21,36 +20,10 @@
  */
 package com.intel.bluetooth;
 
-import java.io.IOException;
-
-import javax.bluetooth.RemoteDevice;
-
 /**
- * Used when client application has only access to Proxy of the connection. e.g.
- * WebStart in MicroEmulator
- * 
- * @author vlads
+ * Marker to indicate accepted connections by service.
  * 
  */
-public interface BluetoothConnectionAccess {
+public interface BluetoothServerConnection {
 
-	public BluetoothStack getBluetoothStack();
-
-	public long getRemoteAddress() throws IOException;
-
-	public boolean isClosed();
-
-	public void markAuthenticated();
-
-	public int getSecurityOpt();
-
-	/**
-	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection ,
-	 *      boolean)
-	 */
-	public boolean encrypt(long address, boolean on) throws IOException;
-
-	public RemoteDevice getRemoteDevice();
-
-	public void setRemoteDevice(RemoteDevice remoteDevice);
 }

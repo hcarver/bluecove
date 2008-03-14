@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import javax.bluetooth.L2CAPConnection;
 import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRecord;
 
 /**
  * @author vlads
@@ -161,9 +162,33 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#isClosed()
+	 */
+	public boolean isClosed() {
+		return isClosed;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#markAuthenticated()
+	 */
+	public void markAuthenticated() {
+		if (this.securityOpt == ServiceRecord.NOAUTHENTICATE_NOENCRYPT) {
+			this.securityOpt = ServiceRecord.AUTHENTICATE_NOENCRYPT;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
 	 */
 	public int getSecurityOpt() {
+		try {
+			this.securityOpt = bluetoothStack.l2GetSecurityOpt(this.handle, this.securityOpt);
+		} catch (IOException notChanged) {
+		}
 		return this.securityOpt;
 	}
 
@@ -177,7 +202,15 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		if (isClosed) {
 			throw new IOException("L2CAP Connection is already closed");
 		}
-		return bluetoothStack.l2Encrypt(address, this.handle, on);
+		boolean changed = bluetoothStack.l2Encrypt(address, this.handle, on);
+		if (changed) {
+			if (on) {
+				this.securityOpt = ServiceRecord.AUTHENTICATE_ENCRYPT;
+			} else {
+				this.securityOpt = ServiceRecord.AUTHENTICATE_NOENCRYPT;
+			}
+		}
+		return changed;
 	}
 
 	/*

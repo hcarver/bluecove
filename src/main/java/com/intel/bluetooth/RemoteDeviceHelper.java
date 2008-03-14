@@ -138,13 +138,54 @@ public abstract class RemoteDeviceHelper {
 			}
 			boolean authenticated = bluetoothStack.authenticateRemoteDevice(addressLong);
 			if (authenticated) {
-				updateConnectionSecurityOpt(ServiceRecord.AUTHENTICATE_NOENCRYPT);
+				updateConnectionMarkAuthenticated();
 			}
 			return authenticated;
 		}
 
-		private void updateConnectionSecurityOpt(int options) {
+		private void updateConnectionMarkAuthenticated() {
+			synchronized (connections) {
+				for (Enumeration en = connections.elements(); en.hasMoreElements();) {
+					BluetoothConnectionAccess c = (BluetoothConnectionAccess) en.nextElement();
+					c.markAuthenticated();
+				}
+			}
+		}
 
+		/**
+		 * Determines if this RemoteDevice should be allowed to continue to
+		 * access the local service provided by the Connection.
+		 * 
+		 * @see javax.bluetooth.RemoteDevice#authorize(javax.microedition.io.Connection)
+		 */
+		public boolean authorize(Connection conn) throws IOException {
+			if (!(conn instanceof BluetoothConnectionAccess)) {
+				throw new IllegalArgumentException("Connection is not a Bluetooth connection");
+			}
+			if (((BluetoothConnectionAccess) conn).isClosed()) {
+				throw new IOException("Connection is already closed");
+			}
+			if (!(conn instanceof BluetoothServerConnection)) {
+				throw new IllegalArgumentException("Connection is not an incomming Bluetooth connection");
+			}
+			return isTrustedDevice() || isAuthenticated();
+		}
+
+		/**
+		 * 
+		 * @see javax.bluetooth.RemoteDevice#isAuthorized(javax.microedition.io.Connection)
+		 */
+		public boolean isAuthorized(Connection conn) throws IOException {
+			if (!(conn instanceof BluetoothConnectionAccess)) {
+				throw new IllegalArgumentException("Connection is not a Bluetooth connection");
+			}
+			if (((BluetoothConnectionAccess) conn).isClosed()) {
+				throw new IOException("Connection is already closed");
+			}
+			if (!(conn instanceof BluetoothServerConnection)) {
+				throw new IllegalArgumentException("Connection is not an incomming Bluetooth connection");
+			}
+			return isTrustedDevice();
 		}
 
 		/**
@@ -426,6 +467,16 @@ public abstract class RemoteDeviceHelper {
 	}
 
 	/**
+	 * Determines if this RemoteDevice should be allowed to continue to access
+	 * the local service provided by the Connection.
+	 * 
+	 * @see javax.bluetooth.RemoteDevice#authorize(javax.microedition.io.Connection)
+	 */
+	public static boolean authorize(RemoteDevice device, Connection conn) throws IOException {
+		return remoteDeviceImpl(device).authorize(conn);
+	}
+
+	/**
 	 * Attempts to turn encryption on or off for an existing connection.
 	 * 
 	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection,
@@ -453,6 +504,10 @@ public abstract class RemoteDeviceHelper {
 	 */
 	public static boolean isAuthenticated(RemoteDevice device) {
 		return remoteDeviceImpl(device).isAuthenticated();
+	}
+
+	public static boolean isAuthorized(RemoteDevice device, Connection conn) throws IOException {
+		return remoteDeviceImpl(device).isAuthorized(conn);
 	}
 
 	/**

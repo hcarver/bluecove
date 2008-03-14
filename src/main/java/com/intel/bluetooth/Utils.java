@@ -94,7 +94,7 @@ public abstract class Utils {
 		return (UUIDTo32Bit(uuid) != -1);
 	}
 
-	static int securityOpt(boolean authenticate, boolean encrypt) {
+	public static int securityOpt(boolean authenticate, boolean encrypt) {
 		int security = ServiceRecord.NOAUTHENTICATE_NOENCRYPT;
 		if (authenticate) {
 			if (encrypt) {

@@ -31,8 +31,6 @@ import java.io.IOException;
 import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.DebugLog;
-import com.intel.bluetooth.NotImplementedError;
-import com.intel.bluetooth.NotImplementedIOException;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
 /**
@@ -282,11 +280,7 @@ public class RemoteDevice {
 	 *                if <code>conn</code> is closed
 	 */
 	public boolean authorize(javax.microedition.io.Connection conn) throws IOException {
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedIOException();
-		} else {
-			return false;
-		}
+		return RemoteDeviceHelper.authorize(this, conn);
 	}
 
 	/**
@@ -426,10 +420,7 @@ public class RemoteDevice {
 	 *                if <code>conn</code> is closed
 	 */
 	public boolean isAuthorized(javax.microedition.io.Connection conn) throws IOException {
-		if (NotImplementedError.enabled) {
-			throw new NotImplementedIOException();
-		}
-		return false;
+		return RemoteDeviceHelper.isAuthorized(this, conn);
 	}
 
 	/**

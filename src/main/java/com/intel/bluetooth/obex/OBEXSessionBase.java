@@ -104,10 +104,6 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		}
 	}
 
-	protected boolean isClosed() {
-		return (this.conn == null);
-	}
-
 	public static HeaderSet createOBEXHeaderSet() {
 		return new OBEXHeaderSetImpl();
 	}
@@ -232,6 +228,27 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 			return null;
 		}
 		return ((BluetoothConnectionAccess) conn).getRemoteDevice();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#isClosed()
+	 */
+	public boolean isClosed() {
+		return ((this.conn == null) || ((BluetoothConnectionAccess) conn).isClosed());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#markAuthenticated()
+	 */
+	public void markAuthenticated() {
+		validateBluetoothConnection();
+		if (conn != null) {
+			((BluetoothConnectionAccess) conn).markAuthenticated();
+		}
 	}
 
 	/*

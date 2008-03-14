@@ -29,10 +29,11 @@ import javax.obex.HeaderSet;
 import javax.obex.ResponseCodes;
 import javax.obex.ServerRequestHandler;
 
+import com.intel.bluetooth.BluetoothServerConnection;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.UtilsJavaSE;
 
-class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable {
+class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, BluetoothServerConnection {
 
 	private ServerRequestHandler handler;
 
