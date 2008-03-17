@@ -221,6 +221,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerCreat
 		throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 		return 0;
 	}
+	comm->authenticate = authenticate;
 	RFCOMMServicePublish runnable;
 	runnable.comm = comm;
 	runnable.uuidValue = env->GetByteArrayElements(uuidValue, 0);
@@ -276,9 +277,25 @@ void rfcommServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNoti
 	    ndebug("fail to get IOBluetoothRFCOMMChannel");
 	    return;
 	}
+	if (comm->authenticate) {
+	    IOBluetoothDevice* device = [rfcommChannel getDevice];
+	    if (device == NULL) {
+	        ndebug("drop incomming connection unable to get device");
+	        [rfcommChannel closeChannel];
+	        return;
+	    }
+	    IOReturn as = [device requestAuthentication];
+	    if (as != kIOReturnSuccess) {
+	        ndebug("drop incomming connection unable to authenticate [0x%08x]", as);
+	        [rfcommChannel closeChannel];
+	        return;
+	    }
+	    ndebug("RFCOMM incomming connection authenticated");
+	}
 	RFCOMMChannelController* client = comm->acceptClientComm;
 	if (client == NULL) {
 	    ndebug("drop incomming connection since AcceptAndOpen not running");
+	    [rfcommChannel closeChannel];
 	    return;
 	}
 	client->openIncomingChannel(rfcommChannel);

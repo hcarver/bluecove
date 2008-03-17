@@ -153,6 +153,7 @@ void L2CAPChannelController::openIncomingChannel(IOBluetoothL2CAPChannel* newL2C
     l2capChannel = newL2CAPChannel;
     [l2capChannel retain];
     openStatus = [l2capChannel setDelegate:delegate];
+    bluetoothDevice = [l2capChannel getDevice];
 }
 
 void L2CAPChannelController::l2capChannelClosed() {
@@ -574,11 +575,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2GetSecurityO
 		return 0;
 	}
 
-	if (comm->encrypted) {
+	if (runnable.encrypted) {
 	    return AUTHENTICATE_ENCRYPT;
 	} else if (NOAUTHENTICATE_NOENCRYPT == expected) {
 	    return AUTHENTICATE_NOENCRYPT;
 	} else {
-	    return NOAUTHENTICATE_NOENCRYPT
+	    return NOAUTHENTICATE_NOENCRYPT;
 	}
 }

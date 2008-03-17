@@ -34,6 +34,8 @@ public:
 
     NSMutableDictionary* l2capPSMDataElement;
 
+    jboolean authenticate;
+
     int receiveMTU;
     int transmitMTU;
 

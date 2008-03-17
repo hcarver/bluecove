@@ -34,6 +34,8 @@ public:
 
     NSMutableDictionary* rfcommChannelIDDataElement;
 
+    jboolean authenticate;
+
 public:
     RFCOMMServerController();
     virtual ~RFCOMMServerController();

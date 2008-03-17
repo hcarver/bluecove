@@ -252,6 +252,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerOpenI
 		throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 		return 0;
 	}
+	comm->authenticate = authenticate;
 	L2CAPServicePublish runnable;
 	runnable.comm = comm;
 	runnable.uuidValue = env->GetByteArrayElements(uuidValue, 0);
@@ -312,6 +313,21 @@ void l2capServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNotif
 	    ndebug("fail to get IOBluetoothL2CAPChannel");
 	    return;
 	}
+	if (comm->authenticate) {
+	    IOBluetoothDevice* device = [l2capChannel getDevice];
+	    if (device == NULL) {
+	        ndebug("drop incomming connection unable to get device");
+	        [l2capChannel closeChannel];
+	        return;
+	    }
+	    IOReturn as = [device requestAuthentication];
+	    if (as != kIOReturnSuccess) {
+	        ndebug("drop incomming connection unable to authenticate [0x%08x]", as);
+	        [l2capChannel closeChannel];
+	        return;
+	    }
+	    ndebug("L2CAP incomming connection authenticated");
+	}
 	L2CAPChannelController* client = comm->acceptClientComm;
 	if (client == NULL) {
 	    ndebug("drop incomming connection since AcceptAndOpen not running");
@@ -361,7 +377,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
         L2CAPServiceRegisterForOpen runnable;
 	    runnable.pData[0] = comm;
         synchronousBTOperation(&runnable);
-    if (runnable.error) {
+        if (runnable.error) {
 		    throwIOException(env, "Failed to register for L2CAPChannel Notifications");
 		    return 0;
 	    }

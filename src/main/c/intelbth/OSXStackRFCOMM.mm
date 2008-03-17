@@ -150,6 +150,7 @@ void RFCOMMChannelController::openIncomingChannel(IOBluetoothRFCOMMChannel* newR
     rfcommChannel = newRfcommChannel;
     [rfcommChannel retain];
     openStatus = [rfcommChannel setDelegate:delegate];
+    bluetoothDevice = [rfcommChannel getDevice];
 }
 
 void RFCOMMChannelController::rfcommChannelClosed() {
@@ -573,11 +574,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfGetSecurityO
 		return 0;
 	}
 
-	if (comm->encrypted) {
+	if (runnable.encrypted) {
 	    return AUTHENTICATE_ENCRYPT;
 	} else if (NOAUTHENTICATE_NOENCRYPT == expected) {
 	    return AUTHENTICATE_NOENCRYPT;
 	} else {
-	    return NOAUTHENTICATE_NOENCRYPT
+	    return NOAUTHENTICATE_NOENCRYPT;
 	}
 }
