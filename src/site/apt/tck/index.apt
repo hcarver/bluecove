@@ -68,9 +68,9 @@ JSR 82 Technology Compatibility Kit
 
 * Starting TCK client as Java Web Start
 
-    * <<<{{{../bluecove-webstart/tck/localhost:8080/getNextApp.jad}\u00bbStart TCK client}}>>> Gatling on localhost:8080
+    * <<<{{{../bluecove-webstart/tck/localhost:8080/getNextApp.jnlp}\u00bbStart TCK client}}>>> Gatling on localhost:8080
 
-    * <<<{{{../bluecove-webstart/tck/tckhost:8080/getNextApp.jad}\u00bbStart TCK client}}>>>  Gatling on tckhost:8080
+    * <<<{{{../bluecove-webstart/tck/tckhost:8080/getNextApp.jnlp}\u00bbStart TCK client}}>>>  Gatling on tckhost:8080
 
  You will need a TCK agent running on another bluetooth device use  {{{../bluecove-examples/bluecove-tester}bluecove-tester Web Start}}.
 
