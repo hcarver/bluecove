@@ -52,18 +52,26 @@ JSR 82 Technology Compatibility Kit
 
     []
 
- Here is how you would run the JSR 82 TCK Gatling tests on BlueCove in the "autotest" mode with the help of MicroEmulator:
-
----
-    java -cp microemulator.jar;bluecove.jar org.microemu.app.Main -Xautotest:http://localhost:8080/getNextApp.jad
----
-
-
 * Description of {failures}
 
     * RemoteDevice.Security: RemoteDevice.authenticate() and RemoteDevice.authorize() Not implemented
 
     * ServiceRecord.setDeviceServiceClassesTest: Function ServiceRecord.setDeviceServiceClasses not implemented because there are no such API in WIDCOMM native stack
 
-
     []
+
+ Here is how you would run the JSR 82 TCK Gatling tests on BlueCove in the "autotest" mode with the help of MicroEmulator:
+
+---
+    java -cp microemulator.jar;bluecove.jar org.microemu.app.Main -Xautotest:http://localhost:8080/getNextApp.jad
+---
+
+* Starting TCK client as Java Web Start
+
+    * <<<{{{../bluecove-webstart/tck/localhost:8080/getNextApp.jad}\u00bbStart TCK client}}>>> Gatling on localhost:8080
+
+    * <<<{{{../bluecove-webstart/tck/tckhost:8080/getNextApp.jad}\u00bbStart TCK client}}>>>  Gatling on tckhost:8080
+
+ You will need a TCK agent running on another bluetooth device use  {{{../bluecove-examples/bluecove-tester}bluecove-tester Web Start}}.
+
+
