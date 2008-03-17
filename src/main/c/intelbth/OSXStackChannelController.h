@@ -62,3 +62,15 @@ public:
     BasebandConnectionOpen();
     virtual void run();
 };
+
+class BasebandConnectionGetOptions: public Runnable {
+public:
+    jboolean encrypted;
+
+    ChannelController* comm;
+
+    volatile IOReturn status;
+
+    BasebandConnectionGetOptions();
+    virtual void run();
+};

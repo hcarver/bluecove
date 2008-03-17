@@ -125,3 +125,16 @@ void BasebandConnectionOpen::run() {
         return;
     }
 }
+
+BasebandConnectionGetOptions::BasebandConnectionGetOptions() {
+    name = "BasebandConnectionGetOptions";
+}
+
+void BasebandConnectionGetOptions::run() {
+    if (comm->bluetoothDevice == NULL) {
+        error = 1;
+        return;
+    }
+    BluetoothHCIEncryptionMode em = [comm->bluetoothDevice getEncryptionMode];
+    encrypted = (em != kEncryptionDisabled);
+}

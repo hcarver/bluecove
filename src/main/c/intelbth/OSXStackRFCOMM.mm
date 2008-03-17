@@ -556,3 +556,28 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 
 	env->ReleaseByteArrayElements(b, bytes, 0);
 }
+
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfGetSecurityOpt
+  (JNIEnv *env, jobject peer, jlong handle, jint expected) {
+    RFCOMMChannelController* comm = validOpenRFCOMMChannelHandle(env, handle);
+    if (comm == NULL) {
+		return 0;
+	}
+
+	BasebandConnectionGetOptions runnable;
+	runnable.comm = comm;
+    synchronousBTOperation(&runnable);
+	if (runnable.error) {
+		throwIOException(env, cCONNECTION_IS_CLOSED);
+		return 0;
+	}
+
+	if (comm->encrypted) {
+	    return AUTHENTICATE_ENCRYPT;
+	} else if (NOAUTHENTICATE_NOENCRYPT == expected) {
+	    return AUTHENTICATE_NOENCRYPT;
+	} else {
+	    return NOAUTHENTICATE_NOENCRYPT
+	}
+}

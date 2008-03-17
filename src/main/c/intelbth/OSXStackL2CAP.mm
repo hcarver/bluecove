@@ -558,3 +558,27 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2RemoteAddre
 	}
     return comm->address;
 }
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2GetSecurityOpt
+  (JNIEnv *env, jobject peer, jlong handle, jint expected) {
+    L2CAPChannelController* comm = validOpenL2CAPChannelHandle(env, handle);
+    if (comm == NULL) {
+		return 0;
+	}
+
+	BasebandConnectionGetOptions runnable;
+	runnable.comm = comm;
+    synchronousBTOperation(&runnable);
+	if (runnable.error) {
+		throwIOException(env, cCONNECTION_IS_CLOSED);
+		return 0;
+	}
+
+	if (comm->encrypted) {
+	    return AUTHENTICATE_ENCRYPT;
+	} else if (NOAUTHENTICATE_NOENCRYPT == expected) {
+	    return AUTHENTICATE_NOENCRYPT;
+	} else {
+	    return NOAUTHENTICATE_NOENCRYPT
+	}
+}

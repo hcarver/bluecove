@@ -28,6 +28,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
+import javax.bluetooth.BluetoothConnectionException;
 import javax.bluetooth.DataElement;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
@@ -427,6 +428,10 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 			boolean encrypt, int timeout) throws IOException;
 
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
+	    if (params.encrypt) {
+	        throw new BluetoothConnectionException(BluetoothConnectionException.SECURITY_BLOCK,
+					"encrypt mode not supported");
+	    }
 		Object lock = RemoteDeviceHelper.createRemoteDevice(this, params.address, null, false);
 		synchronized (lock) {
 			return connectionRfOpenClientConnectionImpl(params.address, params.channel, params.authenticate,
@@ -436,9 +441,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	public native void connectionRfCloseClientConnection(long handle) throws IOException;
 
-	public int rfGetSecurityOpt(long handle, int expected) throws IOException {
-		return expected;
-	}
+	public native int rfGetSecurityOpt(long handle, int expected) throws IOException;
 
 	/*
 	 * (non-Javadoc)
@@ -461,6 +464,10 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord)
 			throws IOException {
 		verifyDeviceReady();
+		if (params.encrypt) {
+	        throw new BluetoothConnectionException(BluetoothConnectionException.SECURITY_BLOCK,
+					"encrypt mode not supported");
+	    }
 		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
 		long handle = rfServerCreateImpl(uuidValue, params.obex, params.name, params.authenticate, params.encrypt);
 		boolean success = false;
@@ -615,6 +622,10 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU)
 			throws IOException {
 		validateMTU(receiveMTU, transmitMTU);
+		if (params.encrypt) {
+	        throw new BluetoothConnectionException(BluetoothConnectionException.SECURITY_BLOCK,
+					"encrypt mode not supported");
+	    }
 		Object lock = RemoteDeviceHelper.createRemoteDevice(this, params.address, null, false);
 		synchronized (lock) {
 			return l2OpenClientConnectionImpl(params.address, params.channel, params.authenticate, params.encrypt,
@@ -644,6 +655,10 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 			ServiceRecordImpl serviceRecord) throws IOException {
 		verifyDeviceReady();
 		validateMTU(receiveMTU, transmitMTU);
+		if (params.encrypt) {
+	        throw new BluetoothConnectionException(BluetoothConnectionException.SECURITY_BLOCK,
+					"encrypt mode not supported");
+	    }
 		byte[] uuidValue = Utils.UUIDToByteArray(params.uuid);
 		long handle = l2ServerOpenImpl(uuidValue, params.authenticate, params.encrypt, params.name, receiveMTU,
 				transmitMTU, params.bluecove_ext_psm);
@@ -701,9 +716,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetSecurityOpt(long, int)
 	 */
-	public int l2GetSecurityOpt(long handle, int expected) throws IOException {
-		return expected;
-	}
+	public native int l2GetSecurityOpt(long handle, int expected) throws IOException;
 
 	/*
 	 * (non-Javadoc)
