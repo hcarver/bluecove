@@ -14,23 +14,23 @@ JSR 82 Technology Compatibility Kit
 
 * BlueCove TCK Tests on Windows and Mac OS X
 
-    L2CAP connection can't be implemented on Microsoft stack. Because of this BlueCove JSR-82 implementation can't be certified on  Microsoft stack. L2CAP tests has been excluded from run on this stack to save time
-
-    Latest test reports for Bluetooth_1-1_006_TCK can be found {{{Bluetooth_1-1_006_TCK/}here}}. See Description of {{{#failures}failures}}.
+    Latest test reports for Bluetooth_1-1_007_TCK can be found {{{Bluetooth_1-1_007_TCK/}here}}. See Description of {{{#failures}failures}}.
 
     Latest test reports for OBEX_1-1_006_TCK can be found {{{OBEX_1-1_006_TCK/}here}}.
 
+    L2CAP connection can't be implemented on Microsoft stack. Because of this BlueCove JSR-82 implementation can't be certified on  Microsoft stack. L2CAP tests has been excluded from run on this stack to save time
+
     To run TCK we are using:
 
-    * {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.gatling}Gatling}} v1.0.03 test harness
+    * {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.gatling}Gatling}} v1.0.04 test harness
 
     * {{{http://www.microemu.org/}MicroEmulator}} v2.0.2-SNAPSHOT as MIDP container.
 
-    * BlueCove on WIDCOMM stack as TCK agent for Microsoft stack Mac OS X tests
+    * BlueCove on WIDCOMM stack as TCK agent for Microsoft stack and Mac OS X tests
 
     * BlueCove on Mac OS X as TCK agent for WIDCOMM stack tests
 
-    * Cellphone Nokia 6265i (RFCOMM only) or Sony Ericson K790a as TCK agent
+    * Cellphone Sony Ericson K790a as TCK agent
 
     * Sun Java Wireless Toolkit 2.5.1 as OBEX TCK agent for <<<tcpobex>>> tests
 
@@ -38,23 +38,19 @@ JSR 82 Technology Compatibility Kit
 
     Test environment
 
-    * Microsoft Windows XP Service Pack 2
+    * Sun Java(TM) SE Runtime Environment (build 1.5.0_14-b03)
 
-    * Sun Java(TM) SE Runtime Environment (build 1.6.0_01-b06)
+    * System 1 TCK Client, WinXP SP2, Intel Pentium M 1.7 GHz, RAM 1.25 GB, WIDCOMM (Broadcom Bluetooth stack) v5.1.0.1100, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
-    * System 1 TCK Client, Intel Pentium M 1.7 GHz, RAM 1.25 GB, WIDCOMM (Broadcom Bluetooth stack) v5.0.1.2800, Integrated Cambridge Silicon Radio on HP ZT3380US
+    * System 1 TCK Client, WinXP SP2, Intel Pentium M 1.7 GHz, RAM 1.25 GB, Microsoft Bluetooth stack, {{{http://www.dlink.com/products/?pid=34}D-Link DBT-120 Rev. B4}}
 
-    * System 1 TCK Client, Intel Pentium M 1.7 GHz, RAM 1.25 GB, Microsoft Bluetooth stack, D-Link DBT-120
+    * System 2 TCK Agent, WinXP SP2, Intel Core 2 Duo 1.5 GHz, RAM 1GB, WIDCOMM (Broadcom Bluetooth stack) v5.1.0.3100, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
-    * System 2 TCK Agent, Intel Pentium III 646 MHz, RAM 320 MB, WIDCOMM (Broadcom Bluetooth stack) v5.0.1.2800, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
-
-    * Mac OS X 10.4.8 i386, Java: Apple Computer Inc. 1.5.0_07, D-Link DBT-120
+    * System 3 TCK Client, Mac OS X 10.5.2 i386, Java: Apple Computer Inc. 1.5.0_13, {{{http://www.dlink.com/products/?pid=34}D-Link DBT-120 Rev. B4}}
 
     []
 
 * Description of {failures}
-
-    * RemoteDevice.Security: RemoteDevice.authenticate() and RemoteDevice.authorize() Not implemented
 
     * ServiceRecord.setDeviceServiceClassesTest: Function ServiceRecord.setDeviceServiceClasses not implemented because there are no such API in WIDCOMM native stack
 
@@ -68,9 +64,9 @@ JSR 82 Technology Compatibility Kit
 
 * Starting TCK client as Java Web Start
 
-    * <<<{{{../bluecove-webstart/tck/localhost:8080/getNextApp.jnlp}\u00bbStart TCK client}}>>> Gatling on localhost:8080
+    * <<<{{{../bluecove-examples/bluecove-webstart/tck/localhost:8080/getNextApp.jnlp}\u00bbStart TCK client, Gatling on localhost:8080}}>>>
 
-    * <<<{{{../bluecove-webstart/tck/tckhost:8080/getNextApp.jnlp}\u00bbStart TCK client}}>>>  Gatling on tckhost:8080
+    * <<<{{{../bluecove-examples/bluecove-webstart/tck/tckhost:8080/getNextApp.jnlp}\u00bbStart TCK client, Gatling on tckhost:8080}}>>>
 
  You will need a TCK agent running on another bluetooth device use  {{{../bluecove-examples/bluecove-tester}bluecove-tester Web Start}}.
 
