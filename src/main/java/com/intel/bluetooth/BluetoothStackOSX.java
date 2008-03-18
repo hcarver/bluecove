@@ -53,6 +53,10 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	private long lastDeviceDiscoveryTime = 0;
 
+	private int localDeviceServiceClasses = 0;
+
+    private Thread localDeviceServiceClassMaintainer = null;
+
 	// Used mainly in Unit Tests
 	static {
 		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_OSX);
@@ -74,7 +78,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
 	 */
 	public int getFeatureSet() {
-		return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES;// | FEATURE_SET_DEVICE_SERVICE_CLASSES;
+		return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES;
 	}
 
 	public native int getLibraryVersion();
@@ -118,14 +122,48 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
     private native boolean setLocalDeviceServiceClassesImpl(int classOfDevice);
 
+		private class MaintainDeviceServiceClassesThread extends Thread {
+
+		MaintainDeviceServiceClassesThread() {
+			super("MaintainDeviceServiceClassesThread");
+		}
+
+		public void run() {
+		    boolean updated = true;
+			while (true) {
+				try {
+				    int delay = 1000 * 30;
+				    if (!updated) {
+				        delay = 1000;
+				    }
+					Thread.sleep(delay);
+				} catch (InterruptedException e) {
+					break;
+				}
+				if (localDeviceServiceClasses != 0) {
+					updated = setLocalDeviceServiceClassesImpl(localDeviceServiceClasses);
+				} else if (!updated) {
+				    updated = true;
+				}
+			}
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *
 	 * @see com.intel.bluetooth.BluetoothStack#setLocalDeviceServiceClasses(int)
 	 */
-	public void setLocalDeviceServiceClasses(int classOfDevice) {
-	    //setLocalDeviceServiceClassesImpl(classOfDevice);
-		throw new NotSupportedRuntimeException(getStackID());
+	public synchronized void setLocalDeviceServiceClasses(int classOfDevice) {
+		if (classOfDevice != localDeviceServiceClasses) {
+			setLocalDeviceServiceClassesImpl(classOfDevice);
+		}
+		localDeviceServiceClasses = classOfDevice;
+		if ((classOfDevice != 0) && (localDeviceServiceClassMaintainer == null)) {
+			localDeviceServiceClassMaintainer = new MaintainDeviceServiceClassesThread();
+			UtilsJavaSE.threadSetDaemon(localDeviceServiceClassMaintainer);
+			localDeviceServiceClassMaintainer.start();
+		}
 	}
 
 	public native boolean isLocalDevicePowerOn();

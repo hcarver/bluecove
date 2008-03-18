@@ -59,11 +59,6 @@ public:
     virtual IOReturn updateSDPServiceRecord() = 0;
 };
 
-@interface MaintainClassOfDevice : NSObject {
-}
-- (void) controllerClassOfDeviceReverted:(id)sender;
-@end
-
 NSMutableDictionary* createIntDataElement(int size, int type, int value);
 
 extern NSString *kServiceItemKeyServiceClassIDList;
