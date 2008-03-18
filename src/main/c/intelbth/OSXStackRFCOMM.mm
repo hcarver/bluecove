@@ -577,8 +577,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfGetSecurityO
 	if (runnable.encrypted) {
 	    return AUTHENTICATE_ENCRYPT;
 	} else if (NOAUTHENTICATE_NOENCRYPT == expected) {
-	    return AUTHENTICATE_NOENCRYPT;
-	} else {
 	    return NOAUTHENTICATE_NOENCRYPT;
+	} else {
+	    return AUTHENTICATE_NOENCRYPT;
 	}
 }
