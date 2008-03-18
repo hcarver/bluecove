@@ -386,10 +386,47 @@ public abstract class RemoteDeviceHelper {
 		}
 	}
 
+	/**
+	 * Count total number of open connections to all devices.
+	 * 
+	 * @return number of connections
+	 */
 	public static int openConnections() {
 		int c = 0;
-		for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
-			c += ((RemoteDeviceWithExtendedInfo) en.nextElement()).connectionsCount();
+		synchronized (devicesCashed) {
+			for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
+				c += ((RemoteDeviceWithExtendedInfo) en.nextElement()).connectionsCount();
+			}
+		}
+		return c;
+	}
+
+	/**
+	 * Count number of open connections to or from specific device.
+	 * 
+	 * @return number of connections
+	 */
+	public static int openConnections(long address) {
+		RemoteDeviceWithExtendedInfo dev = getCashedDeviceWithExtendedInfo(address);
+		if (dev == null) {
+			return 0;
+		}
+		return dev.connectionsCount();
+	}
+
+	/**
+	 * Count number of device that have open connections to or from them.
+	 * 
+	 * @return number of connections
+	 */
+	public static int connectedDevices() {
+		int c = 0;
+		synchronized (devicesCashed) {
+			for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
+				if (((RemoteDeviceWithExtendedInfo) en.nextElement()).hasConnections()) {
+					c++;
+				}
+			}
 		}
 		return c;
 	}
