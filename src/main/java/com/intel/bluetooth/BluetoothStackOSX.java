@@ -206,7 +206,8 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 			return String.valueOf(ATTR_RETRIEVABLE_MAX);
 		}
 		if ("bluetooth.master.switch".equals(property)) {
-			return isLocalDeviceFeatureSwitchRoles() ? TRUE : FALSE;
+			//return isLocalDeviceFeatureSwitchRoles() ? TRUE : FALSE;
+			return FALSE;
 		}
 		if ("bluetooth.l2cap.receiveMTU.max".equals(property)) {
 			return String.valueOf(receiveMTUMAX());
