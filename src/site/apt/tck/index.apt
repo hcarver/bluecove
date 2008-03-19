@@ -16,7 +16,7 @@ JSR 82 Technology Compatibility Kit
 
     Latest test reports for Bluetooth_1-1_007_TCK can be found {{{Bluetooth_1-1_007_TCK/}here}}. See Description of {{{#failures}failures}}.
 
-    Latest test reports for OBEX_1-1_006_TCK can be found {{{OBEX_1-1_006_TCK/}here}}.
+    Latest test reports for OBEX_1-1_007_TCK can be found {{{OBEX_1-1_007_TCK/}here}}.
 
     L2CAP connection can't be implemented on Microsoft stack. Because of this BlueCove JSR-82 implementation can't be certified on  Microsoft stack. L2CAP tests has been excluded from run on this stack to save time
 
@@ -46,7 +46,7 @@ JSR 82 Technology Compatibility Kit
 
     * System 2 TCK Agent, WinXP SP2, Intel Core 2 Duo 1.5 GHz, RAM 1GB, WIDCOMM (Broadcom Bluetooth stack) v5.1.0.3100, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
-    * System 3 TCK Client, Mac OS X 10.5.2 i386, Java: Apple Computer Inc. 1.5.0_13, {{{http://www.dlink.com/products/?pid=34}D-Link DBT-120 Rev. B4}}
+    * System 3 TCK Client, Mac OS X 10.5.2 i386, Java: Apple Computer Inc. 1.5.0_13, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
     []
 
