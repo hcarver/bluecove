@@ -32,7 +32,7 @@ JSR 82 Technology Compatibility Kit
 
     * Cellphone Sony Ericson K790a as TCK agent
 
-    * Sun Java Wireless Toolkit 2.5.1 as OBEX TCK agent for <<<tcpobex>>> tests
+    * Sun Java Wireless Toolkit 2.5.2 as OBEX TCK agent for <<<tcpobex>>> tests
 
     []
 
