@@ -138,6 +138,7 @@ void vthrowException(JNIEnv *env, const char *name, const char *fmt, va_list ap)
 		debug(("ERROR: can't throw second exception %s(%s)", name, msg));
 		return;
 	}
+	debug(("will throw exception %s(%s)", name, msg));
 	jclass cls = env->FindClass(name);
     /* if cls is NULL, an exception has already been thrown */
     if (cls != NULL) {
@@ -205,7 +206,7 @@ void throwBluetoothConnectionException(JNIEnv *env, int error, const char *fmt, 
 		debug(("ERROR: can't throw second exception %s(%s)", cBluetoothConnectionException, msg));
 		return;
 	}
-
+    debug(("will throw exception %s(%s)", cBluetoothConnectionException, msg));
 	jclass cls = env->FindClass(cBluetoothConnectionException);
     /* if cls is NULL, an exception has already been thrown */
     if (cls != NULL) {

@@ -228,6 +228,11 @@ int deviceInquiryCount = 0;
             }
         } else {
             _aborted = aborted;
+            // code 4 returned all the time, ignore it.
+            if (error == 0x4) {
+                ndebug("deviceInquiry %i ignores error code [0x%08x]", _logID, error);
+                error = kIOReturnSuccess;
+            }
             _error = error;
             _busy = FALSE;
         }
