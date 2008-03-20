@@ -380,7 +380,6 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceSequ
     }
 }
 
-BluetoothClassOfDevice localClassOfDevice = 0;
 BluetoothClassOfDevice updatedServiceClasses = 0;
 
 RUNNABLE(SetDeviceClass, "SetDeviceClass") {
@@ -391,19 +390,18 @@ RUNNABLE(SetDeviceClass, "SetDeviceClass") {
     BluetoothClassOfDevice serviceClasses = SERVICE_MASK & lData;
     BluetoothClassOfDevice currentClassOfDevice = [controller classOfDevice];
 
-    if (localClassOfDevice == 0) {
-        localClassOfDevice = currentClassOfDevice;
-    } else {
-        localClassOfDevice = currentClassOfDevice - (updatedServiceClasses & currentClassOfDevice & SERVICE_MASK);
-    }
-    BluetoothClassOfDevice newClassofDevice = localClassOfDevice | serviceClasses;
-    if (newClassofDevice == currentClassOfDevice) {
+    // Unset previously set bits
+    BluetoothClassOfDevice newClassofDevice = currentClassOfDevice & (~updatedServiceClasses);
+    newClassofDevice = newClassofDevice | serviceClasses;
+    //if (newClassofDevice == currentClassOfDevice) {
         // Need to run update again with short dellay, ClassOfDevice was not Reverted
-        bData = false;
-        return;
-    }
+        //ndebug("SetDeviceClass [0x%08x] not set [0x%08x] service [0x%08x]", currentClassOfDevice, newClassofDevice, serviceClasses);
+        //bData = false;
+        //return;
+    //}
 
-    ndebug("SetDeviceClass [0x%08x] service [0x%08x]", newClassofDevice, serviceClasses);
+    ndebug("SetDeviceClass [0x%08x] -> [0x%08x] service [0x%08x]", currentClassOfDevice, newClassofDevice, serviceClasses);
+    bData = true;
 
     NSTimeInterval seconds = 30;
     IOReturn status = [controller setClassOfDevice:newClassofDevice forTimeInterval:seconds];
@@ -411,7 +409,6 @@ RUNNABLE(SetDeviceClass, "SetDeviceClass") {
         error = 1;
         lData = status;
     } else {
-        bData = true;
         updatedServiceClasses = serviceClasses;
     }
 }
