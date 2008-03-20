@@ -403,7 +403,7 @@ RUNNABLE(SetDeviceClass, "SetDeviceClass") {
     ndebug("SetDeviceClass [0x%08x] -> [0x%08x] service [0x%08x]", currentClassOfDevice, newClassofDevice, serviceClasses);
     bData = true;
 
-    NSTimeInterval seconds = 30;
+    NSTimeInterval seconds = 120;
     IOReturn status = [controller setClassOfDevice:newClassofDevice forTimeInterval:seconds];
     if (status != kIOReturnSuccess) {
         error = 1;

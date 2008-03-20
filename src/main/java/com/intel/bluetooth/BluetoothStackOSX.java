@@ -132,7 +132,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
             boolean updated = true;
             while (true) {
                 try {
-                    int delay = 1000 * 30;
+                    int delay = 1000 * 120;
                     if (!updated) {
                         delay = 1000;
                     }
