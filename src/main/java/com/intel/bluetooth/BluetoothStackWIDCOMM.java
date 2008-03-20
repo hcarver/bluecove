@@ -43,6 +43,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	private Vector deviceDiscoveryListeners = new Vector/* <DiscoveryListener> */();
 
+	private Hashtable deviceDiscoveryListenerFoundDevices = new Hashtable();
+
 	private Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
 
 	// TODO what is the real number for Attributes retrievable ?
@@ -247,6 +249,10 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		deviceDiscoveryListeners.addElement(listener);
+		String asap = BlueCoveImpl.getConfigProperty("bluecove.inquiry.report_asap");
+		if ((asap == null) || (asap.equals("false"))) {
+			deviceDiscoveryListenerFoundDevices.put(listener, new Hashtable());
+		}
 		deviceDiscoveryListenerReportedDevices.put(listener, new Vector());
 		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
 	}
@@ -254,9 +260,32 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException {
 		try {
-			return runDeviceInquiryImpl(startedNotify, accessCode, listener);
+			int discType = runDeviceInquiryImpl(startedNotify, accessCode, listener);
+			if (discType == DiscoveryListener.INQUIRY_COMPLETED) {
+				// Report found devices if any not reported
+				Hashtable previouslyFound = (Hashtable) deviceDiscoveryListenerFoundDevices.get(listener);
+				if (previouslyFound != null) {
+					Vector reported = (Vector) deviceDiscoveryListenerReportedDevices.get(listener);
+					for (Enumeration en = previouslyFound.keys(); en.hasMoreElements();) {
+						RemoteDevice remoteDevice = (RemoteDevice) en.nextElement();
+						if (reported.contains(remoteDevice)) {
+							continue;
+						}
+						reported.addElement(remoteDevice);
+						Integer deviceClassInt = (Integer) previouslyFound.get(remoteDevice);
+						DeviceClass deviceClass = new DeviceClass(deviceClassInt.intValue());
+						listener.deviceDiscovered(remoteDevice, deviceClass);
+						// If cancelInquiry has been called
+						if (!deviceDiscoveryListeners.contains(listener)) {
+							return DiscoveryListener.INQUIRY_TERMINATED;
+						}
+					}
+				}
+			}
+			return discType;
 		} finally {
 			deviceDiscoveryListeners.removeElement(listener);
+			deviceDiscoveryListenerFoundDevices.remove(listener);
 			deviceDiscoveryListenerReportedDevices.remove(listener);
 		}
 	}
@@ -264,6 +293,11 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 	public native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException;
 
+	/*
+	 * This function may trigger multiple times per inquiry – even multiple
+	 * times per device – once for the address alone, and once for the address
+	 * and the user-friendly name.
+	 */
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
 			String deviceName, boolean paired) {
 		DebugLog.debug("deviceDiscoveredCallback deviceName", deviceName);
@@ -276,11 +310,22 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 		if (reported == null || (reported.contains(remoteDevice))) {
 			return;
 		}
-		reported.addElement(remoteDevice);
-		DeviceClass cod = new DeviceClass(deviceClass);
-		DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
-		DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
-		listener.deviceDiscovered(remoteDevice, cod);
+		// See -Dbluecove.inquiry.report_asap=false
+		Hashtable previouslyFound = (Hashtable) deviceDiscoveryListenerFoundDevices.get(listener);
+		if (previouslyFound != null) {
+			Integer deviceClassInt = (Integer) previouslyFound.get(remoteDevice);
+			if (deviceClassInt == null) {
+				previouslyFound.put(remoteDevice, new Integer(deviceClass));
+			} else if (deviceClass != 0) {
+				previouslyFound.put(remoteDevice, new Integer(deviceClass));
+			}
+		} else {
+			DeviceClass cod = new DeviceClass(deviceClass);
+			reported.addElement(remoteDevice);
+			DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
+			DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
+			listener.deviceDiscovered(remoteDevice, cod);
+		}
 	}
 
 	private native boolean deviceInquiryCancelImpl();
