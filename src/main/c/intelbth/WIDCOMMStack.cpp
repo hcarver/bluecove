@@ -1132,6 +1132,7 @@ void WIDCOMMStackServerConnectionBase::addClient(WIDCOMMStackConnectionBase* c) 
 }
 
 void WIDCOMMStackServerConnectionBase::closeClient(JNIEnv *env, WIDCOMMStackConnectionBase* c) {
+    c->server = NULL;
     for(int i = 0 ; i < OPEN_COMMPORTS_MAX; i ++) {
 		if (conn[i] == c) {
 			conn[i] = NULL;
@@ -1143,8 +1144,9 @@ void WIDCOMMStackServerConnectionBase::closeClient(JNIEnv *env, WIDCOMMStackConn
 
 void WIDCOMMStackServerConnectionBase::close(JNIEnv *env, BOOL allowExceptions) {
 	for(int i = 0 ; i < OPEN_COMMPORTS_MAX; i ++) {
-		if (conn[i] != NULL) {
-			conn[i]->close(env, false);
+	    WIDCOMMStackConnectionBase* c = conn[i];
+		if (c != NULL) {
+			c->close(env, false);
 			conn[i] = NULL;
 		}
 	}

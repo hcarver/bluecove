@@ -55,7 +55,7 @@ void WIDCOMMStackL2CapConn::OnConnected() {
 void WIDCOMMStackL2CapConn::close(JNIEnv *env, BOOL allowExceptions) {
 	debug(("l2(%i) l2CloseConnection handle", internalHandle));
 	Disconnect();
-	l2CapIf.Deregister();
+    l2CapIf.Deregister();
 	isConnected = FALSE;
 	SetEvent(hConnectionEvent);
 }
@@ -456,8 +456,9 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2CloseSer
 	if (l2c == NULL) {
 		return;
 	}
-	if (l2c->server != NULL) {
-	    l2c->server->closeClient(env, l2c);
+	WIDCOMMStackServerConnectionBase* srv = l2c->server;
+	if (srv != NULL) {
+	    srv->closeClient(env, l2c);
 	} else {
 	    l2c->close(env, true);
     }

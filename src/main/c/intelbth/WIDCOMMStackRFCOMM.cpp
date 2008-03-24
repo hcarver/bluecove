@@ -792,8 +792,9 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		return;
 	}
 	debug(("rf(%i) CloseServerConnection", rf->internalHandle));
-	if (rf->server != NULL) {
-	    rf->server->closeClient(env, rf);
+	WIDCOMMStackServerConnectionBase* srv = rf->server;
+	if (srv != NULL) {
+	    srv->closeClient(env, rf);
 	} else {
 	    rf->close(env, true);
     }
