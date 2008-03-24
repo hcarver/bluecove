@@ -47,18 +47,18 @@ IOReturn L2CAPServerController::publish() {
 	IOBluetoothSDPServiceRecordRef serviceRecordRef;
 	IOReturn status = IOBluetoothAddServiceDict((CFDictionaryRef)sdpEntries, &serviceRecordRef);
     if (status != kIOReturnSuccess) {
-        ndebug("failed to IOBluetoothAddServiceDict");
+        ndebug(("failed to IOBluetoothAddServiceDict"));
         return status;
     }
 
 	IOBluetoothSDPServiceRecord *serviceRecord = [IOBluetoothSDPServiceRecord withSDPServiceRecordRef:serviceRecordRef];
 	if (serviceRecord == NULL) {
-	    ndebug("failed to create IOBluetoothSDPServiceRecord");
+	    ndebug(("failed to create IOBluetoothSDPServiceRecord"));
 	} else {
 	    // get service channel ID & service record handle
 	    status = [serviceRecord getL2CAPPSM:&l2capPSM];
 	    if (status != kIOReturnSuccess) {
-		    ndebug("failed to getL2CAPPSM [0x%08x]", status);
+		    ndebug(("failed to getL2CAPPSM [0x%08x]", status));
 		} else {
 		    createPSMDataElement();
 		    [l2capPSMDataElement setObject:[NSNumber numberWithInt:l2capPSM] forKey:kDataElementValue];
@@ -85,23 +85,23 @@ IOReturn L2CAPServerController::updateSDPServiceRecord() {
     IOBluetoothSDPServiceRecordRef serviceRecordRef;
 	status = IOBluetoothAddServiceDict((CFDictionaryRef)sdpEntries, &serviceRecordRef);
     if (status != kIOReturnSuccess) {
-        ndebug("failed to IOBluetoothAddServiceDict updated");
+        ndebug(("failed to IOBluetoothAddServiceDict updated"));
         return status;
     }
 
 	IOBluetoothSDPServiceRecord *serviceRecord = [IOBluetoothSDPServiceRecord withSDPServiceRecordRef:serviceRecordRef];
 	if (serviceRecord == NULL) {
-	    ndebug("failed to create IOBluetoothSDPServiceRecord updated");
+	    ndebug(("failed to create IOBluetoothSDPServiceRecord updated"));
 	} else {
 	    // get service channel ID & service record handle
 	    BluetoothL2CAPPSM newL2capPSM;
 
 	    status = [serviceRecord getL2CAPPSM:&newL2capPSM];
 	    if (status != kIOReturnSuccess) {
-		    ndebug("failed to getL2CAPPSM updated [0x%08x]", status);
+		    ndebug(("failed to getL2CAPPSM updated [0x%08x]", status));
 		} else {
 		    if (newL2capPSM != l2capPSM) {
-		        ndebug("Changed L2CAP PSM %d -> %d", l2capPSM, newL2capPSM);
+		        ndebug(("Changed L2CAP PSM %d -> %d", l2capPSM, newL2capPSM));
 		        l2capPSM = newL2capPSM;
 		    }
 		    createPSMDataElement();
@@ -139,14 +139,14 @@ void L2CAPServerController::createPSMDataElement() {
 
     NSMutableArray *protocolDescriptorList = [sdpEntries objectForKey:kServiceItemKeyProtocolDescriptorList];
 	if (protocolDescriptorList == nil) {
-	    ndebug("create protocolDescriptorList");
+	    ndebug(("create protocolDescriptorList"));
 		protocolDescriptorList = [NSMutableArray array];
 		[sdpEntries setObject:protocolDescriptorList forKey:kServiceItemKeyProtocolDescriptorList];
 	}
 
 	NSMutableArray *protocolDescriptorList1 = [protocolDescriptorList objectAtIndex:0];
 	if (protocolDescriptorList1 == nil) {
-	    ndebug("create protocolDescriptorList1");
+	    ndebug(("create protocolDescriptorList1"));
 	    protocolDescriptorList1 = [NSMutableArray array];
 
 	    IOBluetoothSDPUUID* l2cap_uuid = [IOBluetoothSDPUUID uuid16:0x0100];
@@ -160,7 +160,7 @@ void L2CAPServerController::createPSMDataElement() {
 
     l2capPSMDataElement =  [protocolDescriptorList1 objectAtIndex:1];
     if (l2capPSMDataElement == nil) {
-        ndebug("create l2capPSMDataElement");
+        ndebug(("create l2capPSMDataElement"));
         l2capPSMDataElement = createIntDataElement(2, 1, psm);
         [protocolDescriptorList1 addObject:l2capPSMDataElement];
     }
@@ -300,7 +300,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerCloseI
 }
 
 void l2capServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNotificationRef inRef, IOBluetoothObjectRef objectRef ) {
-    ndebug("l2capServiceOpenNotificationCallback");
+    ndebug(("l2capServiceOpenNotificationCallback"));
     L2CAPServerController* comm = (L2CAPServerController*)userRefCon;
     if (comm == NULL) {
         return;
@@ -310,27 +310,27 @@ void l2capServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNotif
 	}
 	IOBluetoothL2CAPChannel *l2capChannel = [IOBluetoothL2CAPChannel withL2CAPChannelRef:(IOBluetoothL2CAPChannelRef)objectRef];
 	if (l2capChannel == NULL) {
-	    ndebug("fail to get IOBluetoothL2CAPChannel");
+	    ndebug(("fail to get IOBluetoothL2CAPChannel"));
 	    return;
 	}
 	if (comm->authenticate) {
 	    IOBluetoothDevice* device = [l2capChannel getDevice];
 	    if (device == NULL) {
-	        ndebug("drop incomming connection unable to get device");
+	        ndebug(("drop incomming connection unable to get device"));
 	        [l2capChannel closeChannel];
 	        return;
 	    }
 	    IOReturn as = [device requestAuthentication];
 	    if (as != kIOReturnSuccess) {
-	        ndebug("drop incomming connection unable to authenticate [0x%08x]", as);
+	        ndebug(("drop incomming connection unable to authenticate [0x%08x]", as));
 	        [l2capChannel closeChannel];
 	        return;
 	    }
-	    ndebug("L2CAP incomming connection authenticated");
+	    ndebug(("L2CAP incomming connection authenticated"));
 	}
 	L2CAPChannelController* client = comm->acceptClientComm;
 	if (client == NULL) {
-	    ndebug("drop incomming connection since AcceptAndOpen not running");
+	    ndebug(("drop incomming connection since AcceptAndOpen not running"));
 	    return;
 	}
 	client->openIncomingChannel(l2capChannel);

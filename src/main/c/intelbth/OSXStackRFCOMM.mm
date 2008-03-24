@@ -49,7 +49,7 @@ BOOL isValidObject(RFCOMMChannelController* comm ) {
         if (_controller->bluetoothDevice && [_controller->bluetoothDevice isEqual:device]) {
             _controller->connectionComplete(device, status);
         } else {
-            ndebug("ignore connectionComplete");
+            ndebug(("ignore connectionComplete"));
         }
     }
 }
@@ -83,10 +83,10 @@ BOOL isValidObject(RFCOMMChannelController* comm ) {
 }
 
 - (void)rfcommChannelClosed:(IOBluetoothRFCOMMChannel *)rfcommChannel {
-    ndebug("rfcommChannelClosed->");
+    ndebug(("rfcommChannelClosed->"));
     if (isValidObject(_controller)) {
         if (_controller->rfcommChannel == rfcommChannel) {
-            ndebug("rfcommChannelClosed");
+            ndebug(("rfcommChannelClosed"));
             _controller->rfcommChannelClosed();
         }
     }
@@ -110,7 +110,7 @@ RFCOMMChannelController::RFCOMMChannelController() {
 }
 
 RFCOMMChannelController::~RFCOMMChannelController() {
-    ndebug("~RFCOMMChannelController");
+    ndebug(("~RFCOMMChannelController"));
 }
 
 void RFCOMMChannelController::initDelegate() {
@@ -123,7 +123,7 @@ id RFCOMMChannelController::getDelegate() {
 }
 
 void RFCOMMChannelController::connectionComplete(IOBluetoothDevice *device, IOReturn status) {
-    ndebug("connectionComplete");
+    ndebug(("connectionComplete"));
     if (status == kIOReturnSuccess) {
         isBasebandConnected = true;
     } else {
@@ -133,7 +133,7 @@ void RFCOMMChannelController::connectionComplete(IOBluetoothDevice *device, IORe
 }
 
 void RFCOMMChannelController::rfcommChannelOpenComplete(IOReturn error) {
-    ndebug("rfcommChannelOpenComplete");
+    ndebug(("rfcommChannelOpenComplete"));
     if (error == kIOReturnSuccess) {
         isConnected = true;
         rfcommChannelMTU = [rfcommChannel getMTU];
@@ -154,14 +154,14 @@ void RFCOMMChannelController::openIncomingChannel(IOBluetoothRFCOMMChannel* newR
 }
 
 void RFCOMMChannelController::rfcommChannelClosed() {
-    ndebug("rfcommChannelClosed");
+    ndebug(("rfcommChannelClosed"));
     isClosed = true;
     MPSetEvent(notificationEvent, 0);
     MPSetEvent(writeCompleteNotificationEvent, 0);
 }
 
 void RFCOMMChannelController::rfcommChannelData(void* dataPointer, size_t dataLength) {
-    ndebug("rfcommChannelData");
+    ndebug(("rfcommChannelData"));
     if (isConnected && !isClosed) {
         receiveBuffer.write(dataPointer, dataLength);
 		MPSetEvent(notificationEvent, 1);
@@ -323,18 +323,18 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfCl
 RUNNABLE(RFCOMMChannelRemoteAddress, "RFCOMMChannelRemoteAddress") {
     RFCOMMChannelController* comm = (RFCOMMChannelController*)pData[0];
     if (comm->rfcommChannel == NULL) {
-        ndebug("rfcommChannel is NULL");
+        ndebug(("rfcommChannel is NULL"));
         error = 1;
     } else {
         bool isOpen = [comm->rfcommChannel isOpen];
         if (!isOpen) {
-            ndebug("rfcommChannel is NOT Open");
+            ndebug(("rfcommChannel is NOT Open"));
             error = 1;
             return;
         }
         IOBluetoothDevice* device = [comm->rfcommChannel getDevice];
         if (device == NULL) {
-            ndebug("rfcommChannel getDevice is NULL");
+            ndebug(("rfcommChannel getDevice is NULL"));
             error = 1;
             return;
         }

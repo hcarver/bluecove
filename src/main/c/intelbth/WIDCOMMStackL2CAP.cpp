@@ -44,14 +44,16 @@ WIDCOMMStackL2CapConn::~WIDCOMMStackL2CapConn() {
 
 void WIDCOMMStackL2CapConn::OnConnected() {
 	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || (!isValidStackObject(this))) {
+	    ndebug(("e.l2(%i) l2OnConnected for invlaid object", internalHandle));
 		return;
 	}
+	ndebug(("l2(%i) l2OnConnected", internalHandle));
 	isConnected = TRUE;
 	SetEvent(hConnectionEvent);
 }
 
 void WIDCOMMStackL2CapConn::close(JNIEnv *env, BOOL allowExceptions) {
-	debug(("closeConnection handle %i", internalHandle));
+	debug(("l2(%i) l2CloseConnection handle", internalHandle));
 	Disconnect();
 	l2CapIf.Deregister();
 	isConnected = FALSE;
@@ -59,7 +61,12 @@ void WIDCOMMStackL2CapConn::close(JNIEnv *env, BOOL allowExceptions) {
 }
 
 void WIDCOMMStackL2CapConn::OnIncomingConnection() {
+	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || (!isValidStackObject(this))) {
+	    ndebug(("e.l2(%i) l2OnIncomingConnection for invlaid object", internalHandle));
+		return;
+	}
 	incomingL2CAPConnectionCount ++;
+	ndebug(("l2(%i) l2OnIncomingConnection", internalHandle));
 	if (Accept(receiveMTU)) {
 	    isConnected = TRUE;
 	} else {
@@ -70,6 +77,7 @@ void WIDCOMMStackL2CapConn::OnIncomingConnection() {
 
 void WIDCOMMStackL2CapConn::OnDataReceived(void *p_data, UINT16 length) {
 	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || (!isConnected) || (!isValidStackObject(this))) {
+	    ndebug(("e.l2(%i) l2OnDataReceived for invlaid object", internalHandle));
 		return;
 	}
 	receiveBuffer.write_with_len(p_data, length);
@@ -78,8 +86,10 @@ void WIDCOMMStackL2CapConn::OnDataReceived(void *p_data, UINT16 length) {
 
 void WIDCOMMStackL2CapConn::OnRemoteDisconnected(UINT16 reason) {
 	if ((magic1 != MAGIC_1) || (magic2 != MAGIC_2) || (!isConnected) || (!isValidStackObject(this))) {
+	    ndebug(("e.l2(%i) l2OnRemoteDisconnected for invlaid object", internalHandle));
 		return;
 	}
+	ndebug(("l2(%i) l2OnRemoteDisconnected", internalHandle));
 	isDisconnected = TRUE;
 	isConnected = FALSE;
     SetEvent(hConnectionEvent);
@@ -130,7 +140,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 			open_l2client_return 0;
 		}
-		debug(("L2CapConn handle %i", l2c->internalHandle));
+		debug(("l2(%i) L2CapConn handle created", l2c->internalHandle));
 		if ((l2c->hConnectionEvent == NULL) || (l2c->hDataReceivedEvent == NULL)) {
 			throwRuntimeException(env, "fails to CreateEvent");
 			open_l2client_return 0;
@@ -211,7 +221,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 		    open_l2client_return 0;
 		}
 
-	    debug(("connected"));
+	    debug(("l2(%i) l2Client connected", l2c->internalHandle));
 		l2c->selectConnectionTransmitMTU(env);
 		jlong handle = l2c->internalHandle;
 		l2c = NULL;
@@ -256,7 +266,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerO
 			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
 			open_l2server_return 0;
 		}
-		debug(("L2CapConn server handle %i", srv->internalHandle));
+		debug(("l2s(%i) L2CapConn server handle created", srv->internalHandle));
 		if (srv->hConnectionEvent == NULL) {
 			throwRuntimeException(env, "fails to CreateEvent");
 			open_l2server_return 0;
@@ -381,7 +391,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
 	hEvents[0] = l2c->hConnectionEvent;
 	hEvents[1] = srv->hConnectionEvent;
 
-	debug(("L2CAP server waits for connection"));
+	debug(("l2s(%i) l2(%i) L2CAP server waits for connection", srv->internalHandle, l2c->internalHandle));
 	long incomingConnectionCountWas = incomingL2CAPConnectionCount;
     while ((stack != NULL) && (!srv->isClosing)  && (!l2c->isConnected) && (!l2c->isDisconnected) && (srv->sdpService != NULL)) {
 		DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, 500);
@@ -413,7 +423,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
         accept_server_return 0;
     }
 
-	debug(("L2CAP server connection made"));
+	debug(("l2s(%i) l2(%i) L2CAP server connection made", srv->internalHandle, l2c->internalHandle));
 	l2c->selectConnectionTransmitMTU(env);
 	return l2c->internalHandle;
 }
@@ -526,11 +536,11 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Read
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 (JNIEnv *env, jobject peer, jlong handle, jbyteArray inBuf) {
-	debug(("->receive(byte[])"));
 	WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
 	if (l2c == NULL) {
 		return 0;
 	}
+	debug(("l2(%i) receive(byte[])", l2c->internalHandle));
 	if ((!l2c->isConnected ) && (l2c->receiveBuffer.available() < sizeof(UINT16))) {
 		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return 0;
@@ -609,11 +619,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Send
 (JNIEnv *env, jobject, jlong handle, jbyteArray data) {
-	debug(("->send(byte[])"));
 	WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
 	if (l2c == NULL) {
 		return;
 	}
+	debug(("l2(%i) send(byte[])", l2c->internalHandle));
 	if (!l2c->isConnected ) {
 		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return;

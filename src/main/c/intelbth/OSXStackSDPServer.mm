@@ -395,12 +395,12 @@ RUNNABLE(SetDeviceClass, "SetDeviceClass") {
     newClassofDevice = newClassofDevice | serviceClasses;
     //if (newClassofDevice == currentClassOfDevice) {
         // Need to run update again with short dellay, ClassOfDevice was not Reverted
-        //ndebug("SetDeviceClass [0x%08x] not set [0x%08x] service [0x%08x]", currentClassOfDevice, newClassofDevice, serviceClasses);
+        //ndebug(("SetDeviceClass [0x%08x] not set [0x%08x] service [0x%08x]", currentClassOfDevice, newClassofDevice, serviceClasses));
         //bData = false;
         //return;
     //}
 
-    ndebug("SetDeviceClass [0x%08x] -> [0x%08x] service [0x%08x]", currentClassOfDevice, newClassofDevice, serviceClasses);
+    ndebug(("SetDeviceClass [0x%08x] -> [0x%08x] service [0x%08x]", currentClassOfDevice, newClassofDevice, serviceClasses));
     bData = true;
 
     NSTimeInterval seconds = 120;

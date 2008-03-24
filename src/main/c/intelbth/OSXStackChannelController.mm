@@ -111,7 +111,7 @@ void BasebandConnectionOpen::run() {
         return;
     }
     if ([comm->bluetoothDevice isConnected]) {
-        ndebug("baseband connection to the device exists");
+        ndebug(("baseband connection to the device exists"));
         //comm->isBasebandConnected = true;
         //return;
     }

@@ -36,7 +36,7 @@ int deviceInquiryCount = 0;
     _logID = logID;
     [self   stopSearch];
 
-    ndebug("deviceInquiry %i startSearch", _logID);
+    ndebug(("deviceInquiry %i startSearch", _logID));
     _notificationEvent = &(stack->deviceInquiryNotificationEvent);
 
     _aborted = FALSE;
@@ -82,7 +82,7 @@ int deviceInquiryCount = 0;
 
 -(void) stopSearch {
     _finished = TRUE;
-    ndebug("deviceInquiry %i stopSearch", _logID);
+    ndebug(("deviceInquiry %i stopSearch", _logID));
 
     if (_inquiry) {
         [_inquiry stop];
@@ -148,7 +148,7 @@ int deviceInquiryCount = 0;
 
 -(void) addDeviceToList:(IOBluetoothDevice*)inDevice {
     @synchronized(self) {
-        ndebug("deviceInquiry %i deviceFound", _logID);
+        ndebug(("deviceInquiry %i deviceFound", _logID));
         [_foundDevices addObject:inDevice];
     }
 }
@@ -159,7 +159,7 @@ int deviceInquiryCount = 0;
 
 -(void) updateDeviceInfo:(IOBluetoothDevice *)inDevice {
     @synchronized(self) {
-        ndebug("deviceInquiry %i deviceUpdated", _logID);
+        ndebug(("deviceInquiry %i deviceUpdated", _logID));
         [_foundDevices addObject:inDevice];
     }
 }
@@ -215,7 +215,7 @@ int deviceInquiryCount = 0;
  */
 -(void) deviceInquiryComplete:(IOBluetoothDeviceInquiry*)sender error:(IOReturn)error   aborted:(BOOL)aborted {
     // aborted may reflet the sate of previous transaction. Ignore it.
-    ndebug("deviceInquiry %i complete, [0x%08x] %u", _logID, error, aborted);
+    ndebug(("deviceInquiry %i complete, [0x%08x] %u", _logID, error, aborted));
     if ((!BUG_Inquiry_stop) && (_inquiry != NULL)) {
         [_inquiry clearFoundDevices];
         [_inquiry release];
@@ -224,13 +224,13 @@ int deviceInquiryCount = 0;
     @synchronized(self) {
         if (!_busy) {
             if (!aborted) {
-                ndebug("WARN deviceInquiry complete and WAS NOT BUZY");
+                ndebug(("WARN deviceInquiry complete and WAS NOT BUZY"));
             }
         } else {
             _aborted = aborted;
             // code 4 returned all the time, ignore it.
             if (error == 0x4) {
-                ndebug("deviceInquiry %i ignores error code [0x%08x]", _logID, error);
+                ndebug(("deviceInquiry %i ignores error code [0x%08x]", _logID, error));
                 error = kIOReturnSuccess;
             }
             _error = error;
@@ -316,7 +316,7 @@ void DeviceInquiryStart::run() {
     } else {
         discovery = [[OSXStackDiscovery alloc] init];
     }
-    ndebug("deviceInquiry %i run", logID);
+    ndebug(("deviceInquiry %i run", logID));
     startStatus = [discovery startSearch: logID inquiryLength: duration];
     if (startStatus) {
         if (!BUG_Inquiry_stop) {
@@ -335,7 +335,7 @@ void DeviceInquiryStart::stopAndRelease() {
         }
         discovery = NULL;
     } else {
-        ndebug("ERROR deviceInquiry %i can't release", logID);
+        ndebug(("ERROR deviceInquiry %i can't release", logID));
     }
 }
 

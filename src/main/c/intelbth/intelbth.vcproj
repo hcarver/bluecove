@@ -1182,6 +1182,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WIDCOMMStackRFCOMM.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\WIDCOMMStackL2CAP.cpp"
 				>
 			</File>

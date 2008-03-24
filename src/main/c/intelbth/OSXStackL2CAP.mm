@@ -49,7 +49,7 @@ BOOL isValidObject(L2CAPChannelController* comm ) {
         if (_controller->bluetoothDevice && [_controller->bluetoothDevice isEqual:device]) {
             _controller->connectionComplete(device, status);
         } else {
-            ndebug("ignore connectionComplete");
+            ndebug(("ignore connectionComplete"));
         }
     }
 }
@@ -65,7 +65,7 @@ BOOL isValidObject(L2CAPChannelController* comm ) {
 - (void)l2capChannelClosed:(IOBluetoothL2CAPChannel*)l2capChannel {
     if (isValidObject(_controller)) {
         if (_controller->l2capChannel == l2capChannel) {
-            ndebug("l2capChannelClosed");
+            ndebug(("l2capChannelClosed"));
             _controller->l2capChannelClosed();
         }
     }
@@ -114,7 +114,7 @@ id L2CAPChannelController::getDelegate() {
 }
 
 void L2CAPChannelController::connectionComplete(IOBluetoothDevice *device, IOReturn status) {
-    ndebug("connectionComplete");
+    ndebug(("connectionComplete"));
     if (status == kIOReturnSuccess) {
         isBasebandConnected = true;
     } else {
@@ -178,7 +178,7 @@ void L2CAPChannelController::l2capChannelWriteComplete(void* refcon, IOReturn er
 }
 
 IOReturn L2CAPChannelController::close() {
-    ndebug("L2CAPChannelController::close");
+    ndebug(("L2CAPChannelController::close"));
     IOReturn rc = kIOReturnSuccess;
     if (delegate != NULL) {
         [delegate close];

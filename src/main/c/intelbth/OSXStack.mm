@@ -22,7 +22,7 @@
 #include "OSXStack.h"
 #include <pthread.h>
 
-#define CPP_FILE "OSXStack.cpp"
+#define CPP_FILE "OSXStack.mm"
 
 OSXStack* stack = NULL;
 
@@ -194,7 +194,7 @@ void *oneNativeThreadMain(void * pThreadParams) {
     // Init complete, releasing the library load thread
     MPSetEvent(threadParams->initializedNotificationEvent, 1);
 
-    ndebug("Starting the CFRunLoop");
+    ndebug(("Starting the CFRunLoop"));
     // Starting the CFRunLoop
     CFRunLoopRun();
     // should only reach this point when getting unloaded
@@ -210,11 +210,11 @@ void performBTOperationCallBack(void *info) {
     BTOperationParams* params = (BTOperationParams*)info;
     if (params->runnable != NULL) {
         if (isRunnableCorrupted(params->runnable)) {
-            ndebug("Error: execute BTOperation got corrupted runnable");
+            ndebug(("Error: execute BTOperation got corrupted runnable"));
         } else {
-            ndebug(" execute  BTOperation %s", params->runnable->name);
+            ndebug((" execute  BTOperation %s", params->runnable->name));
             params->runnable->run();
-            ndebug(" finished BTOperation %s", params->runnable->name);
+            ndebug((" finished BTOperation %s", params->runnable->name));
         }
     }
     MPSetEvent(synchronousBTOperationCallComplete, 1);
@@ -229,7 +229,7 @@ void synchronousBTOperation(Runnable* runnable) {
     BTOperationParams* params = (BTOperationParams*)context.info;
     params->runnable = runnable;
 
-    ndebug("invoke    BTOperation %s", params->runnable->name);
+    ndebug(("invoke    BTOperation %s", params->runnable->name));
     CFRunLoopSourceSignal(btOperationSource);
     CFRunLoopWakeUp(mainRunLoop);
 
@@ -237,7 +237,7 @@ void synchronousBTOperation(Runnable* runnable) {
     MPWaitForEvent(synchronousBTOperationCallComplete, &flags, kDurationForever);
 
     pthread_mutex_unlock(&btOperationInProgress);
-    ndebug("return    BTOperation %s", params->runnable->name);
+    ndebug(("return    BTOperation %s", params->runnable->name));
 }
 
 // --- Helper functions

@@ -65,16 +65,9 @@ void enableNativeDebug(JNIEnv *env, jobject loggerClass, jboolean on) {
 	}
 }
 
-void ndebug(const char *fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	if (nativeDebugCallbackEnabled) {
-	    fprintf(stdout, "NATIVE:");
-        vfprintf(stdout, fmt, ap);
-        fprintf(stdout, "\n");
-        fflush(stdout);
-    }
-    va_end(ap);
+void stdOutPrint(const char* fileName, int lineN, const char* msg) {
+    fprintf(stdout, "NATIVE:      %s\n\t%s(%i)\n", msg, fileName, lineN);
+    fflush(stdout);
 }
 
 void log_info(const char *fmt, ...) {
@@ -100,8 +93,18 @@ void DebugMessage::printf(const char *fmt, ...) {
 
 void DebugMessage::callDebugListener(JNIEnv *env, const char* fileName, int lineN) {
 	if ((env != NULL) && (nativeDebugCallbackEnabled)) {
-		env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, env->NewStringUTF(fileName), lineN, env->NewStringUTF(msg));
+	    if (ExceptionCheckCompatible(env)) {
+	        stdOutPrint(fileName, lineN, msg);
+	    } else {
+		    env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, env->NewStringUTF(fileName), lineN, env->NewStringUTF(msg));
+	    }
 	}
+}
+
+void DebugMessage::callDebugStdOut(const char* fileName, int lineN) {
+    if (nativeDebugCallbackEnabled) {
+	    stdOutPrint(fileName, lineN, msg);
+    }
 }
 
 void callDebugListener(JNIEnv *env, const char* fileName, int lineN, ...) {
@@ -112,7 +115,26 @@ void callDebugListener(JNIEnv *env, const char* fileName, int lineN, ...) {
 		    char msg[DEBUG_MESSAGE_MAX+1];
 		    char *fmt = va_arg(ap, char*);
 			_vsnprintf_s(msg, DEBUG_MESSAGE_MAX, fmt, ap);
-			env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, env->NewStringUTF(fileName), lineN, env->NewStringUTF(msg));
+			if (ExceptionCheckCompatible(env)) {
+	            stdOutPrint(fileName, lineN, msg);
+	        } else {
+			    env->CallStaticVoidMethod(nativeDebugListenerClass, nativeDebugMethod, env->NewStringUTF(fileName), lineN, env->NewStringUTF(msg));
+			}
+		}
+	}
+	va_end(ap);
+}
+
+void callDebugStdOut(const char* fileName, int lineN, ...) {
+    va_list ap;
+	va_start(ap, lineN);
+	{
+		if (nativeDebugCallbackEnabled) {
+		    char msg[DEBUG_MESSAGE_MAX+1];
+		    char *fmt = va_arg(ap, char*);
+			_vsnprintf_s(msg, DEBUG_MESSAGE_MAX, fmt, ap);
+
+			stdOutPrint(fileName, lineN, msg);
 		}
 	}
 	va_end(ap);
@@ -675,6 +697,8 @@ ObjectPool::ObjectPool(int size, int handleOffset, BOOL delayDelete) {
 	this->size = size;
 	this->handleOffset = handleOffset;
 	this->delayDelete = delayDelete;
+	this->handleReturned = 0;
+	this->handleBatch = 0;
 	handleMove = 0;
 	objs = new (PoolableObject* [size]);
 	for(int i = 0; i < size; i ++) {
@@ -695,7 +719,7 @@ ObjectPool::~ObjectPool() {
 }
 
 jlong ObjectPool::realIndex(jlong internalHandle) {
-	return internalHandle - handleOffset;
+	return (internalHandle - handleOffset) % size;
 }
 
 jlong ObjectPool::realIndex(PoolableObject* obj) {
@@ -721,7 +745,18 @@ BOOL ObjectPool::addObject(PoolableObject* obj) {
 		if (objs[i] == NULL) {
 			freeIndex = i;
 			objs[freeIndex] = obj;
-			obj->internalHandle = handleOffset + freeIndex;
+			long newHandle = handleOffset + freeIndex + handleBatch * size;
+			while (newHandle <= handleReturned) {
+			    newHandle += size;
+			    handleBatch ++;
+			}
+			// Start all over from start
+			if (newHandle >= INT_MAX) {
+			    newHandle = handleOffset + freeIndex;
+			    handleBatch = 0;
+			}
+			handleReturned = (int)newHandle;
+			obj->internalHandle = (int)newHandle;
 
 			handleMove ++;
 			if (handleMove >= size) {

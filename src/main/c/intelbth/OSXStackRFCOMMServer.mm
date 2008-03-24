@@ -44,18 +44,18 @@ IOReturn RFCOMMServerController::publish() {
 	IOBluetoothSDPServiceRecordRef serviceRecordRef;
 	IOReturn status = IOBluetoothAddServiceDict((CFDictionaryRef)sdpEntries, &serviceRecordRef);
     if (status != kIOReturnSuccess) {
-        ndebug("failed to IOBluetoothAddServiceDict");
+        ndebug(("failed to IOBluetoothAddServiceDict"));
         return status;
     }
 
 	IOBluetoothSDPServiceRecord *serviceRecord = [IOBluetoothSDPServiceRecord withSDPServiceRecordRef:serviceRecordRef];
 	if (serviceRecord == NULL) {
-	    ndebug("failed to create IOBluetoothSDPServiceRecord");
+	    ndebug(("failed to create IOBluetoothSDPServiceRecord"));
 	} else {
 	    // get service channel ID & service record handle
 	    status = [serviceRecord getRFCOMMChannelID:&rfcommChannelID];
 	    if (status != kIOReturnSuccess) {
-		    ndebug("failed to getRFCOMMChannelID");
+		    ndebug(("failed to getRFCOMMChannelID"));
 		} else {
 		    [rfcommChannelIDDataElement setObject:[NSNumber numberWithInt:rfcommChannelID] forKey:kDataElementValue];
 		    status = [serviceRecord getServiceRecordHandle:&sdpServiceRecordHandle];
@@ -81,23 +81,23 @@ IOReturn RFCOMMServerController::updateSDPServiceRecord() {
     IOBluetoothSDPServiceRecordRef serviceRecordRef;
 	status = IOBluetoothAddServiceDict((CFDictionaryRef)sdpEntries, &serviceRecordRef);
     if (status != kIOReturnSuccess) {
-        ndebug("failed to IOBluetoothAddServiceDict updated");
+        ndebug(("failed to IOBluetoothAddServiceDict updated"));
         return status;
     }
 
 	IOBluetoothSDPServiceRecord *serviceRecord = [IOBluetoothSDPServiceRecord withSDPServiceRecordRef:serviceRecordRef];
 	if (serviceRecord == NULL) {
-	    ndebug("failed to create IOBluetoothSDPServiceRecord updated");
+	    ndebug(("failed to create IOBluetoothSDPServiceRecord updated"));
 	} else {
 	    // get service channel ID & service record handle
 	    BluetoothRFCOMMChannelID newRfcommChannelID;
 
 	    status = [serviceRecord getRFCOMMChannelID:&newRfcommChannelID];
 	    if (status != kIOReturnSuccess) {
-		    ndebug("failed to getRFCOMMChannelID updated");
+		    ndebug(("failed to getRFCOMMChannelID updated"));
 		} else {
 		    if (newRfcommChannelID != rfcommChannelID) {
-		        ndebug("Changed RFCOMMChannelID %d -> %d", rfcommChannelID, newRfcommChannelID);
+		        ndebug(("Changed RFCOMMChannelID %d -> %d", rfcommChannelID, newRfcommChannelID));
 		        rfcommChannelID = newRfcommChannelID;
 		    }
 		    [rfcommChannelIDDataElement setObject:[NSNumber numberWithInt:rfcommChannelID] forKey:kDataElementValue];
@@ -264,7 +264,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerCloseI
 }
 
 void rfcommServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNotificationRef inRef, IOBluetoothObjectRef objectRef ) {
-    ndebug("rfcommServiceOpenNotificationCallback");
+    ndebug(("rfcommServiceOpenNotificationCallback"));
     RFCOMMServerController* comm = (RFCOMMServerController*)userRefCon;
     if (comm == NULL) {
         return;
@@ -274,27 +274,27 @@ void rfcommServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNoti
 	}
 	IOBluetoothRFCOMMChannel *rfcommChannel = [IOBluetoothRFCOMMChannel withRFCOMMChannelRef:(IOBluetoothRFCOMMChannelRef)objectRef];
 	if (rfcommChannel == NULL) {
-	    ndebug("fail to get IOBluetoothRFCOMMChannel");
+	    ndebug(("fail to get IOBluetoothRFCOMMChannel"));
 	    return;
 	}
 	if (comm->authenticate) {
 	    IOBluetoothDevice* device = [rfcommChannel getDevice];
 	    if (device == NULL) {
-	        ndebug("drop incomming connection unable to get device");
+	        ndebug(("drop incomming connection unable to get device"));
 	        [rfcommChannel closeChannel];
 	        return;
 	    }
 	    IOReturn as = [device requestAuthentication];
 	    if (as != kIOReturnSuccess) {
-	        ndebug("drop incomming connection unable to authenticate [0x%08x]", as);
+	        ndebug(("drop incomming connection unable to authenticate [0x%08x]", as));
 	        [rfcommChannel closeChannel];
 	        return;
 	    }
-	    ndebug("RFCOMM incomming connection authenticated");
+	    ndebug(("RFCOMM incomming connection authenticated"));
 	}
 	RFCOMMChannelController* client = comm->acceptClientComm;
 	if (client == NULL) {
-	    ndebug("drop incomming connection since AcceptAndOpen not running");
+	    ndebug(("drop incomming connection since AcceptAndOpen not running"));
 	    [rfcommChannel closeChannel];
 	    return;
 	}

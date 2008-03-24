@@ -46,6 +46,8 @@ CLEAN :
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(INTDIR)\WIDCOMMStack.obj"
 	-@erase "$(INTDIR)\WIDCOMMStack.sbr"
+	-@erase "$(INTDIR)\WIDCOMMStackRFCOMM.obj"
+	-@erase "$(INTDIR)\WIDCOMMStackRFCOMM.sbr"
 	-@erase "$(INTDIR)\WIDCOMMStackL2CAP.obj"
 	-@erase "$(INTDIR)\WIDCOMMStackL2CAP.sbr"
 	-@erase "$(OUTDIR)\bluecove.bsc"
@@ -100,6 +102,7 @@ BSC32_SBRS= \
 	"$(INTDIR)\common.sbr" \
 	"$(INTDIR)\commonTest.sbr" \
 	"$(INTDIR)\WIDCOMMStack.sbr" \
+	"$(INTDIR)\WIDCOMMStackRFCOMM.sbr" \
 	"$(INTDIR)\WIDCOMMStackL2CAP.sbr" \
 	"$(INTDIR)\ToshibaStack.sbr"
 
@@ -115,6 +118,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\common.obj" \
 	"$(INTDIR)\commonTest.obj" \
 	"$(INTDIR)\WIDCOMMStack.obj" \
+	"$(INTDIR)\WIDCOMMStackRFCOMM.obj" \
 	"$(INTDIR)\WIDCOMMStackL2CAP.obj" \
 	"$(INTDIR)\bluecove.res" \
 	"$(INTDIR)\ToshibaStack.obj"
@@ -168,6 +172,9 @@ SOURCE=.\WIDCOMMStack.cpp
 
 "$(INTDIR)\WIDCOMMStack.obj"	"$(INTDIR)\WIDCOMMStack.sbr" : $(SOURCE) "$(INTDIR)" ".\com_intel_bluetooth_BluetoothStackWIDCOMM.h"
 
+SOURCE=.\WIDCOMMStackRFCOMM.cpp
+
+"$(INTDIR)\WIDCOMMStackRFCOMM.obj"	"$(INTDIR)\WIDCOMMStackRFCOMM.sbr" : $(SOURCE) "$(INTDIR)" ".\com_intel_bluetooth_BluetoothStackWIDCOMM.h"
 
 SOURCE=.\WIDCOMMStackL2CAP.cpp
 

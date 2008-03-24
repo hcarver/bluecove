@@ -122,7 +122,7 @@ typedef struct {
 #define SDP_DISCOVERY_RECORDS_HANDLE_OFFSET 1
 // 7 for Server and 7 for Client, Bluetooth Can't have more
 #define COMMPORTS_POOL_MAX 100
-#define OPEN_COMMPORTS_MAX 7
+#define OPEN_COMMPORTS_MAX 14
 
 class WIDCOMMStackRfCommPort;
 class WIDCOMMStackServerConnectionBase;
@@ -157,6 +157,7 @@ public:
 	DiscoveryRecHolder* discoveryRecHolderCurrent;
 	DiscoveryRecHolder* discoveryRecHolderHold;
 
+    BOOL delayDeleteComm;
 	ObjectPool* commPool;
 	// CRfCommIf shared by application, lock it when connection is made
 	CRITICAL_SECTION csCommIf;
@@ -190,6 +191,9 @@ BOOL isValidStackObject(PoolableObject* object);
 extern WIDCOMMStack* stack;
 
 //	 --- Client RFCOMM connections
+
+WIDCOMMStackRfCommPort* validRfCommHandle(JNIEnv *env, jlong handle);
+WIDCOMMStackRfCommPortServer* validRfCommServerHandle(JNIEnv *env, jlong handle);
 
 class WIDCOMMStackConnectionBase : public PoolableObject {
 public:

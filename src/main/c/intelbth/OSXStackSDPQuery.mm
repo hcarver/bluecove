@@ -78,7 +78,7 @@ void StackSDPQueryStart::run() {
 }
 
 void StackSDPQueryStart::sdpQueryComplete(IOBluetoothDeviceRef deviceRef, IOReturn status) {
-    ndebug("sdpQueryComplete 0x%08x", status);
+    ndebug(("sdpQueryComplete 0x%08x", status));
     this->status = status;
     // Apperantly connection to device is still open after SDP query for some time. This may affect other connections.
     if (deviceRef != NULL) {
@@ -332,7 +332,7 @@ int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
 BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElement) {
     BluetoothSDPDataElementTypeDescriptor typeDescrip = IOBluetoothSDPDataElementGetTypeDescriptor(dataElement);
     BluetoothSDPDataElementSizeDescriptor sizeDescriptor = IOBluetoothSDPDataElementGetSizeDescriptor(dataElement);
-    ndebug("sizeDescriptor %i", sizeDescriptor);
+    ndebug(("sizeDescriptor %i", sizeDescriptor));
     BOOL isSeq = false;
     BOOL isURL = false;
     BOOL isUnsigned = false;
@@ -354,7 +354,7 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
             isUnsigned = true;
         case kBluetoothSDPDataElementTypeSignedInt: {
                 UInt8 type = isUnsigned ? 8: 16;
-                ndebug("processing number %i", type);
+                ndebug(("processing number %i", type));
                 write(type | sizeDescriptor);
                 if (sizeDescriptor == 4) { /* 16 byte integer */
 				    CFDataRef bigData = IOBluetoothSDPDataElementGetDataValue(dataElement);
@@ -377,7 +377,7 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
 				    }
 				    SInt64 l = 0LL;
 				    CFNumberGetValue(number, kCFNumberSInt64Type, &l);
-				    ndebug("number len %i, %lli", length, l);
+				    ndebug(("number len %i, %lli", length, l));
 				    writeLong(l, length);
 			    }
             }

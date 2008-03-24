@@ -104,6 +104,8 @@ private:
 
 	// generate different handlers for each new object
 	int handleMove;
+	int handleBatch;
+	int handleReturned;
 
 	PoolableObject** objs;
 
