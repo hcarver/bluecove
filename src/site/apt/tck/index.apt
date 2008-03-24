@@ -40,11 +40,11 @@ JSR 82 Technology Compatibility Kit
 
     * Sun Java(TM) SE Runtime Environment (build 1.5.0_14-b03)
 
-    * System 1 TCK Client, WinXP SP2, Intel Pentium M 1.7 GHz, RAM 1.25 GB, WIDCOMM (Broadcom Bluetooth stack) v5.1.0.4500, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
+    * System 1 TCK Client, WinXP SP2, Intel Pentium M 1.7 GHz, RAM 1.25 GB, WIDCOMM (Broadcom Bluetooth stack) v5.1.0.4200, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
     * System 1 TCK Client, WinXP SP2, Intel Pentium M 1.7 GHz, RAM 1.25 GB, Microsoft Bluetooth stack, {{{http://www.dlink.com/products/?pid=34}D-Link DBT-120 Rev. B4}}
 
-    * System 2 TCK Agent, WinXP SP2, Intel Core 2 Duo 1.5 GHz, RAM 1GB, WIDCOMM (Broadcom Bluetooth stack) v5.1.0.4500, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
+    * System 2 TCK Agent, WinXP SP2, Intel Core 2 Duo 1.5 GHz, RAM 1GB, WIDCOMM (Broadcom Bluetooth stack) v5.1.0.4200, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
     * System 3 TCK Client, Mac OS X 10.5.2 i386, Java: Apple Computer Inc. 1.5.0_13, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
