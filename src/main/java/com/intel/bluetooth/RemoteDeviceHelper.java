@@ -143,6 +143,18 @@ public abstract class RemoteDeviceHelper {
 			return authenticated;
 		}
 
+		/**
+		 * @see com.intel.bluetooth.RemoteDeviceHelper#authenticateRemoteDevice(RemoteDevice,
+		 *      java.lang.String)
+		 */
+		public boolean authenticate(String passkey) throws IOException {
+			boolean authenticated = bluetoothStack.authenticateRemoteDevice(addressLong, passkey);
+			if (authenticated) {
+				updateConnectionMarkAuthenticated();
+			}
+			return authenticated;
+		}
+
 		private void updateConnectionMarkAuthenticated() {
 			synchronized (connections) {
 				for (Enumeration en = connections.elements(); en.hasMoreElements();) {
@@ -501,6 +513,24 @@ public abstract class RemoteDeviceHelper {
 	 */
 	public static boolean authenticate(RemoteDevice device) throws IOException {
 		return remoteDeviceImpl(device).authenticate();
+	}
+
+	/**
+	 * Sends an authentication request to a remote Bluetooth device. Non JSR-82,
+	 * Return <code>false</code> if the stack does not support authentication.
+	 * 
+	 * @param address
+	 *            Remote Device
+	 * @param passkey
+	 *            A Personal Identification Number (PIN) to be used for device
+	 *            authentication.
+	 * @return <code>true</code> if authentication is successful; otherwise
+	 *         <code>false</code>
+	 * @throws IOException
+	 *             if there are error during authentication.
+	 */
+	public static boolean authenticate(RemoteDevice device, String passkey) throws IOException {
+		return remoteDeviceImpl(device).authenticate(passkey);
 	}
 
 	/**

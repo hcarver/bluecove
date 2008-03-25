@@ -157,6 +157,21 @@ public interface BluetoothStack {
 	 */
 	public boolean authenticateRemoteDevice(long address) throws IOException;
 
+	/**
+	 * Sends an authentication request to a remote Bluetooth device. Non JSR-82,
+	 * 
+	 * @param address
+	 *            Remote Device address
+	 * @param passkey
+	 *            A Personal Identification Number (PIN) to be used for device
+	 *            authentication.
+	 * @return <code>true</code> if authentication is successful; otherwise
+	 *         <code>false</code>
+	 * @throws IOException
+	 *             if there are error during authentication.
+	 */
+	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException;
+
 	// ---------------------- Device Inquiry
 
 	/**
