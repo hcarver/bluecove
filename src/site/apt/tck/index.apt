@@ -24,7 +24,7 @@ JSR 82 Technology Compatibility Kit
 
     * {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.gatling}Gatling}} v1.0.04 test harness
 
-    * {{{http://www.microemu.org/}MicroEmulator}} v2.0.2-SNAPSHOT as MIDP container.
+    * {{{http://www.microemu.org/}MicroEmulator}} v2.0.2 as MIDP container.
 
     * BlueCove on WIDCOMM stack as TCK agent for Microsoft stack and Mac OS X tests
 
