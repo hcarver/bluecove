@@ -245,6 +245,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 		return false;
 	}
 
+	private native boolean authenticateRemoteDeviceImpl(long address, String passkey) throws IOException;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -252,7 +254,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 	 *      java.lang.String)
 	 */
 	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException {
-		return false;
+		return authenticateRemoteDeviceImpl(address, passkey);
 	}
 
 	// --- Device Inquiry

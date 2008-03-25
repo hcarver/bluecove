@@ -266,7 +266,7 @@ WIDCOMMStackL2CapServer* validL2CapServerHandle(JNIEnv *env, jlong handle);
 
 class WIDCOMMStackL2CapConn : public CL2CapConn, public WIDCOMMStackConnectionBase {
 public:
-	CL2CapIf l2CapIf;
+	CL2CapIf* pL2CapIf;
 
     BOOL isDisconnected;
 

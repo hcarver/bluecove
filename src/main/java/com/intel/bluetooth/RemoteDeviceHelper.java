@@ -156,6 +156,9 @@ public abstract class RemoteDeviceHelper {
 		}
 
 		private void updateConnectionMarkAuthenticated() {
+			if (connections == null) {
+				return;
+			}
 			synchronized (connections) {
 				for (Enumeration en = connections.elements(); en.hasMoreElements();) {
 					BluetoothConnectionAccess c = (BluetoothConnectionAccess) en.nextElement();

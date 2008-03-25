@@ -31,6 +31,7 @@ int incomingL2CAPConnectionCount = 0;
 
 WIDCOMMStackL2CapConn::WIDCOMMStackL2CapConn() {
     isDisconnected = FALSE;
+    pL2CapIf = NULL;
 	hDataReceivedEvent = CreateEvent(
             NULL,     // no security attributes
             FALSE,     // auto-reset event
@@ -40,6 +41,10 @@ WIDCOMMStackL2CapConn::WIDCOMMStackL2CapConn() {
 
 WIDCOMMStackL2CapConn::~WIDCOMMStackL2CapConn() {
 	CloseHandle(hDataReceivedEvent);
+	if (pL2CapIf != NULL) {
+	    delete(pL2CapIf);
+	    pL2CapIf = NULL;
+	}
 }
 
 void WIDCOMMStackL2CapConn::OnConnected() {
@@ -55,7 +60,9 @@ void WIDCOMMStackL2CapConn::OnConnected() {
 void WIDCOMMStackL2CapConn::close(JNIEnv *env, BOOL allowExceptions) {
 	debug(("l2(%i) l2CloseConnection handle", internalHandle));
 	Disconnect();
-    l2CapIf.Deregister();
+	if (pL2CapIf != NULL) {
+        pL2CapIf->Deregister();
+    }
 	isConnected = FALSE;
 	SetEvent(hConnectionEvent);
 }
@@ -148,9 +155,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
 		debug(("L2CapConn channel 0x%X", channel));
 		//debug(("AssignPsmValue");
 
-		CL2CapIf *l2CapIf;
-		l2CapIf = &l2c->l2CapIf;
-		//l2CapIf = new CL2CapIf();
+		CL2CapIf *l2CapIf = new CL2CapIf();
+		l2c->pL2CapIf = l2CapIf;
 
 		if (!l2CapIf->AssignPsmValue(&(l2c->service_guid), (UINT16)channel)) {
 		    // What GUID do we need in call to CL2CapIf.AssignPsmValue() if we don't have any?
@@ -237,6 +243,7 @@ WIDCOMMStackL2CapServer::~WIDCOMMStackL2CapServer() {
 
 void WIDCOMMStackL2CapServer::close(JNIEnv *env, BOOL allowExceptions) {
     WIDCOMMStackServerConnectionBase::close(env, allowExceptions);
+    debug(("l2s(%i) Deregister", internalHandle));
     l2CapIf.Deregister();
 }
 

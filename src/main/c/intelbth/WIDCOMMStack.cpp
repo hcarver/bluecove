@@ -498,6 +498,48 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemo
 	return NULL;
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_authenticateRemoteDeviceImpl
+  (JNIEnv *env, jobject, jlong address, jstring passkey) {
+    if (stack == NULL) {
+		return FALSE;
+	}
+	BD_ADDR bda;
+	LongToBcAddr(address, bda);
+	BT_CHAR* pin_code = NULL;
+	BT_CHAR pinBuf[PIN_CODE_LEN +1];
+	if (passkey != NULL) {
+		#ifdef WIDCOMM_CE30
+			const jchar *cpasskey = env->GetStringChars(passkey, JNI_FALSE);
+			jsize size = env->GetStringLength(passkey);
+			int i = 0;
+			for(; (i < PIN_CODE_LEN) && (i < size); i ++) {
+				pinBuf[i] = cpasskey[i];
+			}
+			pinBuf[i] = '\0';
+			pin_code = pinBuf;
+			env->ReleaseStringChars(passkey, cpasskey);
+		#else
+			const char *cpasskey = env->GetStringUTFChars(passkey, 0);
+			jsize size = env->GetStringLength(passkey);
+			int i = 0;
+			for(; (i < PIN_CODE_LEN) && (i < size); i ++) {
+				pinBuf[i] = cpasskey[i];
+			}
+			pinBuf[i] = '\0';
+			pin_code = pinBuf;
+			env->ReleaseStringUTFChars(passkey, cpasskey);
+			debug(("Bond pin [%s]", pin_code));
+		#endif
+	}
+	CBtIf::BOND_RETURN_CODE rc = stack->Bond(bda, pin_code);
+	if ((rc == CBtIf::SUCCESS) || (rc == CBtIf::ALREADY_BONDED)) {
+	    return JNI_TRUE;
+	} else {
+	    throwIOException(env, "Bonding error [%i]", rc);
+		return JNI_FALSE;
+	}
+}
+
 jboolean isDevicePaired(JNIEnv *env, jlong address, DEV_CLASS devClass) {
 	if (stack == NULL) {
 		return FALSE;
@@ -1146,7 +1188,10 @@ void WIDCOMMStackServerConnectionBase::close(JNIEnv *env, BOOL allowExceptions) 
 	for(int i = 0 ; i < OPEN_COMMPORTS_MAX; i ++) {
 	    WIDCOMMStackConnectionBase* c = conn[i];
 		if (c != NULL) {
-			c->close(env, false);
+		    if (isValidStackObject(c)) {
+		        debug(("s(%i) close client #%i c(%i)", internalHandle, i, c->internalHandle));
+			    c->close(env, false);
+		    }
 			conn[i] = NULL;
 		}
 	}
