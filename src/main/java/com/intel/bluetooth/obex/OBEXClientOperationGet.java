@@ -38,6 +38,8 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 
 	private boolean finalBodyReceived = false;
 
+	private boolean errorReceived = false;
+
 	OBEXClientOperationGet(OBEXClientSessionImpl session, HeaderSet replyHeaders) throws IOException {
 		super(session, replyHeaders);
 		this.inputStream = new OBEXOperationInputStream(this);
@@ -78,10 +80,13 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 
 	public void closeStream() throws IOException {
 		this.operationInProgress = false;
-		while (!finalBodyReceived) {
-			receiveData(this.inputStream);
+		try {
+			while (!isClosed() && (!finalBodyReceived) && (!errorReceived)) {
+				receiveData(this.inputStream);
+			}
+		} finally {
+			inputStream.close();
 		}
-		inputStream.close();
 	}
 
 	/*
@@ -115,6 +120,7 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 			closeStream();
 			break;
 		default:
+			errorReceived = true;
 			throw new IOException("Operation error "
 					+ OBEXUtils.toStringObexResponseCodes(dataHeaders.getResponseCode()));
 		}

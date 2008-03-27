@@ -32,16 +32,18 @@ class OBEXOperationInputStream extends InputStream {
 	}
 
 	private byte[] buffer = new byte[0x100];
-    
+
 	private int readPos = 0;
-    
+
 	private int appendPos = 0;
 
 	private Object lock = new Object();
 
 	private boolean isClosed = false;
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.io.InputStream#read()
 	 */
 	public int read() throws IOException {
@@ -49,7 +51,7 @@ class OBEXOperationInputStream extends InputStream {
 			return -1;
 		}
 		synchronized (lock) {
-			while (!isClosed && (!this.operation.isClosed()) && (appendPos == readPos)) {	
+			while (!isClosed && (!this.operation.isClosed()) && (appendPos == readPos)) {
 				try {
 					this.operation.receiveData(this);
 				} catch (IOException e) {
@@ -64,8 +66,10 @@ class OBEXOperationInputStream extends InputStream {
 			return buffer[readPos++] & 0xFF;
 		}
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.io.InputStream#available()
 	 */
 	public int available() throws IOException {
@@ -74,7 +78,9 @@ class OBEXOperationInputStream extends InputStream {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.io.InputStream#close()
 	 */
 	public void close() throws IOException {
@@ -83,8 +89,11 @@ class OBEXOperationInputStream extends InputStream {
 			lock.notifyAll();
 		}
 	}
-	 
+
 	void appendData(byte[] b) {
+		if (isClosed) {
+			return;
+		}
 		synchronized (lock) {
 			if (appendPos + b.length > buffer.length) {
 				int newSize = (b.length + (appendPos - readPos)) * 2;
@@ -92,14 +101,14 @@ class OBEXOperationInputStream extends InputStream {
 					newSize = buffer.length;
 				}
 				byte[] newBuffer = new byte[newSize];
-		        System.arraycopy(buffer, readPos, newBuffer, 0, appendPos - readPos);
-		        buffer = newBuffer;
-		        appendPos -= readPos;
-		        readPos = 0;
+				System.arraycopy(buffer, readPos, newBuffer, 0, appendPos - readPos);
+				buffer = newBuffer;
+				appendPos -= readPos;
+				readPos = 0;
 			}
 			System.arraycopy(b, 0, buffer, appendPos, b.length);
 			appendPos += b.length;
-			
+
 			lock.notifyAll();
 		}
 	}
