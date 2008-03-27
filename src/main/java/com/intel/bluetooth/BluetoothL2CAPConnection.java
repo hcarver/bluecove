@@ -139,7 +139,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		}
 
 		isClosed = true;
-		DebugLog.debug("closing L2CAP Connection");
+		DebugLog.debug("closing L2CAP Connection", handle);
 
 		// close() can be called safely in another thread
 		long synchronizedHandle;

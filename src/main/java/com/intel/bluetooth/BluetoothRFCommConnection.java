@@ -94,7 +94,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 		}
 
 		if (handle != 0) {
-			DebugLog.debug("closing RFCOMM Connection");
+			DebugLog.debug("closing RFCOMM Connection", handle);
 			// close() can be called safely in another thread
 			long synchronizedHandle;
 			synchronized (this) {
