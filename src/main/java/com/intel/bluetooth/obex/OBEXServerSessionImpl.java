@@ -65,7 +65,9 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 				}
 			}
 		} catch (Throwable e) {
-			DebugLog.error("OBEXServerSession error", e);
+			if (this.isConnected) {
+				DebugLog.error("OBEXServerSession error", e);
+			}
 		} finally {
 			DebugLog.debug("OBEXServerSession ends");
 			try {
@@ -213,8 +215,8 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			rc = ResponseCodes.OBEX_HTTP_UNAVAILABLE;
 			DebugLog.error("onDisconnect", e);
 		}
-		writeOperation(rc, OBEXHeaderSetImpl.toByteArray(replyHeaders));
 		this.isConnected = false;
+		writeOperation(rc, OBEXHeaderSetImpl.toByteArray(replyHeaders));
 	}
 
 	private boolean processDelete(HeaderSet requestHeaders) throws IOException {

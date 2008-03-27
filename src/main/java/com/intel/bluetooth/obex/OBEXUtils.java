@@ -135,6 +135,28 @@ abstract class OBEXUtils {
 
 	public static String toStringObexResponseCodes(int code) {
 		switch (code) {
+		case OBEXOperationCodes.CONNECT:
+			return "CONNECT";
+		case OBEXOperationCodes.DISCONNECT:
+			return "DISCONNECT";
+		case OBEXOperationCodes.ABORT:
+			return "ABORT";
+		case OBEXOperationCodes.SESSION:
+			return "SESSION";
+		case OBEXOperationCodes.SESSION | OBEXOperationCodes.FINAL_BIT:
+			return "SESSION FINAL";
+		case OBEXOperationCodes.PUT:
+			return "PUT";
+		case OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT:
+			return "PUT FINAL";
+		case OBEXOperationCodes.GET:
+			return "GET";
+		case OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT:
+			return "GET FINAL";
+		case OBEXOperationCodes.SETPATH:
+			return "SETPATH";
+		case OBEXOperationCodes.SETPATH | OBEXOperationCodes.FINAL_BIT:
+			return "SETPATH FINAL";
 		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
 			return "OBEX_RESPONSE_CONTINUE";
 		case ResponseCodes.OBEX_HTTP_OK:

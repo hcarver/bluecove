@@ -144,6 +144,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		os.write(buf.toByteArray());
 		os.flush();
 		DebugLog.debug0x("obex sent", commId);
+		DebugLog.debug("obex sent", OBEXUtils.toStringObexResponseCodes(commId));
 		DebugLog.debug("obex sent len", len);
 	}
 
@@ -151,7 +152,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		byte[] header = new byte[3];
 		OBEXUtils.readFully(is, obexConnectionParams, header);
 		DebugLog.debug0x("obex received", header[0] & 0xFF);
-		DebugLog.debug("obex response", OBEXUtils.toStringObexResponseCodes(header[0]));
+		DebugLog.debug("obex received", OBEXUtils.toStringObexResponseCodes(header[0]));
 		int lenght = OBEXUtils.bytesToShort(header[1], header[2]);
 		if (lenght == 3) {
 			return header;

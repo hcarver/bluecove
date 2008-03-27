@@ -265,6 +265,18 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		return hs;
 	}
 
+	static HeaderSet appendHeaders(HeaderSet dst, HeaderSet src) throws IOException {
+		int[] headerIDArray = src.getHeaderList();
+		for (int i = 0; (headerIDArray != null) && (i < headerIDArray.length); i++) {
+			int headerID = headerIDArray[i];
+			if ((headerID == OBEX_HDR_BODY) || (headerID == OBEX_HDR_BODY_END)) {
+				continue;
+			}
+			dst.setHeader(headerID, src.getHeader(headerID));
+		}
+		return dst;
+	}
+
 	public void createAuthenticationChallenge(String realm, boolean userID, boolean access) {
 		authChallenges.addElement(OBEXAuthentication.createChallenge(realm, userID, access));
 	}
