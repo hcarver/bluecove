@@ -378,6 +378,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
     WIDCOMMStackL2CapConn* l2c = stack->createL2CapConn();
     if (l2c == NULL) {
         throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_NO_RESOURCES, "No free connections Objects in Pool");
+        LeaveCriticalSection(&stack->csCommIf);
 		return 0;
     }
 	srv->addClient(l2c);
@@ -463,6 +464,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2CloseSer
 	if (l2c == NULL) {
 		return;
 	}
+	debug(("l2(%i) closing server client", l2c->internalHandle));
 	WIDCOMMStackServerConnectionBase* srv = l2c->server;
 	if (srv != NULL) {
 	    srv->closeClient(env, l2c);

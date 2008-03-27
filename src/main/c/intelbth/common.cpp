@@ -773,7 +773,7 @@ BOOL ObjectPool::addObject(PoolableObject* obj) {
 
 BOOL ObjectPool::hasObject(PoolableObject* obj) {
     for(int i = 0; i < size; i++) {
-		if (objs[i] == obj) {
+		if ((void*)objs[i] == (void*)obj) {
 			return TRUE;
 		}
 	}
@@ -787,25 +787,29 @@ BOOL ObjectPool::addObject(PoolableObject* obj, char poolableObjectType) {
 
 PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle) {
 	if (handle <= 0) {
-		throwIOException(env, "Invalid handle %i", handle);
+		throwIOException(env, "[EAO] Invalid handle %i", handle);
 		return NULL;
 	}
 	jlong idx = realIndex(handle);
 	if ((idx < 0) || (idx >= size)) {
-		throwIOException(env, "Obsolete handle %i", handle);
+		throwIOException(env, "[EAO] Obsolete handle %i", handle);
 		return NULL;
 	}
 	PoolableObject* o = objs[idx];
 	if (o == NULL) {
-		throwIOException(env, "Destroyed handle %i", handle);
+		throwIOException(env, "[EAO] Destroyed handle %i", handle);
+		return NULL;
+	}
+	if (o->readyToFree) {
+		throwIOException(env, "[EAO] Delay delete object access %i", handle);
 		return NULL;
 	}
 	if ((o->magic1 != MAGIC_1) || (o->magic2 != MAGIC_2)) {
-		throwIOException(env, "Corrupted object %i", handle);
+		throwIOException(env, "[EAO] Corrupted object %i", handle);
 		return NULL;
 	}
 	if ((o->internalHandle != handle) || (!o->isValidObject())) {
-		throwIOException(env, "Corrupted handle %i", handle);
+		throwIOException(env, "[EAO] Corrupted handle %i", handle);
 		return NULL;
 	}
 	return o;
@@ -814,7 +818,7 @@ PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle) {
 PoolableObject* ObjectPool::getObject(JNIEnv *env, jlong handle, char poolableObjectType) {
 	PoolableObject* o = getObject(env, handle);
 	if ((o != NULL) && (o->poolableObjectType != poolableObjectType)) {
-		throwIOException(env, "Invalid handle type %i", handle);
+		throwIOException(env, "[EAO] Invalid handle type %i", handle);
 		return NULL;
 	}
 	return o;
@@ -829,7 +833,7 @@ PoolableObject* ObjectPool::getObjectByExternalHandle(jlong handle) {
 			}
 		}
 	}
-	return NULL;
+    return NULL;
 }
 
 void ObjectPool::removeObject(PoolableObject* obj) {

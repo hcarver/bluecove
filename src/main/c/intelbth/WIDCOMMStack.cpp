@@ -1165,7 +1165,7 @@ WIDCOMMStackServerConnectionBase::~WIDCOMMStackServerConnectionBase() {
 
 void WIDCOMMStackServerConnectionBase::addClient(WIDCOMMStackConnectionBase* c) {
     for(int i = 0 ; i < OPEN_COMMPORTS_MAX; i ++) {
-		if (conn[i] == NULL) {
+		if (NULL == conn[i]) {
 			conn[i] = c;
 			c->server = this;
 			break;
@@ -1176,7 +1176,8 @@ void WIDCOMMStackServerConnectionBase::addClient(WIDCOMMStackConnectionBase* c) 
 void WIDCOMMStackServerConnectionBase::closeClient(JNIEnv *env, WIDCOMMStackConnectionBase* c) {
     c->server = NULL;
     for(int i = 0 ; i < OPEN_COMMPORTS_MAX; i ++) {
-		if (conn[i] == c) {
+        const void* p = conn[i];
+		if (p == c) {
 			conn[i] = NULL;
 			break;
 		}
