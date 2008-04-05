@@ -612,21 +612,27 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 
     DeviceInquiryCallback callback;
     if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
-        stack->deviceInquiryInProcess = FALSE;
+        if (stack != NULL) {
+            stack->deviceInquiryInProcess = FALSE;
+        }
         return INQUIRY_ERROR;
     }
 
 	if (!stack->StartInquiry()) {
 		debug(("deviceInquiryStart error"));
-		stack->throwExtendedBluetoothStateException(env);
-		stack->deviceInquiryInProcess = FALSE;
+		if (stack != NULL) {
+		    stack->throwExtendedBluetoothStateException(env);
+		    stack->deviceInquiryInProcess = FALSE;
+	    }
 		return INQUIRY_ERROR;
 	}
 	debug(("deviceInquiryStarted"));
 
     if (!callback.callDeviceInquiryStartedCallback(env)) {
-		stack->StopInquiry();
-		stack->deviceInquiryInProcess = FALSE;
+        if (stack != NULL) {
+		    stack->StopInquiry();
+		    stack->deviceInquiryInProcess = FALSE;
+	    }
 		return INQUIRY_ERROR;
 	}
 
@@ -638,7 +644,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 		    DWORD  rc = WaitForSingleObject(stack->hEvent, 200);
 		    if (rc == WAIT_FAILED) {
 			    throwRuntimeException(env, "WaitForSingleObject");
-			    stack->deviceInquiryInProcess = FALSE;
+			    if (stack != NULL) {
+			        stack->deviceInquiryInProcess = FALSE;
+			    }
 			    return INQUIRY_ERROR;
 		    }
 	    }
@@ -650,8 +658,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
 			DeviceFound dev = stack->deviceResponded[reportedIdx];
 			jboolean paired = isDevicePaired(env, dev.deviceAddr, dev.devClass);
 			if (!callback.callDeviceDiscovered(env, listener, dev.deviceAddr, dev.deviceClass, env->NewStringUTF((char*)(dev.bdName)), paired)) {
-				stack->StopInquiry();
-				stack->deviceInquiryInProcess = FALSE;
+			    if (stack != NULL) {
+				    stack->StopInquiry();
+				    stack->deviceInquiryInProcess = FALSE;
+			    }
 				return INQUIRY_ERROR;
 			}
 		}
