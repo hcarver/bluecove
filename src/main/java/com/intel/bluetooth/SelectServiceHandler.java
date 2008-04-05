@@ -46,13 +46,15 @@ public class SelectServiceHandler implements DiscoveryListener {
 
 	private Object inquiryCompletedEvent = new Object();
 
+	private boolean inquiryCompleted;
+
 	private Object serviceSearchCompletedEvent = new Object();
+
+	private boolean serviceSearchCompleted;
 
 	private Hashtable devicesProcessed = new Hashtable();
 
 	private Vector serviceSearchDeviceQueue = new Vector();
-
-	UUID uuid;
 
 	private ServiceRecord servRecordDiscovered;
 
@@ -139,23 +141,27 @@ public class SelectServiceHandler implements DiscoveryListener {
 				return sr.getConnectionURL(security, master);
 			}
 		}
-		this.uuid = uuid;
-		ParallelSearchServicesThread t = new ParallelSearchServicesThread();
+		ParallelSearchServicesThread t = new ParallelSearchServicesThread(uuid);
 		t.start();
 
 		synchronized (inquiryCompletedEvent) {
 			if (!agent.startInquiry(DiscoveryAgent.GIAC, this)) {
 				return null;
 			}
-			try {
-				inquiryCompletedEvent.wait();
-			} catch (InterruptedException e) {
-				return null;
+			while (!inquiryCompleted) {
+				try {
+					inquiryCompletedEvent.wait();
+				} catch (InterruptedException e) {
+					return null;
+				}
 			}
 			agent.cancelInquiry(this);
 		}
 
 		if ((servRecordDiscovered == null) && (!t.processedAll())) {
+			synchronized (serviceSearchDeviceQueue) {
+				serviceSearchDeviceQueue.notifyAll();
+			}
 			try {
 				t.join();
 			} catch (InterruptedException e) {
@@ -173,14 +179,17 @@ public class SelectServiceHandler implements DiscoveryListener {
 
 	private class ParallelSearchServicesThread extends Thread {
 
-		boolean stoped = false;
+		private boolean stoped = false;
 
-		int processedNext = 0;
+		private int processedNext = 0;
 
-		int processedSize = 0;
+		private int processedSize = 0;
 
-		ParallelSearchServicesThread() {
+		private UUID uuid;
+
+		ParallelSearchServicesThread(UUID uuid) {
 			super("SelectServiceThread-" + nextThreadNum());
+			this.uuid = uuid;
 		}
 
 		boolean processedAll() {
@@ -189,12 +198,18 @@ public class SelectServiceHandler implements DiscoveryListener {
 
 		public void interrupt() {
 			stoped = true;
+			synchronized (serviceSearchDeviceQueue) {
+				serviceSearchDeviceQueue.notifyAll();
+			}
 			super.interrupt();
 		}
 
 		public void run() {
 			mainLoop: while ((!stoped) && (servRecordDiscovered == null)) {
 				synchronized (serviceSearchDeviceQueue) {
+					if ((inquiryCompleted) && (processedSize == serviceSearchDeviceQueue.size())) {
+						return;
+					}
 					if (processedSize == serviceSearchDeviceQueue.size()) {
 						try {
 							serviceSearchDeviceQueue.wait();
@@ -224,14 +239,18 @@ public class SelectServiceHandler implements DiscoveryListener {
 		DebugLog.debug("searchServices on ", device);
 		synchronized (serviceSearchCompletedEvent) {
 			try {
+				serviceSearchCompleted = false;
 				agent.searchServices(null, new UUID[] { uuid }, device, this);
 			} catch (BluetoothStateException e) {
 				DebugLog.error("searchServices", e);
-			}
-			try {
-				serviceSearchCompletedEvent.wait();
-			} catch (InterruptedException e) {
 				return null;
+			}
+			while (!serviceSearchCompleted) {
+				try {
+					serviceSearchCompletedEvent.wait();
+				} catch (InterruptedException e) {
+					return null;
+				}
 			}
 		}
 		return servRecordDiscovered;
@@ -242,19 +261,21 @@ public class SelectServiceHandler implements DiscoveryListener {
 			return;
 		}
 		synchronized (serviceSearchDeviceQueue) {
-			serviceSearchDeviceQueue.add(btDevice);
+			serviceSearchDeviceQueue.addElement(btDevice);
 			serviceSearchDeviceQueue.notifyAll();
 		}
 	}
 
 	public void inquiryCompleted(int discType) {
 		synchronized (inquiryCompletedEvent) {
+			inquiryCompleted = true;
 			inquiryCompletedEvent.notifyAll();
 		}
 	}
 
 	public void serviceSearchCompleted(int transID, int respCode) {
 		synchronized (serviceSearchCompletedEvent) {
+			serviceSearchCompleted = true;
 			serviceSearchCompletedEvent.notifyAll();
 		}
 	}
@@ -262,7 +283,12 @@ public class SelectServiceHandler implements DiscoveryListener {
 	public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
 		if ((servRecord.length > 0) && (servRecordDiscovered == null)) {
 			servRecordDiscovered = servRecord[0];
+			synchronized (serviceSearchCompletedEvent) {
+				serviceSearchCompleted = true;
+				serviceSearchCompletedEvent.notifyAll();
+			}
 			synchronized (inquiryCompletedEvent) {
+				inquiryCompleted = true;
 				inquiryCompletedEvent.notifyAll();
 			}
 		}
