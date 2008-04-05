@@ -43,8 +43,14 @@ class DeviceInquiryThread extends Thread {
 
 	private Object inquiryStartedEvent = new Object();
 
+	private static int threadNumber;
+
+	private static synchronized int nextThreadNum() {
+		return threadNumber++;
+	}
+
 	private DeviceInquiryThread(DeviceInquiryRunnable stack, int accessCode, DiscoveryListener listener) {
-		super("DeviceInquiryThread");
+		super("DeviceInquiryThread-" + nextThreadNum());
 		this.stack = stack;
 		this.accessCode = accessCode;
 		this.listener = listener;

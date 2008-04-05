@@ -62,12 +62,16 @@ class SearchServicesThread extends Thread {
 
 	private Object serviceSearchStartedEvent = new Object();
 
-	private SearchServicesThread(BluetoothStack stack, SearchServicesRunnable serachRunnable, int[] attrSet,
-			UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
-		super("SearchServicesThread");
+	private static synchronized int nextThreadNum() {
+		return transIDGenerator++;
+	}
+
+	private SearchServicesThread(int transID, BluetoothStack stack, SearchServicesRunnable serachRunnable,
+			int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) {
+		super("SearchServicesThread-" + transID);
 		this.stack = stack;
 		this.serachRunnable = serachRunnable;
-		this.transID = (++transIDGenerator);
+		this.transID = transID;
 		this.attrSet = attrSet;
 		this.listener = listener;
 		this.uuidSet = uuidSet;
@@ -87,7 +91,7 @@ class SearchServicesThread extends Thread {
 			if (runningCount >= concurrentAllow) {
 				throw new BluetoothStateException("Already running " + runningCount + " service discovery transactions");
 			}
-			t = (new SearchServicesThread(stack, serachRunnable, attrSet, uuidSet, device, listener));
+			t = (new SearchServicesThread(nextThreadNum(), stack, serachRunnable, attrSet, uuidSet, device, listener));
 			threads.put(new Integer(t.getTransID()), t);
 		}
 		// In case the BTStack hangs, exit JVM anyway

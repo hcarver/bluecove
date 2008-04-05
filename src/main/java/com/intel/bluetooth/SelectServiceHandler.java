@@ -38,68 +38,79 @@ import javax.bluetooth.UUID;
  * <b><u>Your application should not use this class directly.</u></b>
  * 
  * @author vlads
- *
+ * 
  */
 public class SelectServiceHandler implements DiscoveryListener {
-	
+
 	private DiscoveryAgent agent;
-	
+
 	private Object inquiryCompletedEvent = new Object();
-	
+
 	private Object serviceSearchCompletedEvent = new Object();
-	
+
 	private Hashtable devicesProcessed = new Hashtable();
-	
+
 	private Vector serviceSearchDeviceQueue = new Vector();
-	
+
 	UUID uuid;
-	
+
 	private ServiceRecord servRecordDiscovered;
-	
+
+	private static int threadNumber;
+
+	private static synchronized int nextThreadNum() {
+		return threadNumber++;
+	}
+
 	public SelectServiceHandler(DiscoveryAgent agent) {
 		this.agent = agent;
 	}
-	
+
 	/**
-	 * Attempts to locate a service that contains <code>uuid</code> in
-	 * the ServiceClassIDList of its service record.  This
-	 * method will return a string that may be used in
-	 * <code>Connector.open()</code> to establish a connection to the
-	 * service.  How the service is selected if there are multiple services
-	 * with <code>uuid</code> and which devices to
-	 * search is implementation dependent.
-	 *
+	 * Attempts to locate a service that contains <code>uuid</code> in the
+	 * ServiceClassIDList of its service record. This method will return a
+	 * string that may be used in <code>Connector.open()</code> to establish a
+	 * connection to the service. How the service is selected if there are
+	 * multiple services with <code>uuid</code> and which devices to search is
+	 * implementation dependent.
+	 * 
 	 * @see ServiceRecord#NOAUTHENTICATE_NOENCRYPT
 	 * @see ServiceRecord#AUTHENTICATE_NOENCRYPT
 	 * @see ServiceRecord#AUTHENTICATE_ENCRYPT
-	 *
-	 * @param uuid the UUID to search for in the ServiceClassIDList
-	 *
-	 * @param security specifies the security requirements for a connection
-	 * to this service; must be one of
-	 * <code>ServiceRecord.NOAUTHENTICATE_NOENCRYPT</code>,
-	 * <code>ServiceRecord.AUTHENTICATE_NOENCRYPT</code>, or
-	 * <code>ServiceRecord.AUTHENTICATE_ENCRYPT</code>
-	 *
-	 * @param master determines if this client must be the master of the
-	 * connection; <code>true</code> if the client must be the master;
-	 * <code>false</code> if the client can be the master or the slave
-	 *
-	 * @return the connection string used to connect to the service
-	 * with a UUID of <code>uuid</code>; or <code>null</code> if no
-	 * service could be found with a UUID of <code>uuid</code> in the
-	 * ServiceClassIDList
-	 *
-	 * @exception BluetoothStateException if the Bluetooth system cannot
-	 * start the request due to the current state of the Bluetooth system
-	 *
-	 * @exception NullPointerException if <code>uuid</code> is
-	 * <code>null</code>
-	 *
-	 * @exception IllegalArgumentException if <code>security</code> is
-	 * not <code>ServiceRecord.NOAUTHENTICATE_NOENCRYPT</code>,
-	 * <code>ServiceRecord.AUTHENTICATE_NOENCRYPT</code>, or
-	 * <code>ServiceRecord.AUTHENTICATE_ENCRYPT</code>
+	 * 
+	 * @param uuid
+	 *            the UUID to search for in the ServiceClassIDList
+	 * 
+	 * @param security
+	 *            specifies the security requirements for a connection to this
+	 *            service; must be one of
+	 *            <code>ServiceRecord.NOAUTHENTICATE_NOENCRYPT</code>,
+	 *            <code>ServiceRecord.AUTHENTICATE_NOENCRYPT</code>, or
+	 *            <code>ServiceRecord.AUTHENTICATE_ENCRYPT</code>
+	 * 
+	 * @param master
+	 *            determines if this client must be the master of the
+	 *            connection; <code>true</code> if the client must be the
+	 *            master; <code>false</code> if the client can be the master
+	 *            or the slave
+	 * 
+	 * @return the connection string used to connect to the service with a UUID
+	 *         of <code>uuid</code>; or <code>null</code> if no service
+	 *         could be found with a UUID of <code>uuid</code> in the
+	 *         ServiceClassIDList
+	 * 
+	 * @exception BluetoothStateException
+	 *                if the Bluetooth system cannot start the request due to
+	 *                the current state of the Bluetooth system
+	 * 
+	 * @exception NullPointerException
+	 *                if <code>uuid</code> is <code>null</code>
+	 * 
+	 * @exception IllegalArgumentException
+	 *                if <code>security</code> is not
+	 *                <code>ServiceRecord.NOAUTHENTICATE_NOENCRYPT</code>,
+	 *                <code>ServiceRecord.AUTHENTICATE_NOENCRYPT</code>, or
+	 *                <code>ServiceRecord.AUTHENTICATE_ENCRYPT</code>
 	 */
 	public String selectService(UUID uuid, int security, boolean master) throws BluetoothStateException {
 		if (uuid == null) {
@@ -113,17 +124,17 @@ public class SelectServiceHandler implements DiscoveryListener {
 		default:
 			throw new IllegalArgumentException();
 		}
-		
+
 		RemoteDevice[] devs = agent.retrieveDevices(DiscoveryAgent.PREKNOWN);
 		for (int i = 0; (devs != null) && (i < devs.length); i++) {
-			ServiceRecord sr = findServiceOnDevice(uuid, devs[i]);	
+			ServiceRecord sr = findServiceOnDevice(uuid, devs[i]);
 			if (sr != null) {
 				return sr.getConnectionURL(security, master);
 			}
 		}
 		devs = agent.retrieveDevices(DiscoveryAgent.CACHED);
 		for (int i = 0; (devs != null) && (i < devs.length); i++) {
-			ServiceRecord sr = findServiceOnDevice(uuid, devs[i]);	
+			ServiceRecord sr = findServiceOnDevice(uuid, devs[i]);
 			if (sr != null) {
 				return sr.getConnectionURL(security, master);
 			}
@@ -131,55 +142,58 @@ public class SelectServiceHandler implements DiscoveryListener {
 		this.uuid = uuid;
 		ParallelSearchServicesThread t = new ParallelSearchServicesThread();
 		t.start();
-		
+
 		synchronized (inquiryCompletedEvent) {
 			if (!agent.startInquiry(DiscoveryAgent.GIAC, this)) {
 				return null;
 			}
 			try {
 				inquiryCompletedEvent.wait();
-            } catch (InterruptedException e) {
-                return null;
-            }
-            agent.cancelInquiry(this);
+			} catch (InterruptedException e) {
+				return null;
+			}
+			agent.cancelInquiry(this);
 		}
-		
+
 		if ((servRecordDiscovered == null) && (!t.processedAll())) {
 			try {
 				t.join();
 			} catch (InterruptedException e) {
-                return null;
-            }
+				return null;
+			}
 		}
 		t.interrupt();
-		
+
 		if (servRecordDiscovered != null) {
 			return servRecordDiscovered.getConnectionURL(security, master);
 		}
-		
+
 		return null;
 	}
 
 	private class ParallelSearchServicesThread extends Thread {
 
 		boolean stoped = false;
-		
+
 		int processedNext = 0;
-		
+
 		int processedSize = 0;
-		
+
+		ParallelSearchServicesThread() {
+			super("SelectServiceThread-" + nextThreadNum());
+		}
+
 		boolean processedAll() {
 			return (processedNext == serviceSearchDeviceQueue.size());
 		}
-		
+
 		public void interrupt() {
 			stoped = true;
 			super.interrupt();
 		}
-		
+
 		public void run() {
-			mainLoop:
-			while ((!stoped) && (servRecordDiscovered == null)) {
+			mainLoop: while ((!stoped) && (servRecordDiscovered == null)) {
 				synchronized (serviceSearchDeviceQueue) {
 					if (processedSize == serviceSearchDeviceQueue.size()) {
 						try {
@@ -190,18 +204,18 @@ public class SelectServiceHandler implements DiscoveryListener {
 					}
 					processedSize = serviceSearchDeviceQueue.size();
 				}
-				for (int i = processedNext; i < processedSize; i ++) {
-					RemoteDevice btDevice = (RemoteDevice)serviceSearchDeviceQueue.elementAt(i);
+				for (int i = processedNext; i < processedSize; i++) {
+					RemoteDevice btDevice = (RemoteDevice) serviceSearchDeviceQueue.elementAt(i);
 					if (findServiceOnDevice(uuid, btDevice) != null) {
 						break mainLoop;
-					}	
+					}
 				}
 				processedNext = processedSize + 1;
 			}
 		}
-		
+
 	}
-	
+
 	private ServiceRecord findServiceOnDevice(UUID uuid, RemoteDevice device) {
 		if (devicesProcessed.containsKey(device)) {
 			return null;
@@ -210,15 +224,15 @@ public class SelectServiceHandler implements DiscoveryListener {
 		DebugLog.debug("searchServices on ", device);
 		synchronized (serviceSearchCompletedEvent) {
 			try {
-				agent.searchServices(null, new UUID[]{uuid}, device, this);
+				agent.searchServices(null, new UUID[] { uuid }, device, this);
 			} catch (BluetoothStateException e) {
 				DebugLog.error("searchServices", e);
 			}
 			try {
 				serviceSearchCompletedEvent.wait();
-            } catch (InterruptedException e) {
-                return null;
-            }
+			} catch (InterruptedException e) {
+				return null;
+			}
 		}
 		return servRecordDiscovered;
 	}
@@ -246,7 +260,7 @@ public class SelectServiceHandler implements DiscoveryListener {
 	}
 
 	public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
-		if ((servRecord.length > 0 ) && (servRecordDiscovered == null)) {
+		if ((servRecord.length > 0) && (servRecordDiscovered == null)) {
 			servRecordDiscovered = servRecord[0];
 			synchronized (inquiryCompletedEvent) {
 				inquiryCompletedEvent.notifyAll();
