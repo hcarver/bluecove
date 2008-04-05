@@ -33,6 +33,7 @@ import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
 import com.intel.bluetooth.BluetoothStack;
 import com.intel.bluetooth.RemoteDeviceHelper;
 import com.intel.bluetooth.ServiceRecordsRegistry;
+import com.intel.bluetooth.UtilsJavaSE;
 
 /**
  * The <code>LocalDevice</code> class defines the basic functions of the
@@ -331,7 +332,7 @@ public class LocalDevice {
 			}
 			return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceProperty(property);
 		} catch (BluetoothStateException e) {
-			throw new RuntimeException(e.getMessage());
+			throw (RuntimeException) UtilsJavaSE.initCause(new RuntimeException(e.getMessage()), e);
 		}
 	}
 

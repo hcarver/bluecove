@@ -321,7 +321,8 @@ public abstract class RemoteDeviceHelper {
 				try {
 					bluetoothStack = BlueCoveImpl.instance().getBluetoothStack();
 				} catch (BluetoothStateException e) {
-					throw new RuntimeException("Can't initialize bluetooth support");
+					throw (RuntimeException) UtilsJavaSE.initCause(new RuntimeException(
+							"Can't initialize bluetooth support"), e);
 				}
 			}
 			return createRemoteDevice(bluetoothStack, getAddress(device), null, false);

@@ -169,7 +169,7 @@ public class UtilsJavaSE {
 		}
 	}
 
-	static Throwable initCause(Throwable throwable, Throwable cause) {
+	public static Throwable initCause(Throwable throwable, Throwable cause) {
 		if (!java14) {
 			return throwable;
 		}
