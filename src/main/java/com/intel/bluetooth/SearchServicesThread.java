@@ -63,7 +63,7 @@ class SearchServicesThread extends Thread {
 	private Object serviceSearchStartedEvent = new Object();
 
 	private static synchronized int nextThreadNum() {
-		return transIDGenerator++;
+		return ++transIDGenerator;
 	}
 
 	private SearchServicesThread(int transID, BluetoothStack stack, SearchServicesRunnable serachRunnable,
