@@ -83,12 +83,11 @@ class DeviceInquiryThread extends Thread {
 	}
 
 	public static int getConfigDeviceInquiryDuration() {
-		final int DEFAULT_DURATION = 11;
-		String duration = BlueCoveImpl.getConfigProperty("bluecove.inquiry.duration");
+		String duration = BlueCoveImpl.getConfigProperty(BlueCoveImpl.PROPERTY_INQUIRY_DURATION);
 		if (duration != null) {
 			return Integer.parseInt(duration);
 		} else {
-			return DEFAULT_DURATION;
+			return BlueCoveImpl.PROPERTY_INQUIRY_DURATION_DEFAULT;
 		}
 	}
 

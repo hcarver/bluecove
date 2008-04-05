@@ -186,8 +186,6 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 	private native int getDeviceManufacturer();
 
 	public String getLocalDeviceProperty(String property) {
-		final String TRUE = "true";
-		final String FALSE = "false";
 		if ("bluetooth.connected.devices.max".equals(property)) {
 			return "7";
 		}
@@ -195,23 +193,23 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 			return "1";
 		}
 		if ("bluetooth.connected.inquiry.scan".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 		if ("bluetooth.connected.page.scan".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 		if ("bluetooth.connected.inquiry".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 		if ("bluetooth.connected.page".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 
 		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
 			return String.valueOf(ATTR_RETRIEVABLE_MAX);
 		}
 		if ("bluetooth.master.switch".equals(property)) {
-			return FALSE;
+			return BlueCoveImpl.FALSE;
 		}
 		if ("bluetooth.l2cap.receiveMTU.max".equals(property)) {
 			return String.valueOf(RECEIVE_MTU_MAX);
@@ -261,8 +259,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		deviceDiscoveryListeners.addElement(listener);
-		String asap = BlueCoveImpl.getConfigProperty("bluecove.inquiry.report_asap");
-		if ((asap == null) || (asap.equals("false"))) {
+		if (BlueCoveImpl.getConfigProperty(BlueCoveImpl.PROPERTY_INQUIRY_REPORT_ASAP, false)) {
 			deviceDiscoveryListenerFoundDevices.put(listener, new Hashtable());
 		}
 		deviceDiscoveryListenerReportedDevices.put(listener, new Vector());

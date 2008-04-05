@@ -181,8 +181,6 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 	private native String getLocalDeviceVersion();
 
 	public String getLocalDeviceProperty(String property) {
-		final String TRUE = "true";
-		final String FALSE = "false";
 		if ("bluetooth.connected.devices.max".equals(property)) {
 			return isLocalDeviceFeatureParkMode() ? "255" : "7";
 		}
@@ -190,16 +188,16 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 			return "7";
 		}
 		if ("bluetooth.connected.inquiry.scan".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 		if ("bluetooth.connected.page.scan".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 		if ("bluetooth.connected.inquiry".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 		if ("bluetooth.connected.page".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 
 		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
@@ -207,7 +205,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 		}
 		if ("bluetooth.master.switch".equals(property)) {
 			// return isLocalDeviceFeatureSwitchRoles() ? TRUE : FALSE;
-			return FALSE;
+			return BlueCoveImpl.FALSE;
 		}
 		if ("bluetooth.l2cap.receiveMTU.max".equals(property)) {
 			return String.valueOf(receiveMTUMAX());

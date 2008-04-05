@@ -243,8 +243,6 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	}
 
 	public String getLocalDeviceProperty(String property) {
-		final String TRUE = "true";
-		final String FALSE = "false";
 		if ("bluetooth.connected.devices.max".equals(property)) {
 			return "7";
 		}
@@ -252,23 +250,23 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 			return "7";
 		}
 		if ("bluetooth.connected.inquiry.scan".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 		if ("bluetooth.connected.page.scan".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 		if ("bluetooth.connected.inquiry".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 		if ("bluetooth.connected.page".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 
 		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
 			return String.valueOf(ATTR_RETRIEVABLE_MAX);
 		}
 		if ("bluetooth.master.switch".equals(property)) {
-			return FALSE;
+			return BlueCoveImpl.FALSE;
 		}
 		if ("bluetooth.l2cap.receiveMTU.max".equals(property)) {
 			return "0";

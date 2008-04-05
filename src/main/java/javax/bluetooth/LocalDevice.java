@@ -317,17 +317,17 @@ public class LocalDevice {
 				return "1.1";
 			} else if ("obex.api.version".equals(property)) {
 				return "1.1";
-			} else if ("bluecove".equals(property)) {
+			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_BLUECOVE_VERSION.equals(property)) {
 				return BlueCoveImpl.version;
-			} else if ("bluecove.stack".equals(property)) {
+			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_STACK.equals(property)) {
 				return BlueCoveImpl.instance().getBluetoothStack().getStackID();
-			} else if ("bluecove.feature.l2cap".equals(property)) {
+			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_FEATURE_L2CAP.equals(property)) {
 				return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_L2CAP);
-			} else if ("bluecove.feature.service_attributes".equals(property)) {
+			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_FEATURE_SERVICE_ATTRIBUTES.equals(property)) {
 				return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_SERVICE_ATTRIBUTES);
-			} else if ("bluecove.feature.set_device_service_classes".equals(property)) {
+			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_FEATURE_SET_DEVICE_SERVICE_CLASSES.equals(property)) {
 				return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_SET_DEVICE_SERVICE_CLASSES);
-			} else if ("bluecove.connections".equals(property)) {
+			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_OPEN_CONNECTIONS.equals(property)) {
 				return String.valueOf(RemoteDeviceHelper.openConnections());
 			}
 			return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceProperty(property);

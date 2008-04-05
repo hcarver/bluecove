@@ -142,7 +142,6 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 	}
 
 	public String getLocalDeviceProperty(String property) {
-		final String TRUE = "true";
 		if ("bluetooth.connected.devices.max".equals(property)) {
 			return "7";
 		}
@@ -150,13 +149,13 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 			return "1";
 		}
 		if ("bluetooth.connected.inquiry.scan".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 		if ("bluetooth.connected.page.scan".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 		if ("bluetooth.connected.inquiry".equals(property)) {
-			return TRUE;
+			return BlueCoveImpl.TRUE;
 		}
 
 		// service attributes are not supported.

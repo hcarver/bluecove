@@ -91,8 +91,8 @@ public abstract class DebugLog {
 			return;
 		}
 		initialized = true;
-		String d = BlueCoveImpl.getConfigProperty("bluecove.debug");
-		debugEnabled = ((d != null) && (d.equalsIgnoreCase("true") || d.equalsIgnoreCase("1")));
+		String d = BlueCoveImpl.getConfigProperty(BlueCoveImpl.PROPERTY_DEBUG);
+		debugEnabled = ((d != null) && (d.equalsIgnoreCase(BlueCoveImpl.TRUE) || d.equalsIgnoreCase("1")));
 		if (debugEnabled && debugCompiledOut) {
 			debugEnabled = false;
 			System.err.println("BlueCove debug functions have been Compiled Out");

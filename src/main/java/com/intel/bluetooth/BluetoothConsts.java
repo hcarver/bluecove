@@ -303,9 +303,7 @@ public abstract class BluetoothConsts {
 			if (comma) {
 				buf.append(',');
 			}
-
 			buf.append(str);
-
 			return true;
 		}
 
@@ -538,14 +536,18 @@ public abstract class BluetoothConsts {
 
 				boolean comma = false;
 
-				if ((minor & IMAGING_MINOR_DISPLAY_MASK) != 0)
+				if ((minor & IMAGING_MINOR_DISPLAY_MASK) != 0) {
 					comma = append(buf, "Display", comma);
-				if ((minor & IMAGING_MINOR_CAMERA_MASK) != 0)
+				}
+				if ((minor & IMAGING_MINOR_CAMERA_MASK) != 0) {
 					comma = append(buf, "Camera", comma);
-				if ((minor & IMAGING_MINOR_SCANNER_MASK) != 0)
+				}
+				if ((minor & IMAGING_MINOR_SCANNER_MASK) != 0) {
 					comma = append(buf, "Scanner", comma);
-				if ((minor & IMAGING_MINOR_PRINTER_MASK) != 0)
-					comma = append(buf, "Printer", comma);
+				}
+				if ((minor & IMAGING_MINOR_PRINTER_MASK) != 0) {
+					append(buf, "Printer", comma);
+				}
 
 				buf.append(')');
 
@@ -565,24 +567,33 @@ public abstract class BluetoothConsts {
 
 			int record = dc.getServiceClasses();
 
-			if ((record & LIMITED_DISCOVERY_SERVICE) != 0)
+			if ((record & LIMITED_DISCOVERY_SERVICE) != 0) {
 				comma = append(buf, "Limited Discovery", comma);
-			if ((record & POSITIONING_SERVICE) != 0)
+			}
+			if ((record & POSITIONING_SERVICE) != 0) {
 				comma = append(buf, "Positioning", comma);
-			if ((record & NETWORKING_SERVICE) != 0)
+			}
+			if ((record & NETWORKING_SERVICE) != 0) {
 				comma = append(buf, "Networking", comma);
-			if ((record & RENDERING_SERVICE) != 0)
+			}
+			if ((record & RENDERING_SERVICE) != 0) {
 				comma = append(buf, "Rendering", comma);
-			if ((record & CAPTURING_SERVICE) != 0)
+			}
+			if ((record & CAPTURING_SERVICE) != 0) {
 				comma = append(buf, "Capturing", comma);
-			if ((record & OBJECT_TRANSFER_SERVICE) != 0)
+			}
+			if ((record & OBJECT_TRANSFER_SERVICE) != 0) {
 				comma = append(buf, "Object Transfer", comma);
-			if ((record & AUDIO_SERVICE) != 0)
+			}
+			if ((record & AUDIO_SERVICE) != 0) {
 				comma = append(buf, "Audio", comma);
-			if ((record & TELEPHONY_SERVICE) != 0)
+			}
+			if ((record & TELEPHONY_SERVICE) != 0) {
 				comma = append(buf, "Telephony", comma);
-			if ((record & INFORMATION_SERVICE) != 0)
-				comma = append(buf, "Information", comma);
+			}
+			if ((record & INFORMATION_SERVICE) != 0) {
+				append(buf, "Information", comma);
+			}
 
 			buf.append(')');
 

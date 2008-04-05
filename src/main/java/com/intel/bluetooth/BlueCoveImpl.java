@@ -129,9 +129,43 @@ public class BlueCoveImpl {
 
 	public static final int BLUECOVE_STACK_DETECT_BLUEZ = 1 << 5;
 
-	static final int BLUECOVE_STACK_DETECT_EMULATOR = 1 << 6;
+	public static final int BLUECOVE_STACK_DETECT_EMULATOR = 1 << 6;
 
 	private static Hashtable configProperty = new Hashtable();
+
+	public static final String PROPERTY_DEBUG = "bluecove.debug";
+
+	public static final String PROPERTY_STACK_FIRST = "bluecove.stack.first";
+
+	public static final String PROPERTY_STACK = "bluecove.stack";
+
+	public static final String PROPERTY_INQUIRY_DURATION = "bluecove.inquiry.duration";
+
+	public static final int PROPERTY_INQUIRY_DURATION_DEFAULT = 11;
+
+	public static final String PROPERTY_INQUIRY_REPORT_ASAP = "bluecove.inquiry.report_asap";
+
+	public static final String PROPERTY_CONNECT_TIMEOUT = "bluecove.connect.timeout";
+
+	public static final String PROPERTY_OBEX_TIMEOUT = "bluecove.obex.timeout";
+
+	public static final String PROPERTY_OBEX_MTU = "bluecove.obex.mtu";
+
+	public static final String LOCAL_DEVICE_PROPERTY_BLUECOVE_VERSION = "bluecove";
+
+	public static final String LOCAL_DEVICE_PROPERTY_STACK = PROPERTY_STACK;
+
+	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_L2CAP = "bluecove.feature.l2cap";
+
+	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_SERVICE_ATTRIBUTES = "bluecove.feature.service_attributes";
+
+	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_SET_DEVICE_SERVICE_CLASSES = "bluecove.feature.set_device_service_classes";
+
+	public static final String LOCAL_DEVICE_PROPERTY_OPEN_CONNECTIONS = "bluecove.connections";
+
+	static final String TRUE = "true";
+
+	static final String FALSE = "false";
 
 	private static final String FQCN = BlueCoveImpl.class.getName();
 
@@ -154,7 +188,9 @@ public class BlueCoveImpl {
 	 */
 	private class AsynchronousShutdownThread extends Thread {
 
-		Object monitor = new Object();
+		final Object monitor = new Object();
+
+		boolean shutdownStart = false;
 
 		AsynchronousShutdownThread() {
 			super("BluecoveAsynchronousShutdownThread");
@@ -162,15 +198,20 @@ public class BlueCoveImpl {
 
 		public void run() {
 			synchronized (monitor) {
-				try {
-					monitor.wait();
-				} catch (InterruptedException e) {
-					return;
+				while (!shutdownStart) {
+					try {
+						monitor.wait();
+					} catch (InterruptedException e) {
+						return;
+					}
 				}
 			}
 			if (bluetoothStack != null) {
-				bluetoothStack.destroy();
-				bluetoothStack = null;
+				try {
+					bluetoothStack.destroy();
+				} finally {
+					bluetoothStack = null;
+				}
 			}
 			System.out.println("BlueCove stack shutdown completed");
 			synchronized (monitor) {
@@ -181,15 +222,17 @@ public class BlueCoveImpl {
 
 	private class ShutdownHookThread extends Thread {
 
-		private Object monitor;
+		AsynchronousShutdownThread shutdownHookThread;
 
-		ShutdownHookThread(Object monitor) {
+		ShutdownHookThread(AsynchronousShutdownThread shutdownHookThread) {
 			super("BluecoveShutdownHookThread");
-			this.monitor = monitor;
+			this.shutdownHookThread = shutdownHookThread;
 		}
 
 		public void run() {
+			final Object monitor = shutdownHookThread.monitor;
 			synchronized (monitor) {
+				shutdownHookThread.shutdownStart = true;
 				monitor.notifyAll();
 				if (bluetoothStack != null) {
 					try {
@@ -238,7 +281,7 @@ public class BlueCoveImpl {
 		shutdownHookThread.start();
 		try {
 			// since Java 1.3
-			UtilsJavaSE.runtimeAddShutdownHook(new ShutdownHookThread(shutdownHookThread.monitor));
+			UtilsJavaSE.runtimeAddShutdownHook(new ShutdownHookThread(shutdownHookThread));
 		} catch (Throwable java12) {
 		}
 	}
@@ -269,7 +312,6 @@ public class BlueCoveImpl {
 			className = classNameDefault;
 		}
 		try {
-			Class c = Class.forName(className);
 			return Class.forName(className);
 		} catch (ClassNotFoundException e) {
 			DebugLog.error(className, e);
@@ -297,9 +339,9 @@ public class BlueCoveImpl {
 
 		BluetoothStack detectorStack = null;
 
-		String stackFirstDetector = getConfigProperty("bluecove.stack.first");
+		String stackFirstDetector = getConfigProperty(PROPERTY_STACK_FIRST);
 
-		String stackSelected = getConfigProperty("bluecove.stack");
+		String stackSelected = getConfigProperty(PROPERTY_STACK);
 
 		if (stackFirstDetector == null) {
 			stackFirstDetector = stackSelected;
@@ -410,6 +452,15 @@ public class BlueCoveImpl {
 		return value;
 	}
 
+	static boolean getConfigProperty(String key, boolean defaultValue) {
+		String value = getConfigProperty(key);
+		if (value != null) {
+			return TRUE.equals(value);
+		} else {
+			return defaultValue;
+		}
+	}
+
 	void copySystemProperty() {
 		if (bluetoothStack != null) {
 			UtilsJavaSE.setSystemProperty("bluetooth.api.version", "1.1");
@@ -425,8 +476,6 @@ public class BlueCoveImpl {
 	}
 
 	public String getLocalDeviceFeature(int featureID) throws BluetoothStateException {
-		final String TRUE = "true";
-		final String FALSE = "false";
 		return ((getBluetoothStack().getFeatureSet() & featureID) != 0) ? TRUE : FALSE;
 	}
 
