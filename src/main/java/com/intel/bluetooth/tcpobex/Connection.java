@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth.tcpobex;
 
 import java.io.IOException;
@@ -36,20 +36,23 @@ import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
 import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.MicroeditionConnector;
 
-
 /**
- * This class is Proxy for tcpobex (OBEX over TCP) Connection implementations for IBM J9 support.
- * 
+ * This class is Proxy for tcpobex (OBEX over TCP) Connection implementations
+ * for IBM J9 support.
+ * <p>
+ * You need to configure -Dmicroedition.connection.pkgs=com.intel.bluetooth if
+ * not installing bluecove.jar to "%J9_HOME%\lib\jclMidp20\ext\
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- *
+ * 
  * @author vlads
- *
+ * 
  */
-public class Connection implements CreateConnection, ClientSession, SessionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
+public class Connection implements CreateConnection, ClientSession, SessionNotifier,
+		BluetoothConnectionNotifierServiceRecordAccess {
 
 	private javax.microedition.io.Connection impl;
-	
+
 	public Connection() {
 		impl = null;
 	}
@@ -62,73 +65,77 @@ public class Connection implements CreateConnection, ClientSession, SessionNotif
 		setParameters(spec, access, timeout);
 		return this;
 	}
-	
+
 	public void close() throws IOException {
 		impl.close();
 	}
 
 	public HeaderSet connect(HeaderSet headers) throws IOException {
-		return ((ClientSession)impl).connect(headers);
+		return ((ClientSession) impl).connect(headers);
 	}
 
 	public HeaderSet createHeaderSet() {
-		return ((ClientSession)impl).createHeaderSet();
+		return ((ClientSession) impl).createHeaderSet();
 	}
 
 	public HeaderSet delete(HeaderSet headers) throws IOException {
-		return ((ClientSession)impl).delete(headers);
+		return ((ClientSession) impl).delete(headers);
 	}
 
 	public HeaderSet disconnect(HeaderSet headers) throws IOException {
-		return ((ClientSession)impl).disconnect(headers);
+		return ((ClientSession) impl).disconnect(headers);
 	}
 
 	public Operation get(HeaderSet headers) throws IOException {
-		return ((ClientSession)impl).get(headers);
+		return ((ClientSession) impl).get(headers);
 	}
 
 	public long getConnectionID() {
-		return ((ClientSession)impl).getConnectionID();
+		return ((ClientSession) impl).getConnectionID();
 	}
 
 	public Operation put(HeaderSet headers) throws IOException {
-		return ((ClientSession)impl).put(headers);
+		return ((ClientSession) impl).put(headers);
 	}
 
 	public void setAuthenticator(Authenticator auth) {
-		((ClientSession)impl).setAuthenticator(auth);
-		
+		((ClientSession) impl).setAuthenticator(auth);
+
 	}
 
 	public void setConnectionID(long id) {
-		((ClientSession)impl).setConnectionID(id);
+		((ClientSession) impl).setConnectionID(id);
 	}
 
 	public HeaderSet setPath(HeaderSet headers, boolean backup, boolean create) throws IOException {
-		return ((ClientSession)impl).setPath(headers, backup, create);
+		return ((ClientSession) impl).setPath(headers, backup, create);
 	}
 
 	public javax.microedition.io.Connection acceptAndOpen(ServerRequestHandler handler) throws IOException {
-		return ((SessionNotifier)impl).acceptAndOpen(handler);
+		return ((SessionNotifier) impl).acceptAndOpen(handler);
 	}
 
-	public javax.microedition.io.Connection acceptAndOpen(ServerRequestHandler handler, Authenticator auth) throws IOException {
-		return ((SessionNotifier)impl).acceptAndOpen(handler, auth);
+	public javax.microedition.io.Connection acceptAndOpen(ServerRequestHandler handler, Authenticator auth)
+			throws IOException {
+		return ((SessionNotifier) impl).acceptAndOpen(handler, auth);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#getServiceRecord()
 	 */
 	public ServiceRecord getServiceRecord() {
-		return ((BluetoothConnectionNotifierServiceRecordAccess)impl).getServiceRecord();
+		return ((BluetoothConnectionNotifierServiceRecordAccess) impl).getServiceRecord();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#updateServiceRecord(boolean)
 	 */
 	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
-		((BluetoothConnectionNotifierServiceRecordAccess)impl).updateServiceRecord(acceptAndOpen);
+		((BluetoothConnectionNotifierServiceRecordAccess) impl).updateServiceRecord(acceptAndOpen);
 	}
-
 
 }

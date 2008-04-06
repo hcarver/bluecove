@@ -41,7 +41,9 @@ import com.intel.bluetooth.MicroeditionConnector;
 /**
  * This class is Proxy for btgoep (OBEX over RFCOMM) Connection implementations
  * for IBM J9 support
- * 
+ * <p>
+ * You need to configure -Dmicroedition.connection.pkgs=com.intel.bluetooth if
+ * not installing bluecove.jar to "%J9_HOME%\lib\jclMidp20\ext\
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
  * 
