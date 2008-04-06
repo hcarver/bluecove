@@ -91,7 +91,7 @@ public abstract class DebugLog {
 			return;
 		}
 		initialized = true;
-		String d = BlueCoveImpl.getConfigProperty(BlueCoveImpl.PROPERTY_DEBUG);
+		String d = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_DEBUG);
 		debugEnabled = ((d != null) && (d.equalsIgnoreCase(BlueCoveImpl.TRUE) || d.equalsIgnoreCase("1")));
 		if (debugEnabled && debugCompiledOut) {
 			debugEnabled = false;

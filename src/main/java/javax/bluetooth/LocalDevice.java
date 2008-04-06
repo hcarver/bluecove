@@ -29,6 +29,7 @@ package javax.bluetooth;
 import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.BlueCoveImpl;
+import com.intel.bluetooth.BlueCoveLocalDeviceProperties;
 import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
 import com.intel.bluetooth.BluetoothStack;
 import com.intel.bluetooth.RemoteDeviceHelper;
@@ -282,28 +283,8 @@ public class LocalDevice {
 	 * </TR>
 	 * </TABLE>
 	 * <p>
-	 * BlueCove specific properties. <TABLE>
-	 * <TR>
-	 * <TH>Property Name</TH>
-	 * <TH>Description</TH>
-	 * </TR>
-	 * <TR>
-	 * <TD>bluecove</TD>
-	 * <TD>The version of BlueCove implementation</TD>
-	 * </TR>
-	 * <TR>
-	 * <TD>bluecove.stack</TD>
-	 * <TD>The Bluetooth Stack: "winsock", "widcomm" or "bluesoleil"</TD>
-	 * </TR>
-	 * <TR>
-	 * <TD>bluecove.feature.l2cap</TD>
-	 * <TD>Does the Bluetooth Stack support L2CAP: "true" or "false"</TD>
-	 * </TR>
-	 * <TR>
-	 * <TD>bluecove.connections</TD>
-	 * <TD>The number of open connections</TD>
-	 * </TR>
-	 * </TABLE>
+	 * 
+	 * @see com.intel.bluetooth.BlueCoveLocalDeviceProperties<TABLE>
 	 * 
 	 * @param property
 	 *            the property to retrieve as defined in this class.
@@ -317,17 +298,18 @@ public class LocalDevice {
 				return "1.1";
 			} else if ("obex.api.version".equals(property)) {
 				return "1.1";
-			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_BLUECOVE_VERSION.equals(property)) {
+			} else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_BLUECOVE_VERSION.equals(property)) {
 				return BlueCoveImpl.version;
-			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_STACK.equals(property)) {
+			} else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_STACK.equals(property)) {
 				return BlueCoveImpl.instance().getBluetoothStack().getStackID();
-			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_FEATURE_L2CAP.equals(property)) {
+			} else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_FEATURE_L2CAP.equals(property)) {
 				return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_L2CAP);
-			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_FEATURE_SERVICE_ATTRIBUTES.equals(property)) {
+			} else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_FEATURE_SERVICE_ATTRIBUTES.equals(property)) {
 				return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_SERVICE_ATTRIBUTES);
-			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_FEATURE_SET_DEVICE_SERVICE_CLASSES.equals(property)) {
+			} else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_FEATURE_SET_DEVICE_SERVICE_CLASSES
+					.equals(property)) {
 				return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_SET_DEVICE_SERVICE_CLASSES);
-			} else if (BlueCoveImpl.LOCAL_DEVICE_PROPERTY_OPEN_CONNECTIONS.equals(property)) {
+			} else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_OPEN_CONNECTIONS.equals(property)) {
 				return String.valueOf(RemoteDeviceHelper.openConnections());
 			}
 			return BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceProperty(property);

@@ -29,6 +29,9 @@ import javax.bluetooth.RemoteDevice;
  * Used when client application has only access to Proxy of the connection. e.g.
  * WebStart in MicroEmulator
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ * 
  * @author vlads
  * 
  */

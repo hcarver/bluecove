@@ -35,7 +35,8 @@ import javax.bluetooth.BluetoothStateException;
  * 
  * Singleton class used as holder for BluetoothStack.
  * 
- * All you need to do is initialize BlueCoveImpl inside Privileged context.
+ * Under security manager all you need to do is initialize BlueCoveImpl inside
+ * Privileged context.
  * <p>
  * If automatic Bluetooth Stack detection is not enough Java System property
  * "bluecove.stack" can be used to force desired Stack Initialization. Values
@@ -133,36 +134,6 @@ public class BlueCoveImpl {
 
 	private static Hashtable configProperty = new Hashtable();
 
-	public static final String PROPERTY_DEBUG = "bluecove.debug";
-
-	public static final String PROPERTY_STACK_FIRST = "bluecove.stack.first";
-
-	public static final String PROPERTY_STACK = "bluecove.stack";
-
-	public static final String PROPERTY_INQUIRY_DURATION = "bluecove.inquiry.duration";
-
-	public static final int PROPERTY_INQUIRY_DURATION_DEFAULT = 11;
-
-	public static final String PROPERTY_INQUIRY_REPORT_ASAP = "bluecove.inquiry.report_asap";
-
-	public static final String PROPERTY_CONNECT_TIMEOUT = "bluecove.connect.timeout";
-
-	public static final String PROPERTY_OBEX_TIMEOUT = "bluecove.obex.timeout";
-
-	public static final String PROPERTY_OBEX_MTU = "bluecove.obex.mtu";
-
-	public static final String LOCAL_DEVICE_PROPERTY_BLUECOVE_VERSION = "bluecove";
-
-	public static final String LOCAL_DEVICE_PROPERTY_STACK = PROPERTY_STACK;
-
-	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_L2CAP = "bluecove.feature.l2cap";
-
-	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_SERVICE_ATTRIBUTES = "bluecove.feature.service_attributes";
-
-	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_SET_DEVICE_SERVICE_CLASSES = "bluecove.feature.set_device_service_classes";
-
-	public static final String LOCAL_DEVICE_PROPERTY_OPEN_CONNECTIONS = "bluecove.connections";
-
 	static final String TRUE = "true";
 
 	static final String FALSE = "false";
@@ -180,6 +151,20 @@ public class BlueCoveImpl {
 
 	static {
 		fqcnSet.addElement(FQCN);
+	}
+
+	/**
+	 * Enables the use of Multiple Adapters and Bluetooth Stacks in parallel.
+	 */
+	private static class ThreadLocalBluetoothStack {
+
+		private BluetoothStack bluetoothStack;
+
+		private Hashtable configProperty = new Hashtable();
+
+		public String toString() {
+			return null;
+		}
 	}
 
 	/**
@@ -339,9 +324,9 @@ public class BlueCoveImpl {
 
 		BluetoothStack detectorStack = null;
 
-		String stackFirstDetector = getConfigProperty(PROPERTY_STACK_FIRST);
+		String stackFirstDetector = getConfigProperty(BlueCoveConfigProperties.PROPERTY_STACK_FIRST);
 
-		String stackSelected = getConfigProperty(PROPERTY_STACK);
+		String stackSelected = getConfigProperty(BlueCoveConfigProperties.PROPERTY_STACK);
 
 		if (stackFirstDetector == null) {
 			stackFirstDetector = stackSelected;
@@ -414,6 +399,101 @@ public class BlueCoveImpl {
 
 		copySystemProperty();
 		System.out.println("BlueCove version " + version + " on " + stackSelected);
+	}
+
+	/**
+	 * API that enables the use of Multiple Adapters and Bluetooth Stacks in
+	 * parallel in the same JVM. Each thread should call
+	 * setThreadBluetoothStackID() before using JSR-82 API.
+	 * 
+	 * Affects the following JSR-82 API methods:
+	 * 
+	 * <pre>
+	 *  LocalDevice.getLocalDevice();
+	 *  LocalDevice.getProperty(String);
+	 *  Connector.open(...);
+	 *  methods of RemoteDevice instance created by user.
+	 * </pre>
+	 * 
+	 * <STRONG>Example</STRONG>
+	 * <P>
+	 * 
+	 * <pre>
+	 * BlueCoveImpl.useThreadLocalBluetoothStack();
+	 * BlueCoveImpl.setConfigProperty(&quot;bluecove.stack&quot;, &quot;widcomm&quot;);
+	 * 
+	 * final Object id1 = BlueCoveImpl.getThreadBluetoothStackID();
+	 * ... do some work with stack 1
+	 * 
+	 * Thread t1 = new Thread() {
+	 *    public void run() {
+	 *        BlueCoveImpl.setThreadBluetoothStackID(id1);
+	 *        agent = LocalDevice.getLocalDevice().getDiscoveryAgent();
+	 *        agent.startInquiry(...);
+	 *        .....
+	 *    }
+	 * }
+	 * t1.start(); 
+	 * 
+	 * // Start another thread that is using different stack 
+	 * Thread t2 = new Thread() {
+	 *    public void run() {
+	 *        BlueCoveImpl.setConfigProperty(&quot;bluecove.stack&quot;, &quot;winsock&quot;);
+	 *        agent = LocalDevice.getLocalDevice().getDiscoveryAgent();
+	 *        agent.startInquiry(...);
+	 *        .....
+	 *    }
+	 * }
+	 * t2.start(); 
+	 * 
+	 * Thread t3 = new Thread() {
+	 *    public void run() {
+	 *    	  // Wrong Thread StackID not configured
+	 *        Connector.open(&quot;btspp://12345678:1&quot;);
+	 *        .....
+	 *    }
+	 * }
+	 * t3.start();
+	 * 
+	 * </pre>
+	 * 
+	 * @see #setConfigProperty
+	 */
+	public static void useThreadLocalBluetoothStack() {
+
+	}
+
+	/**
+	 * Initialize BluetoothStack if not already done and returns the ID to be
+	 * used in other threads accessing the same stack.
+	 * 
+	 * @return an object that represents Adapter/BluetoothStack, stackID to be
+	 *         used in call to <code>setThreadBluetoothStackID</code>
+	 * @throws BluetoothStateException
+	 *             if the Bluetooth system could not be initialized
+	 */
+	public static Object getThreadBluetoothStackID() throws BluetoothStateException {
+		return null;
+	}
+
+	/**
+	 * Updates the current Thread BluetoothStack. Updating is possible only if
+	 * <code>stackID</code> was obtained using the
+	 * <code>getThreadBluetoothStackID()</code> method. Should be called
+	 * before connection is made or LocalDevice received from
+	 * LocalDevice.getLocalDevice().
+	 * 
+	 * @param stackID
+	 *            stackID to use or <code>null</code> to detach the current
+	 *            Thread
+	 */
+	public static void setThreadBluetoothStackID(Object stackID) {
+		if (stackID == null) {
+			throw new NullPointerException("stackID is null");
+		}
+		if (!(stackID instanceof ThreadLocalBluetoothStack)) {
+			throw new IllegalArgumentException("stackID is not valid");
+		}
 	}
 
 	/**

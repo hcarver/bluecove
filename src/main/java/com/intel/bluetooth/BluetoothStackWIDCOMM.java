@@ -259,7 +259,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		deviceDiscoveryListeners.addElement(listener);
-		if (BlueCoveImpl.getConfigProperty(BlueCoveImpl.PROPERTY_INQUIRY_REPORT_ASAP, false)) {
+		if (BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_INQUIRY_REPORT_ASAP, false)) {
 			deviceDiscoveryListenerFoundDevices.put(listener, new Hashtable());
 		}
 		deviceDiscoveryListenerReportedDevices.put(listener, new Vector());

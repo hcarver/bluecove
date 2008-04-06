@@ -25,16 +25,22 @@ import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 
 /**
- * Used when client application has only access to Proxy of the connection. e.g. WebStart in MicroEmulator
+ * Used when client application has only access to Proxy of the connection. e.g.
+ * WebStart in MicroEmulator
+ * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ * 
  * @author vlads
- *
+ * 
  */
 public interface BluetoothConnectionNotifierServiceRecordAccess {
-	
+
 	public ServiceRecord getServiceRecord();
-	
+
 	/**
-	 * @param acceptAndOpen wrap validation in ServiceRegistrationException
+	 * @param acceptAndOpen
+	 *            wrap validation in ServiceRegistrationException
 	 * @throws ServiceRegistrationException
 	 */
 	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException;

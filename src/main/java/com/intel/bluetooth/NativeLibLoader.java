@@ -175,7 +175,7 @@ public abstract class NativeLibLoader {
 			return state.libraryAvailable;
 		}
 
-		String path = System.getProperty("bluecove.native.path");
+		String path = System.getProperty(BlueCoveConfigProperties.PROPERTY_NATIVE_PATH);
 		if (path != null) {
 			if (!UtilsJavaSE.ibmJ9midp) {
 				state.libraryAvailable = tryloadPath(path, libFileName);
@@ -186,7 +186,7 @@ public abstract class NativeLibLoader {
 			}
 		}
 		boolean useResource = true;
-		String d = System.getProperty("bluecove.native.resource");
+		String d = System.getProperty(BlueCoveConfigProperties.PROPERTY_NATIVE_RESOURCE);
 		if ((d != null) && (d.equalsIgnoreCase("false"))) {
 			useResource = false;
 		}

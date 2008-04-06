@@ -349,7 +349,7 @@ public abstract class MicroeditionConnector {
 								"encryption requires authentication");
 					}
 				}
-				String timeout = BlueCoveImpl.getConfigProperty(BlueCoveImpl.PROPERTY_CONNECT_TIMEOUT);
+				String timeout = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_CONNECT_TIMEOUT);
 				if (timeout != null) {
 					connectionParams.timeout = Integer.parseInt(timeout);
 				}
@@ -361,11 +361,11 @@ public abstract class MicroeditionConnector {
 				|| scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX)) {
 			obexConnectionParams = new OBEXConnectionParams();
 			obexConnectionParams.timeouts = timeouts;
-			String timeout = BlueCoveImpl.getConfigProperty(BlueCoveImpl.PROPERTY_OBEX_TIMEOUT);
+			String timeout = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_OBEX_TIMEOUT);
 			if (timeout != null) {
 				obexConnectionParams.timeout = Integer.parseInt(timeout);
 			}
-			String mtu = BlueCoveImpl.getConfigProperty(BlueCoveImpl.PROPERTY_OBEX_MTU);
+			String mtu = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_OBEX_MTU);
 			if (mtu != null) {
 				obexConnectionParams.mtu = Integer.parseInt(mtu);
 			}

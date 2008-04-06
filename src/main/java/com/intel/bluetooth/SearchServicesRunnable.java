@@ -28,8 +28,12 @@ import javax.bluetooth.UUID;
 /**
  * @author vlads
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ * 
+ * @see DeviceInquiryRunnable
  */
-public interface SearchServicesRunnable {
+interface SearchServicesRunnable {
 
 	/**
 	 * Common synchronous method called by SearchServicesThread. Should throw

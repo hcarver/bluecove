@@ -26,23 +26,26 @@ import javax.bluetooth.DiscoveryListener;
 /**
  * DeviceInquiryThread and SearchServicesThread approach is nearly the same so I
  * will describe only DeviceInquiryThread.
- * 
+ * <p>
  * a) DeviceInquiryThread is create from DeviceInquiryThread.startInquiry().
  * startInquiry function is returned when callDeviceInquiryStartedCallback is
  * called from native code or error returned from runDeviceInquiry.
- * 
+ * <p>
  * b) stack.runDeviceInquiry is executed from DeviceInquiryThread.run() and
  * should not returned until Inquiry finished. The return code would be given to
  * listener.inquiryCompleted
- * 
+ * <p>
  * c) all listener.deviceDiscovered() should not be called from native code! Use
  * java wrappers for this! stack.deviceDiscoveredCallback and
  * callback.callDeviceDiscovered in native code.
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ * 
  * @author vlads
  * 
  */
-public interface DeviceInquiryRunnable {
+interface DeviceInquiryRunnable {
 
 	/**
 	 * Common synchronous method called by DeviceInquiryThread. Should throw

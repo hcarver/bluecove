@@ -42,6 +42,9 @@ import com.intel.bluetooth.WeakVectorFactory.WeakVector;
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
  * 
+ * The only exception is method authenticate(RemoteDevice device, String
+ * passkey).
+ * 
  * @author vlads
  */
 public abstract class RemoteDeviceHelper {
@@ -520,8 +523,11 @@ public abstract class RemoteDeviceHelper {
 	}
 
 	/**
+	 * 
 	 * Sends an authentication request to a remote Bluetooth device. Non JSR-82,
 	 * Return <code>false</code> if the stack does not support authentication.
+	 * <p>
+	 * <b>PUBLIC JSR-82 extension</b>
 	 * 
 	 * @param address
 	 *            Remote Device

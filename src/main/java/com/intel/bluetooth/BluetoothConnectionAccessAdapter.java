@@ -24,6 +24,10 @@ import java.io.IOException;
 
 import javax.bluetooth.RemoteDevice;
 
+/**
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ */
 public abstract class BluetoothConnectionAccessAdapter implements BluetoothConnectionAccess {
 
 	protected abstract BluetoothConnectionAccess getImpl();

@@ -23,6 +23,8 @@ package com.intel.bluetooth;
 /**
  * Marker to indicate accepted connections by service.
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
  */
 public interface BluetoothServerConnection {
 

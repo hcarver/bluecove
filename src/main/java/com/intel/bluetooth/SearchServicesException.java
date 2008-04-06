@@ -26,9 +26,9 @@ import java.io.IOException;
  * Thrown from JNI code.
  * 
  * @author vlads
- *
+ * 
  */
-public class SearchServicesException extends IOException {
+class SearchServicesException extends IOException {
 
 	private static final long serialVersionUID = 1L;
 

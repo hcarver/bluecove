@@ -35,6 +35,9 @@ import javax.microedition.io.Connection;
  * classes should ideally be changed except BlueCoveImpl where the instance of
  * new class should be created.
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ * 
  * @author vlads
  * 
  */

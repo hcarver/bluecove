@@ -1,6 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
+ *  Copyright (C) 2008 Vlad Skarzhevskyy
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -21,22 +21,44 @@
 package com.intel.bluetooth;
 
 /**
- * Thrown from JNI code when service search has been canceled by the
- * application.
+ * 
+ * When ThreadLocal not available on Java 1.1 or MIDP will do nothing.
  * 
  * @author vlads
  * 
  */
-class SearchServicesTerminatedException extends SearchServicesException {
+class ThreadLocalWrapper {
 
-	private static final long serialVersionUID = 1L;
+	static boolean java11 = false;
 
-	public SearchServicesTerminatedException() {
-		super();
+	private Object threadLocal;
+
+	private Object java11Object;
+
+	ThreadLocalWrapper() {
+		if (java11) {
+			return;
+		}
+		try {
+			threadLocal = new ThreadLocal();
+		} catch (Throwable ejava11) {
+			java11 = true;
+		}
 	}
 
-	public SearchServicesTerminatedException(String s) {
-		super(s);
+	public Object get() {
+		if (java11) {
+			return java11Object;
+		} else {
+			return ((ThreadLocal) threadLocal).get();
+		}
 	}
 
+	public void set(Object value) {
+		if (java11) {
+			java11Object = value;
+		} else {
+			((ThreadLocal) threadLocal).set(value);
+		}
+	}
 }
