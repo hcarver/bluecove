@@ -282,9 +282,8 @@ public class LocalDevice {
 	 * another device. Valid values are either "true" or "false".</TD>
 	 * </TR>
 	 * </TABLE>
-	 * <p>
 	 * 
-	 * @see com.intel.bluetooth.BlueCoveLocalDeviceProperties<TABLE>
+	 * @see com.intel.bluetooth.BlueCoveLocalDeviceProperties
 	 * 
 	 * @param property
 	 *            the property to retrieve as defined in this class.

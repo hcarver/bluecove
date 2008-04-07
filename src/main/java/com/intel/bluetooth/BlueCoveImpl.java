@@ -529,14 +529,18 @@ public class BlueCoveImpl {
 
 	/**
 	 * API that can be used to configure BlueCove properties instead of System
-	 * properties. Should be used before stack initialized. If <code>null</code>
-	 * is passed as the <code>value</code> then the property will be removed.
+	 * properties. Initialization properties should be changed before stack
+	 * initialized. If <code>null</code> is passed as the <code>value</code>
+	 * then the property will be removed.
 	 * 
 	 * @param key
 	 * @param value
 	 * 
+	 * @see com.intel.bluetooth.BlueCoveLocalDeviceProperties
+	 * 
 	 * @exception IllegalArgumentException
-	 *                if the stack already initialized.
+	 *                if the stack already initialized and property can't be
+	 *                changed.
 	 */
 	public static void setConfigProperty(String key, String value) {
 		if (key == null) {

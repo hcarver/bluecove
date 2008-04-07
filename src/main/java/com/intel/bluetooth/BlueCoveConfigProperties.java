@@ -94,7 +94,7 @@ public interface BlueCoveConfigProperties {
 	 */
 	public static final String PROPERTY_INQUIRY_DURATION = "bluecove.inquiry.duration";
 
-	public static final int PROPERTY_INQUIRY_DURATION_DEFAULT = 11;
+	static final int PROPERTY_INQUIRY_DURATION_DEFAULT = 11;
 
 	/**
 	 * Set true to make Device Inquiry call DiscoveryListener?.deviceDiscovered
