@@ -62,6 +62,25 @@ public interface BlueCoveConfigProperties {
 	public static final String PROPERTY_NATIVE_PATH = "bluecove.native.path";
 
 	/**
+	 * If Stack support multiple bluetooth adapters select one by its system ID.
+	 * (Linux BlueZ and Emulator)
+	 */
+	public static final String PROPERTY_LOCAL_DEVICE_ID = "bluecove.deviceID";
+
+	/**
+	 * If Stack support multiple bluetooth adapters select one by its bluetooth
+	 * address. (Linux BlueZ and Emulator)
+	 */
+	public static final String PROPERTY_LOCAL_DEVICE_ADDRESS = "bluecove.deviceAddress";
+
+	/**
+	 * Some properties can't be changed at runtime once the Stack was
+	 * initialized.
+	 */
+	public static final String[] INITIALIZATION_PROPERTIES = new String[] { PROPERTY_STACK, PROPERTY_STACK_FIRST,
+			PROPERTY_NATIVE_RESOURCE, PROPERTY_NATIVE_RESOURCE, PROPERTY_LOCAL_DEVICE_ID, PROPERTY_LOCAL_DEVICE_ADDRESS };
+
+	/**
 	 * The amount of time in milliseconds for which the implementation will
 	 * attempt to establish connection RFCOMM or L2CAP before it throws
 	 * BluetoothConnectionException. Defaults to 2 minutes. WIDCOMM and OS X
