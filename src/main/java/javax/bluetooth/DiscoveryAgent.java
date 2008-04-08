@@ -156,7 +156,7 @@ public class DiscoveryAgent {
 	 *                <code>PREKNOWN</code>
 	 */
 	public RemoteDevice[] retrieveDevices(int option) {
-		return RemoteDeviceHelper.retrieveDevices(option);
+		return RemoteDeviceHelper.retrieveDevices(this.bluetoothStack, option);
 	}
 
 	/**

@@ -278,26 +278,36 @@ public abstract class RemoteDeviceHelper {
 		}
 	}
 
-	private static Hashtable devicesCashed = new Hashtable();
+	private static Hashtable stackDevicesCashed = new Hashtable();
 
 	private RemoteDeviceHelper() {
 
 	}
 
-	private static RemoteDeviceWithExtendedInfo getCashedDeviceWithExtendedInfo(long address) {
-		Object key = new Long(address);
-		return (RemoteDeviceWithExtendedInfo) devicesCashed.get(key);
+	private static synchronized Hashtable devicesCashed(BluetoothStack bluetoothStack) {
+		Hashtable devicesCashed = (Hashtable) stackDevicesCashed.get(bluetoothStack);
+		if (devicesCashed == null) {
+			devicesCashed = new Hashtable();
+			stackDevicesCashed.put(bluetoothStack, devicesCashed);
+		}
+		return devicesCashed;
 	}
 
-	static RemoteDevice getCashedDevice(long address) {
-		return getCashedDeviceWithExtendedInfo(address);
+	private static RemoteDeviceWithExtendedInfo getCashedDeviceWithExtendedInfo(BluetoothStack bluetoothStack,
+			long address) {
+		Object key = new Long(address);
+		return (RemoteDeviceWithExtendedInfo) devicesCashed(bluetoothStack).get(key);
+	}
+
+	static RemoteDevice getCashedDevice(BluetoothStack bluetoothStack, long address) {
+		return getCashedDeviceWithExtendedInfo(bluetoothStack, address);
 	}
 
 	static RemoteDevice createRemoteDevice(BluetoothStack bluetoothStack, long address, String name, boolean paired) {
-		RemoteDeviceWithExtendedInfo dev = getCashedDeviceWithExtendedInfo(address);
+		RemoteDeviceWithExtendedInfo dev = getCashedDeviceWithExtendedInfo(bluetoothStack, address);
 		if (dev == null) {
 			dev = new RemoteDeviceWithExtendedInfo(bluetoothStack, address, name);
-			devicesCashed.put(new Long(address), dev);
+			devicesCashed(bluetoothStack).put(new Long(address), dev);
 			DebugLog.debug0x("new devicesCashed", address);
 		} else if (!Utils.isStringSet(dev.name)) {
 			// New name found
@@ -312,6 +322,15 @@ public abstract class RemoteDeviceHelper {
 		return dev;
 	}
 
+	private static BluetoothStack getBluetoothStack() throws RuntimeException {
+		try {
+			return BlueCoveImpl.instance().getBluetoothStack();
+		} catch (BluetoothStateException e) {
+			throw (RuntimeException) UtilsJavaSE.initCause(new RuntimeException("Can't initialize bluetooth support"),
+					e);
+		}
+	}
+
 	private static RemoteDeviceWithExtendedInfo remoteDeviceImpl(RemoteDevice device) {
 		return (RemoteDeviceWithExtendedInfo) createRemoteDevice(null, device);
 	}
@@ -321,12 +340,7 @@ public abstract class RemoteDeviceHelper {
 			return device;
 		} else {
 			if (bluetoothStack == null) {
-				try {
-					bluetoothStack = BlueCoveImpl.instance().getBluetoothStack();
-				} catch (BluetoothStateException e) {
-					throw (RuntimeException) UtilsJavaSE.initCause(new RuntimeException(
-							"Can't initialize bluetooth support"), e);
-				}
+				bluetoothStack = getBluetoothStack();
 			}
 			return createRemoteDevice(bluetoothStack, getAddress(device), null, false);
 		}
@@ -365,7 +379,8 @@ public abstract class RemoteDeviceHelper {
 	 * 
 	 * @see javax.bluetooth.DiscoveryAgent#retrieveDevices(int)
 	 */
-	public static RemoteDevice[] retrieveDevices(int option) {
+	public static RemoteDevice[] retrieveDevices(BluetoothStack bluetoothStack, int option) {
+		Hashtable devicesCashed = devicesCashed(bluetoothStack);
 		switch (option) {
 		case DiscoveryAgent.PREKNOWN:
 			if (devicesCashed.size() == 0) {
@@ -412,6 +427,7 @@ public abstract class RemoteDeviceHelper {
 	 */
 	public static int openConnections() {
 		int c = 0;
+		Hashtable devicesCashed = devicesCashed(getBluetoothStack());
 		synchronized (devicesCashed) {
 			for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
 				c += ((RemoteDeviceWithExtendedInfo) en.nextElement()).connectionsCount();
@@ -426,7 +442,7 @@ public abstract class RemoteDeviceHelper {
 	 * @return number of connections
 	 */
 	public static int openConnections(long address) {
-		RemoteDeviceWithExtendedInfo dev = getCashedDeviceWithExtendedInfo(address);
+		RemoteDeviceWithExtendedInfo dev = getCashedDeviceWithExtendedInfo(getBluetoothStack(), address);
 		if (dev == null) {
 			return 0;
 		}
@@ -440,6 +456,7 @@ public abstract class RemoteDeviceHelper {
 	 */
 	public static int connectedDevices() {
 		int c = 0;
+		Hashtable devicesCashed = devicesCashed(getBluetoothStack());
 		synchronized (devicesCashed) {
 			for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
 				if (((RemoteDeviceWithExtendedInfo) en.nextElement()).hasConnections()) {
@@ -483,12 +500,12 @@ public abstract class RemoteDeviceHelper {
 		devInfo.setStackAttributes(key, value);
 	}
 
-	static Object getStackAttributes(RemoteDevice device, Object key) {
+	static Object getStackAttributes(BluetoothStack bluetoothStack, RemoteDevice device, Object key) {
 		RemoteDeviceWithExtendedInfo devInfo = null;
 		if (device instanceof RemoteDeviceWithExtendedInfo) {
 			devInfo = (RemoteDeviceWithExtendedInfo) device;
 		} else {
-			devInfo = getCashedDeviceWithExtendedInfo(getAddress(device));
+			devInfo = getCashedDeviceWithExtendedInfo(bluetoothStack, getAddress(device));
 		}
 
 		if (devInfo != null) {

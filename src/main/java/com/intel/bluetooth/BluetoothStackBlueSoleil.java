@@ -311,11 +311,11 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 		if (params.authenticate || params.encrypt) {
 			throw new IOException("authenticate not supported on BlueSoleil");
 		}
-		RemoteDevice listedDevice = RemoteDeviceHelper.getCashedDevice(params.address);
+		RemoteDevice listedDevice = RemoteDeviceHelper.getCashedDevice(this, params.address);
 		if (listedDevice == null) {
 			throw new IOException("Device not discovered");
 		}
-		UUID uuid = (UUID) RemoteDeviceHelper.getStackAttributes(listedDevice, "RFCOMM_channel" + params.channel);
+		UUID uuid = (UUID) RemoteDeviceHelper.getStackAttributes(this, listedDevice, "RFCOMM_channel" + params.channel);
 		if (uuid == null) {
 			throw new IOException("Device service not discovered");
 		}
