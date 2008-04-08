@@ -26,6 +26,8 @@
  */
 package javax.bluetooth;
 
+import java.util.Hashtable;
+
 import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.BlueCoveImpl;
@@ -49,7 +51,7 @@ import com.intel.bluetooth.UtilsJavaSE;
  */
 public class LocalDevice {
 
-	private static LocalDevice localDevice;
+	private static Hashtable localDevices = new Hashtable();
 
 	private BluetoothStack bluetoothStack;
 
@@ -65,15 +67,18 @@ public class LocalDevice {
 	 * 
 	 * @see #getLocalDevice
 	 */
-	private LocalDevice() throws BluetoothStateException {
-		this.bluetoothStack = BlueCoveImpl.instance().getBluetoothStack();
+	private LocalDevice(BluetoothStack stack) throws BluetoothStateException {
+		this.bluetoothStack = stack;
 		discoveryAgent = new DiscoveryAgent(this.bluetoothStack);
 		addressStr = RemoteDeviceHelper.formatBluetoothAddress(this.bluetoothStack.getLocalDeviceBluetoothAddress());
 	}
 
 	private static synchronized LocalDevice getLocalDeviceInstance() throws BluetoothStateException {
+		BluetoothStack stack = BlueCoveImpl.instance().getBluetoothStack();
+		LocalDevice localDevice = (LocalDevice) localDevices.get(stack);
 		if (localDevice == null) {
-			localDevice = new LocalDevice();
+			localDevice = new LocalDevice(stack);
+			localDevices.put(stack, localDevice);
 		}
 		return localDevice;
 	}
