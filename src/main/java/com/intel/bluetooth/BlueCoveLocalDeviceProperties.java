@@ -28,34 +28,34 @@ package com.intel.bluetooth;
 public interface BlueCoveLocalDeviceProperties {
 
 	/**
-	 * <code>bluecove</code> The version of BlueCove implementation/
+	 * <code>"bluecove"</code> The version of BlueCove implementation.
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_BLUECOVE_VERSION = "bluecove";
 
 	/**
-	 * <code>bluecove.stack</code> The Bluetooth Stack: "winsock", "widcomm"
+	 * <code>"bluecove.stack"</code> The Bluetooth Stack: "winsock", "widcomm"
 	 * or "bluesoleil" on windows.
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_STACK = BlueCoveConfigProperties.PROPERTY_STACK;
 
 	/**
-	 * <code>bluecove.feature.l2cap</code> Does the current Bluetooth Stack
+	 * <code>"bluecove.feature.l2cap"</code> Does the current Bluetooth Stack
 	 * support L2CAP: "true" or "false"
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_L2CAP = "bluecove.feature.l2cap";
 
 	/**
-	 * <code>bluecove.feature.service_attributes</code>
+	 * <code>"bluecove.feature.service_attributes"</code>
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_SERVICE_ATTRIBUTES = "bluecove.feature.service_attributes";
 
 	/**
-	 * <code>bluecove.feature.set_device_service_classes</code>
+	 * <code>"bluecove.feature.set_device_service_classes"</code>
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_SET_DEVICE_SERVICE_CLASSES = "bluecove.feature.set_device_service_classes";
 
 	/**
-	 * <code>bluecove.connections</code> The number of open connections by
+	 * <code>"bluecove.connections"</code> The number of open connections by
 	 * current Bluetooth Stack.
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_OPEN_CONNECTIONS = "bluecove.connections";
