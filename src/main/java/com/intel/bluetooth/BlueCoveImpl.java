@@ -150,7 +150,7 @@ public class BlueCoveImpl {
 
 	private static ThreadLocalWrapper threadStack;
 
-	private static Hashtable stacks = new Hashtable();
+	private static Hashtable/* <BluetoothStack, BluetoothStackHolder> */stacks = new Hashtable();
 
 	private static Vector initializationProperties = new Vector();
 
@@ -207,7 +207,7 @@ public class BlueCoveImpl {
 				}
 			}
 			if (!stacks.isEmpty()) {
-				for (Enumeration en = stacks.keys(); en.hasMoreElements();) {
+				for (Enumeration en = stacks.elements(); en.hasMoreElements();) {
 					BluetoothStackHolder s = (BluetoothStackHolder) en.nextElement();
 					if (s.bluetoothStack != null) {
 						try {
@@ -555,6 +555,12 @@ public class BlueCoveImpl {
 		if ((s != null) && (s.bluetoothStack == bluetoothStack)) {
 			return;
 		}
+
+		BluetoothStackHolder sh = (BluetoothStackHolder) stacks.get(bluetoothStack);
+		if (sh == null) {
+			throw new RuntimeException("ThreadLocal not found for BluetoothStack");
+		}
+		threadStack.set(sh);
 	}
 
 	/**
@@ -715,13 +721,9 @@ public class BlueCoveImpl {
 	}
 
 	public void enableNativeDebug(boolean on) {
-		synchronized (stacks) {
-			for (Enumeration en = stacks.elements(); en.hasMoreElements();) {
-				BluetoothStackHolder s = (BluetoothStackHolder) en.nextElement();
-				if (s.bluetoothStack != null) {
-					s.bluetoothStack.enableNativeDebug(DebugLog.class, on);
-				}
-			}
+		BluetoothStackHolder s = currentStackHolder(false);
+		if (s.bluetoothStack != null) {
+			s.bluetoothStack.enableNativeDebug(DebugLog.class, on);
 		}
 	}
 
@@ -771,6 +773,7 @@ public class BlueCoveImpl {
 		// Store stack in Thread or static variables
 		BluetoothStackHolder newsh = currentStackHolder(true);
 		newsh.bluetoothStack = stack;
+		stacks.put(stack, newsh);
 		return stack;
 	}
 
