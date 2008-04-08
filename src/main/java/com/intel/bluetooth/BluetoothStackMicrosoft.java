@@ -71,6 +71,10 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 		return BlueCoveImpl.STACK_WINSOCK;
 	}
 
+	public String toString() {
+		return getStackID();
+	}
+
 	public native int getLibraryVersion();
 
 	public native int detectBluetoothStack();

@@ -306,7 +306,13 @@ public abstract class RemoteDeviceHelper {
 	static RemoteDevice createRemoteDevice(BluetoothStack bluetoothStack, long address, String name, boolean paired) {
 		RemoteDeviceWithExtendedInfo dev = getCashedDeviceWithExtendedInfo(bluetoothStack, address);
 		if (dev == null) {
-			dev = new RemoteDeviceWithExtendedInfo(bluetoothStack, address, name);
+			Object saveID = BlueCoveImpl.getCurrentThreadBluetoothStackID();
+			try {
+				BlueCoveImpl.setThreadBluetoothStack(bluetoothStack);
+				dev = new RemoteDeviceWithExtendedInfo(bluetoothStack, address, name);
+			} finally {
+				BlueCoveImpl.setThreadBluetoothStackID(saveID);
+			}
 			devicesCashed(bluetoothStack).put(new Long(address), dev);
 			DebugLog.debug0x("new devicesCashed", address);
 		} else if (!Utils.isStringSet(dev.name)) {

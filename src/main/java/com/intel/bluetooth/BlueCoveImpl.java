@@ -150,7 +150,7 @@ public class BlueCoveImpl {
 
 	private static ThreadLocalWrapper threadStack;
 
-	private static Vector stacks = new Vector();
+	private static Hashtable stacks = new Hashtable();
 
 	private static Vector initializationProperties = new Vector();
 
@@ -170,8 +170,15 @@ public class BlueCoveImpl {
 
 		private Hashtable configProperties = new Hashtable();
 
+		private static void initBluetoothStack() throws BluetoothStateException {
+			instance().getBluetoothStack();
+		}
+
 		public String toString() {
-			return null;
+			if (bluetoothStack == null) {
+				return "not initialized";
+			}
+			return bluetoothStack.toString();
 		}
 	}
 
@@ -200,7 +207,7 @@ public class BlueCoveImpl {
 				}
 			}
 			if (!stacks.isEmpty()) {
-				for (Enumeration en = stacks.elements(); en.hasMoreElements();) {
+				for (Enumeration en = stacks.keys(); en.hasMoreElements();) {
 					BluetoothStackHolder s = (BluetoothStackHolder) en.nextElement();
 					if (s.bluetoothStack != null) {
 						try {
@@ -211,8 +218,8 @@ public class BlueCoveImpl {
 					}
 				}
 				stacks.clear();
+				System.out.println("BlueCove stack shutdown completed");
 			}
-			System.out.println("BlueCove stack shutdown completed");
 			synchronized (monitor) {
 				monitor.notifyAll();
 			}
@@ -435,7 +442,10 @@ public class BlueCoveImpl {
 	 * 
 	 * <pre>
 	 * BlueCoveImpl.useThreadLocalBluetoothStack();
+	 * // On Windows
 	 * BlueCoveImpl.setConfigProperty(&quot;bluecove.stack&quot;, &quot;widcomm&quot;);
+	 * // On Linux or in Emulator
+	 * // BlueCoveImpl.setConfigProperty(&quot;bluecove.deviceID&quot;, &quot;0&quot;);
 	 * 
 	 * final Object id1 = BlueCoveImpl.getThreadBluetoothStackID();
 	 * ... do some work with stack 1
@@ -453,7 +463,10 @@ public class BlueCoveImpl {
 	 * // Start another thread that is using different stack 
 	 * Thread t2 = new Thread() {
 	 *    public void run() {
+	 *        // On Windows
 	 *        BlueCoveImpl.setConfigProperty(&quot;bluecove.stack&quot;, &quot;winsock&quot;);
+	 *        // On Linux or in Emulator
+	 *        // BlueCoveImpl.setConfigProperty(&quot;bluecove.deviceID&quot;, &quot;1&quot;);
 	 *        agent = LocalDevice.getLocalDevice().getDiscoveryAgent();
 	 *        agent.startInquiry(...);
 	 *        .....
@@ -502,7 +515,14 @@ public class BlueCoveImpl {
 	 */
 	public static synchronized Object getThreadBluetoothStackID() throws BluetoothStateException {
 		useThreadLocalBluetoothStack();
-		instance().getBluetoothStack();
+		BluetoothStackHolder.initBluetoothStack();
+		return threadStack.get();
+	}
+
+	static synchronized Object getCurrentThreadBluetoothStackID() {
+		if (threadStack == null) {
+			return null;
+		}
 		return threadStack.get();
 	}
 
@@ -525,6 +545,16 @@ public class BlueCoveImpl {
 			throw new IllegalArgumentException("ThreadLocal configuration is not initialized");
 		}
 		threadStack.set(stackID);
+	}
+
+	static synchronized void setThreadBluetoothStack(BluetoothStack bluetoothStack) {
+		if (threadStack == null) {
+			return;
+		}
+		BluetoothStackHolder s = ((BluetoothStackHolder) threadStack.get());
+		if ((s != null) && (s.bluetoothStack == bluetoothStack)) {
+			return;
+		}
 	}
 
 	/**

@@ -82,6 +82,10 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 		return BlueCoveImpl.STACK_WIDCOMM;
 	}
 
+	public String toString() {
+		return getStackID();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

@@ -32,6 +32,7 @@ import javax.microedition.io.Connection;
 
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.RemoteDeviceHelper;
+import com.intel.bluetooth.UtilsJavaSE;
 
 /**
  * The <code>RemoteDevice</code> class represents a remote Bluetooth device.
@@ -90,7 +91,8 @@ public class RemoteDevice {
 				throw new IllegalArgumentException("can't use the LocalDevice address.");
 			}
 		} catch (BluetoothStateException e) {
-			throw new RuntimeException("Can't initialize bluetooth support");
+			throw (RuntimeException) UtilsJavaSE.initCause(new RuntimeException("Can't initialize bluetooth support"),
+					e);
 		}
 		this.addressLong = RemoteDeviceHelper.getAddress(address);
 	}

@@ -72,6 +72,10 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 		return BlueCoveImpl.STACK_OSX;
 	}
 
+	public String toString() {
+		return getStackID();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

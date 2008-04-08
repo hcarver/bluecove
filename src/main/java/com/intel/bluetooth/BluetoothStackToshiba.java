@@ -48,6 +48,10 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		return BlueCoveImpl.STACK_TOSHIBA;
 	}
 
+	public String toString() {
+		return getStackID();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

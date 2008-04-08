@@ -28,7 +28,6 @@ import java.util.Hashtable;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DataElement;
-import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
@@ -392,7 +391,8 @@ class ServiceRecordImpl implements ServiceRecord {
 
 		if (device == null) {
 			try {
-				buf.append(LocalDevice.getLocalDevice().getBluetoothAddress());
+				buf.append(RemoteDeviceHelper.formatBluetoothAddress(this.bluetoothStack
+						.getLocalDeviceBluetoothAddress()));
 			} catch (BluetoothStateException bse) {
 				buf.append("localhost");
 			}
