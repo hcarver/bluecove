@@ -28,6 +28,7 @@ import java.util.Hashtable;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DataElement;
+import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
@@ -391,9 +392,17 @@ class ServiceRecordImpl implements ServiceRecord {
 
 		if (device == null) {
 			try {
-				buf.append(RemoteDeviceHelper.formatBluetoothAddress(this.bluetoothStack
-						.getLocalDeviceBluetoothAddress()));
+				Object saveID = BlueCoveImpl.getCurrentThreadBluetoothStackID();
+				try {
+					BlueCoveImpl.setThreadBluetoothStack(bluetoothStack);
+					buf.append(LocalDevice.getLocalDevice().getBluetoothAddress());
+				} finally {
+					if (saveID != null) {
+						BlueCoveImpl.setThreadBluetoothStackID(saveID);
+					}
+				}
 			} catch (BluetoothStateException bse) {
+				DebugLog.error("can't read LocalAddress", bse);
 				buf.append("localhost");
 			}
 		} else {
