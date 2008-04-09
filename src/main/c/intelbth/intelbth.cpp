@@ -948,9 +948,11 @@ connectRety:
 			}
 		}
 		if (last_error == WSAEACCES) {
-			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_SECURITY_BLOCK, "[10013] Connecting application requested authentication, but authentication failed.");
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_SECURITY_BLOCK, "Connecting application requested authentication, but authentication failed [10013] .");
+		} else if (last_error == WSAETIMEDOUT) {
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout; [%lu] %S", last_error, getWinErrorMessage(last_error));
 		} else {
-			throwIOExceptionWinErrorMessage(env, "Failed to connect socket", last_error);
+			throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to connect; [%lu] %S", last_error, getWinErrorMessage(last_error));
 		}
 	}
 }
