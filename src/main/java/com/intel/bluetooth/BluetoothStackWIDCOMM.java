@@ -39,6 +39,8 @@ import javax.bluetooth.UUID;
 
 class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
 
+	private static BluetoothStackWIDCOMM singleInstance = null;
+
 	private boolean initialized = false;
 
 	private Vector deviceDiscoveryListeners = new Vector/* <DiscoveryListener> */();
@@ -101,11 +103,15 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	public native void enableNativeDebug(Class nativeDebugCallback, boolean on);
 
-	public void initialize() {
+	public void initialize() throws BluetoothStateException {
+		if (singleInstance != null) {
+			throw new BluetoothStateException("Only one instance of " + getStackID() + " stack supported");
+		}
 		if (!initializeImpl()) {
 			throw new RuntimeException("WIDCOMM BluetoothStack not found");
 		}
 		initialized = true;
+		singleInstance = this;
 	}
 
 	public native boolean initializeImpl();
@@ -118,6 +124,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 			initialized = false;
 			DebugLog.debug("WIDCOMM destroyed");
 		}
+		singleInstance = null;
 	}
 
 	protected void finalize() {
@@ -267,7 +274,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 			deviceDiscoveryListenerFoundDevices.put(listener, new Hashtable());
 		}
 		deviceDiscoveryListenerReportedDevices.put(listener, new Vector());
-		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
+		return DeviceInquiryThread.startInquiry(this, this, accessCode, listener);
 	}
 
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)

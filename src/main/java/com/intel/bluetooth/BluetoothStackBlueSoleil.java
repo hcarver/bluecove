@@ -33,6 +33,8 @@ import javax.bluetooth.UUID;
 
 class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
 
+	private static BluetoothStackBlueSoleil singleInstance = null;
+
 	private boolean initialized = false;
 
 	private DiscoveryListener currentDeviceDiscoveryListener;
@@ -60,12 +62,16 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	public native boolean initializeImpl();
 
-	public void initialize() {
+	public void initialize() throws BluetoothStateException {
+		if (singleInstance != null) {
+			throw new BluetoothStateException("Only one instance of " + getStackID() + " stack supported");
+		}
 		if (!initializeImpl()) {
 			DebugLog.fatal("Can't initialize BlueSoleil");
-			throw new RuntimeException("BlueSoleil BluetoothStack not found");
+			throw new BluetoothStateException("BlueSoleil BluetoothStack not found");
 		}
 		initialized = true;
+		singleInstance = this;
 	}
 
 	private native void uninitialize();
@@ -76,6 +82,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 			initialized = false;
 			DebugLog.debug("BlueSoleil destroyed");
 		}
+		singleInstance = null;
 	}
 
 	protected void finalize() {
@@ -210,7 +217,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 			throw new BluetoothStateException("Another inquiry already running");
 		}
 		currentDeviceDiscoveryListener = listener;
-		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
+		return DeviceInquiryThread.startInquiry(this, this, accessCode, listener);
 	}
 
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)

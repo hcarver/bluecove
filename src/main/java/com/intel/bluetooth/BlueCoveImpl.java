@@ -717,6 +717,14 @@ public class BlueCoveImpl {
 		}
 		newStack.initialize();
 		createShutdownHook();
+
+		// Store stack in Thread or static variables
+		BluetoothStackHolder sh = currentStackHolder(true);
+		sh.bluetoothStack = newStack;
+		stacks.put(newStack, sh);
+		if (threadStack != null) {
+			threadStack.set(sh);
+		}
 		return newStack;
 	}
 
@@ -769,11 +777,6 @@ public class BlueCoveImpl {
 		} else {
 			stack = detectStackPrivileged();
 		}
-
-		// Store stack in Thread or static variables
-		BluetoothStackHolder newsh = currentStackHolder(true);
-		newsh.bluetoothStack = stack;
-		stacks.put(stack, newsh);
 		return stack;
 	}
 

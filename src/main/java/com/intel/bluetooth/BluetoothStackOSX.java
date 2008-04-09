@@ -40,7 +40,9 @@ import javax.bluetooth.UUID;
 
 class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
 
-	public static final boolean debug = true;
+	public static final boolean debug = false;
+
+	private static BluetoothStackOSX singleInstance = null;
 
 	// TODO what is the real number for Attributes retrivable ?
 	private final static int ATTR_RETRIEVABLE_MAX = 256;
@@ -91,14 +93,19 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	private native boolean initializeImpl();
 
-	public void initialize() {
-		if (!initializeImpl()) {
-			throw new RuntimeException("OS X BluetoothStack not found");
+	public void initialize() throws BluetoothStateException {
+		if (singleInstance != null) {
+			throw new BluetoothStateException("Only one instance of " + getStackID() + " stack supported");
 		}
+		if (!initializeImpl()) {
+			throw new BluetoothStateException("OS X BluetoothStack not found");
+		}
+		singleInstance = this;
 	}
 
 	public void destroy() {
 		setLocalDeviceServiceClassesImpl(0);
+		singleInstance = null;
 	}
 
 	public native void enableNativeDebug(Class nativeDebugCallback, boolean on);
@@ -296,7 +303,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 		deviceDiscoveryListeners.addElement(listener);
 		deviceDiscoveryListenerReportedDevices.put(listener, new Vector());
-		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
+		return DeviceInquiryThread.startInquiry(this, this, accessCode, listener);
 	}
 
 	private native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, int duration,

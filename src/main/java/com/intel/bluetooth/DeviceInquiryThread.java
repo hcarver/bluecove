@@ -29,7 +29,9 @@ import javax.bluetooth.DiscoveryListener;
  */
 class DeviceInquiryThread extends Thread {
 
-	private DeviceInquiryRunnable stack;
+	private BluetoothStack stack;
+
+	private DeviceInquiryRunnable inquiryRunnable;
 
 	private int accessCode;
 
@@ -49,9 +51,11 @@ class DeviceInquiryThread extends Thread {
 		return threadNumber++;
 	}
 
-	private DeviceInquiryThread(DeviceInquiryRunnable stack, int accessCode, DiscoveryListener listener) {
+	private DeviceInquiryThread(BluetoothStack stack, DeviceInquiryRunnable inquiryRunnable, int accessCode,
+			DiscoveryListener listener) {
 		super("DeviceInquiryThread-" + nextThreadNum());
 		this.stack = stack;
+		this.inquiryRunnable = inquiryRunnable;
 		this.accessCode = accessCode;
 		this.listener = listener;
 	}
@@ -60,9 +64,9 @@ class DeviceInquiryThread extends Thread {
 	 * Start DeviceInquiry and wait for startException or
 	 * deviceInquiryStartedCallback
 	 */
-	static boolean startInquiry(DeviceInquiryRunnable stack, int accessCode, DiscoveryListener listener)
-			throws BluetoothStateException {
-		DeviceInquiryThread t = (new DeviceInquiryThread(stack, accessCode, listener));
+	static boolean startInquiry(BluetoothStack stack, DeviceInquiryRunnable inquiryRunnable, int accessCode,
+			DiscoveryListener listener) throws BluetoothStateException {
+		DeviceInquiryThread t = (new DeviceInquiryThread(stack, inquiryRunnable, accessCode, listener));
 		// In case the BTStack hangs, exit JVM anyway
 		UtilsJavaSE.threadSetDaemon(t);
 		synchronized (t.inquiryStartedEvent) {
@@ -94,7 +98,8 @@ class DeviceInquiryThread extends Thread {
 	public void run() {
 		int discType = DiscoveryListener.INQUIRY_ERROR;
 		try {
-			discType = stack.runDeviceInquiry(this, accessCode, listener);
+			BlueCoveImpl.setThreadBluetoothStack(stack);
+			discType = inquiryRunnable.runDeviceInquiry(this, accessCode, listener);
 		} catch (BluetoothStateException e) {
 			DebugLog.debug("runDeviceInquiry throw", e);
 			startException = e;

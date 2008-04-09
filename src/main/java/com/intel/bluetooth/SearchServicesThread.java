@@ -135,6 +135,7 @@ class SearchServicesThread extends Thread {
 	public void run() {
 		int respCode = DiscoveryListener.SERVICE_SEARCH_ERROR;
 		try {
+			BlueCoveImpl.setThreadBluetoothStack(stack);
 			respCode = serachRunnable.runSearchServices(this, attrSet, uuidSet, device, listener);
 		} catch (BluetoothStateException e) {
 			startException = e;

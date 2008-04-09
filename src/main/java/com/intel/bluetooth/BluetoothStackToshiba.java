@@ -162,7 +162,7 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	// ---------------------- Device Inquiry
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
-		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
+		return DeviceInquiryThread.startInquiry(this, this, accessCode, listener);
 	}
 
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)

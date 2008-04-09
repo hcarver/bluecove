@@ -43,6 +43,8 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 
 	private static final int BTH_MODE_DISCOVERABLE = 3;
 
+	private static BluetoothStackMicrosoft singleInstance = null;
+
 	private boolean peerInitialized = false;
 
 	private boolean windowsCE;
@@ -83,11 +85,14 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 
 	private static native int initializationStatus() throws IOException;
 
-	native void uninitialize();
+	private native void uninitialize();
 
 	private native boolean isWindowsCE();
 
 	public void initialize() throws BluetoothStateException {
+		if (singleInstance != null) {
+			throw new BluetoothStateException("Only one instance of " + getStackID() + " stack supported");
+		}
 		try {
 			int status = initializationStatus();
 			DebugLog.debug("initializationStatus", status);
@@ -95,6 +100,7 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 				peerInitialized = true;
 			}
 			windowsCE = isWindowsCE();
+			singleInstance = this;
 		} catch (BluetoothStateException e) {
 			throw e;
 		} catch (IOException e) {
@@ -109,9 +115,10 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 			uninitialize();
 		}
 		cancelLimitedDiscoverableTimer();
+		singleInstance = null;
 	}
 
-	public void initialized() throws BluetoothStateException {
+	private void initialized() throws BluetoothStateException {
 		if (!peerInitialized) {
 			throw new BluetoothStateException("Bluetooth system is unavailable");
 		}
@@ -316,7 +323,7 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 			throw new BluetoothStateException("Another inquiry already running");
 		}
 		currentDeviceDiscoveryListener = listener;
-		return DeviceInquiryThread.startInquiry(this, accessCode, listener);
+		return DeviceInquiryThread.startInquiry(this, this, accessCode, listener);
 	}
 
 	/*
