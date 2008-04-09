@@ -730,7 +730,7 @@ public class BlueCoveImpl {
 
 	public void enableNativeDebug(boolean on) {
 		BluetoothStackHolder s = currentStackHolder(false);
-		if (s.bluetoothStack != null) {
+		if ((s != null) && (s.bluetoothStack != null)) {
 			s.bluetoothStack.enableNativeDebug(DebugLog.class, on);
 		}
 	}
