@@ -9,6 +9,8 @@ BlueCove is a LGPL licensed JSR-82 implementation on Java Standard Edition (J2SE
 the Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack. Originally developed by Intel Research and
 currently maintained by volunteers. The LGPL license allow to link and distribute commercial software with !BlueCove.
 
+Support for Linux BlueZ is added in BlueCove version 2.0.3 as additional [http://www.gnu.org/licenses/gpl.html GNU General Public License] module `bluecove-gpl`.
+
  [http://bluecove.wiki.sourceforge.net/ BlueCove public contirbutions Wiki]
 
  [http://www.rococosoft.com/weblog/archives/2007/07/another_cool_project_using_jsr.html Blog about Blue Cove]
@@ -17,10 +19,10 @@ currently maintained by volunteers. The LGPL license allow to link and distribut
 
 BlueCove provides an implementation of the JSR 82. Applications should use API defined in JSR-82. See [http://bluecove.sourceforge.net/apidocs/index.html BlueCove JSR-82 API]
 
-== Requirements ==
+== Runtime Requirements ==
 
   * WIDCOMM (Broadcom) BTW Stack software version 1.4.2.10 SP5 or above
-  * BlueSoleil version 1.6.0 or above
+  * BlueSoleil version 1.6.0, 2.3 or 3.2.2.8. Version 5.0.5 not supported.
   * Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer and Windows Mobile 2003 or newer)
   * PowerPC- or Intel-based Mac OS X 10.4 (Bluetooth v1.2) or late
   * A Bluetooth device supported by the WIDCOMM, BlueSoleil or Microsoft bluetooth stack
@@ -29,11 +31,11 @@ BlueCove provides an implementation of the JSR 82. Applications should use API d
 
 == Limitations ==
 
-  L2CAP support available only on WIDCOMM and Mac OS X Stack.
+  L2CAP support available only on Windows WIDCOMM Stack, Linux BlueZ and Mac OS X Stack.
 
-  Due to the Microsoft Bluetooth stack only supporting RFCOMM connections,
-BlueCove also only supports RFCOMM connections on this stack. The operating system support is
-currently limited to Windows XP SP2 and newer, because the Microsoft Bluetooth
+  Since Microsoft Bluetooth stack only supporting RFCOMM connections,
+BlueCove also supports only RFCOMM connections on this stack. The Microsoft operating system support is
+currently limited to Windows XP SP2, Windows Mobile 2003 and newer, because the Microsoft Bluetooth
 stack is not available on other operating systems.
 
  For more limitations details see stacks.txt or [http://code.google.com/p/bluecove/wiki/stacks BlueCove supported stacks].
@@ -48,10 +50,12 @@ The BlueCove developer community welcomes your participation.
 
 == Installation ==
 
+!BlueCove rely upon already installed native Bluetooth stack that comes with you operating system or Bluetooth USB device.
 Installation of the binary (already compiled) version of BlueCove is as follows:
 
   # [http://code.google.com/p/bluecove/downloads/list Download BlueCove] binary release
   # Add `bluecove.jar` to your classpath
+  # Also add `bluecove-gpl.jar` to your classpath if you are running application on Linux
 
 For maven2 users see [maven2 Using maven2 to build application or MIDlet]
 
@@ -105,13 +109,14 @@ Debug
 Configuration options
 
     System properties:
-     (Since v2.0.2)
-        # `bluecove.obex.timeout` time in milliseconds defaults to 2 minutes.
-        # `bluecove.connect.timeout` time in milliseconds defaults to 2 minutes. WIDCOMM and OS X only.
-        # `bluecove.obex.mtu` You can increase transfer speed by changing mtu to bigger value. Default is 1024
-        # `bluecove.bluez.class` defaults to com.intel.bluetooth.BluetoothStackBlueZ. Use reflection to start Linux version.
-    (Since v2.0.3)
-        # `bluecove.inquiry.duration` Device Inquiry time in seconds defaults to 11 seconds. MS Stack and OS X only.
+     Since v2.0.2
+        * `bluecove.obex.timeout` time in milliseconds defaults to 2 minutes.
+        * `bluecove.connect.timeout` time in milliseconds defaults to 2 minutes. WIDCOMM and OS X only.
+        * `bluecove.obex.mtu` You can increase transfer speed by changing mtu to bigger value. Default is 1024
+        * `bluecove.bluez.class` defaults to com.intel.bluetooth.BluetoothStackBlueZ. Use reflection to start Linux version.
+    Since v2.0.3
+        * `bluecove.inquiry.duration` Device Inquiry time in seconds defaults to 11 seconds. MS Stack and OS X only.
+        * `bluecove.inquiry.report_asap` Set true to make Device Inquiry call DiscoveryListener.deviceDiscovered without waiting for updated service class.  WIDCOMM only.
 
 == Compilation ==
 
@@ -145,7 +150,7 @@ On Mac OS X
   # Run `ant` or `mvn`
   # When using maven native Dlls are build as well
 
-  If you are uisng `ant`:
+  If you are using `ant`:
 
   # Go into `src\main\c\intelbth`
   # Open `intelbth.sln`
