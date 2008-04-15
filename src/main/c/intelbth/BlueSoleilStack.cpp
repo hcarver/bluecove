@@ -38,6 +38,14 @@ BOOL isBlueSoleilBluetoothStackPresent(JNIEnv *env) {
 
 #ifdef _BLUESOLEIL
 
+static BOOL BlueSoleilStarted = FALSE;
+
+//static BYTE localDeviceAddress[DEVICE_ADDRESS_LENGTH];
+// This is to avoid errors in BlueSoleil when the BLUETOOTH_DEVICE_INFO_EX is in the stack.
+int dummyData1[1024];
+BLUETOOTH_DEVICE_INFO_EX localDeviceInfo = {0};
+int dummyData2[1024];
+
 void BsAddrToString(wchar_t* addressString, BYTE* address) {
     swprintf_s(addressString, 14, L"%02x%02x%02x%02x%02x%02x",
              address[5],
@@ -67,6 +75,31 @@ jint BsDeviceClassToInt(BYTE* devClass) {
     return (((devClass[0] << 8) + devClass[1]) << 8) + devClass[2];
 }
 
+#define MULTI_BYTE_HACK
+
+#ifndef MULTI_BYTE_HACK
+// For some reson devInfo.szName can't be used in call to JNI NewStringUTF
+jstring BsNewDeviceNameString(JNIEnv* env, char* str) {
+    char n[MAX_DEVICE_NAME_LENGTH + 1];
+    sprintf_s(n, (size_t)MAX_DEVICE_NAME_LENGTH, "%s", str);
+	return env->NewStringUTF(n);
+}
+#else
+jstring BsNewDeviceNameString(JNIEnv* env, char* str) {
+	jstring value = NULL;
+	int length =  (UINT32)strlen(str);
+	int length_mb = MultiByteToWideChar( CP_ACP, 0, (LPCSTR)str, length, NULL, 0);
+    unsigned short* buffer = (unsigned short*)malloc(length_mb * 2 + 1);
+	if (buffer != NULL) {
+		if (MultiByteToWideChar( CP_ACP, 0, (LPCSTR)str, length, (LPWSTR)buffer, length_mb) > 0 ) {
+			value = env->NewString((jchar*)buffer, length_mb );
+		}
+		free(buffer);
+	}
+	return value;
+}
+#endif
+
 //API calling status code to String
 char * getBsAPIStatusString(DWORD dwResult) {
     switch (dwResult) {
@@ -86,8 +119,6 @@ char * getBsAPIStatusString(DWORD dwResult) {
             return "Unknown BlueSoleil error";
     }
 }
-
-static BOOL BlueSoleilStarted = FALSE;
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getLibraryVersion
 (JNIEnv *, jobject) {
@@ -123,6 +154,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_ini
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_uninitialize
 (JNIEnv *env, jobject) {
     if (stack != NULL) {
+        debug(("uninitialize BlueSoleil"));
         BlueSoleilStack* stackTmp = stack;
         stack = NULL;
         delete stackTmp;
@@ -134,8 +166,11 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_uniniti
 }
 
 BOOL BsGetLocalDeviceInfo(JNIEnv *env, DWORD dwMask, PBLUETOOTH_DEVICE_INFO_EX pDevInfo) {
-    memset(pDevInfo, 0, sizeof(BLUETOOTH_DEVICE_INFO_EX));
+    //memset(pDevInfo, 0, sizeof(BLUETOOTH_DEVICE_INFO_EX));
     pDevInfo->dwSize = sizeof(BLUETOOTH_DEVICE_INFO_EX);
+	//if ((dwMask & MASK_DEVICE_ADDRESS) == 0) {
+		//memcpy(pDevInfo->address, localDeviceAddress, DEVICE_ADDRESS_LENGTH);
+	//}
     DWORD dwResult = BT_GetLocalDeviceInfo(dwMask, pDevInfo);
     if (dwResult != BTSTATUS_SUCCESS) {
         debug(("BT_GetLocalDeviceInfo return  [%s]", getBsAPIStatusString(dwResult)));
@@ -147,43 +182,56 @@ BOOL BsGetLocalDeviceInfo(JNIEnv *env, DWORD dwMask, PBLUETOOTH_DEVICE_INFO_EX p
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getLocalDeviceBluetoothAddress
 (JNIEnv *env, jobject) {
-    BLUETOOTH_DEVICE_INFO_EX devInfo;
-    BsGetLocalDeviceInfo(env, MASK_DEVICE_ADDRESS, &devInfo);
+    if (stack == NULL) {
+        throwRuntimeException(env, cSTACK_CLOSED);
+        return NULL;
+    }
+    BsGetLocalDeviceInfo(env, MASK_DEVICE_ADDRESS, &localDeviceInfo);
+    //memcpy(localDeviceAddress, localDeviceInfo.address, DEVICE_ADDRESS_LENGTH);
     wchar_t addressString[14];
-    BsAddrToString(addressString, devInfo.address);
+    BsAddrToString(addressString, localDeviceInfo.address);
     return env->NewString((jchar*)addressString, (jsize)wcslen(addressString));
 }
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getLocalDeviceName
 (JNIEnv *env, jobject) {
-    BLUETOOTH_DEVICE_INFO_EX devInfo;
-    if (!BsGetLocalDeviceInfo(env, MASK_DEVICE_NAME, &devInfo)) {
+    if (stack == NULL) {
+        throwRuntimeException(env, cSTACK_CLOSED);
         return NULL;
     }
-    // For some reson devInfo.szName can't be used in call to JNI NewStringUTF
-    //char name[MAX_DEVICE_NAME_LENGTH];
-    //sprintf_s(name, MAX_DEVICE_NAME_LENGTH, "%s", devInfo.szName);
-    //return env->NewStringUTF(name);
-	return newMultiByteString(env, devInfo.szName);
+    if (!BsGetLocalDeviceInfo(env, MASK_DEVICE_NAME, &localDeviceInfo)) {
+        return NULL;
+    }
+    return BsNewDeviceNameString(env, localDeviceInfo.szName);
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getDeviceVersion
 (JNIEnv *env, jobject) {
-    BLUETOOTH_DEVICE_INFO_EX devInfo;
-    BsGetLocalDeviceInfo(env, MASK_LMP_VERSION, &devInfo);
-    return devInfo.wLmpSubversion;
+    if (stack == NULL) {
+        throwRuntimeException(env, cSTACK_CLOSED);
+        return 0;
+    }
+    BsGetLocalDeviceInfo(env, MASK_LMP_VERSION, &localDeviceInfo);
+    return localDeviceInfo.wLmpSubversion;
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getDeviceManufacturer
 (JNIEnv *env, jobject) {
-    BLUETOOTH_DEVICE_INFO_EX devInfo;
-    BsGetLocalDeviceInfo(env, MASK_LMP_VERSION, &devInfo);
-    return devInfo.wManuName;
+    if (stack == NULL) {
+        throwRuntimeException(env, cSTACK_CLOSED);
+        return 0;
+    }
+    BsGetLocalDeviceInfo(env, MASK_LMP_VERSION, &localDeviceInfo);
+    return localDeviceInfo.wManuName;
 }
 
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getStackVersionInfo
-(JNIEnv *, jobject) {
+(JNIEnv *env, jobject) {
+    if (stack == NULL) {
+        throwRuntimeException(env, cSTACK_CLOSED);
+        return 0;
+    }
     return BT_GetVersion();
 }
 
@@ -257,7 +305,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runDevi
         BT_GetRemoteDeviceInfo(MASK_DEVICE_NAME | MASK_DEVICE_CLASS, &devInfo);
         jboolean paired = pDevice->bPaired;
         jint deviceClass = BsDeviceClassToInt(devInfo.classOfDevice);
-        if (!callback.callDeviceDiscovered(env, listener, deviceAddr, deviceClass, newMultiByteString(env, (char*)(devInfo.szName)), paired)) {
+        if (!callback.callDeviceDiscovered(env, listener, deviceAddr, deviceClass, BsNewDeviceNameString(env, (char*)(devInfo.szName)), paired)) {
 		    return INQUIRY_ERROR;
 		}
     }

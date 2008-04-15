@@ -386,20 +386,6 @@ void convertGUIDToUUIDBytes(GUID *uuid, jbyte *bytes) {
 		bytes[i + 8] = uuid->Data4[i];
 	}
 }
-
-jstring newMultiByteString(JNIEnv* env, char* str) {
-	jstring value = NULL;
-	int length =  (UINT32)strlen(str);
-	int length_mb = MultiByteToWideChar( CP_ACP, 0, (LPCSTR)str, length, NULL, 0);
-    unsigned short* buffer = (unsigned short*)malloc(length_mb * 2 + 1);
-	if (buffer != NULL) {
-		if (MultiByteToWideChar( CP_ACP, 0, (LPCSTR)str, length, (LPWSTR)buffer, length_mb) > 0 ) {
-			value = env->NewString((jchar*)buffer, length_mb );
-		}
-		free(buffer);
-	}
-	return value;
-}
 #endif
 
 #define MAJOR_COMPUTER 0x0100

@@ -275,7 +275,6 @@ BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer);
 #ifdef WIN32
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid);
 void convertGUIDToUUIDBytes(GUID *uuid, jbyte *bytes);
-jstring newMultiByteString(JNIEnv* env, char* str);
 #endif
 
 #define BLUECOVE_STACK_DETECT_MICROSOFT  1
