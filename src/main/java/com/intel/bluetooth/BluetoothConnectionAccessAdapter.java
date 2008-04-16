@@ -25,6 +25,7 @@ import java.io.IOException;
 import javax.bluetooth.RemoteDevice;
 
 /**
+ * Helper class to create connection Proxy classes.
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
  */

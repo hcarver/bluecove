@@ -49,6 +49,10 @@ import com.intel.bluetooth.obex.OBEXSessionNotifierImpl;
  * Implementation of javax.microedition.io.Connector
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
+ * <p>
+ * BlueCove specific JSR-82 extension <tt>bluecovepsm</tt> enables the use of
+ * specific PSM channel in L2CAP service.
+ * <tt>btl2cap://localhost;name=...;bluecovepsm=1007</tt>
  */
 public abstract class MicroeditionConnector {
 	/*
