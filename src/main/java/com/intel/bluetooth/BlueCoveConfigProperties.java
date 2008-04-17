@@ -116,4 +116,15 @@ public interface BlueCoveConfigProperties {
 	 */
 	public static final String PROPERTY_OBEX_TIMEOUT = "bluecove.obex.timeout";
 
+	/**
+	 * JSR-82 air simulator server can be on remote computer
+	 */
+	public static final String PROPERTY_EMULATOR_HOST = "bluecove.emu.rmiRegistryHost";
+
+	/**
+	 * JSR-82 air simulator server listen on different port, default 8090.
+	 * <p>
+	 * Use 0 on the client to enable in process server
+	 */
+	public static final String PROPERTY_EMULATOR_PORT = "bluecove.emu.rmiRegistryPort";
 }
