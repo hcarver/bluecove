@@ -33,6 +33,7 @@
             <item name="JSR 82 TCK"  href="tck/index.html" />
 
             <item name="Linux BlueZ" href="bluecove-gpl/"/>
+            <item name="JSR 82 Emulator" href="bluecove-emu/"/>
 
             <item name="Download" href="#">
                 <item name="Releases" href="http://sourceforge.net/project/showfiles.php?group_id=114020"/>

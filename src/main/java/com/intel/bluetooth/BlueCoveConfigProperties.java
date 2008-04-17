@@ -40,7 +40,8 @@ public interface BlueCoveConfigProperties {
 	/**
 	 * If automatic Bluetooth Stack detection is not enough this can be used to
 	 * force desired Stack Initialization. Values "widcomm", "bluesoleil" or
-	 * "winsock". By default winsock is selected if available
+	 * "winsock". Use "emulator" value to start jsr-82 emulator. By default
+	 * winsock is selected if available
 	 */
 	public static final String PROPERTY_STACK = "bluecove.stack";
 
