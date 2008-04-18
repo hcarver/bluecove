@@ -313,7 +313,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>site-fix-css</id>
+                        <id>site-fix-version</id>
                         <phase>site</phase>
                         <goals>
                             <goal>run</goal>
@@ -327,8 +327,6 @@
                                     <replacefilter token="#build#" value="${buildLabel}"/>
                                     <replacefilter token="#version#" value="${version}"/>
                                     <replacefilter token="#remove#" value=""/>
-                                    <replacetoken><![CDATA[</body>]]></replacetoken>
-                                    <replacevalue><![CDATA[<script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script><script type="text/javascript">_uacct = "UA-1249205-3";urchinTracker();</script></body>]]></replacevalue>
                                 </replace>
                             </tasks>
                         </configuration>

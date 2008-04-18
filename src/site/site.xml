@@ -5,6 +5,12 @@
 
     <publishDate position="left" format="MM-dd-yyyy HH:mm z 'GMT'Z" />
 
+    <skin>
+        <groupId>net.sf.bluecove</groupId>
+        <artifactId>bluecove-site-skin</artifactId>
+        <version>2.0.0</version>
+    </skin>
+
     <bannerLeft>
         <name>BlueCove</name>
         <src>logo.png</src>
@@ -16,6 +22,8 @@
         <src>http://sourceforge.net/sflogo.php?group_id=114020&amp;amp;type=2</src>
         <href>http://sourceforge.net/projects/bluecove/</href>
     </bannerRight>
+
+    <!-- poweredBy is done in skin -->
 
     <body>
 
