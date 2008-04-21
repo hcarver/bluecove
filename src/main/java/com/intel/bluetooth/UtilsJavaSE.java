@@ -53,6 +53,8 @@ public class UtilsJavaSE {
 
 	static final boolean ibmJ9midp = detectJ9midp();
 
+	static final boolean canCallNotLoadedNativeMethod = !ibmJ9midp;
+
 	private UtilsJavaSE() {
 
 	}

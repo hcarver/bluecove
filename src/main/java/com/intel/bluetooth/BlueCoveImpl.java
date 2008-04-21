@@ -348,7 +348,7 @@ public class BlueCoveImpl {
 	static void loadNativeLibraries(BluetoothStack stack) throws BluetoothStateException {
 		// Check is libraries already loaded
 		try {
-			if (stack.isNativeCodeLoaded()) {
+			if ((UtilsJavaSE.canCallNotLoadedNativeMethod) && (stack.isNativeCodeLoaded())) {
 				return;
 			}
 		} catch (Error e) {
@@ -373,7 +373,9 @@ public class BlueCoveImpl {
 
 	private static boolean isNativeLibrariesAvailable(BluetoothStack stack) {
 		try {
-			return stack.isNativeCodeLoaded();
+			if (UtilsJavaSE.canCallNotLoadedNativeMethod) {
+				return stack.isNativeCodeLoaded();
+			}
 		} catch (Error e) {
 			// We caught UnsatisfiedLinkError
 		}
