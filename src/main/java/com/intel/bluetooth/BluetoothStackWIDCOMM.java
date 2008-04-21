@@ -97,6 +97,24 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP;
 	}
 
+	// ---------------------- Library initialization
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#isNativeCodeLoaded()
+	 */
+	public native boolean isNativeCodeLoaded();
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#requireNativeLibraries()
+	 */
+	public LibraryInformation[] requireNativeLibraries() {
+		return LibraryInformation.library(BlueCoveImpl.NATIVE_LIB_WIDCOMM);
+	}
+
 	public native int getLibraryVersion();
 
 	public native int detectBluetoothStack();

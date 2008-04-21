@@ -284,6 +284,11 @@ void LongToOSxBTAddr(jlong longAddr, BluetoothDeviceAddress* addr) {
 
 // --- JNI function
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isNativeCodeLoaded
+  (JNIEnv *env, jobject peer) {
+    return JNI_TRUE;
+}
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLibraryVersion
 (JNIEnv *, jobject) {
     return blueCoveVersion();

@@ -111,6 +111,11 @@ void throwIOExceptionWSAGetLastError(JNIEnv *env, const char *msg) {
 	throwIOExceptionWinErrorMessage(env, msg, WSAGetLastError());
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_isNativeCodeLoaded
+  (JNIEnv *env, jobject peer) {
+    return JNI_TRUE;
+}
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getLibraryVersion
 (JNIEnv *, jobject) {
 	return blueCoveVersion();

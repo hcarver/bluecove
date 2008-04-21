@@ -61,6 +61,22 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#isNativeCodeLoaded()
+	 */
+	public native boolean isNativeCodeLoaded();
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#requireNativeLibraries()
+	 */
+	public LibraryInformation[] requireNativeLibraries() {
+		return LibraryInformation.library(BlueCoveImpl.NATIVE_LIB_TOSHIBA);
+	}
+
 	public native int getLibraryVersion();
 
 	public native int detectBluetoothStack();

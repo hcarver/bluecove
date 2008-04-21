@@ -73,6 +73,12 @@ ToshibaStack::ToshibaStack() {
 ToshibaStack::~ToshibaStack() {
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_isNativeCodeLoaded
+  (JNIEnv *env, jobject peer) {
+    return JNI_TRUE;
+}
+
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_getLibraryVersion
 (JNIEnv *, jobject) {
 	return blueCoveVersion();

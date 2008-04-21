@@ -113,6 +113,12 @@ jint DeviceClassToInt(DEV_CLASS devClass) {
 	return (((devClass[0] << 8) + devClass[1]) << 8) + devClass[2];
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isNativeCodeLoaded
+  (JNIEnv *env, jobject peer) {
+    return JNI_TRUE;
+}
+
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getLibraryVersion
 (JNIEnv *, jobject) {
 	return blueCoveVersion();

@@ -70,6 +70,22 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	// ---------------------- Library initialization
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#isNativeCodeLoaded()
+	 */
+	public native boolean isNativeCodeLoaded();
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#requireNativeLibraries()
+	 */
+	public LibraryInformation[] requireNativeLibraries() {
+		return LibraryInformation.library(BlueCoveImpl.NATIVE_LIB_OSX);
+	}
+
 	public String getStackID() {
 		return BlueCoveImpl.STACK_OSX;
 	}

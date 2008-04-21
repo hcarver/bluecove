@@ -120,6 +120,11 @@ char * getBsAPIStatusString(DWORD dwResult) {
     }
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_isNativeCodeLoaded
+  (JNIEnv *env, jobject peer) {
+    return JNI_TRUE;
+}
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_getLibraryVersion
 (JNIEnv *, jobject) {
     return blueCoveVersion();

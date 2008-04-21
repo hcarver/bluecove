@@ -49,7 +49,41 @@ public interface BluetoothStack {
 
 	public static final int FEATURE_SET_DEVICE_SERVICE_CLASSES = 1 << 2;
 
+	public static class LibraryInformation {
+
+		public String libraryName;
+
+		/**
+		 * Class ClassLoader of which to use for loading library as resource.
+		 * May be null.
+		 */
+		public Class stackClass;
+
+		public LibraryInformation(String libraryName) {
+			this.libraryName = libraryName;
+		}
+
+		public static LibraryInformation[] library(String libraryName) {
+			return new LibraryInformation[] { new LibraryInformation(libraryName) };
+		}
+	}
+
 	// ---------------------- Library initialization
+
+	/**
+	 * Used by library initialization to detect if shared library already
+	 * loaded. The caller with catch UnsatisfiedLinkError and will load
+	 * libraries returned by requireNativeLibraries().
+	 */
+	public boolean isNativeCodeLoaded();
+
+	/**
+	 * List the native libraries that need to be loaded.
+	 * 
+	 * @see java.lang.System#loadLibrary(java.lang.String)
+	 * @return array of library names used by implementation.
+	 */
+	public LibraryInformation[] requireNativeLibraries();
 
 	/**
 	 * Used to verify native library version. versionMajor1 * 1000000 +

@@ -54,6 +54,24 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 		return getStackID();
 	}
 
+	// ---------------------- Library initialization
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#isNativeCodeLoaded()
+	 */
+	public native boolean isNativeCodeLoaded();
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#requireNativeLibraries()
+	 */
+	public LibraryInformation[] requireNativeLibraries() {
+		return LibraryInformation.library(BlueCoveImpl.NATIVE_LIB_BLUESOLEIL);
+	}
+
 	public native int getLibraryVersion();
 
 	public native int detectBluetoothStack();

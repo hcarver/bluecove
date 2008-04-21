@@ -73,6 +73,22 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 		return BlueCoveImpl.STACK_WINSOCK;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#isNativeCodeLoaded()
+	 */
+	public native boolean isNativeCodeLoaded();
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#requireNativeLibraries()
+	 */
+	public LibraryInformation[] requireNativeLibraries() {
+		return LibraryInformation.library(BlueCoveImpl.NATIVE_LIB_MS);
+	}
+
 	public String toString() {
 		return getStackID();
 	}
@@ -818,5 +834,4 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	public boolean l2Encrypt(long address, long handle, boolean on) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
-
 }
