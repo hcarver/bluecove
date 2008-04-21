@@ -765,6 +765,7 @@ public class BlueCoveImpl {
 		} else {
 			newStack = new BluetoothStackMicrosoft();
 		}
+		loadNativeLibraries(newStack);
 		int libraryVersion = newStack.getLibraryVersion();
 		if (nativeLibraryVersionExpected != libraryVersion) {
 			DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected "
