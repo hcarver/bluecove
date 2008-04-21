@@ -59,11 +59,6 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	private Thread localDeviceServiceClassMaintainer = null;
 
-	// Used mainly in Unit Tests
-	static {
-		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_OSX);
-	}
-
 	BluetoothStackOSX() {
 
 	}

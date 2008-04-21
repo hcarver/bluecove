@@ -60,10 +60,6 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 
 	private Hashtable deviceDiscoveryDevices;
 
-	static {
-		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_MS);
-	}
-
 	BluetoothStackMicrosoft() {
 	}
 

@@ -33,11 +33,6 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	private boolean initialized = false;
 
-	// Used mainly in Unit Tests
-	static {
-		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_TOSHIBA);
-	}
-
 	BluetoothStackToshiba() {
 
 	}

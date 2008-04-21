@@ -39,10 +39,6 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	private DiscoveryListener currentDeviceDiscoveryListener;
 
-	static {
-		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_BLUESOLEIL);
-	}
-
 	BluetoothStackBlueSoleil() {
 	}
 

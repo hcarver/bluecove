@@ -73,10 +73,6 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	final static short URL_DESC_TYPE = 8;
 
-	static {
-		NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_WIDCOMM);
-	}
-
 	BluetoothStackWIDCOMM() {
 	}
 

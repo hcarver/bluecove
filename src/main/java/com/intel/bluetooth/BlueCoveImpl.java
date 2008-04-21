@@ -32,6 +32,8 @@ import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
 
+import com.intel.bluetooth.BluetoothStack.LibraryInformation;
+
 /**
  * 
  * Singleton class used as holder for BluetoothStack.
@@ -343,6 +345,55 @@ public class BlueCoveImpl {
 		return newStackInstance(loadStackClass(classPropertyName, classNameDefault));
 	}
 
+	static void loadNativeLibraries(BluetoothStack stack) throws BluetoothStateException {
+		// Check is libraries already loaded
+		try {
+			if (stack.isNativeCodeLoaded()) {
+				return;
+			}
+		} catch (Error e) {
+			// We caught UnsatisfiedLinkError
+		}
+		LibraryInformation[] libs = stack.requireNativeLibraries();
+		if ((libs == null) || (libs.length == 0)) {
+			// No native libs for this stack
+			return;
+		}
+		for (int i = 0; i < libs.length; i++) {
+			Class c = libs[i].stackClass;
+			if (c == null) {
+				c = stack.getClass();
+			}
+			if (!NativeLibLoader.isAvailable(libs[i].libraryName, c)) {
+				throw new BluetoothStateException("BlueCove library " + libs[i].libraryName + " not available");
+			}
+		}
+		return;
+	}
+
+	private static boolean isNativeLibrariesAvailable(BluetoothStack stack) {
+		try {
+			return stack.isNativeCodeLoaded();
+		} catch (Error e) {
+			// We caught UnsatisfiedLinkError
+		}
+		LibraryInformation[] libs = stack.requireNativeLibraries();
+		if ((libs == null) || (libs.length == 0)) {
+			// No native libs for this stack
+			return true;
+		}
+		for (int i = 0; i < libs.length; i++) {
+			Class c = libs[i].stackClass;
+			if (c == null) {
+				c = stack.getClass();
+			}
+			if (!NativeLibLoader.isAvailable(libs[i].libraryName, c)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private BluetoothStack detectStack() throws BluetoothStateException {
 
 		BluetoothStack detectorStack = null;
@@ -360,17 +411,13 @@ public class BlueCoveImpl {
 			switch (NativeLibLoader.getOS()) {
 			case NativeLibLoader.OS_LINUX:
 				Class stackClass = loadStackClass("bluecove.bluez.class", "com.intel.bluetooth.BluetoothStackBlueZ");
-				if (!NativeLibLoader.isAvailable(NATIVE_LIB_BLUEZ, stackClass)) {
-					throw new BluetoothStateException("BlueCove not available");
-				}
 				detectorStack = newStackInstance(stackClass);
+				loadNativeLibraries(detectorStack);
 				stackSelected = detectorStack.getStackID();
 				break;
 			case NativeLibLoader.OS_MAC_OS_X:
-				if (!NativeLibLoader.isAvailable(NATIVE_LIB_OSX)) {
-					throw new BluetoothStateException("BlueCove not available");
-				}
 				detectorStack = new BluetoothStackOSX();
+				loadNativeLibraries(detectorStack);
 				stackSelected = detectorStack.getStackID();
 				break;
 			case NativeLibLoader.OS_WINDOWS:
@@ -646,33 +693,42 @@ public class BlueCoveImpl {
 	private BluetoothStack createDetectorOnWindows(String stackFirst) throws BluetoothStateException {
 		if (stackFirst != null) {
 			DebugLog.debug("detector stack", stackFirst);
+			BluetoothStack detectorStack;
 			if (STACK_WIDCOMM.equalsIgnoreCase(stackFirst)) {
-				if ((NativeLibLoader.isAvailable(NATIVE_LIB_WIDCOMM))) {
-					return new BluetoothStackWIDCOMM();
+				detectorStack = new BluetoothStackWIDCOMM();
+				if (isNativeLibrariesAvailable(detectorStack)) {
+					return detectorStack;
 				}
 			} else if (STACK_BLUESOLEIL.equalsIgnoreCase(stackFirst)) {
-				if (NativeLibLoader.isAvailable(NATIVE_LIB_BLUESOLEIL)) {
-					return new BluetoothStackBlueSoleil();
+				detectorStack = new BluetoothStackBlueSoleil();
+				if (isNativeLibrariesAvailable(detectorStack)) {
+					return detectorStack;
 				}
 			} else if (STACK_WINSOCK.equalsIgnoreCase(stackFirst)) {
-				if (NativeLibLoader.isAvailable(NATIVE_LIB_MS)) {
-					return new BluetoothStackMicrosoft();
+				detectorStack = new BluetoothStackMicrosoft();
+				if (isNativeLibrariesAvailable(detectorStack)) {
+					return detectorStack;
 				}
 			} else if (STACK_TOSHIBA.equalsIgnoreCase(stackFirst)) {
-				if (NativeLibLoader.isAvailable(NATIVE_LIB_TOSHIBA)) {
-					return new BluetoothStackToshiba();
+				detectorStack = new BluetoothStackToshiba();
+				if (isNativeLibrariesAvailable(detectorStack)) {
+					return detectorStack;
 				}
 			} else {
 				throw new IllegalArgumentException("Invalid BlueCove detector stack [" + stackFirst + "]");
 			}
 		}
-		if (NativeLibLoader.isAvailable(NATIVE_LIB_MS)) {
-			return new BluetoothStackMicrosoft();
-		} else if (NativeLibLoader.isAvailable(NATIVE_LIB_WIDCOMM)) {
-			return new BluetoothStackWIDCOMM();
-		} else {
-			throw new BluetoothStateException("BlueCove not available");
+		BluetoothStack stack = new BluetoothStackMicrosoft();
+		if (isNativeLibrariesAvailable(stack)) {
+			return stack;
 		}
+
+		stack = new BluetoothStackWIDCOMM();
+		if (isNativeLibrariesAvailable(stack)) {
+			return stack;
+		}
+
+		throw new BluetoothStateException("BlueCove libraries not available");
 	}
 
 	public String setBluetoothStack(String stack) throws BluetoothStateException {

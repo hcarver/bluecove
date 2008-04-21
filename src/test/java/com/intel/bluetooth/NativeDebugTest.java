@@ -20,9 +20,11 @@
  */
 package com.intel.bluetooth;
 
-import com.intel.bluetooth.DebugLog.LoggerAppender;
+import javax.bluetooth.BluetoothStateException;
 
 import junit.framework.TestCase;
+
+import com.intel.bluetooth.DebugLog.LoggerAppender;
 
 /**
  * @author vlads
@@ -44,7 +46,7 @@ public class NativeDebugTest extends TestCase implements LoggerAppender {
 
 	String lastMessage;
 
-	public void testDebug() {
+	public void testDebug() throws BluetoothStateException {
 		BluetoothStack anyStack;
 		if (NativeLibLoader.getOS() == NativeLibLoader.OS_MAC_OS_X) {
 			anyStack = new BluetoothStackOSX();
@@ -53,7 +55,7 @@ public class NativeDebugTest extends TestCase implements LoggerAppender {
 		} else {
 			anyStack = new BluetoothStackMicrosoft();
 		}
-
+		BlueCoveImpl.loadNativeLibraries(anyStack);
 		anyStack.enableNativeDebug(DebugLog.class, true);
 		DebugLog.setDebugEnabled(true);
 
