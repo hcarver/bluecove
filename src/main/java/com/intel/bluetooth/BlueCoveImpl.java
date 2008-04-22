@@ -470,7 +470,9 @@ public class BlueCoveImpl {
 		BluetoothStack stack = setBluetoothStack(stackSelected, detectorStack);
 		stackSelected = stack.getStackID();
 		copySystemProperty(stack);
-		System.out.println("BlueCove version " + version + " on " + stackSelected);
+		if (!stackSelected.equals(STACK_EMULATOR)) {
+			System.out.println("BlueCove version " + version + " on " + stackSelected);
+		}
 		return stack;
 	}
 
