@@ -6,6 +6,8 @@
 
    Support for Mac OS X added in BlueCove version 2.0.2.
 
+   Support for Linux BlueZ added in !BlueCove version 2.0.3 as additional GPL licensed module.
+
    To determine which Bluetooth stack is installed on your Windows XP [http://bluecove.sourceforge.net/bluecove-examples/bluetooth-stack.html see this page]
 
    [http://code.google.com/p/bluecove/wiki/WindowsMobile Windows Mobile]
@@ -34,6 +36,8 @@
     * BTW Stack software version 1.4.2.10 SP5 or above on Windows32
     * For AMD64 systems you need to build dll yourself
     * Broadcom wbtapi.dll required. It is installed with WIDCOMM drivers.
+    * On Windows Mobile 2003 WIDCOMM BTW-CE stack versions 1.4.1.60 or newer
+    * On Windows Mobile 5.0 any working Broadcom's WIDCOMM BTW-CE
 
 === JSR-82 Limitations ===
 
@@ -45,12 +49,14 @@
     * L2CAP unable to send and receive empty L2CAP packet
 
     * `ServiceRecord` attributes of `DataElement` types U_INT_8, INT_8, INT_16 and UINT_16 are not properly discovered (fixed in BTW-6_1_0_1501-SDK, you should make your binaries)
+    * On Vista WIDCOMM stack detected as Microsoft with all the benefits of one.
 
 == Winsock (Microsoft) ==
 
 === Requirements ===
 
     * Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer and Windows Mobile 2003 or newer)
+    * Broadcom stack v6 on Windows Vista
     * A Bluetooth [http://support.microsoft.com/default.aspx?kbid=841803 device supported] by the Microsoft Bluetooth stack.
     * [http://bluecove.wiki.sourceforge.net/ms-usb-dongles List of Bluetooth USB dongles working with Microsoft Bluetooth stack]
     * [http://code.google.com/p/bluecove/wiki/WindowsMobile Windows Mobile Devices]
@@ -74,6 +80,7 @@
     SDK provided by IVT is very limited. We just implemented what we can on top of it.
 
     * BlueSoleil Bluetooth stack only supporting RFCOMM connections
+    * Only RFCOMM services can be created. No OBEX services
     * L2CAP not supported
     * Service attributes are not supported in Service search of when creating Server, `LocalDevice.getProperty("bluetooth.sd.attr.retrievable.max") == "0"`
     * `DiscoveryAgent.searchServices()` can only find 128bits-GUID service with specific UUID. You can't list all service on remote device.
