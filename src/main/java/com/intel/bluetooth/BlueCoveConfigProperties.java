@@ -75,11 +75,24 @@ public interface BlueCoveConfigProperties {
 	public static final String PROPERTY_LOCAL_DEVICE_ADDRESS = "bluecove.deviceAddress";
 
 	/**
+	 * JSR-82 air simulator server can be on remote computer
+	 */
+	public static final String PROPERTY_EMULATOR_HOST = "bluecove.emu.rmiRegistryHost";
+
+	/**
+	 * JSR-82 air simulator server listen on different port, default 8090.
+	 * <p>
+	 * Use 0 on the client to enable in process server
+	 */
+	public static final String PROPERTY_EMULATOR_PORT = "bluecove.emu.rmiRegistryPort";
+
+	/**
 	 * Some properties can't be changed at runtime once the Stack was
 	 * initialized.
 	 */
 	public static final String[] INITIALIZATION_PROPERTIES = new String[] { PROPERTY_STACK, PROPERTY_STACK_FIRST,
-			PROPERTY_NATIVE_RESOURCE, PROPERTY_NATIVE_RESOURCE, PROPERTY_LOCAL_DEVICE_ID, PROPERTY_LOCAL_DEVICE_ADDRESS };
+			PROPERTY_NATIVE_RESOURCE, PROPERTY_NATIVE_RESOURCE, PROPERTY_LOCAL_DEVICE_ID,
+			PROPERTY_LOCAL_DEVICE_ADDRESS, PROPERTY_EMULATOR_HOST, PROPERTY_EMULATOR_PORT };
 
 	/**
 	 * The amount of time in milliseconds for which the implementation will
@@ -116,15 +129,4 @@ public interface BlueCoveConfigProperties {
 	 */
 	public static final String PROPERTY_OBEX_TIMEOUT = "bluecove.obex.timeout";
 
-	/**
-	 * JSR-82 air simulator server can be on remote computer
-	 */
-	public static final String PROPERTY_EMULATOR_HOST = "bluecove.emu.rmiRegistryHost";
-
-	/**
-	 * JSR-82 air simulator server listen on different port, default 8090.
-	 * <p>
-	 * Use 0 on the client to enable in process server
-	 */
-	public static final String PROPERTY_EMULATOR_PORT = "bluecove.emu.rmiRegistryPort";
 }
