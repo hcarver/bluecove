@@ -12,6 +12,8 @@ BlueCove
 
     {{{./bluecove-gpl}BlueCove-GPL}} is additional GPL licensed module to support BlueCove runtime on Linux BlueZ.
 
+    {{{./bluecove-emu}BlueCove JSR-82 Emulator module}} is additional module for BlueCove to simulate Bluetooth stack.
+
     BlueCove can be used in Java Standard Edition (J2SE) 1.1 or newer.
 
     BlueCove has been tested on following JVM:

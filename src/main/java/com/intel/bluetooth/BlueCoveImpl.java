@@ -508,7 +508,7 @@ public class BlueCoveImpl {
 	 *        agent.startInquiry(...);
 	 *        .....
 	 *    }
-	 * }
+	 * };
 	 * t1.start(); 
 	 * 
 	 * // Start another thread that is using different stack 
@@ -531,7 +531,7 @@ public class BlueCoveImpl {
 	 *        Connector.open(&quot;btspp://12345678:1&quot;);
 	 *        .....
 	 *    }
-	 * }
+	 * };
 	 * t3.start();
 	 * 
 	 * </pre>
@@ -596,6 +596,46 @@ public class BlueCoveImpl {
 			throw new IllegalArgumentException("ThreadLocal configuration is not initialized");
 		}
 		threadStack.set(stackID);
+	}
+
+	/**
+	 * Shutdown BluetoothStack assigned for current Thread and clear
+	 * configuration properties for this thread
+	 */
+	public static synchronized void shutdownThreadBluetoothStack() {
+		// ThreadLocal configuration is not initialized
+		if (threadStack == null) {
+			return;
+		}
+		BluetoothStackHolder s = ((BluetoothStackHolder) threadStack.get());
+		if (s == null) {
+			return;
+		}
+		s.configProperties.clear();
+		if (s.bluetoothStack != null) {
+			s.bluetoothStack.destroy();
+			stacks.remove(s.bluetoothStack);
+			s.bluetoothStack = null;
+		}
+	}
+
+	/**
+	 * Shutdown all BluetoothStacks interfaces initialized by BlueCove
+	 */
+	public static synchronized void shutdown() {
+		for (Enumeration en = stacks.elements(); en.hasMoreElements();) {
+			BluetoothStackHolder s = (BluetoothStackHolder) en.nextElement();
+			s.configProperties.clear();
+			if (s.bluetoothStack != null) {
+				try {
+					s.bluetoothStack.destroy();
+				} finally {
+					s.bluetoothStack = null;
+				}
+			}
+		}
+		stacks.clear();
+		singleStack = null;
 	}
 
 	static synchronized void setThreadBluetoothStack(BluetoothStack bluetoothStack) {
