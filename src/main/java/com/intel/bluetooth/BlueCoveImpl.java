@@ -154,6 +154,8 @@ public class BlueCoveImpl {
 
 	private static ThreadLocalWrapper threadStack;
 
+	private static BluetoothStackHolder threadStackIDDefault;
+
 	private static Hashtable/* <BluetoothStack, BluetoothStackHolder> */stacks = new Hashtable();
 
 	private static Vector initializationProperties = new Vector();
@@ -572,7 +574,14 @@ public class BlueCoveImpl {
 		return threadStack.get();
 	}
 
-	static synchronized Object getCurrentThreadBluetoothStackID() {
+	/**
+	 * Returns the ID to be used in other threads accessing the same stack.
+	 * 
+	 * @return an object that represents Adapter/BluetoothStack, stackID to be
+	 *         used in call to <code>setThreadBluetoothStackID</code> or
+	 *         <code>null<code> if ThreadLocalBluetoothStack not used.
+	 */
+	public static synchronized Object getCurrentThreadBluetoothStackID() {
 		if (threadStack == null) {
 			return null;
 		}
@@ -601,6 +610,41 @@ public class BlueCoveImpl {
 	}
 
 	/**
+	 * Set default Thread BluetoothStack for Threads that do not call
+	 * <code>setThreadBluetoothStackID(stackID)</code>. Updating is possible
+	 * only if <code>stackID</code> was obtained using the
+	 * <code>getThreadBluetoothStackID()</code> method.
+	 * 
+	 * @param stackID
+	 *            stackID to use or <code>null</code> to remove default
+	 */
+	public static synchronized void setDefaultThreadBluetoothStackID(Object stackID) {
+		if ((stackID != null) && (!(stackID instanceof BluetoothStackHolder))) {
+			throw new IllegalArgumentException("stackID is not valid");
+		}
+		if (threadStack == null) {
+			throw new IllegalArgumentException("ThreadLocal configuration is not initialized");
+		}
+		threadStackIDDefault = (BluetoothStackHolder) stackID;
+	}
+
+	static synchronized void setThreadBluetoothStack(BluetoothStack bluetoothStack) {
+		if (threadStack == null) {
+			return;
+		}
+		BluetoothStackHolder s = ((BluetoothStackHolder) threadStack.get());
+		if ((s != null) && (s.bluetoothStack == bluetoothStack)) {
+			return;
+		}
+
+		BluetoothStackHolder sh = (BluetoothStackHolder) stacks.get(bluetoothStack);
+		if (sh == null) {
+			throw new RuntimeException("ThreadLocal not found for BluetoothStack");
+		}
+		threadStack.set(sh);
+	}
+
+	/**
 	 * Shutdown BluetoothStack assigned for current Thread and clear
 	 * configuration properties for this thread
 	 */
@@ -612,6 +656,9 @@ public class BlueCoveImpl {
 		BluetoothStackHolder s = ((BluetoothStackHolder) threadStack.get());
 		if (s == null) {
 			return;
+		}
+		if (threadStackIDDefault == s) {
+			threadStackIDDefault = null;
 		}
 		s.configProperties.clear();
 		if (s.bluetoothStack != null) {
@@ -638,22 +685,7 @@ public class BlueCoveImpl {
 		}
 		stacks.clear();
 		singleStack = null;
-	}
-
-	static synchronized void setThreadBluetoothStack(BluetoothStack bluetoothStack) {
-		if (threadStack == null) {
-			return;
-		}
-		BluetoothStackHolder s = ((BluetoothStackHolder) threadStack.get());
-		if ((s != null) && (s.bluetoothStack == bluetoothStack)) {
-			return;
-		}
-
-		BluetoothStackHolder sh = (BluetoothStackHolder) stacks.get(bluetoothStack);
-		if (sh == null) {
-			throw new RuntimeException("ThreadLocal not found for BluetoothStack");
-		}
-		threadStack.set(sh);
+		threadStackIDDefault = null;
 	}
 
 	/**
@@ -841,6 +873,9 @@ public class BlueCoveImpl {
 	private static BluetoothStackHolder currentStackHolder(boolean create) {
 		if (threadStack != null) {
 			BluetoothStackHolder s = ((BluetoothStackHolder) threadStack.get());
+			if ((s == null) && (threadStackIDDefault != null)) {
+				return threadStackIDDefault;
+			}
 			if ((s == null) && create) {
 				s = new BluetoothStackHolder();
 				threadStack.set(s);

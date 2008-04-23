@@ -29,6 +29,7 @@ import javax.obex.HeaderSet;
 import javax.obex.ResponseCodes;
 import javax.obex.ServerRequestHandler;
 
+import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothServerConnection;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.UtilsJavaSE;
@@ -47,18 +48,30 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 
 	private Object canCloseEvent = new Object();
 
+	private Object stackID;
+
+	private static int threadNumber;
+
+	private static synchronized int nextThreadNum() {
+		return threadNumber++;
+	}
+
 	OBEXServerSessionImpl(StreamConnection connection, ServerRequestHandler handler, Authenticator authenticator,
 			OBEXConnectionParams obexConnectionParams) throws IOException {
 		super(connection, obexConnectionParams);
 		this.handler = handler;
 		this.authenticator = authenticator;
-		Thread t = new Thread(this);
+		stackID = BlueCoveImpl.getCurrentThreadBluetoothStackID();
+		Thread t = new Thread(this, "OBEXServerSessionThread-" + nextThreadNum());
 		UtilsJavaSE.threadSetDaemon(t);
 		t.start();
 	}
 
 	public void run() {
 		try {
+			if (stackID != null) {
+				BlueCoveImpl.setThreadBluetoothStackID(stackID);
+			}
 			while (!isClosed() && !closeRequested) {
 				if (!handleRequest()) {
 					return;
