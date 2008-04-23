@@ -38,6 +38,12 @@ public interface BlueCoveConfigProperties {
 	public static final String PROPERTY_DEBUG = "bluecove.debug";
 
 	/**
+	 * BlueCove log is redirected to log4j when log4j classes are available in
+	 * classpath. You can disable this feature.
+	 */
+	public static final String PROPERTY_DEBUG_LOG4J = "bluecove.debug.log4j";
+
+	/**
 	 * If automatic Bluetooth Stack detection is not enough this can be used to
 	 * force desired Stack Initialization. Values "widcomm", "bluesoleil" or
 	 * "winsock". Use "emulator" value to start jsr-82 emulator. By default

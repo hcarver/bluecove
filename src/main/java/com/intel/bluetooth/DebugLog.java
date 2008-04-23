@@ -91,22 +91,24 @@ public abstract class DebugLog {
 			return;
 		}
 		initialized = true;
-		String d = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_DEBUG);
-		debugEnabled = ((d != null) && (d.equalsIgnoreCase(BlueCoveImpl.TRUE) || d.equalsIgnoreCase("1")));
+		debugEnabled = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_DEBUG, false);
 		if (debugEnabled && debugCompiledOut) {
 			debugEnabled = false;
 			System.err.println("BlueCove debug functions have been Compiled Out");
 		}
 		debugInternalEnabled = debugEnabled;
-		try {
-			LoggerAppenderExt log4jAppender = (LoggerAppenderExt) Class.forName(
-					"com.intel.bluetooth.DebugLog4jAppender").newInstance();
-			System.out.println("BlueCove log redirected to log4j");
-			addAppender(log4jAppender);
-			if (log4jAppender.isLogEnabled(DEBUG)) {
-				debugEnabled = true || debugEnabled;
+		boolean useLog4j = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_DEBUG_LOG4J, true);
+		if (useLog4j) {
+			try {
+				LoggerAppenderExt log4jAppender = (LoggerAppenderExt) Class.forName(
+						"com.intel.bluetooth.DebugLog4jAppender").newInstance();
+				System.out.println("BlueCove log redirected to log4j");
+				addAppender(log4jAppender);
+				if (log4jAppender.isLogEnabled(DEBUG)) {
+					debugEnabled = true || debugEnabled;
+				}
+			} catch (Throwable e) {
 			}
-		} catch (Throwable e) {
 		}
 	}
 

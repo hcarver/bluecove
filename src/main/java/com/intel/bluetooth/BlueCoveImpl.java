@@ -156,6 +156,8 @@ public class BlueCoveImpl {
 
 	private static BluetoothStackHolder threadStackIDDefault;
 
+	private static Hashtable resourceConfigProperties = new Hashtable();
+
 	private static Hashtable/* <BluetoothStack, BluetoothStackHolder> */stacks = new Hashtable();
 
 	private static Vector initializationProperties = new Vector();
@@ -734,7 +736,21 @@ public class BlueCoveImpl {
 			}
 		}
 		if (value == null) {
-			value = Utils.getResourceProperty(BlueCoveImpl.class, key);
+			synchronized (resourceConfigProperties) {
+				Object casheValue = resourceConfigProperties.get(key);
+				if (casheValue != null) {
+					if (casheValue instanceof String) {
+						value = (String) casheValue;
+					}
+				} else {
+					value = Utils.getResourceProperty(BlueCoveImpl.class, key);
+					if (value == null) {
+						resourceConfigProperties.put(key, new Object());
+					} else {
+						resourceConfigProperties.put(key, value);
+					}
+				}
+			}
 		}
 		return value;
 	}
@@ -742,7 +758,7 @@ public class BlueCoveImpl {
 	static boolean getConfigProperty(String key, boolean defaultValue) {
 		String value = getConfigProperty(key);
 		if (value != null) {
-			return TRUE.equals(value);
+			return TRUE.equals(value) || "1".equals(value);
 		} else {
 			return defaultValue;
 		}
