@@ -38,6 +38,12 @@ public interface BlueCoveConfigProperties {
 	public static final String PROPERTY_DEBUG = "bluecove.debug";
 
 	/**
+	 * BlueCove log when enabled is printed to System.out. You can disable this
+	 * feature.
+	 */
+	public static final String PROPERTY_DEBUG_STDOUT = "bluecove.debug.stdout";
+
+	/**
 	 * BlueCove log is redirected to log4j when log4j classes are available in
 	 * classpath. You can disable this feature.
 	 */

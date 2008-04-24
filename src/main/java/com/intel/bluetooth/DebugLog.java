@@ -96,7 +96,8 @@ public abstract class DebugLog {
 			debugEnabled = false;
 			System.err.println("BlueCove debug functions have been Compiled Out");
 		}
-		debugInternalEnabled = debugEnabled;
+		boolean useStdOut = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_DEBUG_STDOUT, true);
+		debugInternalEnabled = useStdOut && debugEnabled;
 		boolean useLog4j = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_DEBUG_LOG4J, true);
 		if (useLog4j) {
 			try {
