@@ -61,6 +61,10 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	protected OBEXConnectionParams obexConnectionParams;
 
+	protected int packetsCountWrite;
+
+	protected int packetsCountRead;
+
 	public OBEXSessionBase(StreamConnection conn, OBEXConnectionParams obexConnectionParams) throws IOException {
 		if (obexConnectionParams == null) {
 			throw new NullPointerException("obexConnectionParams is null");
@@ -68,7 +72,9 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		this.conn = conn;
 		this.obexConnectionParams = obexConnectionParams;
 		this.mtu = obexConnectionParams.mtu;
-		connectionID = -1;
+		this.connectionID = -1;
+		this.packetsCountWrite = 0;
+		this.packetsCountRead = 0;
 		boolean initOK = false;
 		try {
 			this.os = conn.openOutputStream();
@@ -146,6 +152,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		DebugLog.debug0x("obex sent", commId);
 		DebugLog.debug("obex sent", OBEXUtils.toStringObexResponseCodes(commId));
 		DebugLog.debug("obex sent len", len);
+		this.packetsCountWrite++;
 	}
 
 	protected byte[] readOperation() throws IOException {
@@ -153,6 +160,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		OBEXUtils.readFully(is, obexConnectionParams, header);
 		DebugLog.debug0x("obex received", header[0] & 0xFF);
 		DebugLog.debug("obex received", OBEXUtils.toStringObexResponseCodes(header[0]));
+		this.packetsCountRead++;
 		int lenght = OBEXUtils.bytesToShort(header[1], header[2]);
 		if (lenght == 3) {
 			return header;
@@ -309,5 +317,23 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 			return null;
 		}
 		return ((BluetoothConnectionAccess) conn).getBluetoothStack();
+	}
+
+	/**
+	 * Function used in unit tests.
+	 * 
+	 * @return the packetsCountWrite
+	 */
+	int getPacketsCountWrite() {
+		return packetsCountWrite;
+	}
+
+	/**
+	 * Function used in unit tests.
+	 * 
+	 * @return the packetsCountRead
+	 */
+	int getPacketsCountRead() {
+		return packetsCountRead;
 	}
 }
