@@ -325,7 +325,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	 * @return the packetsCountWrite
 	 */
 	int getPacketsCountWrite() {
-		return packetsCountWrite;
+		return this.packetsCountWrite;
 	}
 
 	/**
@@ -334,6 +334,15 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	 * @return the packetsCountRead
 	 */
 	int getPacketsCountRead() {
-		return packetsCountRead;
+		return this.packetsCountRead;
+	}
+
+	/**
+	 * Function used in unit tests.
+	 * 
+	 * @return the mtu
+	 */
+	int getPacketSize() {
+		return this.mtu;
 	}
 }
