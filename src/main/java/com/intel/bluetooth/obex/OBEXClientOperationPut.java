@@ -31,7 +31,9 @@ import com.intel.bluetooth.DebugLog;
 class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperationDelivery {
 
 	protected OBEXOperationOutputStream os;
-	
+
+	protected boolean finalPacketSent = false;
+
 	OBEXClientOperationPut(OBEXClientSessionImpl session, HeaderSet sendHeaders) throws IOException {
 		super(session, null);
 		this.sendHeaders = sendHeaders;
@@ -40,20 +42,20 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 	public InputStream openInputStream() throws IOException {
 		validateOperationIsOpen();
 		if (inputStreamOpened) {
-            throw new IOException("input stream already open");
+			throw new IOException("input stream already open");
 		}
 		this.inputStreamOpened = true;
 		this.operationInProgress = true;
 		return new UnsupportedInputStream();
 	}
-	
+
 	void started() throws IOException {
 		if ((!outputStreamOpened) && (!operationStarted)) {
 			this.replyHeaders = session.deleteImp(sendHeaders);
 			operationStarted = true;
 		}
 	}
-	
+
 	private void startPutOperation() throws IOException {
 		operationStarted = true;
 		session.writeOperation(OBEXOperationCodes.PUT, OBEXHeaderSetImpl.toByteArray(sendHeaders));
@@ -63,11 +65,11 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		DebugLog.debug0x("PUT got reply", replyHeaders.getResponseCode());
 		this.operationInProgress = true;
 	}
-	
+
 	public OutputStream openOutputStream() throws IOException {
 		validateOperationIsOpen();
 		if (outputStreamOpened) {
-            throw new IOException("output already open");
+			throw new IOException("output already open");
 		}
 		outputStreamOpened = true;
 		startPutOperation();
@@ -81,24 +83,32 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 			os.deliverBuffer(false);
 		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean, byte[])
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean,
+	 *      byte[])
 	 */
 	public void deliverPacket(boolean finalPacket, byte buffer[]) throws IOException {
+		if (finalPacketSent) {
+			return;
+		}
 		int commId = OBEXOperationCodes.PUT;
-		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY; 
+		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
 		if (finalPacket) {
 			commId |= OBEXOperationCodes.FINAL_BIT;
 			dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY_END;
+			finalPacketSent = true;
 		}
 		HeaderSet dataHeaders = session.createHeaderSet();
 		dataHeaders.setHeader(dataHeaderID, buffer);
-		
+
 		if ((sendHeadersLength + buffer.length + OBEXOperationCodes.OBEX_MTU_HEADER_RESERVE) > session.mtu) {
 			session.writeOperation(commId, OBEXHeaderSetImpl.toByteArray(dataHeaders));
 		} else {
-			session.writeOperation(commId, OBEXHeaderSetImpl.toByteArray(sendHeaders), OBEXHeaderSetImpl.toByteArray(dataHeaders));
+			session.writeOperation(commId, OBEXHeaderSetImpl.toByteArray(sendHeaders), OBEXHeaderSetImpl
+					.toByteArray(dataHeaders));
 			sendHeaders = null;
 			sendHeadersLength = 0;
 		}
@@ -106,20 +116,23 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		replyHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 		int responseCode = replyHeaders.getResponseCode();
 		DebugLog.debug0x("PUT server reply", responseCode);
-		switch(responseCode) {
-			case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
-				this.operationInProgress = false;
-				break;
-			case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
-				break;
-			default: 
-				if (!finalPacket) {
-					throw new IOException ("Can't continue connection, 0x" + Integer.toHexString(responseCode) + " " + OBEXUtils.toStringObexResponseCodes(responseCode));
-				}
+		switch (responseCode) {
+		case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
+			this.operationInProgress = false;
+			break;
+		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
+			break;
+		default:
+			if (!finalPacket) {
+				throw new IOException("Can't continue connection, 0x" + Integer.toHexString(responseCode) + " "
+						+ OBEXUtils.toStringObexResponseCodes(responseCode));
+			}
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.obex.Operation#abort()
 	 */
 	public void abort() throws IOException {
@@ -134,7 +147,7 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		}
 		writeAbort();
 	}
-	
+
 	public void closeStream() throws IOException {
 		this.operationInProgress = false;
 		if (os != null) {

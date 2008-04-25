@@ -136,6 +136,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		if (len > mtu) {
 			throw new IOException("Can't sent more data than in MTU, len=" + len + ", mtu=" + mtu);
 		}
+		this.packetsCountWrite++;
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
 		OBEXHeaderSetImpl.writeObexLen(buf, commId, len);
 		if (this.connectionID != -1) {
@@ -152,7 +153,6 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		DebugLog.debug0x("obex sent", commId);
 		DebugLog.debug("obex sent", OBEXUtils.toStringObexResponseCodes(commId));
 		DebugLog.debug("obex sent len", len);
-		this.packetsCountWrite++;
 	}
 
 	protected byte[] readOperation() throws IOException {

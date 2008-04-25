@@ -31,29 +31,32 @@ import com.intel.bluetooth.DebugLog;
 
 /**
  * @author vlads
- *
+ * 
  */
 class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperationReceive {
 
 	private OBEXOperationInputStream inputStream;
-	
+
 	private boolean inputStreamOpened = false;
-	
-	protected OBEXServerOperationPut(OBEXServerSessionImpl session, HeaderSet receivedHeaders, boolean finalPacket) throws IOException {
+
+	protected OBEXServerOperationPut(OBEXServerSessionImpl session, HeaderSet receivedHeaders, boolean finalPacket)
+			throws IOException {
 		super(session, receivedHeaders);
 		this.inputStream = new OBEXOperationInputStream(this);
 		processData(receivedHeaders, inputStream);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.microedition.io.InputConnection#openInputStream()
 	 */
 	public InputStream openInputStream() throws IOException {
 		if (isClosed) {
-            throw new IOException("operation closed");
+			throw new IOException("operation closed");
 		}
 		if (inputStreamOpened) {
-            throw new IOException("input stream already open");
+			throw new IOException("input stream already open");
 		}
 		DebugLog.debug("openInputStream");
 		inputStreamOpened = true;
@@ -61,32 +64,44 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 		return inputStream;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.microedition.io.OutputConnection#openOutputStream()
 	 */
 	public OutputStream openOutputStream() throws IOException {
 		if (isClosed) {
-            throw new IOException("operation closed");
+			throw new IOException("operation closed");
 		}
 		return new UnsupportedOutputStream();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {
 		DebugLog.debug("server close put");
-		//(new Throwable()).printStackTrace();
-		inputStream.close();
-		super.close();
+		try {
+			boolean TODO = true;
+			if (!TODO) {
+				while (!isClosed() && (!finalPacketReceived) && (!errorReceived)) {
+					receiveData(this.inputStream);
+				}
+			}
+		} finally {
+			inputStream.close();
+			super.close();
+		}
 	}
-	
+
 	public void receiveData(OBEXOperationInputStream is) throws IOException {
 		byte[] b = session.readOperation();
 		int opcode = b[0] & 0xFF;
 		boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
 		if (finalPacket) {
-			DebugLog.debug("OBEXServerSession operation final packet");	
+			DebugLog.debug("OBEXServerSession operation final packet");
 			finalPacketReceived = true;
 		}
 		switch (opcode) {
@@ -99,20 +114,21 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 			processAbort();
 			break;
 		default:
+			errorReceived = true;
 			session.writeOperation(ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED, null);
 		}
 	}
-	
+
 	private void processAbort() throws IOException {
 		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);
 		close();
 		throw new IOException("Operation aborted by client");
 	}
-	
+
 	private boolean processData(HeaderSet requestHeaders, OBEXOperationInputStream is) throws IOException {
-		byte[] data = (byte[])requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);
+		byte[] data = (byte[]) requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);
 		if (data == null) {
-			data = (byte[])requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
+			data = (byte[]) requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
 		}
 		if ((data != null) && (data.length != 0) && (is != null)) {
 			DebugLog.debug("processData len", data.length);
@@ -122,19 +138,23 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 			return false;
 		}
 	}
-	
-	protected void processRequest(HeaderSet requestHeaders, boolean finalPacket, OBEXOperationInputStream is) throws IOException {
+
+	protected void processRequest(HeaderSet requestHeaders, boolean finalPacket, OBEXOperationInputStream is)
+			throws IOException {
 		processData(requestHeaders, is);
 		if (finalPacket) {
 			DebugLog.debug("put got final packet");
 			close();
 		} else {
 			DebugLog.debug("reply continue");
-			session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+			session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl
+					.toByteArray(sendHeaders));
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.obex.OBEXServerOperation#writeResponse(int)
 	 */
 	void writeResponse(int responseCode) throws IOException {
@@ -144,7 +164,7 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 				DebugLog.debug("receive final packet");
 				receiveData(null);
 				if (finalPacketReceived) {
-					session.writeOperation(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));			
+					session.writeOperation(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));
 				}
 			}
 		} else {

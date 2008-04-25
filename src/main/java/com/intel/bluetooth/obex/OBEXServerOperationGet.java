@@ -68,6 +68,11 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		return os;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.microedition.io.Connection#close()
+	 */
 	public void close() throws IOException {
 		if (os != null) {
 			os.close();

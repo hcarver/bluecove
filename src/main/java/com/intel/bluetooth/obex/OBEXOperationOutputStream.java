@@ -76,7 +76,9 @@ class OBEXOperationOutputStream extends OutputStream {
 	}
 
 	public void flush() throws IOException {
-		deliverBuffer(false);
+		if (bufferLength > 0) {
+			deliverBuffer(false);
+		}
 	}
 
 	void deliverBuffer(boolean finalPacket) throws IOException {
