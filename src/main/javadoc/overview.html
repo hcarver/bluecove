@@ -1,8 +1,22 @@
 <body>
 BlueCove JSR-82 for J2SE implementation.
 <p>
+<h2>Introduction</h2>
+<p>
+    BlueCove provides an implementation of the JSR 82. Applications should use API defined in JSR-82.
+    See <a href="javax/bluetooth/package-summary.html">javax.bluetooth</A> package for JSR-82 Bluetooth API and <a href="javax/obex/package-summary.html">javax.obex</A> package for JSR-82 OBEX API.
+    Javadocs for this packages are licensed under the Apache License, Version 2.0 and copied from <a href="http://www.jcp.org/en/jsr/detail?id=82">The Java Community Process - JSR 82 website</a>.
+<p>
+    BlueCove expose some initialization API to enables the use of Multiple Adapters and Bluetooth Stacks in parallel in the same JVM.
+    <ul>
+        <li><a href="com/intel/bluetooth/BlueCoveImpl.html#useThreadLocalBluetoothStack()">BlueCove ThreadLocal Bluetooth Stacks</a></li>
+        <li><a href="com/intel/bluetooth/BlueCoveConfigProperties.html">BlueCove runtime configuration properties</a></li>
+        <li><a href="com/intel/bluetooth/BlueCoveLocalDeviceProperties.html">BlueCove specific LocalDevice properties</a></li>
+    </ul>
 
-<h2>Related Documentation</h2>
+<p>
+
+<h2>JSR-82 Related Documentation</h2>
   <ul>
     <li><a href="http://developers.sun.com/techtopics/mobility/midp/articles/bluetooth2/index.html">The Java APIs for Bluetooth Wireless Technology</a></li>
     <li><a href="http://forum.nokia.com/info/sw.nokia.com/id/0b51461e-5f77-40f4-b755-7915ad4d0e31/MIDP_Bluetooth_RFCOMM_Example_v1_0_en.zip.html">Nokia Bluetooth RFCOMM and L2CAP Examples</a></li>
