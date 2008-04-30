@@ -161,6 +161,8 @@ public abstract class NativeLibLoader {
 				// regular Intel
 			} else if ((sysArch.indexOf("amd64") != -1) || (sysArch.indexOf("x86_64") != -1)) {
 				libName += "_x64";
+			} else if ((sysArch.indexOf("x86") != -1)) {
+				// regular Intel under IBM J9
 			} else {
 				// Any other system
 				libName += "_" + sysArch;
