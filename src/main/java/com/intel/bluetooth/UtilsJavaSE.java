@@ -20,7 +20,6 @@
  */
 package com.intel.bluetooth;
 
-import java.lang.reflect.Method;
 import java.security.PrivilegedActionException;
 import java.util.Properties;
 import java.util.Vector;
@@ -193,10 +192,9 @@ public class UtilsJavaSE {
 			return e.getCause();
 		} catch (Throwable j9pp10) {
 		}
-		// Use reflection to call getException ()
+		// Use older function
 		try {
-			Method m = e.getClass().getDeclaredMethod("getException", null);
-			return (Throwable) m.invoke(e, null);
+			return e.getException();
 		} catch (Throwable ignore) {
 		}
 		return null;
