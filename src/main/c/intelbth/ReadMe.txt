@@ -11,12 +11,14 @@ intelbth.vcproj
     Release Configuration on Win32 will incorporated Winsock and BlueSoleil Configurations and should be used for distribution!
 
     N.B. We can't use the same DLL on windows for all implemenations. Since WIDCOMM need to be compile /MD using VC6 and winsock and BlueSoleil /MT using VC2005
-        intelbth.dll build by VC2005 Configuration "Win32 winsock"
+        intelbth.dll build by VC2005 Configuration "Win32 Release"
         bluecove.dll build by VC6 Configuration "Win32 Release"
 
-    Release on Windows Mobile will incorporated Winsock and WIDCOMM Configurations
-
     "Pocket PC 2003 (ARMV4)" is Platform we use to build DLL for WindowsCE
+    Build for Windows Mobile will use Winsock and WIDCOMM Configurations
+        intelbth_ce.dll build by VC2005 Configuration "Pocket PC 2003 (ARMV4) Winsock"
+        bluecove_ce.dll build by VC2005 Configuration "Pocket PC 2003 (ARMV4) WIDCOMM"
+
 
     There are three working Configurations:  Winsock, WIDCOMM and Release  TODO
 
