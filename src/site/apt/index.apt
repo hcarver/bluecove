@@ -30,9 +30,11 @@ BlueCove
 
     * WebSphere Everyplace Micro Environment 5.7.2, CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows XP/X86
 
-    * WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows XP/X86
+    * WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows XP and Linux/X86
 
     * WebSphere Everyplace Micro Environment 5.7.2, CLDC 1.1, MIDP 2.0 on Windows XP/X86
+
+    * WebSphere Everyplace Micro Environment 6.1.1, CLDC 1.1, MIDP 2.0 on Linux/X86
 
     * {{{http://www2s.biglobe.ne.jp/~dat/java/project/jvm/index_en.html}Mysaifu JVM}} - An open-source (GPL v.2 license) Java VM on Windows Mobile 2003 Second Edition.
 
