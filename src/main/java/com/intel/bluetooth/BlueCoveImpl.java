@@ -21,7 +21,6 @@
  */
 package com.intel.bluetooth;
 
-import java.io.IOException;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -942,10 +941,11 @@ public class BlueCoveImpl {
 				}
 			}, (AccessControlContext) accessControlContext);
 		} catch (PrivilegedActionException e) {
-			if (e.getCause() instanceof IOException) {
-				throw (BluetoothStateException) e.getCause();
+			Throwable cause = UtilsJavaSE.getCause(e);
+			if (cause instanceof BluetoothStateException) {
+				throw (BluetoothStateException) cause;
 			}
-			throw new BluetoothStateException(e.toString());
+			throw (BluetoothStateException) UtilsJavaSE.initCause(new BluetoothStateException(e.getMessage()), cause);
 		}
 	}
 

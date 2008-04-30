@@ -20,6 +20,8 @@
  */
 package com.intel.bluetooth;
 
+import java.lang.reflect.Method;
+import java.security.PrivilegedActionException;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -172,9 +174,31 @@ public class UtilsJavaSE {
 	}
 
 	public static Throwable initCause(Throwable throwable, Throwable cause) {
-		if (!java14) {
+		if ((!java14) || (cause == null)) {
 			return throwable;
 		}
-		return throwable.initCause(cause);
+		try {
+			return throwable.initCause(cause);
+		} catch (Throwable j9pp10) {
+			return throwable;
+		}
+
+	}
+
+	/**
+	 * Support for JBM J9 PPRO 10
+	 */
+	static Throwable getCause(PrivilegedActionException e) {
+		try {
+			return e.getCause();
+		} catch (Throwable j9pp10) {
+		}
+		// Use reflection to call getException ()
+		try {
+			Method m = e.getClass().getDeclaredMethod("getException", null);
+			return (Throwable) m.invoke(e, null);
+		} catch (Throwable ignore) {
+		}
+		return null;
 	}
 }
