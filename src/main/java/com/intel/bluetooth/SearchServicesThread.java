@@ -194,7 +194,7 @@ class SearchServicesThread extends Thread {
 	}
 
 	void addServicesRecords(ServiceRecord servRecord) {
-		this.servicesRecords.add(servRecord);
+		this.servicesRecords.addElement(servRecord);
 	}
 
 	Vector getServicesRecords() {
