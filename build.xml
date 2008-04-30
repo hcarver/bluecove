@@ -62,13 +62,13 @@
             </manifest>
             <fileset dir="${build}">
                 <include name="**/*.class"/>
-                <exclude>**/*.log</exclude>
-                <exclude>**/.*</exclude>
-                <exclude>**/Thumbs.db</exclude>
-                <exclude>com/ibm/oti/connection/CreateConnection.class</exclude>
-                <exclude>com/ibm/oti/vm/**</exclude>
-                <exclude>com/sun/cdc/io/ConnectionBaseInterface.class</exclude>
-                <exclude>com/intel/bluetooth/BluetoothStackBlueZ.class</exclude>
+                <exclude name="**/*.log"/>
+                <exclude name="**/.*"/>
+                <exclude name="**/Thumbs.db"/>
+                <exclude name="com/ibm/oti/connection/CreateConnection.class"/>
+                <exclude name="com/ibm/oti/vm/**"/>
+                <exclude name="com/sun/cdc/io/ConnectionBaseInterface.class"/>
+                <exclude name="com/intel/bluetooth/BluetoothStackBlueZ.class"/>
             </fileset>
             <fileset dir="${resources}">
                 <include name="*.dll"/>
