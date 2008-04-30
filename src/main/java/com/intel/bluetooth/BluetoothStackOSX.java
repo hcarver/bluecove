@@ -127,7 +127,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
 	 */
 	public boolean isCurrentThreadInterruptedCallback() {
-		return Thread.interrupted();
+		return UtilsJavaSE.isCurrentThreadInterrupted();
 	}
 
 	// ---------------------- LocalDevice

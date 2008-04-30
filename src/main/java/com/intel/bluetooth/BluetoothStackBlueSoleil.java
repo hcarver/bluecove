@@ -207,7 +207,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
 	 */
 	public boolean isCurrentThreadInterruptedCallback() {
-		return Thread.interrupted();
+		return UtilsJavaSE.isCurrentThreadInterrupted();
 	}
 
 	public boolean authenticateRemoteDevice(long address) throws IOException {

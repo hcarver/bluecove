@@ -187,6 +187,16 @@ public class UtilsJavaSE {
 	/**
 	 * Support for JBM J9 PPRO 10
 	 */
+	static boolean isCurrentThreadInterrupted() {
+		if (ibmJ9midp) {
+			return false;
+		}
+		return Thread.interrupted();
+	}
+
+	/**
+	 * Support for JBM J9 PPRO 10
+	 */
 	static Throwable getCause(PrivilegedActionException e) {
 		try {
 			return e.getCause();

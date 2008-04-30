@@ -259,7 +259,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
 	 */
 	public boolean isCurrentThreadInterruptedCallback() {
-		return Thread.interrupted();
+		return UtilsJavaSE.isCurrentThreadInterrupted();
 	}
 
 	// ---------------------- Remote Device authentication
