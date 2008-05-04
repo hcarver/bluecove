@@ -51,6 +51,8 @@ class WeakVectorFactory {
 
 		public Enumeration elements();
 
+		public void removeAllElements();
+
 	}
 
 	public static WeakVector createWeakVector() {
@@ -91,6 +93,10 @@ class WeakVectorFactory {
 
 		public int size() {
 			return vectorImpl.size();
+		}
+
+		public void removeAllElements() {
+			vectorImpl.removeAllElements();
 		}
 
 	}
@@ -145,6 +151,10 @@ class WeakVectorFactory {
 
 		public int size() {
 			return mapImpl.size();
+		}
+
+		public void removeAllElements() {
+			mapImpl.clear();
 		}
 
 	}

@@ -663,6 +663,7 @@ public class BlueCoveImpl {
 		}
 		s.configProperties.clear();
 		if (s.bluetoothStack != null) {
+			RemoteDeviceHelper.shutdownConnections(s.bluetoothStack);
 			s.bluetoothStack.destroy();
 			stacks.remove(s.bluetoothStack);
 			s.bluetoothStack = null;
@@ -677,6 +678,7 @@ public class BlueCoveImpl {
 			BluetoothStackHolder s = (BluetoothStackHolder) en.nextElement();
 			s.configProperties.clear();
 			if (s.bluetoothStack != null) {
+				RemoteDeviceHelper.shutdownConnections(s.bluetoothStack);
 				try {
 					s.bluetoothStack.destroy();
 				} finally {

@@ -95,6 +95,34 @@ public abstract class RemoteDeviceHelper {
 			}
 		}
 
+		void shutdownConnections() {
+			if (hasConnections()) {
+				return;
+			}
+			Vector c2shutdown = new Vector();
+			synchronized (connections) {
+				for (Enumeration en = connections.elements(); en.hasMoreElements();) {
+					Object c = en.nextElement();
+					if (c instanceof Connection) {
+						c2shutdown.addElement(c);
+					} else {
+						DebugLog.debug("invalid connection type", c.getClass().getName());
+					}
+				}
+			}
+			for (Enumeration en = c2shutdown.elements(); en.hasMoreElements();) {
+				Connection c = (Connection) en.nextElement();
+				try {
+					c.close();
+				} catch (IOException e) {
+					DebugLog.debug("connection shutdown", e);
+				}
+			}
+			synchronized (connections) {
+				connections.removeAllElements();
+			}
+		}
+
 		private void setStackAttributes(Object key, Object value) {
 			if (stackAttributes == null) {
 				stackAttributes = new Hashtable();
@@ -473,6 +501,15 @@ public abstract class RemoteDeviceHelper {
 			}
 		}
 		return c;
+	}
+
+	static void shutdownConnections(BluetoothStack bluetoothStack) {
+		Hashtable devicesCashed = devicesCashed(getBluetoothStack());
+		synchronized (devicesCashed) {
+			for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
+				((RemoteDeviceWithExtendedInfo) en.nextElement()).shutdownConnections();
+			}
+		}
 	}
 
 	public static String formatBluetoothAddress(String address) {
