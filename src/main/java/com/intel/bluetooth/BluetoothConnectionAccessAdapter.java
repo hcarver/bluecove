@@ -63,6 +63,15 @@ public abstract class BluetoothConnectionAccessAdapter implements BluetoothConne
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#shutdown()
+	 */
+	public void shutdown() throws IOException {
+		getImpl().shutdown();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#markAuthenticated()
 	 */
 	public void markAuthenticated() {

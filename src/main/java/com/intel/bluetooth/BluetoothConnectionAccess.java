@@ -47,6 +47,8 @@ public interface BluetoothConnectionAccess {
 
 	public int getSecurityOpt();
 
+	public void shutdown() throws IOException;
+
 	/**
 	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection ,
 	 *      boolean)

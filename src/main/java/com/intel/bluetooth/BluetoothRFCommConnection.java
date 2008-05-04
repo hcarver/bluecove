@@ -93,6 +93,15 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 			return;
 		}
 
+		shutdown();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#shutdown()
+	 */
+	public void shutdown() throws IOException {
 		if (handle != 0) {
 			DebugLog.debug("closing RFCOMM Connection", handle);
 			// close() can be called safely in another thread

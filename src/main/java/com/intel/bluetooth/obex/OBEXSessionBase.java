@@ -258,6 +258,17 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#shutdown()
+	 */
+	public void shutdown() throws IOException {
+		if (this.conn instanceof BluetoothConnectionAccess) {
+			((BluetoothConnectionAccess) conn).shutdown();
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#markAuthenticated()
 	 */
 	public void markAuthenticated() {

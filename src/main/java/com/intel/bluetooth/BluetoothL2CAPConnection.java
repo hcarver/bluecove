@@ -139,16 +139,26 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		}
 
 		isClosed = true;
-		DebugLog.debug("closing L2CAP Connection", handle);
+		shutdown();
+	}
 
-		// close() can be called safely in another thread
-		long synchronizedHandle;
-		synchronized (this) {
-			synchronizedHandle = handle;
-			handle = 0;
-		}
-		if (synchronizedHandle != 0) {
-			closeConnectionHandle(synchronizedHandle);
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothConnectionAccess#shutdown()
+	 */
+	public void shutdown() throws IOException {
+		if (handle != 0) {
+			DebugLog.debug("closing L2CAP Connection", handle);
+			// close() can be called safely in another thread
+			long synchronizedHandle;
+			synchronized (this) {
+				synchronizedHandle = handle;
+				handle = 0;
+			}
+			if (synchronizedHandle != 0) {
+				closeConnectionHandle(synchronizedHandle);
+			}
 		}
 	}
 

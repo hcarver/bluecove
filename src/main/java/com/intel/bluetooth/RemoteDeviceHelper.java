@@ -96,24 +96,19 @@ public abstract class RemoteDeviceHelper {
 		}
 
 		void shutdownConnections() {
-			if (hasConnections()) {
+			if (!hasConnections()) {
 				return;
 			}
 			Vector c2shutdown = new Vector();
 			synchronized (connections) {
 				for (Enumeration en = connections.elements(); en.hasMoreElements();) {
-					Object c = en.nextElement();
-					if (c instanceof Connection) {
-						c2shutdown.addElement(c);
-					} else {
-						DebugLog.debug("invalid connection type", c.getClass().getName());
-					}
+					c2shutdown.addElement(en.nextElement());
 				}
 			}
 			for (Enumeration en = c2shutdown.elements(); en.hasMoreElements();) {
-				Connection c = (Connection) en.nextElement();
+				BluetoothConnectionAccess c = (BluetoothConnectionAccess) en.nextElement();
 				try {
-					c.close();
+					c.shutdown();
 				} catch (IOException e) {
 					DebugLog.debug("connection shutdown", e);
 				}
