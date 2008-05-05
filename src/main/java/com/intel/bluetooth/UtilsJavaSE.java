@@ -24,6 +24,8 @@ import java.security.PrivilegedActionException;
 import java.util.Properties;
 import java.util.Vector;
 
+import com.ibm.oti.vm.VM;
+
 /**
  * 
  * J2ME/J9 compatibility module.
@@ -136,8 +138,12 @@ public class UtilsJavaSE {
 	static void runtimeAddShutdownHook(Thread thread) {
 		try {
 			// since Java 1.3
-			if ((!javaSECompiledOut) && (!ibmJ9midp)) {
-				Runtime.getRuntime().addShutdownHook(thread);
+			if (!javaSECompiledOut) {
+				if (ibmJ9midp) {
+					VM.addShutdownClass(thread);
+				} else {
+					Runtime.getRuntime().addShutdownHook(thread);
+				}
 			}
 		} catch (Throwable java12) {
 		}
