@@ -101,9 +101,7 @@ public abstract class RemoteDeviceHelper {
 			}
 			Vector c2shutdown = new Vector();
 			synchronized (connections) {
-				for (Enumeration en = connections.elements(); en.hasMoreElements();) {
-					c2shutdown.addElement(en.nextElement());
-				}
+				c2shutdown = Utils.clone(connections.elements());
 			}
 			for (Enumeration en = c2shutdown.elements(); en.hasMoreElements();) {
 				BluetoothConnectionAccess c = (BluetoothConnectionAccess) en.nextElement();

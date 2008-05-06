@@ -47,6 +47,8 @@ class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase i
 		this.serviceRecord.attributeUpdated = false;
 
 		this.securityOpt = Utils.securityOpt(params.authenticate, params.encrypt);
+
+		this.connectionCreated();
 	}
 
 	/*
@@ -63,6 +65,8 @@ class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase i
 			long clientHandle = bluetoothStack.l2ServerAcceptAndOpenServerConnection(handle);
 			int clientSecurityOpt = bluetoothStack.l2GetSecurityOpt(clientHandle, this.securityOpt);
 			return new BluetoothL2CAPServerConnection(bluetoothStack, clientHandle, clientSecurityOpt);
+		} catch (InterruptedIOException e) {
+			throw e;
 		} catch (IOException e) {
 			if (closed) {
 				throw new InterruptedIOException("Notifier has been closed");

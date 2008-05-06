@@ -22,6 +22,8 @@ package com.intel.bluetooth;
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DataElement;
@@ -35,6 +37,8 @@ import javax.microedition.io.Connection;
  */
 abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothConnectionNotifierServiceRecordAccess {
 
+	private static Hashtable stackConnections = new Hashtable();
+
 	protected BluetoothStack bluetoothStack;
 
 	protected volatile long handle;
@@ -43,15 +47,32 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 
 	protected boolean closed;
 
-	protected boolean closing;
-
 	protected int securityOpt;
+
+	static void shutdownConnections(BluetoothStack bluetoothStack) {
+		Vector connections;
+		synchronized (stackConnections) {
+			connections = (Vector) stackConnections.get(bluetoothStack);
+		}
+		if (connections == null) {
+			return;
+		}
+		Vector c2shutdown = new Vector();
+		c2shutdown = Utils.clone(connections.elements());
+		for (Enumeration en = c2shutdown.elements(); en.hasMoreElements();) {
+			BluetoothConnectionNotifierBase c = (BluetoothConnectionNotifierBase) en.nextElement();
+			try {
+				c.shutdown();
+			} catch (IOException e) {
+				DebugLog.debug("connection shutdown", e);
+			}
+		}
+	}
 
 	protected BluetoothConnectionNotifierBase(BluetoothStack bluetoothStack, BluetoothConnectionNotifierParams params)
 			throws BluetoothStateException, Error {
 		this.bluetoothStack = bluetoothStack;
 		this.closed = false;
-		this.closing = false;
 		if (params.name == null) {
 			throw new NullPointerException("Service name is null");
 		}
@@ -59,6 +80,18 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 		 * create service record to be later updated by BluetoothStack
 		 */
 		this.serviceRecord = new ServiceRecordImpl(this.bluetoothStack, null, 0);
+	}
+
+	protected void connectionCreated() {
+		Vector connections;
+		synchronized (stackConnections) {
+			connections = (Vector) stackConnections.get(this.bluetoothStack);
+			if (connections == null) {
+				connections = new Vector();
+				stackConnections.put(this.bluetoothStack, connections);
+			}
+		}
+		connections.addElement(this);
 	}
 
 	protected abstract void stackServerClose(long handle) throws IOException;
@@ -80,25 +113,34 @@ abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothC
 	 */
 	public void close() throws IOException {
 		if (!closed) {
-			long h = handle;
-			handle = 0;
-			if (h != 0) {
-				ServiceRecordsRegistry.unregister(serviceRecord);
-				closing = true;
-				DebugLog.debug("closing ConnectionNotifier");
-				try {
-					if ((serviceRecord.deviceServiceClasses != 0)
-							&& ((bluetoothStack.getFeatureSet() & BluetoothStack.FEATURE_SET_DEVICE_SERVICE_CLASSES) != 0)) {
-						bluetoothStack.setLocalDeviceServiceClasses(ServiceRecordsRegistry.getDeviceServiceClasses());
-					}
+			shutdown();
+		}
+	}
 
-					if (h != 0) {
-						stackServerClose(h);
-					}
-					closed = true;
-				} finally {
-					closing = false;
+	public void shutdown() throws IOException {
+		closed = true;
+		if (handle != 0) {
+			DebugLog.debug("closing ConnectionNotifier", handle);
+			Vector connections;
+			synchronized (stackConnections) {
+				connections = (Vector) stackConnections.get(this.bluetoothStack);
+			}
+			connections.removeElement(this);
+			long synchronizedHandle;
+			synchronized (this) {
+				synchronizedHandle = handle;
+				handle = 0;
+			}
+			if (synchronizedHandle != 0) {
+
+				ServiceRecordsRegistry.unregister(serviceRecord);
+
+				if ((serviceRecord.deviceServiceClasses != 0)
+						&& ((bluetoothStack.getFeatureSet() & BluetoothStack.FEATURE_SET_DEVICE_SERVICE_CLASSES) != 0)) {
+					bluetoothStack.setLocalDeviceServiceClasses(ServiceRecordsRegistry.getDeviceServiceClasses());
 				}
+
+				stackServerClose(synchronizedHandle);
 			}
 		}
 	}

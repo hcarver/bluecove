@@ -43,6 +43,8 @@ class BluetoothRFCommConnectionNotifier extends BluetoothConnectionNotifierBase 
 		this.serviceRecord.attributeUpdated = false;
 
 		this.securityOpt = Utils.securityOpt(params.authenticate, params.encrypt);
+
+		this.connectionCreated();
 	}
 
 	/*
@@ -69,8 +71,10 @@ class BluetoothRFCommConnectionNotifier extends BluetoothConnectionNotifierBase 
 			long clientHandle = bluetoothStack.rfServerAcceptAndOpenRfServerConnection(handle);
 			int clientSecurityOpt = bluetoothStack.rfGetSecurityOpt(clientHandle, this.securityOpt);
 			return new BluetoothRFCommServerConnection(bluetoothStack, clientHandle, clientSecurityOpt);
+		} catch (InterruptedIOException e) {
+			throw e;
 		} catch (IOException e) {
-			if (closed || closing) {
+			if (closed) {
 				throw new InterruptedIOException("Notifier has been closed");
 			}
 			throw e;

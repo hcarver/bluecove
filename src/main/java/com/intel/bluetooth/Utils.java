@@ -23,6 +23,7 @@ package com.intel.bluetooth;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.bluetooth.ServiceRecord;
@@ -160,6 +161,14 @@ public abstract class Utils {
 		byte[] bClone = new byte[length];
 		System.arraycopy(value, 0, bClone, 0, length);
 		return bClone;
+	}
+
+	public static Vector clone(Enumeration en) {
+		Vector copy = new Vector();
+		for (; en.hasMoreElements();) {
+			copy.addElement(en.nextElement());
+		}
+		return copy;
 	}
 
 	static String newStringUTF8(byte bytes[]) {
