@@ -69,7 +69,7 @@ class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase i
 			throw e;
 		} catch (IOException e) {
 			if (closed) {
-				throw new InterruptedIOException("Notifier has been closed");
+				throw new InterruptedIOException("Notifier has been closed; " + e.getMessage());
 			}
 			throw e;
 		}
