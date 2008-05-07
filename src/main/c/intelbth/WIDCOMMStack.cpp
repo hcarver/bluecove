@@ -218,10 +218,28 @@ WIDCOMMStack::~WIDCOMMStack() {
     DeleteCriticalSection(&csCommIf);
 }
 
+DWORD WINAPI GCThreadFunction(LPVOID lpParam) {
+    Sleep(30 * 1000);
+    ndebug(("GC ObjectPool"));
+    ObjectPool* commPool = (ObjectPool*)lpParam;
+    delete commPool;
+    return 0;
+}
+
 void WIDCOMMStack::destroy(JNIEnv * env) {
     SetEvent(hEvent);
     if (commPool != NULL) {
-        delete commPool;
+        //delete commPool;
+        // create Delay GC Thread
+        HANDLE  hThread = CreateThread(
+            NULL,                   // default security attributes
+            0,                      // use default stack size
+            GCThreadFunction,       // thread function name
+            commPool,               // argument to thread function
+            0,                      // use default creation flags
+            NULL);   // returns the thread identifier
+        CloseHandle(hThread);
+
         commPool = NULL;
     }
     if (discoveryRecHolderHold != NULL) {
