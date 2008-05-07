@@ -708,7 +708,9 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerCl
 
 void accept_rf_server_finally(JNIEnv *env, WIDCOMMStackRfCommPort* rf) {
 	if ((stack != NULL) && (rf != NULL)) {
-		rf->close(env, false);
+	    if (rf->server != NULL) {
+	        rf->server->closeClient(env, rf);
+	    }
 	    if (stack != NULL) {
 		    stack->deleteConnection(rf);
 	    }
