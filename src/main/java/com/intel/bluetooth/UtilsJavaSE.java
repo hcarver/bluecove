@@ -135,15 +135,28 @@ public class UtilsJavaSE {
 		}
 	}
 
-	static void runtimeAddShutdownHook(Thread thread) {
+	static boolean runtimeAddShutdownHook(Thread thread) {
 		try {
 			// since Java 1.3
 			if (!javaSECompiledOut) {
 				if (ibmJ9midp) {
 					VM.addShutdownClass(thread);
+					return true;
 				} else {
 					Runtime.getRuntime().addShutdownHook(thread);
+					return true;
 				}
+			}
+		} catch (Throwable java12) {
+		}
+		return false;
+	}
+
+	static void runtimeRemoveShutdownHook(Thread thread) {
+		try {
+			// since Java 1.3
+			if ((!javaSECompiledOut) && (!ibmJ9midp)) {
+				Runtime.getRuntime().removeShutdownHook(thread);
 			}
 		} catch (Throwable java12) {
 		}

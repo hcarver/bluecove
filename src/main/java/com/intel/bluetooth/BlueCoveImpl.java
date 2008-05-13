@@ -145,7 +145,7 @@ public class BlueCoveImpl {
 	/* The context to be used when loading native DLL */
 	private Object accessControlContext;
 
-	private boolean shutdownHookCreated;
+	private static ShutdownHookThread shutdownHookRegistered;
 
 	private static BlueCoveImpl instance;
 
@@ -197,7 +197,7 @@ public class BlueCoveImpl {
 
 		final Object monitor = new Object();
 
-		boolean shutdownStart = false;
+		int shutdownStart = 0;
 
 		AsynchronousShutdownThread() {
 			super("BluecoveAsynchronousShutdownThread");
@@ -205,13 +205,16 @@ public class BlueCoveImpl {
 
 		public void run() {
 			synchronized (monitor) {
-				while (!shutdownStart) {
+				while (shutdownStart == 0) {
 					try {
 						monitor.wait();
 					} catch (InterruptedException e) {
 						return;
 					}
 				}
+			}
+			if (shutdownStart == -1) {
+				return;
 			}
 			if (!stacks.isEmpty()) {
 				for (Enumeration en = stacks.elements(); en.hasMoreElements();) {
@@ -231,6 +234,13 @@ public class BlueCoveImpl {
 				monitor.notifyAll();
 			}
 		}
+
+		void deRegister() {
+			shutdownStart = -1;
+			synchronized (monitor) {
+				monitor.notifyAll();
+			}
+		}
 	}
 
 	private class ShutdownHookThread extends Thread {
@@ -245,7 +255,7 @@ public class BlueCoveImpl {
 		public void run() {
 			final Object monitor = shutdownHookThread.monitor;
 			synchronized (monitor) {
-				shutdownHookThread.shutdownStart = true;
+				shutdownHookThread.shutdownStart = 1;
 				monitor.notifyAll();
 				if (!stacks.isEmpty()) {
 					try {
@@ -254,6 +264,12 @@ public class BlueCoveImpl {
 					}
 				}
 			}
+		}
+
+		void deRegister() {
+			shutdownHookRegistered = null;
+			UtilsJavaSE.runtimeRemoveShutdownHook(this);
+			shutdownHookThread.deRegister();
 		}
 	}
 
@@ -285,17 +301,13 @@ public class BlueCoveImpl {
 	}
 
 	private synchronized void createShutdownHook() {
-		if (shutdownHookCreated) {
+		if (shutdownHookRegistered != null) {
 			return;
 		}
-		shutdownHookCreated = true;
 		AsynchronousShutdownThread shutdownHookThread = new AsynchronousShutdownThread();
-		UtilsJavaSE.threadSetDaemon(shutdownHookThread);
-		shutdownHookThread.start();
-		try {
-			// since Java 1.3
-			UtilsJavaSE.runtimeAddShutdownHook(new ShutdownHookThread(shutdownHookThread));
-		} catch (Throwable java12) {
+		if (UtilsJavaSE.runtimeAddShutdownHook(shutdownHookRegistered = new ShutdownHookThread(shutdownHookThread))) {
+			UtilsJavaSE.threadSetDaemon(shutdownHookThread);
+			shutdownHookThread.start();
 		}
 	}
 
@@ -611,6 +623,17 @@ public class BlueCoveImpl {
 	}
 
 	/**
+	 * Detach BluetoothStack from ThreadLocal. Used for removing itself from
+	 * container threads.
+	 */
+	public static synchronized void releaseThreadBluetoothStack() {
+		if (threadStack == null) {
+			throw new IllegalArgumentException("ThreadLocal configuration is not initialized");
+		}
+		threadStack.set(null);
+	}
+
+	/**
 	 * Set default Thread BluetoothStack for Threads that do not call
 	 * <code>setThreadBluetoothStackID(stackID)</code>. Updating is possible
 	 * only if <code>stackID</code> was obtained using the
@@ -691,6 +714,9 @@ public class BlueCoveImpl {
 		stacks.clear();
 		singleStack = null;
 		threadStackIDDefault = null;
+		if (shutdownHookRegistered != null) {
+			shutdownHookRegistered.deRegister();
+		}
 	}
 
 	/**
