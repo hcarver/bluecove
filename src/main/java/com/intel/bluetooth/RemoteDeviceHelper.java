@@ -497,7 +497,7 @@ public abstract class RemoteDeviceHelper {
 	}
 
 	static void shutdownConnections(BluetoothStack bluetoothStack) {
-		Hashtable devicesCashed = devicesCashed(getBluetoothStack());
+		Hashtable devicesCashed = devicesCashed(bluetoothStack);
 		synchronized (devicesCashed) {
 			for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
 				((RemoteDeviceWithExtendedInfo) en.nextElement()).shutdownConnections();
