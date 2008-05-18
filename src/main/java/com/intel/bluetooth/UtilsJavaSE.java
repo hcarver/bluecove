@@ -81,7 +81,7 @@ public class UtilsJavaSE {
 				try {
 					Class.forName("java.lang.StackTraceElement");
 					java14 = true;
-					DebugLog.debug("Java 1.4+ detected");
+					DebugLog.debug("Java 1.4+ detected:", vmInfo());
 				} catch (ClassNotFoundException e) {
 					java13 = true;
 					return null;
@@ -94,6 +94,15 @@ public class UtilsJavaSE {
 			}
 		}
 		return null;
+	}
+
+	static String vmInfo() {
+		try {
+			return System.getProperty("java.version") + "; " + System.getProperty("java.vm.name") + "; "
+					+ System.getProperty("java.vendor");
+		} catch (SecurityException ignore) {
+			return "";
+		}
 	}
 
 	private static StackTraceLocation getLocationJava14(Vector fqcnSet) {
