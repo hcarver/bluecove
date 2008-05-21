@@ -35,15 +35,11 @@ import com.intel.bluetooth.DebugLog;
  */
 class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperationReceive {
 
-	private OBEXOperationInputStream inputStream;
-
-	private boolean inputStreamOpened = false;
-
 	protected OBEXServerOperationPut(OBEXServerSessionImpl session, HeaderSet receivedHeaders, boolean finalPacket)
 			throws IOException {
 		super(session, receivedHeaders);
 		this.inputStream = new OBEXOperationInputStream(this);
-		processData(receivedHeaders, inputStream);
+		processIncommingData(receivedHeaders, finalPacket);
 	}
 
 	/*
@@ -125,26 +121,28 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 		throw new IOException("Operation aborted by client");
 	}
 
-	private boolean processData(HeaderSet requestHeaders, OBEXOperationInputStream is) throws IOException {
-		byte[] data = (byte[]) requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);
+	private void processIncommingData(HeaderSet dataHeaders, boolean eof) throws IOException {
+		byte[] data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
 		if (data == null) {
-			data = (byte[]) requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
+			data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);
+			if (data != null) {
+				eof = true;
+			}
 		}
-		if ((data != null) && (data.length != 0) && (is != null)) {
-			DebugLog.debug("processData len", data.length);
-			is.appendData(data);
-			return true;
-		} else {
-			return false;
+		if (data != null) {
+			DebugLog.debug("srv received Data eof " + eof + " len", data.length);
+			inputStream.appendData(data, eof);
+		} else if (eof) {
+			inputStream.appendData(null, eof);
 		}
 	}
 
 	protected void processRequest(HeaderSet requestHeaders, boolean finalPacket, OBEXOperationInputStream is)
 			throws IOException {
-		processData(requestHeaders, is);
+		processIncommingData(requestHeaders, finalPacket);
 		if (finalPacket) {
 			DebugLog.debug("put got final packet");
-			close();
+			// close();
 		} else {
 			DebugLog.debug("reply continue");
 			session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl

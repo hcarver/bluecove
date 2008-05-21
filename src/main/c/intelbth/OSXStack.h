@@ -60,7 +60,7 @@ public:
     char* name;
     int error;
 
-    // Data passes and recived from thread
+    // Data passes and received from thread
     char sData[RUNNABLE_DATA_MAX];
     UniChar uData[RUNNABLE_DATA_MAX];
     int iData;

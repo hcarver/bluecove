@@ -29,47 +29,137 @@ import javax.obex.Operation;
 
 import com.intel.bluetooth.DebugLog;
 
-abstract class OBEXClientOperation implements Operation {
+abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
 	protected OBEXClientSessionImpl session;
-	
+
+	protected char operationId;
+
 	protected HeaderSet replyHeaders;
-	
-	protected HeaderSet sendHeaders;
-	
-	protected int sendHeadersLength = 0;
-	
+
 	protected boolean isClosed;
-	
+
 	protected boolean operationInProgress;
-	
-	protected boolean operationStarted;
-	
+
+	protected OBEXOperationOutputStream outputStream;
+
 	protected boolean outputStreamOpened = false;
-	
+
+	protected OBEXOperationInputStream inputStream;
+
 	protected boolean inputStreamOpened = false;
-	
+
+	protected boolean errorReceived = false;
+
+	protected boolean requestEnded = false;
+
+	protected boolean finalBodyReceived = false;
+
 	protected Object lock;
-	
-	OBEXClientOperation(OBEXClientSessionImpl session, HeaderSet replyHeaders) throws IOException {
+
+	OBEXClientOperation(OBEXClientSessionImpl session, char operationId) throws IOException {
 		this.session = session;
-		this.replyHeaders = replyHeaders;
+		this.operationId = operationId;
 		this.isClosed = false;
+		this.operationInProgress = false;
 		this.lock = new Object();
-		if (replyHeaders != null) {
-			switch (replyHeaders.getResponseCode()) {
+	}
+
+	protected void startOperation(HeaderSet sendHeaders) throws IOException {
+		this.operationInProgress = true;
+		exchangePacket(OBEXHeaderSetImpl.toByteArray(sendHeaders));
+	}
+
+	protected void endRequestPhase() throws IOException {
+		if (requestEnded) {
+			return;
+		}
+		this.operationInProgress = false;
+		this.requestEnded = true;
+		this.operationId |= OBEXOperationCodes.FINAL_BIT;
+		exchangePacket(null);
+	}
+
+	protected void exchangePacket(byte[] data) throws IOException {
+		boolean success = false;
+		try {
+			session.writeOperation(this.operationId, data);
+			byte[] b = session.readOperation();
+			HeaderSet dataHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+			int responseCode = dataHeaders.getResponseCode();
+			DebugLog.debug0x("client operation got reply", OBEXUtils.toStringObexResponseCodes(responseCode),
+					responseCode);
+			switch (responseCode) {
 			case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
+				processIncommingHeaders(dataHeaders);
+				processIncommingData(dataHeaders, true);
+				this.operationInProgress = false;
+				break;
 			case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
-				this.operationInProgress = true;
+				processIncommingHeaders(dataHeaders);
+				processIncommingData(dataHeaders, false);
 				break;
 			default:
-				this.operationInProgress = false;
+				errorReceived = true;
+				// responseCode may be reported by getResponseCode()
+				processIncommingHeaders(dataHeaders);
+				if ((this.operationId & OBEXOperationCodes.FINAL_BIT) == 0) {
+					throw new IOException("Operation error, 0x" + Integer.toHexString(responseCode) + " "
+							+ OBEXUtils.toStringObexResponseCodes(responseCode));
+				}
 			}
-		} else {
-			this.operationInProgress = false;
+			success = true;
+		} finally {
+			if (!success) {
+				errorReceived = true;
+			}
 		}
 	}
-	
+
+	protected void processIncommingHeaders(HeaderSet dataHeaders) throws IOException {
+		if (replyHeaders != null) {
+			OBEXHeaderSetImpl.appendHeaders(dataHeaders, replyHeaders);
+		}
+		// replyHeaders will contain responseCode from last reply
+		this.replyHeaders = dataHeaders;
+	}
+
+	protected void processIncommingData(HeaderSet dataHeaders, boolean eof) throws IOException {
+		byte[] data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
+		if (data == null) {
+			data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);
+			if (data != null) {
+				finalBodyReceived = true;
+				eof = true;
+			}
+		}
+		if (data != null) {
+			DebugLog.debug("client received Data eof " + eof + " len", data.length);
+			inputStream.appendData(data, eof);
+		} else if (eof) {
+			inputStream.appendData(null, eof);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.obex.Operation#abort()
+	 */
+	public void abort() throws IOException {
+		validateOperationIsOpen();
+		if (!this.operationInProgress) {
+			throw new IOException("the transaction has already ended");
+		}
+		synchronized (lock) {
+			if (outputStream != null) {
+				outputStream.abort();
+			}
+			this.inputStream.close();
+		}
+		writeAbort();
+	}
+
 	protected void writeAbort() throws IOException {
 		try {
 			session.writeOperation(OBEXOperationCodes.ABORT, null);
@@ -84,33 +174,36 @@ abstract class OBEXClientOperation implements Operation {
 		}
 	}
 
-	abstract void started() throws IOException;
-	
 	abstract void closeStream() throws IOException;
-	
-	protected void validateOperationIsOpen()  throws IOException {
+
+	protected void validateOperationIsOpen() throws IOException {
 		if (isClosed) {
-            throw new IOException("operation closed");
+			throw new IOException("operation closed");
 		}
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.obex.Operation#getReceivedHeaders()
 	 */
 	public HeaderSet getReceivedHeaders() throws IOException {
 		validateOperationIsOpen();
-		started();
+		endRequestPhase();
 		return OBEXHeaderSetImpl.cloneHeaders(this.replyHeaders);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.obex.Operation#getResponseCode()
 	 * 
-	 *  A call will do an implicit close on the Stream and therefore signal that the request is done.
+	 * A call will do an implicit close on the Stream and therefore signal that
+	 * the request is done.
 	 */
 	public int getResponseCode() throws IOException {
 		validateOperationIsOpen();
-		started();
+		endRequestPhase();
 		closeStream();
 		return this.replyHeaders.getResponseCode();
 	}
@@ -121,32 +214,33 @@ abstract class OBEXClientOperation implements Operation {
 		}
 		OBEXHeaderSetImpl.validateCreatedHeaderSet(headers);
 		validateOperationIsOpen();
-		if ((this.operationStarted) && (!this.operationInProgress)) {
-			throw new IOException("the transaction has already ended");
+		if (this.requestEnded) {
+			throw new IOException("the request phase has already ended");
 		}
-		synchronized (lock) {
-			sendHeaders = headers;
-			sendHeadersLength = OBEXHeaderSetImpl.toByteArray(sendHeaders).length;
-		}
+		exchangePacket(OBEXHeaderSetImpl.toByteArray(headers));
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.microedition.io.ContentConnection#getEncoding()
-	 * <code>getEncoding()</code> will always return <code>null</code>
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.microedition.io.ContentConnection#getEncoding() <code>getEncoding()</code>
+	 *      will always return <code>null</code>
 	 */
 	public String getEncoding() {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.microedition.io.ContentConnection#getLength()
-	 * <code>getLength()</code> will return the length specified by the OBEX
-     * Length header or -1 if the OBEX Length header was not included.
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.microedition.io.ContentConnection#getLength() <code>getLength()</code>
+	 *      will return the length specified by the OBEX Length header or -1 if
+	 *      the OBEX Length header was not included.
 	 */
 	public long getLength() {
 		Long len;
 		try {
-			len = (Long)replyHeaders.getHeader(HeaderSet.LENGTH);
+			len = (Long) replyHeaders.getHeader(HeaderSet.LENGTH);
 		} catch (IOException e) {
 			return -1;
 		}
@@ -156,40 +250,47 @@ abstract class OBEXClientOperation implements Operation {
 		return len.longValue();
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.microedition.io.ContentConnection#getType()
-	 * <code>getType()</code> will return the value specified in the OBEX Type
-     * header or <code>null</code> if the OBEX Type header was not included.
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.microedition.io.ContentConnection#getType() <code>getType()</code>
+	 *      will return the value specified in the OBEX Type header or <code>null</code>
+	 *      if the OBEX Type header was not included.
 	 */
 	public String getType() {
 		try {
-			return (String)replyHeaders.getHeader(HeaderSet.TYPE);
+			return (String) replyHeaders.getHeader(HeaderSet.TYPE);
 		} catch (IOException e) {
 			return null;
 		}
 	}
 
 	public DataInputStream openDataInputStream() throws IOException {
-		 return new DataInputStream(openInputStream());
+		return new DataInputStream(openInputStream());
 	}
 
 	public DataOutputStream openDataOutputStream() throws IOException {
 		return new DataOutputStream(openOutputStream());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {
-		started();
-		closeStream();
-		if (!this.isClosed) {
-			this.isClosed = true;
-			DebugLog.debug("operation closed");
+		try {
+			endRequestPhase();
+		} finally {
+			closeStream();
+			if (!this.isClosed) {
+				this.isClosed = true;
+				DebugLog.debug("client operation closed");
+			}
 		}
 	}
 
 	public boolean isClosed() {
-		return this.isClosed;
+		return this.isClosed || this.errorReceived;
 	}
 }

@@ -24,11 +24,10 @@ import java.io.IOException;
 
 /**
  * @author vlads
- *
+ * 
  */
-interface OBEXOperationDelivery {
-	
+interface OBEXOperationDelivery extends OBEXOperation {
+
 	void deliverPacket(boolean finalPacket, byte buffer[]) throws IOException;
-	
-	boolean isClosed();
+
 }

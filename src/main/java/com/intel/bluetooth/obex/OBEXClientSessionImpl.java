@@ -189,12 +189,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 	public Operation get(HeaderSet headers) throws IOException {
 		validateCreatedHeaderSet(headers);
 		canStartOperation();
-		writeOperation(OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(headers));
-		byte[] b = readOperation();
-		HeaderSet replyHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
-		DebugLog.debug0x("GET got reply", replyHeaders.getResponseCode());
-
-		this.operation = new OBEXClientOperationGet(this, replyHeaders);
+		this.operation = new OBEXClientOperationGet(this, headers);
 		return this.operation;
 	}
 
@@ -212,7 +207,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 	}
 
 	HeaderSet deleteImp(HeaderSet headers) throws IOException {
-		writeOperation(OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl.toByteArray(headers));
+		writeOperation(OBEXOperationCodes.PUT_FINAL, OBEXHeaderSetImpl.toByteArray(headers));
 		byte[] b = readOperation();
 		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 	}

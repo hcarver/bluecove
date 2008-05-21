@@ -143,7 +143,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			case OBEXOperationCodes.DISCONNECT:
 				processDisconnect(b);
 				break;
-			case OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT:
+			case OBEXOperationCodes.PUT_FINAL:
 			case OBEXOperationCodes.PUT:
 				processPut(b, finalPacket);
 				break;
@@ -154,7 +154,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			case OBEXOperationCodes.ABORT:
 				processAbort();
 				break;
-			case OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT:
+			case OBEXOperationCodes.GET_FINAL:
 			case OBEXOperationCodes.GET:
 				processGet(b, finalPacket);
 				break;
@@ -283,7 +283,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 3);
 
 		try {
-			operation = new OBEXServerOperationGet(this, requestHeaders);
+			operation = new OBEXServerOperationGet(this, requestHeaders, finalPacket);
 			int rc = ResponseCodes.OBEX_HTTP_OK;
 			try {
 				rc = handler.onGet(operation);

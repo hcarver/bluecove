@@ -147,11 +147,11 @@ abstract class OBEXUtils {
 			return "SESSION FINAL";
 		case OBEXOperationCodes.PUT:
 			return "PUT";
-		case OBEXOperationCodes.PUT | OBEXOperationCodes.FINAL_BIT:
+		case OBEXOperationCodes.PUT_FINAL:
 			return "PUT FINAL";
 		case OBEXOperationCodes.GET:
 			return "GET";
-		case OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT:
+		case OBEXOperationCodes.GET_FINAL:
 			return "GET FINAL";
 		case OBEXOperationCodes.SETPATH:
 			return "SETPATH";

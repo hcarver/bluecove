@@ -20,14 +20,12 @@
  */
 package com.intel.bluetooth.obex;
 
-import java.io.IOException;
-
 /**
  * @author vlads
  * 
  */
-interface OBEXOperationReceive extends OBEXOperation {
+public interface OBEXOperation {
 
-	void receiveData(OBEXOperationInputStream is) throws IOException;
+	boolean isClosed();
 
 }

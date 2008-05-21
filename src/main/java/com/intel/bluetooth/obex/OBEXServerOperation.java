@@ -31,7 +31,7 @@ import javax.obex.Operation;
  * @author vlads
  * 
  */
-abstract class OBEXServerOperation implements Operation {
+abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	protected OBEXServerSessionImpl session;
 
@@ -43,7 +43,17 @@ abstract class OBEXServerOperation implements Operation {
 
 	protected boolean finalPacketReceived = false;
 
+	protected boolean requestEnded = false;
+
 	protected boolean errorReceived = false;
+
+	protected OBEXOperationOutputStream outputStream;
+
+	protected boolean outputStreamOpened = false;
+
+	protected OBEXOperationInputStream inputStream;
+
+	protected boolean inputStreamOpened = false;
 
 	protected OBEXServerOperation(OBEXServerSessionImpl session, HeaderSet receivedHeaders) {
 		this.session = session;
@@ -67,6 +77,8 @@ abstract class OBEXServerOperation implements Operation {
 	 * @see javax.obex.Operation#getReceivedHeaders()
 	 */
 	public HeaderSet getReceivedHeaders() throws IOException {
+		// TODO make clone, Also may be clean/remove the containing headers so
+		// next call will receive another set of headers
 		return receivedHeaders;
 	}
 

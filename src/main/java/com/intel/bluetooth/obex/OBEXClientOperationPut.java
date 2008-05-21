@@ -26,17 +26,12 @@ import java.io.OutputStream;
 
 import javax.obex.HeaderSet;
 
-import com.intel.bluetooth.DebugLog;
-
 class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperationDelivery {
 
-	protected OBEXOperationOutputStream os;
-
-	protected boolean finalPacketSent = false;
-
 	OBEXClientOperationPut(OBEXClientSessionImpl session, HeaderSet sendHeaders) throws IOException {
-		super(session, null);
-		this.sendHeaders = sendHeaders;
+		super(session, OBEXOperationCodes.PUT);
+		this.inputStream = new OBEXOperationInputStream(this);
+		startOperation(sendHeaders);
 	}
 
 	public InputStream openInputStream() throws IOException {
@@ -46,24 +41,7 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		}
 		this.inputStreamOpened = true;
 		this.operationInProgress = true;
-		return new UnsupportedInputStream();
-	}
-
-	void started() throws IOException {
-		if ((!outputStreamOpened) && (!operationStarted)) {
-			this.replyHeaders = session.deleteImp(sendHeaders);
-			operationStarted = true;
-		}
-	}
-
-	private void startPutOperation() throws IOException {
-		operationStarted = true;
-		session.writeOperation(OBEXOperationCodes.PUT, OBEXHeaderSetImpl.toByteArray(sendHeaders));
-		sendHeaders = null;
-		byte[] b = session.readOperation();
-		this.replyHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
-		DebugLog.debug0x("PUT got reply", replyHeaders.getResponseCode());
-		this.operationInProgress = true;
+		return this.inputStream;
 	}
 
 	public OutputStream openOutputStream() throws IOException {
@@ -72,16 +50,9 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 			throw new IOException("output already open");
 		}
 		outputStreamOpened = true;
-		startPutOperation();
-		os = new OBEXOperationOutputStream(session.mtu, this);
-		return os;
-	}
-
-	public void sendHeaders(HeaderSet headers) throws IOException {
-		super.sendHeaders(headers);
-		if (os != null) {
-			os.deliverBuffer(false);
-		}
+		outputStream = new OBEXOperationOutputStream(session.mtu, this);
+		this.operationInProgress = true;
+		return outputStream;
 	}
 
 	/*
@@ -91,71 +62,28 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 	 *      byte[])
 	 */
 	public void deliverPacket(boolean finalPacket, byte buffer[]) throws IOException {
-		if (finalPacketSent) {
+		if (requestEnded) {
 			return;
 		}
-		int commId = OBEXOperationCodes.PUT;
 		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
 		if (finalPacket) {
-			commId |= OBEXOperationCodes.FINAL_BIT;
+			this.operationId |= OBEXOperationCodes.FINAL_BIT;
 			dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY_END;
-			finalPacketSent = true;
+			requestEnded = true;
 		}
 		HeaderSet dataHeaders = session.createHeaderSet();
 		dataHeaders.setHeader(dataHeaderID, buffer);
-
-		if ((sendHeadersLength + buffer.length + OBEXOperationCodes.OBEX_MTU_HEADER_RESERVE) > session.mtu) {
-			session.writeOperation(commId, OBEXHeaderSetImpl.toByteArray(dataHeaders));
-		} else {
-			session.writeOperation(commId, OBEXHeaderSetImpl.toByteArray(sendHeaders), OBEXHeaderSetImpl
-					.toByteArray(dataHeaders));
-			sendHeaders = null;
-			sendHeadersLength = 0;
-		}
-		byte[] b = session.readOperation();
-		replyHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
-		int responseCode = replyHeaders.getResponseCode();
-		DebugLog.debug0x("PUT server reply", responseCode);
-		switch (responseCode) {
-		case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
-			this.operationInProgress = false;
-			break;
-		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
-			break;
-		default:
-			if (!finalPacket) {
-				throw new IOException("Can't continue connection, 0x" + Integer.toHexString(responseCode) + " "
-						+ OBEXUtils.toStringObexResponseCodes(responseCode));
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.obex.Operation#abort()
-	 */
-	public void abort() throws IOException {
-		validateOperationIsOpen();
-		if (!this.operationInProgress) {
-			throw new IOException("the transaction has already ended");
-		}
-		synchronized (lock) {
-			if (os != null) {
-				os.abort();
-			}
-		}
-		writeAbort();
+		exchangePacket(OBEXHeaderSetImpl.toByteArray(dataHeaders));
 	}
 
 	public void closeStream() throws IOException {
 		this.operationInProgress = false;
-		if (os != null) {
+		if (outputStream != null) {
 			synchronized (lock) {
-				if (os != null) {
-					os.close();
+				if (outputStream != null) {
+					outputStream.close();
 				}
-				os = null;
+				outputStream = null;
 			}
 		}
 	}

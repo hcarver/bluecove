@@ -32,21 +32,12 @@ import com.intel.bluetooth.DebugLog;
  * @author vlads
  * 
  */
-class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperationReceive {
+class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperationReceive, OBEXOperationDelivery {
 
-	private OBEXOperationInputStream inputStream;
-
-	private boolean finalBodyReceived = false;
-
-	private boolean errorReceived = false;
-
-	OBEXClientOperationGet(OBEXClientSessionImpl session, HeaderSet replyHeaders) throws IOException {
-		super(session, replyHeaders);
+	OBEXClientOperationGet(OBEXClientSessionImpl session, HeaderSet sendHeaders) throws IOException {
+		super(session, OBEXOperationCodes.GET);
 		this.inputStream = new OBEXOperationInputStream(this);
-		processData(replyHeaders, inputStream);
-	}
-
-	void started() throws IOException {
+		startOperation(sendHeaders);
 	}
 
 	/*
@@ -56,37 +47,24 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 	 */
 	public InputStream openInputStream() throws IOException {
 		validateOperationIsOpen();
-		if (inputStreamOpened) {
+		if (this.inputStreamOpened) {
 			throw new IOException("input stream already open");
 		}
 		DebugLog.debug("openInputStream");
-		inputStreamOpened = true;
-		operationStarted = true;
-		return inputStream;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.obex.Operation#abort()
-	 */
-	public void abort() throws IOException {
-		validateOperationIsOpen();
-		if (!this.operationInProgress) {
-			throw new IOException("the transaction has already ended");
-		}
-		writeAbort();
+		this.inputStreamOpened = true;
+		endRequestPhase();
+		return this.inputStream;
 	}
 
 	public void closeStream() throws IOException {
 		this.operationInProgress = false;
-		try {
-			while (!isClosed() && (!finalBodyReceived) && (!errorReceived)) {
-				receiveData(this.inputStream);
-			}
-		} finally {
-			inputStream.close();
-		}
+		// try {
+		// while (!isClosed() && (!finalBodyReceived) && (!errorReceived)) {
+		// receiveData(this.inputStream);
+		// }
+		// } finally {
+		inputStream.close();
+		// }
 	}
 
 	/*
@@ -99,51 +77,42 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 		if (outputStreamOpened) {
 			throw new IOException("output already open");
 		}
+		if (this.requestEnded) {
+			throw new IOException("the request phase has already ended");
+		}
 		this.outputStreamOpened = true;
-		return new UnsupportedOutputStream();
+		this.outputStream = new OBEXOperationOutputStream(session.mtu, this);
+		return this.outputStream;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.obex.OBEXOperationReceive#receiveData(com.intel.bluetooth.obex.OBEXOperationInputStream)
+	 */
 	public void receiveData(OBEXOperationInputStream is) throws IOException {
-		session.writeOperation(OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT, OBEXHeaderSetImpl
-				.toByteArray(sendHeaders));
-		byte[] b = session.readOperation();
-		HeaderSet dataHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
-		switch (dataHeaders.getResponseCode()) {
-		case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
-			processData(dataHeaders, is);
-			OBEXHeaderSetImpl.appendHeaders(replyHeaders, dataHeaders);
-			break;
-		case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
-			finalBodyReceived = true;
-			processData(dataHeaders, is);
-			OBEXHeaderSetImpl.appendHeaders(replyHeaders, dataHeaders);
-			closeStream();
-			break;
-		default:
-			errorReceived = true;
-			throw new IOException("Operation error "
-					+ OBEXUtils.toStringObexResponseCodes(dataHeaders.getResponseCode()));
-		}
+		exchangePacket(null);
 	}
 
-	private boolean processData(HeaderSet requestHeaders, OBEXOperationInputStream is) throws IOException {
-		byte[] data = (byte[]) requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
-		if (data != null) {
-			requestHeaders.setHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY, null);
-		} else {
-			data = (byte[]) requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);
-			if (data != null) {
-				finalBodyReceived = true;
-				requestHeaders.setHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END, null);
-			}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean,
+	 *      byte[])
+	 */
+	public void deliverPacket(boolean finalPacket, byte[] buffer) throws IOException {
+		if (requestEnded) {
+			return;
 		}
-		if ((data != null) && (data.length != 0)) {
-			DebugLog.debug("processData len", data.length);
-			is.appendData(data);
-			return true;
-		} else {
-			return false;
+		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
+		if (finalPacket) {
+			this.operationId |= OBEXOperationCodes.FINAL_BIT;
+			dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY_END;
+			requestEnded = true;
 		}
+		HeaderSet dataHeaders = session.createHeaderSet();
+		dataHeaders.setHeader(dataHeaderID, buffer);
+		exchangePacket(OBEXHeaderSetImpl.toByteArray(dataHeaders));
 	}
 
 }
