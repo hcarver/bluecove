@@ -130,7 +130,7 @@ typedef struct NativeThreadParams {
     MPEventID initializedNotificationEvent;
 };
 
-JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
 
     pthread_t thread;
     NativeThreadParams threadParams;

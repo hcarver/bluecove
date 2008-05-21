@@ -85,6 +85,10 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	return TRUE;
 }
 
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
+    return JNI_VERSION_1_2;
+}
+
 JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     dllCleanup();
 }
