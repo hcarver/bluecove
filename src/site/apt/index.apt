@@ -28,6 +28,8 @@ BlueCove
 
     * SUN Java 2 Platform Standard Edition 6.0 on Windows XP/X86 and Windows Vista
 
+    * SUN Sun Java Toolkit for CDC 1.0 on Windows XP/X86 (Need {{{http://snapshot.bluecove.org/special-build/}custom made}} dlls with __cdecl exports)
+
     * WebSphere Everyplace Micro Environment 5.7.2, CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows XP/X86
 
     * WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows XP and Linux/X86
