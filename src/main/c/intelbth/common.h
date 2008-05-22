@@ -93,6 +93,22 @@
 // Windows Header Files:
 #include <windows.h>
 #include <tchar.h>
+
+// #define CDC_DLL_VERSION
+
+#ifdef CDC_DLL_VERSION
+#define _JAVASOFT_JNI_MD_H_
+
+#define JNIEXPORT __declspec(dllexport)
+#define JNIIMPORT __declspec(dllimport)
+#define JNICALL __cdecl
+
+typedef long jint;
+typedef __int64 jlong;
+typedef signed char jbyte;
+
+#endif // CDC_DLL_VERSION
+
 #else
 
 // OS X
