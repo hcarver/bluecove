@@ -56,9 +56,9 @@ The BlueCove developer community welcomes your participation.
 BlueCove rely upon already installed native Bluetooth stack that comes with you operating system or Bluetooth USB device.
 Installation of the binary (already compiled) version of BlueCove is as follows:
 
-  # [http://code.google.com/p/bluecove/downloads/list Download BlueCove] binary release
-  # Add `bluecove.jar` to your classpath
-  # Also add `bluecove-gpl.jar` to your classpath if you are running application on Linux
+  * [http://code.google.com/p/bluecove/downloads/list Download BlueCove] binary release
+  * Add `bluecove.jar` to your classpath
+  * Also add `bluecove-gpl.jar` to your classpath if you are running application on Linux
 
 For maven2 users see [maven2 Using maven2 to build application or MIDlet]
 
@@ -80,33 +80,33 @@ Bluetooth Stack
 
 Native Library location
 
-  # By default Native Library is extracted from from jar to temporary directory `${java.io.tmpdir}/bluecove_${user.name}_N` and loaded from this location.
-  # If you wish to load library (.dll) from another location add this system property `-Dbluecove.native.path=/your/path`.
-  # If you wish to load library from default location in path e.g. `%SystemRoot%\system32` or any other location in %PATH% use `-Dbluecove.native.resource=false`
+  * By default Native Library is extracted from from jar to temporary directory `${java.io.tmpdir}/bluecove_${user.name}_N` and loaded from this location.
+  * If you wish to load library (.dll) from another location add this system property `-Dbluecove.native.path=/your/path`.
+  * If you wish to load library from default location in path e.g. `%SystemRoot%\system32` or any other location in %PATH% use `-Dbluecove.native.resource=false`
 
 IBM J9 Personal Profile
 
     To run BlueCove with [http://www.ibm.com/software/wireless/weme/ IBMs J9] Java VM on Win32 or PocketPC add this system property `-Dmicroedition.connection.pkgs=com.intel.bluetooth`.
 
     Tested on
-        # WebSphere Everyplace Micro Environment 5.7.2, CDC 1.0/Foundation 1.0/Personal Profile 1.0 for Windows XP/X86
-        # WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile 1.0 for Windows XP/X86
+        * WebSphere Everyplace Micro Environment 5.7.2, CDC 1.0/Foundation 1.0/Personal Profile 1.0 for Windows XP/X86
+        * WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile 1.0 for Windows XP/X86
 
 IBM J9 MIDP 2.0 Profile
-    # Copy to `bluecove.jar` %J9_HOME%\lib\jclMidp20\ext directory (remove `javax.microedition.io` classes from the jar)
-    # Copy all bluecove dlls to %J9_HOME%\bin directory or add -Dcom.ibm.oti.vm.bootstrap.library.path=%bluecove_dll_path%;%J9_HOME%\bin
-    # run app "%J9_HOME%\bin\j9.exe" -jcl:midp20 -Dmicroedition.connection.pkgs=com.intel.bluetooth -cp target\bctest.jar "-jxe:%J9_HOME%\lib\jclMidp20\jclMidp20.jxe" target\bctest.jad
-    # -Dmicroedition.connection.pkgs=com.intel.bluetooth is optonal if you place bluecove.jar to ext directory (Since v2.0.2)
+    * Copy to `bluecove.jar` %J9_HOME%\lib\jclMidp20\ext directory (remove `javax.microedition.io` classes from the jar)
+    * Copy all bluecove dlls to %J9_HOME%\bin directory or add -Dcom.ibm.oti.vm.bootstrap.library.path=%bluecove_dll_path%;%J9_HOME%\bin
+    * run app "%J9_HOME%\bin\j9.exe" -jcl:midp20 -Dmicroedition.connection.pkgs=com.intel.bluetooth -cp target\bctest.jar "-jxe:%J9_HOME%\lib\jclMidp20\jclMidp20.jxe" target\bctest.jad
+    * -Dmicroedition.connection.pkgs=com.intel.bluetooth is optonal if you place bluecove.jar to ext directory (Since v2.0.2)
 
     Tested on
-        # WebSphere Everyplace Micro Environment 5.7.2,	CLDC 1.1, MIDP 2.0 for Windows XP/X86
-        # WebSphere Everyplace Micro Environment 6.1.1,	CLDC 1.1, MIDP 2.0 for Windows XP/X86
+        * WebSphere Everyplace Micro Environment 5.7.2,	CLDC 1.1, MIDP 2.0 for Windows XP/X86
+        * WebSphere Everyplace Micro Environment 6.1.1,	CLDC 1.1, MIDP 2.0 for Windows XP/X86
 
 SUN CDCTK
 
-    # Take [http://snapshot.bluecove.org/special-build/ custom bluecove and intelbth dll build] for CDC and place in CDCTK10\bin
-    # Add -Dbluecove.native.resource=false when running emulator or remove original dlls from bluecove jar
-    # Run CDC emulator adding BlueCove to boot class path of emulator using -Xbootclasspath: argument
+    * Take [http://snapshot.bluecove.org/special-build/ custom bluecove and intelbth dll build] for CDC and place in CDCTK10\bin
+    * Add -Dbluecove.native.resource=false when running emulator or remove original dlls from bluecove jar
+    * Run CDC emulator adding BlueCove to boot class path of emulator using -Xbootclasspath: argument
 
 Debug
 
@@ -154,17 +154,17 @@ On Mac OS X
 
  Ant or maven2 are used as the build tool for java.
 
-  # [http://code.google.com/p/bluecove/downloads/list Download BlueCove]source release
-  # Unzip the source
-  # Run `ant` or `mvn`
-  # When using maven native Dlls are build as well
+  * [http://code.google.com/p/bluecove/downloads/list Download BlueCove]source release
+  * Unzip the source
+  * Run `ant` or `mvn`
+  * When using maven native Dlls are build as well
 
   If you are using `ant`:
 
-  # Go into `src\main\c\intelbth`
-  # Open `intelbth.sln`
-  # Compile the project for your platform (e.g. 'Winsock' for 'Win32')
-  # Run `ant jar` or `mvn`
+  * Go into `src\main\c\intelbth`
+  * Open `intelbth.sln`
+  * Compile the project for your platform (e.g. 'Winsock' for 'Win32')
+  * Run `ant jar` or `mvn`
 
  We don't use `ant` for official distributions! `build.xml` only provided for your convenience
 
