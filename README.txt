@@ -7,9 +7,11 @@
 
 BlueCove is a LGPL licensed JSR-82 implementation on Java Standard Edition (J2SE) that currently interfaces with
 the Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack. Originally developed by Intel Research and
-currently maintained by volunteers. The LGPL license allow to link and distribute commercial software with !BlueCove.
+currently maintained by volunteers. The LGPL license allow to link and distribute commercial software with BlueCove.
 
 Support for Linux BlueZ is added in BlueCove version 2.0.3 as additional [http://www.gnu.org/licenses/gpl.html GNU General Public License] module `bluecove-gpl`.
+
+JSR-82 Emulator added in BlueCove version 2.0.3 as additional module `bluecove-emu`.
 
  [http://bluecove.wiki.sourceforge.net/ BlueCove public contirbutions Wiki]
 
@@ -24,7 +26,8 @@ BlueCove provides an implementation of the JSR 82. Applications should use API d
   * WIDCOMM (Broadcom) BTW Stack software version 1.4.2.10 SP5 or above
   * BlueSoleil version 1.6.0, 2.3 or 3.2.2.8. Version 5.0.5 not supported.
   * Microsoft Bluetooth stack (currently this means Windows XP SP2 or newer and Windows Mobile 2003 or newer)
-  * PowerPC- or Intel-based Mac OS X 10.4 (Bluetooth v1.2) or late
+  * PowerPC- or Intel-based Mac OS X 10.4 (Bluetooth v1.2) or late (Since v2.0.2)
+  * Linux with BlueZ Bluetooth stack
   * A Bluetooth device supported by the WIDCOMM, BlueSoleil or Microsoft bluetooth stack
   * Java 1.1 or newer for the binary execution, Java 1.4 or newer to compile.
   * Another Bluetooth device to communicate with. See [http://code.google.com/p/bluecove/wiki/phones Complete list of the JSR-82 compliant phones]
@@ -50,7 +53,7 @@ The BlueCove developer community welcomes your participation.
 
 == Installation ==
 
-!BlueCove rely upon already installed native Bluetooth stack that comes with you operating system or Bluetooth USB device.
+BlueCove rely upon already installed native Bluetooth stack that comes with you operating system or Bluetooth USB device.
 Installation of the binary (already compiled) version of BlueCove is as follows:
 
   # [http://code.google.com/p/bluecove/downloads/list Download BlueCove] binary release
@@ -67,7 +70,7 @@ Bluetooth Stack
    Values "widcomm", "bluesoleil" or "winsock". By default winsock is selected if available.
 
    Another property "bluecove.stack.first" is used optimize stack detection.
-   If -Dbluecove.stack.first=widcomm then widcomm (bluecove.dll) stack is loaded first and if not available then !BlueCove will switch to winsock.
+   If -Dbluecove.stack.first=widcomm then widcomm (bluecove.dll) stack is loaded first and if not available then BlueCove will switch to winsock.
    By default intelbth.dll is loaded first.
 
    If multiple stacks are detected they are selected in following order: "winsock", "widcomm", "bluesoleil".
@@ -90,7 +93,7 @@ IBM J9 Personal Profile
         # WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile 1.0 for Windows XP/X86
 
 IBM J9 MIDP 2.0 Profile
-    # Copy to `bluecove.jar` %J9_HOME%\lib\jclMidp20\ext directory
+    # Copy to `bluecove.jar` %J9_HOME%\lib\jclMidp20\ext directory (remove `javax.microedition.io` classes from the jar)
     # Copy all bluecove dlls to %J9_HOME%\bin directory or add -Dcom.ibm.oti.vm.bootstrap.library.path=%bluecove_dll_path%;%J9_HOME%\bin
     # run app "%J9_HOME%\bin\j9.exe" -jcl:midp20 -Dmicroedition.connection.pkgs=com.intel.bluetooth -cp target\bctest.jar "-jxe:%J9_HOME%\lib\jclMidp20\jclMidp20.jxe" target\bctest.jad
     # -Dmicroedition.connection.pkgs=com.intel.bluetooth is optonal if you place bluecove.jar to ext directory (Since v2.0.2)
@@ -98,6 +101,12 @@ IBM J9 MIDP 2.0 Profile
     Tested on
         # WebSphere Everyplace Micro Environment 5.7.2,	CLDC 1.1, MIDP 2.0 for Windows XP/X86
         # WebSphere Everyplace Micro Environment 6.1.1,	CLDC 1.1, MIDP 2.0 for Windows XP/X86
+
+SUN CDCTK
+
+    # Take [http://snapshot.bluecove.org/special-build/ custom bluecove and intelbth dll build] for CDC and place in CDCTK10\bin
+    # Add -Dbluecove.native.resource=false when running emulator or remove original dlls from bluecove jar
+    # Run CDC emulator adding BlueCove to boot class path of emulator using -Xbootclasspath: argument
 
 Debug
 
@@ -141,7 +150,7 @@ On Windows
 On Mac OS X
 
   Xcode 2.5 or later can be used duirng build on Mac.
-  We use Xcode 3.0 on OSX 2.5.1 to build distribution.
+  We use Xcode 3.0 on OSX 2.5.2 to build distribution.
 
  Ant or maven2 are used as the build tool for java.
 
