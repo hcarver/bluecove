@@ -48,7 +48,7 @@
                 <!--4snapshot-->
                 <item name="Snapshot" href="http://www.pyx4me.com/maven2-snapshot/net/sf/bluecove/bluecove/#version#/"/>
                 <item name="SVN Access" href="source-repository.html"/>
-                <item name="Browse SVN" href="http://bluecove.googlecode.com/svn/trunk/"/>
+                <item name="Browse SVN" href="http://code.google.com/p/bluecove/source/browse/trunk"/>
             </item>
 
             <item name="Maven" href="maven.html"/>
