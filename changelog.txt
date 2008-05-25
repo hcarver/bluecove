@@ -2,6 +2,29 @@
 
 * 2.0.3 to released 2008-02-XX
 
+    2008-05-01 - 2008-05-25
+    * BlueCoveImpl.shutdown() API function
+    * Supports IBM J9 (MIDP and PPRO 1.0) on Linux, Sun CDC on Windows XP
+    * OBEX Operation Get supports InputStream
+
+    2008-04-17
+    * bluecove-emu: JSR 82 Emulator
+
+    2008-04-08
+    * Support Multiple Adapters and Bluetooth Stacks in same JVM
+
+    2008-03-06
+    * Fixed OBEX bug reciving Time Headers (Nokia)
+    * Proper behaviour for concurrent DiscoveryAgent.searchServices, "bluetooth.sd.trans.max"
+
+    2008-02-27
+    * Configurable "bluecove.inquiry.duration" for MS stack and OSX
+
+    2008-01-30 Vlad Skarzhevskyy
+    * Fixed major start problem on Mac OS X
+    * Fixed SDP SEQ8, SEQ16, UUID 16 and 36 bit
+    * Allow to load x64 libraries on Windows and Linux
+
     2008-01-19 Vlad Skarzhevskyy
     *  bluecove-gpl: RFCOMM and L2CAP client on Linux BlueZ
 
