@@ -496,6 +496,25 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
     return env->NewStringUTF(swVers);
 }
 
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceSupportedSoftwareVersion
+(JNIEnv *env, jobject) {
+    Edebug(("getLocalDeviceSupportedSoftwareVersion"));
+    NumVersion btVersion;
+    GetLocalDeviceVersion runnable;
+    runnable.pData[0] = &btVersion;
+    synchronousBTOperation(&runnable);
+    if (runnable.error) {
+        return 0;
+    }
+
+    jint v = 100 * (100 * (btVersion.majorRev >> 4) + (btVersion.majorRev & 0x0F)) + (btVersion.minorAndBugRev >> 4);
+    if (v < BLUETOOTH_VERSION_CURRENT) {
+        return v;
+    } else {
+        return BLUETOOTH_VERSION_CURRENT;
+    }
+}
+
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceManufacturer
 (JNIEnv *env, jobject) {
     Edebug(("getLocalDeviceManufacturer"));

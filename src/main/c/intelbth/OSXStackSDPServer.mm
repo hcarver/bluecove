@@ -21,7 +21,10 @@
 
 #import "OSXStackSDPServer.h"
 #import <IOBluetooth/objc/IOBluetoothSDPUUID.h>
+
+#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
 #import <IOBluetooth/objc/IOBluetoothHostController.h>
+#endif
 
 #define CPP_FILE "OSXStackSDPServer.mm"
 
@@ -380,6 +383,8 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceSequ
     }
 }
 
+#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
+
 BluetoothClassOfDevice updatedServiceClasses = 0;
 
 RUNNABLE(SetDeviceClass, "SetDeviceClass") {
@@ -413,8 +418,11 @@ RUNNABLE(SetDeviceClass, "SetDeviceClass") {
     }
 }
 
+#endif
+
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_setLocalDeviceServiceClassesImpl
  (JNIEnv *env, jobject peer, jint classOfDevice) {
+#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
     SetDeviceClass runnable;
     runnable.lData = classOfDevice;
     synchronousBTOperation(&runnable);
@@ -426,4 +434,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_setLocalDe
     } else {
         return JNI_FALSE;
     }
+#else
+    return JNI_FALSE;
+#endif
 }
