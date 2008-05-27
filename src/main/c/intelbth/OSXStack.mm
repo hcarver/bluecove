@@ -515,12 +515,12 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDevice
     #else
         compiledFor = 10603;
     #endif
-    log_info("compiled for         %d", compiledFor);
-    log_info(" this majorRev       %d", (int)btVersion.majorRev);
-    log_info(" this minorAndBugRev %d", (int)btVersion.minorAndBugRev);
+    //log_info("compiled for         %d", compiledFor);
+    //log_info(" this majorRev       %d", (int)btVersion.majorRev);
+    //log_info(" this minorAndBugRev %d", (int)btVersion.minorAndBugRev);
 
     jint v = (100 * ((100 * btVersion.majorRev) + ((btVersion.minorAndBugRev >> 4) & 0x0F))) + (btVersion.minorAndBugRev & 0x0F);
-    log_info(" this                %d", v);
+    //log_info(" this                %d", v);
     if (v < compiledFor) {
         return v;
     } else {
