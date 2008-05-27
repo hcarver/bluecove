@@ -491,7 +491,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
         return NULL;
     }
 
-    snprintf(swVers, 133, "%1d.%1d.%1d rev %d", btVersion.majorRev, btVersion.minorAndBugRev >> 4,
+    snprintf(swVers, 133, "%1d.%1d.%1d rev %d", btVersion.majorRev, (btVersion.minorAndBugRev >> 4) & 0x0F,
                           btVersion.minorAndBugRev & 0x0F, btVersion.nonRelRev);
     return env->NewStringUTF(swVers);
 }
@@ -507,11 +507,24 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDevice
         return 0;
     }
 
-    jint v = (100 * (100 * btVersion.majorRev) + (btVersion.minorAndBugRev >> 4)) + (btVersion.minorAndBugRev & 0x0F);
-    if (v < BLUETOOTH_VERSION_CURRENT) {
+    // Define starts with 0 and interprited as Octal constants
+    int compiledFor = 0;
+    #ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
+        // not Octal since API version 2
+        compiledFor = BLUETOOTH_VERSION_CURRENT;
+    #else
+        compiledFor = 10603;
+    #endif
+    log_info("compiled for         %d", compiledFor);
+    log_info(" this majorRev       %d", (int)btVersion.majorRev);
+    log_info(" this minorAndBugRev %d", (int)btVersion.minorAndBugRev);
+
+    jint v = (100 * ((100 * btVersion.majorRev) + ((btVersion.minorAndBugRev >> 4) & 0x0F))) + (btVersion.minorAndBugRev & 0x0F);
+    log_info(" this                %d", v);
+    if (v < compiledFor) {
         return v;
     } else {
-        return BLUETOOTH_VERSION_CURRENT;
+        return compiledFor;
     }
 }
 
