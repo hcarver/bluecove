@@ -491,8 +491,8 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
         return NULL;
     }
 
-    snprintf(swVers, 133, "%1d%1d.%1d.%1d rev %d", btVersion.majorRev >> 4, btVersion.majorRev & 0x0F,
-                          btVersion.minorAndBugRev >> 4, btVersion.minorAndBugRev & 0x0F, btVersion.nonRelRev);
+    snprintf(swVers, 133, "%1d.%1d.%1d rev %d", btVersion.majorRev, btVersion.minorAndBugRev >> 4,
+                          btVersion.minorAndBugRev & 0x0F, btVersion.nonRelRev);
     return env->NewStringUTF(swVers);
 }
 
@@ -507,7 +507,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDevice
         return 0;
     }
 
-    jint v = 100 * (100 * (btVersion.majorRev >> 4) + (btVersion.majorRev & 0x0F)) + (btVersion.minorAndBugRev >> 4);
+    jint v = (100 * (100 * btVersion.majorRev) + (btVersion.minorAndBugRev >> 4)) + (btVersion.minorAndBugRev & 0x0F);
     if (v < BLUETOOTH_VERSION_CURRENT) {
         return v;
     } else {
