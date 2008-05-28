@@ -271,6 +271,7 @@
                        <goals><goal>single</goal></goals>
                        <configuration>
                            <attach>false</attach>
+                           <tarLongFileMode>gnu</tarLongFileMode>
                            <descriptors>
                                <descriptor>assembly-distr-sources.xml</descriptor>
                            </descriptors>
