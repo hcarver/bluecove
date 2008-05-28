@@ -49,7 +49,7 @@
     * L2CAP unable to send and receive empty L2CAP packet
 
     * `ServiceRecord` attributes of `DataElement` types U_INT_8, INT_8, INT_16 and UINT_16 are not properly discovered (fixed in BTW-6_1_0_1501-SDK, you should make your binaries)
-    * On Vista WIDCOMM stack detected as Microsoft with all the benefits of one.
+    * On Vista WIDCOMM stack detected as Microsoft with all the benefits of one. If you need L2CAP support on Vista and Broadcom v6 use [http://snapshot.bluecove.org/special-build/ custom bluecove.dll build]
 
 == Winsock (Microsoft) ==
 
@@ -110,3 +110,18 @@ This does not happen when we used dongle bought from [http://bluesoleil.com blue
     * `ServiceRecord` attributes of `DataElement` types U_INT_8, INT_8 are not properly publshed by service on OS X 10.4
     * `ServiceRecord` attributes of `DataElement` type BOOL published as U_INT_1
     * `ServiceRecord` attributes of `DataElement` type URL published as STRING
+    * ServiceRecord.setDeviceServiceClasses(..) will work on Mac OS X 10.5 Leo and later.
+
+== Linux BlueZ ==
+
+*N.B.* Support for BlueZ is added in BlueCove version 2.0.3 as additional [http://www.gnu.org/licenses/gpl.html GNU General Public License] module `bluecove-gpl`.
+
+=== Requirements ===
+
+    * Package bluez-libs 3.7 or later installed on your system
+
+=== JSR-82 Limitations ===
+
+    * `LocalDevice.setDiscoverable(...)` supported only when running with superuser privileges.
+    * `ServiceRecord.setDeviceServiceClasses(..)` not supported.
+    * authenticate and encrypt not implemented.
