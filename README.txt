@@ -150,7 +150,7 @@ On Windows
 On Mac OS X
 
   Xcode 2.5 or later can be used duirng build on Mac.
-  We use Xcode 3.0 on OSX 2.5.2 to build distribution.
+  We use Xcode 3.0 on OSX 10.5.2 to build distribution.
 
  Ant or maven2 are used as the build tool for java.
 
