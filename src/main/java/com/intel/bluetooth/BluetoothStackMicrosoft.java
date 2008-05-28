@@ -578,7 +578,9 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 		boolean success = false;
 		try {
 
-			bind(socket);
+			synchronized (this) {
+				bind(socket);
+			}
 			listen(socket);
 
 			int channel = getsockchannel(socket);
@@ -595,7 +597,11 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 			success = true;
 		} finally {
 			if (!success) {
-				close(socket);
+				try {
+					close(socket);
+				} catch (IOException e) {
+					DebugLog.debug("close on failure", e);
+				}
 			}
 		}
 		return socket;
