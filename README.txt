@@ -108,6 +108,10 @@ SUN CDCTK
     * Add -Dbluecove.native.resource=false when running emulator or remove original dlls from bluecove jar
     * Run CDC emulator adding BlueCove to boot class path of emulator using -Xbootclasspath: argument
 
+MicroEmulator with JSR-82
+
+    * java -cp microemulator.jar;bluecove.jar org.microemu.app.Main --impl com.intel.bluetooth.BlueCoveImpl path2yourApp/YourApp.jad
+
 Debug
 
     If something goes wrong system property `-Dbluecove.debug=true` will enable debug prints in BlueCove code
