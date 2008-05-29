@@ -294,6 +294,7 @@ public class BlueCoveImpl {
 		}
 		// Initialization in WebStart.
 		DebugLog.isDebugEnabled();
+		copySystemProperty(null);
 	}
 
 	static int getNativeLibraryVersion() {
@@ -794,9 +795,9 @@ public class BlueCoveImpl {
 	}
 
 	void copySystemProperty(BluetoothStack bluetoothStack) {
+		UtilsJavaSE.setSystemProperty("bluetooth.api.version", "1.1");
+		UtilsJavaSE.setSystemProperty("obex.api.version", "1.1");
 		if (bluetoothStack != null) {
-			UtilsJavaSE.setSystemProperty("bluetooth.api.version", "1.1");
-			UtilsJavaSE.setSystemProperty("obex.api.version", "1.1");
 			String[] property = { "bluetooth.master.switch", "bluetooth.sd.attr.retrievable.max",
 					"bluetooth.connected.devices.max", "bluetooth.l2cap.receiveMTU.max", "bluetooth.sd.trans.max",
 					"bluetooth.connected.inquiry.scan", "bluetooth.connected.page.scan", "bluetooth.connected.inquiry",
