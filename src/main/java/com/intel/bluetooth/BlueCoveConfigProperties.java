@@ -87,16 +87,23 @@ public interface BlueCoveConfigProperties {
 	public static final String PROPERTY_LOCAL_DEVICE_ADDRESS = "bluecove.deviceAddress";
 
 	/**
-	 * JSR-82 air simulator server can be on remote computer
+	 * JSR-82 air simulator server can be on remote computer, default
+	 * 'localhost'.
 	 */
 	public static final String PROPERTY_EMULATOR_HOST = "bluecove.emu.rmiRegistryHost";
 
 	/**
 	 * JSR-82 air simulator server listen on different port, default 8090.
 	 * <p>
-	 * Use 0 on the client to enable in process server
+	 * Use 0 on the client to enable in process server, RMI will not be used.
 	 */
 	public static final String PROPERTY_EMULATOR_PORT = "bluecove.emu.rmiRegistryPort";
+
+	/**
+	 * JSR-82 air simulator server and RMI registry can be started inside client
+	 * JVM, default 'false'.
+	 */
+	public static final String PROPERTY_EMULATOR_RMI_REGISTRY = "bluecove.emu.rmiRegistry";
 
 	/**
 	 * Some properties can't be changed at runtime once the Stack was
