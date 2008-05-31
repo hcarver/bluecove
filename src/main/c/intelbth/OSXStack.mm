@@ -327,7 +327,9 @@ RUNNABLE(GetLocalDeviceBluetoothAddress, "GetLocalDeviceBluetoothAddress") {
         return;
     }
     BluetoothDeviceAddress localAddress;
-    if (IOBluetoothLocalDeviceReadAddress(&localAddress, NULL, NULL, NULL)) {
+    IOReturn rc = IOBluetoothLocalDeviceReadAddress(&localAddress, NULL, NULL, NULL);
+    if (rc != kIOReturnSuccess) {
+        ndebug(("LocalDeviceReadAddress error [0x%08x]", rc));
         error = 2;
         return;
     }
