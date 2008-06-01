@@ -642,7 +642,26 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
         return INQUIRY_ERROR;
     }
 
-    if (!stack->StartInquiry()) {
+    // synchronized (BluetoothStackWIDCOMM instance) {
+    if (env->MonitorEnter(peer) != JNI_OK) {
+        if (stack != NULL) {
+            stack->deviceInquiryInProcess = FALSE;
+        }
+        throwRuntimeException(env, "Monitor error");
+        return INQUIRY_ERROR;
+    }
+
+    BOOL startOk = stack->StartInquiry();
+
+    if (env->MonitorExit(peer) != JNI_OK) {
+        if (stack != NULL) {
+            stack->deviceInquiryInProcess = FALSE;
+        }
+        throwRuntimeException(env, "Monitor error");
+        return INQUIRY_ERROR;
+    }
+
+    if (!startOk) {
         debug(("deviceInquiryStart error"));
         if (stack != NULL) {
             stack->throwExtendedBluetoothStateException(env);
@@ -749,7 +768,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_peekRem
 JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runSearchServicesImpl
 (JNIEnv *env, jobject peer, jobject startedNotify, jbyteArray uuidValue, jlong address) {
     if (stack == NULL) {
-        throwIOException(env, cSTACK_CLOSED);
+        throwBluetoothStateException(env, cSTACK_CLOSED);
         return 0;
     }
     debug(("StartSearchServices"));
@@ -782,10 +801,22 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
     stack->searchServicesComplete = FALSE;
     stack->searchServicesTerminated = FALSE;
 
-    BOOL discoveryStarted = TRUE;
-    if (!stack->StartDiscovery(bda, p_service_guid)) {
+    // synchronized (BluetoothStackWIDCOMM instance) {
+    if (env->MonitorEnter(peer) != JNI_OK) {
+        throwRuntimeException(env, "Monitor error");
+        return NULL;
+    }
+
+    BOOL discoveryStarted = stack->StartDiscovery(bda, p_service_guid);
+
+    if (env->MonitorExit(peer) != JNI_OK) {
+        throwRuntimeException(env, "Monitor error");
+        return NULL;
+    }
+
+    if (!discoveryStarted) {
         if (stack == NULL) {
-            throwIOException(env, cSTACK_CLOSED);
+            throwBluetoothStateException(env, cSTACK_CLOSED);
             return NULL;
         }
         #ifndef _WIN32_WCE
@@ -802,7 +833,7 @@ JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runS
     }
 
     if (stack == NULL) {
-        throwIOException(env, cSTACK_CLOSED);
+        throwBluetoothStateException(env, cSTACK_CLOSED);
         return NULL;
     }
 
