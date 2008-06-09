@@ -41,6 +41,12 @@ WIDCOMMStackRfCommPort::WIDCOMMStackRfCommPort() {
             FALSE,     // initial state is NOT signaled
             NULL);    // object not named
 
+    hDataTransmitEvent = CreateEvent(
+            NULL,     // no security attributes
+            FALSE,     // auto-reset event
+            FALSE,     // initial state is NOT signaled
+            NULL);    // object not named
+
 	openConnections ++;
 }
 
@@ -67,6 +73,7 @@ WIDCOMMStackRfCommPort::~WIDCOMMStackRfCommPort() {
 	}
 	isConnected = FALSE;
 
+    CloseHandle(hDataTransmitEvent);
 	CloseHandle(hDataReceivedEvent);
 	openConnections --;
 }
@@ -104,6 +111,13 @@ void WIDCOMMStackRfCommPort::OnEventReceived (UINT32 event_code) {
 		isConnectionError = TRUE;
 		receiveBuffer.setOverflown();
 		SetEvent(hConnectionEvent);
+	} else if (PORT_EV_TXCHAR & event_code) {
+	    // Any character transmitted
+	    SetEvent(hDataTransmitEvent);
+	} else if (PORT_EV_TXEMPTY & event_code) {
+	    // Transmit Queue Empty
+	    // TODO use in flush();
+	    SetEvent(hDataTransmitEvent);
 	} else if ((!isConnected) && (!isConnectionError) && (PORT_EV_RXFLAG & event_code)) {
 	    ndebug(("e.rf(%i) OnEventReceived not yet connected, 0x%x", internalHandle, event_code));
 	    isConnectionErrorType = 3;
@@ -445,51 +459,17 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 	return rf->receiveBuffer.available();
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfWrite__JI
-(JNIEnv *env, jobject peer, jlong handle, jint b) {
-	WIDCOMMStackRfCommPort* rf = validRfCommHandle(env, handle);
-	if (rf == NULL) {
-		return;
-	}
-	debug(("rf(%i) write(int)", rf->internalHandle));
-	if (!rf->isConnected || rf->isClosing) {
-		throwIOException(env, cCONNECTION_IS_CLOSED);
-		return;
-	}
-
-	while ((rf->isConnected) && (!rf->isClosing)) {
-		UINT8 signal;
-		rf->GetModemStatus(&signal);
-		if (signal & PORT_CTSRTS_ON) {
-			break;
-		}
-		Sleep(200);
-	}
-
-	char c = (char)b;
-	UINT16 written = 0;
-	while ((written == 0) && rf->isConnected) {
-		CRfCommPort::PORT_RETURN_CODE rc = rf->Write((void*)(&c), 1, &written);
-		if (rc != CRfCommPort::SUCCESS) {
-			throwIOException(env, "Failed to write");
-			return;
-		}
-		if (written == 0) {
-			debug(("write(int) write again"));
-		}
-		if (isCurrentThreadInterrupted(env, peer)) {
-			return;
-		}
-	}
-}
-
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfWrite__J_3BII
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectionRfWriteImpl
 (JNIEnv *env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
 	WIDCOMMStackRfCommPort* rf = validRfCommHandle(env, handle);
 	if (rf == NULL) {
 		return;
 	}
 	debug(("rf(%i) write(byte[%i])", rf->internalHandle, len));
+	if (len > 0x10000) {
+	    throwRuntimeException(env, "64K Array max");
+	    return;
+	}
 	if (!rf->isConnected || rf->isClosing) {
 		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return;
@@ -497,7 +477,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
 
-	UINT16 done = 0;
+	jint done = 0;
 
 	while ((rf->isConnected) && (!rf->isClosing)) {
 		UINT8 signal;
@@ -506,20 +486,42 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			break;
 		}
 		Sleep(200);
+		if (isCurrentThreadInterrupted(env, peer)) {
+		    return;
+		}
 	}
+    HANDLE hEvents[2];
+	hEvents[0] = rf->hConnectionEvent;
+	hEvents[1] = rf->hDataTransmitEvent;
+
+	BOOL waitForTransmit = false;
 
 	while ((done < len) && rf->isConnected && (!rf->isClosing)) {
+	    if (waitForTransmit) {
+	        // second write since not all data was written by first call
+	        debug(("rf(%i) write(byte[%i]) continue from [%i]", rf->internalHandle, len, done));
+	        DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, 500);
+			if (rc == WAIT_FAILED) {
+				env->ReleaseByteArrayElements(b, bytes, 0);
+				throwRuntimeException(env, "WaitForMultipleObjects");
+				return;
+			}
+			if (rc != WAIT_TIMEOUT) {
+				debug(("write waits returns %s", waitResultsString(rc)));
+			}
+	    }
 		UINT16 written = 0;
-		CRfCommPort::PORT_RETURN_CODE rc = rf->Write((void*)(bytes + off + done), (UINT16)(len - done), &written);
-		if (rc != CRfCommPort::SUCCESS) {
+		UINT16 write_len = (UINT16)(len - done);
+		CRfCommPort::PORT_RETURN_CODE rc = rf->Write((void*)(bytes + off + done), write_len, &written);
+		if ((rc != CRfCommPort::SUCCESS) || (written > write_len)) {
 			throwIOException(env, "Failed to write");
 			break;
 		}
 		done += written;
 		if (isCurrentThreadInterrupted(env, peer)) {
-			debug(("Interrupted while writing"));
 			break;
 		}
+		waitForTransmit = true;
 	}
 
 	env->ReleaseByteArrayElements(b, bytes, 0);

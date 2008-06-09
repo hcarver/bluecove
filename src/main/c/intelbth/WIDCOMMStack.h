@@ -219,6 +219,7 @@ public:
 	BOOL isConnectionError;
 
 	HANDLE hDataReceivedEvent;
+	HANDLE hDataTransmitEvent;
 
 	UINT32 other_event_code;
 
