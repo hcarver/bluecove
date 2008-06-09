@@ -1,6 +1,9 @@
 @version $Id$
 
-* 2.0.3 to released 2008-02-XX
+* 2.0.3 to released 2008-07-XX
+
+    2008-06-01 - 2008-06-..
+    * Fixed 64K buffer limit on WIDCOMM Stack
 
     2008-05-01 - 2008-05-25
     * BlueCoveImpl.shutdown() API function
