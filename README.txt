@@ -102,7 +102,7 @@ IBM J9 MIDP 2.0 Profile
         * WebSphere Everyplace Micro Environment 5.7.2,	CLDC 1.1, MIDP 2.0 for Windows XP/X86
         * WebSphere Everyplace Micro Environment 6.1.1, CLDC 1.1, MIDP 2.0 for Windows XP/X86 and Linux/X86
 
-SUN CDCTK
+SUN CDC
 
     * Take [http://snapshot.bluecove.org/special-build/ custom bluecove and intelbth dll build] for CDC and place in CDCTK10\bin
     * Add -Dbluecove.native.resource=false when running emulator or remove original dlls from bluecove jar
