@@ -177,8 +177,8 @@ public class BlueCoveImpl {
 
 		private Hashtable configProperties = new Hashtable();
 
-		private static void initBluetoothStack() throws BluetoothStateException {
-			instance().getBluetoothStack();
+		private static BluetoothStack getBluetoothStack() throws BluetoothStateException {
+			return instance().getBluetoothStack();
 		}
 
 		public String toString() {
@@ -509,7 +509,7 @@ public class BlueCoveImpl {
 	 */
 	public static Vector getLocalDevicesID() throws BluetoothStateException {
 		Vector v = new Vector();
-		String ids = BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceProperty(
+		String ids = BluetoothStackHolder.getBluetoothStack().getLocalDeviceProperty(
 				BlueCoveLocalDeviceProperties.LOCAL_DEVICE_DEVICES_LIST);
 		if (ids != null) {
 			UtilsStringTokenizer tok = new UtilsStringTokenizer(ids, ",");
@@ -614,7 +614,7 @@ public class BlueCoveImpl {
 	 */
 	public static synchronized Object getThreadBluetoothStackID() throws BluetoothStateException {
 		useThreadLocalBluetoothStack();
-		BluetoothStackHolder.initBluetoothStack();
+		BluetoothStackHolder.getBluetoothStack();
 		return threadStack.get();
 	}
 
@@ -840,7 +840,7 @@ public class BlueCoveImpl {
 	}
 
 	public String getLocalDeviceFeature(int featureID) throws BluetoothStateException {
-		return ((getBluetoothStack().getFeatureSet() & featureID) != 0) ? TRUE : FALSE;
+		return ((BluetoothStackHolder.getBluetoothStack().getFeatureSet() & featureID) != 0) ? TRUE : FALSE;
 	}
 
 	private BluetoothStack createDetectorOnWindows(String stackFirst) throws BluetoothStateException {
