@@ -493,6 +493,34 @@ public class BlueCoveImpl {
 	}
 
 	/**
+	 * List the local adapters that can be initialized using configuration
+	 * property "bluecove.deviceID".
+	 * 
+	 * The first stack/adapter would be initialized if not initialized already,
+	 * you can exclude it from the list.
+	 * 
+	 * The function return empty list on non bluez environment.
+	 * 
+	 * @return List of Strings
+	 * @throws BluetoothStateException
+	 *             is stack interface can't be initialized
+	 * @see com.intel.bluetooth.BlueCoveConfigProperties.PROPERTY_LOCAL_DEVICE_ID
+	 * @see com.intel.bluetooth.BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_DEVICE_ID
+	 */
+	public static Vector getLocalDevicesID() throws BluetoothStateException {
+		Vector v = new Vector();
+		String ids = BlueCoveImpl.instance().getBluetoothStack().getLocalDeviceProperty(
+				BlueCoveLocalDeviceProperties.LOCAL_DEVICE_DEVICES_LIST);
+		if (ids != null) {
+			UtilsStringTokenizer tok = new UtilsStringTokenizer(ids, ",");
+			while (tok.hasMoreTokens()) {
+				v.addElement(tok.nextToken());
+			}
+		}
+		return v;
+	}
+
+	/**
 	 * API that enables the use of Multiple Adapters and Bluetooth Stacks in
 	 * parallel in the same JVM. Each thread should call
 	 * setThreadBluetoothStackID() before using JSR-82 API.
@@ -519,6 +547,7 @@ public class BlueCoveImpl {
 	 * final Object id1 = BlueCoveImpl.getThreadBluetoothStackID();
 	 * ... do some work with stack 1
 	 * 
+	 * // Illustrates attaching thread to already initialized stack interface
 	 * Thread t1 = new Thread() {
 	 *    public void run() {
 	 *        BlueCoveImpl.setThreadBluetoothStackID(id1);
@@ -529,6 +558,7 @@ public class BlueCoveImpl {
 	 * };
 	 * t1.start(); 
 	 * 
+	 * // Illustrates initialization of new/different stack interface in new thread
 	 * // Start another thread that is using different stack 
 	 * Thread t2 = new Thread() {
 	 *    public void run() {
@@ -545,7 +575,7 @@ public class BlueCoveImpl {
 	 * 
 	 * Thread t3 = new Thread() {
 	 *    public void run() {
-	 *    	  // Wrong Thread StackID not configured
+	 *    	  // Wrong, will produce error: Thread StackID not configured
 	 *        Connector.open(&quot;btspp://12345678:1&quot;);
 	 *        .....
 	 *    }
@@ -625,7 +655,8 @@ public class BlueCoveImpl {
 
 	/**
 	 * Detach BluetoothStack from ThreadLocal. Used for removing itself from
-	 * container threads.
+	 * container threads. Also can be use to initialize different stack in the
+	 * same thread.
 	 */
 	public static synchronized void releaseThreadBluetoothStack() {
 		if (threadStack == null) {

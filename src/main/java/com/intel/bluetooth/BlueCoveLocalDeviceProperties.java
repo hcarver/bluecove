@@ -60,4 +60,18 @@ public interface BlueCoveLocalDeviceProperties {
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_OPEN_CONNECTIONS = "bluecove.connections";
 
+	/**
+	 * If Stack support multiple bluetooth adapters return selected one ID.
+	 * (Linux BlueZ and Emulator)
+	 * 
+	 * @see com.intel.bluetooth.BlueCoveConfigProperties.PROPERTY_LOCAL_DEVICE_ID
+	 */
+	public static final String LOCAL_DEVICE_PROPERTY_DEVICE_ID = BlueCoveConfigProperties.PROPERTY_LOCAL_DEVICE_ID;
+
+	/**
+	 * List the local adapters supported by the system. Returns comma separated
+	 * integer list.
+	 */
+	public static final String LOCAL_DEVICE_DEVICES_LIST = "bluecove.local_devices_ids";
+
 }
