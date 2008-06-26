@@ -112,5 +112,6 @@ public:
 
 
 extern OSXStack* stack;
+extern jint localDeviceSupportedSoftwareVersion;
 
 #endif // __OSXSTACK_H__

@@ -388,7 +388,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
             RFCOMMChannelCloseExec(clientComm);
             return 0;
         }
-        debug(("RFCOMM client connected"));
-        return clientComm->internalHandle;;
+        debug(("rfcomm (%i) client connected", clientComm->internalHandle));
+        debug(("rfcomm MTU %i", clientComm->rfcommChannelMTU));
+        return clientComm->internalHandle;
     }
 }

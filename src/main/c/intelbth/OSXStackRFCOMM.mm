@@ -284,7 +284,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfO
         RFCOMMChannelCloseExec(comm);
         return 0;
     }
-    debug(("rfcomm connected"));
+    debug(("rfcomm (%i) connected", comm->internalHandle));
+    debug(("rfcomm MTU %i", comm->rfcommChannelMTU));
 	return comm->internalHandle;
 }
 
@@ -512,11 +513,11 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 
     jbyte *bytes = env->GetByteArrayElements(b, 0);
 
-	UInt16 done = 0;
+	jint done = 0;
     BOOL error = false;
 	while ((stack != NULL) && (!error) && (done < len) && (comm->isConnected) && (!comm->isClosed)) {
-		UInt16 numBytesRemaining = len - done;
-		UInt16 writeLen = ( ( numBytesRemaining > comm->rfcommChannelMTU ) ? comm->rfcommChannelMTU :  numBytesRemaining );
+		jint numBytesRemaining = len - done;
+		UInt16 writeLen = (UInt16)( ( numBytesRemaining > comm->rfcommChannelMTU ) ? comm->rfcommChannelMTU :  numBytesRemaining );
 		RFCOMMConnectionWrite runnable;
 	    runnable.comm = comm;
 	    runnable.data = (void*)(bytes + off + done);
@@ -526,11 +527,16 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
             throwIOException(env, "Failed to write [0x%08x]", runnable.ioerror);
 			break;
         }
+        int waitCount = 1;
         while ((stack != NULL) &&( comm->isConnected) && (!comm->isClosed)) {
             // Already finished
             if (runnable.writeComplete) {
                 break;
             }
+            if ((waitCount % 10) == 0) {
+                debug(("rfcomm wait for writeComplete %i, %i of %i", waitCount, done, len));
+            }
+            waitCount ++;
             MPEventFlags flags;
             OSStatus err = MPWaitForEvent(comm->writeCompleteNotificationEvent, &flags, kDurationMillisecond * 500);
             if (err == kMPTimeoutErr) {
@@ -542,7 +548,6 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 			    break;
 		    }
             if (isCurrentThreadInterrupted(env, peer)) {
-			    debug(("Interrupted while writing"));
 			    error = true;
 			    break;
 		    }

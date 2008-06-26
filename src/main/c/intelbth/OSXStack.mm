@@ -22,9 +22,14 @@
 #include "OSXStack.h"
 #include <pthread.h>
 
+#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
+#import <IOBluetooth/objc/IOBluetoothHostController.h>
+#endif
+
 #define CPP_FILE "OSXStack.mm"
 
 OSXStack* stack = NULL;
+jint localDeviceSupportedSoftwareVersion = 0;
 
 OSXStack::OSXStack() {
     deviceInquiryInProcess = FALSE;
@@ -322,11 +327,27 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_destroyImpl
 // --- LocalDevice
 
 RUNNABLE(GetLocalDeviceBluetoothAddress, "GetLocalDeviceBluetoothAddress") {
+    BluetoothDeviceAddress localAddress;
     if (!IOBluetoothLocalDeviceAvailable()) {
         error = 1;
         return;
     }
-    BluetoothDeviceAddress localAddress;
+#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
+    if (localDeviceSupportedSoftwareVersion >= BLUETOOTH_VERSION_2_0) {
+        IOBluetoothHostController* controller = [IOBluetoothHostController defaultController];
+        if (controller != NULL) {
+            IOReturn rc = [controller getAddress:&localAddress];
+            if (rc != kIOReturnSuccess) {
+                ndebug(("IOBluetoothHostController.getAddress error [0x%08x]", rc));
+                error = 2;
+                return;
+            }
+            OSxAddrToString(sData, &localAddress);
+            return;
+        }
+    }
+#endif
+    // Tiger version
     IOReturn rc = IOBluetoothLocalDeviceReadAddress(&localAddress, NULL, NULL, NULL);
     if (rc != kIOReturnSuccess) {
         ndebug(("LocalDeviceReadAddress error [0x%08x]", rc));
@@ -524,10 +545,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDevice
     jint v = (100 * ((100 * btVersion.majorRev) + ((btVersion.minorAndBugRev >> 4) & 0x0F))) + (btVersion.minorAndBugRev & 0x0F);
     //log_info(" this                %d", v);
     if (v < compiledFor) {
-        return v;
+        localDeviceSupportedSoftwareVersion = v;
     } else {
-        return compiledFor;
+        localDeviceSupportedSoftwareVersion = compiledFor;
     }
+    return localDeviceSupportedSoftwareVersion;
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDeviceManufacturer
