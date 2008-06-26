@@ -53,7 +53,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	private int receive_mtu_max = -1;
 
-    private int localDeviceSupportedSoftwareVersion;
+	private int localDeviceSupportedSoftwareVersion;
 
 	private long lastDeviceDiscoveryTime = 0;
 
@@ -61,7 +61,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	private Thread localDeviceServiceClassMaintainer = null;
 
-    private static final int BLUETOOTH_SOFTWARE_VERSION_2_0_0  = 20000;
+	private static final int BLUETOOTH_SOFTWARE_VERSION_2_0_0 = 20000;
 
 	BluetoothStackOSX() {
 
@@ -71,14 +71,14 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#isNativeCodeLoaded()
 	 */
 	public native boolean isNativeCodeLoaded();
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#requireNativeLibraries()
 	 */
 	public LibraryInformation[] requireNativeLibraries() {
@@ -95,15 +95,15 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
 	 */
 	public int getFeatureSet() {
-	    if (localDeviceSupportedSoftwareVersion >= BLUETOOTH_SOFTWARE_VERSION_2_0_0) {
-		    return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES;
-	    } else {
-	        return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES;
-	    }
+		if (localDeviceSupportedSoftwareVersion >= BLUETOOTH_SOFTWARE_VERSION_2_0_0) {
+			return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES;
+		} else {
+			return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES;
+		}
 	}
 
 	public native int getLibraryVersion();
@@ -116,8 +116,8 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 		if (singleInstance != null) {
 			throw new BluetoothStateException("Only one instance of " + getStackID() + " stack supported");
 		}
-        localDeviceSupportedSoftwareVersion = getLocalDeviceSupportedSoftwareVersion();
-        DebugLog.debug("localDeviceSupportedSoftwareVersion", localDeviceSupportedSoftwareVersion);
+		localDeviceSupportedSoftwareVersion = getLocalDeviceSupportedSoftwareVersion();
+		DebugLog.debug("localDeviceSupportedSoftwareVersion", localDeviceSupportedSoftwareVersion);
 		if (!initializeImpl()) {
 			throw new BluetoothStateException("OS X BluetoothStack not found");
 		}
@@ -125,9 +125,9 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 	}
 
 	public void destroy() {
-	    if (localDeviceSupportedSoftwareVersion >= BLUETOOTH_SOFTWARE_VERSION_2_0_0) {
-		    setLocalDeviceServiceClassesImpl(0);
-	    }
+		if (localDeviceSupportedSoftwareVersion >= BLUETOOTH_SOFTWARE_VERSION_2_0_0) {
+			setLocalDeviceServiceClassesImpl(0);
+		}
 		singleInstance = null;
 	}
 
@@ -135,7 +135,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
 	 */
 	public boolean isCurrentThreadInterruptedCallback() {
@@ -185,13 +185,13 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#setLocalDeviceServiceClasses(int)
 	 */
 	public synchronized void setLocalDeviceServiceClasses(int classOfDevice) {
-	    if (localDeviceSupportedSoftwareVersion < BLUETOOTH_SOFTWARE_VERSION_2_0_0) {
-	        return;
-	    }
+		if (localDeviceSupportedSoftwareVersion < BLUETOOTH_SOFTWARE_VERSION_2_0_0) {
+			return;
+		}
 		if (classOfDevice != localDeviceServiceClasses) {
 			setLocalDeviceServiceClassesImpl(classOfDevice);
 		}
@@ -211,7 +211,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	private native int getLocalDeviceL2CAPMTUMaximum();
 
-    private native int getLocalDeviceSupportedSoftwareVersion();
+	private native int getLocalDeviceSupportedSoftwareVersion();
 
 	private native String getLocalDeviceSoftwareVersionInfo();
 
@@ -304,7 +304,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#authenticateRemoteDevice(long,
 	 *      java.lang.String)
 	 */
@@ -385,7 +385,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 	}
 
 	/**
-	 *
+	 * 
 	 * @param address
 	 *            Bluetooth device address
 	 * @return number of service records found on device
@@ -531,7 +531,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
 	 */
 	public boolean rfEncrypt(long address, long handle, boolean on) throws IOException {
@@ -656,7 +656,10 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 			int attrID = ids[i];
 			switch (attrID) {
 			case BluetoothConsts.ServiceRecordHandle:
+				continue;
 			case BluetoothConsts.ServiceClassIDList:
+				// TODO update serviceClass
+				continue;
 			case BluetoothConsts.ProtocolDescriptorList:
 			case BluetoothConsts.AttributeIDServiceName:
 				continue;
@@ -701,7 +704,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams,
 	 *      int, int)
 	 */
@@ -721,7 +724,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
 	 */
 	public native void l2CloseClientConnection(long handle) throws IOException;
@@ -733,7 +736,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams,
 	 *      int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
@@ -760,7 +763,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long,
 	 *      com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
@@ -771,14 +774,14 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection(long)
 	 */
 	public native long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseServerConnection(long)
 	 */
 	public void l2CloseServerConnection(long handle) throws IOException {
@@ -789,7 +792,7 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long,
 	 *      com.intel.bluetooth.ServiceRecordImpl)
 	 */
@@ -799,56 +802,56 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetSecurityOpt(long, int)
 	 */
 	public native int l2GetSecurityOpt(long handle, int expected) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
 	 */
 	public native boolean l2Ready(long handle) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
 	 */
 	public native int l2Receive(long handle, byte[] inBuf) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
 	public native void l2Send(long handle, byte[] data) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetReceiveMTU(long)
 	 */
 	public native int l2GetReceiveMTU(long handle) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetTransmitMTU(long)
 	 */
 	public native int l2GetTransmitMTU(long handle) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
 	 */
 	public native long l2RemoteAddress(long handle) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
 	 */
 	public boolean l2Encrypt(long address, long handle, boolean on) throws IOException {

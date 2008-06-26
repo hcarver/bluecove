@@ -701,7 +701,10 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 			int id = ids[i];
 			switch (id) {
 			case BluetoothConsts.ServiceRecordHandle:
+				continue;
 			case BluetoothConsts.ServiceClassIDList:
+				// TODO add native function to update serviceClass
+				continue;
 			case BluetoothConsts.ProtocolDescriptorList:
 			case BluetoothConsts.AttributeIDServiceName:
 				continue;
