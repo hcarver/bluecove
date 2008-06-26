@@ -503,9 +503,9 @@ public class BlueCoveImpl {
 	 * 
 	 * @return List of Strings
 	 * @throws BluetoothStateException
-	 *             is stack interface can't be initialized
-	 * @see com.intel.bluetooth.BlueCoveConfigProperties.PROPERTY_LOCAL_DEVICE_ID
-	 * @see com.intel.bluetooth.BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_DEVICE_ID
+	 *             if stack interface can't be initialized
+	 * @see com.intel.bluetooth.BlueCoveConfigProperties#PROPERTY_LOCAL_DEVICE_ID
+	 * @see com.intel.bluetooth.BlueCoveLocalDeviceProperties#LOCAL_DEVICE_PROPERTY_DEVICE_ID
 	 */
 	public static Vector getLocalDevicesID() throws BluetoothStateException {
 		Vector v = new Vector();
@@ -757,27 +757,29 @@ public class BlueCoveImpl {
 	 * initialized. If <code>null</code> is passed as the <code>value</code>
 	 * then the property will be removed.
 	 * 
-	 * @param key
+	 * @param name
+	 *            property name
 	 * @param value
+	 *            property value
 	 * 
-	 * @see com.intel.bluetooth.BlueCoveLocalDeviceProperties
+	 * @see com.intel.bluetooth.BlueCoveConfigProperties
 	 * 
 	 * @exception IllegalArgumentException
 	 *                if the stack already initialized and property can't be
 	 *                changed.
 	 */
-	public static void setConfigProperty(String key, String value) {
-		if (key == null) {
+	public static void setConfigProperty(String name, String value) {
+		if (name == null) {
 			throw new NullPointerException("key is null");
 		}
 		BluetoothStackHolder sh = currentStackHolder(true);
-		if ((sh.bluetoothStack != null) && (initializationProperties.contains(key))) {
+		if ((sh.bluetoothStack != null) && (initializationProperties.contains(name))) {
 			throw new IllegalArgumentException("BlueCove Stack already initialized");
 		}
 		if (value == null) {
-			sh.configProperties.remove(key);
+			sh.configProperties.remove(name);
 		} else {
-			sh.configProperties.put(key, value);
+			sh.configProperties.put(name, value);
 		}
 	}
 
@@ -884,6 +886,13 @@ public class BlueCoveImpl {
 		throw new BluetoothStateException("BlueCove libraries not available");
 	}
 
+	/**
+	 * @deprecated use setConfigProperty("bluecove.stack", ...);
+	 * 
+	 * @param stack
+	 * @return stack ID
+	 * @throws BluetoothStateException
+	 */
 	public String setBluetoothStack(String stack) throws BluetoothStateException {
 		return setBluetoothStack(stack, null).getStackID();
 	}
