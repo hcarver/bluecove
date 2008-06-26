@@ -387,15 +387,19 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_runSear
         throwRuntimeException(env, "Fail to get MethodID servicesFoundCallback");
         return SERVICE_SEARCH_ERROR;
     }
-    debug(("services found: %i", dwLength / sizeof(SPPEX_SERVICE_INFO)));
-    for(DWORD i = 0; i < dwLength / sizeof(SPPEX_SERVICE_INFO); i++) {
+    DWORD foundCount = dwLength / sizeof(SPPEX_SERVICE_INFO);
+    debug(("services found: %i", foundCount));
+    for(DWORD i = 0; i < foundCount; i++) {
         SPPEX_SERVICE_INFO* sr = &(sppex_svc_info[i]);
-        if (sr->dwSDAPRecordHanlde == 0) {
+        if ((sr == NULL) || (sr->dwSDAPRecordHanlde == 0)) {
+            debug((" ignore null sppex_svc_info"));
             continue;
         }
 
         debug(("SDAP Record Handle: %u", sr->dwSDAPRecordHanlde));
+        if (sr->szServiceName != NULL) {
         debug(("      Service Name: %s", sr->szServiceName));
+        }
         debug(("   Service Channel: %02X", sr->ucServiceChannel));
         debug(("         Com Index: %u", (unsigned int)(sr->ucComIndex)));
 
@@ -1277,7 +1281,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
                     Edebug(("write(byte) GetOverlappedResult return ERROR_SUCCESS"));
                     break;
                 }
-                if (last_error != ERROR_IO_PENDING) {
+                if ((last_error != ERROR_IO_PENDING) && (last_error != ERROR_IO_INCOMPLETE)) {
                     debug(("connection handle [%li] [%p]", handle, rf->hComPort));
                     throwIOExceptionWinErrorMessage(env, "Failed to write byte overlapped", last_error);
                     rf->tDec();
@@ -1357,7 +1361,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
                         Edebug(("write(byte[]) GetOverlappedResult return ERROR_SUCCESS"));
                         break;
                     }
-                    if (last_error != ERROR_IO_PENDING) {
+                    if ((last_error != ERROR_IO_PENDING) && (last_error != ERROR_IO_INCOMPLETE)) {
                         env->ReleaseByteArrayElements(b, bytes, 0);
                         debug(("connection handle [%li] [%p]", handle, rf->hComPort));
                         throwIOExceptionWinErrorMessage(env, "Failed to write array overlapped", last_error);
@@ -1376,7 +1380,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
                 wait = (rc != WAIT_TIMEOUT);
             }
         }
-        if (numberOfBytesWritten <= 0) {
+        if (numberOfBytesWritten < 0) {
             env->ReleaseByteArrayElements(b, bytes, 0);
             throwIOException(env, "Failed to write full array");
             rf->tDec();
