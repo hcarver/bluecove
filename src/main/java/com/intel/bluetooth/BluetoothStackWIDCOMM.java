@@ -681,21 +681,43 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 		return out.toByteArray();
 	}
 
+	private native void sdpServiceAddServiceClassIdList(long handle, char handleType, byte[][] uuidValues)
+			throws ServiceRegistrationException;
+
 	private void sdpServiceUpdateServiceRecord(long handle, char handleType, ServiceRecordImpl serviceRecord)
 			throws ServiceRegistrationException {
 		int[] ids = serviceRecord.getAttributeIDs();
 		if ((ids == null) || (ids.length == 0)) {
 			return;
 		}
+		// Update the records that can be update only once
+		DataElement serviceClassIDList = serviceRecord.getAttributeValue(BluetoothConsts.ServiceClassIDList);
+		if (serviceClassIDList.getDataType() != DataElement.DATSEQ) {
+			throw new ServiceRegistrationException("Invalid serviceClassIDList");
+		}
+		Enumeration en = (Enumeration) serviceClassIDList.getValue();
+		Vector uuids = new Vector();
+		while (en.hasMoreElements()) {
+			DataElement u = (DataElement) en.nextElement();
+			if (u.getDataType() != DataElement.UUID) {
+				throw new ServiceRegistrationException("Invalid serviceClassIDList element " + u);
+			}
+			uuids.add(u.getValue());
+		}
+		if (uuids.size() > 0) {
+			byte[][] uuidValues = new byte[uuids.size()][];
+			for (int u = 0; u < uuidValues.length; u++) {
+				uuidValues[u] = Utils.UUIDToByteArray((UUID) uuids.elementAt(u));
+			}
+			sdpServiceAddServiceClassIdList(handle, handleType, uuidValues);
+		}
 
+		// Update all other records
 		for (int i = 0; i < ids.length; i++) {
 			int id = ids[i];
 			switch (id) {
 			case BluetoothConsts.ServiceRecordHandle:
-				continue;
 			case BluetoothConsts.ServiceClassIDList:
-				// TODO add native function to update serviceClass
-				continue;
 			case BluetoothConsts.ProtocolDescriptorList:
 			case BluetoothConsts.AttributeIDServiceName:
 				continue;

@@ -1224,12 +1224,25 @@ WIDCOMMStackServerConnectionBase::WIDCOMMStackServerConnectionBase() {
     for(int i = 0 ; i < OPEN_COMMPORTS_MAX; i ++) {
         conn[i] = NULL;
     }
+    sdpRecordCommited = FALSE;
+    service_guids = NULL;
+    service_guids_len = 0;
+    proto_elem_list = NULL;
+    proto_num_elem = 0;
 }
 
 WIDCOMMStackServerConnectionBase::~WIDCOMMStackServerConnectionBase() {
     if (sdpService != NULL) {
         delete sdpService;
         sdpService = NULL;
+    }
+    if (proto_elem_list != NULL) {
+        delete proto_elem_list;
+        proto_elem_list = NULL;
+    }
+    if (service_guids != NULL) {
+        delete service_guids;
+        service_guids = NULL;
     }
 }
 
@@ -1278,26 +1291,98 @@ void WIDCOMMStackServerConnectionBase::close(JNIEnv *env, BOOL allowExceptions) 
 
 // --- SDP ---
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpServiceAddAttribute
-(JNIEnv *env, jobject, jlong handle, jchar handleType, jint attrID, jshort attrType, jbyteArray value) {
-    CSdpService* sdpService;
+BOOL WIDCOMMStackServerConnectionBase::finalizeSDPRecord(JNIEnv *env) {
+    if (sdpRecordCommited) {
+        return TRUE;
+    }
+    sdpRecordCommited = TRUE;
+    CSdpService* sdpService = this->sdpService;
+    if (sdpService == NULL) {
+        throwServiceRegistrationException(env, cCONNECTION_IS_CLOSED);
+        return FALSE;
+    }
+
+    SDP_RETURN_CODE rc;
+    rc = sdpService->AddServiceClassIdList(this->service_guids_len, this->service_guids);
+	if (rc != SDP_OK) {
+		throwServiceRegistrationException(env, "Failed to addServiceClassIdList (%i)", (int)rc);
+		return FALSE;
+	}
+    rc = sdpService->AddServiceName(this->service_name);
+	if (rc != SDP_OK) {
+		throwServiceRegistrationException(env, "Failed to addServiceName (%i)", (int)rc);
+		return FALSE;
+	}
+
+    rc = sdpService->AddProtocolList(this->proto_num_elem, this->proto_elem_list);
+	if (rc != SDP_OK) {
+		throwServiceRegistrationException(env, "Failed to addProtocolList (%i)", (int)rc);
+		return FALSE;
+	}
+
+	UINT32 service_name_len;
+	#ifdef _WIN32_WCE
+		service_name_len = wcslen((wchar_t*)this->service_name);
+	#else // _WIN32_WCE
+		service_name_len = (UINT32)strlen(this->service_name);
+	#endif // #else // _WIN32_WCE
+
+    rc = sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, service_name_len, (UINT8*)this->service_name);
+	if (rc != SDP_OK) {
+		throwServiceRegistrationException(env, "Failed to addAttribute ServiceName (%i)", (int)rc);
+		return FALSE;
+	}
+	debug(("service_name assigned [%s]", this->service_name));
+
+    /*
+	rc = sdpService->MakePublicBrowseable();
+	if (rc != SDP_OK) {
+		throwIOException(env, "Failed to MakePublicBrowseable (%i)", (int)rc);
+		return FALSE;
+	}
+	sdpService->SetAvailability(255);
+	*/
+
+	return TRUE;
+}
+
+WIDCOMMStackServerConnectionBase* getServerConnection(JNIEnv *env, jlong handle, jchar handleType) {
     if (handleType == 'r') {
         WIDCOMMStackRfCommPortServer* rf = validRfCommServerHandle(env, handle);
         if (rf == NULL) {
-            return;
+            return  NULL;
         }
-        sdpService = rf->sdpService;
+        if (rf->sdpService == NULL) {
+            throwServiceRegistrationException(env, cCONNECTION_IS_CLOSED);
+            return NULL;
+        }
+        return rf;
     } else if (handleType == 'l') {
         WIDCOMMStackL2CapServer* l2c = validL2CapServerHandle(env, handle);
         if (l2c == NULL) {
-            return;
+            return NULL;
         }
-        sdpService = l2c->sdpService;
-    }
-    if (sdpService == NULL) {
+        if (l2c->sdpService == NULL) {
+            throwServiceRegistrationException(env, cCONNECTION_IS_CLOSED);
+            return NULL;
+        }
+        return l2c;
+    } else {
         throwServiceRegistrationException(env, cCONNECTION_IS_CLOSED);
+        return NULL;
+    }
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpServiceAddAttribute
+(JNIEnv *env, jobject, jlong handle, jchar handleType, jint attrID, jshort attrType, jbyteArray value) {
+    WIDCOMMStackServerConnectionBase* srv = getServerConnection(env, handle, handleType);
+    if (srv == NULL) {
         return;
     }
+    if (!srv->finalizeSDPRecord(env)) {
+        return;
+    }
+    CSdpService* sdpService = srv->sdpService;
 
     #define ATTR_LEN_MAX 497
     UINT32 arrLen = 0;
@@ -1323,12 +1408,39 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
     //}
 
     debug(("AddAttribute %i type=%i len=%i [%s]", attrID, attrType, arrLen, p_val));
-    if (sdpService->AddAttribute((UINT16)attrID, (UINT8)attrType, arrLen, p_val) != SDP_OK) {
-        throwServiceRegistrationException(env, "Failed to AddAttribute %i", attrID);
+    SDP_RETURN_CODE rc = sdpService->AddAttribute((UINT16)attrID, (UINT8)attrType, arrLen, p_val);
+    if (rc != SDP_OK) {
+        throwServiceRegistrationException(env, "Failed to addAttribute %i (%i)", attrID, (int)rc);
     }
 
     //delete p_val;
 
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpServiceAddServiceClassIdList
+(JNIEnv *env, jobject, jlong handle, jchar handleType, jobjectArray uuidArray) {
+    WIDCOMMStackServerConnectionBase* srv = getServerConnection(env, handle, handleType);
+    if (srv == NULL) {
+        return;
+    }
+    int service_guids_len = env->GetArrayLength(uuidArray);
+    GUID *service_guids = new GUID[service_guids_len];
+    if (service_guids == NULL) {
+        throwIOException(env, cOUT_OF_MEMORY);
+        return;
+    }
+    for(int i = 0; i < service_guids_len; i++) {
+        jbyteArray uuidValue = (jbyteArray) env->GetObjectArrayElement(uuidArray, i);
+	    jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
+	    convertUUIDBytesToGUID(bytes, &(service_guids[i]));
+	    env->ReleaseByteArrayElements(uuidValue, bytes, 0);
+	}
+
+	if (srv->service_guids != NULL) {
+	    delete srv->service_guids;
+	}
+	srv->service_guids = service_guids;
+	srv->service_guids_len = service_guids_len;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testWIDCOMMConstants

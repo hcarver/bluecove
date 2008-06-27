@@ -301,38 +301,30 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerO
         l2CapIf->Register();
 
         const char *cname = env->GetStringUTFChars(name, 0);
-        UINT32 service_name_len;
         #ifdef _WIN32_WCE
             swprintf_s((wchar_t*)srv->service_name, BT_MAX_SERVICE_NAME_LEN, L"%s", cname);
-            service_name_len = wcslen((wchar_t*)srv->service_name);
         #else // _WIN32_WCE
             sprintf_s(srv->service_name, BT_MAX_SERVICE_NAME_LEN, "%s", cname);
-            service_name_len = (UINT32)strlen(srv->service_name);
         #endif // #else // _WIN32_WCE
         env->ReleaseStringUTFChars(name, cname);
 
-        CSdpService *sdpService = new CSdpService();
-        srv->sdpService = sdpService;
-        if (sdpService->AddServiceClassIdList(1, &(srv->service_guid)) != SDP_OK) {
-            throwIOException(env, "Error AddServiceClassIdList");
+        srv->service_guids_len = 1;
+        srv->service_guids = new GUID[srv->service_guids_len];
+        if (srv->service_guids == NULL) {
+            throwIOException(env, cOUT_OF_MEMORY);
             open_l2server_return 0;
         }
-        if (sdpService->AddServiceName(srv->service_name) != SDP_OK) {
-            throwIOException(env, "Error AddServiceName");
+		memcpy(&(srv->service_guids[0]), &(srv->service_guid), sizeof(GUID));
+
+        srv->proto_num_elem = 1;
+        srv->proto_elem_list = new tSDP_PROTOCOL_ELEM[srv->proto_num_elem];
+		if (srv->proto_elem_list == NULL) {
+            throwIOException(env, cOUT_OF_MEMORY);
             open_l2server_return 0;
         }
-        if (sdpService->AddL2CapProtocolDescriptor(l2CapIf->GetPsm()) != SDP_OK) {
-            throwIOException(env, "Error AddL2CapProtocolDescriptor");
-            open_l2server_return 0;
-        }
-        if (sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, service_name_len, (UINT8*)srv->service_name) != SDP_OK) {
-            throwIOException(env, "Error AddAttribute ServiceName");
-            open_l2server_return 0;
-        }
-        if (sdpService->MakePublicBrowseable() != SDP_OK) {
-            throwIOException(env, "Error MakePublicBrowseable");
-            open_l2server_return 0;
-        }
+		srv->proto_elem_list[0].protocol_uuid = 0x0100; // L2CAP
+		srv->proto_elem_list[0].num_params = 1;
+		srv->proto_elem_list[0].params[0] = l2CapIf->GetPsm();
 
         UINT8 sec_level = BTM_SEC_NONE;
         if (authenticate) {
@@ -373,7 +365,9 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
         throwIOException(env, cCONNECTION_CLOSED);
         return 0;
     }
-
+    if (!srv->finalizeSDPRecord(env)) {
+        return 0;
+    }
     #ifdef BWT_SINCE_SDK_6_0_1
     srv->sdpService->CommitRecord();
     #endif

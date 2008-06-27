@@ -240,7 +240,15 @@ public:
 class WIDCOMMStackServerConnectionBase : public WIDCOMMStackConnectionBase {
 public:
     CSdpService* sdpService;
+    //Use in finalizeSDPRecord
+    BOOL sdpRecordCommited;
+    GUID* service_guids;
+    int service_guids_len;
+    tSDP_PROTOCOL_ELEM* proto_elem_list;
+    int proto_num_elem;
+
     WIDCOMMStackConnectionBase* conn[OPEN_COMMPORTS_MAX];
+
 
     WIDCOMMStackServerConnectionBase();
 	virtual ~WIDCOMMStackServerConnectionBase();
@@ -248,6 +256,8 @@ public:
     void addClient(WIDCOMMStackConnectionBase* c);
     void closeClient(JNIEnv *env, WIDCOMMStackConnectionBase* c);
     virtual void close(JNIEnv *env, BOOL allowExceptions);
+
+    BOOL finalizeSDPRecord(JNIEnv *env);
 };
 
 class WIDCOMMStackRfCommPortServer : public WIDCOMMStackServerConnectionBase {

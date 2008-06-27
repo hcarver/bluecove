@@ -308,6 +308,7 @@ BOOL isBlueSoleilBluetoothStackPresent(JNIEnv *env);
 BOOL isToshibaBluetoothStackPresent(JNIEnv *env);
 
 #define cSTACK_CLOSED "Stack closed"
+#define cOUT_OF_MEMORY "Out of memory"
 #define cCONNECTION_CLOSED "Connection closed"
 #define cCONNECTION_IS_CLOSED "Connection is closed"
 #define cINQUIRY_RUNNING "Another inquiry already running"

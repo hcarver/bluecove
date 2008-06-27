@@ -590,77 +590,47 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerO
 		}
 		rf->scn = rfCommIf->GetScn();
 
-
-		GUID service_guids[2];
-		int service_guids_len = 1;
-		memcpy(&(service_guids[0]), &(rf->service_guid), sizeof(GUID));
-
+        rf->service_guids_len = 1;
+        if (uuidValue2 != NULL) {
+            rf->service_guids_len = 2;
+        }
+        rf->service_guids = new GUID[rf->service_guids_len];
+        if (rf->service_guids == NULL) {
+            throwIOException(env, cOUT_OF_MEMORY);
+            open_rf_server_return 0;
+        }
+		memcpy(&(rf->service_guids[0]), &(rf->service_guid), sizeof(GUID));
 		if (uuidValue2 != NULL) {
 			jbyte *bytes2 = env->GetByteArrayElements(uuidValue2, 0);
-			convertUUIDBytesToGUID(bytes2, &(service_guids[1]));
+			convertUUIDBytesToGUID(bytes2, &(rf->service_guids[1]));
 			env->ReleaseByteArrayElements(uuidValue2, bytes2, 0);
-			service_guids_len = 2;
 		}
-
-		if (rf->sdpService->AddServiceClassIdList(service_guids_len, service_guids) != SDP_OK) {
-		//if (rf->sdpService->AddServiceClassIdList(1, &(rf->service_guid)) != SDP_OK) {
-			throwIOException(env, "Error AddServiceClassIdList");
-			open_rf_server_return 0;
-		}
-
-		if (rf->sdpService->AddServiceName(rf->service_name) != SDP_OK) {
-			throwIOException(env, "Error AddServiceName");
-			open_rf_server_return 0;
-		}
-
 		/*
-		//Note: An L2Cap UUID (100) with a value of 3 is added because RFCOMM protocol is over the L2CAP protocol.
-		if (rf->sdpService->AddRFCommProtocolDescriptor(rf->scn) != SDP_OK) {
-			throwIOException(env, "Error AddRFCommProtocolDescriptor");
-			open_rf_server_return 0;
-		}
+		  Can't use AddRFCommProtocolDescriptor
+		  An L2Cap UUID (100) with a value of 3 is added because RFCOMM protocol is over the L2CAP protocol.
+		  build the proto_elem_list
 		*/
-		int proto_num_elem = 2;
-		tSDP_PROTOCOL_ELEM* proto_elem_list = new tSDP_PROTOCOL_ELEM[3];
-		proto_elem_list[0].protocol_uuid = 0x0100; // L2CAP
-		proto_elem_list[0].num_params = 0;
+		rf->proto_num_elem = 2;
+		if (obexSrv) {
+			rf->proto_num_elem++;
+		}
 
-		proto_elem_list[1].protocol_uuid = 0x0003; // RFCOMM
-		proto_elem_list[1].num_params = 1;
-		proto_elem_list[1].params[0] = rf->scn;
+		rf->proto_elem_list = new tSDP_PROTOCOL_ELEM[rf->proto_num_elem];
+		if (rf->proto_elem_list == NULL) {
+            throwIOException(env, cOUT_OF_MEMORY);
+            open_rf_server_return 0;
+        }
+		rf->proto_elem_list[0].protocol_uuid = 0x0100; // L2CAP
+		rf->proto_elem_list[0].num_params = 0;
+
+		rf->proto_elem_list[1].protocol_uuid = 0x0003; // RFCOMM
+		rf->proto_elem_list[1].num_params = 1;
+		rf->proto_elem_list[1].params[0] = rf->scn;
 
 		if (obexSrv) {
-			proto_num_elem++;
-			proto_elem_list[2].protocol_uuid = 0x0008; // OBEX
-			proto_elem_list[2].num_params = 0;
+			rf->proto_elem_list[2].protocol_uuid = 0x0008; // OBEX
+			rf->proto_elem_list[2].num_params = 0;
 		}
-
-		if (rf->sdpService->AddProtocolList(proto_num_elem, proto_elem_list) != SDP_OK) {
-			delete proto_elem_list;
-			throwIOException(env, "Error AddProtocolList");
-			open_rf_server_return 0;
-		}
-		delete proto_elem_list;
-
-
-		UINT32 service_name_len;
-		#ifdef _WIN32_WCE
-			service_name_len = wcslen((wchar_t*)rf->service_name);
-		#else // _WIN32_WCE
-			service_name_len = (UINT32)strlen(rf->service_name);
-		#endif // #else // _WIN32_WCE
-
-		if (rf->sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, service_name_len, (UINT8*)rf->service_name) != SDP_OK) {
-			throwIOException(env, "Error AddAttribute ServiceName");
-			open_rf_server_return 0;
-		}
-		debug(("service_name assigned [%s]", rf->service_name));
-
-		if (rf->sdpService->MakePublicBrowseable() != SDP_OK) {
-			throwIOException(env, "Error MakePublicBrowseable");
-			open_rf_server_return 0;
-		}
-		rf->sdpService->SetAvailability(255);
 
 		UINT8 sec_level = BTM_SEC_NONE;
 		if (authenticate) {
@@ -730,6 +700,9 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 		throwIOException(env, cCONNECTION_IS_CLOSED);
 		return 0;
 	}
+    if (!srv->finalizeSDPRecord(env)) {
+        return 0;
+    }
 
 	#ifdef BWT_SINCE_SDK_6_0_1
 	srv->sdpService->CommitRecord();
