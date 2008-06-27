@@ -434,11 +434,14 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 			return DiscoveryListener.SERVICE_SEARCH_ERROR;
 		} else if (handles.length > 0) {
 			ServiceRecord[] records = new ServiceRecordImpl[handles.length];
+			int[] requiredAttrIDs = new int[] { BluetoothConsts.ServiceRecordHandle,
+					BluetoothConsts.ServiceClassIDList, BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID,
+					BluetoothConsts.ProtocolDescriptorList };
 			boolean hasError = false;
 			for (int i = 0; i < handles.length; i++) {
 				records[i] = new ServiceRecordImpl(this, device, handles[i]);
 				try {
-					records[i].populateRecord(new int[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004 });
+					records[i].populateRecord(requiredAttrIDs);
 					if (attrSet != null) {
 						records[i].populateRecord(attrSet);
 					}

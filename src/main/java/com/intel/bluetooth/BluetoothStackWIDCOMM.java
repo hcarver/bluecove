@@ -438,6 +438,18 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 		// Retrieve all Records, Filter here in Java
 		synchronized (BluetoothStackWIDCOMM.class) {
 			byte[] uuidValue = Utils.UUIDToByteArray(BluetoothConsts.L2CAP_PROTOCOL_UUID);
+			for (int u = 0; u < uuidSet.length; u++) {
+				if (uuidSet[u].equals(BluetoothConsts.L2CAP_PROTOCOL_UUID)) {
+					continue;
+				} else if (uuidSet[u].equals(BluetoothConsts.RFCOMM_PROTOCOL_UUID)) {
+					uuidValue = Utils.UUIDToByteArray(uuidSet[u]);
+					continue;
+				} else {
+					// Look for the most specific UUID
+					uuidValue = Utils.UUIDToByteArray(uuidSet[u]);
+					break;
+				}
+			}
 			long[] handles;
 			try {
 				handles = runSearchServicesImpl(startedNotify, uuidValue, RemoteDeviceHelper.getAddress(device));
@@ -449,44 +461,23 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 				DebugLog.debug("SERVICE_SEARCH_ERROR");
 				return DiscoveryListener.SERVICE_SEARCH_ERROR;
 			} else if (handles.length > 0) {
-
-				boolean reqRFCOMM = false;
-				// boolean reqL2CAP = false;
-				UUID uuidFiler = null;
-				// If Search for specific service, select its UUID
-				for (int u = 0; u < uuidSet.length; u++) {
-					if (uuidSet[u].equals(BluetoothConsts.L2CAP_PROTOCOL_UUID)) {
-						// reqL2CAP = true;
-						continue;
-					}
-					if (uuidSet[u].equals(BluetoothConsts.RFCOMM_PROTOCOL_UUID)) {
-						reqRFCOMM = true;
-						continue;
-					}
-					uuidFiler = uuidSet[u];
-					break;
-				}
-				if ((uuidFiler == null) && (reqRFCOMM)) {
-					uuidFiler = BluetoothConsts.RFCOMM_PROTOCOL_UUID;
-				} else if (BluetoothStackWIDCOMMSDPInputStream.debug) {
-					DebugLog.debug("uuidFiler selected", uuidFiler);
-				}
-
 				Vector records = new Vector();
 				int[] uuidFilerAttrIDs = new int[] { BluetoothConsts.ServiceClassIDList,
 						BluetoothConsts.ProtocolDescriptorList };
 				int[] requiredAttrIDs = new int[] { BluetoothConsts.ServiceRecordHandle,
 						BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID };
-				for (int i = 0; i < handles.length; i++) {
+				nextRecord: for (int i = 0; i < handles.length; i++) {
 					ServiceRecordImpl sr = new ServiceRecordImpl(this, device, handles[i]);
 					try {
 						sr.populateRecord(uuidFilerAttrIDs);
-						if ((uuidFiler != null)
-								&& !(sr.hasServiceClassUUID(uuidFiler) || sr.hasProtocolClassUUID(uuidFiler))) {
-							if (BluetoothStackWIDCOMMSDPInputStream.debug) {
-								DebugLog.debug("filtered ServiceRecord (" + i + ")", sr);
+						// Apply JSR-82 filter, all UUID should be present
+						for (int u = 0; u < uuidSet.length; u++) {
+							if (!((sr.hasServiceClassUUID(uuidSet[u]) || sr.hasProtocolClassUUID(uuidSet[u])))) {
+								if (BluetoothStackWIDCOMMSDPInputStream.debug) {
+									DebugLog.debug("filtered ServiceRecord (" + i + ")", sr);
+								}
+								continue nextRecord;
 							}
-							continue;
 						}
 						if (BluetoothStackWIDCOMMSDPInputStream.debug) {
 							DebugLog.debug("accepted ServiceRecord (" + i + ")", sr);
