@@ -119,19 +119,19 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	}
 
 	protected void writeOperation(int commId, byte[] data) throws IOException {
-		writeOperation(commId, data, null);
+		writeOperation(commId, null, data);
 	}
 
-	protected void writeOperation(int commId, byte[] data1, byte[] data2) throws IOException {
+	protected void writeOperation(int commId, byte[] headerFlagsData, byte[] data) throws IOException {
 		int len = 3;
 		if (this.connectionID != -1) {
 			len += 5;
 		}
-		if (data1 != null) {
-			len += data1.length;
+		if (headerFlagsData != null) {
+			len += headerFlagsData.length;
 		}
-		if (data2 != null) {
-			len += data2.length;
+		if (data != null) {
+			len += data.length;
 		}
 		if (len > mtu) {
 			throw new IOException("Can't sent more data than in MTU, len=" + len + ", mtu=" + mtu);
@@ -139,26 +139,28 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		this.packetsCountWrite++;
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
 		OBEXHeaderSetImpl.writeObexLen(buf, commId, len);
+		if (headerFlagsData != null) {
+			buf.write(headerFlagsData);
+		}
 		if (this.connectionID != -1) {
 			OBEXHeaderSetImpl.writeObexInt(buf, OBEXHeaderSetImpl.OBEX_HDR_CONNECTION, this.connectionID);
 		}
-		if (data1 != null) {
-			buf.write(data1);
+		if (data != null) {
+			buf.write(data);
 		}
-		if (data2 != null) {
-			buf.write(data2, 0, data2.length);
-		}
+		DebugLog.debug0x("obex send (" + this.packetsCountWrite + ")", OBEXUtils.toStringObexResponseCodes(commId),
+				commId);
 		os.write(buf.toByteArray());
 		os.flush();
-		DebugLog.debug0x("obex sent", OBEXUtils.toStringObexResponseCodes(commId), commId);
-		DebugLog.debug("obex sent len", len);
+		DebugLog.debug("obex sent (" + this.packetsCountWrite + ") len", len);
 	}
 
 	protected byte[] readOperation() throws IOException {
 		byte[] header = new byte[3];
 		OBEXUtils.readFully(is, obexConnectionParams, header);
-		DebugLog.debug0x("obex received", OBEXUtils.toStringObexResponseCodes(header[0]), header[0] & 0xFF);
 		this.packetsCountRead++;
+		DebugLog.debug0x("obex received (" + this.packetsCountRead + ")", OBEXUtils
+				.toStringObexResponseCodes(header[0]), header[0] & 0xFF);
 		int lenght = OBEXUtils.bytesToShort(header[1], header[2]);
 		if (lenght == 3) {
 			return header;
