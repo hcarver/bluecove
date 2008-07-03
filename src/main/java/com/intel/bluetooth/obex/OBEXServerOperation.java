@@ -47,6 +47,8 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	protected boolean errorReceived = false;
 
+	protected boolean incommingDataReceived = false;
+
 	protected OBEXOperationOutputStream outputStream;
 
 	protected boolean outputStreamOpened = false;
@@ -77,9 +79,7 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 	 * @see javax.obex.Operation#getReceivedHeaders()
 	 */
 	public HeaderSet getReceivedHeaders() throws IOException {
-		// TODO make clone, Also may be clean/remove the containing headers so
-		// next call will receive another set of headers
-		return receivedHeaders;
+		return OBEXHeaderSetImpl.cloneHeaders(receivedHeaders);
 	}
 
 	/*
@@ -174,5 +174,13 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	public boolean isClosed() {
 		return this.isClosed;
+	}
+
+	public boolean isIncommingDataReceived() {
+		return this.incommingDataReceived;
+	}
+
+	public boolean isErrorReceived() {
+		return this.errorReceived;
 	}
 }

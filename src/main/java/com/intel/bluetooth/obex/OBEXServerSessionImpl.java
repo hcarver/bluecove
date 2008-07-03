@@ -134,7 +134,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			int opcode = b[0] & 0xFF;
 			boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
 			if (finalPacket) {
-				DebugLog.debug("OBEXServerSession operation finalPacket");
+				DebugLog.debug("OBEXServerSession got operation finalPacket");
 			}
 			switch (opcode) {
 			case OBEXOperationCodes.CONNECT:
@@ -232,22 +232,17 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		writeOperation(rc, OBEXHeaderSetImpl.toByteArray(replyHeaders));
 	}
 
-	private boolean processDelete(HeaderSet requestHeaders) throws IOException {
-		if ((requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY) == null)
-				&& (requestHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END) == null)) {
-			DebugLog.debug("Delete operation");
-			HeaderSet replyHeaders = createOBEXHeaderSet();
-			int rc = ResponseCodes.OBEX_HTTP_OK;
-			try {
-				rc = handler.onDelete(requestHeaders, replyHeaders);
-			} catch (Throwable e) {
-				rc = ResponseCodes.OBEX_HTTP_UNAVAILABLE;
-				DebugLog.error("onDelete", e);
-			}
-			writeOperation(rc, OBEXHeaderSetImpl.toByteArray(replyHeaders));
-			return true;
+	private void processDelete(HeaderSet requestHeaders) throws IOException {
+		DebugLog.debug("Delete operation");
+		HeaderSet replyHeaders = createOBEXHeaderSet();
+		int rc = ResponseCodes.OBEX_HTTP_OK;
+		try {
+			rc = handler.onDelete(requestHeaders, replyHeaders);
+		} catch (Throwable e) {
+			rc = ResponseCodes.OBEX_HTTP_UNAVAILABLE;
+			DebugLog.error("onDelete", e);
 		}
-		return false;
+		writeOperation(rc, OBEXHeaderSetImpl.toByteArray(replyHeaders));
 	}
 
 	private void processPut(byte[] b, boolean finalPacket) throws IOException {
@@ -256,11 +251,20 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			return;
 		}
 		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 3);
-		if (finalPacket && processDelete(requestHeaders)) {
+		operation = new OBEXServerOperationPut(this, requestHeaders, finalPacket);
+		while ((!finalPacket) && (!operation.isIncommingDataReceived())) {
+			finalPacket = ((OBEXServerOperationPut) operation).exchangeRequestPhasePackets();
+		}
+		if (operation.isErrorReceived()) {
+			return;
+		}
+		// A PUT operation with NO Body or End-of-Body headers whatsoever should
+		// be treated as a delete request.
+		if (finalPacket && (!operation.isIncommingDataReceived())) {
+			processDelete(operation.getReceivedHeaders());
 			return;
 		}
 		try {
-			operation = new OBEXServerOperationPut(this, requestHeaders, finalPacket);
 			int rc = ResponseCodes.OBEX_HTTP_OK;
 			try {
 				rc = handler.onPut(operation);

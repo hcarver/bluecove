@@ -260,6 +260,10 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		int[] headerIDArray = headers.getHeaderList();
 		for (int i = 0; (headerIDArray != null) && (i < headerIDArray.length); i++) {
 			int headerID = headerIDArray[i];
+			// Body is not accessible by the client
+			if ((headerID == OBEX_HDR_BODY) || (headerID == OBEX_HDR_BODY_END)) {
+				continue;
+			}
 			hs.setHeader(headerID, headers.getHeader(headerID));
 		}
 		return hs;
