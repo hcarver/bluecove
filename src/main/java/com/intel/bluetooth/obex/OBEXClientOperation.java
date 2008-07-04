@@ -31,6 +31,16 @@ import com.intel.bluetooth.DebugLog;
 
 abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
+	/**
+	 * This is not 100% by JSR-82 doc. But some know implementations of OBEX are
+	 * working this way. This solves the problems for Samsung phones that are
+	 * sending nothing in response to GET request without final bit.
+	 * 
+	 * Basically instead of sending at least two packets 'initial' and 'final'
+	 * we are sending just 'final' one when applicable.
+	 */
+	final static boolean SHORT_REQUEST_PHASE = true;
+
 	protected OBEXClientSessionImpl session;
 
 	protected char operationId;
@@ -55,6 +65,8 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
 	protected boolean finalBodyReceived = false;
 
+	protected HeaderSet startOperationHeaders = null;
+
 	protected Object lock;
 
 	OBEXClientOperation(OBEXClientSessionImpl session, char operationId) throws IOException {
@@ -65,19 +77,33 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 		this.lock = new Object();
 	}
 
+	static boolean isShortRequestPhase() {
+		return SHORT_REQUEST_PHASE;
+	}
+
 	protected void startOperation(HeaderSet sendHeaders) throws IOException {
-		this.operationInProgress = true;
-		exchangePacket(OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		if (SHORT_REQUEST_PHASE) {
+			this.startOperationHeaders = sendHeaders;
+		} else {
+			this.operationInProgress = true;
+			exchangePacket(OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		}
 	}
 
 	protected void endRequestPhase() throws IOException {
 		if (requestEnded) {
 			return;
 		}
+		DebugLog.debug("client end Request Phase");
 		this.operationInProgress = false;
 		this.requestEnded = true;
 		this.operationId |= OBEXOperationCodes.FINAL_BIT;
-		exchangePacket(null);
+		if (SHORT_REQUEST_PHASE) {
+			exchangePacket(OBEXHeaderSetImpl.toByteArray(this.startOperationHeaders));
+			this.startOperationHeaders = null;
+		} else {
+			exchangePacket(null);
+		}
 	}
 
 	protected void exchangePacket(byte[] data) throws IOException {
@@ -134,7 +160,7 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 			}
 		}
 		if (data != null) {
-			DebugLog.debug("client received Data eof " + eof + " len", data.length);
+			DebugLog.debug("client received Data eof: " + eof + " len: ", data.length);
 			inputStream.appendData(data, eof);
 		} else if (eof) {
 			inputStream.appendData(null, eof);
@@ -216,6 +242,10 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 		validateOperationIsOpen();
 		if (this.requestEnded) {
 			throw new IOException("the request phase has already ended");
+		}
+		if (SHORT_REQUEST_PHASE && (this.startOperationHeaders != null)) {
+			exchangePacket(OBEXHeaderSetImpl.toByteArray(this.startOperationHeaders));
+			this.startOperationHeaders = null;
 		}
 		exchangePacket(OBEXHeaderSetImpl.toByteArray(headers));
 	}

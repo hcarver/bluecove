@@ -91,7 +91,12 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 	 * @see com.intel.bluetooth.obex.OBEXOperationReceive#receiveData(com.intel.bluetooth.obex.OBEXOperationInputStream)
 	 */
 	public void receiveData(OBEXOperationInputStream is) throws IOException {
-		exchangePacket(null);
+		if (SHORT_REQUEST_PHASE) {
+			exchangePacket(OBEXHeaderSetImpl.toByteArray(this.startOperationHeaders));
+			this.startOperationHeaders = null;
+		} else {
+			exchangePacket(null);
+		}
 	}
 
 	/*
@@ -103,6 +108,10 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 	public void deliverPacket(boolean finalPacket, byte[] buffer) throws IOException {
 		if (requestEnded) {
 			return;
+		}
+		if (SHORT_REQUEST_PHASE && (this.startOperationHeaders != null)) {
+			exchangePacket(OBEXHeaderSetImpl.toByteArray(this.startOperationHeaders));
+			this.startOperationHeaders = null;
 		}
 		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
 		if (finalPacket) {

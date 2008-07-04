@@ -65,6 +65,10 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		if (requestEnded) {
 			return;
 		}
+		if (SHORT_REQUEST_PHASE && (this.startOperationHeaders != null)) {
+			exchangePacket(OBEXHeaderSetImpl.toByteArray(this.startOperationHeaders));
+			this.startOperationHeaders = null;
+		}
 		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
 		if (finalPacket) {
 			this.operationId |= OBEXOperationCodes.FINAL_BIT;
