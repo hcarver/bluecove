@@ -33,50 +33,49 @@ import com.intel.bluetooth.DebugLog;
 
 /**
  * @author vlads
- *
+ * 
  */
 class OBEXAuthentication {
 
 	private static byte[] privateKey;
-	
+
 	private static long uniqueTimestamp = 0;
-	
+
 	private static final byte column[] = { ':' };
-	
+
 	static class Challenge {
-		
-		String realm; 
-		
-		boolean userID;
-		
-		boolean access;
-		
+
+		private String realm;
+
+		private boolean isUserIdRequired;
+
+		private boolean isFullAccess;
+
 		byte nonce[];
-		
+
 		Challenge(byte data[]) throws IOException {
 			this.read(data);
 		}
-		
-		Challenge(String realm, boolean userID, boolean access, byte[] nonce) {
+
+		Challenge(String realm, boolean isUserIdRequired, boolean isFullAccess, byte[] nonce) {
 			this.realm = realm;
-			this.userID = userID;
-			this.access = access;
+			this.isUserIdRequired = isUserIdRequired;
+			this.isFullAccess = isFullAccess;
 			this.nonce = nonce;
 		}
 
-		
 		byte[] write() {
 			ByteArrayOutputStream buf = new ByteArrayOutputStream();
-			
+
 			buf.write(0x00); // Tag
 			buf.write(0x10); // Len
 			buf.write(nonce, 0, 0x10);
-			
-			byte options = (byte)((userID ? 1 : 0) | ((!access) ? 2 : 0));
+
+			byte options = (byte) ((isUserIdRequired ? 1 : 0) | ((!isFullAccess) ? 2 : 0));
 			buf.write(0x01); // Tag
 			buf.write(0x01); // Len
 			buf.write(options);
-			
+
 			if (realm != null) {
 				byte realmArray[];
 				byte charSetCode;
@@ -96,27 +95,29 @@ class OBEXAuthentication {
 				buf.write(charSetCode);
 				buf.write(realmArray, 0, realmArray.length);
 			}
-			
-			return buf.toByteArray();			
+
+			return buf.toByteArray();
 		}
-		
+
 		void read(byte data[]) throws IOException {
+			DebugLog.debug("authChallenge", data);
 			for (int i = 0; i < data.length;) {
 				int tag = data[i] & 0xFF;
 				int len = data[i + 1] & 0xFF;
 				i += 2;
-				switch(tag) {
+				switch (tag) {
 				case 0:
 					if (len != 0x10) {
 						throw new IOException("OBEX Digest Challenge error in tag Nonce");
 					}
 					nonce = new byte[0x10];
-	                System.arraycopy(data, i, nonce, 0, 0x10);
-	                break;
+					System.arraycopy(data, i, nonce, 0, 0x10);
+					break;
 				case 1:
 					byte options = data[i];
-					userID = ((options & 1) != 0);
-					access = ((options & 2) == 0);
+					DebugLog.debug("authChallenge options", options);
+					isUserIdRequired = ((options & 1) != 0);
+					isFullAccess = ((options & 2) == 0);
 					break;
 				case 2:
 					int charSetCode = data[i] & 0xFF;
@@ -130,59 +131,74 @@ class OBEXAuthentication {
 						realm = new String(chars, "ISO-8859-" + charSetCode);
 					} else {
 						DebugLog.error("Unsupported charset code " + charSetCode + " in Challenge");
-						//throw new UnsupportedEncodingException("charset code " + charSetCode);
-                        // BUG on SE K790a
-						realm = new String(chars, 1, len, "ASCII");
+						// throw new UnsupportedEncodingException("charset code
+						// " + charSetCode);
+						// BUG on SE K790a
+						realm = new String(chars, 0, len - 1, "ASCII");
 					}
 					break;
+				default:
+					DebugLog.error("invalid authChallenge tag " + tag);
 				}
 				i += len;
 			}
 		}
-	
+
+		public boolean isUserIdRequired() {
+			return isUserIdRequired;
+		}
+
+		public boolean isFullAccess() {
+			return isFullAccess;
+		}
+
+		public String getRealm() {
+			return realm;
+		}
+
 	}
-	
+
 	static class DigestResponse {
-		
+
 		byte requestDigest[];
-		
+
 		byte userName[];
-		
+
 		byte nonce[];
-		
+
 		byte[] write() {
 			ByteArrayOutputStream buf = new ByteArrayOutputStream();
-			
+
 			buf.write(0x00); // Tag
 			buf.write(0x10); // Len
 			buf.write(requestDigest, 0, 0x10);
-			
+
 			if (userName != null) {
 				buf.write(0x01); // Tag
 				buf.write(userName.length); // Len
 				buf.write(userName, 0, userName.length);
 			}
-			
+
 			buf.write(0x02); // Tag
 			buf.write(0x10); // Len
 			buf.write(nonce, 0, 0x10);
-			
-			return buf.toByteArray();			
+
+			return buf.toByteArray();
 		}
-		
-		void read(byte data[])  throws IOException {
+
+		void read(byte data[]) throws IOException {
 			for (int i = 0; i < data.length;) {
 				int tag = data[i] & 0xFF;
 				int len = data[i + 1] & 0xFF;
 				i += 2;
-				switch(tag) {
+				switch (tag) {
 				case 0:
 					if (len != 0x10) {
 						throw new IOException("OBEX Digest Response error in tag request-digest");
 					}
 					requestDigest = new byte[0x10];
-	                System.arraycopy(data, i, requestDigest, 0, 0x10);
-	                break;
+					System.arraycopy(data, i, requestDigest, 0, 0x10);
+					break;
 				case 1:
 					userName = new byte[len];
 					System.arraycopy(data, i, userName, 0, userName.length);
@@ -192,20 +208,21 @@ class OBEXAuthentication {
 						throw new IOException("OBEX Digest Response error in tag Nonce");
 					}
 					nonce = new byte[0x10];
-	                System.arraycopy(data, i, nonce, 0, 0x10);
-	                break;
+					System.arraycopy(data, i, nonce, 0, 0x10);
+					break;
 				}
 				i += len;
 			}
 		}
 	}
-	
-	static byte[] createChallenge(String realm, boolean userID, boolean access) {
-		Challenge challenge = new Challenge(realm, userID, access, createNonce());
+
+	static byte[] createChallenge(String realm, boolean isUserIdRequired, boolean isFullAccess) {
+		Challenge challenge = new Challenge(realm, isUserIdRequired, isFullAccess, createNonce());
 		return challenge.write();
 	}
 
-	static void handleAuthenticationResponse(OBEXHeaderSetImpl incomingHeaders, Authenticator authenticator, ServerRequestHandler serverHandler) throws IOException {
+	static void handleAuthenticationResponse(OBEXHeaderSetImpl incomingHeaders, Authenticator authenticator,
+			ServerRequestHandler serverHandler) throws IOException {
 		for (Enumeration iter = incomingHeaders.getAuthenticationResponses(); iter.hasMoreElements();) {
 			byte[] authResponse = (byte[]) iter.nextElement();
 			DigestResponse dr = new DigestResponse();
@@ -222,20 +239,22 @@ class OBEXAuthentication {
 				if (serverHandler != null) {
 					serverHandler.onAuthenticationFailure(dr.userName);
 				} else {
-					throw new IOException ("Authentication failure");
+					throw new IOException("Authentication failure");
 				}
 			}
 		}
 	}
-	
-	public static void handleAuthenticationChallenge(OBEXHeaderSetImpl incomingHeaders, OBEXHeaderSetImpl replyHeaders, Authenticator authenticator) throws IOException {
+
+	public static void handleAuthenticationChallenge(OBEXHeaderSetImpl incomingHeaders, OBEXHeaderSetImpl replyHeaders,
+			Authenticator authenticator) throws IOException {
 		for (Enumeration iter = incomingHeaders.getAuthenticationChallenges(); iter.hasMoreElements();) {
 			byte[] authChallenge = (byte[]) iter.nextElement();
 			Challenge challenge = new Challenge(authChallenge);
-			PasswordAuthentication pwd = authenticator.onAuthenticationChallenge(challenge.realm, challenge.userID, challenge.access);
+			PasswordAuthentication pwd = authenticator.onAuthenticationChallenge(challenge.getRealm(), challenge
+					.isUserIdRequired(), challenge.isFullAccess());
 			DigestResponse dr = new DigestResponse();
 			dr.nonce = challenge.nonce;
-			if (challenge.userID) {
+			if (challenge.isUserIdRequired()) {
 				dr.userName = pwd.getUserName();
 			}
 			MD5DigestWrapper md5 = new MD5DigestWrapper();
@@ -246,7 +265,7 @@ class OBEXAuthentication {
 			replyHeaders.addAuthenticationResponse(dr.write());
 		}
 	}
-	
+
 	private static synchronized byte[] createNonce() {
 		MD5DigestWrapper md5 = new MD5DigestWrapper();
 		md5.update(createTimestamp());
@@ -254,7 +273,7 @@ class OBEXAuthentication {
 		md5.update(getPrivateKey());
 		return md5.digest();
 	}
-	
+
 	static boolean equals(byte[] digest1, byte[] digest2) {
 		for (int i = 0; i < 0x10; i++) {
 			if (digest1[i] != digest2[i]) {
@@ -263,7 +282,7 @@ class OBEXAuthentication {
 		}
 		return true;
 	}
-	
+
 	private static synchronized byte[] getPrivateKey() {
 		if (privateKey != null) {
 			return privateKey;
@@ -273,20 +292,19 @@ class OBEXAuthentication {
 		privateKey = md5.digest();
 		return privateKey;
 	}
-	
+
 	private static synchronized byte[] createTimestamp() {
 		long t = System.currentTimeMillis();
 		if (t <= uniqueTimestamp) {
-			t = uniqueTimestamp + 1; 
+			t = uniqueTimestamp + 1;
 		}
 		uniqueTimestamp = t;
 		byte[] buf = new byte[8];
 		for (int i = 0; i < buf.length; i++) {
-			buf[i] = (byte)(t >> (buf.length - 1 << 3));
+			buf[i] = (byte) (t >> (buf.length - 1 << 3));
 			t <<= 8;
 		}
 		return buf;
 	}
 
-	
 }

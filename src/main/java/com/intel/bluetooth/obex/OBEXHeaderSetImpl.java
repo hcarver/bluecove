@@ -281,8 +281,8 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		return dst;
 	}
 
-	public void createAuthenticationChallenge(String realm, boolean userID, boolean access) {
-		authChallenges.addElement(OBEXAuthentication.createChallenge(realm, userID, access));
+	public void createAuthenticationChallenge(String realm, boolean isUserIdRequired, boolean isFullAccess) {
+		authChallenges.addElement(OBEXAuthentication.createChallenge(realm, isUserIdRequired, isFullAccess));
 	}
 
 	void addAuthenticationResponse(byte[] authResponse) {

@@ -202,7 +202,7 @@ public abstract class DebugLog {
 
 	public static void debug0x(String message, String s, long v) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			log(message, " 0x", Utils.toHexString(v));
+			log(message, " " + s + " 0x", Utils.toHexString(v));
 			printLocation();
 			callAppenders(DEBUG, message + " " + s + " 0x" + Utils.toHexString(v), null);
 		}
