@@ -94,28 +94,31 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		super.close();
 	}
 
-	protected void processIncommingHeaders(HeaderSet dataHeaders) throws IOException {
-		if (this.receivedHeaders != null) {
-			OBEXHeaderSetImpl.appendHeaders(this.receivedHeaders, dataHeaders);
-		} else {
-			this.receivedHeaders = dataHeaders;
+	protected boolean readRequestPacket() throws IOException {
+		byte[] b = session.readOperation();
+		int opcode = b[0] & 0xFF;
+		boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
+		if (finalPacket) {
+			DebugLog.debug("server operation got final packet");
+			finalPacketReceived = true;
 		}
-	}
-
-	protected void processIncommingData(HeaderSet dataHeaders, boolean eof) throws IOException {
-		byte[] data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
-		if (data == null) {
-			data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);
-			if (data != null) {
-				eof = true;
-			}
+		switch (opcode) {
+		case OBEXOperationCodes.GET_FINAL:
+			requestEnded = true;
+		case OBEXOperationCodes.GET:
+			HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+			OBEXHeaderSetImpl.appendHeaders(this.receivedHeaders, requestHeaders);
+			processIncommingData(requestHeaders, finalPacket);
+			break;
+		case OBEXOperationCodes.ABORT:
+			processAbort();
+			break;
+		default:
+			errorReceived = true;
+			DebugLog.debug0x("server operation invalid request", OBEXUtils.toStringObexResponseCodes(opcode), opcode);
+			session.writeOperation(ResponseCodes.OBEX_HTTP_BAD_REQUEST, null);
 		}
-		if (data != null) {
-			DebugLog.debug("server received Data eof " + eof + " len", data.length);
-			inputStream.appendData(data, eof);
-		} else if (eof) {
-			inputStream.appendData(null, eof);
-		}
+		return finalPacket;
 	}
 
 	/*
@@ -124,33 +127,14 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 	 * @see com.intel.bluetooth.obex.OBEXOperationReceive#receiveData(com.intel.bluetooth.obex.OBEXOperationInputStream)
 	 */
 	public void receiveData(OBEXOperationInputStream is) throws IOException {
-		if (requestEnded) {
+		if (requestEnded || errorReceived) {
 			this.inputStream.appendData(null, true);
 			return;
 		}
+		DebugLog.debug("server operation reply continue");
 		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
 		sendHeaders = null;
-		byte[] b = session.readOperation();
-		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
-		int requestCode = requestHeaders.getResponseCode();
-		switch (requestCode) {
-		case OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT:
-			finalPacketReceived = true;
-			requestEnded = true;
-		case OBEXOperationCodes.GET:
-			processIncommingHeaders(requestHeaders);
-			processIncommingData(requestHeaders, requestEnded);
-			break;
-		case OBEXOperationCodes.ABORT:
-			processAbort();
-			break;
-		default:
-			DebugLog.debug0x("server failed to handle request", OBEXUtils.toStringObexResponseCodes(requestCode),
-					requestCode);
-			session.writeOperation(ResponseCodes.OBEX_HTTP_UNAVAILABLE, null);
-			throw new IOException("Operation request error, 0x" + Integer.toHexString(requestCode) + " "
-					+ OBEXUtils.toStringObexResponseCodes(requestCode));
-		}
+		readRequestPacket();
 	}
 
 	/*
@@ -160,27 +144,20 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 	 *      byte[])
 	 */
 	public void deliverPacket(boolean finalPacket, byte[] buffer) throws IOException {
-		byte[] b = session.readOperation();
-		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
-		int requestCode = requestHeaders.getResponseCode();
-		switch (requestCode) {
-		case OBEXOperationCodes.GET | OBEXOperationCodes.FINAL_BIT:
-			finalPacketReceived = true;
-			requestEnded = true;
-			processIncommingHeaders(requestHeaders);
-			processIncommingData(requestHeaders, requestEnded);
-			replyWithDataPacket(finalPacket, buffer);
-			break;
-		case OBEXOperationCodes.ABORT:
-			processAbort();
-			break;
-		default:
-			DebugLog.debug0x("server failed to handle request", OBEXUtils.toStringObexResponseCodes(requestCode),
-					requestCode);
-			session.writeOperation(ResponseCodes.OBEX_HTTP_UNAVAILABLE, null);
-			throw new IOException("Operation request error, 0x" + Integer.toHexString(requestCode) + " "
-					+ OBEXUtils.toStringObexResponseCodes(requestCode));
+		HeaderSet dataHeaders = OBEXSessionBase.createOBEXHeaderSet();
+		int opcode = OBEXOperationCodes.OBEX_RESPONSE_CONTINUE;
+		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
+		if (finalPacket) {
+			// opcode = OBEXOperationCodes.OBEX_RESPONSE_SUCCESS;
+			dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY_END;
 		}
+		dataHeaders.setHeader(dataHeaderID, buffer);
+		if (sendHeaders != null) {
+			OBEXHeaderSetImpl.appendHeaders(dataHeaders, sendHeaders);
+			sendHeaders = null;
+		}
+		session.writeOperation(opcode, OBEXHeaderSetImpl.toByteArray(dataHeaders));
+		readRequestPacket();
 	}
 
 	private void processAbort() throws IOException {
@@ -189,40 +166,6 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		requestEnded = true;
 		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);
 		throw new IOException("Operation aborted");
-	}
-
-	private void replyWithDataPacket(boolean finalPacket, byte[] buffer) throws IOException {
-		HeaderSet dataHeaders = OBEXSessionBase.createOBEXHeaderSet();
-		int opcode = OBEXOperationCodes.OBEX_RESPONSE_CONTINUE;
-		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
-		if (finalPacket) {
-			opcode = OBEXOperationCodes.OBEX_RESPONSE_SUCCESS;
-			dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY_END;
-		}
-
-		dataHeaders.setHeader(dataHeaderID, buffer);
-		session.writeOperation(opcode, OBEXHeaderSetImpl.toByteArray(dataHeaders));
-
-		// if (finalPacket) {
-		// byte[] b = session.readOperation();
-		// HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
-		// if (requestHeaders.getResponseCode() != (OBEXOperationCodes.GET |
-		// OBEXOperationCodes.FINAL_BIT)) {
-		// throw new IOException("wrong final request "
-		// +
-		// OBEXUtils.toStringObexResponseCodes(requestHeaders.getResponseCode()));
-		// }
-		// }
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.intel.bluetooth.obex.OBEXServerOperation#writeResponse(int)
-	 */
-	void writeResponse(int responseCode) throws IOException {
-		session.writeOperation(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));
-		sendHeaders = null;
 	}
 
 }

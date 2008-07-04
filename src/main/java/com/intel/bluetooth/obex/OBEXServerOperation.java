@@ -26,6 +26,9 @@ import java.io.IOException;
 
 import javax.obex.HeaderSet;
 import javax.obex.Operation;
+import javax.obex.ResponseCodes;
+
+import com.intel.bluetooth.DebugLog;
 
 /**
  * @author vlads
@@ -62,7 +65,46 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 		this.receivedHeaders = receivedHeaders;
 	}
 
-	abstract void writeResponse(int responseCode) throws IOException;
+	public boolean exchangeRequestPhasePackets() throws IOException {
+		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, null);
+		return readRequestPacket();
+	}
+
+	protected abstract boolean readRequestPacket() throws IOException;
+
+	void writeResponse(int responseCode) throws IOException {
+		DebugLog.debug("server operation reply final");
+		session.writeOperation(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		sendHeaders = null;
+		if (responseCode == ResponseCodes.OBEX_HTTP_OK) {
+			while ((!finalPacketReceived) && (!session.isClosed())) {
+				DebugLog.debug("server waits to receive final packet");
+				readRequestPacket();
+				if (!errorReceived) {
+					session.writeOperation(responseCode, null);
+				}
+			}
+		} else {
+			DebugLog.debug("sent final reply");
+		}
+	}
+
+	protected void processIncommingData(HeaderSet dataHeaders, boolean eof) throws IOException {
+		byte[] data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
+		if (data == null) {
+			data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);
+			if (data != null) {
+				eof = true;
+			}
+		}
+		if (data != null) {
+			incommingDataReceived = true;
+			DebugLog.debug("server received Data eof: " + eof + " len:", data.length);
+			inputStream.appendData(data, eof);
+		} else if (eof) {
+			inputStream.appendData(null, eof);
+		}
+	}
 
 	/*
 	 * (non-Javadoc)

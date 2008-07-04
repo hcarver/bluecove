@@ -253,7 +253,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 3);
 		operation = new OBEXServerOperationPut(this, requestHeaders, finalPacket);
 		while ((!finalPacket) && (!operation.isIncommingDataReceived())) {
-			finalPacket = ((OBEXServerOperationPut) operation).exchangeRequestPhasePackets();
+			finalPacket = operation.exchangeRequestPhasePackets();
 		}
 		if (operation.isErrorReceived()) {
 			return;
@@ -285,9 +285,14 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			return;
 		}
 		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 3);
-
+		operation = new OBEXServerOperationGet(this, requestHeaders, finalPacket);
+		while ((!finalPacket) && (!operation.isIncommingDataReceived())) {
+			finalPacket = operation.exchangeRequestPhasePackets();
+		}
+		if (operation.isErrorReceived()) {
+			return;
+		}
 		try {
-			operation = new OBEXServerOperationGet(this, requestHeaders, finalPacket);
 			int rc = ResponseCodes.OBEX_HTTP_OK;
 			try {
 				rc = handler.onGet(operation);

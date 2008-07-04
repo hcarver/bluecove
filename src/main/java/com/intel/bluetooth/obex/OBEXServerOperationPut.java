@@ -82,12 +82,7 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 		super.close();
 	}
 
-	public boolean exchangeRequestPhasePackets() throws IOException {
-		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, null);
-		return readRequestPacket();
-	}
-
-	private boolean readRequestPacket() throws IOException {
+	protected boolean readRequestPacket() throws IOException {
 		byte[] b = session.readOperation();
 		int opcode = b[0] & 0xFF;
 		boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
@@ -108,7 +103,7 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 		default:
 			errorReceived = true;
 			DebugLog.debug0x("server operation invalid request", OBEXUtils.toStringObexResponseCodes(opcode), opcode);
-			session.writeOperation(ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED, null);
+			session.writeOperation(ResponseCodes.OBEX_HTTP_BAD_REQUEST, null);
 		}
 		return finalPacket;
 	}
@@ -133,45 +128,6 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);
 		close();
 		throw new IOException("Operation aborted by client");
-	}
-
-	private void processIncommingData(HeaderSet dataHeaders, boolean eof) throws IOException {
-		byte[] data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
-		if (data == null) {
-			data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);
-			if (data != null) {
-				eof = true;
-			}
-		}
-		if (data != null) {
-			incommingDataReceived = true;
-			DebugLog.debug("srv received Data eof: " + eof + " len:", data.length);
-			inputStream.appendData(data, eof);
-		} else if (eof) {
-			inputStream.appendData(null, eof);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.intel.bluetooth.obex.OBEXServerOperation#writeResponse(int)
-	 */
-	void writeResponse(int responseCode) throws IOException {
-		DebugLog.debug("server operation reply final");
-		session.writeOperation(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));
-		sendHeaders = null;
-		if (responseCode == ResponseCodes.OBEX_HTTP_OK) {
-			while ((!finalPacketReceived) && (!session.isClosed())) {
-				DebugLog.debug("server waits to receive final packet");
-				readRequestPacket();
-				if (!errorReceived) {
-					session.writeOperation(responseCode, null);
-				}
-			}
-		} else {
-			DebugLog.debug("sent final reply");
-		}
 	}
 
 }
