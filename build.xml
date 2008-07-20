@@ -11,6 +11,8 @@
     <property name="build_classes" location="target/classes"/>
     <property name="dist"  location="target"/>
 
+    <property name="java5_src" value="com/intel/bluetooth/*SE5.java"/>
+
     <target name="init">
         <!-- Create the time stamp -->
         <tstamp/>
@@ -23,8 +25,9 @@
     <target name="compile" depends="init"
         description="compile the source" >
 
-        <condition property="exclude_SE5" value="com.intel.bluetooth.*SE5.java">
-            <equals arg1="1.4" arg2="${ant.java.version}"/>
+        <echo message="compiling on java ${java.version}"/>
+        <condition property="exclude_SE5" value="${java5_src}">
+            <contains substring="1.4" string="${java.version}"/>
         </condition>
 
         <!-- Compile the java code from ${src} -->
