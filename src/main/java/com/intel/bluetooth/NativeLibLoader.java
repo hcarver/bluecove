@@ -268,12 +268,14 @@ public abstract class NativeLibLoader {
 			try {
 				if (stackClass != null) {
 					clo = stackClass.getClassLoader();
+					DebugLog.debug("Use stack ClassLoader");
 				} else {
 					clo = NativeLibLoader.class.getClassLoader();
 				}
 			} catch (Throwable j9) {
 			}
 			if (clo == null) {
+				DebugLog.debug("Use System ClassLoader");
 				is = ClassLoader.getSystemResourceAsStream(libFileName);
 			} else {
 				is = clo.getResourceAsStream(libFileName);
