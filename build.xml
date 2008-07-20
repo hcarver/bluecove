@@ -3,34 +3,41 @@
         Open source implementation of JSR-82 Java Bluetooth API.
     </description>
 
-    <property name="product-version" value="2.0.3-SNAPSHOT"/>
+    <property name="product_version" value="2.0.3-SNAPSHOT"/>
 
     <!-- set global properties for this build -->
     <property name="src" location="src/main/java"/>
     <property name="resources" location="src/main/resources"/>
-    <property name="build" location="target/classes"/>
+    <property name="build_classes" location="target/classes"/>
     <property name="dist"  location="target"/>
 
     <target name="init">
         <!-- Create the time stamp -->
         <tstamp/>
         <!-- Create the build directory structure used by compile -->
-        <mkdir dir="${build}"/>
+        <mkdir dir="${build_classes}"/>
     </target>
 
     <target name="default" depends="compile, jni-headers"/>
 
     <target name="compile" depends="init"
         description="compile the source" >
-        <!-- Compile the java code from ${src} into ${build} -->
+
+        <condition property="exclude_SE5" value="com.intel.bluetooth.*SE5.java">
+            <equals arg1="1.4" arg2="${ant.java.version}"/>
+        </condition>
+
+        <!-- Compile the java code from ${src} -->
         <javac source="1.3" target="1.1" debug="true"
-               srcdir="${src}" destdir="${build}"
-               excludes="com/intel/bluetooth/DebugLog4jAppender.java"/>
+               srcdir="${src}" destdir="${build_classes}">
+            <exclude name="com/intel/bluetooth/DebugLog4jAppender.java"/>
+            <exclude name="${exclude_SE5}"/>
+        </javac>
     </target>
 
     <target name="jni-headers" depends="init"
         description="Create JNI headers" >
-        <javah destdir="src/main/c/intelbth" classpath="${build}">
+        <javah destdir="src/main/c/intelbth" classpath="${build_classes}">
             <class name="com.intel.bluetooth.NativeTestInterfaces"/>
             <class name="com.intel.bluetooth.BluetoothStackMicrosoft"/>
             <class name="com.intel.bluetooth.BluetoothStackWIDCOMM"/>
@@ -51,16 +58,16 @@
         </tstamp>
 
         <!-- Put everything in ${build} into the BlueCove-${DSTAMP}.jar file -->
-        <jar jarfile="${dist}/bluecove-${product-version}.jar">
+        <jar jarfile="${dist}/bluecove-${product_version}.jar">
             <manifest>
                 <attribute name="Description" value="BlueCove JSR-82 implementation"/>
                 <attribute name="License" value="GNU Library or Lesser General Public License (LGPL)"/>
                 <attribute name="Built-By" value="${user.name}"/>
-                <attribute name="Implementation-Version" value="${product-version}"/>
+                <attribute name="Implementation-Version" value="${product_version}"/>
                 <attribute name="Build-Date" value="${today}"/>
                 <attribute name="Built-Env"   value="${os.name} ${os.version} ${os.arch}, Java ${java.version}"/>
             </manifest>
-            <fileset dir="${build}">
+            <fileset dir="${build_classes}">
                 <include name="**/*.class"/>
                 <exclude name="**/*.log"/>
                 <exclude name="**/.*"/>
@@ -68,7 +75,6 @@
                 <exclude name="com/ibm/oti/connection/CreateConnection.class"/>
                 <exclude name="com/ibm/oti/vm/**"/>
                 <exclude name="com/sun/cdc/io/ConnectionBaseInterface.class"/>
-                <exclude name="com/intel/bluetooth/BluetoothStackBlueZ.class"/>
             </fileset>
             <fileset dir="${resources}">
                 <include name="*.dll"/>

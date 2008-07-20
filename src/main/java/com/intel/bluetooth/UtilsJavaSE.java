@@ -50,9 +50,19 @@ public class UtilsJavaSE {
 		public int lineNumber;
 	}
 
+	static interface JavaSE5Features {
+
+		public void clearProperty(String propertyName);
+
+	}
+
 	static boolean java13 = false;
 
 	static boolean java14 = false;
+
+	static boolean detectJava5 = true;
+
+	static JavaSE5Features java5Helper;
 
 	static final boolean ibmJ9midp = detectJ9midp();
 
@@ -70,6 +80,19 @@ public class UtilsJavaSE {
 			return false;
 		}
 		return (ibmJ9config != null) && (ibmJ9config.indexOf("midp") != -1);
+	}
+
+	private static void detectJava5() {
+		if (java13 || ibmJ9midp || (!detectJava5)) {
+			return;
+		}
+		try {
+			Class klass = Class.forName("com.intel.bluetooth.UtilsJavaSE5");
+			java5Helper = (JavaSE5Features) klass.newInstance();
+			DebugLog.debug("Java 1.5+ detected:", vmInfo());
+		} catch (Throwable e) {
+			detectJava5 = false;
+		}
 	}
 
 	static StackTraceLocation getLocation(Vector fqcnSet) {
@@ -192,8 +215,10 @@ public class UtilsJavaSE {
 				if (propertyValue != null) {
 					System.setProperty(propertyName, propertyValue);
 				} else {
-					// Java 1.5 - OK
-					System.clearProperty(propertyName);
+					detectJava5();
+					if (java5Helper != null) {
+						java5Helper.clearProperty(propertyName);
+					}
 				}
 			} catch (Throwable java11) {
 			}
