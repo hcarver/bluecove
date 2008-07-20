@@ -42,9 +42,11 @@ BlueCove
 
     * Java for Mac OS X 10.4 and 10.5, Release 5 on PowerPC and Intel processors
 
-    * SUN Java 2 SE 5.0 on Linux Fedora 6 i386 BlueZ 3.7, Fedora 7 i386 BlueZ 3.9, (Also tested on Ubuntu and OpenSUSE)
+    * SUN Java 2 SE 5.0 on Linux Fedora 6 i386 BlueZ 3.7, Fedora 7 i386 BlueZ 3.9, (Also tested on Ubuntu and OpenSUSE, i386 and 64-bit)
 
     * GNU libgcj 4.1.2 on Fedora 7 i386 BlueZ 3.9
+
+    * {{{http://www.sablevm.org/}SableVM}} on Debian 4.0r3 ARM on {{{http://www.nslu2-linux.org/}Linksys NSLU2}}
 
     []
 
