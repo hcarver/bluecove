@@ -75,7 +75,7 @@
                 <include name="*.jnilib"/>
             </fileset>
             <fileset dir=".">
-                <include name="LICENSE"/>
+                <include name="LICENSE.txt"/>
             </fileset>
         </jar>
     </target>
