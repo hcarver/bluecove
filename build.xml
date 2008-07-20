@@ -18,6 +18,14 @@
         <tstamp/>
         <!-- Create the build directory structure used by compile -->
         <mkdir dir="${build_classes}"/>
+
+        <condition property="create_jni_headers" value="true">
+            <or>
+                <os family="mac"/>
+                <os family="windows"/>
+            </or>
+        </condition>
+
     </target>
 
     <target name="default" depends="compile, jni-headers"/>
@@ -38,8 +46,11 @@
         </javac>
     </target>
 
-    <target name="jni-headers" depends="init"
+    <target name="jni-headers" depends="init" if="create_jni_headers"
         description="Create JNI headers" >
+
+        <echo message="create JNI headers using java.home ${java.home}"/>
+
         <javah destdir="src/main/c/intelbth" classpath="${build_classes}">
             <class name="com.intel.bluetooth.NativeTestInterfaces"/>
             <class name="com.intel.bluetooth.BluetoothStackMicrosoft"/>
