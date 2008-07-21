@@ -104,8 +104,10 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		}
 		switch (opcode) {
 		case OBEXOperationCodes.GET_FINAL:
-			requestEnded = true;
 		case OBEXOperationCodes.GET:
+			if (finalPacket) {
+				requestEnded = true;
+			}
 			HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 			OBEXHeaderSetImpl.appendHeaders(this.receivedHeaders, requestHeaders);
 			processIncommingData(requestHeaders, finalPacket);
