@@ -56,11 +56,13 @@ public class UtilsJavaSE {
 
 	}
 
+	static final int javaSpecificationVersion = getJavaSpecificationVersion();
+
 	static boolean java13 = false;
 
 	static boolean java14 = false;
 
-	static boolean detectJava5 = true;
+	static boolean detectJava5Helper = true;
 
 	static JavaSE5Features java5Helper;
 
@@ -82,16 +84,28 @@ public class UtilsJavaSE {
 		return (ibmJ9config != null) && (ibmJ9config.indexOf("midp") != -1);
 	}
 
-	private static void detectJava5() {
-		if (java13 || ibmJ9midp || (!detectJava5)) {
+	private static int getJavaSpecificationVersion() {
+		try {
+			String javaV = System.getProperty("java.specification.version");
+			if ((javaV == null) || (javaV.length() < 3)) {
+				return 0;
+			}
+			return Integer.valueOf(javaV.charAt(2)).intValue();
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	private static void detectJava5Helper() {
+		if (java13 || ibmJ9midp || (!detectJava5Helper) || (javaSpecificationVersion < 5)) {
 			return;
 		}
+		detectJava5Helper = false;
 		try {
 			Class klass = Class.forName("com.intel.bluetooth.UtilsJavaSE5");
 			java5Helper = (JavaSE5Features) klass.newInstance();
-			DebugLog.debug("Java 1.5+ detected:", vmInfo());
+			DebugLog.debug("Use java 1.5+ features:", vmInfo());
 		} catch (Throwable e) {
-			detectJava5 = false;
 		}
 	}
 
@@ -211,11 +225,12 @@ public class UtilsJavaSE {
 		} catch (SecurityException e) {
 		}
 		if (!propertySet) {
+			// Fall back if security managed allow to change only specific key
 			try {
 				if (propertyValue != null) {
 					System.setProperty(propertyName, propertyValue);
 				} else {
-					detectJava5();
+					detectJava5Helper();
 					if (java5Helper != null) {
 						java5Helper.clearProperty(propertyName);
 					}

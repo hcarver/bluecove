@@ -294,7 +294,7 @@ public class BlueCoveImpl {
 		}
 		// Initialization in WebStart.
 		DebugLog.isDebugEnabled();
-		copySystemProperty(null);
+		copySystemProperties(null);
 	}
 
 	static int getNativeLibraryVersion() {
@@ -485,7 +485,7 @@ public class BlueCoveImpl {
 
 		BluetoothStack stack = setBluetoothStack(stackSelected, detectorStack);
 		stackSelected = stack.getStackID();
-		copySystemProperty(stack);
+		copySystemProperties(stack);
 		if (!stackSelected.equals(STACK_EMULATOR)) {
 			System.out.println("BlueCove version " + version + " on " + stackSelected);
 		}
@@ -749,6 +749,7 @@ public class BlueCoveImpl {
 		if (shutdownHookRegistered != null) {
 			shutdownHookRegistered.deRegister();
 		}
+		clearSystemProperties();
 	}
 
 	/**
@@ -827,14 +828,28 @@ public class BlueCoveImpl {
 		}
 	}
 
-	void copySystemProperty(BluetoothStack bluetoothStack) {
+	static String[] getSystemPropertiesList() {
+		String[] p = { "bluetooth.master.switch", "bluetooth.sd.attr.retrievable.max",
+				"bluetooth.connected.devices.max", "bluetooth.l2cap.receiveMTU.max", "bluetooth.sd.trans.max",
+				"bluetooth.connected.inquiry.scan", "bluetooth.connected.page.scan", "bluetooth.connected.inquiry",
+				"bluetooth.connected.page" };
+		return p;
+	}
+
+	static void clearSystemProperties() {
+		UtilsJavaSE.setSystemProperty("bluetooth.api.version", null);
+		UtilsJavaSE.setSystemProperty("obex.api.version", null);
+		String[] property = getSystemPropertiesList();
+		for (int i = 0; i < property.length; i++) {
+			UtilsJavaSE.setSystemProperty(property[i], null);
+		}
+	}
+
+	void copySystemProperties(BluetoothStack bluetoothStack) {
 		UtilsJavaSE.setSystemProperty("bluetooth.api.version", "1.1");
 		UtilsJavaSE.setSystemProperty("obex.api.version", "1.1");
 		if (bluetoothStack != null) {
-			String[] property = { "bluetooth.master.switch", "bluetooth.sd.attr.retrievable.max",
-					"bluetooth.connected.devices.max", "bluetooth.l2cap.receiveMTU.max", "bluetooth.sd.trans.max",
-					"bluetooth.connected.inquiry.scan", "bluetooth.connected.page.scan", "bluetooth.connected.inquiry",
-					"bluetooth.connected.page" };
+			String[] property = getSystemPropertiesList();
 			for (int i = 0; i < property.length; i++) {
 				UtilsJavaSE.setSystemProperty(property[i], bluetoothStack.getLocalDeviceProperty(property[i]));
 			}
