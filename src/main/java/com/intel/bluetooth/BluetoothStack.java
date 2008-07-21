@@ -28,7 +28,6 @@ import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
-import javax.microedition.io.Connection;
 
 /**
  * New native stack support should ONLY implement this interface. No other
@@ -326,7 +325,7 @@ public interface BluetoothStack {
 	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
 
 	/**
-	 * @see javax.bluetooth.RemoteDevice#getRemoteDevice(Connection)
+	 * @see javax.bluetooth.RemoteDevice#getRemoteDevice(javax.microedition.io.Connection)
 	 */
 	public long getConnectionRfRemoteAddress(long handle) throws IOException;
 
@@ -450,7 +449,7 @@ public interface BluetoothStack {
 	public void l2Send(long handle, byte[] data) throws IOException;
 
 	/**
-	 * @see javax.bluetooth.RemoteDevice#getRemoteDevice(Connection)
+	 * @see javax.bluetooth.RemoteDevice#getRemoteDevice(javax.microedition.io.Connection)
 	 */
 	public long l2RemoteAddress(long handle) throws IOException;
 

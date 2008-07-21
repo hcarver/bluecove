@@ -165,7 +165,7 @@ public abstract class Utils {
 
 	public static Vector clone(Enumeration en) {
 		Vector copy = new Vector();
-		for (; en.hasMoreElements();) {
+		while (en.hasMoreElements()) {
 			copy.addElement(en.nextElement());
 		}
 		return copy;

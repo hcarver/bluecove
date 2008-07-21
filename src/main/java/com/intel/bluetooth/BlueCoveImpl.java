@@ -175,7 +175,7 @@ public class BlueCoveImpl {
 
 		private BluetoothStack bluetoothStack;
 
-		private Hashtable configProperties = new Hashtable();
+		Hashtable configProperties = new Hashtable();
 
 		private static BluetoothStack getBluetoothStack() throws BluetoothStateException {
 			return instance().getBluetoothStack();
@@ -384,7 +384,6 @@ public class BlueCoveImpl {
 				throw new BluetoothStateException("BlueCove library " + libs[i].libraryName + " not available");
 			}
 		}
-		return;
 	}
 
 	private static boolean isNativeLibrariesAvailable(BluetoothStack stack) {

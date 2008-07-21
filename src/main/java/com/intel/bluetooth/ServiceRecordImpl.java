@@ -115,7 +115,7 @@ class ServiceRecordImpl implements ServiceRecord {
 			throw new IOException("DATSEQ expected instead of " + element.getDataType());
 		}
 		Enumeration en = (Enumeration) element.getValue();
-		for (; en.hasMoreElements();) {
+		while (en.hasMoreElements()) {
 			DataElement id = (DataElement) en.nextElement();
 			if (id.getDataType() != DataElement.U_INT_2) {
 				throw new IOException("U_INT_2 expected instead of " + id.getDataType());
