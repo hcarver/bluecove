@@ -122,6 +122,9 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	}
 
 	public void destroy() {
+		if (singleInstance != this) {
+			throw new RuntimeException("Destroy invalid instance");
+		}
 		if (peerInitialized) {
 			peerInitialized = false;
 			uninitialize();

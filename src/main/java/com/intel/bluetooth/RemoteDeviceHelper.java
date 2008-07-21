@@ -584,7 +584,7 @@ public abstract class RemoteDeviceHelper {
 	 * <p>
 	 * <b>PUBLIC JSR-82 extension</b>
 	 * 
-	 * @param address
+	 * @param device
 	 *            Remote Device
 	 * @param passkey
 	 *            A Personal Identification Number (PIN) to be used for device

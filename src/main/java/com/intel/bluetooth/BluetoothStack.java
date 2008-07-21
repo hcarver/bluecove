@@ -263,7 +263,8 @@ public interface BluetoothStack {
 	// ---------------------- Client and Server RFCOMM connections
 
 	/**
-	 * Used to create handle for {@link BluetoothRFCommClientConnection}
+	 * Used to create handle for
+	 * {@link com.intel.bluetooth.BluetoothRFCommClientConnection}
 	 * 
 	 * @see javax.microedition.io.Connector#open(String, int, boolean)
 	 */
@@ -283,21 +284,22 @@ public interface BluetoothStack {
 	public int rfGetSecurityOpt(long handle, int expected) throws IOException;
 
 	/**
-	 * @see BluetoothRFCommClientConnection
-	 * @see BluetoothRFCommConnection#close()
-	 * @see BluetoothRFCommConnection#closeConnectionHandle(long)
+	 * @see com.intel.bluetooth.BluetoothRFCommClientConnection
+	 * @see com.intel.bluetooth.BluetoothRFCommConnection#close()
+	 * @see com.intel.bluetooth.BluetoothRFCommConnection#closeConnectionHandle(long)
 	 */
 	public void connectionRfCloseClientConnection(long handle) throws IOException;
 
 	/**
-	 * @see BluetoothRFCommServerConnection
+	 * @see com.intel.bluetooth.BluetoothRFCommServerConnection
 	 * @see #connectionRfCloseClientConnection(long)
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void connectionRfCloseServerConnection(long handle) throws IOException;
 
 	/**
-	 * Used to create handle for {@link BluetoothRFCommConnectionNotifier}
+	 * Used to create handle for
+	 * {@link com.intel.bluetooth.BluetoothRFCommConnectionNotifier}
 	 * 
 	 * @see javax.microedition.io.Connector#open(String, int, boolean)
 	 */
@@ -311,15 +313,16 @@ public interface BluetoothStack {
 			throws ServiceRegistrationException;
 
 	/**
-	 * Used to create handle for {@link BluetoothRFCommServerConnection}
+	 * Used to create handle for
+	 * {@link com.intel.bluetooth.BluetoothRFCommServerConnection}
 	 * 
-	 * @see BluetoothRFCommConnectionNotifier#acceptAndOpen()
+	 * @see com.intel.bluetooth.BluetoothRFCommConnectionNotifier#acceptAndOpen()
 	 * @see javax.microedition.io.StreamConnectionNotifier#acceptAndOpen()
 	 */
 	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
 
 	/**
-	 * @see BluetoothConnectionNotifierBase#close()
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#close()
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;
@@ -337,54 +340,57 @@ public interface BluetoothStack {
 
 	/**
 	 * @see java.io.InputStream#read()
-	 * @see BluetoothRFCommInputStream#read()
+	 * @see com.intel.bluetooth.BluetoothRFCommInputStream#read()
 	 */
 	public int connectionRfRead(long handle) throws IOException;
 
 	/**
 	 * @see java.io.InputStream#read(byte[],int,int)
-	 * @see BluetoothRFCommInputStream#read(byte[],int,int)
+	 * @see com.intel.bluetooth.BluetoothRFCommInputStream#read(byte[],int,int)
 	 */
 	public int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException;
 
 	/**
 	 * @see java.io.InputStream#available()
-	 * @see BluetoothRFCommInputStream#available()
+	 * @see com.intel.bluetooth.BluetoothRFCommInputStream#available()
 	 */
 	public int connectionRfReadAvailable(long handle) throws IOException;
 
 	/**
-	 * @see BluetoothRFCommOutputStream#write(int)
+	 * @see com.intel.bluetooth.BluetoothRFCommOutputStream#write(int)
 	 */
 	public void connectionRfWrite(long handle, int b) throws IOException;
 
 	/**
-	 * @see BluetoothRFCommOutputStream#write(byte[], int, int)
+	 * @see com.intel.bluetooth.BluetoothRFCommOutputStream#write(byte[], int,
+	 *      int)
 	 */
 	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
 
 	/**
-	 * @see BluetoothRFCommOutputStream#flush()
+	 * @see com.intel.bluetooth.BluetoothRFCommOutputStream#flush()
 	 */
 	public void connectionRfFlush(long handle) throws IOException;
 
 	// ---------------------- Client and Server L2CAP connections
 
 	/**
-	 * Used to create handle for {@link BluetoothL2CAPClientConnection}
+	 * Used to create handle for
+	 * {@link com.intel.bluetooth.BluetoothL2CAPClientConnection}
 	 */
 	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU)
 			throws IOException;
 
 	/**
-	 * Closing {@link  BluetoothL2CAPClientConnection}
+	 * Closing {@link  com.intel.bluetooth.BluetoothL2CAPClientConnection}
 	 * 
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void l2CloseClientConnection(long handle) throws IOException;
 
 	/**
-	 * Used to create handle for {@link BluetoothL2CAPConnectionNotifier}
+	 * Used to create handle for
+	 * {@link com.intel.bluetooth.BluetoothL2CAPConnectionNotifier}
 	 * 
 	 * @see javax.microedition.io.Connector#open(String, int, boolean)
 	 */
@@ -398,22 +404,23 @@ public interface BluetoothStack {
 			throws ServiceRegistrationException;
 
 	/**
-	 * Used to create handle for {@link BluetoothL2CAPServerConnection}
+	 * Used to create handle for
+	 * {@link com.intel.bluetooth.BluetoothL2CAPServerConnection}
 	 * 
-	 * @see BluetoothL2CAPConnectionNotifier#acceptAndOpen()
+	 * @see com.intel.bluetooth.BluetoothL2CAPConnectionNotifier#acceptAndOpen()
 	 * @see javax.bluetooth.L2CAPConnectionNotifier#acceptAndOpen()
 	 */
 	public long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException;
 
 	/**
-	 * Closing {@link  BluetoothL2CAPServerConnection}
+	 * Closing {@link  com.intel.bluetooth.BluetoothL2CAPServerConnection}
 	 * 
 	 * @see #l2CloseClientConnection(long)
 	 */
 	public void l2CloseServerConnection(long handle) throws IOException;
 
 	/**
-	 * @see BluetoothConnectionNotifierBase#close()
+	 * @see com.intel.bluetooth.BluetoothConnectionNotifierBase#close()
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException;

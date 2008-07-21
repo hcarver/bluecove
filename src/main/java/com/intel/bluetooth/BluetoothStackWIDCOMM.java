@@ -133,6 +133,9 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 	private native void uninitialize();
 
 	public void destroy() {
+		if (singleInstance != this) {
+			throw new RuntimeException("Destroy invalid instance");
+		}
 		if (initialized) {
 			uninitialize();
 			initialized = false;

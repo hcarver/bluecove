@@ -259,7 +259,7 @@ public abstract class DebugLog {
 					if (i != off) {
 						buf.append(", ");
 					}
-					buf.append((new Integer(data[i])).toString());
+					buf.append(Integer.toString(data[i]));
 				}
 				buf.append("]");
 				if (len > 4) {

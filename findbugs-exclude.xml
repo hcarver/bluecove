@@ -2,4 +2,20 @@
 <FindBugsFilter>
     <!-- we need to run under MIDP, There are no String.toUpperCase(Locale) -->
     <Match><Bug code="Dm" /></Match>
+    <!-- null instead of zero length array by specification -->
+    <Match>
+       <Class name="com.intel.bluetooth.RemoteDeviceHelper" />
+       <Method name="retrieveDevices" params="com.intel.bluetooth.BluetoothStack, int" returns="javax.bluetooth.RemoteDevice[]"/>
+       <Bug code="PZLA" />
+    </Match>
+    <Match>
+       <Class name="com.intel.bluetooth.Utils" />
+       <Method name="clone" params="byte[]" returns="byte[]"/>
+       <Bug code="PZLA" />
+    </Match>
+    <Match>
+       <Class name="com.intel.bluetooth.obex.OBEXHeaderSetImpl" />
+       <Method name="getHeaderList" params="" returns="int[]"/>
+       <Bug code="PZLA" />
+    </Match>
 </FindBugsFilter>
