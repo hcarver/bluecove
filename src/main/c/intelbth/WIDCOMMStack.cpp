@@ -662,6 +662,21 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_cancel
 }
 #endif
 
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteDeviceRSSI
+  (JNIEnv *env, jobject, jlong address) {
+    if (stack == NULL) {
+        throwRuntimeException(env, cSTACK_CLOSED);
+        return NULL;
+    }
+    BD_ADDR bda;
+    LongToBcAddr(address, bda);
+    tBT_CONN_STATS conn_stats;
+    if (!stack->GetConnectionStats(bda, &conn_stats)) {
+        return -1;
+    }
+    return conn_stats.Rssi;
+}
+
 jboolean isDevicePaired(JNIEnv *env, jlong address, DEV_CLASS devClass) {
     if (stack == NULL) {
         return FALSE;
