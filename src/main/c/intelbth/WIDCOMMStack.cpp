@@ -564,6 +564,104 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_authen
     }
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isRemoteDeviceConnected
+  (JNIEnv *env, jobject, jlong address) {
+    if (stack == NULL) {
+        throwRuntimeException(env, cSTACK_CLOSED);
+        return FALSE;
+    }
+    BD_ADDR bda;
+    LongToBcAddr(address, bda);
+    return stack->IsRemoteDeviceConnected(bda);
+}
+
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteDeviceLinkMode
+  (JNIEnv *env, jobject, jlong address) {
+    if (stack == NULL) {
+        throwRuntimeException(env, cSTACK_CLOSED);
+        return NULL;
+    }
+    UINT8 mode = 0;
+    BD_ADDR bda;
+    LongToBcAddr(address, bda);
+    BOOL rc;
+    #ifdef WIDCOMM_CE30
+        rc = stack->ReadLinkMode(bda, &mode);
+        // TODO verify this values
+        const UINT8 LINK_MODE_NORMAL = 0;
+        const UINT8 LINK_MODE_HOLD = 1;
+        const UINT8 LINK_MODE_SNIFF = 2;
+        const UINT8 LINK_MODE_PARK = 3;
+    #else
+        rc = CBtIf::ReadLinkMode(bda, &mode);
+        const UINT8 LINK_MODE_NORMAL = CBtIf::LINK_MODE::LINK_MODE_NORMAL;
+        const UINT8 LINK_MODE_HOLD = CBtIf::LINK_MODE::LINK_MODE_HOLD;
+        const UINT8 LINK_MODE_SNIFF = CBtIf::LINK_MODE::LINK_MODE_SNIFF;
+        const UINT8 LINK_MODE_PARK = CBtIf::LINK_MODE::LINK_MODE_PARK;
+    #endif
+
+    if (rc) {
+        char* cMode;
+        switch(mode) {
+            case LINK_MODE_NORMAL:
+                cMode = "normal";
+                break;
+            case LINK_MODE_HOLD:
+                cMode = "hold";
+                break;
+            case LINK_MODE_SNIFF:
+                cMode = "sniff";
+                break;
+            case LINK_MODE_PARK:
+                cMode = "park";
+                break;
+            default:
+                throwIOException(env, "Invalid link mode [%i]", mode);
+                return NULL;
+        }
+        return env->NewStringUTF(cMode);
+    } else {
+        throwRuntimeException(env, "Can't read link mode");
+        return NULL;
+    }
+}
+
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteDeviceVersionInfo
+  (JNIEnv *env, jobject, jlong address) {
+    // TODO
+    if (stack == NULL) {
+        throwRuntimeException(env, cSTACK_CLOSED);
+        return NULL;
+    }
+    UINT8 mode = 0;
+    BD_ADDR bda;
+    LongToBcAddr(address, bda);
+    CBtIf::DEV_VER_INFO devVerInfo;
+    if (!stack->GetRemoteDeviceVersionInfo(bda, &devVerInfo)) {
+        return NULL;
+    } else {
+        char info[256];
+        sprintf_s(info, 256, "manufacturer=%i,lmp_version=%i,lmp_sub_version=%i", devVerInfo.manufacturer, devVerInfo.lmp_version, devVerInfo.lmp_sub_version);
+        return env->NewStringUTF(info);
+    }
+}
+
+#ifndef WIDCOMM_CE30
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_setSniffMode
+  (JNIEnv *env, jobject, jlong address) {
+    BD_ADDR bda;
+    LongToBcAddr(address, bda);
+    return CBtIf::SetSniffMode(bda);
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_cancelSniffMode
+  (JNIEnv *env, jobject, jlong address) {
+    BD_ADDR bda;
+    LongToBcAddr(address, bda);
+    return CBtIf::CancelSniffMode(bda);
+}
+#endif
+
 jboolean isDevicePaired(JNIEnv *env, jlong address, DEV_CLASS devClass) {
     if (stack == NULL) {
         return FALSE;

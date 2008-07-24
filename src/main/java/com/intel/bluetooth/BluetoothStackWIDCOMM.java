@@ -252,7 +252,26 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 		if ("bluecove.stack.version".equals(property)) {
 			return getBTWVersionInfo();
 		}
-
+		// Some testing functions, not documented
+		if (property.startsWith("bluecove.nativeFunction:")) {
+			String functionDescr = property.substring(property.indexOf(':') + 1, property.length());
+			String function = functionDescr.substring(0, functionDescr.indexOf(':'));
+			long address = RemoteDeviceHelper.getAddress(functionDescr.substring(function.length() + 1, functionDescr
+					.length()));
+			if ("getRemoteDeviceVersionInfo".equals(function)) {
+				return getRemoteDeviceVersionInfo(address);
+			} else if ("cancelSniffMode".equals(function)) {
+				return String.valueOf(cancelSniffMode(address));
+			} else if ("setSniffMode".equals(function)) {
+				return String.valueOf(setSniffMode(address));
+			} else if ("getRemoteDeviceLinkMode".equals(function)) {
+				if (isRemoteDeviceConnected(address)) {
+					return getRemoteDeviceLinkMode(address);
+				} else {
+					return "disconnected";
+				}
+			}
+		}
 		return null;
 	}
 
@@ -282,6 +301,18 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException {
 		return authenticateRemoteDeviceImpl(address, passkey);
 	}
+
+	// --- Some testing functions accessible by LocalDevice.getProperty
+
+	public native boolean isRemoteDeviceConnected(long address);
+
+	public native String getRemoteDeviceLinkMode(long address);
+
+	public native String getRemoteDeviceVersionInfo(long address);
+
+	public native boolean setSniffMode(long address);
+
+	public native boolean cancelSniffMode(long address);
 
 	// --- Device Inquiry
 
