@@ -26,6 +26,9 @@ import javax.bluetooth.DiscoveryListener;
 /**
  * This is Common class to solve JNI call backs problem
  * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ * 
  */
 class DeviceInquiryThread extends Thread {
 

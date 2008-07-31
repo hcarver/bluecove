@@ -30,6 +30,13 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
+/**
+ * This is Common class to solve JNI call backs problem
+ * 
+ * <p>
+ * <b><u>Your application should not use this class directly.</u></b>
+ * 
+ */
 class SearchServicesThread extends Thread {
 
 	private static int transIDGenerator = 0;
