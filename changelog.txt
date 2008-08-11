@@ -1,8 +1,10 @@
 @version $Id$
 
-* 2.0.3 to released 2008-07-XX
+* 2.1.0 to be released 2008-12-XX
 
-    2008-06-01 - 2008-06-..
+* 2.0.3 released 2008-08-11
+
+    2008-06-01 - 2008-08-11
     * Fixed 64K buffer limit on WIDCOMM Stack
     * Fixed ERROR_IO_INCOMPLETE on BlueSoleil Stack
     * Fixed services search on WIDCOMM to use 'and' for all UUID in query
