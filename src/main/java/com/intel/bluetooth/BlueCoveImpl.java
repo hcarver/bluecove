@@ -493,7 +493,7 @@ public class BlueCoveImpl {
 
 	/**
 	 * List the local adapters that can be initialized using configuration
-	 * property "bluecove.deviceID".
+	 * property "bluecove.deviceID". (Linux BlueZ and Emulator)
 	 * 
 	 * The first stack/adapter would be initialized if not initialized already,
 	 * you can exclude it from the list.
@@ -634,8 +634,8 @@ public class BlueCoveImpl {
 	/**
 	 * Updates the current Thread BluetoothStack. Updating is possible only if
 	 * <code>stackID</code> was obtained using the
-	 * <code>getThreadBluetoothStackID()</code> method. Should be called
-	 * before connection is made or LocalDevice received from
+	 * <code>getThreadBluetoothStackID()</code> method. Should be called before
+	 * connection is made or LocalDevice received from
 	 * LocalDevice.getLocalDevice().
 	 * 
 	 * @param stackID
