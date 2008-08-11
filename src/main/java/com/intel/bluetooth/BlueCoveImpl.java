@@ -74,7 +74,7 @@ public class BlueCoveImpl {
 
 	public static final int versionMinor = 3;
 
-	public static final int versionBuild = 100;
+	public static final int versionBuild = 99;
 
 	public static final String versionSufix = ""; // SNAPSHOT
 

@@ -22,7 +22,7 @@
 #pragma once
 
 #ifndef BLUECOVE_BUILD
-#define BLUECOVE_BUILD 100
+#define BLUECOVE_BUILD 99
 #endif
 
 #ifndef BLUECOVE_VERSION

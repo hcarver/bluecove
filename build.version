@@ -2,5 +2,5 @@
 # When you increment a build.version in this file You need to set build.buildNum=0
 # This way the first build will start from 01
 #Fri Aug 01 01:00:39 EDT 2008
-build.buildNum=99
+build.buildNum=98
 build.version=2.0.3
