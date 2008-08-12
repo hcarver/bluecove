@@ -72,6 +72,8 @@
 
         <!-- Create the distribution directory -->
         <mkdir dir="${dist}"/>
+        <!-- Create the directory not present in src distribution -->
+        <mkdir dir="${resources}"/>
 
         <tstamp>
             <format property="today" pattern="yyyy-MM-dd hh:mm:ss" />
