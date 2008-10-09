@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="BlueCove">
+
+<!-- @version $Revision$ ($Author$) $Date$ -->
+
+    <publishDate position="left" format="MM-dd-yyyy HH:mm z 'GMT'Z" />
+
+    <bannerLeft>
+        <name>BlueCove</name>
+        <src>http://www.bluecove.org/logo.png</src>
+        <href>http://www.bluecove.org/</href>
+    </bannerLeft>
+
+    <bannerRight>
+        <name>Sourceforge</name>
+        <src>http://sourceforge.net/sflogo.php?group_id=114020&amp;amp;type=2</src>
+        <href>http://sourceforge.net/projects/bluecove/</href>
+    </bannerRight>
+
+    <body>
+
+        <menu name="Ver #version#">
+
+            <item name="BlueCove" href="../" />
+            <item name="Project site" href="http://bluecove.googlecode.com" />
+            <item name="Introduction" href="index.html" />
+            <item name="Download" href="#">
+                <item name="Releases" href="http://sourceforge.net/project/showfiles.php?group_id=114020"/>
+                <item name="Snapshot" href="http://www.pyx4me.com/maven2-snapshot/net/sf/bluecove/bluecove-gpl/#version#/"/>
+                <item name="SVN Access" href="source-repository.html"/>
+                <item name="Browse SVN" href="http://code.google.com/p/bluecove/source/browse/bluecove-gpl/trunk"/>
+            </item>
+
+            <item name="Test module" href="../bluecove-examples/bluecove-tester/" />
+
+            <!--4release-->
+<!--
+            <item name="Preview 2.0.2" href="http://snapshot-bluecove.pyx4j.com/"/>
+-->
+
+        </menu>
+
+        <menu ref="parent" />
+
+        <menu ref="reports" />
+
+    </body>
+
+</project>

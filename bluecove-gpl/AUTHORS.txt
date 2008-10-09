@@ -1,0 +1,10 @@
+
+BlueCove-gpl was written and maintained by:
+    2008 Mina Shokry and Vlad Skarzhevskyy
+
+BlueCove was written and maintained by:
+    2004 James Scott, Eben Upton and Christophe Diot at Intel Research Cambridge
+    2005 Denis Labaye
+    2006 Paul Totterman
+    2007 Vlad Skarzhevskyy
+

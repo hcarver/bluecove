@@ -1,0 +1,49 @@
+ @version $Revision$ ($Author$) $Date$
+
+* Build maven2
+
+   The project is a module for bluecove project.
+
+   We are using maven2 to download main bluecove.jar and build this project.
+
+   To create Eclipse projects run:
+     mvn eclipse:clean eclipse:eclipse -DdownloadSources=true
+
+   To run build without tests:
+     mvn -Dmaven.test.skip=true
+
+   To run build without building native code:
+     mvn -Dnative.build.skip=true
+
+* Build using ant
+
+    For your convenience you may use ant to create the librayr binary and jar. You will need Optional ant taks installed (ant-nodeps.jar) to run the build.
+
+    For this main bluecove.jar should be download or compiled, expected location is: ../bluecove/target/bluecove-${version}.jar
+
+    To build native library libbluecove-${os.arch}.so and bluecove-gpl-${version}.jar:
+        ant all
+
+* Native Library Compilation Requirements
+
+    - GCC compiler (4.1 or newer)
+    - Java SE Development Kit 1.4 or newer
+    - Linux Bluetooth protocol stack (BlueZ)
+    - Development librararies for Bluetooth applications (package bluez-libs-devel 3.9 or newer)
+    - When building on 64-bit platform make sure JAVA_HOME during build is pointing to 64-bit java
+
+    The native library are build during maven or ant build.
+
+* JVM specific notes
+
+    *  sablevm on debian (in particular for NSLU2)
+        build dependencies:
+            apt-get install gcc
+            apt-get install sablevm
+            apt-get install libsablevm1-dev
+            // apt-get install ant-optional
+            // TODO manualy build and install sablevm-sdk-1.13 cp-tools
+        build:
+            //for now create .h on another computer
+            ant -Dbuild.compiler=jikes -Djni_headers_skip=true all
+

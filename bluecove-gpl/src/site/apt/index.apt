@@ -1,0 +1,71 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/doxia/references/apt-format.html
+
+                                    ------------------
+                                    BlueCove Linux module
+                                    ------------------
+
+BlueCove Linux module
+
+   BlueCove-gpl is additional module for BlueCove to support bluecove on Linux.
+This module distributed as different jar because of the License differences.
+
+  Compiled for i386 and x86-64 versions of the native code (shared library) is included in jar distribution. Native shared library have been tested and should work on Ubuntu, OpenSUSE and Fedora. For other Linux distributions you may need to compile it yourself.
+
+  N.B. This is experimental module. Another module bluecove-bluez (Apache Software License) that is using D-Bus is in developement. {{{http://groups.google.com/group/bluecove-developers}Help us make it}}.
+
+* Usage
+
+---
+java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:yourApp.jar org.your.app.Main
+---
+
+* Requirements
+
+    * BlueCove library of the same mojor version
+
+    * Package bluez-libs 3.7 or later should be installed on your system
+
+    * To change Discoverable mode of the device you should be root
+
+    * On 64-bit Linux platform 64-bit java should be used
+
+
+* Standard Linux Distribution that can be used with binary BlueCove distribution
+
+    * Ubuntu 7.04 feisty (bluez 3.8) and later
+
+    * OpenSUSE 10.2 (bluez-libs-3.7) and later
+
+    * Fedora Core 6 (bluez-libs-3.7) and later
+
+    * {{{http://www.cyrius.com/debian/nslu2/}Debian 4.0r3 ARM on the Linksys NSLU2}} (bluez-libs-3.7)
+
+    * This is not complete list! For other Linux distributions you may need to compile it yourself using maven or ant.
+
+
+* Configuration options
+
+    System properties:
+
+        * `bluecove.deviceID=1` bluecove supports multiple local devices, this will force it to select second one.
+
+        * `bluecove.deviceAddress=btaddr` select local devices by Bluetooth address
+
+* Documentation
+
+    API-Documentation for BlueCove {{{../apidocs/index.html}Java docs}}. For application it is not recommended to use any classes or API other than defined in JSR-82.
+
+    API that enables the use of Multiple Adapters and Bluetooth Stacks in parallel in the same JVM is BlueCove specific, documentation can be found {{{../apidocs/com/intel/bluetooth/BlueCoveImpl.html#useThreadLocalBluetoothStack()}here}}.
+
+    JSR-82 extension <<<bluecovepsm>>> enables the use of specific PSM channel in L2CAP service. <<<btl2cap://localhost;name=...;bluecovepsm=1007>>>
+
+    BlueCove {{{http://code.google.com/p/bluecove/wiki/Documentation}Installation and configuration instructions here}}.
+
+
+* Legal
+
+  BlueCove-gpl is licensed under {{{http://www.gnu.org/licenses/gpl.html}GNU General Public License}}.
+
+  If you know how we can legaly make a library for BlueZ licensed differently please let us know.
+
