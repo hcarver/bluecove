@@ -1,0 +1,2 @@
+RewriteEngine on
+RewriteRule   ^(.+)\.jnlp$  jnlp-opener-local.php?app-url=$1

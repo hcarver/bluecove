@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp
+  spec="1.0+"
+  codebase="http://www.bluecove.org/bluecove-examples/bluecove-tester"
+  href="awt-bctest-1.2.3.jnlp">
+  <information>
+    <title>bluecove-tester 1.2.3</title>
+    <vendor>BlueCove; Vlad Skarzhevskyy</vendor>
+    <homepage href="http://www.bluecove.org/"/>
+    <description>bluecove-tester</description>
+    <description kind="short">bluecove-tester with BlueCove 1.2.3</description>
+    <icon href="icon.png"/>
+    <offline-allowed/>
+  </information>
+
+  <security>
+      <all-permissions/>
+  </security>
+  <update check="always"/>
+
+  <resources>
+    <j2se version="1.1+"/>
+    <jar href="bluecove-1.2.3-signed.jar"/>
+    <jar href="junit-3.8.1-signed.jar"/>
+    <jar href="bluecove-tester-signed.jar" main="true"/>
+  </resources>
+
+  <application-desc main-class="net.sf.bluecove.awt.Main">
+  </application-desc>
+
+</jnlp>

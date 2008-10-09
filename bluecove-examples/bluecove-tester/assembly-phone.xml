@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<assembly>
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <id>phone</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <excludes>
+                    <exclude>bluecove.dll</exclude>
+                    <exclude>intelbth.dll</exclude>
+                    <exclude>libbluecove.jnilib</exclude>
+                    <exclude>META-INF/**</exclude>
+                    <exclude>cldcunit/**</exclude>
+                    <exclude>com/intel/bluetooth/BluetoothStackOSX*.*</exclude>
+                    <exclude>com/intel/bluetooth/BluetoothStackToshiba*.*</exclude>
+                    <exclude>com/intel/bluetooth/BluetoothStackBlueSoleil*.*</exclude>
+                </excludes>
+            </unpackOptions>
+            <outputDirectory></outputDirectory>
+            <outputFileNameMapping></outputFileNameMapping>
+            <includes>
+                <include>net.sf.bluecove:bluecove</include>
+                <include>com.pyx4me:cldcunit</include>
+            </includes>
+            <scope>provided</scope>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>target/classes</directory>
+            <outputDirectory></outputDirectory>
+            <excludes>
+                <exclude>BluetoothTCKAgent/*.*</exclude>
+                <exclude>OBEXTCKAgent/*.*</exclude>
+                <exclude>BluetoothTCKAgent</exclude>
+                <exclude>OBEXTCKAgent</exclude>
+                <exclude>net/sf/bluecove/BlueCoveTest*.*</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+</assembly>

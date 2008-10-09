@@ -1,0 +1,52 @@
+#breadcrumbs {
+	overflow: hidden;
+	padding: 3px 10px 3px 20px;
+	background-image: url(../images/breadcrumbs-g.png);
+	background-repeat: repeat-x;
+	border: none;
+	background-color: #fff !important;
+}
+
+#bannerLeft {
+  float:left;
+  color: #00488F;
+}
+
+#bannerRight img {
+  width: 125px;
+  height: 37px;
+}
+
+h2,h3,h4,h5 {
+    color: #00488F;
+}
+
+#poweredBy img {
+  margin: 5px 0 5px 17px;
+  border: 0px solid black;
+}
+
+#poweredByOhloh img {
+  display:block;
+  margin: 5px 0 5px 12px;
+  border: 0px solid black;
+  width: 100px;
+  height: 16px;
+}
+
+#poweredBySourceforge img {
+  display:block;
+  margin: 5px 0 5px 17px;
+  border: 1px solid black;
+  width: 88px;
+  height: 30px;
+}
+
+#poweredBySourceforgeDonate img {
+  display:block;
+  margin: 5px 0 5px 17px;
+  border: 0px solid black;
+  width: 88px;
+  height: 32px;
+}
+

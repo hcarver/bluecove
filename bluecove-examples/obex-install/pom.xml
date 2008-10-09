@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0">
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.sf.bluecove</groupId>
+        <artifactId>bluecove-examples</artifactId>
+        <version>2.0.3</version><!--bluecove-version-->
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>obex-install</artifactId>
+    <name>obex-install</name>
+    <packaging>jar</packaging>
+
+    <description>BlueCove OBEX Push J2ME application installer Web Start</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove</artifactId>
+            <version>${version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove-gpl</artifactId>
+            <version>${version}</version>
+            <!-- TODO scope>runtime</scope-->
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.4</source>
+                    <target>1.4</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                        <manifest>
+                            <mainClass>net.sf.bluecove.obex.Main</mainClass>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                        <manifestEntries>
+                            <Version>${label}</Version>
+                            <Build-Time>${cctimestamp}</Build-Time>
+                            <Build-Time>${cctimestamp}</Build-Time>
+                            <Implementation-Version2>${pom.version}</Implementation-Version2>
+                            <SVN-Revision>${scm.revision}</SVN-Revision>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.pyx4me</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <version>${pyx4meVersion}</version>
+                <executions>
+                   <execution>
+                       <phase>package</phase>
+                       <goals><goal>proguard</goal></goals>
+                   </execution>
+                </executions>
+                <configuration>
+                    <proguardInclude>${basedir}/proguard.conf</proguardInclude>
+                    <attach>true</attach>
+                    <attachArtifactClassifier>mini</attachArtifactClassifier>
+                    <assembly>
+                        <inclusions>
+                            <inclusion>
+                                <groupId>net.sf.bluecove</groupId><artifactId>bluecove</artifactId>
+                                <filter>!**_ce.dll</filter>
+                            </inclusion>
+                            <inclusion>
+                                <groupId>net.sf.bluecove</groupId><artifactId>bluecove-gpl</artifactId>
+                            </inclusion>
+                        </inclusions>
+                    </assembly>
+                    <libs>
+                        <lib>${java.home}/lib/rt.jar</lib>
+                    </libs>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                        <manifest>
+                            <mainClass>net.sf.bluecove.obex.Main</mainClass>
+                        </manifest>
+                        <!-- this does not work, bug http://jira.codehaus.org/browse/MASSEMBLY-188 -->
+                        <manifestEntries>
+                            <Version>${label}</Version>
+                            <Build-Time>${cctimestamp}</Build-Time>
+                            <Build-Time>${cctimestamp}</Build-Time>
+                            <Implementation-Version2>${pom.version}</Implementation-Version2>
+                            <SVN-Revision>${scm.revision}</SVN-Revision>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>site-copy-proguard-map</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <copy overwrite="true"
+                                    file="${project.build.directory}/proguard_map.txt"
+                                    tofile="${project.build.directory}/site/proguard_map.txt"/>
+                                <copy overwrite="true"
+                                    file="${project.build.directory}/proguard_seeds.txt"
+                                    tofile="${project.build.directory}/site/proguard_seeds.txt"/>
+                                <copy overwrite="true"
+                                    file="${project.build.directory}/${project.build.finalName}.${project.packaging}"
+                                    tofile="${project.build.directory}/site/bluecove-obex-install.jar"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>build</id>
+            <activation>
+                <property>
+                    <name>buildByMicroEmulatorTeam</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-app</id>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <jarPath>${project.build.directory}/${project.build.finalName}-mini.${project.packaging}</jarPath>
+                                    <signedjar>${project.build.directory}/site/bluecove-obex-install-mini.jar</signedjar>
+                                    <keystore>${user.home}/.m2/MicroEmulator.keystore</keystore>
+                                    <keypass>${MicroEmulator-keystore-pwd}</keypass>
+                                    <storepass>${MicroEmulator-keystore-pwd}</storepass>
+                                    <alias>MicroEmulatorSignJars</alias>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

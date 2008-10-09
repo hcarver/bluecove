@@ -1,0 +1,48 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/guides/mini/guide-apt-format.html
+
+                                    ------------------
+                                    BlueCove examples projects
+                                    ------------------
+
+BlueCove examples project
+
+    To start BlueCove with {{{http://www.microemu.org/}MicroEmulator}} click this link << {{{bluecove-webstart/demo.jnlp}Java Web Start}} >>.
+
+    This will start J2ME Emulator with JSR-82 support.
+
+    You can Drag and Drop .jad files or links to running MicroEmulator application.
+
+    * GPS receiver over bluetooth {{{http://wap.mgmaps.com/mgmaps.jad}Mobile GMaps JAD}};  FREE application {{{http://www.mgmaps.com/}Mobile GMaps}} created by Cristian Streng. <<<{{{bluecove-webstart/open/wap.mgmaps.com/mgmaps.jnlp}\u00bbStart now}}>>>.
+
+    * {{{bluecove-tester/bctest.jad}bluecove test application JAD}}. <<<{{{bluecove-webstart/open-local/~/bluecove-tester/bctest.jnlp}\u00bbStart now}}>>>.
+
+* BlueCove Tests
+
+    You can help us to make BlueCove better or understand how we are testing it look {{{./bluecove-tester}here}} for manual tests and {{{./bluecove-tests}here}} for automatic tests.
+
+* BlueCove OBEX Push J2ME application installer
+
+    This application will install MIDlets on your mobile phone using Bluetooth. Details {{{./obex-install}here}}.
+
+* BlueCove OBEX Push Server application Web Start
+
+    The OBEX server accept any file types and store them on local computer. Details {{{./obex-server}here}}.
+
+* Short JSR-82 usage examples
+
+    BlueCove provides an implementation of the JSR 82. Applications should use API defined in JSR-82.
+
+    We created short (50 lines of code each) examples for you to get started with JSR-82 application development:
+
+    * {{{../apidocs/overview-summary.html#DeviceDiscovery}Remote Device Discovery}}
+
+    * {{{../apidocs/overview-summary.html#ServicesSearch}Services Search}}
+
+    * {{{../apidocs/overview-summary.html#OBEXPutClient}OBEX Put Client}}
+
+    * {{{../apidocs/overview-summary.html#OBEXPutServer}OBEX Put Server}}
+
+    []
+
+    Examples can be downloaded from {{{http://bluecove.googlecode.com/svn/trunk/src/test/java/com/intel/bluetooth/javadoc}SVN repository}}

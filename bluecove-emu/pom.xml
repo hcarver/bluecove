@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0">
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.sf.bluecove</groupId>
+    <version>2.0.3</version><!--bluecove-version-->
+    <artifactId>bluecove-emu</artifactId>
+    <name>bluecove-emu</name>
+    <packaging>jar</packaging>
+
+    <description>BlueCove JSR-82 Emulator</description>
+
+    <url>http://www.bluecove.org/bluecove-emu/</url>
+
+    <organization>
+        <name>BlueCove Team</name>
+        <url>http://bluecove.org</url>
+    </organization>
+    <inceptionYear>2008</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>GNU Library or Lesser General Public License (LGPL)</name>
+            <url>http://www.gnu.org/licenses/lgpl.html</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:svn:http://bluecove.googlecode.com/svn/bluecove-emu</connection>
+        <developerConnection>scm:svn:https://bluecove.googlecode.com/svn/bluecove-emu</developerConnection>
+        <url>http://bluecove.googlecode.com/svn/bluecove-emu</url>
+    </scm>
+
+	<issueManagement>
+		<system>Google Code Issue Tracking</system>
+		<url>http://code.google.com/p/bluecove/issues/list</url>
+	</issueManagement>
+
+    <mailingLists>
+        <mailingList>
+            <name>bluecove-users</name>
+            <post>bluecove-users@googlegroups.com</post>
+            <archive>http://groups.google.com/group/bluecove-users</archive>
+        </mailingList>
+        <mailingList>
+            <name>bluecove-developers</name>
+            <post>bluecove-developers@googlegroups.com</post>
+            <archive>http://groups.google.com/group/bluecove-developers</archive>
+        </mailingList>
+    </mailingLists>
+
+    <ciManagement>
+        <system>Cruisecontrol</system>
+        <url>https://pyx4j.com/cruisecontrol/</url>
+    </ciManagement>
+
+    <distributionManagement>
+        <site>
+            <id>test-pyx4j-site</id>
+            <url>file:///home/apache/bluecove/bluecove-emu</url>
+        </site>
+        <repository>
+            <id>pyx4j.com-file-release</id>
+            <url>file:///home/apache/pyx4j/maven2-release</url>
+        </repository>
+        <snapshotRepository>
+            <id>pyx4j.com-file-development</id>
+            <url>file:///home/apache/pyx4j/maven2</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <!--4snapshot-->
+    <!--
+    <repositories>
+        <repository>
+            <id>pyx4me-web-repo</id>
+            <url>http://www.pyx4me.com/maven2-snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+    -->
+
+    <developers>
+        <developer>
+            <name>Vlad Skarzhevskyy</name>
+            <id>skarzhevskyy</id>
+            <email>skarzhevskyy@gmail.com</email>
+            <organization>pyx4me.com</organization>
+            <organizationUrl>http://www.pyx4me.com</organizationUrl>
+            <roles>
+                <role>admin</role>
+                <role>developer</role>
+                <role>Build master</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+
+        <developer>
+            <name>Michael Lifshits</name>
+            <id>michael.lifschitz</id>
+            <email>michael.lifschitz@gmail.com</email>
+            <organization>pyx4j.com</organization>
+            <roles>
+                <role>Developer, Architect</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+
+    </developers>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!--
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.14</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pyx4j</groupId>
+            <artifactId>pyx4j-rpc-over-http</artifactId>
+ 			<version>1.0.2-SNAPSHOT</version>
+        </dependency>
+        -->
+
+    </dependencies>
+
+    <properties>
+        <buildLabel>${version}</buildLabel>
+    </properties>
+
+    <build>
+        <defaultGoal>install</defaultGoal>
+
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <outputEncoding>UTF-8</outputEncoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Description>BlueCove JSR-82 implementation, JSR-82 Emulator module</Description>
+                            <License>GNU Library or Lesser General Public License (LGPL)</License>
+                            <Implementation-Version>${pom.version}</Implementation-Version>
+                            <Implementation-Build>${buildLabel}</Implementation-Build>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- jar sources during build -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                    <id>attach-sources</id>
+                    <goals>
+                        <goal>jar</goal>
+                    </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>site-fix-css</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <!-- Set build number -->
+                                <replace dir="${project.build.directory}/site">
+                                    <include name="*.html"></include>
+                                    <replacefilter token="#build#" value="${label}"/>
+                                    <replacefilter token="#version#" value="${version}"/>
+                                    <replacetoken><![CDATA[</body>]]></replacetoken>
+                                    <replacevalue><![CDATA[<script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script><script type="text/javascript">_uacct = "UA-1249205-3";urchinTracker();</script></body>]]></replacevalue>
+                                </replace>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+    </build>
+
+    <profiles>
+
+        <profile>
+            <id>hasBuildLabel</id>
+            <activation>
+                <property>
+                    <name>label</name>
+                </property>
+            </activation>
+            <properties>
+                <buildLabel>${label}</buildLabel>
+            </properties>
+        </profile>
+
+    </profiles>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <quiet>true</quiet>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </reporting>
+
+</project>

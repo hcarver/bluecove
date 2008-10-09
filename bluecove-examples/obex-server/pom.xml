@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0">
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.sf.bluecove</groupId>
+        <artifactId>bluecove-examples</artifactId>
+        <version>2.0.3</version><!--bluecove-version-->
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>obex-server</artifactId>
+    <name>obex-server</name>
+    <packaging>jar</packaging>
+
+    <description>BlueCove OBEX Push Server Web Start</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove</artifactId>
+            <version>${version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.4</source>
+                    <target>1.4</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                        <manifest>
+                            <mainClass>net.sf.bluecove.obex.server.Main</mainClass>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                        <manifestEntries>
+                            <Version>${label}</Version>
+                            <Build-Time>${cctimestamp}</Build-Time>
+                           <Build-Time>${cctimestamp}</Build-Time>
+                            <Implementation-Version2>${pom.version}</Implementation-Version2>
+                            <SVN-Revision>${scm.revision}</SVN-Revision>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- awt app jar-with-dependencies -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                       <id>jar-with-dependencies</id>
+                       <phase>package</phase>
+                       <goals><goal>single</goal></goals>
+                       <configuration>
+                           <attach>true</attach>
+                           <appendAssemblyId>true</appendAssemblyId>
+                           <descriptors>
+                               <descriptor>assembly-app.xml</descriptor>
+                           </descriptors>
+                           <archive>
+                                <manifest>
+                                    <mainClass>net.sf.bluecove.obex.server.Main</mainClass>
+                                </manifest>
+                                <!-- this does not work, bug http://jira.codehaus.org/browse/MASSEMBLY-188 -->
+                                <manifestEntries>
+                                    <Version>${label}</Version>
+                                    <Build-Time>${cctimestamp}</Build-Time>
+                                    <Build-Time>${cctimestamp}</Build-Time>
+                                    <Implementation-Version2>${pom.version}</Implementation-Version2>
+                                    <SVN-Revision>${scm.revision}</SVN-Revision>
+                                </manifestEntries>
+                            </archive>
+                       </configuration>
+                    </execution>
+               </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>build</id>
+            <activation>
+                <property>
+                    <name>buildByMicroEmulatorTeam</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-app</id>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <jarPath>${project.build.directory}/${project.build.finalName}-app.${project.packaging}</jarPath>
+                                    <signedjar>${project.build.directory}/site/bluecove-obex-server-app.jar</signedjar>
+                                    <keystore>${user.home}/.m2/MicroEmulator.keystore</keystore>
+                                    <keypass>${MicroEmulator-keystore-pwd}</keypass>
+                                    <storepass>${MicroEmulator-keystore-pwd}</storepass>
+                                    <alias>MicroEmulatorSignJars</alias>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

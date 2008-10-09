@@ -1,0 +1,109 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/guides/mini/guide-apt-format.html
+
+                                    ------------------
+                                    BlueCove test Results
+                                    ------------------
+
+BlueCove test Results
+
+    Devices/software used in test:
+
+        * JSR-082 Phones: Nokia 6230, Nokia 6265i, Moto V360, Sony Ericsson K790
+
+        * {BlueCove-MS} - BlueCove with Microsoft Bluetooth stack, Microsoft Wireless Transceiver for Bluetooth 2.0
+
+        * {BlueCove-MS2} - BlueCove with Microsoft Bluetooth stack, D-Link DBT-120
+
+        * {BlueCove-WC} - BlueCove with WIDCOMM (Broadcom Bluetooth stack) v5.0.1.2800, Integrated Cambridge Silicon Radio on HP ZT3380US
+
+        * {BlueCove-WC2} - BlueCove with WIDCOMM (Broadcom Bluetooth stack) v4.0.1.2900, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}};
+
+        * MPx220 - BlueCove with Microsoft Bluetooth stack, Windows Mobile 2003 Phone Edition, Motorola MPx220;
+
+        * {BlueCove-BS} - BlueCove with BlueSoleil stack 1.6 on BlueSoleil BS001 Dongle (Class I 100 Metres);
+
+        * {BlueCove-BS2} - BlueCove with BlueSoleil stack 1.6 on ES-388 Bluetooth USB Adapter
+            fake item, bought on eBay, don't buy! Device has illegal Bluetooth addr 11:11:11:11:11:11
+
+        * avetana-WC - avetanaBluetooth 1.3.17 on WIDCOMM (Broadcom Bluetooth stack) v5.0.1.2800, Integrated Cambridge Silicon Radio on HP ZT3380US;
+          {{{http://www.avetana-gmbh.de/avetana-gmbh/produkte/jsr82.eng.xml} The best commercial JSR-82 by Moritz Gmelin}}
+
+        * avetana-MS - avetanaBluetooth 1.3.17 on Microsoft Bluetooth stack, Microsoft Wireless Transceiver for Bluetooth 2.0
+            {{{http://www.avetana-gmbh.de/avetana-gmbh/produkte/jsr82.eng.xml} The best commercial JSR-82 by Moritz Gmelin}}
+
+
+
+    We tested Device discovery, Service search and RFCOMM connections (emulation of serial ports over the L2CAP protocol)
+
+    Matrix of tests performed with BlueCove-tester application:
+
+*---------------------------------+-------------+-------------+-------------+-------------+-------------+-------------+-------------+
+| <<Server>>\\<<Client>>          | Nokia 6265i | BlueCove-MS | BlueCove-WC | BlueCove-BS2|  MPx220     |  SE-K790    |  Nokia 6230 |
+*---------------------------------+-------------+-------------+-------------+-------------+-------------+-------------+-------------+
+| Nokia 6265i                     |             |  Ok         |  Ok         | Works       |             |             |             |
+*---------------------------------+-------------+-------------+-------------+-------------+-------------+-------------+-------------+
+| {{{#BlueCove-MS}BlueCove-MS}}   | Ok          |             |  Ok         | Works       |  Ok         | Ok          | Ok          |
+*---------------------------------+-------------+-------------+-------------+-------------+-------------+-------------+-------------+
+| {{{#BlueCove-WC}BlueCove-WC}}   | Ok          |  Ok         |             | Works       |             | Ok          | Ok          |
+*---------------------------------+-------------+-------------+-------------+-------------+-------------+-------------+-------------+
+| MPx220                          |             |  Ok         |  Ok         |             |             |             |             |
+*---------------------------------+-------------+-------------+-------------+-------------+-------------+-------------+-------------+
+| SE-K790                         |             |  Ok         |  Ok {{#se}} |             |             |             |             |
+*---------------------------------+-------------+-------------+-------------+-------------+-------------+-------------+-------------+
+| avetana-MS                      |             |  Ok         |  Ok         |             |             |             |             |
+*---------------------------------+-------------+-------------+-------------+-------------+-------------+-------------+-------------+
+| avetana-WC                      |             |  Ok         |  Ok         |             |             |             |             |
+*---------------------------------+-------------+-------------+-------------+-------------+-------------+-------------+-------------+
+
+
+    Long running tests. Test application was left running for a long time (over night)
+    It does continuous Discovery then connection to discovered services.
+
+*--------------------------------+--------------------------------+----------------------------------------------+
+| <<Server>>                     | <<Client>>                     | Problems/Comments
+*--------------------------------+--------------------------------+-
+| Nokia 6265i                    | {{{#BlueCove-MS}BlueCove-MS}}  |  1,800 Connections made before MS Stack hangs, {{#ms}}
+*--------------------------------+--------------------------------+-
+| Nokia 6265i                    | {{{#BlueCove-MS2}BlueCove-MS2}}|  more than 3,000 Connections made and running
+*--------------------------------+--------------------------------+-
+| Nokia 6265i                    | {{{#BlueCove-WC}BlueCove-WC}}  |  more than 6,000 Connections made and running
+*--------------------------------+--------------------------------+-
+| {{{#BlueCove-MS}BlueCove-MS}}  | {{{#BlueCove-WC}BlueCove-WC}}  |  1,010 Connections made before MS Stack hangs, {{#ms}}
+*--------------------------------+--------------------------------+-
+| {{{#BlueCove-MS}BlueCove-MS}}  | Nokia 6265i                    |  2,020 Connections made before MS Stack hangs, {{#ms}}
+*--------------------------------+--------------------------------+-
+| {{{#BlueCove-MS2}BlueCove-MS2}}| {{{#BlueCove-WC}BlueCove-WC}}  |  more than 3,000 Connections made and running
+*--------------------------------+--------------------------------+-
+| {{{#BlueCove-WC}BlueCove-WC}}  | {{{#BlueCove-MS2}BlueCove-MS2}}|  more than 10,000 Connections made and running
+*--------------------------------+--------------------------------+-
+| {{{#BlueCove-WC}BlueCove-WC}}  | Nokia 6265i                    |  more than 2,000 Connections made and running
+*--------------------------------+--------------------------------+-
+| {{{#BlueCove-WC}BlueCove-WC}}  | SE-K790                        |  more than 3,000 Connections made and running
+*--------------------------------+--------------------------------+-
+| {{{#BlueCove-WC2}BlueCove-WC2}}| {{{#BlueCove-BS}BlueCove-BS}}  |  more than 1,000 Connections made and running
+*--------------------------------+--------------------------------+-
+
+  Just connection tests
+
+*--------------------------------+---------------------------------+----------------------------------------------+
+| <<Server>>                     | <<Client>>                      | Problems/Comments
+*--------------------------------+---------------------------------+-
+| Nokia 6265i                    | {{{#BlueCove-MS}BlueCove-MS}}   |  7,400 Connections made and running, NO Discovery
+*--------------------------------+---------------------------------+-
+| Nokia 6265i                    | BlueCove v1.2.3-MS              |  7,681 Connections made and running, NO Discovery
+*--------------------------------+---------------------------------+-
+| Nokia 6265i                    | {{{#BlueCove-BS2}BlueCove-BS2}} |  256 Connections made OK, 257th will make BlueSoleil.exe taking 99% of CPU
+*--------------------------------+---------------------------------+-
+| {{{#BlueCove-MS}BlueCove-MS}}  | Nokia 6265i                     |  4,500 Connections made and running, NO Discovery
+*--------------------------------+---------------------------------+-
+| BlueCove v1.2.3-MS             | Nokia 6265i                     |  3,114 Connections made and running, NO Discovery
+*--------------------------------+---------------------------------+-
+
+  * <<{ms}>> On Microsoft stack with Microsoft Wireless Transceiver for Bluetooth 2.0 ({{{#BlueCove-MS}BlueCove-MS}}) Server or Client 600-2000 connections made before MS Stack hangs, Apply to avetana-MS as well.
+             Don't know solution yet. May be this is related to MS Mouse Connected to the same Transceiver.
+
+  * <<{se}>> JSR-82 on Sony Ericsson K790 appears to be not stable. After some time 2% of connections may fail.
+
+  * <<{BlueCove-BS2}>> BlueSoleil stack of any version 1.6, 2.3 or 3.2.2.8 with ES-388 Adapter (process BlueSoleil.exe on WinXP in particular) eats handles for each connection. You may restart the BlueSoleil after each hundred connections so it will not hang.
+    See {{{http://code.google.com/p/bluecove/wiki/stacks}other limitations when running on BlueSoleil}}

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0">
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.sf.bluecove</groupId>
+        <artifactId>bluecove-examples</artifactId>
+        <version>2.0.3</version><!--bluecove-version-->
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>bluecove-webstart</artifactId>
+    <name>bluecove-webstart</name>
+    <packaging>pom</packaging>
+
+    <description>BlueCove Web Start creator</description>
+
+    <dependencies>
+
+        <!-- See JNLP tempate for dependancy order hack -->
+
+        <dependency>
+            <groupId>org.microemu</groupId>
+            <artifactId>microemulator</artifactId>
+            <version>${me2Version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.microemu</groupId>
+            <artifactId>microemu-device-large</artifactId>
+            <version>${me2Version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.microemu</groupId>
+            <artifactId>microemu-device-minimum</artifactId>
+            <version>${me2Version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove</artifactId>
+            <version>${version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove-gpl</artifactId>
+            <version>${version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <properties>
+        <jnlpPrefix></jnlpPrefix>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>debug</id>
+            <properties>
+                <jnlpPrefix>local-debug-</jnlpPrefix>
+            </properties>
+        </profile>
+        <!--
+        <profile>
+            <id>build</id>
+            <properties>
+                <jnlpPrefix>snapshot-</jnlpPrefix>
+            </properties>
+        </profile>
+        -->
+    </profiles>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>webstart-maven-plugin</artifactId>
+                <!-- http://mojo.codehaus.org/webstart-maven-plugin-parent/webstart-maven-plugin/howto.html -->
+                <executions>
+                   <execution>
+                      <goals>
+                         <goal>jnlp</goal>
+                      </goals>
+                   </execution>
+                </executions>
+                <configuration>
+                    <workDirectory>${project.build.directory}/site</workDirectory>
+
+                    <!-- transitive dependencies filter -->
+                    <dependencies>
+                        <!-- Note that only groupId and artifactId must be specified here. because of a limitation of the Include/ExcludesArtifactFilter -->
+                        <!--includes>
+                            <include>org.microemu:microemu-swing</include>
+                        </includes-->
+                        <!-- excludes>
+                            <exclude></exclude>
+                        <excludes-->
+                    </dependencies>
+
+                    <!-- JNLP generation -->
+                    <jnlp>
+                        <!-- default values -->
+                        <resources>${project.basedir}/src/main/jnlp</resources>
+                        <!--inputTemplateResourcePath>${project.basedir}</inputTemplateResourcePath-->
+                        <inputTemplate>src/jnlp-templates/${jnlpPrefix}template.vm</inputTemplate> <!-- relative to inputTemplateResourcePath -->
+                        <outputFile>${jnlpPrefix}demo.jnlp</outputFile> <!-- defaults to launch.jnlp -->
+
+                        <!-- used to automatically identify the jar containing the main class. -->
+                        <!-- this is perhaps going to change -->
+                        <mainClass>org.microemu.app.Main</mainClass>
+                    </jnlp>
+
+
+                    <!-- SIGNING -->
+                    <!-- defining this will automatically sign the jar and its dependencies, if necessary -->
+                    <sign>
+                        <keystore>${user.home}/.m2/MicroEmulator.keystore</keystore>
+                        <keypass>${MicroEmulator-keystore-pwd}</keypass>  <!-- we need to override passwords easily from the command line. ${keypass} -->
+                        <storepass>${MicroEmulator-keystore-pwd}</storepass> <!-- ${storepass} -->
+                        <alias>MicroEmulatorSignJars</alias>
+
+                        <verify>true</verify>
+                    </sign>
+
+                    <!-- KEYSTORE MANGEMENT -->
+                    <keystore>
+                        <delete>false</delete> <!-- delete the keystore -->
+                        <gen>false</gen>       <!-- optional shortcut to generate the store. -->
+                   </keystore>
+
+                    <verbose>false</verbose>
+
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>maven-jetty-plugin</artifactId>
+                <version>6.1.1</version>
+                <configuration>
+                    <webAppSourceDirectory>${project.build.directory}/site</webAppSourceDirectory>
+                    <webXml>${basedir}/jetty-web.xml</webXml>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

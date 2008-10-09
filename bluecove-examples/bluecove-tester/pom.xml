@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0">
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.sf.bluecove</groupId>
+        <artifactId>bluecove-examples</artifactId>
+        <version>2.0.3</version><!--bluecove-version-->
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>bluecove-tester</artifactId>
+    <name>bluecove-tester</name>
+
+    <description>Project used to test bluecove, Contains MIDlet responder application and J2SE application</description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove-gpl</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.microemu</groupId>
+            <artifactId>microemulator</artifactId>
+            <version>${me2Version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pyx4me</groupId>
+            <artifactId>cldcunit</artifactId>
+            <version>${pyx4meVersion}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pyx4me</groupId>
+            <artifactId>cldcunit-se</artifactId>
+            <version>${pyx4meVersion}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+
+    </dependencies>
+
+    <properties>
+        <!--wtk.bluetooth.enabled>true</wtk.bluetooth.enabled-->
+        <!-- short name for Motorola iDEN phones -->
+        <mainjarname>bctest</mainjarname>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.3</source>
+                    <target>1.1</target>
+                    <!--compilerArguments>
+                        <bootclasspath>${settings.localRepository}/org/microemu/cldcapi10/${me2Version}/cldcapi10-${me2Version}.jar${path.separator}${settings.localRepository}/org/microemu/midpapi20/${me2Version}/midpapi20-${me2Version}.jar</bootclasspath>
+                    </compilerArguments-->
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependency</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <stripVersion>true</stripVersion>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.pyx4me</groupId>
+                                    <artifactId>cldcunit</artifactId>
+                                    <outputDirectory>target</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.pyx4me</groupId>
+                                    <artifactId>cldcunit-se</artifactId>
+                                    <outputDirectory>target</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Create application loadable on the phone -->
+            <plugin>
+                <groupId>com.pyx4me</groupId>
+                <artifactId>j2me-maven-plugin</artifactId>
+                <version>${pyx4meVersion}</version>
+                <executions>
+                   <execution>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <j2meConfiguration>CLDC-1.1</j2meConfiguration>
+                    <proguard>true</proguard>
+                    <obfuscate>true</obfuscate>
+                    <proguardPreverify>true</proguardPreverify>
+                    <appendClassifier>false</appendClassifier>
+                    <jarfile>${mainjarname}</jarfile>
+                    <jadfile>${mainjarname}</jadfile>
+                   <!--proguardInclude>${basedir}/proguard.conf</proguardInclude-->
+                    <proguardInclude></proguardInclude>
+                    <proguardOptions>
+                        <options>
+                            <option>-ignorewarnings</option>
+                            <option>-dontusemixedcaseclassnames</option>
+                            <option>-defaultpackage 'bc1'</option>
+                        </options>
+                    </proguardOptions>
+                    <inFilter>!net/sf/bluecove/se/**,!net/sf/bluecove/swing/**,!net/sf/bluecove/awt/**</inFilter>
+                    <jadAttributes>
+                        <!--FlipInsensitive>true</FlipInsensitive-->
+                        <MIDlet-Permissions>javax.microedition.io.Connector.bluetooth.client,javax.microedition.io.Connector.bluetooth.server</MIDlet-Permissions>
+                    </jadAttributes>
+                    <midlets>
+                        <MIDlet>
+                            <name>BlueCove</name>
+                            <class>net.sf.bluecove.BlueCoveTestMIDlet</class>
+                        </MIDlet>
+                    </midlets>
+                    <useWtkLibs>false</useWtkLibs>
+                    <libs>
+                        <!--lib>${java.home}/lib/rt.jar</lib-->
+                        <!--
+                        <lib>${env.WTK_HOME}/lib/cldcapi11.jar</lib>
+                        <lib>${env.WTK_HOME}/lib/midpapi20.jar</lib>
+                        -->
+                        <lib>${settings.localRepository}/org/microemu/cldcapi11/${me2Version}/cldcapi11-${me2Version}.jar</lib>
+                        <lib>${settings.localRepository}/org/microemu/midpapi20/${me2Version}/midpapi20-${me2Version}.jar</lib>
+                    </libs>
+
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.microemu</groupId>
+                            <artifactId>microemulator</artifactId>
+                            <exclude>true</exclude>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sf.bluecove</groupId>
+                            <artifactId>bluecove</artifactId>
+                            <filter>!javax/microedition/io/**,!com/intel/bluetooth/**</filter>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sf.bluecove</groupId>
+                            <artifactId>bluecove-gpl</artifactId>
+                            <exclude>true</exclude>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.pyx4me</groupId>
+                            <artifactId>cldcunit-se</artifactId>
+                            <exclude>true</exclude>
+                        </dependency>
+                    </dependencies>
+
+                </configuration>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.microemu</groupId>
+                        <artifactId>midpapi20</artifactId>
+                        <version>${me2Version}</version>
+                    </dependency>
+                </dependencies>
+
+            </plugin>
+
+            <!--
+            <plugin>
+                <groupId>com.pyx4me</groupId>
+                <artifactId>gammu-maven-plugin</artifactId>
+                <version>${pyx4meVersion}</version>
+                <configuration>
+                    <gammurc>${env.HOME}/gammurc</gammurc>
+                    <appendClassifier>false</appendClassifier>
+                    <jarfile>${mainjarname}</jarfile>
+                </configuration>
+            </plugin>
+            -->
+
+            <plugin>
+                <groupId>com.pyx4me</groupId>
+                <artifactId>obex-maven-plugin</artifactId>
+                <version>${pyx4meVersion}</version>
+                <configuration>
+                    <jarfile>${mainjarname}.jar</jarfile>
+                </configuration>
+            </plugin>
+
+            <!-- awt app jar-with-dependencies -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                       <id>jar-with-dependencies</id>
+                       <phase>package</phase>
+                       <goals><goal>single</goal></goals>
+                       <configuration>
+                           <attach>true</attach>
+                           <appendAssemblyId>true</appendAssemblyId>
+                           <descriptors>
+                               <descriptor>assembly-app.xml</descriptor>
+                           </descriptors>
+                           <archive>
+                                <manifest>
+                                    <mainClass>net.sf.bluecove.se.Main</mainClass>
+                                </manifest>
+                                <!-- this does not work, bug http://jira.codehaus.org/browse/MASSEMBLY-188 -->
+                                <manifestEntries>
+                                    <Version>${label}</Version>
+                                    <Build-Time>${cctimestamp}</Build-Time>
+                                    <Build-Time>${cctimestamp}</Build-Time>
+                                    <Implementation-Version2>${pom.version}</Implementation-Version2>
+                                    <SVN-Revision>${scm.revision}</SVN-Revision>
+                                </manifestEntries>
+                            </archive>
+                       </configuration>
+                    </execution>
+                    <execution>
+                       <id>jar-with-dependencies-mobile</id>
+                       <phase>package</phase>
+                       <goals><goal>single</goal></goals>
+                       <configuration>
+                           <attach>true</attach>
+                           <appendAssemblyId>true</appendAssemblyId>
+                           <descriptors>
+                               <descriptor>assembly-mobile.xml</descriptor>
+                           </descriptors>
+                           <archive>
+                                <manifest>
+                                    <mainClass>net.sf.bluecove.se.Main</mainClass>
+                                </manifest>
+                                <!-- this does not work, bug http://jira.codehaus.org/browse/MASSEMBLY-188 -->
+                                <manifestEntries>
+                                    <Version>${label}</Version>
+                                    <Build-Time>${cctimestamp}</Build-Time>
+                                    <Build-Time>${cctimestamp}</Build-Time>
+                                    <Implementation-Version2>${pom.version}</Implementation-Version2>
+                                    <SVN-Revision>${scm.revision}</SVN-Revision>
+                                </manifestEntries>
+                            </archive>
+                       </configuration>
+                    </execution>
+                    <execution>
+                       <id>jar-with-dependencies-phone</id>
+                       <phase>package</phase>
+                       <goals><goal>single</goal></goals>
+                       <configuration>
+                           <attach>true</attach>
+                           <appendAssemblyId>true</appendAssemblyId>
+                           <descriptors>
+                               <descriptor>assembly-phone.xml</descriptor>
+                           </descriptors>
+                           <archive>
+                                <manifest>
+                                    <mainClass>net.sf.bluecove.se.Main</mainClass>
+                                </manifest>
+                                <!-- this does not work, bug http://jira.codehaus.org/browse/MASSEMBLY-188 -->
+                                <manifestEntries>
+                                    <Version>${label}</Version>
+                                    <Build-Time>${cctimestamp}</Build-Time>
+                                    <Build-Time>${cctimestamp}</Build-Time>
+                                    <Implementation-Version2>${pom.version}</Implementation-Version2>
+                                    <SVN-Revision>${scm.revision}</SVN-Revision>
+                                </manifestEntries>
+                            </archive>
+                       </configuration>
+                    </execution>
+               </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package-make-scripts-version</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <echo file="scripts/generated-version.cmd" append="false">set BLUECOVE_VERSION=${project.version}</echo>
+                                <echo file="scripts/generated-version.sh" append="false">#! /bin/sh
+export BLUECOVE_VERSION=${project.version}
+</echo>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>site-copy-jars</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <copy overwrite="true"
+                                    file="${project.build.directory}/${mainjarname}.jar"
+                                    tofile="${project.build.directory}/site/${mainjarname}.jar"/>
+                                <copy overwrite="true"
+                                    file="${project.build.directory}/${mainjarname}.jad"
+                                    tofile="${project.build.directory}/site/${mainjarname}.jad"/>
+                                <!--replace value="${artifactId}.jar" token="${project.build.finalName}-me.jar" dir="${project.build.directory}/site">
+                                    <include name="${artifactId}.jad"></include>
+                                </replace-->
+                                <copy overwrite="true"
+                                    file="${project.build.directory}/${project.build.finalName}.jar"
+                                    tofile="${project.build.directory}/site/bluecove-tester.jar"/>
+                                <copy overwrite="true"
+                                    file="${project.build.directory}/bluecove-tester-${pom.version}-phone.jar"
+                                    tofile="${project.build.directory}/site/bluecove-tester-phone.jar"/>
+                                <copy overwrite="true"
+                                    file="${project.build.directory}/bluecove-tester-${pom.version}-mobile.jar"
+                                    tofile="${project.build.directory}/site/bluecove-tester-mobile.jar"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>maven-jetty-plugin</artifactId>
+                <version>6.1.1</version>
+                <configuration>
+                    <webAppSourceDirectory>${project.build.directory}/site</webAppSourceDirectory>
+                    <webXml>${basedir}/jetty-web.xml</webXml>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>build</id>
+            <activation>
+                <property>
+                    <name>buildByMicroEmulatorTeam</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>site-sign-tester-app</id>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <jarPath>${project.build.directory}/${project.build.finalName}-app.${project.packaging}</jarPath>
+                                    <signedjar>${project.build.directory}/site/bluecove-tester-app.jar</signedjar>
+                                    <!--
+                                    <jarPath>src\site\resources\bluecove-2.0.0.jar</jarPath>
+                                    <signedjar>src\site\resources\bluecove-2.0.0-signed.jar</signedjar>
+                                    -->
+                                    <keystore>${user.home}/.m2/MicroEmulator.keystore</keystore>
+                                    <keypass>${MicroEmulator-keystore-pwd}</keypass>
+                                    <storepass>${MicroEmulator-keystore-pwd}</storepass>
+                                    <alias>MicroEmulatorSignJars</alias>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>site-sign-tester</id>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                               <configuration>
+                                    <jarPath>${project.build.directory}/${project.build.finalName}.${project.packaging}</jarPath>
+                                    <signedjar>${project.build.directory}/site/bluecove-tester-signed.jar</signedjar>
+                                    <keystore>${user.home}/.m2/MicroEmulator.keystore</keystore>
+                                    <keypass>${MicroEmulator-keystore-pwd}</keypass>
+                                    <storepass>${MicroEmulator-keystore-pwd}</storepass>
+                                    <alias>MicroEmulatorSignJars</alias>
+                                </configuration>
+                            </execution>
+                            <!--
+                            <execution>
+                                <id>sign-tester-app-3p</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <jarPath>src\site\resources\junit-3.8.1.jar</jarPath>
+                                    <signedjar>src\site\resources\junit-3.8.1-signed.jar</signedjar>
+                                    <keystore>${user.home}/.m2/MicroEmulator.keystore</keystore>
+                                    <keypass>${MicroEmulator-keystore-pwd}</keypass>
+                                    <storepass>${MicroEmulator-keystore-pwd}</storepass>
+                                    <alias>MicroEmulatorSignJars</alias>
+                                </configuration>
+                            </execution>
+                            -->
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+
+        </profile>
+    </profiles>
+
+</project>

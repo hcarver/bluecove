@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<assembly>
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <id>app</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <excludes>
+                    <exclude>META-INF/**</exclude>
+                </excludes>
+            </unpackOptions>
+            <outputDirectory></outputDirectory>
+            <outputFileNameMapping></outputFileNameMapping>
+            <includes>
+                <include>net.sf.bluecove:bluecove</include>
+                <include>net.sf.bluecove:bluecove-gpl</include>
+                <include>com.pyx4me:cldcunit</include>
+            </includes>
+            <scope>provided</scope>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>target/classes</directory>
+            <outputDirectory></outputDirectory>
+            <excludes>
+                <exclude>net/sf/bluecove/BlueCoveTest*.*</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+</assembly>

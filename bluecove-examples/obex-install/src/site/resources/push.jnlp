@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp
+  spec="1.0+"
+  codebase="http://www.bluecove.org/bluecove-examples/obex-install"
+  href="push.jnlp">
+  <information>
+    <title>obex-install</title>
+    <vendor>BlueCove; Vlad Skarzhevskyy</vendor>
+    <homepage href="www.bluecove.org/"/>
+    <description>OBEX push J2ME application installer</description>
+    <description kind="short">BlueCove OBEX Push J2ME application installer</description>
+    <icon href="icon.png"/>
+    <offline-allowed/>
+  </information>
+
+  <security>
+      <all-permissions/>
+  </security>
+  <update check="always"/>
+
+  <resources>
+    <j2se version="1.4+"/>
+    <jar href="bluecove-obex-install-mini.jar"/>
+    <!--property name="bluecove.debug" value="true" /-->
+  </resources>
+
+  <application-desc main-class="net.sf.bluecove.obex.Main">
+        <!--jadRewrite--> <!--jadRewrite-->
+  </application-desc>
+
+</jnlp>

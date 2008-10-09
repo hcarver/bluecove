@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//log4j//DTD//EN" "http://logging.apache.org/log4j/docs/api/org/apache/log4j/xml/log4j.dtd">
+ <!-- @version $Revision$ ($Author$) $Date$ -->
+<log4j:configuration>
+
+    <appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+        <param name="Threshold" value="debug" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <!-- Line# clickable in eclipse -->
+            <param name="ConversionPattern" value="%-5p [%-33t %m \n\t\t\t\t\t\t\t\t{ %l}\n" />
+        </layout>
+    </appender>
+
+    <appender name="FileAppender" class="org.apache.log4j.RollingFileAppender">
+      	<param name="File" value="target/tests.log"/>
+	    <param name="Append" value="false"/>
+        <!-- start new file on every restart -->
+	    <param name="MaxFileSize" value="3000KB"/>
+        <param name="MaxBackupIndex" value="10"/>
+      	<layout class="org.apache.log4j.PatternLayout">
+	        <param name="ConversionPattern" value="%-5p %d %6r [%t] { %l}\n\t%m\n" />
+        </layout>
+    </appender>
+
+    <logger name="com.intel.bluetooth">
+        <level value="debug" />
+    </logger>
+
+    <root>
+        <level value="info" />
+        <appender-ref ref="ConsoleAppender" />
+        <appender-ref ref="FileAppender" />
+    </root>
+
+
+</log4j:configuration>

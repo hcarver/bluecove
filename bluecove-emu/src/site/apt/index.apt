@@ -1,0 +1,68 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/doxia/references/apt-format.html
+
+                                    ------------------
+                                    BlueCove JSR-82 Emulator module
+                                    ------------------
+
+BlueCove JSR-82 Emulator module
+
+   bluecove-emu is additional module for BlueCove to simulate Bluetooth stack.
+
+   bluecove-emu is a pure Java implementation of JSR-82. Fully tested using TCK {{{../tck/Bluetooth_1-1_007_TCK/bluecove-jsr082-emulator/}JSR-82 TCK test results}}
+
+   bluecove-emu requires Java 5 Standard Edition and uses RMI for interprocess communication.
+
+   N.B. This is experimental module and have no monitoring GUI. Another module bluecove-emu-gui is in developement. {{{http://groups.google.com/group/bluecove-developers}Help us make it}}.
+
+* Usage
+
+ Start local bluetooth air simulator server
+
+---
+java -cp bluecove-#version#.jar;bluecove-emu-#version#.jar com.intel.bluetooth.emu.EmuServer
+---
+
+ Start jsr-82 application that connects to air simulator server
+
+---
+java -Dbluecove.stack=emulator -cp bluecove-#version#.jar;bluecove-emu-#version#.jar;yourApp.jar org.your.app.Main
+---
+
+ Start MIDP jsr-82 application that connects to air simulator server
+
+---
+java -Dbluecove.stack=emulator -cp microemulator.jar;bluecove-#version#.jar;bluecove-emu-#version#.jar org.microemu.app.Main btApp.jad
+---
+
+* Emulator in Unit tests
+
+    Emulator has been designed to be used during unit test to help in automation of tests for JSR-82 applications.
+
+    For unit tests air simulator server can be started as in process server. {{{apidocs/com/intel/bluetooth/EmulatorTestsHelper.html#startInProcessServer()}EmulatorTestsHelper.startInProcessServer()}}
+
+    Documentation for BlueCove API that enables the use of Multiple Adapters and Bluetooth Stacks in parallel in the same JVM can be found {{{../apidocs/com/intel/bluetooth/BlueCoveImpl.html#useThreadLocalBluetoothStack()}here}}.
+
+    Complete JUnit test example can be found here {{{http://bluecove.googlecode.com/svn/incubator/bluecove-emu/src/test/java/net/sf/bluecove/ExampleTest.java}ExampleTest}}
+
+* Configuration options
+
+    System properties:
+
+        * `bluecove.stack=emulator` force BlueCove to use Emulator instead of real Bluetooth stack
+
+        * `bluecove.deviceID=1` bluecove supports multiple local devices, this will force it to select second one.
+
+        * `bluecove.deviceAddress=btaddr` select local devices by Bluetooth address
+
+        * `bluecove.emu.rmiRegistryHost=localhost` air simulator server can be on remote computer
+
+        * `bluecove.emu.rmiRegistryPort=8090` air simulator server listen on different port. Use 0 on the client to enable in process server (no rmi)
+
+        * `bluecove.emu.rmiRegistry=true` air simulator server and RMI registry can be started inside client JVM
+
+    (TODO) Emulator Configuration properties:
+
+        This is the resource file 'bluecove.emulator.properties' loaded by air simulator server.
+        Defines devices address and names auto assignment.
+        It also can define LocalDevice properties returned to the client application

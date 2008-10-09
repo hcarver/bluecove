@@ -1,0 +1,52 @@
+
+1.
+
+ Create a 1024-bit RSA key:
+
+    keytool -genkey -keystore bluecove-tck.ks -storepass password  -alias tckTestsSignMIDlet -keypass password -keyalg RSA -keysize 1024 -validity 4386 -dname "cn=BlueCove Team, ou=Testing, o=BlueCove, c=CA"
+
+2.
+   Import Java SE Certificate to WTK
+
+3.
+  --- GATLING Docs  ------
+
+Running in Trusted Mode
+
+To run in trusted mode, the user will need to create a keystore.
+
+If this keystore is not imported to the Device, it will need to be imported.
+
+To import the keystore to Gatling via the CLI the user will need to register the keystore information in Gatling's security_pki.xml and the test bundle's global.xml.
+
+security_pki.xml is located in <Gatling_CLI_Root>/gatling_core/config/services directory. It requires an entry in the following format.
+
+<security-tag value="<keystore_entry_name>"> <property name="keystoreFileName" value="<keystore_location>"/> <property name="keystorePassword" value="<keystore_password>"/> <property name="alias" value="<keystore_alias>"/> <property name="passwordToPrivateKey" value="<keystore_private_key>"/> </security-tag>
+
+<credentials>
+    <security-tag value="BluecoveTrusted">
+        <property name="keystoreFileName" value="D:\di\me2\bluecove\3p\TCK\bluecove-tck.ks"/>
+        <property name="keystorePassword" value="password"/>
+        <property name="alias" value="tckTestsSignMIDlet"/>
+        <property name="passwordToPrivateKey" value="password"/>
+    </security-tag>
+</credentials>
+
+Also, the user will need to add an entry corresponding to the above entry in global.xml of the workdir where the tests are located. It will appear as follows
+
+<Security> <MIDlet_Domain value="Trusted"/> <PKI_Credential_Tag value="<keystore_entry_name>"/> </Security>
+
+    <Security>
+        <MIDlet_Domain value="Trusted"/>
+        <PKI_Credential_Tag value="BluecoveTrusted"/>
+    </Security>
+
+The values listed above are as follows
+
+    * keystore_entry_name is a name that is designated for a security entry, it us used to map a keystore entry between the gatling.ks file and a test's global.xml file e.g. mykeystore
+    * keystore_location is the absolute path to the keystore e.g. c:\keystores\mykeystore.ks
+    * keystore_password corresponds to the given keystore's password
+    * keystore_alias is a user-specified alias
+    * keystore_private_key corresponds to the given keystore's private key
+
+Lastly when the MIDlet_Domain is set has to be set to trusted once this occurs, the test can run in trusted mode.

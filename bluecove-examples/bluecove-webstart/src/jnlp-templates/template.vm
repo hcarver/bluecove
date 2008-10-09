@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp
+  spec="1.0+"
+  codebase="http://www.bluecove.org/bluecove-examples/bluecove-webstart"
+  href="$outputFile">
+  <information>
+    <title>MicroEmulator</title>
+    <vendor>BlueCove; Vlad Skarzhevskyy</vendor>
+    <homepage href="http://www.bluecove.org/"/>
+    <description>MicroEmulator</description>
+    <description kind="short">MicroEmulator with BlueCove</description>
+    <icon href="icon.png"/>
+    <offline-allowed/>
+  </information>
+
+  <security>
+      <all-permissions/>
+  </security>
+  <update check="always"/>
+
+  <resources>
+    <j2se version="1.4+"/>
+    <!--property name="bluecove.debug" value="true" /-->
+    $dependencies
+  </resources>
+
+  <application-desc main-class="$mainClass">
+        <argument>--impl</argument>
+        <argument>com.intel.bluetooth.BlueCoveImpl</argument>
+        <!--jadRewrite--> <!--jadRewrite-->
+  </application-desc>
+
+</jnlp>

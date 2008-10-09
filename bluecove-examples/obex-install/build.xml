@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- @version $Revision$ ($Author$) $Date$ -->
+<project
+	name="Deploy demo"
+	default="deploy">
+
+    <!-- Deploy to a device using OBEX Bluetooth -->
+    <target name="deploy">
+        <java fork="yes" classname="net.sf.bluecove.obex.Deploy">
+            <arg value="btgoep://0019639c4007:6;authenticate=false;encrypt=false" />
+            <arg value="src/main/resources/icon.png" />
+            <classpath>
+                <pathelement location="target/obex-install-2.0.3-SNAPSHOT-mini.jar"/>
+                <pathelement path="${java.class.path}"/>
+            </classpath>
+        </java>
+    </target>
+
+</project>

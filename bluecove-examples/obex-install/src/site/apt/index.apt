@@ -1,0 +1,83 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/guides/mini/guide-apt-format.html
+
+                                    ------------------
+                                    BlueCove OBEX Push J2ME application installer
+                                    ------------------
+
+
+BlueCove OBEX Push J2ME application installer Web Start
+
+    To start application click this link {{{./push.jnlp}Java Web Start}}.
+
+    You can Drag and Drop .jar files or http jar links to running application to install it on your OBEX Bluetooth enabled mobile device (phone).
+
+    Actualy it accept any file types and can be used to upload images or audio files using Bluetooth.
+
+* Some example applications you can try.
+
+*---------------------------+-----------+
+| Drag and Drop .jar link   | Web Start |
+*---------------------------+-----------+
+| {{{http://wintermute.de/wap/extended/5ud0ku.jar}A Sudoku Game}}  |  <<<{{{./push/wintermute.de/wap/extended/5ud0ku.jnlp}\u00bbInstall}}>>>
+*---------------------------+-----------+
+| {{{http://www.mgmaps.com/mgmaps.jar}Mobile GMaps}} | <<<{{{./push/wap.mgmaps.com/mgmaps.jnlp}\u00bbInstall}}>>>
+*---------------------------+-----------+
+
+* Using obex-install in command line
+
+---
+    java -jar bluecove-obex-install-mini.jar yourApp.jar
+---
+
+    {{{./bluecove-obex-install-mini.jar}Download application jar}}
+
+    If you want to use obex-install as part of your maven build see {{{http://pyx4me.com/pyx4me-maven-plugins/obex-maven-plugin/}obex-maven-plugin}}
+
+* Using obex-install in command line (no GUI)
+
+---
+    java -cp bluecove-obex-install-mini.jar net.sf.bluecove.obex.Deploy btgoep://ABC123456789:6 yourApp.jar
+---
+
+   You can use this approach as an Ant task to speedup test-develop cycle while writing J2ME applications.
+
+---
+    <!-- Deploy to a device using OBEX Bluetooth -->
+    <target name="deploy" depends="build">
+        <java fork="yes" classname="net.sf.bluecove.obex.Deploy">
+            <arg value="btgoep://ABC123456789:6;authenticate=false;encrypt=false" />
+            <arg value="yourApp.jad" />
+            <classpath>
+                <pathelement location="bluecove-obex-install.jar"/>
+                <pathelement location="bluecove.jar"/>
+                <!-- If you are on Linux add BlueZ Module -->
+                <pathelement location="bluecove-gpl.jar"/>
+                <pathelement path="${java.class.path}"/>
+            </classpath>
+        </java>
+    </target>
+---
+
+    {{{./bluecove-obex-install.jar}Download bluecove-obex-install.jar}}
+
+* Add a link from your page to start BlueCove OBEX Push with your application.
+
+    Your users can install your MIDlet application with a single click.
+
+    URL Example:
+
+---
+For JAR URL:
+    http://wintermute.de/wap/extended/5ud0ku.jar
+BlueCove OBEX Push Web Start URL:
+    http://www.bluecove.org/bluecove-examples/obex-install/push/wintermute.de/wap/extended/5ud0ku.jnlp
+---
+
+  HTML text on your page:
+
+---
+    <a href="http://www.bluecove.org/bluecove-examples/obex-install/push/wintermute.de/wap/extended/5ud0ku.jnlp">Install it now</a>
+---
+
+  {{{http://www.bluecove.org/bluecove-examples/obex-install/push/wintermute.de/wap/extended/5ud0ku.jnlp}Try it yourself first}}

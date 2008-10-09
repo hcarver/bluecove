@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="BlueCove">
+
+<!-- @version $Revision$ ($Author$) $Date$ -->
+
+    <body>
+
+        <menu name="Ver #version#">
+            <item name="BlueCove" href="../../" />
+            <item name="Project site" href="http://bluecove.googlecode.com/" />
+            <item name="Introduction" href="index.html" />
+            <item name="Download" href="#">
+                <item name="Releases" href="http://sourceforge.net/project/showfiles.php?group_id=114020"/>
+                <!--4snapshot-->
+                <!--
+                <item name="Snapshot" href="http://www.pyx4me.com/maven2-snapshot/net/sf/bluecove/bluecove/#version#/"/>
+                -->
+                <item name="SVN Access" href="source-repository.html"/>
+                <item name="Browse SVN" href="http://code.google.com/p/bluecove/source/browse/bluecove-examples/bluecove-tester"/>
+            </item>
+
+        </menu>
+
+        <menu name="Tests">
+            <item name="Results" href="results.html" />
+            <item name="Speed" href="speed.html" />
+            <item name="Run Web Start MIDlet" href="../bluecove-webstart/open-local/~/bluecove-tester/bctest.jnlp" />
+            <item name="Run Web Start AWT" href="awt-bctest.jnlp" />
+            <item name="Install MIDlet" href="../obex-install/push-local/~/bluecove-tester/bctest.jnlp" />
+        </menu>
+
+        <menu ref="parent" />
+
+        <menu ref="reports" />
+
+    </body>
+
+</project>

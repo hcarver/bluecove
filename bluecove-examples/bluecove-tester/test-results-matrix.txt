@@ -1,0 +1,52 @@
+@version $Id$
+
+Devices used:
+  Phones: Nokia 6230, Moto V360, Sony Ericsson K790,
+  Windows PC: avetanaBluetooth 1.3.12a on MS and WC (Widcomm by HP)
+  Windows PC: BlueCove-MS - BlueCove with Microsoft Bluetooth stack
+
+Server      | Client      | Problems
+------------+-------------+-----------------
+Moto V360   | Nokia 6230  | Attribute Value for name and string
+Moto V360   | BlueCove    | -- // --
+Moto V360   | avetana-MS  | -- // --
+Moto V360   | avetana-WC  | -- // --
+                               attr 161 str expected:<SomeData> but was:<a??>
+                               attr 256 name expected:<bluecoveResponderSrv> but was:<?‰¬c•????>
+
+Nokia 6230  | Moto V360   | OK
+Nokia 6230  | BlueCove    | OK
+Nokia 6230  | avetana-MS  | Not Discoverable   <---
+Nokia 6230  | avetana-WC  | OK
+
+avetana-MS  | BlueCove    | srv INT/STR/URL attr. not found
+avetana-MS  | avetana-MS  | -- // --
+avetana-MS  | Nokia 6230  | -- // --
+avetana-MS  | Moto V360   | -- // --
+avetana-MS  | avetana-WC  | -- // --
+
+BlueCove-MS | BlueCove    | -- // --
+BlueCove-MS | Nokia 6230  | -- // --
+BlueCove-MS | SE K790     | -- // --
+BlueCove-MS | avetana-MS  | -- // --
+BlueCove-MS | Moto V360   | Not Discoverable   <---
+
+
+BlueCove v2.0
+Devices used in test:
+  Phones: Nokia 6230, Nokia 6265i, Moto V360, Sony Ericsson K790,
+  Windows PC: avetanaBluetooth 1.3.16e on MS and WC (Widcomm by HP)
+  Windows PC: BlueCove-MS - BlueCove with Microsoft Bluetooth stack
+  Windows PC: BlueCove-WC - BlueCove with WIDCOMM (Broadcom Bluetooth stack) v5.0.1.2800
+  Windows PC: BlueCove-BS - BlueCove with BlueSoleil stack 1.6 on ES-388 Bluetooth USB Adapter
+
+Server      | Client      | Problems
+------------+-------------+-----------------
+Nokia 6265i | BlueCove-MS | OK;  1800 Connections made b4 MS Stack hangs
+Nokia 6265i | BlueCove-WC | OK;  6777 Connections made during test and running
+------------+-------------+-----------------
+BlueCove-MS | BlueCove-WC | OK;  1010 Connections made b4 MS Stack hangs
+BlueCove-MS | Nokia 6265i | OK;  630 Connections made b4 MS Stack hangs
+------------+-------------+-----------------
+BlueCove-WC | Nokia 6265i | OK
+BlueCove-WC | BlueCove-MS | OK

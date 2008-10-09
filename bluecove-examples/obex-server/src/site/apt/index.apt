@@ -1,0 +1,14 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/guides/mini/guide-apt-format.html
+
+                                    ------------------
+                                    BlueCove OBEX Push Server application
+                                    ------------------
+
+
+BlueCove OBEX Push Server application Web Start
+
+    To start application click this link {{{./server.jnlp}Java Web Start}}.
+
+    The OBEX server accept any file types and store them in <"My Documents/Bluetooth Exchange Folder"> on Windows and <"$home/bluetooth"> on Linux.
+

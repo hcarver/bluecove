@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *  $HeadURL$
+ *
+ *
+ *  Copyright (c) 2001-2007 Motorola, Inc.  All rights reserved.
+ *
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *
+ *  Revision History:
+ *
+ *  Date             Author                   Comment
+ *  =================================================================================
+ *  Oct 15,2006      Motorola, Inc.           Initial creation
+ *
+-->
+
+<global-metadata>
+	<!-- Specify the bluetooth address of the machine that runs the OBEX TCK Agent -->
+	<property name="obex.address" value="127.1.1.1"/>
+
+	<!-- Specify the obex scheme -->
+	<property name="obex.scheme" value="tcpobex"/>
+
+    <!-- Specify the port to be used on the machine that runs the OBEX TCK Client -->
+    <property name="tcpobex.client.port" value="9500"/>
+
+	<!-- Specify the dynamic dependency files -->
+	<dynamicDependancyList>
+		<dependancyFile name="com/motorola/tck/tests/api/javax/obex/tcpobex/TestUtilImpl.class"/>
+	</dynamicDependancyList>
+
+	<!-- Specify the interval of short pause -->
+	<property name="timeout_short" value="2000"/>
+
+	<!-- Specify the interval of medium pause -->
+	<property name="timeout_medium" value="5000"/>
+
+	<!-- Specify the interval of long pause -->
+	<property name="timeout_long" value="10000"/>
+
+</global-metadata>

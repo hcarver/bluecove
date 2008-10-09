@@ -1,0 +1,38 @@
+Vlad Skarzhevskyy
+1) Professional XP SP2 - Laptop HP ZT3380US, Integrated Cambridge Silicon Radio
+      Microsoft Bluetooth stack for USB
+      Broadcom Bluetooth stack v3.0.1.905 for HP
+2) Professional XP SP2  - desktop
+      Microsoft Bluetooth stack for USB
+      Broadcom Bluetooth stack v4.0.1.2900 for USN
+      Toshiba Bluetooth stack 5.10.12
+3) Linux FC-6
+      BlueZ
+4) OS X 10.4.8 Intel  - desktop
+      TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp
+      BlueSoleil BS001 Dongle (Class I 100 Metres)
+
+
+WIN-CE
+1)  Motorola MPx220, Windows Mobile 2003 Phone Edition
+      Microsoft Bluetooth stack
+2)  Dell AXIM X30, Windows Mobile 2003 SE (WinCE 4.21)
+      Broadcom Bluetooth stack BT-PPC 1.5.0.4300
+
+BT radios
+    2 x Microsoft Wireless Transceiver for Bluetooth 2.0
+    2 x TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp
+    BlueSoleil BS001 Dongle (Class I 100 Metres)
+    ES-388 Bluetooth USB Adapter  (fake item, Device has illegal Bluetooth addr 11:11:11:11:11:11)
+    D-Link DBT-120 USB Bluetooth Adapter
+    Linksys Bluetooth USB Adapter USBBT100
+    Toshiba Bluetooth V2.0 EDR USB Adapter PA3455U-1BTM
+    Motorola Bluetooth USB PC850
+
+JSR-082 Phones:
+    2 x Nokia 6230,
+    Motorola V360, Sony Ericsson K790
+    Nokia 6265i, Motorola i605,  Motorola i870
+
+
+----------------------------------------------------------------------------------------------------------

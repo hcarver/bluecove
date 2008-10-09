@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0">
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.sf.bluecove</groupId>
+    <artifactId>bluecove-bluez</artifactId>
+    <version>2.0.3-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <url>http://www.bluecove.org/bluecove-bluez</url>
+
+    <name>bluecove-bluez</name>
+
+    <description>BlueCove Linux version using D-Bus</description>
+
+    <organization>
+        <name>BlueCove Team</name>
+        <url>http://bluecove.sourceforge.net/</url>
+    </organization>
+    <inceptionYear>2008</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:svn:http://bluecove.googlecode.com/svn/incubator/bluecove-bluez</connection>
+        <developerConnection>scm:svn:https://bluecove.googlecode.com/svn/incubator/bluecove-bluez</developerConnection>
+        <url>http://bluecove.googlecode.com/svn/incubator/bluecove-bluez</url>
+    </scm>
+
+	<issueManagement>
+		<system>Google Code Issue Tracking</system>
+		<url>http://code.google.com/p/bluecove/issues/list</url>
+	</issueManagement>
+
+    <mailingLists>
+        <mailingList>
+            <name>bluecove-users</name>
+            <post>bluecove-users@googlegroups.com</post>
+            <archive>http://groups.google.com/group/bluecove-users</archive>
+        </mailingList>
+        <mailingList>
+            <name>bluecove-developers</name>
+            <post>bluecove-developers@googlegroups.com</post>
+            <archive>http://groups.google.com/group/bluecove-developers</archive>
+        </mailingList>
+    </mailingLists>
+
+    <ciManagement>
+        <system>Cruisecontrol</system>
+        <url>https://pyx4j.com/cruisecontrol/</url>
+    </ciManagement>
+
+    <distributionManagement>
+        <site>
+            <id>test-pyx4j-site</id>
+            <url>file:///home/apache/bluecove/bluecove-bluez</url>
+        </site>
+        <repository>
+            <id>pyx4j.com-file-release</id>
+            <url>file:///home/apache/pyx4j/maven2-release</url>
+        </repository>
+        <snapshotRepository>
+            <id>pyx4j.com-file-development</id>
+            <url>file:///home/apache/pyx4j/maven2</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <developers>
+        <developer>
+            <name>Vlad Skarzhevskyy</name>
+            <id>skarzhevskyy</id>
+            <email>skarzhevskyy@gmail.com</email>
+            <organization>pyx4me.com</organization>
+            <organizationUrl>http://www.pyx4me.com</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+        <developer>
+            <name>Mark Swanson</name>
+            <id>TBD</id>
+            <email>mark@scheduleworld.com</email>
+            <organization>scheduleworld.com</organization>
+            <organizationUrl>http://www.scheduleworld.com</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
+
+    <repositories>
+        <repository>
+            <id>pyx4me-web-repo</id>
+            <url>http://www.pyx4me.com/maven2-snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.freedesktop.dbus</groupId>
+            <version>2.3.2-SNAPSHOT</version>
+            <artifactId>dbus</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+
+    </dependencies>
+
+    <properties>
+        <buildLabel>${version}</buildLabel>
+        <native.source.dir>${basedir}/src/main/c</native.source.dir>
+    </properties>
+
+    <build>
+
+        <defaultGoal>install</defaultGoal>
+
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <extensions>false</extensions>
+                <executions>
+                    <execution>
+                        <id>build-jni-headers</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>javah</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${native.source.dir}</outputDirectory>
+                            <classNames>
+                                <className>com.intel.bluetooth.BluetoothStackBlueZ</className>
+								<className>com.intel.bluetooth.BluetoothStackBlueZConsts</className>
+                                <className>com.intel.bluetooth.BluetoothStackBlueZNativeTests</className>
+                            </classNames>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>build-native</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>link</goal>
+                        </goals>
+                        <configuration>
+                            <javahOS>linux</javahOS>
+                            <sources>
+                                <source>
+                                    <directory>${native.source.dir}</directory>
+                                    <fileNames>
+                                        <fileName>BlueCoveBlueZ.c</fileName>
+                                        <fileName>common.c</fileName>
+                                        <fileName>BlueCoveBlueZ_RFCOMM.c</fileName>
+                                        <fileName>BlueCoveBlueZ_RFCOMMServer.c</fileName>
+                                        <fileName>BlueCoveBlueZ_L2CAP.c</fileName>
+                                        <fileName>BlueCoveBlueZ_L2CAPServer.c</fileName>
+                                        <fileName>BlueCoveBlueZ_Tests.c</fileName>
+                                        <!--
+                                        <fileName>BlueCoveBlueZ_LocalDevice.c</fileName>
+                                        <fileName>BlueCoveBlueZ_Discovery.c</fileName>
+                                        <fileName>BlueCoveBlueZ_SDPServer.c</fileName>
+                                        <fileName>BlueCoveBlueZ_SDPQuery.c</fileName>
+                                        -->
+                                    </fileNames>
+                                </source>
+                                <source>
+                                    <directory>${native.source.dir}</directory>
+                                </source>
+                            </sources>
+                            <compilerStartOptions>
+                                <!-- This flag creates position independent code on 64 bit platform/ IA32 has this flag applied by default with GCC -->
+                                <compilerStartOption>-fPIC</compilerStartOption>
+                            </compilerStartOptions>
+                            <linkerStartOptions>
+                                <linkerStartOption>-shared</linkerStartOption>
+                                <linkerStartOption>-nodefaultlibs</linkerStartOption>
+                                <linkerStartOption>-lstdc++</linkerStartOption>
+                                <linkerStartOption>-nodefaultlibs</linkerStartOption>
+                            </linkerStartOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <outputEncoding>UTF-8</outputEncoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>link-move-so</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <condition property="library_sufix" value="_x64" else="">
+                                     <os name="Linux" arch="amd64"/>
+                                </condition>
+                                <move file="${project.build.directory}/${project.build.finalName}.jar" tofile="${project.build.directory}/classes/libbluecove${library_sufix}.so" overwrite="true"/>
+                                <copy file="${project.build.directory}/classes/libbluecove${library_sufix}.so" todir="${basedir}/src/main/resources" overwrite="true"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>site-fix-css</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <!-- Set build number -->
+                                <replace dir="${project.build.directory}/site">
+                                    <include name="*.html"></include>
+                                    <replacefilter token="#build#" value="${label}"/>
+                                    <replacefilter token="#version#" value="${version}"/>
+                                    <replacetoken><![CDATA[</body>]]></replacetoken>
+                                    <replacevalue><![CDATA[<script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script><script type="text/javascript">_uacct = "UA-1249205-3";urchinTracker();</script></body>]]></replacevalue>
+                                </replace>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Description>BlueCove JSR-82 implementation, BlueZ D-Bus Linux module</Description>
+                            <License>The Apache Software License, Version 2.0</License>
+                            <Implementation-Version>${pom.version}</Implementation-Version>
+                            <Implementation-Build>${buildLabel}</Implementation-Build>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- jar sources during build -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                    <id>attach-sources</id>
+                    <goals>
+                        <goal>jar</goal>
+                    </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+    </build>
+
+    <profiles>
+
+        <profile>
+            <id>hasBuildLabel</id>
+            <activation>
+                <property>
+                    <name>label</name>
+                </property>
+            </activation>
+            <properties>
+                <buildLabel>${label}</buildLabel>
+            </properties>
+        </profile>
+
+    </profiles>
+
+</project>

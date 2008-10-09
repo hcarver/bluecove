@@ -1,0 +1,70 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/guides/mini/guide-apt-format.html
+
+                                    ------------------
+                                    How determine which Bluetooth stack is used by your Windows
+                                    ------------------
+
+BlueCove and Bluetooth stack on Windows
+
+* Supported stacks
+
+    BlueCove currently supports the Microsoft (winsock), WIDCOMM and BlueSoleil Bluetooth stack.
+
+    To see which stack is installed for a specific Bluetooth hardware follow those steps on Windows XP
+
+    * Open the Control Panel.
+
+    * Open "System"
+
+    * Click in the "Hardware" tab.
+
+    * Click on "Device Manager"
+
+    * Browse to your Bluetooth device
+
+    * Right click and select "Properties"
+
+    * Click on "Driver" tab.
+
+    []
+
+    Or
+
+    * On Desktop find "My Computer" and Select context menu "Manage"
+
+    * In "Computer Management" select "Device Manager"
+
+    * On the top there would be "Bluetooth Devices" or "Bluetooth Radios" see the "Properties"
+
+    []
+
+**    This is some examples from my system
+
+    My computer has Widcomm first and Microsoft Bluetooth stacks installed
+
+[images/xp-computer-management.png]
+
+
+
+***    This is Microsoft Bluetooth stack "Properties"
+
+[images/xp-microsoft.png]
+
+[images/xp-microsoft-driver.png]
+
+
+
+***    This is how WIDCOMM (Broadcom) "Properties" looks like
+
+[images/xp-widcomm.png]
+
+[images/xp-widcomm-driver.png]
+
+
+
+***    This is BlueSoleil (IVT Corporation) Bluetooth stack "Properties"
+
+[images/xp-bluesoleil.png]
+
+[images/xp-bluesoleil-driver.png]

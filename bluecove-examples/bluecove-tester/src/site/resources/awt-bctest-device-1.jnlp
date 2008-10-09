@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp
+  spec="1.0+"
+  codebase="http://www.bluecove.org/bluecove-examples/bluecove-tester"
+  href="awt-bctest-device-1.jnlp">
+  <information>
+    <title>bluecove-tester (device-1)</title>
+    <vendor>BlueCove; Vlad Skarzhevskyy</vendor>
+    <homepage href="http://www.bluecove.org/"/>
+    <description>bluecove-tester (device-1)</description>
+    <description kind="short">bluecove-tester with BlueCove</description>
+    <icon href="icon.png"/>
+    <offline-allowed/>
+  </information>
+
+  <security>
+      <all-permissions/>
+  </security>
+  <update check="always"/>
+
+  <resources>
+    <j2se version="1.1+"/>
+    <jar href="bluecove-tester-app.jar"/>
+    <property name="bluecove.deviceID" value="1" />
+    <!--property name="bluecove.debug" value="true" /-->
+  </resources>
+
+  <application-desc main-class="net.sf.bluecove.awt.Main">
+  </application-desc>
+
+</jnlp>

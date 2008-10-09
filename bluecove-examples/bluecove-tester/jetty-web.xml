@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app>
+<!-- @version $Revision$ ($Author$) $Date$ -->
+    <!-- Dummy war for packaging -->
+</web-app>

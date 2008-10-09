@@ -1,0 +1,15 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/doxia/references/apt-format.html
+
+                                    ------------------
+                                    BlueCove automated tests
+                                    ------------------
+
+
+BlueCove automated tests
+
+    This Project is used to test BlueCove. We are using this application in addition to {{{../../tck/}JSR 82 TCK tests}} because they cover more execution scenario and are compleatly automated.
+This project does not use real Bluetooth devices only {{{../../bluecove-emu/}BlueCove JSR-82 Emulator module}}  . There are also manual set of tests {{{../bluecove-tester/}BlueCove tester}} that we running manually with real Bluetooth devices.
+
+
+    {{{./surefire-report.html}Test results are published here}}.

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//log4j//DTD//EN" "http://logging.apache.org/log4j/docs/api/org/apache/log4j/xml/log4j.dtd">
+<!--
+// $Id$
+-->
+<log4j:configuration>
+
+    <appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+        <param name="Threshold" value="debug" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <!-- Line# clickable in eclipse -->
+            <param name="ConversionPattern" value="%-5p %m { %l}\n" />
+        </layout>
+    </appender>
+
+
+    <root>
+        <level value="debug" />
+        <appender-ref ref="ConsoleAppender" />
+    </root>
+
+
+</log4j:configuration>

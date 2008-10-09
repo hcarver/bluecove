@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0">
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+    <parent>
+        <groupId>net.sf.bluecove</groupId>
+        <artifactId>bluecove</artifactId>
+        <version>1.2.2</version>
+        <relativePath>../bluecove/pom.xml</relativePath>
+    </parent>
+    -->
+
+    <groupId>net.sf.bluecove</groupId>
+    <version>2.0.3</version><!--bluecove-version-->
+    <artifactId>bluecove-examples</artifactId>
+    <name>bluecove-examples</name>
+    <packaging>pom</packaging>
+
+    <description>BlueCove examples demos and Web Start</description>
+
+    <url>http://www.bluecove.org/bluecove-examples/</url>
+
+    <organization>
+        <name>BlueCove Team</name>
+        <url>http://bluecove.googlecode.com</url>
+    </organization>
+    <inceptionYear>2004</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>GNU Library or Lesser General Public License (LGPL)</name>
+            <url>http://www.gnu.org/licenses/lgpl.html</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:svn:http://bluecove.googlecode.com/svn/bluecove-examples</connection>
+        <developerConnection>scm:svn:https://bluecove.googlecode.com/svn/bluecove-examples</developerConnection>
+        <url>http://code.google.com/p/bluecove/source/browse/bluecove-examples</url>
+    </scm>
+
+	<issueManagement>
+		<system>Google Code Issue Tracking</system>
+		<url>http://code.google.com/p/bluecove/issues/list</url>
+	</issueManagement>
+
+    <distributionManagement>
+        <site>
+            <id>test-pyx4j-site</id>
+            <url>file:///home/apache/bluecove/bluecove-examples</url>
+        </site>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>pyx4me-web-repo</id>
+            <url>http://www.pyx4me.com/maven2-snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+
+        <pluginRepository>
+            <id>pyx4me-web-plugin-repo</id>
+            <url>http://www.pyx4me.com/maven2-snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+
+    </pluginRepositories>
+
+    <properties>
+        <me2Version>2.0.2</me2Version>
+        <pyx4meVersion>2.0.2</pyx4meVersion>
+    </properties>
+
+    <modules>
+        <module>bluecove-site-skin</module>
+        <module>bluecove-tests</module>
+        <module>bluecove-tester</module>
+        <module>bluecove-webstart</module>
+        <module>bluecove-microemu-starter</module>
+        <module>obex-install</module>
+        <module>obex-server</module>
+    </modules>
+
+    <developers>
+        <developer>
+            <name>Paul Totterman</name>
+            <id>paul.totterman</id>
+            <email>paul.totterman@gmail.com</email>
+            <roles>
+                <role>admin</role>
+                <role>developer</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <name>Vlad Skarzhevskyy</name>
+            <id>skarzhevskyy</id>
+            <email>skarzhevskyy@gmail.com</email>
+            <organization>pyx4me.com</organization>
+            <organizationUrl>http://www.pyx4me.com</organizationUrl>
+            <roles>
+                <role>developer</role>
+                <role>Build master</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
+
+    <contributors>
+        <contributor>
+            <name>Eric Wagner</name>
+            <email>gnuloki@gmail.com</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>-5</timezone>
+        </contributor>
+
+        <!--
+        <contributor>
+            <name></name>
+            <email></email>
+            <organization></organization>
+            <organizationUrl></organizationUrl>
+            <roles>
+                <role></role>
+            </roles>
+        </contributor>
+        -->
+    </contributors>
+
+    <build>
+        <defaultGoal>install</defaultGoal>
+
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.4</source>
+                    <target>1.4</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <!-- fix for site.xml TODO see version 7 -->
+                <version>2.0-beta-5</version>
+                <configuration>
+                    <outputEncoding>UTF-8</outputEncoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>site-fix-version</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <!-- Set build number -->
+                                <replace dir="${project.build.directory}/site">
+                                    <include name="*.html"></include>
+                                    <replacefilter token="#build#" value="${label}"/>
+                                    <replacefilter token="#version#" value="${version}"/>
+                                </replace>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+    </build>
+
+    <profiles>
+        <profile>
+            <id>build</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>site-fix-jnlp</id>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <replace dir="${project.build.directory}/site">
+                                            <include name="*.jnlp"></include>
+                                            <replacetoken><![CDATA[http://www.bluecove.org/bluecove-examples]]></replacetoken>
+                                            <replacevalue><![CDATA[http://snapshot.bluecove.org/bluecove-examples]]></replacevalue>
+                                        </replace>
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

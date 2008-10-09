@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0">
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.sf.bluecove</groupId>
+    <artifactId>bluecove-site-skin</artifactId>
+    <name>bluecove-site-skin</name>
+    <version>2.0.0</version>
+
+    <description>bluecove-site-skin</description>
+
+    <distributionManagement>
+        <site>
+            <id>pyx4j.com-no-deployment</id>
+            <url>file:///${basedir}/target/tmp</url>
+        </site>
+        <!-- no-deployment -->
+        <repository>
+            <id>pyx4j.com-no-deployment</id>
+            <url>file:///${basedir}/target/tmp</url>
+        </repository>
+        <snapshotRepository>
+            <id>pyx4j.com-no-deployment</id>
+            <url>file:///${basedir}/target/tmp</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+</project>

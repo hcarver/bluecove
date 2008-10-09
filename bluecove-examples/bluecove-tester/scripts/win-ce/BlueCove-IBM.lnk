@@ -1,0 +1,1 @@
+126#"\Program Files\J9\PPRO10\bin\j9.exe" -Dmicroedition.connection.pkgs=com.intel.bluetooth "-jcl:ppro10" -cp "\bluecove\bluecove-tester.jar" net.sf.bluecove.awt.Main

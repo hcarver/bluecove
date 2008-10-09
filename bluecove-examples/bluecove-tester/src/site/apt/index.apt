@@ -1,0 +1,212 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/doxia/references/apt-format.html
+
+                                    ------------------
+                                    BlueCove test application
+                                    ------------------
+
+
+BlueCove test application
+
+    This Project is used to test BlueCove. We are using this application in addition to {{{../../tck/}JSR 82 TCK tests}} because it is simple to start and we can add implementation specific cases. There are also automated set of tests {{{../bluecove-tests/}BlueCove tests}} that are executed during build.
+
+    The goals of this project:
+
+    * Verify BlueCove communication with other devices
+
+    * Verify BlueCove stability using {{{./results.html}long running tests}}
+
+    * Simplify the start of {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.jsr82}JSR 82 TCK Agent}} using BlueCove
+
+    * Test Bluetooth {{{./speed.html}transfer speed}}
+
+    []
+
+    Test application can also be used as simple Bluetooth client for Device and Service Discovery.
+
+    Tests contains {{{#MIDlet}MIDlet}} application and {{{#Start}J2SE AWT application}}. We are testing BlueCove before release on WinXP connecting to Nokia, Motorola and Sony Ericsson phones.
+
+    Server and Client application can be started directly from this page using Java Web Start.
+
+    First Client discovers server. During ServiceSearch client verify the server Service attributes values.
+    Then client connects to server and sends and receives different types of data. This includes int, long, bytes, byte array, Strings.
+    This is communication test code {{{http://bluecove.googlecode.com/svn/bluecove-examples/bluecove-tester/src/main/java/net/sf/bluecove/CommunicationTester.java}CommunicationTester.java}}.
+    The same functions are called from server and from client. E.g. sendString() and readString(). In first test Client sendString over established connection and server readString. In second the direction is reversed.
+
+    For tests you need two devices. Once device should run as server another as client. You can switch roles in the application.
+
+    There is no fancy GUI! Just communication log windows.  While client is running you will see the log like this:
+
+---
+Client started...21:52:02
+Starting Device inquiry
+deviceDiscovered 00123755ae71
+  Device inquiry took 11 sec
+Search Services on Nokia6265i
+*found server btspp://00123755ae71:25;authenticate=false;encrypt=false
+service Attr found
+Common Service Attr OK
+Found BlueCove SRV:Nokia6265i
+  Services Search took 01 sec
+Services search completed 02 sec
+connect:Nokia6265i btspp://00123755ae71:25;authenticate=false;encrypt=false
+connected:1
+read server status
+test 3 BYTE: OK
+...
+Test time 01:42:28
+*Success:966 Failure:0
+---
+
+    <<Failure:0>> is good and <<Failure:1>> may be bad.
+
+    To see the failure list after app was running for some time select "Print FailureLog" from menu.
+
+---
+Client failure 2
+21:59:24 Nokia6265i test 3 java.io.IOException: Failed to connect
+00:21:32 Nokia6265i test 3 BYTE junit.framework.AssertionFailedError: Server reply expected:<77> but was:<-1>
+Server failure 0
+---
+
+
+* {Start} BlueCove tester Web Start
+
+   You can start Java Web Start with MIDlet application and see how it communicates with application running on another computer or cell phone. <<<{{{../bluecove-webstart/open-local/~/bluecove-tester/bctest.jnlp}\u00bbStart MIDlet now}}>>>.
+
+   Also AWT test application can be used in Java Web Start. <<<{{{./awt-bctest.jnlp}\u00bbStart application now}}>>>.
+
+   You can start two Java Web Start applications and see how they communicate if you have two different Bluetooth Stacks. e.g. Winsock (Microsoft) and WIDCOMM (Broadcom).
+   More information on {{{http://code.google.com/p/bluecove/wiki/stacks}BlueCove supported stacks here}}
+
+        * <<<{{{./awt-bctest-winsock.jnlp}\u00bbStart with Microsoft Winsock}}>>>
+
+        * <<<{{{./awt-bctest-widcomm.jnlp}\u00bbStart with Broadcom WIDCOMM}}>>>
+
+        * <<<{{{./awt-bctest-bluesoleil.jnlp}\u00bbStart with IVT BlueSoleil}}>>>
+
+        * Web Start with {{{#previous} previous releases of BlueCove}}
+
+
+    On Linux BlueZ bluecove supports multiple local devices so you can start more then one applications and see how they communicate.
+
+        * <<<{{{./awt-bctest-device-0.jnlp}\u00bbStart with Local Bluetooth device 0}}>>>
+
+        * <<<{{{./awt-bctest-device-1.jnlp}\u00bbStart with Local Bluetooth device 1}}>>>
+
+        * <<<{{{./awt-bctest-device-2.jnlp}\u00bbStart with Local Bluetooth device 2}}>>>
+
+    If for some reason Java Web Start is not working for you. Try downloading this {{{./bluecove-tester-app.jar}bluecove-tester-app.jar}} application.
+
+    Run it like this:
+
+---
+java -jar bluecove-tester-app.jar
+---
+
+    To start application with no GUI
+
+---
+java -jar bluecove-tester-app.jar --console
+---
+
+    To test JSR-82 implemenation other then BlueCove e.g. avetana. Run test application like this:
+
+---
+java -cp avetanaBluetooth.jar;bluecove-tester-app.jar net.sf.bluecove.se.Main
+---
+
+    You can download the {{{./bluecove-tester.jar}bluecove-tester.jar}} application jar and run it with or without BlueCove JSR-82 in calsspath.
+
+---
+java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:bluecove-tester.jar:junit-3.8.1.jar net.sf.bluecove.se.Main
+---
+
+---
+java -cp avetanaBluetooth.jar:bluecove-tester.jar:junit-3.8.1.jar net.sf.bluecove.se.Main
+---
+
+    bluecove-tester-app.jar is the same application as bluecove-tester.jar only JUnit and BlueCove classes are included.
+
+
+* This is the test {MIDlet}. It can run on a {{{http://code.google.com/p/bluecove/wiki/phones} cell phone with JSR-82}}
+
+    * {{{./bctest.jar}bctest.jar}}
+
+    * {{{./bctest.jad}bctest.jad}}
+
+    * {{{../bluecove-webstart/open-local/~/bluecove-tester/bctest.jnlp}\u00bbStart MIDlet in emulator}}
+
+    []
+
+    You can upload this MIDlet to your cell phone and use it as responder for BlueCove application on PC.
+
+    <<<{{{../obex-install/push-local/~/bluecove-tester/bctest.jnlp}\u00bbInstall MIDlet now}}>>>
+
+    See {{{http://code.google.com/p/bluecove/wiki/phones}complete list of the JSR-82 compliant phones}}
+
+    MIDlet application hot {keys}:
+
+    * <<<2>>> - Start Client
+
+    * <<<3>>> - Stop Client
+
+    * <<<5>>> - Start Server
+
+    * <<<6>>> - Stop Server
+
+    * <<<*>>> - Run Discovery
+
+    * <<<Arrows>>> - Scroll log
+
+    * <<<#>>> - Clear log
+
+    * <<<0>>> - Scroll to the end of the log
+
+    []
+
+* Windows Mobile
+
+   We are using Motorola MPx220 and Dell Axim X30 to test BlueCove.  {{{http://code.google.com/p/bluecove/wiki/WindowsMobile} BlueCove supported devices}}
+
+   {{{http://www2s.biglobe.ne.jp/~dat/java/project/jvm/index_en.html}Mysaifu JVM}} - An open-source (GPL v.2 license) Java VM is used during tests.
+
+   The same AWT {{{./bluecove-tester-mobile.jar}bluecove-tester-mobile.jar}} or {{{./bluecove-tester-phone.jar}bluecove-tester-phone.jar}} application that you just run on Windows can be uploaded to your mobile and started there.
+
+   Those jars been made smaller to exclude Linux and Max OS X code.
+
+   Start application like this:
+
+---
+"\Storage Card\Mysaifu JVM\jre\bin\jvm.exe" -jar "\bluecove\bluecove-tester-mobile.jar"
+---
+
+    We tried IBM's J9 VM  and NSICOM's CrEme JVM and BlueCove works there.
+
+    If you run test application Mysaifu on Windows Mobile Phone Edition application Menu will not appear in AWT application! Use {{{#keys}hot keys}}. # key two times will exit the application.
+
+* Web Start with {previous} releases of BlueCove
+
+        * <<<{{{./awt-bctest-1.2.3.jnlp}\u00bbStart with Microsoft Winsock v 1.2.3}}>>>
+
+        * <<<{{{./awt-bctest-2.0.0.jnlp}\u00bbStart with BlueCove v 2.0.0}}>>>
+
+        * <<<{{{./awt-bctest-2.0.1.jnlp}\u00bbStart with BlueCove v 2.0.1}}>>>
+
+        * <<<{{{./awt-bctest-2.0.2.jnlp}\u00bbStart with BlueCove v 2.0.2}}>>>
+
+* Servers in this application can be used as traffic generator
+
+   To initialize the server send special initialization 4 bytes sequence to it.  "7, 100, 45, 90, 1",  45 is sleep in microseconds between each array sent; and 90 is size of the array to send (min 16, max 255); 1 duration in minutes .
+
+   To send this data using BlueCove Tester use menu "More" -> "Client Connection" Near Send select from drop down "as parseByte(text)"
+
+   Array size special values: 251 = 1K (1024 bytes); 252 = 2K; 253 = 3K;  254 = 4K;  255 = 5K;
+
+   Using this generators we collected this {{{./speed.html}speed test results}}
+
+* BlueCove test lab
+
+[testing-bluecove-small.jpg] bluecove test lab}
+
+    {{{./testing-bluecove.jpg}details}}

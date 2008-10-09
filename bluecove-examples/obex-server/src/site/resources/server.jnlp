@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp
+  spec="1.0+"
+  codebase="http://www.bluecove.org/bluecove-examples/obex-server"
+  href="server.jnlp">
+  <information>
+    <title>obex-install</title>
+    <vendor>BlueCove; Vlad Skarzhevskyy</vendor>
+    <homepage href="http://www.bluecove.org/"/>
+    <description>OBEX push Server application</description>
+    <description kind="short">BlueCove OBEX Push Server application</description>
+    <icon href="icon.png"/>
+    <offline-allowed/>
+  </information>
+
+  <security>
+      <all-permissions/>
+  </security>
+  <update check="always"/>
+
+  <resources>
+    <j2se version="1.4+"/>
+    <jar href="bluecove-obex-server-app.jar"/>
+  </resources>
+
+  <application-desc main-class="net.sf.bluecove.obex.server.Main"/>
+
+</jnlp>
