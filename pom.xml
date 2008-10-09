@@ -14,7 +14,7 @@
 
     <url>http://www.bluecove.org</url>
 
-    <name>bluecove</name>
+    <name>bluecove-parent</name>
 
     <description>BlueCove is JSR-82 J2SE implementation that currently interfaces with the Linux BlueZ, Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack</description>
 
@@ -42,10 +42,10 @@
         <url>http://code.google.com/p/bluecove/source/browse/trunk</url>
     </scm>
 
-	<issueManagement>
-		<system>Google Code Issue Tracking</system>
-		<url>http://code.google.com/p/bluecove/issues/list</url>
-	</issueManagement>
+    <issueManagement>
+        <system>Google Code Issue Tracking</system>
+        <url>http://code.google.com/p/bluecove/issues/list</url>
+    </issueManagement>
 
     <mailingLists>
         <mailingList>
@@ -202,43 +202,21 @@
 
     </dependencies>
 
+    <modules>
+        <module>bluecove-site-skin</module>
+        <module>bluecove</module>
+        <module>bluecove-emu</module>
+        <module>bluecove-emu-gui</module>
+        <module>bluecove-gpl</module>
+        <module>bluecove-bluez</module>
+        <module>bluecove-examples</module>
+    </modules>
+
     <build>
 
         <defaultGoal>install</defaultGoal>
 
         <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.3</source>
-                    <target>1.1</target>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>native-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>build-jni-headers</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>javah</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>src/main/c/intelbth</outputDirectory>
-                            <classNames>
-                                <className>com.intel.bluetooth.NativeTestInterfaces</className>
-                                <className>com.intel.bluetooth.BluetoothStackMicrosoft</className>
-                                <className>com.intel.bluetooth.BluetoothStackWIDCOMM</className>
-                                <className>com.intel.bluetooth.BluetoothStackBlueSoleil</className>
-                                <className>com.intel.bluetooth.BluetoothStackToshiba</className>
-                                <className>com.intel.bluetooth.BluetoothStackOSX</className>
-                            </classNames>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -252,72 +230,6 @@
                 </configuration>
             </plugin>
 
-            <!-- need 2.2 version
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Description>BlueCove JSR-82 implementation</Description>
-                            <License>GNU Library or Lesser General Public License (LGPL)</License>
-                            <Implementation-Version>${pom.version}</Implementation-Version>
-                            <Implementation-Build>${buildLabel}</Implementation-Build>
-                        </manifestEntries>
-                    </archive>
-                    <excludes>
-                        <exclude>**/*.log</exclude>
-                        <exclude>**/.*</exclude>
-                        <exclude>**/Thumbs.db</exclude>
-                        <exclude>com/ibm/oti/connection/CreateConnection.class</exclude>
-                        <exclude>com/ibm/oti/vm/**</exclude>
-                        <exclude>com/sun/cdc/io/ConnectionBaseInterface.class</exclude>
-                        <exclude>com/intel/bluetooth/BluetoothStackBlueZ.class</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            -->
-
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                   <execution>
-                       <id>main-jar</id>
-                       <phase>package</phase>
-                       <goals><goal>single</goal></goals>
-                       <configuration>
-                           <attach>false</attach>
-                           <appendAssemblyId>false</appendAssemblyId>
-                           <descriptors>
-                               <descriptor>assembly.xml</descriptor>
-                           </descriptors>
-                           <archive>
-                               <manifestFile>${project.build.directory}/assembly.manifest</manifestFile>
-                               <!-- this does not work, bug http://jira.codehaus.org/browse/MASSEMBLY-188
-                               <manifestEntries>
-                                   <Description>BlueCove JSR-82 implementation</Description>
-                                   <License>GNU Library or Lesser General Public License (LGPL)</License>
-                                   <Implementation-Version>${pom.version}</Implementation-Version>
-                               </manifestEntries>
-                               -->
-                           </archive>
-                       </configuration>
-                   </execution>
-                   <execution>
-                       <id>all-sources-gz</id>
-                       <phase>install</phase>
-                       <goals><goal>single</goal></goals>
-                       <configuration>
-                           <attach>false</attach>
-                           <tarLongFileMode>gnu</tarLongFileMode>
-                           <descriptors>
-                               <descriptor>assembly-distr-sources.xml</descriptor>
-                           </descriptors>
-                       </configuration>
-                   </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
@@ -329,28 +241,6 @@
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>site-fix-manifest</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <copy file="${basedir}/assembly.manifest" todir="${project.build.directory}" overwrite="true"/>
-                                <tstamp><format property="TODAY" pattern="yyyy-MM-dd hh:mm:ss" /></tstamp>
-                                <echo>pom.xml: timestamp ${TODAY}</echo>
-                                <!-- Set build number -->
-                                <replace dir="${project.build.directory}">
-                                    <include name="assembly.manifest"/>
-                                    <replacefilter token="#build#" value="${buildLabel}"/>
-                                    <replacefilter token="#version#" value="${version}"/>
-                                    <replacefilter token="#user.name#" value="${user.name}"/>
-                                    <replacefilter token="#today#" value="${TODAY}"/>
-                                </replace>
-                            </tasks>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>site-fix-version</id>
                         <phase>site</phase>
@@ -501,198 +391,6 @@
     </properties>
 
     <profiles>
-        <profile>
-            <id>build_on_windows</id>
-            <activation>
-                <os>
-                    <name>Windows XP</name>
-                    <family>windows</family>
-                    <arch>x86</arch>
-                    <version>5.1</version>
-                </os>
-            </activation>
-            <build>
-                <plugins>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <testFailureIgnore>false</testFailureIgnore>
-                            <excludes>
-                                <exclude>**/*OSXTest.*</exclude>
-                                <exclude>**/*BlueZTest.*</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <configuration>
-                            <skip>${native.build.skip}</skip>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>compile-intelbth-dll-on-windows</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>${basedir}/build-native-intelbth.cmd</executable>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>compile-bluecove-dll-on-windows</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>${basedir}/build-native-bluecove.cmd</executable>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>build_on_linux</id>
-            <activation>
-                <os>
-                    <name>linux</name>
-                    <family>unix</family>
-                </os>
-            </activation>
-            <build>
-                <plugins>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <testFailureIgnore>false</testFailureIgnore>
-                            <excludes>
-                                <exclude>**/Native*.*</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>build_on_osx</id>
-            <activation>
-                <os>
-                    <family>mac</family>
-                </os>
-            </activation>
-            <build>
-                <plugins>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <testFailureIgnore>false</testFailureIgnore>
-                            <excludes>
-                                <exclude>**/*WIDCOMMTest.*</exclude>
-                                <exclude>**/*BlueZTest.*</exclude>
-                                <exclude>**/NativeConversionTest.*</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <configuration>
-                            <skip>${native.build.skip}</skip>
-                       </configuration>
-                        <executions>
-                            <execution>
-                                <id>compile-bluecove-jnilib-on-osx</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>${basedir}/build-native-osx.sh</executable>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>build</id>
-            <build>
-                <plugins>
-
-                    <plugin>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>get-compileed-on-windows-dll</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <tasks>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/intelbth.dll" dest="${project.build.directory}/classes/intelbth.dll"/>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/bluecove.dll" dest="${project.build.directory}/classes/bluecove.dll"/>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/intelbth_ce.dll" dest="${project.build.directory}/classes/intelbth_ce.dll"/>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/bluecove_ce.dll" dest="${project.build.directory}/classes/bluecove_ce.dll"/>
-                                        <get src="http://bluecove.googlecode.com/svn/build/osx-jnilib/libbluecove.jnilib" dest="${project.build.directory}/classes/libbluecove.jnilib"/>
-                                    </tasks>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>update-site-map</id>
-                                <phase>site</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <tasks>
-                                        <replace dir="${project.build.directory}/site">
-                                            <include name="sitemap.xml"></include>
-                                            <replacetoken><![CDATA[http://bluecove.sourceforge.net/]]></replacetoken>
-                                            <replacevalue><![CDATA[http://snapshot-bluecove.pyx4j.com/]]></replacevalue>
-                                        </replace>
-                                    </tasks>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- jar sources during snapshot build -->
-                    <plugin>
-                        <inherited>true</inherited>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                            <id>attach-sources</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
 
         <profile>
             <id>hasBuildLabel</id>

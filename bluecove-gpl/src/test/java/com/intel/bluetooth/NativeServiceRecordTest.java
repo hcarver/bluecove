@@ -28,9 +28,9 @@ import javax.bluetooth.UUID;
 
 /**
  * @author vlads
- * 
+ *
  */
-public class ServiceRecordTest extends NativeTestCase {
+public class NativeServiceRecordTest extends NativeTestCase {
 
 	public void validateServiceRecordConvert(ServiceRecordImpl serviceRecord) throws IOException {
 		byte[] inRecordData = serviceRecord.toByteArray();
@@ -49,27 +49,27 @@ public class ServiceRecordTest extends NativeTestCase {
 		serviceRecord.populateL2CAPAttributes(1, 2, new UUID(3), "BBBB");
 		validateServiceRecordConvert(serviceRecord);
 	}
-	
+
 	public void xtestServiceRecordConvertLarge() throws IOException {
 		ServiceRecordImpl serviceRecord = new ServiceRecordImpl(null, null, 0);
 		serviceRecord.populateL2CAPAttributes(1, 2, new UUID(3), "BBBB");
-		
+
 		final int baseID = 0x200;
 		DataElement base = new DataElement(DataElement.DATSEQ);
 		serviceRecord.setAttributeValue(baseID, base);
-		
+
 		for (int i = 0; i < 253; i++) {
 			DataElement d;
 			//d = new DataElement(DataElement.STRING, "C");
 			d = new DataElement(DataElement.NULL);
 			base.addElement(d);
 		}
-		
+
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		(new SDPOutputStream(out)).writeElement(base);
 		byte bp[] = out.toByteArray();
 		System.out.println("DATSEQ LEN " + bp.length);
-		
+
 		validateServiceRecordConvert(serviceRecord);
 	}
 }
