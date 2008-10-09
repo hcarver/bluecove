@@ -20,21 +20,6 @@
 
     <description>BlueCove JSR-82 Emulator</description>
 
-    <distributionManagement>
-        <site>
-            <id>test-pyx4j-site</id>
-            <url>file:///home/apache/bluecove/bluecove-emu</url>
-        </site>
-        <repository>
-            <id>pyx4j.com-file-release</id>
-            <url>file:///home/apache/pyx4j/maven2-release</url>
-        </repository>
-        <snapshotRepository>
-            <id>pyx4j.com-file-development</id>
-            <url>file:///home/apache/pyx4j/maven2</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <!--4snapshot-->
     <!--
     <repositories>

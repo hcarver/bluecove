@@ -18,8 +18,6 @@
     <artifactId>bluecove</artifactId>
     <packaging>jar</packaging>
 
-    <url>http://www.bluecove.org</url>
-
     <name>bluecove</name>
 
     <description>BlueCove is JSR-82 J2SE implementation that currently interfaces with the Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack</description>
@@ -236,14 +234,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <configuration>
-                    <outputEncoding>UTF-8</outputEncoding>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
@@ -264,25 +254,6 @@
                                     <replacefilter token="#version#" value="${version}"/>
                                     <replacefilter token="#user.name#" value="${user.name}"/>
                                     <replacefilter token="#today#" value="${TODAY}"/>
-                                </replace>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>site-fix-version</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <!-- Set build number -->
-                                <replace dir="${project.build.directory}/site">
-                                    <include name="*.html"></include>
-                                    <include name="tck/*.html"></include>
-                                    <replacefilter token="#build#" value="${buildLabel}"/>
-                                    <replacefilter token="#version#" value="${version}"/>
-                                    <replacefilter token="#remove#" value=""/>
                                 </replace>
                             </tasks>
                         </configuration>

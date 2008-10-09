@@ -13,7 +13,7 @@
 
     <bannerLeft>
         <name>BlueCove</name>
-        <src>logo.png</src>
+        <src>#remove#/logo.png</src>
         <href>http://bluecove.org/</href>
     </bannerLeft>
 
@@ -27,41 +27,42 @@
 
     <body>
 
+        <menu ref="parent" />
+
         <!--4release-->
+        <!--
         <menu name="Ver #version#">
+        -->
 
         <!--4snapshot-->
-        <!--
         <menu name="Ver #build#" inherit="top">
-            <item name="Release 2.0.2" href="http://bluecove.org/"/>
-        -->
+            <item name="Release 2.0.3" href="http://bluecove.org/"/>
             <item name="Project site" href="#remove#http://bluecove.googlecode.com" />
             <item name="sf.net" href="http://sourceforge.net/projects/bluecove/" />
-            <item name="Introduction" href="index.html" />
-            <item name="JSR 82 TCK"  href="tck/index.html" />
+            <item name="Introduction" href="#remove#/index.html" />
+            <item name="JSR 82 TCK"  href="#remove#/tck/index.html" />
 
-            <item name="Linux BlueZ" href="bluecove-gpl/"/>
-            <item name="JSR 82 Emulator" href="bluecove-emu/"/>
+            <item name="Linux BlueZ" href="#remove#/bluecove-gpl/index.html"/>
+            <item name="JSR 82 Emulator" href="#remove#/bluecove-emu/index.html"/>
 
             <item name="Download" href="#">
                 <item name="Releases" href="http://sourceforge.net/project/showfiles.php?group_id=114020"/>
                 <!--4snapshot-->
-                <!--
                 <item name="Snapshot" href="http://www.pyx4me.com/maven2-snapshot/net/sf/bluecove/bluecove/#version#/"/>
-                -->
+
                 <item name="SVN Access" href="source-repository.html"/>
                 <item name="Browse SVN" href="http://code.google.com/p/bluecove/source/browse/trunk"/>
             </item>
 
-            <item name="Maven" href="maven.html"/>
+            <item name="Maven" href="http://www.bluecove.org/maven.html"/>
 
-            <item name="Examples" href="bluecove-examples/"/>
+            <item name="Examples" href="#remove#/bluecove-examples/index.html"/>
 
             <!--4release-->
+            <!--
             <item name="Preview 2.1.0" href="http://snapshot.bluecove.org/"/>
-
+            -->
         </menu>
-
 
         <menu ref="modules" collapse="true" />
 

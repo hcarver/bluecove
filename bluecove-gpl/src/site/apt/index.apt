@@ -54,9 +54,9 @@ java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:yourApp.jar org.your.
 
 * Documentation
 
-    API-Documentation for BlueCove {{{../apidocs/index.html}Java docs}}. For application it is not recommended to use any classes or API other than defined in JSR-82.
+    API-Documentation for BlueCove {{{../bluecove/apidocs/index.html}Java docs}}. For application it is not recommended to use any classes or API other than defined in JSR-82.
 
-    API that enables the use of Multiple Adapters and Bluetooth Stacks in parallel in the same JVM is BlueCove specific, documentation can be found {{{../apidocs/com/intel/bluetooth/BlueCoveImpl.html#useThreadLocalBluetoothStack()}here}}.
+    API that enables the use of Multiple Adapters and Bluetooth Stacks in parallel in the same JVM is BlueCove specific, documentation can be found {{{../bluecove/apidocs/com/intel/bluetooth/BlueCoveImpl.html#useThreadLocalBluetoothStack()}here}}.
 
     JSR-82 extension <<<bluecovepsm>>> enables the use of specific PSM channel in L2CAP service. <<<btl2cap://localhost;name=...;bluecovepsm=1007>>>
 

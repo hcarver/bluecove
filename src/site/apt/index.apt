@@ -68,7 +68,7 @@ BlueCove
 
     {{{http://code.google.com/p/bluecove/wiki/Documentation}BlueCove Installation and configuration instructions}}
 
-    API-Documentation for BlueCove {{{apidocs/index.html}Java docs}}. For application it is not recommended to use any classes or API other than defined in JSR-82.
+    API-Documentation for BlueCove {{{bluecove/apidocs/index.html}Java docs}}. For application it is not recommended to use any classes or API other than defined in JSR-82.
 
     Main project website {{{http://bluecove.googlecode.com}http://bluecove.googlecode.com}}
 
@@ -86,18 +86,18 @@ BlueCove
 
     * MIDlet application {{{http://www.mgmaps.com/}Mobile GMaps}} created by Cristian Streng will connect to GPS receiver over bluetooth. <<<{{{bluecove-examples/bluecove-webstart/open/wap.mgmaps.com/mgmaps.jnlp}\u00bbStart now}}>>>.
 
- BlueCove provides an implementation of the JSR 82. Applications should use {{{apidocs/index.html}API defined in JSR-82}}.
+ BlueCove provides an implementation of the JSR 82. Applications should use {{{bluecove/apidocs/index.html}API defined in JSR-82}}.
 You may find many examples on the {{{http://www.google.com/search?q=JSR+82+tutorial}internet}} describing the usage of JSR 82.
 
  We created short (50 lines of code each) examples for you to get started with JSR-82 application development:
 
-    * {{{apidocs/overview-summary.html#DeviceDiscovery}Remote Device Discovery}}
+    * {{{bluecove/apidocs/overview-summary.html#DeviceDiscovery}Remote Device Discovery}}
 
-    * {{{apidocs/overview-summary.html#ServicesSearch}Services Search}}
+    * {{{bluecove/apidocs/overview-summary.html#ServicesSearch}Services Search}}
 
-    * {{{apidocs/overview-summary.html#OBEXPutClient}OBEX Put Client}}
+    * {{{bluecove/apidocs/overview-summary.html#OBEXPutClient}OBEX Put Client}}
 
-    * {{{apidocs/overview-summary.html#OBEXPutServer}OBEX Put Server}}
+    * {{{bluecove/apidocs/overview-summary.html#OBEXPutServer}OBEX Put Server}}
 
     []
 

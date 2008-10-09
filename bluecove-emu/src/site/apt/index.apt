@@ -41,9 +41,9 @@ java -Dbluecove.stack=emulator -cp microemulator.jar;bluecove-#version#.jar;blue
 
     For unit tests air simulator server can be started as in process server. {{{apidocs/com/intel/bluetooth/EmulatorTestsHelper.html#startInProcessServer()}EmulatorTestsHelper.startInProcessServer()}}
 
-    Documentation for BlueCove API that enables the use of Multiple Adapters and Bluetooth Stacks in parallel in the same JVM can be found {{{../apidocs/com/intel/bluetooth/BlueCoveImpl.html#useThreadLocalBluetoothStack()}here}}.
+    Documentation for BlueCove API that enables the use of Multiple Adapters and Bluetooth Stacks in parallel in the same JVM can be found {{{../bluecove/apidocs/com/intel/bluetooth/BlueCoveImpl.html#useThreadLocalBluetoothStack()}here}}.
 
-    Complete JUnit test example can be found here {{{http://bluecove.googlecode.com/svn/incubator/bluecove-emu/src/test/java/net/sf/bluecove/ExampleTest.java}ExampleTest}}
+    Complete JUnit test example can be found here {{{xref-test/net/sf/bluecove/ExampleTest.html}ExampleTest}}
 
 * Configuration options
 
