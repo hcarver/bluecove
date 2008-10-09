@@ -6,55 +6,20 @@
     <!-- @version $Revision$ ($Author$) $Date$ -->
     <modelVersion>4.0.0</modelVersion>
 
-    <!--
     <parent>
         <groupId>net.sf.bluecove</groupId>
-        <artifactId>bluecove</artifactId>
-        <version>1.2.2</version>
-        <relativePath>../bluecove/pom.xml</relativePath>
+        <artifactId>bluecove-parent</artifactId>
+        <version>2.1.0-SNAPSHOT</version><!--bluecove-version-->
+        <relativePath>../pom.xml</relativePath>
     </parent>
-    -->
 
     <groupId>net.sf.bluecove</groupId>
-    <version>2.0.3</version><!--bluecove-version-->
+    <version>2.1.0-SNAPSHOT</version><!--bluecove-version-->
     <artifactId>bluecove-examples</artifactId>
     <name>bluecove-examples</name>
     <packaging>pom</packaging>
 
     <description>BlueCove examples demos and Web Start</description>
-
-    <url>http://www.bluecove.org/bluecove-examples/</url>
-
-    <organization>
-        <name>BlueCove Team</name>
-        <url>http://bluecove.googlecode.com</url>
-    </organization>
-    <inceptionYear>2004</inceptionYear>
-
-    <licenses>
-        <license>
-            <name>GNU Library or Lesser General Public License (LGPL)</name>
-            <url>http://www.gnu.org/licenses/lgpl.html</url>
-        </license>
-    </licenses>
-
-    <scm>
-        <connection>scm:svn:http://bluecove.googlecode.com/svn/bluecove-examples</connection>
-        <developerConnection>scm:svn:https://bluecove.googlecode.com/svn/bluecove-examples</developerConnection>
-        <url>http://code.google.com/p/bluecove/source/browse/bluecove-examples</url>
-    </scm>
-
-	<issueManagement>
-		<system>Google Code Issue Tracking</system>
-		<url>http://code.google.com/p/bluecove/issues/list</url>
-	</issueManagement>
-
-    <distributionManagement>
-        <site>
-            <id>test-pyx4j-site</id>
-            <url>file:///home/apache/bluecove/bluecove-examples</url>
-        </site>
-    </distributionManagement>
 
     <repositories>
         <repository>
@@ -90,7 +55,6 @@
     </properties>
 
     <modules>
-        <module>bluecove-site-skin</module>
         <module>bluecove-tests</module>
         <module>bluecove-tester</module>
         <module>bluecove-webstart</module>
@@ -100,16 +64,6 @@
     </modules>
 
     <developers>
-        <developer>
-            <name>Paul Totterman</name>
-            <id>paul.totterman</id>
-            <email>paul.totterman@gmail.com</email>
-            <roles>
-                <role>admin</role>
-                <role>developer</role>
-            </roles>
-            <timezone>+2</timezone>
-        </developer>
         <developer>
             <name>Vlad Skarzhevskyy</name>
             <id>skarzhevskyy</id>
@@ -125,15 +79,6 @@
     </developers>
 
     <contributors>
-        <contributor>
-            <name>Eric Wagner</name>
-            <email>gnuloki@gmail.com</email>
-            <roles>
-                <role>developer</role>
-            </roles>
-            <timezone>-5</timezone>
-        </contributor>
-
         <!--
         <contributor>
             <name></name>

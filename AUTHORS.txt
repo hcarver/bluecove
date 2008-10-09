@@ -1,0 +1,17 @@
+BlueCove was written and maintained by:
+
+ 2004 James Scott, Eben Upton and Christophe Diot at Intel Research Cambridge
+ 2005 Denis Labaye
+ 2006 Paul Totterman
+ 2007 Vlad Skarzhevskyy - WIDCOMM, Mac OS X
+ 2008 Vlad Skarzhevskyy - Linux, Emulator
+ 2008 Mina Shokry - Lnux BlueZ GPL module
+ 2008 Mark Swanson - Lnux BlueZ D-Bus module
+ 2008 Michael Lifshits - Emulator GUI
+
+Important bug fixes/reports and other suggestions from:
+ Kobus Grobler
+ Hakan Lager
+ Eric Wagner (Initial OS X)
+ Remco Poortinga
+ Sam Halliday (OS X distribution build)

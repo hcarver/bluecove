@@ -6,57 +6,19 @@
     <!-- @version $Revision$ ($Author$) $Date$ -->
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>net.sf.bluecove</groupId>
+        <artifactId>bluecove-parent</artifactId>
+        <version>2.1.0-SNAPSHOT</version><!--bluecove-version-->
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
     <groupId>net.sf.bluecove</groupId>
-    <version>2.0.3</version><!--bluecove-version-->
     <artifactId>bluecove-emu</artifactId>
     <name>bluecove-emu</name>
     <packaging>jar</packaging>
 
     <description>BlueCove JSR-82 Emulator</description>
-
-    <url>http://www.bluecove.org/bluecove-emu/</url>
-
-    <organization>
-        <name>BlueCove Team</name>
-        <url>http://bluecove.org</url>
-    </organization>
-    <inceptionYear>2008</inceptionYear>
-
-    <licenses>
-        <license>
-            <name>GNU Library or Lesser General Public License (LGPL)</name>
-            <url>http://www.gnu.org/licenses/lgpl.html</url>
-        </license>
-    </licenses>
-
-    <scm>
-        <connection>scm:svn:http://bluecove.googlecode.com/svn/bluecove-emu</connection>
-        <developerConnection>scm:svn:https://bluecove.googlecode.com/svn/bluecove-emu</developerConnection>
-        <url>http://bluecove.googlecode.com/svn/bluecove-emu</url>
-    </scm>
-
-	<issueManagement>
-		<system>Google Code Issue Tracking</system>
-		<url>http://code.google.com/p/bluecove/issues/list</url>
-	</issueManagement>
-
-    <mailingLists>
-        <mailingList>
-            <name>bluecove-users</name>
-            <post>bluecove-users@googlegroups.com</post>
-            <archive>http://groups.google.com/group/bluecove-users</archive>
-        </mailingList>
-        <mailingList>
-            <name>bluecove-developers</name>
-            <post>bluecove-developers@googlegroups.com</post>
-            <archive>http://groups.google.com/group/bluecove-developers</archive>
-        </mailingList>
-    </mailingLists>
-
-    <ciManagement>
-        <system>Cruisecontrol</system>
-        <url>https://pyx4j.com/cruisecontrol/</url>
-    </ciManagement>
 
     <distributionManagement>
         <site>

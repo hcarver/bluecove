@@ -7,29 +7,78 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>net.sf.bluecove</groupId>
-        <artifactId>bluecove-parent</artifactId>
-        <version>2.1.0-SNAPSHOT</version><!--bluecove-version-->
-        <relativePath>../pom.xml</relativePath>
-    </parent>
-
     <groupId>net.sf.bluecove</groupId>
-    <artifactId>bluecove</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>bluecove-parent</artifactId>
+    <version>2.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <url>http://www.bluecove.org</url>
 
     <name>bluecove</name>
 
-    <description>BlueCove is JSR-82 J2SE implementation that currently interfaces with the Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack</description>
+    <description>BlueCove is JSR-82 J2SE implementation that currently interfaces with the Linux BlueZ, Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack</description>
+
+
+    <organization>
+        <name>BlueCove Team</name>
+        <url>http://bluecove.sourceforge.net/</url>
+    </organization>
+    <inceptionYear>2004</inceptionYear>
 
     <licenses>
         <license>
-            <name>GNU Library or Lesser General Public License (LGPL)</name>
-            <url>http://www.gnu.org/licenses/lgpl.html</url>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+        <license>
+            <name>GNU General Public License (GPL)</name>
+            <url>http://www.gnu.org/licenses/gpl.html</url>
         </license>
     </licenses>
+
+    <scm>
+        <connection>scm:svn:http://bluecove.googlecode.com/svn/trunk</connection>
+        <developerConnection>scm:svn:https://bluecove.googlecode.com/svn/trunk</developerConnection>
+        <url>http://code.google.com/p/bluecove/source/browse/trunk</url>
+    </scm>
+
+	<issueManagement>
+		<system>Google Code Issue Tracking</system>
+		<url>http://code.google.com/p/bluecove/issues/list</url>
+	</issueManagement>
+
+    <mailingLists>
+        <mailingList>
+            <name>bluecove-users</name>
+            <post>bluecove-users@googlegroups.com</post>
+            <archive>http://groups.google.com/group/bluecove-users</archive>
+        </mailingList>
+        <mailingList>
+            <name>bluecove-developers</name>
+            <post>bluecove-developers@googlegroups.com</post>
+            <archive>http://groups.google.com/group/bluecove-developers</archive>
+        </mailingList>
+    </mailingLists>
+
+    <ciManagement>
+        <system>Cruisecontrol</system>
+        <url>https://pyx4j.com/cruisecontrol/</url>
+    </ciManagement>
+
+    <distributionManagement>
+        <site>
+            <id>test-pyx4j-site</id>
+            <url>file:///home/apache/bluecove</url>
+        </site>
+        <repository>
+            <id>pyx4j.com-file-release</id>
+            <url>file:///home/apache/pyx4j/maven2-release</url>
+        </repository>
+        <snapshotRepository>
+            <id>pyx4j.com-file-development</id>
+            <url>file:///home/apache/pyx4j/maven2</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <developers>
         <developer>
@@ -54,6 +103,40 @@
                 <role>developer-Winsock</role>
                 <role>developer-WIDCOMM</role>
                 <role>developer-OSX</role>
+                <role>developer-BlueZ</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+        <developer>
+            <name>Michael Lifshits</name>
+            <id>michael.lifschitz</id>
+            <email>michael.lifschitz@gmail.com</email>
+            <organization>pyx4j.com</organization>
+            <roles>
+                <role>Developer, Architect</role>
+                <role>developer-emu</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+        <developer>
+            <name>Mina Shokry</name>
+            <id>minashokry</id>
+            <email>minashokry@gmail.com</email>
+            <roles>
+                <role>developer</role>
+                <role>developer-BlueZ-gpl</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <name>Mark Swanson</name>
+            <id>TBD</id>
+            <email>mark@scheduleworld.com</email>
+            <organization>scheduleworld.com</organization>
+            <organizationUrl>http://www.scheduleworld.com</organizationUrl>
+            <roles>
+                <role>developer</role>
+                <role>developer-BlueZ-DBus</role>
             </roles>
             <timezone>-5</timezone>
         </developer>
