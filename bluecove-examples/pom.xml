@@ -55,7 +55,6 @@
     </properties>
 
     <modules>
-        <module>bluecove-tests</module>
         <module>bluecove-tester</module>
         <module>bluecove-webstart</module>
         <module>bluecove-microemu-starter</module>

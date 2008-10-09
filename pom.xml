@@ -206,6 +206,7 @@
         <module>bluecove-site-skin</module>
         <module>bluecove</module>
         <module>bluecove-emu</module>
+        <module>bluecove-tests</module>
         <module>bluecove-emu-gui</module>
         <module>bluecove-gpl</module>
         <module>bluecove-bluez</module>
