@@ -2,19 +2,22 @@
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  *
  *  @version $Id$
  */
@@ -28,7 +31,7 @@ import javax.bluetooth.ServiceRecord;
 
 /**
  * @author vlads
- * 
+ *
  */
 abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothConnectionAccess {
 
@@ -50,7 +53,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
 	 */
 	public long getRemoteAddress() throws IOException {
@@ -62,7 +65,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.bluetooth.L2CAPConnection#getReceiveMTU()
 	 */
 	public int getReceiveMTU() throws IOException {
@@ -74,7 +77,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.bluetooth.L2CAPConnection#getTransmitMTU()
 	 */
 	public int getTransmitMTU() throws IOException {
@@ -86,7 +89,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.bluetooth.L2CAPConnection#ready()
 	 */
 	public boolean ready() throws IOException {
@@ -98,7 +101,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.bluetooth.L2CAPConnection#receive(byte[])
 	 */
 	public int receive(byte[] inBuf) throws IOException {
@@ -113,7 +116,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.bluetooth.L2CAPConnection#send(byte[])
 	 */
 	public void send(byte[] data) throws IOException {
@@ -130,7 +133,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {
@@ -144,7 +147,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#shutdown()
 	 */
 	public void shutdown() throws IOException {
@@ -171,7 +174,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#isClosed()
 	 */
 	public boolean isClosed() {
@@ -180,7 +183,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#markAuthenticated()
 	 */
 	public void markAuthenticated() {
@@ -191,7 +194,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
 	 */
 	public int getSecurityOpt() {
@@ -204,7 +207,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#encrypt(boolean)
 	 * @see javax.bluetooth.RemoteDevice#encrypt(Connection , boolean)
 	 */
@@ -225,7 +228,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteDevice()
 	 */
 	public RemoteDevice getRemoteDevice() {
@@ -234,7 +237,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#setRemoteDevice(javax.bluetooth.RemoteDevice)
 	 */
 	public void setRemoteDevice(RemoteDevice remoteDevice) {
@@ -243,7 +246,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getBluetoothStack()
 	 */
 	public BluetoothStack getBluetoothStack() {

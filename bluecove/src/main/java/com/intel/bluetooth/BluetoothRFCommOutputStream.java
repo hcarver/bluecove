@@ -1,30 +1,33 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2004 Intel Corporation
- * 
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  *
  *  @version $Id$
- */ 
+ */
 package com.intel.bluetooth;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 class BluetoothRFCommOutputStream extends OutputStream {
-	
+
 	volatile private BluetoothRFCommConnection conn;
 
 	public BluetoothRFCommOutputStream(BluetoothRFCommConnection conn) {
@@ -37,7 +40,7 @@ class BluetoothRFCommOutputStream extends OutputStream {
 	 * written is the eight low-order bits of the argument b. The 24 high-order
 	 * bits of b are ignored. Subclasses of OutputStream must provide an
 	 * implementation for this method.
-	 * 
+	 *
 	 * Parameters: b - the byte. Throws: IOException - if an I/O error occurs.
 	 * In particular, an IOException may be thrown if the output stream has been
 	 * closed.
@@ -60,12 +63,12 @@ class BluetoothRFCommOutputStream extends OutputStream {
 	 * calls the write method of one argument on each of the bytes to be written
 	 * out. Subclasses are encouraged to override this method and provide a more
 	 * efficient implementation.
-	 * 
+	 *
 	 * If b is null, a NullPointerException is thrown.
-	 * 
+	 *
 	 * If off is negative, or len is negative, or off+len is greater than the
 	 * length of the array b, then an IndexOutOfBoundsException is thrown.
-	 * 
+	 *
 	 * Parameters: b - the data. off - the start offset in the data. len - the
 	 * number of bytes to write. Throws: IOException - if an I/O error occurs.
 	 * In particular, an IOException is thrown if the output stream is closed.
@@ -90,14 +93,14 @@ class BluetoothRFCommOutputStream extends OutputStream {
 			conn.bluetoothStack.connectionRfFlush(conn.handle);
 		}
     }
-	
+
 	/**
 	 * Closes this output stream and releases any system resources associated
 	 * with this stream.
 	 * <p>
 	 * The general contract of close is that it closes the output stream. A
 	 * closed stream cannot perform output operations and cannot be reopened.
-	 * 
+	 *
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -109,7 +112,7 @@ class BluetoothRFCommOutputStream extends OutputStream {
 			c.streamClosed();
 		}
 	}
-	
+
 	boolean isClosed() {
 		return this.conn == null;
 	}

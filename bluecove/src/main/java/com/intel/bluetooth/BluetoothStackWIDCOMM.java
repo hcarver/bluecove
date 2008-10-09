@@ -2,19 +2,22 @@
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  *
  *  @version $Id$
  */
@@ -86,7 +89,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
 	 */
 	public int getFeatureSet() {
@@ -97,14 +100,14 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#isNativeCodeLoaded()
 	 */
 	public native boolean isNativeCodeLoaded();
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#requireNativeLibraries()
 	 */
 	public LibraryInformation[] requireNativeLibraries() {
@@ -163,7 +166,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#setLocalDeviceServiceClasses(int)
 	 */
 	public void setLocalDeviceServiceClasses(int classOfDevice) {
@@ -172,7 +175,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/**
 	 * There are no functions to set WIDCOMM stack discoverable status.
-	 * 
+	 *
 	 * @return <code>true</code> if the request succeeded, otherwise
 	 *         <code>false</code> if the request failed because the BCC denied
 	 *         the request; <code>false</code> if the Bluetooth system does
@@ -283,7 +286,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
 	 */
 	public boolean isCurrentThreadInterruptedCallback() {
@@ -300,7 +303,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#authenticateRemoteDevice(long,
 	 *      java.lang.String)
 	 */
@@ -420,7 +423,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 	/**
 	 * get device name while discovery running. Device may not report its name
 	 * first time while discovering.
-	 * 
+	 *
 	 * @param address
 	 * @return name
 	 */
@@ -664,7 +667,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
 	 */
 	public boolean rfEncrypt(long address, long handle, boolean on) throws IOException {
@@ -865,7 +868,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams,
 	 *      int, int)
 	 */
@@ -879,7 +882,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
 	 */
 	public native void l2CloseClientConnection(long handle) throws IOException;
@@ -891,7 +894,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams,
 	 *      int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
@@ -914,7 +917,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long,
 	 *      com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
@@ -925,14 +928,14 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection(long)
 	 */
 	public native long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseServerConnection(long)
 	 */
 	public native void l2CloseServerConnection(long handle) throws IOException;
@@ -941,7 +944,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long,
 	 *      com.intel.bluetooth.ServiceRecordImpl)
 	 */
@@ -951,7 +954,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetSecurityOpt(long, int)
 	 */
 	public int l2GetSecurityOpt(long handle, int expected) throws IOException {
@@ -960,49 +963,49 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetReceiveMTU(long)
 	 */
 	public native int l2GetReceiveMTU(long handle) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetTransmitMTU(long)
 	 */
 	public native int l2GetTransmitMTU(long handle) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
 	 */
 	public native boolean l2Ready(long handle) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
 	 */
 	public native int l2Receive(long handle, byte[] inBuf) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
 	public native void l2Send(long handle, byte[] data) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
 	 */
 	public native long l2RemoteAddress(long handle) throws IOException;
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
 	 */
 	public boolean l2Encrypt(long address, long handle, boolean on) throws IOException {

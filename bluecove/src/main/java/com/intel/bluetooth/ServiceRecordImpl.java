@@ -2,19 +2,22 @@
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2004 Intel Corporation
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  *
  *  @version $Id$
  */
@@ -279,7 +282,7 @@ class ServiceRecordImpl implements ServiceRecord {
 	 * ServiceRecord returned from LocalDevice.getRecord(), it will return the
 	 * connection string that a remote device will use to connect to this
 	 * service.
-	 * 
+	 *
 	 * Parameters: requiredSecurity - determines whether authentication or
 	 * encryption are required for a connection mustBeMaster - true indicates
 	 * that this device must play the role of master in connections to this
@@ -513,19 +516,19 @@ class ServiceRecordImpl implements ServiceRecord {
 	 * calling getDeviceClass() on the LocalDevice object. Likewise, a call to
 	 * LocalDevice.updateRecord() will cause the major service class bits to be
 	 * OR'ed with the current settings and updated.
-	 * 
+	 *
 	 * The documentation for DeviceClass gives examples of the integers that
 	 * describe each of the major service classes and provides a URL for the
 	 * complete list. These integers can be used individually or OR'ed together
 	 * to describe the appropriate value for classes.
-	 * 
+	 *
 	 * Later, when this ServiceRecord is removed from the SDDB, the
 	 * implementation will automatically deactivate the device bits that were
 	 * activated as a result of the call to setDeviceServiceClasses. The only
 	 * exception to this occurs if there is another ServiceRecord that is in the
 	 * SDDB and setDeviceServiceClasses has been sent to that other
 	 * ServiceRecord to request that some of the same bits be activated.
-	 * 
+	 *
 	 * Parameters: classes - an integer whose binary representation indicates
 	 * the major service class bits that should be activated Throws:
 	 * IllegalArgumentException - if classes is not an OR of one or more of the
@@ -570,10 +573,10 @@ class ServiceRecordImpl implements ServiceRecord {
 	 * ServiceRecord to the SDDB for the first time, or a call must be made to
 	 * the updateRecord() method of LocalDevice to modify the version of this
 	 * ServiceRecord that is already in the SDDB.
-	 * 
+	 *
 	 * This method prevents the ServiceRecordHandle from being modified by
 	 * throwing an IllegalArgumentException.
-	 * 
+	 *
 	 * Parameters: attrID - the service attribute ID attrValue - the DataElement
 	 * which is the value of the service attribute Returns: true if the service
 	 * attribute was successfully added, removed, or modified; false if

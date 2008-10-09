@@ -28,18 +28,11 @@
     </licenses>
 
     <distributionManagement>
-        <site>
-            <id>test-pyx4j-site</id>
-            <url>file:///home/apache/bluecove/bluecove-emu</url>
-        </site>
+        <!-- no-deployment -->
         <repository>
-            <id>pyx4j.com-file-release</id>
-            <url>file:///home/apache/pyx4j/maven2-release</url>
+            <id>pyx4j.com-no-deployment</id>
+            <url>file:///${basedir}/target/tmp</url>
         </repository>
-        <snapshotRepository>
-            <id>pyx4j.com-file-development</id>
-            <url>file:///home/apache/pyx4j/maven2</url>
-        </snapshotRepository>
     </distributionManagement>
 
     <repositories>

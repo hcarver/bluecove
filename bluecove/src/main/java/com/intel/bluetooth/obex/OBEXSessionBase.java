@@ -2,19 +2,22 @@
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2007-2008 Vlad Skarzhevskyy
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  *
  *  @version $Id$
  */
@@ -41,9 +44,9 @@ import com.intel.bluetooth.DebugLog;
  * Base for Client and Server implementations. See <a
  * href="http://bluetooth.com/Bluetooth/Learn/Technology/Specifications/">Bluetooth
  * Specification Documents</A> for details.
- * 
+ *
  * @author vlads
- * 
+ *
  */
 abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess {
 
@@ -215,7 +218,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
 	 */
 	public long getRemoteAddress() throws IOException {
@@ -228,7 +231,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteDevice()
 	 */
 	public RemoteDevice getRemoteDevice() {
@@ -241,7 +244,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#isClosed()
 	 */
 	public boolean isClosed() {
@@ -257,7 +260,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#shutdown()
 	 */
 	public void shutdown() throws IOException {
@@ -268,7 +271,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#markAuthenticated()
 	 */
 	public void markAuthenticated() {
@@ -280,7 +283,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
 	 */
 	public int getSecurityOpt() {
@@ -294,7 +297,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#encrypt(boolean)
 	 */
 	public boolean encrypt(long address, boolean on) throws IOException {
@@ -307,7 +310,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#setRemoteDevice(javax.bluetooth.RemoteDevice)
 	 */
 	public void setRemoteDevice(RemoteDevice remoteDevice) {
@@ -319,7 +322,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getBluetoothStack()
 	 */
 	public BluetoothStack getBluetoothStack() {
@@ -332,7 +335,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/**
 	 * Function used in unit tests.
-	 * 
+	 *
 	 * @return the packetsCountWrite
 	 */
 	int getPacketsCountWrite() {
@@ -341,7 +344,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/**
 	 * Function used in unit tests.
-	 * 
+	 *
 	 * @return the packetsCountRead
 	 */
 	int getPacketsCountRead() {
@@ -350,7 +353,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	/**
 	 * Function used in unit tests.
-	 * 
+	 *
 	 * @return the mtu
 	 */
 	int getPacketSize() {

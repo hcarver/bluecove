@@ -2,19 +2,22 @@
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  *
  *  @version $Id$
  */
@@ -31,10 +34,10 @@ import javax.bluetooth.UUID;
 
 /**
  * Conversion and JVM compatibility functions.
- * 
+ *
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- * 
+ *
  * @author vlads
  */
 public abstract class Utils {
@@ -149,7 +152,7 @@ public abstract class Utils {
 	/**
 	 * Modifying the returned Object will not change the internal representation
 	 * of the object.
-	 * 
+	 *
 	 * @param value
 	 * @return a clone of the array
 	 */
@@ -213,7 +216,7 @@ public abstract class Utils {
 
 	/**
 	 * J2ME/J9 compatibility instead of Vector.toArray
-	 * 
+	 *
 	 */
 	static Object[] vector2toArray(Vector vector, Object[] anArray) {
 		vector.copyInto(anArray);
@@ -222,7 +225,7 @@ public abstract class Utils {
 
 	/**
 	 * J2ME/J9 compatibility instead of Long.toHexString
-	 * 
+	 *
 	 */
 	public static String toHexString(long l) {
 		StringBuffer buf = new StringBuffer();
@@ -269,7 +272,7 @@ public abstract class Utils {
 	/**
 	 * Java 1.1 compatible. Schedules the specified task for execution after the
 	 * specified delay.
-	 * 
+	 *
 	 * @param delay
 	 *            delay in milliseconds before task is to be executed.
 	 * @param run

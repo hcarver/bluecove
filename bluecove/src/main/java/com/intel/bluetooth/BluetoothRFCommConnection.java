@@ -1,20 +1,23 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2004 Intel Corporation
- * 
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  *
  *  @version $Id$
  */
@@ -40,8 +43,8 @@ import javax.microedition.io.StreamConnection;
  * <p>
  * The methods of StreamConnection are not synchronized. The only stream method
  * that can be called safely in another thread is close.
- * 
- * 
+ *
+ *
  */
 abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothConnectionAccess {
 
@@ -74,7 +77,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	 * called. Any open streams will cause the connection to be held open until
 	 * they themselves are closed. In this latter case access to the open
 	 * streams is permitted, but access to the connection is not.
-	 * 
+	 *
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -98,7 +101,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#shutdown()
 	 */
 	public void shutdown() throws IOException {
@@ -123,9 +126,9 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	 * <p>
 	 * Trying to open the InputStream or OutputStream after they have been
 	 * closed causes an IOException.
-	 * 
+	 *
 	 * @return An input stream
-	 * 
+	 *
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -153,9 +156,9 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	 * <p>
 	 * Trying to open the InputStream or OutputStream after they have been
 	 * closed causes an IOException.
-	 * 
+	 *
 	 * @return An input stream
-	 * 
+	 *
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -170,9 +173,9 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	 * <p>
 	 * Trying to open the InputStream or OutputStream after they have been
 	 * closed causes an IOException.
-	 * 
+	 *
 	 * @return An output stream
-	 * 
+	 *
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -200,9 +203,9 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	 * <p>
 	 * Trying to open the InputStream or OutputStream after they have been
 	 * closed causes an IOException.
-	 * 
+	 *
 	 * @return An output stream
-	 * 
+	 *
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -220,7 +223,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 	 * the connection to be held open until they themselves are closed. In this
 	 * latter case access to the open streams is permitted, but access to the
 	 * connection is not.
-	 * 
+	 *
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -241,7 +244,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#isClosed()
 	 */
 	public boolean isClosed() {
@@ -250,7 +253,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#markAuthenticated()
 	 */
 	public void markAuthenticated() {
@@ -261,7 +264,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getSecurityOpt()
 	 */
 	public int getSecurityOpt() {
@@ -274,7 +277,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#encrypt(boolean)
 	 */
 	public boolean encrypt(long address, boolean on) throws IOException {
@@ -294,7 +297,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteAddress()
 	 */
 	public long getRemoteAddress() throws IOException {
@@ -306,7 +309,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getRemoteDevice()
 	 */
 	public RemoteDevice getRemoteDevice() {
@@ -315,7 +318,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#setRemoteDevice(javax.bluetooth.RemoteDevice)
 	 */
 	public void setRemoteDevice(RemoteDevice remoteDevice) {
@@ -324,7 +327,7 @@ abstract class BluetoothRFCommConnection implements StreamConnection, BluetoothC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothConnectionAccess#getBluetoothStack()
 	 */
 	public BluetoothStack getBluetoothStack() {

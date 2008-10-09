@@ -103,8 +103,8 @@ You may find many examples on the {{{http://www.google.com/search?q=JSR+82+tutor
 
 * Legal
 
-  BlueCove is licensed under {{{http://www.gnu.org/licenses/lgpl.html}GNU Lesser General Public License}}.
-The LGPL license allows linking and distributing commercial software with BlueCove.
+  BlueCove is licensed under {{{http://www.apache.org/licenses/LICENSE-2.0}Apache License, Version 2.0}}.
+The license allows linking and distributing commercial software with BlueCove.
 
   BlueCove BlueZ module is licensed under {{{http://www.gnu.org/licenses/gpl.html}GNU General Public License}}.
 
