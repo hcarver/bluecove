@@ -97,12 +97,7 @@
 
     </dependencies>
 
-    <properties>
-        <buildLabel>${version}</buildLabel>
-    </properties>
-
     <build>
-        <defaultGoal>install</defaultGoal>
 
         <plugins>
 
@@ -114,15 +109,7 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <configuration>
-                    <outputEncoding>UTF-8</outputEncoding>
-                </configuration>
-            </plugin>
-
-            <plugin>
+             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
@@ -151,49 +138,9 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>site-fix-css</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <!-- Set build number -->
-                                <replace dir="${project.build.directory}/site">
-                                    <include name="*.html"></include>
-                                    <replacefilter token="#build#" value="${label}"/>
-                                    <replacefilter token="#version#" value="${version}"/>
-                                    <replacetoken><![CDATA[</body>]]></replacetoken>
-                                    <replacevalue><![CDATA[<script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script><script type="text/javascript">_uacct = "UA-1249205-3";urchinTracker();</script></body>]]></replacevalue>
-                                </replace>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
 
     </build>
-
-    <profiles>
-
-        <profile>
-            <id>hasBuildLabel</id>
-            <activation>
-                <property>
-                    <name>label</name>
-                </property>
-            </activation>
-            <properties>
-                <buildLabel>${label}</buildLabel>
-            </properties>
-        </profile>
-
-    </profiles>
 
     <reporting>
         <plugins>

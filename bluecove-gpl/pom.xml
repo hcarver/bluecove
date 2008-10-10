@@ -90,7 +90,6 @@
     </dependencies>
 
     <properties>
-        <buildLabel>${version}</buildLabel>
         <native.source.dir>${basedir}/src/main/c</native.source.dir>
     </properties>
 

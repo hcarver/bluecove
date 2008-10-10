@@ -8,7 +8,7 @@
 
 BlueCove test application
 
-    This Project is used to test BlueCove. We are using this application in addition to {{{../../tck/}JSR 82 TCK tests}} because it is simple to start and we can add implementation specific cases. There are also automated set of tests {{{../bluecove-tests/}BlueCove tests}} that are executed during build.
+    This Project is used to test BlueCove. We are using this application in addition to {{{../../tck/}JSR 82 TCK tests}} because it is simple to start and we can add implementation specific cases. There are also automated set of tests {{{../../bluecove-tests/}BlueCove tests}} that are executed during build.
 
     The goals of this project:
 
@@ -30,7 +30,7 @@ BlueCove test application
 
     First Client discovers server. During ServiceSearch client verify the server Service attributes values.
     Then client connects to server and sends and receives different types of data. This includes int, long, bytes, byte array, Strings.
-    This is communication test code {{{http://bluecove.googlecode.com/svn/bluecove-examples/bluecove-tester/src/main/java/net/sf/bluecove/CommunicationTester.java}CommunicationTester.java}}.
+    This is communication test code {{{http://bluecove.googlecode.com/svn/trunk/bluecove-examples/bluecove-tester/src/main/java/net/sf/bluecove/CommunicationTester.java}CommunicationTester.java}}.
     The same functions are called from server and from client. E.g. sendString() and readString(). In first test Client sendString over established connection and server readString. In second the direction is reversed.
 
     For tests you need two devices. Once device should run as server another as client. You can switch roles in the application.
