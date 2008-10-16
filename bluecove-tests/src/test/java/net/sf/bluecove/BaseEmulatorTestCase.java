@@ -51,12 +51,12 @@ public abstract class BaseEmulatorTestCase extends TestCase {
 	protected LongRunningTestMonitor monitor;
 
 	/**
-	 * Default 15 seconds
+	 * Default 30 seconds
 	 * 
 	 * @return the length of time for test in milliseconds.
 	 */
 	protected int gracePeriod() {
-		return 15 * 1000;
+		return 30 * 1000;
 	}
 
 	@Override
