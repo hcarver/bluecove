@@ -3,6 +3,7 @@
 * 2.1.0 to be released 2008-12-XX
 
     * Change license to Apache License, Version 2.0
+    * Remove authentication/Non JSR-82 on WIDCOMM
 
 * 2.0.3 released 2008-08-11
 

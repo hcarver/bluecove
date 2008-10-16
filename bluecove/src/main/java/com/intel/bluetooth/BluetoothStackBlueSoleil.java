@@ -57,14 +57,14 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#isNativeCodeLoaded()
 	 */
 	public native boolean isNativeCodeLoaded();
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#requireNativeLibraries()
 	 */
 	public LibraryInformation[] requireNativeLibraries() {
@@ -124,7 +124,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#setLocalDeviceServiceClasses(int)
 	 */
 	public void setLocalDeviceServiceClasses(int classOfDevice) {
@@ -165,7 +165,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
 	 */
 	public int getFeatureSet() {
@@ -209,7 +209,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
 	 */
 	public boolean isCurrentThreadInterruptedCallback() {
@@ -220,14 +220,17 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.intel.bluetooth.BluetoothStack#authenticateRemoteDevice(long,
-	 *      java.lang.String)
-	 */
 	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException {
 		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#removeAuthenticationWithRemoteDevice (long)
+	 */
+	public void removeAuthenticationWithRemoteDevice(long address) throws IOException {
+		throw new NotSupportedIOException(getStackID());
 	}
 
 	// --- Device Inquiry
@@ -305,9 +308,8 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 	}
 
 	/*
-	 * This is all we have under the BlueSoleil. struct SPPEX_SERVICE_INFO {
-	 * DWORD dwSize; DWORD dwSDAPRecordHanlde; UUID serviceClassUuid128; CHAR
-	 * szServiceName[MAX_SERVICE_NAME_LENGTH]; UCHAR ucServiceChannel; }
+	 * This is all we have under the BlueSoleil. struct SPPEX_SERVICE_INFO { DWORD dwSize; DWORD dwSDAPRecordHanlde;
+	 * UUID serviceClassUuid128; CHAR szServiceName[MAX_SERVICE_NAME_LENGTH]; UCHAR ucServiceChannel; }
 	 */
 
 	public void servicesFoundCallback(SearchServicesThread startedNotify, DiscoveryListener listener,
@@ -412,7 +414,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
 	 */
 	public boolean rfEncrypt(long address, long handle, boolean on) throws IOException {
@@ -423,9 +425,9 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams,
-	 *      int, int)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth .BluetoothConnectionParams,
+	 * int, int)
 	 */
 	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU)
 			throws IOException {
@@ -434,7 +436,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseClientConnection(long)
 	 */
 	public void l2CloseClientConnection(long handle) throws IOException {
@@ -443,9 +445,9 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams,
-	 *      int, int, com.intel.bluetooth.ServiceRecordImpl)
+	 * 
+	 * @seecom.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth. BluetoothConnectionNotifierParams, int,
+	 * int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU,
 			ServiceRecordImpl serviceRecord) throws IOException {
@@ -454,9 +456,9 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long,
-	 *      com.intel.bluetooth.ServiceRecordImpl, boolean)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long, com.intel.bluetooth.ServiceRecordImpl,
+	 * boolean)
 	 */
 	public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
 			throws ServiceRegistrationException {
@@ -465,8 +467,8 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection(long)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection (long)
 	 */
 	public long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException {
 		throw new NotSupportedIOException(getStackID());
@@ -474,7 +476,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2CloseServerConnection(long)
 	 */
 	public void l2CloseServerConnection(long handle) throws IOException {
@@ -483,9 +485,8 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long,
-	 *      com.intel.bluetooth.ServiceRecordImpl)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long, com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
 		throw new NotSupportedIOException(getStackID());
@@ -493,7 +494,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetSecurityOpt(long, int)
 	 */
 	public int l2GetSecurityOpt(long handle, int expected) throws IOException {
@@ -502,7 +503,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2Ready(long)
 	 */
 	public boolean l2Ready(long handle) throws IOException {
@@ -511,7 +512,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
 	 */
 	public int l2Receive(long handle, byte[] inBuf) throws IOException {
@@ -520,7 +521,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
 	public void l2Send(long handle, byte[] data) throws IOException {
@@ -529,7 +530,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetReceiveMTU(long)
 	 */
 	public int l2GetReceiveMTU(long handle) throws IOException {
@@ -538,7 +539,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2GetTransmitMTU(long)
 	 */
 	public int l2GetTransmitMTU(long handle) throws IOException {
@@ -547,7 +548,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2RemoteAddress(long)
 	 */
 	public long l2RemoteAddress(long handle) throws IOException {
@@ -556,7 +557,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
 	 */
 	public boolean l2Encrypt(long address, long handle, boolean on) throws IOException {

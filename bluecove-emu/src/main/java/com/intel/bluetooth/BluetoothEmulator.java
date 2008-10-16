@@ -181,11 +181,19 @@ class BluetoothEmulator implements BluetoothStack {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.intel.bluetooth.BluetoothStack#authenticateRemoteDevice(long,
-	 *      java.lang.String)
+	 * @see com.intel.bluetooth.BluetoothStack#authenticateRemoteDevice(long, java.lang.String)
 	 */
 	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException {
 		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#removeAuthenticationWithRemoteDevice (long)
+	 */
+	public void removeAuthenticationWithRemoteDevice(long address) throws IOException {
+		throw new NotSupportedIOException(getStackID());
 	}
 
 	// --- Device Inquiry

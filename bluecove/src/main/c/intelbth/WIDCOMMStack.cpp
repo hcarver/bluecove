@@ -567,6 +567,19 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_authen
     }
 }
 
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_removeAuthenticationWithRemoteDeviceImpl
+  (JNIEnv *env, jobject, jlong address) {
+    if (stack == NULL) {
+        return;
+    }
+    BD_ADDR bda;
+    LongToBcAddr(address, bda);
+    BOOL rc = stack->UnBond(bda);
+    if (!rc) {
+        throwIOException(env, "UnBonding error");
+    }
+}
+
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isRemoteDeviceConnected
   (JNIEnv *env, jobject, jlong address) {
     if (stack == NULL) {

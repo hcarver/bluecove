@@ -291,6 +291,15 @@ public class ClientConnectionDialog extends Dialog {
 					onBond();
 				}
 			});
+
+			Button btnUnBond = new Button("UnBond");
+			panelBtns.add(btnUnBond);
+			btnUnBond.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					onUnBond();
+				}
+			});
+
 			Button btnInfo = new Button("Info");
 			panelBtns.add(btnInfo);
 			btnInfo.addActionListener(new ActionListener() {
@@ -436,6 +445,26 @@ public class ClientConnectionDialog extends Dialog {
 					Logger.error("can't authenticate", e);
 				} catch (Throwable e) {
 					Logger.error("authenticate error", e);
+				}
+			}
+		};
+		t.start();
+	}
+
+	private void onUnBond() {
+		String url = tfURL.getText();
+		String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
+		final RemoteDevice device = new RemoteDeviceIheritance(deviceAddress);
+		Logger.debug("removed authentication:" + deviceAddress);
+		Thread t = new Thread("UnAuthenticate") {
+			public void run() {
+				try {
+					RemoteDeviceHelper.removeAuthentication(device);
+					Logger.info("removed authentication");
+				} catch (IOException e) {
+					Logger.error("can't removed authentication", e);
+				} catch (Throwable e) {
+					Logger.error("removed authentication error", e);
 				}
 			}
 		};

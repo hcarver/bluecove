@@ -51,33 +51,27 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import cx.ath.matthew.unix.UnixSocket;
 
 /**
- * A Java/DBUS implementation. Property "bluecove.deviceID" or
- * "bluecove.deviceAddress" can be used to select Local Bluetooth device.
- * Formats: 1. bluecove.deviceID: String. F.E. hci0, hci1, hci2, etc. 2.
- * bluecove.deviceAddress: String. F.E. 00:00:00:00:00:00
+ * A Java/DBUS implementation. Property "bluecove.deviceID" or "bluecove.deviceAddress" can be used to select Local
+ * Bluetooth device. Formats: 1. bluecove.deviceID: String. F.E. hci0, hci1, hci2, etc. 2. bluecove.deviceAddress:
+ * String. F.E. 00:00:00:00:00:00
  * 
- * Please help with these questions: 0. I note that Adapter.java has a bunch of
- * methods commented out. Do you feel these aren't needed to get a bare bones
- * implementation working? I notice that getLocalDeviceDiscoverable() could use
- * adapter.getMode() "discoverable" though I have no idea how to convert that to
- * an int return value... 1. In order to find the device ID I need to parse the
- * String bluecove presents - which seems to be "/org/bluez/hci". I think the
- * constant: CONST_ADAPTER_PREFIX = "/org/bluez/hci" should be provided in
- * Adapter.java. Or, Adapter.java needs to provide some way of converting
- * "/org/bluez/hci0" to the device ID "0". Thoughts?
+ * Please help with these questions: 0. I note that Adapter.java has a bunch of methods commented out. Do you feel these
+ * aren't needed to get a bare bones implementation working? I notice that getLocalDeviceDiscoverable() could use
+ * adapter.getMode() "discoverable" though I have no idea how to convert that to an int return value... 1. In order to
+ * find the device ID I need to parse the String bluecove presents - which seems to be "/org/bluez/hci". I think the
+ * constant: CONST_ADAPTER_PREFIX = "/org/bluez/hci" should be provided in Adapter.java. Or, Adapter.java needs to
+ * provide some way of converting "/org/bluez/hci0" to the device ID "0". Thoughts?
  * 
- * 2. public DeviceClass getLocalDeviceClass() - I can't construct a DeviceClass
- * because I don't have a record. How do I make a record?
+ * 2. public DeviceClass getLocalDeviceClass() - I can't construct a DeviceClass because I don't have a record. How do I
+ * make a record?
  * 
  * 3. getLocalDeviceName() dbus uniqueName or adapter.getAddress()?
  * 
- * A: Regarding "discoverable" string See in bluez sources what kind of
- * stirrings it accepts then use DiscoveryAgent.NOT_DISCOVERABLE
- * DiscoveryAgent.GIAC, DiscoveryAgent.LIAC:
+ * A: Regarding "discoverable" string See in bluez sources what kind of stirrings it accepts then use
+ * DiscoveryAgent.NOT_DISCOVERABLE DiscoveryAgent.GIAC, DiscoveryAgent.LIAC:
  * 
- * A: The idea was that I copied all the method descriptors from bluez-d-bus
- * documentation. Some I tested and this is uncommented . Some I'm not sure are
- * implemented as described so I commented out.
+ * A: The idea was that I copied all the method descriptors from bluez-d-bus documentation. Some I tested and this is
+ * uncommented . Some I'm not sure are implemented as described so I commented out.
  */
 class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
 
@@ -174,16 +168,13 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	}
 
 	/**
-	 * Returns the device ID F.E. the '0' from /org/bluez/hci0 that corresponds
-	 * to the given findLocalDeviceBTAddress.
+	 * Returns the device ID F.E. the '0' from /org/bluez/hci0 that corresponds to the given findLocalDeviceBTAddress.
 	 * 
 	 * @param id
-	 *            If this is >= 0, we just return the id. I think this parameter
-	 *            had more meaning in the native implementation. In this Java
-	 *            implementation the 'native' ID is the same as the device ID.
+	 *            If this is >= 0, we just return the id. I think this parameter had more meaning in the native
+	 *            implementation. In this Java implementation the 'native' ID is the same as the device ID.
 	 * @param findLocalDeviceBTAddress
-	 *            The parsed long value of the device address F.E.
-	 *            Long.parseLong("00:03:C9:55:DF:3E").
+	 *            The parsed long value of the device address F.E. Long.parseLong("00:03:C9:55:DF:3E").
 	 * @return
 	 * @throws BluetoothStateException
 	 */
@@ -231,8 +222,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	 * 
 	 * @param l
 	 *            The long address format to be converted to a string.
-	 * @return Note: can be optimized - was playing around with the formats
-	 *         required by bluecove.
+	 * @return Note: can be optimized - was playing around with the formats required by bluecove.
 	 */
 	private String toHexString(long l) {
 		StringBuffer buf = new StringBuffer();
@@ -259,9 +249,8 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	// private native int nativeOpenDevice(int deviceID) throws
 	// BluetoothStateException;
 	/*
-	 * private int nativeOpenDevice(int deviceID) throws BluetoothStateException { //
-	 * For now just return the deviceID. return deviceID; //throw new
-	 * BluetoothStateException("nativeOpenDevice() Not supported yet."); }
+	 * private int nativeOpenDevice(int deviceID) throws BluetoothStateException { // For now just return the deviceID.
+	 * return deviceID; //throw new BluetoothStateException("nativeOpenDevice() Not supported yet."); }
 	 */
 
 	public void initialize() throws BluetoothStateException {
@@ -307,15 +296,11 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 				if (foundAdapter != null)
 					adapter = foundAdapter;
 				/*
-				 * long findLocalDeviceBTAddress =
-				 * Long.parseLong(adapter.GetAddress().replaceAll(":", ""), 16);
-				 * if (deviceAddressStr != null) { findLocalDeviceBTAddress =
-				 * Long.parseLong(deviceAddressStr.replaceAll(":", ""), 16); }
-				 * DebugLog.debug("initialize() get deviceID from
-				 * findLocalDeviceBTAddress:" + findLocalDeviceBTAddress);
-				 * deviceID = nativeGetDeviceID(findID,
-				 * findLocalDeviceBTAddress); DebugLog.debug("initialize()
-				 * localDeviceID", deviceID);
+				 * long findLocalDeviceBTAddress = Long.parseLong(adapter.GetAddress().replaceAll(":", ""), 16); if
+				 * (deviceAddressStr != null) { findLocalDeviceBTAddress =
+				 * Long.parseLong(deviceAddressStr.replaceAll(":", ""), 16); } DebugLog.debug("initialize() get deviceID
+				 * from findLocalDeviceBTAddress:" + findLocalDeviceBTAddress); deviceID = nativeGetDeviceID(findID,
+				 * findLocalDeviceBTAddress); DebugLog.debug("initialize() localDeviceID", deviceID);
 				 */
 			}
 		}
@@ -332,8 +317,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 
 	// private native void nativeCloseDevice(int deviceDescriptor);
 	/*
-	 * private void nativeCloseDevice(int deviceDescriptor) {
-	 * //conn.getConnection(arg0) throw new
+	 * private void nativeCloseDevice(int deviceDescriptor) { //conn.getConnection(arg0) throw new
 	 * UnsupportedOperationException("nativeCloseDevice() Not supported yet."); }
 	 */
 
@@ -377,16 +361,14 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	// --- LocalDevice
 
 	/**
-	 * I don't know what this is supposed to do - just returning the
-	 * deviceDescriptor - which is really just the deviceID.
+	 * I don't know what this is supposed to do - just returning the deviceDescriptor - which is really just the
+	 * deviceID.
 	 */
 	/*
-	 * private long getLocalDeviceBluetoothAddressImpl(int deviceDescriptor)
-	 * throws BluetoothStateException { //private native long
-	 * getLocalDeviceBluetoothAddressImpl(int deviceDescriptor) throws
-	 * BluetoothStateException; return deviceDescriptor; //throw new
-	 * BluetoothStateException("getLocalDeviceBluetoothAddressImpl() Not
-	 * supported yet."); }
+	 * private long getLocalDeviceBluetoothAddressImpl(int deviceDescriptor) throws BluetoothStateException { //private
+	 * native long getLocalDeviceBluetoothAddressImpl(int deviceDescriptor) throws BluetoothStateException; return
+	 * deviceDescriptor; //throw new BluetoothStateException("getLocalDeviceBluetoothAddressImpl() Not supported yet.");
+	 * }
 	 */
 
 	public String getLocalDeviceBluetoothAddress() throws BluetoothStateException {
@@ -412,9 +394,8 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 		DeviceClass deviceClass = null;
 
 		/*
-		 * int record = nativeGetDeviceClass(deviceDescriptor); if (record ==
-		 * 0xff000000) { // could not be determined return null; } return new
-		 * DeviceClass(record);
+		 * int record = nativeGetDeviceClass(deviceDescriptor); if (record == 0xff000000) { // could not be determined
+		 * return null; } return new DeviceClass(record);
 		 */
 		return deviceClass;
 	}
@@ -423,8 +404,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	/*
 	 * private String nativeGetDeviceName(int deviceDescriptor) {
 	 * 
-	 * throw new UnsupportedOperationException("nativeGetDeviceName() Not
-	 * supported yet."); }
+	 * throw new UnsupportedOperationException("nativeGetDeviceName() Not supported yet."); }
 	 */
 
 	public String getLocalDeviceName() {
@@ -451,9 +431,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	/*
 	 * private int nativeGetLocalDeviceDiscoverable(int deviceDescriptor) {
 	 * 
-	 * throw new
-	 * UnsupportedOperationException("nativeGetLocalDeviceDiscoverable() Not
-	 * supported yet."); }
+	 * throw new UnsupportedOperationException("nativeGetLocalDeviceDiscoverable() Not supported yet."); }
 	 */
 
 	public int getLocalDeviceDiscoverable() {
@@ -466,21 +444,17 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	// private native int nativeSetLocalDeviceDiscoverable(int deviceDescriptor,
 	// int mode);
 	/*
-	 * private int nativeSetLocalDeviceDiscoverable(int deviceDescriptor, int
-	 * mode) {
+	 * private int nativeSetLocalDeviceDiscoverable(int deviceDescriptor, int mode) {
 	 * 
-	 * throw new
-	 * UnsupportedOperationException("nativeSetLocalDeviceDiscoverable() Not
-	 * supported yet."); }
+	 * throw new UnsupportedOperationException("nativeSetLocalDeviceDiscoverable() Not supported yet."); }
 	 */
 
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
 		DebugLog.debug("setLocalDeviceDiscoverable()");
 		throw new UnsupportedOperationException("setLocalDeviceDiscoverable(int mode) Not supported yet.");
 		/*
-		 * int error = nativeSetLocalDeviceDiscoverable(deviceDescriptor, mode);
-		 * if (error != 0) { throw new BluetoothStateException("Unable to change
-		 * discovery mode. It may be because you aren't root"); } return true;
+		 * int error = nativeSetLocalDeviceDiscoverable(deviceDescriptor, mode); if (error != 0) { throw new
+		 * BluetoothStateException("Unable to change discovery mode. It may be because you aren't root"); } return true;
 		 */
 	}
 
@@ -502,6 +476,16 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#removeAuthenticationWithRemoteDevice (long)
+	 */
+	public void removeAuthenticationWithRemoteDevice(long address) throws IOException {
+		// TODO
+		throw new NotSupportedIOException(getStackID());
 	}
 
 	// --- Device Inquiry
@@ -662,8 +646,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 
 	// private native boolean deviceInquiryCancelImpl(int deviceDescriptor);
 	/*
-	 * private boolean deviceInquiryCancelImpl(int deviceDescriptor) { return
-	 * adapter.CancelDiscovery(); }
+	 * private boolean deviceInquiryCancelImpl(int deviceDescriptor) { return adapter.CancelDiscovery(); }
 	 */
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
@@ -681,11 +664,9 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	// private native String getRemoteDeviceFriendlyNameImpl(int
 	// deviceDescriptor, long remoteAddress) throws IOException;
 	/*
-	 * private String getRemoteDeviceFriendlyNameImpl(int deviceDescriptor, long
-	 * remoteAddress) throws IOException {
+	 * private String getRemoteDeviceFriendlyNameImpl(int deviceDescriptor, long remoteAddress) throws IOException {
 	 * 
-	 * throw new IOException("getRemoteDeviceFriendlyNameImpl() Not supported
-	 * yet."); }
+	 * throw new IOException("getRemoteDeviceFriendlyNameImpl() Not supported yet."); }
 	 */
 
 	public String getRemoteDeviceFriendlyName(long anAddress) throws IOException {
@@ -784,12 +765,9 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 					sst.addServicesRecords(serviceRecordImpl);
 				}
 				/*
-				 * int[] attributeIDs = serviceRecordImpl.getAttributeIDs(); for
-				 * (int j=0; j < attributeIDs.length; ++j) { DataElement
-				 * dataElement =
-				 * serviceRecordImpl.getAttributeValue(attributeIDs[j]);
-				 * DebugLog.debug("dataElement:" +
-				 * ((Object)dataElement).toString()); }
+				 * int[] attributeIDs = serviceRecordImpl.getAttributeIDs(); for (int j=0; j < attributeIDs.length; ++j)
+				 * { DataElement dataElement = serviceRecordImpl.getAttributeValue(attributeIDs[j]);
+				 * DebugLog.debug("dataElement:" + ((Object)dataElement).toString()); }
 				 */
 			} catch (IOException e) {
 				DebugLog.debug("Failed to load serviceRecordBytes", e);
@@ -1069,7 +1047,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	 * (non-Javadoc)
 	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams,
-	 *      int, int)
+	 * int, int)
 	 */
 	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU)
 			throws IOException {
@@ -1094,8 +1072,8 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams,
-	 *      int, int, com.intel.bluetooth.ServiceRecordImpl)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams, int,
+	 * int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU,
 			ServiceRecordImpl serviceRecord) throws IOException {
@@ -1119,8 +1097,8 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long,
-	 *      com.intel.bluetooth.ServiceRecordImpl, boolean)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long, com.intel.bluetooth.ServiceRecordImpl,
+	 * boolean)
 	 */
 	public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
 			throws ServiceRegistrationException {
@@ -1148,8 +1126,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long,
-	 *      com.intel.bluetooth.ServiceRecordImpl)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long, com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
 		try {
