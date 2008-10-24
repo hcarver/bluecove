@@ -319,8 +319,10 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 		return UtilsJavaSE.isCurrentThreadInterrupted();
 	}
 
+	private native boolean authenticateRemoteDeviceImpl(long address, String passkey) throws IOException;
+
 	public boolean authenticateRemoteDevice(long address) throws IOException {
-		return false;
+		return authenticateRemoteDeviceImpl(address, null);
 	}
 
 	/*
@@ -329,8 +331,10 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	 * @see com.intel.bluetooth.BluetoothStack#authenticateRemoteDevice(long, java.lang.String)
 	 */
 	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException {
-		return false;
+		return authenticateRemoteDeviceImpl(address, passkey);
 	}
+
+	private native void removeAuthenticationWithRemoteDeviceImpl(long address) throws IOException;
 
 	/*
 	 * (non-Javadoc)
@@ -338,7 +342,7 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	 * @see com.intel.bluetooth.BluetoothStack#removeAuthenticationWithRemoteDevice (long)
 	 */
 	public void removeAuthenticationWithRemoteDevice(long address) throws IOException {
-		throw new NotSupportedIOException(getStackID());
+		removeAuthenticationWithRemoteDeviceImpl(address);
 	}
 
 	// ---------------------- Device Inquiry

@@ -34,6 +34,8 @@ call "%p%\VCVARS32.BAT"
 
 @set sdk=%ProgramFiles%\Microsoft SDKs\Windows\v6.0
 @if exist "%sdk%\Include" goto sdk_found
+@set sdk=%ProgramFiles%\Microsoft Platform SDK for Windows Server 2003 R2
+@if exist "%sdk%\Include" goto sdk_found
 @echo Microsoft SDKs Not Found
 @goto :errormark
 :sdk_found

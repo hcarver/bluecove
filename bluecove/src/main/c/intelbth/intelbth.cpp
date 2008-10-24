@@ -1428,4 +1428,92 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_setDisco
 #endif
 }
 
+#ifndef _WIN32_WCE
+BOOL getBluetoothDeviceInfo(jlong address, BLUETOOTH_DEVICE_INFO* pbtdi) {
+	BLUETOOTH_DEVICE_SEARCH_PARAMS btsp;
+	memset(&btsp, 0, sizeof(btsp));
+    btsp.dwSize = sizeof(btsp);
+    btsp.fIssueInquiry = false;
+	btsp.fReturnAuthenticated = true;
+    btsp.fReturnConnected     = true;
+    btsp.fReturnRemembered    = true;
+    btsp.fReturnUnknown       = true;
+
+    memset(pbtdi, 0, sizeof(BLUETOOTH_DEVICE_INFO));
+	pbtdi->dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
+	HBLUETOOTH_DEVICE_FIND hFind = BluetoothFindFirstDevice(&btsp, pbtdi);
+	if (NULL != hFind) {
+		do {
+			if (pbtdi->Address.ullLong == address) {
+			    BluetoothFindDeviceClose(hFind);
+				return TRUE;
+            }
+			ndebug(("found device %i", pbtdi->Address.ullLong));
+			memset(pbtdi, 0, sizeof(BLUETOOTH_DEVICE_INFO));
+	        pbtdi->dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
+		} while (BluetoothFindNextDevice(hFind, pbtdi));
+        BluetoothFindDeviceClose(hFind);
+	}
+	return FALSE;
+}
+#endif
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_authenticateRemoteDeviceImpl
+(JNIEnv *env, jobject, jlong address, jstring passkey) {
+#ifdef _WIN32_WCE
+    return JNI_FALSE;
+#else
+	#define MAX_PIN_CODE_LEN 256
+	WCHAR szPasskey[MAX_PIN_CODE_LEN + 1];
+    PWCHAR pszPasskey;
+	ULONG ulPasskeyLength;
+
+	BLUETOOTH_DEVICE_INFO btdi;
+	if (!getBluetoothDeviceInfo(address, &btdi)) {
+	    debug(("device not found"));
+	    return JNI_FALSE;
+	}
+
+	if (passkey != NULL) {
+		const jchar *cpasskey = env->GetStringChars(passkey, JNI_FALSE);
+		jsize size = env->GetStringLength(passkey);
+        int i = 0;
+        for(; (i < MAX_PIN_CODE_LEN) && (i < size); i ++) {
+			szPasskey[i] = cpasskey[i];
+        }
+        szPasskey[i] = '\0';
+		ulPasskeyLength = i;
+        env->ReleaseStringChars(passkey, cpasskey);
+		pszPasskey = szPasskey;
+		debug(("authenticate using pin [%S] %i", szPasskey, ulPasskeyLength));
+	} else {
+		pszPasskey = NULL;
+		ulPasskeyLength = 0;
+		debug(("authenticate using user interface"));
+	}
+	
+	DWORD rc = BluetoothAuthenticateDevice(NULL, NULL, &btdi, pszPasskey, ulPasskeyLength);
+	if (ERROR_SUCCESS != rc) {
+		debug(("authenticate error [%i] %S", rc, getWinErrorMessage(rc)));
+		return JNI_FALSE;
+	} else {
+		return JNI_TRUE;
+	}
+#endif
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_removeAuthenticationWithRemoteDeviceImpl
+(JNIEnv *env, jobject, jlong address) {
+#ifndef _WIN32_WCE
+	BLUETOOTH_ADDRESS btAddr;
+	btAddr.ullLong = address;
+	DWORD rc = BluetoothRemoveDevice(&btAddr);
+	if (ERROR_NOT_FOUND == rc) {
+		throwIOException(env, "device was not found");
+	} else if (ERROR_SUCCESS != rc) {
+		throwIOException(env, "not a remembered device");
+	}
+#endif
+}
+
 #endif // _BTWINSOCKLIB
