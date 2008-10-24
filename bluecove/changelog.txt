@@ -2,6 +2,10 @@
 
 * 2.1.0 to be released 2008-12-XX
 
+    2008-10-24
+    * Authenticate and remove authentication/Non JSR-82 on MS Stack
+
+    2008-10-16
     * Change license to Apache License, Version 2.0
     * Remove authentication/Non JSR-82 on WIDCOMM
 
