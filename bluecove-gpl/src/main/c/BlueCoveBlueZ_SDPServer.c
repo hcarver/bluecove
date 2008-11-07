@@ -24,6 +24,10 @@
 
 #include <bluetooth/sdp_lib.h>
 
+#ifndef defined(sdp_extract_pdu_safe)
+    #define BLUECOVE_BLUEZ_4
+#endif
+
 // Since bluez-libs-3.8 we have sdp_device_record_register_binary
 //#define BLUECOVE_USE_BINARY_SDP
 
@@ -60,7 +64,13 @@ sdp_record_t* createNativeSDPrecord(JNIEnv* env, jbyteArray record) {
     }
     jbyte *bytes = (*env)->GetByteArrayElements(env, record, 0);
     int length_scanned = length;
-    sdp_record_t *rec = sdp_extract_pdu((uint8_t*)bytes, &length_scanned);
+    sdp_record_t *rec;
+    #ifdef BLUECOVE_BLUEZ_4
+        rec = sdp_extract_pdu((uint8_t*)bytes, length, &length_scanned);
+    #else
+        rec = sdp_extract_pdu((uint8_t*)bytes, &length_scanned);
+    #endif
+
     debug("pdu scanned %i -> %i", length, length_scanned);
     if (rec == NULL) {
         throwServiceRegistrationException(env, "Can not convert SDP record. [%d] %s", errno, strerror(errno));

@@ -193,7 +193,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_nativeGet
 (JNIEnv *env, jobject peer, jint deviceDescriptor) {
     char* name = (char*)malloc(DEVICE_NAME_MAX_SIZE);
     jstring nameString = NULL;
-    if (!hci_local_name(deviceDescriptor, 100, name, LOCALDEVICE_ACCESS_TIMEOUT)) {
+    if (!hci_read_local_name(deviceDescriptor, 100, name, LOCALDEVICE_ACCESS_TIMEOUT)) {
         nameString = (*env)->NewStringUTF(env, name);
     }
     free(name);
