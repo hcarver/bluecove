@@ -54,7 +54,8 @@ public class RunDBusManager {
 
 			Manager manager = (Manager) conn.getRemoteObject("org.bluez", "/org/bluez", Manager.class);
 
-			System.out.println("InterfaceVersion " + manager.InterfaceVersion());
+			// System.out.println("InterfaceVersion " +
+			// manager.InterfaceVersion());
 
 			String defaultAdapter = manager.DefaultAdapter();
 			System.out.println("DefaultAdapter " + defaultAdapter);
