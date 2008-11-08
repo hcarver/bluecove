@@ -22,12 +22,8 @@
 
 #include "BlueCoveBlueZ.h"
 #include "com_intel_bluetooth_BluetoothStackBlueZNativeTests.h"
-
+#include <dlfcn.h>
 #include <bluetooth/sdp_lib.h>
-
-#ifndef defined(sdp_extract_pdu_safe)
-    #define BLUECOVE_BLUEZ_4
-#endif
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZNativeTests_testThrowException
 (JNIEnv *env, jclass peer, jint extype) {
@@ -66,17 +62,59 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZNativeTests_t
 }
 
 JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZNativeTests_testServiceRecordConvert
-  (JNIEnv *env, jclass peer, jbyteArray record) {
+(JNIEnv *env, jclass peer, jbyteArray record) {
     int length = (*env)->GetArrayLength(env, record);
-	jbyte *bytes = (*env)->GetByteArrayElements(env, record, 0);
-
-	int length_scanned = length;
+    jbyte *bytes = (*env)->GetByteArrayElements(env, record, 0);
+    int length_scanned = length;
     sdp_record_t *rec;
-    #ifdef BLUECOVE_BLUEZ_4
-        rec = sdp_extract_pdu((uint8_t*)bytes, length, &length_scanned);
-    #else
-        rec = sdp_extract_pdu((uint8_t*)bytes, &length_scanned);
-    #endif
+
+    // we need to declare both to enable code to compile
+    sdp_record_t* (*bluecove_sdp_extract_pdu_bluez_v3)(const uint8_t *pdata, int *scanned);
+    sdp_record_t* (*bluecove_sdp_extract_pdu_bluez_v4)(const uint8_t *pdata, int bufsize, int *scanned);
+
+    char* libraryName = "libbluetooth.so";
+    char* functionName = "sdp_extract_pdu";
+
+    // load library
+    void* dlHandle = dlopen(libraryName, RTLD_LAZY);
+    if (!dlHandle) {
+        throwServiceRegistrationException(env, dlerror());
+        return NULL;
+    }
+    debug("library %s is loaded", libraryName);
+
+    // detect bluez version
+    int bluezVersionMajor = getBlueZVersionMajor();
+    debug("BlueZ major verion %d detected", bluezVersionMajor);
+
+    // look up for function and call appropriate function according to bluez version
+    char* error;
+    switch(bluezVersionMajor) {
+        case BLUEZ_VERSION_MAJOR_3:
+            bluecove_sdp_extract_pdu_bluez_v3 = dlsym(dlHandle, functionName);
+            error = dlerror();
+            if (error != NULL) {
+                throwServiceRegistrationException(env, "can not load native function %s : %s", functionName, error);
+                return NULL;
+            }
+            rec = (*bluecove_sdp_extract_pdu_bluez_v3)((uint8_t*) bytes, &length_scanned);
+            debug("function %s of bluez major version %d is called", functionName, bluezVersionMajor);
+            break;
+        case BLUEZ_VERSION_MAJOR_4:
+            bluecove_sdp_extract_pdu_bluez_v4 = dlsym(dlHandle, functionName);
+            error = dlerror();
+            if (error != NULL) {
+                throwServiceRegistrationException(env, "can not load native function %s : %s", functionName, error);
+                return NULL;
+            }
+            rec = (*bluecove_sdp_extract_pdu_bluez_v4)((uint8_t*) bytes, length, &length_scanned);
+            debug("function %s of bluez major version %d is called", functionName, bluezVersionMajor);
+            break;
+    }
+
+    // unload library at end
+    dlclose(dlHandle);
+    debug("library %s unloaded", libraryName);
 
     debug("pdu scanned %i -> %i", length, length_scanned);
     if (rec == NULL) {
@@ -91,13 +129,13 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZNativeT
     debug("pdu.data_size %i -> %i", length, pdu.data_size);
 
     // construct byte array to hold pdu
-	jbyteArray result = (*env)->NewByteArray(env, pdu.data_size);
+    jbyteArray result = (*env)->NewByteArray(env, pdu.data_size);
     jbyte *result_bytes = (*env)->GetByteArrayElements(env, result, 0);
-	memcpy(result_bytes, pdu.data, pdu.data_size);
-	(*env)->ReleaseByteArrayElements(env, result, result_bytes, 0);
+    memcpy(result_bytes, pdu.data, pdu.data_size);
+    (*env)->ReleaseByteArrayElements(env, result, result_bytes, 0);
 
     free(pdu.data);
 
-	(*env)->ReleaseByteArrayElements(env, record, bytes, 0);
+    (*env)->ReleaseByteArrayElements(env, record, bytes, 0);
     return result;
 }

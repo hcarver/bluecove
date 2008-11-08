@@ -94,3 +94,7 @@ void convertUUIDBytesToUUID(jbyte *bytes, uuid_t* uuid) {
     memcpy(&uuid->value, bytes, 128/8);
 }
 
+int getBlueZVersionMajor() {
+    // until a way is found to detect installed version, assume it is 4
+    return BLUEZ_VERSION_MAJOR_4;
+}

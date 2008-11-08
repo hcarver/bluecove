@@ -106,5 +106,10 @@ void* jlong2ptr(jlong l);
 #define BT_CONNECTION_ERROR_TIMEOUT             com_intel_bluetooth_BluetoothStackBlueZConsts_CONNECTION_ERROR_TIMEOUT
 #define BT_CONNECTION_ERROR_UNACCEPTABLE_PARAMS com_intel_bluetooth_BluetoothStackBlueZConsts_CONNECTION_ERROR_UNACCEPTABLE_PARAMS
 
+#define BLUEZ_VERSION_MAJOR_3 3
+#define BLUEZ_VERSION_MAJOR_4 4
+
+int getBlueZVersionMajor();
+
 #endif  /* _BLUECOVEBLUEZ_H */
 
