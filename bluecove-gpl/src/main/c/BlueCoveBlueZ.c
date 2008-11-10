@@ -22,6 +22,8 @@
 
 #include "BlueCoveBlueZ.h"
 
+#include <dlfcn.h>
+
 #include <bluetooth/sdp_lib.h>
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_isNativeCodeLoaded
@@ -94,7 +96,18 @@ void convertUUIDBytesToUUID(jbyte *bytes, uuid_t* uuid) {
     memcpy(&uuid->value, bytes, 128/8);
 }
 
-int getBlueZVersionMajor() {
-    // until a way is found to detect installed version, assume it is 4
-    return BLUEZ_VERSION_MAJOR_4;
+int getBlueZVersionMajor(JNIEnv* env) {
+    char* libraryName = "libbluetooth.so";
+    char* functionName = "hci_local_name";
+    void* functionHandle;
+
+    void* libraryHandle = dlopen(libraryName, RTLD_LAZY);
+    if(!libraryHandle) {
+        throwBluetoothStateException(env, "can not load native library %s", libraryName);
+        return 0;
+    }
+    functionHandle = dlsym(libraryHandle, functionName);
+    dlclose(libraryHandle);
+
+    return functionHandle ? BLUEZ_VERSION_MAJOR_3 : BLUEZ_VERSION_MAJOR_4;
 }

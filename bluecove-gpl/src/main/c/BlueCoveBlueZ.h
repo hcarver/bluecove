@@ -109,7 +109,9 @@ void* jlong2ptr(jlong l);
 #define BLUEZ_VERSION_MAJOR_3 3
 #define BLUEZ_VERSION_MAJOR_4 4
 
-int getBlueZVersionMajor();
+int getBlueZVersionMajor(JNIEnv* env);
+
+sdp_record_t* bluecove_sdp_extract_pdu(JNIEnv* env, const uint8_t *pdata, int bufsize, int *scanned);
 
 #endif  /* _BLUECOVEBLUEZ_H */
 

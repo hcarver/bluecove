@@ -59,61 +59,43 @@ sdp_record_t* createNativeSDPrecord(JNIEnv* env, jbyteArray record) {
     }
     jbyte *bytes = (*env)->GetByteArrayElements(env, record, 0);
     int length_scanned = length;
-    sdp_record_t *rec;
-
-    // we need to declare both to enable code to compile
-    sdp_record_t* (*bluecove_sdp_extract_pdu_bluez_v3)(const uint8_t *pdata, int *scanned);
-    sdp_record_t* (*bluecove_sdp_extract_pdu_bluez_v4)(const uint8_t *pdata, int bufsize, int *scanned);
-
-    char* libraryName = "libbluetooth.so";
-    char* functionName = "sdp_extract_pdu";
-
-    // load library
-    void* dlHandle = dlopen(libraryName, RTLD_LAZY);
-    if (!dlHandle) {
-        throwServiceRegistrationException(env, dlerror());
-        return NULL;
-    }
-    debug("library %s is loaded", libraryName);
-
-    // detect bluez version
-    int bluezVersionMajor = getBlueZVersionMajor();
-    debug("BlueZ major verion %d detected", bluezVersionMajor);
-
-    // look up for function and call appropriate function according to bluez version
-    char* error;
-    switch(bluezVersionMajor) {
-        case BLUEZ_VERSION_MAJOR_3:
-            bluecove_sdp_extract_pdu_bluez_v3 = dlsym(dlHandle, functionName);
-            error = dlerror();
-            if (error != NULL) {
-                throwServiceRegistrationException(env, "can not load native function %s : %s", functionName, error);
-                return NULL;
-            }
-            rec = (*bluecove_sdp_extract_pdu_bluez_v3)((uint8_t*) bytes, &length_scanned);
-            debug("function %s of bluez major version %d is called", functionName, bluezVersionMajor);
-            break;
-        case BLUEZ_VERSION_MAJOR_4:
-            bluecove_sdp_extract_pdu_bluez_v4 = dlsym(dlHandle, functionName);
-            error = dlerror();
-            if (error != NULL) {
-                throwServiceRegistrationException(env, "can not load native function %s : %s", functionName, error);
-                return NULL;
-            }
-            rec = (*bluecove_sdp_extract_pdu_bluez_v4)((uint8_t*) bytes, length, &length_scanned);
-            debug("function %s of bluez major version %d is called", functionName, bluezVersionMajor);
-            break;
-    }
-
-    // unload library at end
-    dlclose(dlHandle);
-    debug("library %s unloaded", libraryName);
+    sdp_record_t *rec = bluecove_sdp_extract_pdu(env, (uint8_t*) bytes, length, &length_scanned);
 
     debug("pdu scanned %i -> %i", length, length_scanned);
     if (rec == NULL) {
         throwServiceRegistrationException(env, "Can not convert SDP record. [%d] %s", errno, strerror(errno));
     }
     (*env)->ReleaseByteArrayElements(env, record, bytes, 0);
+    return rec;
+}
+
+sdp_record_t* bluecove_sdp_extract_pdu(JNIEnv* env, const uint8_t *pdata, int bufsize, int *scanned) {
+    sdp_record_t* rec;
+
+    // we need to declare both to enable code to compile
+    sdp_record_t* (*bluecove_sdp_extract_pdu_bluez_v3)(const uint8_t *pdata, int *scanned);
+    sdp_record_t* (*bluecove_sdp_extract_pdu_bluez_v4)(const uint8_t *pdata, int bufsize, int *scanned);
+
+    char* functionName = "sdp_extract_pdu";
+
+    // detect bluez version
+    int bluezVersionMajor = getBlueZVersionMajor(env);
+    debug("BlueZ major verion %d detected", bluezVersionMajor);
+
+    // look up for function and call appropriate function according to bluez version
+    switch(bluezVersionMajor) {
+        case BLUEZ_VERSION_MAJOR_3:
+            bluecove_sdp_extract_pdu_bluez_v3 = &sdp_extract_pdu;
+            rec = (*bluecove_sdp_extract_pdu_bluez_v3)(pdata, scanned);
+            debug("function %s of bluez major version %d is called", functionName, bluezVersionMajor);
+            break;
+        case BLUEZ_VERSION_MAJOR_4:
+            bluecove_sdp_extract_pdu_bluez_v4 = &sdp_extract_pdu;
+            rec = (*bluecove_sdp_extract_pdu_bluez_v4)(pdata, bufsize, scanned);
+            debug("function %s of bluez major version %d is called", functionName, bluezVersionMajor);
+            break;
+    }
+
     return rec;
 }
 
