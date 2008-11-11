@@ -26,6 +26,8 @@
 
 #include <bluetooth/sdp_lib.h>
 
+int bluezVersionMajor = 0;
+
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_isNativeCodeLoaded
   (JNIEnv *env, jobject peer) {
     return JNI_TRUE;
@@ -97,17 +99,21 @@ void convertUUIDBytesToUUID(jbyte *bytes, uuid_t* uuid) {
 }
 
 int getBlueZVersionMajor(JNIEnv* env) {
-    char* libraryName = "libbluetooth.so";
-    char* functionName = "hci_local_name";
-    void* functionHandle;
+    if(!bluezVersionMajor) {
+        char* libraryName = "libbluetooth.so";
+        char* functionName = "hci_local_name";
+        void* functionHandle;
 
-    void* libraryHandle = dlopen(libraryName, RTLD_LAZY);
-    if(!libraryHandle) {
-        throwBluetoothStateException(env, "can not load native library %s", libraryName);
-        return 0;
+        void* libraryHandle = dlopen(libraryName, RTLD_LAZY);
+        if(!libraryHandle) {
+            throwBluetoothStateException(env, "can not load native library %s", libraryName);
+            return 0;
+        }
+        functionHandle = dlsym(libraryHandle, functionName);
+        dlclose(libraryHandle);
+        
+        bluezVersionMajor = functionHandle ? BLUEZ_VERSION_MAJOR_3 : BLUEZ_VERSION_MAJOR_4;
     }
-    functionHandle = dlsym(libraryHandle, functionName);
-    dlclose(libraryHandle);
 
-    return functionHandle ? BLUEZ_VERSION_MAJOR_3 : BLUEZ_VERSION_MAJOR_4;
+    return bluezVersionMajor;
 }

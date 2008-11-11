@@ -67,6 +67,9 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZNativeT
     jbyte *bytes = (*env)->GetByteArrayElements(env, record, 0);
     int length_scanned = length;
     sdp_record_t *rec = bluecove_sdp_extract_pdu(env, bytes, length, &length_scanned);
+    if(!rec) {
+        return NULL;
+    }
 
     debug("pdu scanned %i -> %i", length, length_scanned);
     if (rec == NULL) {

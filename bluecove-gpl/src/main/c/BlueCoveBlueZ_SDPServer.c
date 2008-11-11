@@ -60,6 +60,9 @@ sdp_record_t* createNativeSDPrecord(JNIEnv* env, jbyteArray record) {
     jbyte *bytes = (*env)->GetByteArrayElements(env, record, 0);
     int length_scanned = length;
     sdp_record_t *rec = bluecove_sdp_extract_pdu(env, (uint8_t*) bytes, length, &length_scanned);
+    if(!rec) {
+        return NULL;
+    }
 
     debug("pdu scanned %i -> %i", length, length_scanned);
     if (rec == NULL) {
@@ -80,9 +83,12 @@ sdp_record_t* bluecove_sdp_extract_pdu(JNIEnv* env, const uint8_t *pdata, int bu
 
     // detect bluez version
     int bluezVersionMajor = getBlueZVersionMajor(env);
+    if(!bluezVersionMajor) {
+        return NULL;
+    }
     debug("BlueZ major verion %d detected", bluezVersionMajor);
 
-    // look up for function and call appropriate function according to bluez version
+    // call function with appropriate parameters according to bluez version
     switch(bluezVersionMajor) {
         case BLUEZ_VERSION_MAJOR_3:
             bluecove_sdp_extract_pdu_bluez_v3 = &sdp_extract_pdu;
