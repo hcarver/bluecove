@@ -163,6 +163,7 @@ public abstract class RemoteDeviceHelper {
 				return true;
 			}
 			boolean authenticated = bluetoothStack.authenticateRemoteDevice(addressLong);
+			paired = authenticated;
 			if (authenticated) {
 				updateConnectionMarkAuthenticated();
 			}
@@ -174,6 +175,7 @@ public abstract class RemoteDeviceHelper {
 		 */
 		boolean authenticate(String passkey) throws IOException {
 			boolean authenticated = bluetoothStack.authenticateRemoteDevice(addressLong, passkey);
+			paired = authenticated;
 			if (authenticated) {
 				updateConnectionMarkAuthenticated();
 			}
@@ -182,6 +184,7 @@ public abstract class RemoteDeviceHelper {
 
 		void removeAuthentication() throws IOException {
 			bluetoothStack.removeAuthenticationWithRemoteDevice(addressLong);
+			paired = false;
 		}
 
 		private void updateConnectionMarkAuthenticated() {

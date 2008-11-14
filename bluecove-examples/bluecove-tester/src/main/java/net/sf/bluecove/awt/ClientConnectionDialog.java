@@ -433,7 +433,7 @@ public class ClientConnectionDialog extends Dialog {
 			pinStr = null;
 		}
 		final String pin = pinStr;
-		String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
+		final String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
 		final RemoteDevice device = new RemoteDeviceIheritance(deviceAddress);
 		Logger.debug("authenticate:" + deviceAddress + " pin:" + pin);
 		Thread t = new Thread("Authenticate") {
@@ -446,6 +446,8 @@ public class ClientConnectionDialog extends Dialog {
 				} catch (Throwable e) {
 					Logger.error("authenticate error", e);
 				}
+				Logger.debug(deviceAddress + " isAuthenticated", device.isAuthenticated());
+				Logger.debug(deviceAddress + " isTrustedDevice", device.isTrustedDevice());
 			}
 		};
 		t.start();
@@ -453,7 +455,7 @@ public class ClientConnectionDialog extends Dialog {
 
 	private void onUnBond() {
 		String url = tfURL.getText();
-		String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
+		final String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
 		final RemoteDevice device = new RemoteDeviceIheritance(deviceAddress);
 		Logger.debug("removed authentication:" + deviceAddress);
 		Thread t = new Thread("UnAuthenticate") {
@@ -466,6 +468,8 @@ public class ClientConnectionDialog extends Dialog {
 				} catch (Throwable e) {
 					Logger.error("removed authentication error", e);
 				}
+				Logger.debug(deviceAddress + " isAuthenticated", device.isAuthenticated());
+				Logger.debug(deviceAddress + " isTrustedDevice", device.isTrustedDevice());
 			}
 		};
 		t.start();
@@ -490,6 +494,10 @@ public class ClientConnectionDialog extends Dialog {
 		String url = tfURL.getText();
 		try {
 			String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
+			RemoteDevice device = new RemoteDeviceIheritance(deviceAddress);
+			Logger.debug(deviceAddress + " isAuthenticated", device.isAuthenticated());
+			Logger.debug(deviceAddress + " isTrustedDevice", device.isTrustedDevice());
+
 			Logger.debug(deviceAddress + " linkMode is:"
 					+ LocalDevice.getProperty("bluecove.nativeFunction:getRemoteDeviceLinkMode:" + deviceAddress));
 			Logger.debug(deviceAddress + " info:"

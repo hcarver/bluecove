@@ -1491,7 +1491,10 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_auth
 		ulPasskeyLength = 0;
 		debug(("authenticate using user interface"));
 	}
-	
+
+    // ReAuthenticate, Keep devices Authenticated in DB if function fails, suggested by Eric Schreiber
+    btdi.fAuthenticated = false;
+
 	DWORD rc = BluetoothAuthenticateDevice(NULL, NULL, &btdi, pszPasskey, ulPasskeyLength);
 	if (ERROR_SUCCESS != rc) {
 		debug(("authenticate error [%i] %S", rc, getWinErrorMessage(rc)));
