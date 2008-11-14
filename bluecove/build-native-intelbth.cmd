@@ -71,6 +71,29 @@ vcbuild /rebuild src\main\c\intelbth\intelbth.sln "%CONFIGURATION%|Win32"
 @echo [Build OK]
 copy src\main\resources\intelbth.dll target\classes\
 @if errorlevel 1 goto errormark
+
+@if exist "%VCINSTALLDIR%\ce" goto ce_sdk_found
+
+@echo Microsoft Windows CE SDKs Not Found
+
+@goto endmark
+:ce_sdk_found
+
+del src\main\resources\intelbth_ce.dll
+vcbuild /rebuild src\main\c\intelbth\intelbth.sln "Winsock|Pocket PC 2003 (ARMV4)"
+@if errorlevel 1 goto errormark
+@echo [Build OK]
+copy src\main\resources\intelbth_ce.dll target\classes\
+@if errorlevel 1 goto errormark
+
+del src\main\resources\bluecove_ce.dll
+vcbuild /rebuild src\main\c\intelbth\intelbth.sln "WIDCOMM|Pocket PC 2003 (ARMV4)"
+@if errorlevel 1 goto errormark
+@echo [Build OK]
+copy src\main\resources\bluecove_ce.dll target\classes\
+@if errorlevel 1 goto errormark
+
+
 @goto endmark
 :errormark
 	@ENDLOCAL
