@@ -1519,4 +1519,98 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_removeAu
 #endif
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_isRemoteDeviceTrustedImpl
+(JNIEnv *env, jobject, jlong address) {
+#ifndef _WIN32_WCE
+    BLUETOOTH_DEVICE_INFO btdi;
+	if (!getBluetoothDeviceInfo(address, &btdi)) {
+	    debug(("device not found"));
+	    return JNI_FALSE;
+	}
+	if (btdi.fAuthenticated && btdi.fRemembered) {
+	    return JNI_TRUE;
+	} else {
+	    return JNI_FALSE;
+	}
+#else
+    return JNI_FALSE;
+#endif
+}
+
+/*
+ * Class:     com_intel_bluetooth_BluetoothStackMicrosoft
+ * Method:    isRemoteDeviceAuthenticatedImpl
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_isRemoteDeviceAuthenticatedImpl
+(JNIEnv *env, jobject, jlong address) {
+#ifndef _WIN32_WCE
+    BLUETOOTH_DEVICE_INFO btdi;
+	if (!getBluetoothDeviceInfo(address, &btdi)) {
+	    debug(("device not found"));
+	    return JNI_FALSE;
+	}
+	if (btdi.fAuthenticated && btdi.fConnected) {
+	    return JNI_TRUE;
+	} else {
+	    return JNI_FALSE;
+	}
+#else
+    return JNI_FALSE;
+#endif
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_retrieveDevicesImpl
+(JNIEnv *env, jobject peer, jint option, jobject retrieveDevicesCallback) {
+#ifndef _WIN32_WCE
+    RetrieveDevicesCallback callback;
+    if (!callback.builCallback(env, peer, retrieveDevicesCallback)) {
+        return JNI_FALSE;
+    }
+
+    jboolean result = JNI_FALSE;
+    BLUETOOTH_DEVICE_SEARCH_PARAMS btsp;
+	memset(&btsp, 0, sizeof(btsp));
+    btsp.dwSize = sizeof(btsp);
+    btsp.fIssueInquiry = false;
+
+    switch (option) {
+        case RETRIEVEDEVICES_OPTION_PREKNOWN:
+            btsp.fReturnRemembered    = true;
+            break;
+        case RETRIEVEDEVICES_OPTION_CACHED:
+	        btsp.fReturnAuthenticated = true;
+            btsp.fReturnConnected     = true;
+            btsp.fReturnRemembered    = true;
+            btsp.fReturnUnknown       = true;
+            break;
+    }
+	BLUETOOTH_DEVICE_INFO btdi;
+    memset(&btdi, 0, sizeof(BLUETOOTH_DEVICE_INFO));
+	btdi.dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
+	HBLUETOOTH_DEVICE_FIND hFind = BluetoothFindFirstDevice(&btsp, &btdi);
+	if (NULL != hFind) {
+	    result = JNI_TRUE;
+		do {
+            debug(("deviceFoundCallback, notify listener; %i", btdi.Address.ullLong));
+            jlong deviceAddr = btdi.Address.ullLong;
+            jint deviceClass = btdi.ulClassofDevice;
+            jstring deviceName = env->NewString((jchar*)btdi.szName, (jsize)wcslen(btdi.szName));
+            jboolean paired = (btdi.fAuthenticated && btdi.fRemembered)?JNI_TRUE:JNI_FALSE;
+		    if (!callback.callDeviceFoundCallback(env, deviceAddr, deviceClass, deviceName, paired)) {
+			    result = JNI_FALSE;
+		        break;
+		    }
+			memset(&btdi, 0, sizeof(BLUETOOTH_DEVICE_INFO));
+	        btdi.dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
+		} while (BluetoothFindNextDevice(hFind, &btdi));
+        BluetoothFindDeviceClose(hFind);
+	}
+    return result;
+#else
+    return JNI_FALSE;
+#endif
+
+}
+
 #endif // _BTWINSOCKLIB

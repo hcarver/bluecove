@@ -216,6 +216,18 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 		return UtilsJavaSE.isCurrentThreadInterrupted();
 	}
 
+	public RemoteDevice[] retrieveDevices(int option) {
+		return null;
+	}
+
+	public Boolean isRemoteDeviceTrusted(long address) {
+		return null;
+	}
+
+	public Boolean isRemoteDeviceAuthenticated(long address) {
+		return null;
+	}
+
 	public boolean authenticateRemoteDevice(long address) throws IOException {
 		return false;
 	}

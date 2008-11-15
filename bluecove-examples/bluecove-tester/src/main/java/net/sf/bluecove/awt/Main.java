@@ -2,19 +2,22 @@
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
  * 
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  *
  *  @version $Id$
  */
@@ -45,6 +48,7 @@ import java.util.Date;
 import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
+import javax.bluetooth.DiscoveryAgent;
 
 import net.sf.bluecove.Configuration;
 import net.sf.bluecove.Consts;
@@ -56,6 +60,7 @@ import net.sf.bluecove.se.BlueCoveSpecific;
 import net.sf.bluecove.se.FileStorage;
 import net.sf.bluecove.se.JavaSECommon;
 import net.sf.bluecove.se.LocalDeviceManager;
+import net.sf.bluecove.se.RemoteDeviceManager;
 import net.sf.bluecove.se.UIHelper;
 import net.sf.bluecove.util.IOUtils;
 import net.sf.bluecove.util.TimeUtils;
@@ -363,6 +368,19 @@ public class Main extends Frame implements LoggerAppender {
 		});
 
 		menuMore.add(menuLocalDevice);
+
+		Menu menuRemoteDevice = new Menu("RemoteDevice");
+		addMenu(menuRemoteDevice, "Retrieve CACHED", new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				RemoteDeviceManager.retrieveDevices(DiscoveryAgent.CACHED);
+			}
+		});
+		addMenu(menuRemoteDevice, "Retrieve PREKNOWN", new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				RemoteDeviceManager.retrieveDevices(DiscoveryAgent.PREKNOWN);
+			}
+		});
+		menuMore.add(menuRemoteDevice);
 
 		Menu threadLocalStack = new Menu("ThreadLocalStack");
 

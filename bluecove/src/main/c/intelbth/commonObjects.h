@@ -148,4 +148,13 @@ public:
     BOOL callDeviceDiscovered(JNIEnv * env, jobject listener, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired);
 };
 
+class RetrieveDevicesCallback {
+private:
+    jobject listener;
+    jmethodID deviceFoundCallbackMethod;
+public:
+    RetrieveDevicesCallback();
+    BOOL builCallback(JNIEnv * env, jobject peer, jobject listener);
+    BOOL callDeviceFoundCallback(JNIEnv * env, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired);
+};
 

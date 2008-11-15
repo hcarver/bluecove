@@ -263,6 +263,10 @@ public abstract class RemoteDeviceHelper {
 				DebugLog.debug("no connections, Authenticated = false");
 				return false;
 			}
+			Boolean authenticated = bluetoothStack.isRemoteDeviceAuthenticated(addressLong);
+			if (authenticated != null) {
+				return authenticated.booleanValue();
+			}
 			synchronized (connections) {
 				// Find first authenticated connection
 				for (Enumeration en = connections.elements(); en.hasMoreElements();) {
@@ -302,7 +306,12 @@ public abstract class RemoteDeviceHelper {
 		 * @see javax.bluetooth.RemoteDevice#isTrustedDevice()
 		 */
 		public boolean isTrustedDevice() {
-			return paired;
+			Boolean trusted = bluetoothStack.isRemoteDeviceTrusted(addressLong);
+			if (trusted == null) {
+				return paired;
+			} else {
+				return trusted.booleanValue();
+			}
 		}
 	}
 
@@ -416,6 +425,19 @@ public abstract class RemoteDeviceHelper {
 	 * @see javax.bluetooth.DiscoveryAgent#retrieveDevices(int)
 	 */
 	public static RemoteDevice[] retrieveDevices(BluetoothStack bluetoothStack, int option) {
+		if ((option != DiscoveryAgent.PREKNOWN) && (option != DiscoveryAgent.CACHED)) {
+			throw new IllegalArgumentException("invalid option");
+		}
+		RemoteDevice[] impl = bluetoothStack.retrieveDevices(option);
+		if (impl != null) {
+			if (impl.length == 0) {
+				// Spec: null if no devices meet the criteria
+				return null;
+			} else {
+				return impl;
+			}
+		}
+
 		Hashtable devicesCashed = devicesCashed(bluetoothStack);
 		switch (option) {
 		case DiscoveryAgent.PREKNOWN:
@@ -434,12 +456,7 @@ public abstract class RemoteDeviceHelper {
 				// Spec: null if no devices meet the criteria
 				return null;
 			}
-			RemoteDevice[] pdevices = new RemoteDevice[devicesPaired.size()];
-			int i = 0;
-			for (Enumeration en = devicesPaired.elements(); en.hasMoreElements();) {
-				pdevices[i++] = (RemoteDevice) en.nextElement();
-			}
-			return pdevices;
+			return remoteDeviceListToArray(devicesPaired);
 		case DiscoveryAgent.CACHED:
 			if (devicesCashed.size() == 0) {
 				// Spec: null if no devices meet the criteria
@@ -454,6 +471,15 @@ public abstract class RemoteDeviceHelper {
 		default:
 			throw new IllegalArgumentException("invalid option");
 		}
+	}
+
+	static RemoteDevice[] remoteDeviceListToArray(Vector devices) {
+		RemoteDevice[] devicesArray = new RemoteDevice[devices.size()];
+		int i = 0;
+		for (Enumeration en = devices.elements(); en.hasMoreElements();) {
+			devicesArray[i++] = (RemoteDevice) en.nextElement();
+		}
+		return devicesArray;
 	}
 
 	/**

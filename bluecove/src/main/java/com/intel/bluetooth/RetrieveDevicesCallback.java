@@ -1,7 +1,7 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
- * 
+ *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
  *  distributed with this work for additional information
@@ -19,21 +19,18 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
-package net.sf.bluecove.awt;
-
-import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+package com.intel.bluetooth;
 
 /**
- * @author vlads
- * 
+ * This interface is used in functions retrieveDevices
  */
-public abstract class ActionListenerRunnable implements ActionListener, Runnable {
+interface RetrieveDevicesCallback {
 
-	public void actionPerformed(ActionEvent e) {
-		EventQueue.invokeLater(this);
-	}
+	/**
+	 * Convenience method called from native code
+	 */
+	public void deviceFoundCallback(long deviceAddr, int deviceClass, String deviceName, boolean paired);
 }

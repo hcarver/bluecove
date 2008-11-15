@@ -346,6 +346,18 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 		return getRemoteDeviceRSSIImpl(this.deviceDescriptor, address);
 	}
 
+	public RemoteDevice[] retrieveDevices(int option) {
+		return null;
+	}
+
+	public Boolean isRemoteDeviceTrusted(long address) {
+		return null;
+	}
+
+	public Boolean isRemoteDeviceAuthenticated(long address) {
+		return null;
+	}
+
 	// --- Device Inquiry
 
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {

@@ -33,9 +33,8 @@ import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
 /**
- * New native stack support should ONLY implement this interface. No other
- * classes should ideally be changed except BlueCoveImpl where the instance of
- * new class should be created.
+ * New native stack support should ONLY implement this interface. No other classes should ideally be changed except
+ * BlueCoveImpl where the instance of new class should be created.
  * 
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
@@ -56,8 +55,7 @@ public interface BluetoothStack {
 		public String libraryName;
 
 		/**
-		 * Class ClassLoader of which to use for loading library as resource.
-		 * May be null.
+		 * Class ClassLoader of which to use for loading library as resource. May be null.
 		 */
 		public Class stackClass;
 
@@ -73,9 +71,8 @@ public interface BluetoothStack {
 	// ---------------------- Library initialization
 
 	/**
-	 * Used by library initialization to detect if shared library already
-	 * loaded. The caller with catch UnsatisfiedLinkError and will load
-	 * libraries returned by requireNativeLibraries().
+	 * Used by library initialization to detect if shared library already loaded. The caller with catch
+	 * UnsatisfiedLinkError and will load libraries returned by requireNativeLibraries().
 	 */
 	public boolean isNativeCodeLoaded();
 
@@ -88,17 +85,16 @@ public interface BluetoothStack {
 	public LibraryInformation[] requireNativeLibraries();
 
 	/**
-	 * Used to verify native library version. versionMajor1 * 1000000 +
-	 * versionMajor2 * 10000 + versionMinor * 100 + versionBuild
+	 * Used to verify native library version. versionMajor1 * 1000000 + versionMajor2 * 10000 + versionMinor * 100 +
+	 * versionBuild
 	 * 
-	 * @return Version number in decimal presentation. e.g. 2030407 for version
-	 *         2.3.4 build 7
+	 * @return Version number in decimal presentation. e.g. 2030407 for version 2.3.4 build 7
 	 */
 	public int getLibraryVersion() throws BluetoothStateException;
 
 	/**
-	 * Used if OS Supports multiple Bluetooth stacks 0x01 winsock; 0x02 widcomm;
-	 * 0x04 bluesoleil; 0x08 BlueZ; 0x10 OS X stack;
+	 * Used if OS Supports multiple Bluetooth stacks 0x01 winsock; 0x02 widcomm; 0x04 bluesoleil; 0x08 BlueZ; 0x10 OS X
+	 * stack;
 	 * 
 	 * @return stackID
 	 */
@@ -122,8 +118,7 @@ public interface BluetoothStack {
 	public String getStackID();
 
 	/**
-	 * Called from long running native code to see if thread interrupted. If yes
-	 * InterruptedIOException would be thrown.
+	 * Called from long running native code to see if thread interrupted. If yes InterruptedIOException would be thrown.
 	 * 
 	 * @return true if interrupted
 	 */
@@ -189,8 +184,7 @@ public interface BluetoothStack {
 	// ---------------------- Remote Device authentication
 
 	/**
-	 * Attempts to authenticate RemoteDevice. Return <code>false</code> if the
-	 * stack does not support authentication.
+	 * Attempts to authenticate RemoteDevice. Return <code>false</code> if the stack does not support authentication.
 	 * 
 	 * @see javax.bluetooth.RemoteDevice#authenticate()
 	 */
@@ -202,18 +196,15 @@ public interface BluetoothStack {
 	 * @param address
 	 *            Remote Device address
 	 * @param passkey
-	 *            A Personal Identification Number (PIN) to be used for device
-	 *            authentication.
-	 * @return <code>true</code> if authentication is successful; otherwise
-	 *         <code>false</code>
+	 *            A Personal Identification Number (PIN) to be used for device authentication.
+	 * @return <code>true</code> if authentication is successful; otherwise <code>false</code>
 	 * @throws IOException
 	 *             if there are error during authentication.
 	 */
 	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException;
 
 	/**
-	 * Removes authentication between local and remote bluetooth devices. Non
-	 * JSR-82,
+	 * Removes authentication between local and remote bluetooth devices. Non JSR-82,
 	 * 
 	 * @param address
 	 *            Remote Device address authentication.
@@ -228,8 +219,7 @@ public interface BluetoothStack {
 	/**
 	 * called by JSR-82 code Device Inquiry
 	 * 
-	 * @see javax.bluetooth.DiscoveryAgent#startInquiry(int,
-	 *      javax.bluetooth.DiscoveryListener)
+	 * @see javax.bluetooth.DiscoveryAgent#startInquiry(int, javax.bluetooth.DiscoveryListener)
 	 */
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
@@ -241,12 +231,29 @@ public interface BluetoothStack {
 	public boolean cancelInquiry(DiscoveryListener listener);
 
 	/**
-	 * called by implementation when device name is unknown or
-	 * <code>alwaysAsk</code> is <code>true</code>
+	 * called by implementation when device name is unknown or <code>alwaysAsk</code> is <code>true</code>
 	 * 
 	 * @see javax.bluetooth.RemoteDevice#getFriendlyName(boolean)
 	 */
 	public String getRemoteDeviceFriendlyName(long address) throws IOException;
+
+	/**
+	 * @see javax.bluetooth.DiscoveryAgent#retrieveDevices(int)
+	 * @return null if not implemented
+	 */
+	public RemoteDevice[] retrieveDevices(int option);
+
+	/**
+	 * @see javax.bluetooth.RemoteDevice#isTrustedDevice()
+	 * @return null if not implemented
+	 */
+	public Boolean isRemoteDeviceTrusted(long address);
+
+	/**
+	 * @see javax.bluetooth.RemoteDevice#isAuthenticated()
+	 * @return null if not implemented
+	 */
+	public Boolean isRemoteDeviceAuthenticated(long address);
 
 	// ---------------------- Service search
 
@@ -267,8 +274,7 @@ public interface BluetoothStack {
 	public boolean cancelServiceSearch(int transID);
 
 	/**
-	 * Called by ServiceRecord.populateRecord(int[] attrIDs) during Service
-	 * search.
+	 * Called by ServiceRecord.populateRecord(int[] attrIDs) during Service search.
 	 * 
 	 * @see javax.bluetooth.ServiceRecord#populateRecord(int[])
 	 */
@@ -278,8 +284,7 @@ public interface BluetoothStack {
 	// ---------------------- Client and Server RFCOMM connections
 
 	/**
-	 * Used to create handle for
-	 * {@link com.intel.bluetooth.BluetoothRFCommClientConnection}
+	 * Used to create handle for {@link com.intel.bluetooth.BluetoothRFCommClientConnection}
 	 * 
 	 * @see javax.microedition.io.Connector#open(String, int, boolean)
 	 */
@@ -288,8 +293,7 @@ public interface BluetoothStack {
 	/**
 	 * @param handle
 	 * @param expected
-	 *            Value specified when connection was open
-	 *            ServiceRecord.xxAUTHENTICATE_xxENCRYPT
+	 *            Value specified when connection was open ServiceRecord.xxAUTHENTICATE_xxENCRYPT
 	 * @return expected if not implemented by stack
 	 * @throws IOException
 	 * 
@@ -313,8 +317,7 @@ public interface BluetoothStack {
 	public void connectionRfCloseServerConnection(long handle) throws IOException;
 
 	/**
-	 * Used to create handle for
-	 * {@link com.intel.bluetooth.BluetoothRFCommConnectionNotifier}
+	 * Used to create handle for {@link com.intel.bluetooth.BluetoothRFCommConnectionNotifier}
 	 * 
 	 * @see javax.microedition.io.Connector#open(String, int, boolean)
 	 */
@@ -328,8 +331,7 @@ public interface BluetoothStack {
 			throws ServiceRegistrationException;
 
 	/**
-	 * Used to create handle for
-	 * {@link com.intel.bluetooth.BluetoothRFCommServerConnection}
+	 * Used to create handle for {@link com.intel.bluetooth.BluetoothRFCommServerConnection}
 	 * 
 	 * @see com.intel.bluetooth.BluetoothRFCommConnectionNotifier#acceptAndOpen()
 	 * @see javax.microedition.io.StreamConnectionNotifier#acceptAndOpen()
@@ -348,8 +350,7 @@ public interface BluetoothStack {
 	public long getConnectionRfRemoteAddress(long handle) throws IOException;
 
 	/**
-	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection,
-	 *      boolean)
+	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection, boolean)
 	 */
 	public boolean rfEncrypt(long address, long handle, boolean on) throws IOException;
 
@@ -377,8 +378,7 @@ public interface BluetoothStack {
 	public void connectionRfWrite(long handle, int b) throws IOException;
 
 	/**
-	 * @see com.intel.bluetooth.BluetoothRFCommOutputStream#write(byte[], int,
-	 *      int)
+	 * @see com.intel.bluetooth.BluetoothRFCommOutputStream#write(byte[], int, int)
 	 */
 	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException;
 
@@ -390,8 +390,7 @@ public interface BluetoothStack {
 	// ---------------------- Client and Server L2CAP connections
 
 	/**
-	 * Used to create handle for
-	 * {@link com.intel.bluetooth.BluetoothL2CAPClientConnection}
+	 * Used to create handle for {@link com.intel.bluetooth.BluetoothL2CAPClientConnection}
 	 */
 	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU)
 			throws IOException;
@@ -404,8 +403,7 @@ public interface BluetoothStack {
 	public void l2CloseClientConnection(long handle) throws IOException;
 
 	/**
-	 * Used to create handle for
-	 * {@link com.intel.bluetooth.BluetoothL2CAPConnectionNotifier}
+	 * Used to create handle for {@link com.intel.bluetooth.BluetoothL2CAPConnectionNotifier}
 	 * 
 	 * @see javax.microedition.io.Connector#open(String, int, boolean)
 	 */
@@ -419,8 +417,7 @@ public interface BluetoothStack {
 			throws ServiceRegistrationException;
 
 	/**
-	 * Used to create handle for
-	 * {@link com.intel.bluetooth.BluetoothL2CAPServerConnection}
+	 * Used to create handle for {@link com.intel.bluetooth.BluetoothL2CAPServerConnection}
 	 * 
 	 * @see com.intel.bluetooth.BluetoothL2CAPConnectionNotifier#acceptAndOpen()
 	 * @see javax.bluetooth.L2CAPConnectionNotifier#acceptAndOpen()
@@ -476,8 +473,7 @@ public interface BluetoothStack {
 	public long l2RemoteAddress(long handle) throws IOException;
 
 	/**
-	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection,
-	 *      boolean)
+	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection, boolean)
 	 */
 	public boolean l2Encrypt(long address, long handle, boolean on) throws IOException;
 }

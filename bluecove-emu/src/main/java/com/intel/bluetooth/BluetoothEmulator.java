@@ -223,6 +223,18 @@ class BluetoothEmulator implements BluetoothStack {
 		return activeLocalDevice().getDeviceManagerService().getRemoteDeviceFriendlyName(address);
 	}
 
+	public RemoteDevice[] retrieveDevices(int option) {
+		return null;
+	}
+
+	public Boolean isRemoteDeviceTrusted(long address) {
+		return null;
+	}
+
+	public Boolean isRemoteDeviceAuthenticated(long address) {
+		return null;
+	}
+
 	// --- Service search
 
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)

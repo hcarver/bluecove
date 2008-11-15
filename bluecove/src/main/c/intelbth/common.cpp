@@ -906,3 +906,41 @@ BOOL DeviceInquiryCallback::callDeviceDiscovered(JNIEnv * env, jobject listener,
         return TRUE;
     }
 }
+
+// --------------------
+
+RetrieveDevicesCallback::RetrieveDevicesCallback() {
+    this->listener = NULL;
+    this->deviceFoundCallbackMethod = NULL;
+}
+
+BOOL RetrieveDevicesCallback::builCallback(JNIEnv * env, jobject peer, jobject listener) {
+    jclass listenerClass = env->GetObjectClass(listener);
+
+    if (listenerClass == NULL) {
+        throwRuntimeException(env, "Fail to get Object Class");
+        return FALSE;
+    }
+
+    jmethodID callbackMethod = env->GetMethodID(listenerClass, "deviceFoundCallback", "(JILjava/lang/String;Z)V");
+    if (callbackMethod == NULL) {
+        throwRuntimeException(env, "Fail to get MethodID deviceFoundCallback");
+        return FALSE;
+    }
+    this->listener = listener;
+    this->deviceFoundCallbackMethod = callbackMethod;
+    return TRUE;
+}
+
+BOOL RetrieveDevicesCallback::callDeviceFoundCallback(JNIEnv * env, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired) {
+    if ((this->listener == NULL) || (this->deviceFoundCallbackMethod == NULL)) {
+        throwRuntimeException(env, "deviceFoundCallback not initialized");
+        return FALSE;
+    }
+    env->CallVoidMethod(this->listener, this->deviceFoundCallbackMethod, deviceAddr, deviceClass, name, paired);
+    if (ExceptionCheckCompatible(env)) {
+        return FALSE;
+    } else {
+        return TRUE;
+    }
+}
