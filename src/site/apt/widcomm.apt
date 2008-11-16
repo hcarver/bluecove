@@ -1,0 +1,29 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/guides/mini/guide-apt-format.html
+
+                                    ------------------
+                                    Widcomm Settings
+
+Broadcom/Widcomm setting in the Registry
+
+* Bluetooth Stack Status after Softreset
+    [HKEY_LOCAL_MACHINE\SOFTWARE\WIDCOMM\BtConfig\General]
+    "StackMode" -> 0 means Bluetooth OFF, 1 Means Bluetooth ON
+    
+* Discoverable and Connectable
+    [HKEY_LOCAL_MACHINE\SOFTWARE\WIDCOMM\BtConfig\Filters]
+    "WhoAllowedToConnect"-> if 0 No one allow to connect, 1 if All Devices allow to connectble, 2 if Paired Devices Only
+    "AllowOthersToDiscover"-> 0 if Bluetooth Undiscoverable, 1 if Discoverable
+
+* Device Identification
+    [HKEY_LOCAL_MACHINE\SOFTWARE\WIDCOMM\BtConfig\General]
+    "UsePocketPCName" -> 1 if you want to uset the Pocket PC Device ID Name, 0 if you want to set on your own Device ID
+    "DeviceName"-> Preffered BroadCom/Widcomm Device ID    
+    
+* Setting maximum Simultaneous Connection
+    [HKEY_LOCAL_MACHINE\SOFTWARE\WIDCOMM\BtConfig\General]
+    "MaxSimultConnections"    
+    
+* "Advanced" button is shown in "Diagnostic" page at "Bluetooth configuration" page and allow to change Power Control 
+    [HKEY_CURRENT_USER\SOFTWARE\Widcomm\BTConfig\General]
+    "DontShowAdvanced" from 1 to 0     
