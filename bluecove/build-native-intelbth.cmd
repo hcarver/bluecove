@@ -80,7 +80,7 @@ copy src\main\resources\intelbth.dll target\classes\
 :ce_sdk_found
 
 del src\main\resources\intelbth_ce.dll
-vcbuild /rebuild src\main\c\intelbth\intelbth.sln "Winsock|Pocket PC 2003 (ARMV4)"
+vcbuild /rebuild src\main\c\intelbth\intelbth.sln "Release|Pocket PC 2003 (ARMV4)"
 @if errorlevel 1 goto errormark
 @echo [Build OK]
 copy src\main\resources\intelbth_ce.dll target\classes\
