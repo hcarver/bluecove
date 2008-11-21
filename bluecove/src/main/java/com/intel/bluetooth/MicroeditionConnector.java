@@ -427,7 +427,7 @@ public abstract class MicroeditionConnector {
 				return new SocketConnection(host, channel);
 			}
 		} else {
-			throw new ConnectionNotFoundException(scheme);
+			throw new ConnectionNotFoundException("scheme [" + scheme + "]");
 		}
 	}
 
