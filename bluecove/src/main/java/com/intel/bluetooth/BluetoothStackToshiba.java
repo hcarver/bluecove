@@ -23,18 +23,32 @@
  */
 package com.intel.bluetooth;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
+import javax.bluetooth.DataElement;
 import javax.bluetooth.DeviceClass;
+import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
 class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
 
 	private boolean initialized = false;
+
+	private Vector deviceDiscoveryListeners = new Vector/* <DiscoveryListener> */();
+	
+	private Hashtable deviceDiscoveryListenerFoundDevices = new Hashtable();
+
+	private Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
 
 	BluetoothStackToshiba() {
 
@@ -109,6 +123,26 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		return UtilsJavaSE.isCurrentThreadInterrupted();
 	}
 
+	public RemoteDevice[] retrieveDevices(int option) {
+		return null;
+	}
+
+	public Boolean isRemoteDeviceTrusted(long address) {
+		return null;
+	}
+
+	public Boolean isRemoteDeviceAuthenticated(long address) {
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.BluetoothStack#removeAuthenticationWithRemoteDevice (long)
+	 */
+	public void removeAuthenticationWithRemoteDevice(long address) throws IOException {
+	}
+
 	// ---------------------- LocalDevice
 
 	public native String getLocalDeviceBluetoothAddress() throws BluetoothStateException;
@@ -152,23 +186,6 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		return false;
 	}
 
-	public String getRemoteDeviceFriendlyName(long address) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public RemoteDevice[] retrieveDevices(int option) {
-		return null;
-	}
-
-	public Boolean isRemoteDeviceTrusted(long address) {
-		return null;
-	}
-
-	public Boolean isRemoteDeviceAuthenticated(long address) {
-		return null;
-	}
-
 	// ---------------------- Remote Device authentication
 
 	public boolean authenticateRemoteDevice(long address) throws IOException {
@@ -178,41 +195,123 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.intel.bluetooth.BluetoothStack#authenticateRemoteDevice(long, java.lang.String)
+	 * @see com.intel.bluetooth.BluetoothStack#authenticateRemoteDevice(long,
+	 *      java.lang.String)
 	 */
 	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.intel.bluetooth.BluetoothStack#removeAuthenticationWithRemoteDevice (long)
-	 */
-	public void removeAuthenticationWithRemoteDevice(long address) throws IOException {
-		throw new NotSupportedIOException(getStackID());
-	}
-
 	// ---------------------- Device Inquiry
 
+	private native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode,
+			DiscoveryListener listener) throws BluetoothStateException;
+
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
+		deviceDiscoveryListeners.addElement(listener);
+		if (BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_INQUIRY_REPORT_ASAP, false)) {
+			deviceDiscoveryListenerFoundDevices.put(listener, new Hashtable());
+		}
+		deviceDiscoveryListenerReportedDevices.put(listener, new Vector());
 		return DeviceInquiryThread.startInquiry(this, this, accessCode, listener);
 	}
 
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException {
-		// TODO Auto-generated method stub
-		return 0;
+		try {
+			int discType = runDeviceInquiryImpl(startedNotify, accessCode, listener);
+			if (discType == DiscoveryListener.INQUIRY_COMPLETED) {
+				// Report found devices if any not reported
+				Hashtable previouslyFound = (Hashtable) deviceDiscoveryListenerFoundDevices.get(listener);
+				if (previouslyFound != null) {
+					Vector reported = (Vector) deviceDiscoveryListenerReportedDevices.get(listener);
+					for (Enumeration en = previouslyFound.keys(); en.hasMoreElements();) {
+						RemoteDevice remoteDevice = (RemoteDevice) en.nextElement();
+						if (reported.contains(remoteDevice)) {
+							continue;
+						}
+						reported.addElement(remoteDevice);
+						Integer deviceClassInt = (Integer) previouslyFound.get(remoteDevice);
+						DeviceClass deviceClass = new DeviceClass(deviceClassInt.intValue());
+						listener.deviceDiscovered(remoteDevice, deviceClass);
+						// If cancelInquiry has been called
+						if (!deviceDiscoveryListeners.contains(listener)) {
+							return DiscoveryListener.INQUIRY_TERMINATED;
+						}
+					}
+				}
+			}
+			return discType;
+		} finally {
+			deviceDiscoveryListeners.removeElement(listener);
+			deviceDiscoveryListenerFoundDevices.remove(listener);
+			deviceDiscoveryListenerReportedDevices.remove(listener);
+		}
 	}
 
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
 			String deviceName, boolean paired) {
-		// TODO Auto-generated method stub
+		// Copied directly from WIDCOMM driver
+		DebugLog.debug("deviceDiscoveredCallback deviceName", deviceName);
+		if (!deviceDiscoveryListeners.contains(listener)) {
+			return;
+		}
+		// Update name if name retrieved
+		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
+		Vector reported = (Vector) deviceDiscoveryListenerReportedDevices.get(listener);
+		if (reported == null || (reported.contains(remoteDevice))) {
+			return;
+		}
+		// See -Dbluecove.inquiry.report_asap=false
+		Hashtable previouslyFound = (Hashtable) deviceDiscoveryListenerFoundDevices.get(listener);
+		if (previouslyFound != null) {
+			Integer deviceClassInt = (Integer) previouslyFound.get(remoteDevice);
+			if (deviceClassInt == null) {
+				previouslyFound.put(remoteDevice, new Integer(deviceClass));
+			} else if (deviceClass != 0) {
+				previouslyFound.put(remoteDevice, new Integer(deviceClass));
+			}
+		} else {
+			DeviceClass cod = new DeviceClass(deviceClass);
+			reported.addElement(remoteDevice);
+			DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
+			DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
+			listener.deviceDiscovered(remoteDevice, cod);
+		}
 	}
 
+	private native boolean deviceInquiryCancelImpl();
+
 	public boolean cancelInquiry(DiscoveryListener listener) {
-		// TODO Auto-generated method stub
-		return false;
+		// no further deviceDiscovered() events will occur for this inquiry
+		if (!deviceDiscoveryListeners.removeElement(listener)) {
+			return false;
+		}
+		return deviceInquiryCancelImpl();
+	}
+
+	/**
+	 * get device name while discovery running. Device may not report its name first time while discovering.
+	 * 
+	 * @param address
+	 * @return name
+	 */
+	native String peekRemoteDeviceFriendlyName(long address);
+
+	public String getRemoteDeviceFriendlyName(long address) throws IOException {
+		if (deviceDiscoveryListeners.size() != 0) {
+			// discovery running
+			return peekRemoteDeviceFriendlyName(address);
+		} else {
+			// Another way to get name is to run deviceInquiry
+			DiscoveryListener listener = new DiscoveryListenerAdapter();
+			if (startInquiry(DiscoveryAgent.GIAC, listener)) {
+				String name = peekRemoteDeviceFriendlyName(address);
+				cancelInquiry(listener);
+				return name;
+			}
+		}
+		return null;
 	}
 
 	// ---------------------- Service search
@@ -335,7 +434,7 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	 * (non-Javadoc)
 	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth.BluetoothConnectionParams,
-	 * int, int)
+	 *      int, int)
 	 */
 	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU)
 			throws IOException {
@@ -355,8 +454,8 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams, int,
-	 * int, com.intel.bluetooth.ServiceRecordImpl)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.BluetoothConnectionNotifierParams,
+	 *      int, int, com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU,
 			ServiceRecordImpl serviceRecord) throws IOException {
@@ -367,8 +466,8 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long, com.intel.bluetooth.ServiceRecordImpl,
-	 * boolean)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerUpdateServiceRecord(long,
+	 *      com.intel.bluetooth.ServiceRecordImpl, boolean)
 	 */
 	public void l2ServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen)
 			throws ServiceRegistrationException {
@@ -398,7 +497,8 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long, com.intel.bluetooth.ServiceRecordImpl)
+	 * @see com.intel.bluetooth.BluetoothStack#l2ServerClose(long,
+	 *      com.intel.bluetooth.ServiceRecordImpl)
 	 */
 	public void l2ServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
 		// TODO Auto-generated method stub
@@ -477,5 +577,4 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 }

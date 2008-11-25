@@ -23,6 +23,7 @@
  */
 
 #include "common.h"
+#include "commonObjects.h"
 
 #define TOSHIBA_DLL L"tosbtapi.dll"
 
@@ -31,11 +32,5 @@
 #include "com_intel_bluetooth_BluetoothStackToshiba.h"
 
 #include	"TosBtAPI.h"
-
-class ToshibaStack {
-public:
-	ToshibaStack();
-	~ToshibaStack();
-};
 
 #endif //  BLUECOVE_TOSHIBA
