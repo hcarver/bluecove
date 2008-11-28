@@ -45,7 +45,11 @@ BOOL isToshibaBluetoothStackPresent(JNIEnv *env) {
 #pragma comment(lib, "TosBtAPI.lib")
 
 
-const UINT MSG_DISCOVERY_UPDATE   = WM_USER+1;
+const UINT MSG_DISCOVERY_UPDATE         = WM_USER+1;
+const UINT MSG_DISCOVER_NAME_UPDATE     = WM_USER+2;
+const UINT MSG_SDP_CONNECT_UPDATE       = WM_USER+3;
+const UINT MSG_SERVICE_SEARCH_UPDATE    = WM_USER+4;
+const UINT MSG_SERVICE_ATTRIBUTE_UPDATE = WM_USER+5;
 
 
 static TCHAR *title = L"BLCV";
@@ -58,7 +62,6 @@ static HINSTANCE hInstance;
 
 
 // discovery stuff
-static HANDLE hDiscoveryComplete;
 static bool discoveryStarted = false;
 static bool discoveryCancelled = false;
 static bool discoveryError = false;
@@ -85,6 +88,17 @@ jlong tsGetLongAddress(BDADDR addr)
 		((jlong)addr[3] << 16) |
 		((jlong)addr[4] << 8) |
 		((jlong)addr[5]);
+}
+
+
+void tsGetBdAddr(jlong address, PBDADDR addr)
+{
+	addr[0] = (BYTE)(((jlong)address >> 40) & 0xFF);
+	addr[1] = (BYTE)(((jlong)address >> 32) & 0xFF);
+	addr[2] = (BYTE)(((jlong)address >> 24) & 0xFF);
+	addr[3] = (BYTE)(((jlong)address >> 16) & 0xFF);
+	addr[4] = (BYTE)(((jlong)address >>  8) & 0xFF);
+	addr[5] = (BYTE)(((jlong)address >>  0) & 0xFF);
 }
 
 
@@ -127,18 +141,61 @@ LRESULT CALLBACK WndProcBt(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 			PostQuitMessage(0);
 			return 0;
 		case MSG_DISCOVERY_UPDATE: {
+			HANDLE h = (HANDLE)lParam;
 			switch (wParam) {
 				case TOSBTAPI_NM_DISCOVERDEVICE_ERROR:
 					BtCancelDiscoverRemoteDevice(&lStatus);
 					discoveryError = true;
-					SetEvent(hDiscoveryComplete);
+					SetEvent(h);
 					break;
 				case TOSBTAPI_NM_DISCOVERDEVICE_END:
-					SetEvent(hDiscoveryComplete);
+					SetEvent(h);
 					break;
 			}
 			return 0;
 			}
+		case MSG_DISCOVER_NAME_UPDATE: {
+			HANDLE h = (HANDLE)lParam;
+			switch (wParam) {
+				case TOSBTAPI_NM_DISCOVERNAME_ERROR:
+				case TOSBTAPI_NM_DISCOVERNAME_END:
+					SetEvent(h);
+					break;
+			}
+			return 0;
+			}
+		case MSG_SDP_CONNECT_UPDATE: {
+			HANDLE h = (HANDLE)lParam;
+			switch (wParam) {
+				case TOSBTAPI_NM_CONNECTSDP_ERROR:
+				case TOSBTAPI_NM_CONNECTSDP_END:
+					SetEvent(h);
+					break;
+			}
+			return 0;
+			}
+		case MSG_SERVICE_SEARCH_UPDATE: {
+			HANDLE h = (HANDLE)lParam;
+			switch (wParam) {
+				case TOSBTAPI_NM_SS_ERROR:
+				case TOSBTAPI_NM_SS_END:
+					SetEvent(h);
+					break;
+			}
+			return 0;
+		}
+		case MSG_SERVICE_ATTRIBUTE_UPDATE: {
+			HANDLE h = (HANDLE)lParam;
+			switch (wParam) {
+				case TOSBTAPI_NM_SA_START:
+				case TOSBTAPI_NM_SA_RESULT:
+					break;
+				default:
+					SetEvent(h);
+					break;
+			}
+			return 0;
+		}
 	}
 
 	return DefWindowProc(hWnd, message, wParam, lParam);
@@ -151,12 +208,12 @@ ATOM MyRegisterClassBt(HINSTANCE hInstance)
 
 	wcex.cbSize = sizeof(WNDCLASSEX); 
 
-	wcex.style		= 0;
+	wcex.style			= 0;
 	wcex.lpfnWndProc	= (WNDPROC)WndProcBt;
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInstance;
-	wcex.hIcon		= NULL;
+	wcex.hIcon			= NULL;
 	wcex.hCursor		= 0;
 	wcex.hbrBackground	= 0;
 	wcex.lpszMenuName	= (TCHAR *)NULL;
@@ -254,6 +311,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_runDeviceI
 		return 0;
 	}
 
+	HANDLE hDiscoveryComplete;
+
 	hDiscoveryComplete = CreateEvent(NULL, FALSE, FALSE, NULL);
 	if (hDiscoveryComplete == NULL) {
 		return INQUIRY_ERROR;
@@ -280,7 +339,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_runDeviceI
 		devInfo = NULL;
 	}
 
-	BtDiscoverRemoteDevice2(&devInfo, TOSBTAPI_DD_NORMAL, &lStatus, hHiddenWindow, MSG_DISCOVERY_UPDATE, 0);
+	BtDiscoverRemoteDevice2(&devInfo, TOSBTAPI_DD_NORMAL, &lStatus, hHiddenWindow, MSG_DISCOVERY_UPDATE, (LPARAM)hDiscoveryComplete);
 			
 	if (lStatus < 0) {
 		discoveryStarted = false;
@@ -330,36 +389,210 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_device
 		LONG lStatus;
 		BtCancelDiscoverRemoteDevice(&lStatus);
 		discoveryCancelled = true;
-		SetEvent(hDiscoveryComplete);
 	}
 
 	return TRUE;
 }
 
-JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_peekRemoteDeviceFriendlyName
-(JNIEnv *env, jobject, jlong address) {
-	if (devInfo == NULL) {
+JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_getRemoteDeviceFriendlyNameImpl
+  (JNIEnv *env, jobject, jlong address)
+{
+	HANDLE hDiscoverName;
+
+	hDiscoverName = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (hDiscoverName == NULL) {
 		return NULL;
 	}
 
-	while (1) {
-		int n = devInfo->dwDevListNum;
-		for (int i = 0; i < n; i++) {
-			jlong a = tsGetLongAddress(devInfo->DevInfo[i].BdAddr);
-			if (a == address) {
-                		return env->NewStringUTF((char*)devInfo->DevInfo[i].FriendlyName);
-			}
-		}
-		if (discoveryStarted) {
-			Sleep(200);
-		}
-		else {
-			break;
-		}
-	}
+	BDADDR addr;
+	FRIENDLYNAME name;
+	LONG lStatus;
 
-	return NULL;
+	tsGetBdAddr(address, addr);
+
+	BtDiscoverRemoteName(addr, name, &lStatus, hHiddenWindow, MSG_DISCOVER_NAME_UPDATE, (LPARAM)hDiscoverName);
+
+	WaitForSingleObject(hDiscoverName, INFINITE);
+
+	CloseHandle(hDiscoverName);
+
+	if (lStatus >= 0) {
+		return env->NewStringUTF((char *)name);
+	}
+	else {
+		return NULL;
+	}
 }
 
+
+// --- Service search
+
+
+static LONG connectSDP(PBDADDR addr, PWORD pwCID)
+{
+	HANDLE hSDP;
+	LONG status;
+
+	hSDP = CreateEvent(NULL, FALSE, FALSE, NULL);
+
+	BtConnectSDP(addr, pwCID, &status, hHiddenWindow, MSG_SDP_CONNECT_UPDATE, (LPARAM)hSDP);
+
+	WaitForSingleObject(hSDP, INFINITE);
+
+	CloseHandle(hSDP);
+
+	return status;
+}
+
+
+JNIEXPORT jshort JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_connectSDPImpl
+  (JNIEnv *env, jobject, jlong address)
+{
+	WORD cid;
+	LONG status;
+	BDADDR addr;
+
+	tsGetBdAddr(address, addr);
+
+	if ((status = connectSDP(addr, &cid)) < 0) {
+		tsThrowBluetoothStateException(env, status);
+	}
+
+	return cid;
+}
+
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_disconnectSDPImpl
+  (JNIEnv *, jobject, jshort cid)
+{
+	LONG status;
+	BtDisconnectSDP(cid, &status);
+}
+
+JNIEXPORT jlongArray JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_searchServicesImpl
+  (JNIEnv *env, jobject obj, jobject startedNotify, jshort cid, jobjectArray uuidSet)
+{
+	// Convert uuidSet array to Toshiba format
+	int n = env->GetArrayLength(uuidSet);
+	PBTUUIDLIST uuidList = (PBTUUIDLIST)(new BYTE[n*18+4]);
+	uuidList->dwUUIDInfoNum = n;
+
+	for (unsigned int i = 0; i < uuidList->dwUUIDInfoNum; i++) {
+		jbyteArray barray = (jbyteArray)env->GetObjectArrayElement(uuidSet, i);
+		jbyte *bytes = env->GetByteArrayElements(barray, false);
+		for (int j = 0; j < 16; j++) {
+			uuidList->BtUUIDInfo[i].BtUUID[j] = (BYTE)bytes[j];
+		}
+		uuidList->BtUUIDInfo[i].wUUIDType = 128; // 128 bit uuid
+	}
+
+	DWORD patternSize;
+	PBYTE pattern;
+	LONG status;
+
+	if (BtMakeServiceSearchPattern2(uuidList, &patternSize, &pattern, &status) == false) {
+		delete[] uuidList;
+		tsThrowBluetoothStateException(env, status);
+	}
+
+	HANDLE hServiceSearch = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (hServiceSearch == NULL) {
+		delete[] uuidList;
+		BtMemFree(pattern);
+		tsThrowBluetoothStateException(env, TOSBTAPI_ERROR);
+	}
+
+	PBTSDPSSRESULT results;
+
+	if (BtServiceSearch2(cid, patternSize, pattern, &results, &status, hHiddenWindow, MSG_SERVICE_SEARCH_UPDATE, (LPARAM)hServiceSearch) == FALSE) {
+		CloseHandle(hServiceSearch);
+		delete[] uuidList;
+		BtMemFree(pattern);
+		tsThrowBluetoothStateException(env, status);
+	}
+
+    jclass notifyClass = env->GetObjectClass(startedNotify);
+    if (notifyClass == NULL) {
+        throwRuntimeException(env, "Fail to get Object Class");
+        return NULL;
+    }
+    jmethodID notifyMethod = env->GetMethodID(notifyClass, "searchServicesStartedCallback", "()V");
+    if (notifyMethod == NULL) {
+        throwRuntimeException(env, "Fail to get MethodID searchServicesStartedCallback");
+        return NULL;
+    }
+    env->CallVoidMethod(startedNotify, notifyMethod);
+    if (ExceptionCheckCompatible(env)) {
+        return NULL;
+    }
+
+	WaitForSingleObject(hServiceSearch, INFINITE);
+
+	CloseHandle(hServiceSearch);
+
+	if (results == NULL || status < 0) {
+		if (isDebugOn()) {
+			debug(("Search services results == NULL or status < 0\n"));
+		}
+		delete[] uuidList;
+		BtMemFree(pattern);
+		if (results)
+			BtMemFree(results);
+		tsThrowBluetoothStateException(env, status);
+	}
+
+	int size = results->wServiceRecordCount;
+	jlongArray la = env->NewLongArray(size);
+	env->SetLongArrayRegion(la, 0, size, (jlong *)results->ulServiceRecordHandleList);
+
+	delete[] uuidList;
+	BtMemFree(pattern);
+	BtMemFree(results);
+
+	return la;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_populateWorkerImpl
+  (JNIEnv *env, jobject, jshort cid, jlong handle, jintArray attrIDs)
+{
+	if (attrIDs == NULL) {
+		return NULL;
+	}
+
+	int nAttr = env->GetArrayLength(attrIDs);
+	BYTE *attrIdList = new BYTE[nAttr*4];
+	jint *ids = env->GetIntArrayElements(attrIDs, false);
+	int offs = 0;
+
+	for (int i = 0; i < nAttr; i++) {
+		jint id = ids[i];
+		attrIdList[offs++] = (BYTE)((id >>  0) & 0xFF);
+		attrIdList[offs++] = (BYTE)((id >>  8) & 0xFF);
+		attrIdList[offs++] = (BYTE)((id >> 16) & 0xFF);
+		attrIdList[offs++] = (BYTE)((id >> 24) & 0xFF);
+	}
+
+	HANDLE plock = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (plock == NULL) {
+		return NULL;
+	}
+
+	PBTSDPSARESULT result;
+	LONG status;
+
+	BtServiceAttribute2(cid, (unsigned long)handle, offs, attrIdList, &result, &status, hHiddenWindow, MSG_SERVICE_ATTRIBUTE_UPDATE, (LPARAM)plock);
+
+	WaitForSingleObject(plock, INFINITE);
+
+	CloseHandle(plock);
+	delete[] attrIdList;
+
+	if (status < 0)
+		return NULL;
+
+	jbyteArray b = env->NewByteArray(result->dwAttributeListSize);
+	env->SetByteArrayRegion(b, 0, result->dwAttributeListSize, (const signed char *)result->bAttributeList);
+
+	return b;
+}
 
 #endif //  BLUECOVE_TOSHIBA

@@ -50,6 +50,28 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	private Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
 
+	private final static int ATTR_RETRIEVABLE_MAX = 0xFFFF;
+
+	private final static int RECEIVE_MTU_MAX = 1024;
+
+	// FIXME
+	private String getBTWVersionInfo()
+	{
+		return "";
+	}
+
+	// FIXME
+	private int getDeviceVersion()
+	{
+		return 0;
+	}
+
+	// FIXME
+	private int getDeviceManufacturer()
+	{
+		return 0;
+	}
+
 	BluetoothStackToshiba() {
 
 	}
@@ -168,11 +190,75 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	public boolean isLocalDevicePowerOn() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	public String getLocalDeviceProperty(String property) {
-		// TODO Auto-generated method stub
+		// Copied directly from WIDCOMM: probably needs to be changed
+		if ("bluetooth.connected.devices.max".equals(property)) {
+			return "7";
+		}
+		if ("bluetooth.sd.trans.max".equals(property)) {
+			return "1";
+		}
+		if ("bluetooth.connected.inquiry.scan".equals(property)) {
+			return BlueCoveImpl.TRUE;
+		}
+		if ("bluetooth.connected.page.scan".equals(property)) {
+			return BlueCoveImpl.TRUE;
+		}
+		if ("bluetooth.connected.inquiry".equals(property)) {
+			return BlueCoveImpl.TRUE;
+		}
+		if ("bluetooth.connected.page".equals(property)) {
+			return BlueCoveImpl.TRUE;
+		}
+
+		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
+			return String.valueOf(ATTR_RETRIEVABLE_MAX);
+		}
+		if ("bluetooth.master.switch".equals(property)) {
+			return BlueCoveImpl.FALSE;
+		}
+		if ("bluetooth.l2cap.receiveMTU.max".equals(property)) {
+			return String.valueOf(RECEIVE_MTU_MAX);
+		}
+
+		if ("bluecove.radio.version".equals(property)) {
+			return String.valueOf(getDeviceVersion());
+		}
+		if ("bluecove.radio.manufacturer".equals(property)) {
+			return String.valueOf(getDeviceManufacturer());
+		}
+		if ("bluecove.stack.version".equals(property)) {
+			return getBTWVersionInfo();
+		}
+		// Some Hack and testing functions, not documented
+		if (property.startsWith("bluecove.nativeFunction:")) {
+			String functionDescr = property.substring(property.indexOf(':') + 1, property.length());
+			int paramIdx = functionDescr.indexOf(':');
+			if (paramIdx == -1) {
+				throw new RuntimeException("Invalid native function " + functionDescr + "; arguments expected");
+			}
+			String function = functionDescr.substring(0, paramIdx);
+			long address = RemoteDeviceHelper.getAddress(functionDescr.substring(function.length() + 1, functionDescr
+					.length()));
+			if ("getRemoteDeviceVersionInfo".equals(function)) {
+				return getRemoteDeviceVersionInfo(address);
+			} else if ("cancelSniffMode".equals(function)) {
+				return String.valueOf(cancelSniffMode(address));
+			} else if ("setSniffMode".equals(function)) {
+				return String.valueOf(setSniffMode(address));
+			} else if ("getRemoteDeviceRSSI".equals(function)) {
+				return String.valueOf(getRemoteDeviceRSSI(address));
+			} else if ("getRemoteDeviceLinkMode".equals(function)) {
+				if (isRemoteDeviceConnected(address)) {
+					return getRemoteDeviceLinkMode(address);
+				} else {
+					return "disconnected";
+				}
+			}
+		}
 		return null;
 	}
 
@@ -201,6 +287,41 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException {
 		return false;
 	}
+
+	// --- Some testing functions accessible by LocalDevice.getProperty
+
+	// FIXME ALL
+	
+	public boolean isRemoteDeviceConnected(long address)
+	{
+		return true;
+	}
+
+	public String getRemoteDeviceLinkMode(long address)
+	{
+		return "";
+	}
+
+	public String getRemoteDeviceVersionInfo(long address)
+	{
+		return "";
+	}
+
+	public boolean setSniffMode(long address)
+	{
+		return false;
+	}
+
+	public boolean cancelSniffMode(long address)
+	{
+		return false;
+	}
+
+	public int getRemoteDeviceRSSI(long address)
+	{
+		return 0;
+	}
+
 
 	// ---------------------- Device Inquiry
 
@@ -296,46 +417,172 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	 * @param address
 	 * @return name
 	 */
-	native String peekRemoteDeviceFriendlyName(long address);
+	private native String getRemoteDeviceFriendlyNameImpl(long address);
 
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
-		if (deviceDiscoveryListeners.size() != 0) {
-			// discovery running
-			return peekRemoteDeviceFriendlyName(address);
-		} else {
-			// Another way to get name is to run deviceInquiry
-			DiscoveryListener listener = new DiscoveryListenerAdapter();
-			if (startInquiry(DiscoveryAgent.GIAC, listener)) {
-				String name = peekRemoteDeviceFriendlyName(address);
-				cancelInquiry(listener);
-				return name;
-			}
-		}
-		return null;
+		return getRemoteDeviceFriendlyNameImpl(address);
 	}
 
 	// ---------------------- Service search
 
+	private native short connectSDPImpl(long address);
+
+	private native void disconnectSDPImpl(short cid);
+
+	private native long[] searchServicesImpl(SearchServicesThread startedNotify, short cid, byte[][] uuidSet);
+
+	private native byte[] populateWorkerImpl(short cid, long handle, int[] attrSet);
+
+	private boolean setAttributes(ServiceRecordImpl serviceRecord, int[] attrIDs, byte[] bytes) {
+		boolean anyRetrived = false;
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+		// Need to rename this class
+		BluetoothStackWIDCOMMSDPInputStream btis = null;
+		try {
+			btis = new BluetoothStackWIDCOMMSDPInputStream(bais);
+		}
+		catch (Exception e) {
+		}
+
+		for (int i = 0; i < attrIDs.length; i++) {
+			int id = attrIDs[i];
+			try {
+				if (BluetoothStackWIDCOMMSDPInputStream.debug) {
+					DebugLog.debug("decode attribute " + id + " Ox" + Integer.toHexString(id));
+				}
+				DataElement element = btis.readElement();
+
+				// Do special case conversion for only one element in the
+				// list.
+				if (id == BluetoothConsts.ProtocolDescriptorList) {
+					Enumeration protocolsSeqEnum = (Enumeration) element.getValue();
+					if (protocolsSeqEnum.hasMoreElements()) {
+						DataElement protocolElement = (DataElement) protocolsSeqEnum.nextElement();
+						if (protocolElement.getDataType() != DataElement.DATSEQ) {
+							DataElement newMainSeq = new DataElement(DataElement.DATSEQ);
+							newMainSeq.addElement(element);
+							element = newMainSeq;
+						}
+					}
+				}
+
+				serviceRecord.populateAttributeValue(id, element);
+				anyRetrived = true;
+			} catch (Throwable e) {
+				if (BluetoothStackWIDCOMMSDPInputStream.debug) {
+					DebugLog.error("error populate attribute " + id + " Ox" + Integer.toHexString(id), e);
+				}
+			}
+		}
+		return anyRetrived;
+	}
+
+
 	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
 			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
-		return SearchServicesThread.startSearchServices(this, this, attrSet, uuidSet, device, listener);
+		short cid;
+		try {
+			cid = connectSDPImpl(RemoteDeviceHelper.getAddress(device.getBluetoothAddress()));
+		}
+		catch (Exception e) {
+			return DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
+		}
+
+		byte[][] uuidBytes = new byte[uuidSet.length][16];
+		for (int i = 0; i < uuidSet.length; i++) {
+			uuidBytes[i] = new byte[16];
+			String full = uuidSet[i].toString();
+			for (int j = 0; j < 16; j++) {
+				String sub = full.substring(j*2, j*2+2).toUpperCase();
+				uuidBytes[i][j] = (byte)Integer.parseInt(sub, 16);
+			}
+		}
+
+		long[] handles;
+
+		try {
+			handles = searchServicesImpl(startedNotify, cid, uuidBytes);
+		}
+		catch (Exception e) {
+			disconnectSDPImpl(cid);
+			return DiscoveryListener.SERVICE_SEARCH_ERROR;
+		}
+
+		if (handles.length <= 0) {
+			disconnectSDPImpl(cid);
+			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
+		}
+
+		ServiceRecordImpl[] records = new ServiceRecordImpl[handles.length];
+
+		for (int i = 0; i < handles.length; i++) {
+			records[i] = new ServiceRecordImpl(this, device, handles[i]);
+			byte[] bytes;
+			try {
+				bytes = populateWorkerImpl(cid, handles[i], attrSet);
+			}
+			catch (Exception e) {
+				disconnectSDPImpl(cid);
+				return DiscoveryListener.SERVICE_SEARCH_ERROR;
+			}
+			if (bytes != null) {
+				setAttributes(records[i], attrSet, bytes);
+			}
+		}
+
+		listener.servicesDiscovered(startedNotify.getTransID(), records);
+
+		disconnectSDPImpl(cid);
+
+		return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
 	}
 
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
 			throws BluetoothStateException {
-		// TODO Auto-generated method stub
-		return 0;
+		return SearchServicesThread.startSearchServices(this, this, attrSet, uuidSet, device, listener);
 	}
 
 	public boolean cancelServiceSearch(int transID) {
-		// TODO Auto-generated method stub
+		// No service search cancel on Toshiba
 		return false;
 	}
 
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs)
 			throws IOException {
-		// TODO Auto-generated method stub
-		return false;
+		if (attrIDs.length > 0xFFFF) {
+			throw new IllegalArgumentException();
+		}
+
+		short cid;
+		try {
+			cid = connectSDPImpl(RemoteDeviceHelper.getAddress(serviceRecord.getHostDevice().getBluetoothAddress()));
+		}
+		catch (Exception e) {
+			return false;
+		}
+
+		byte[] bytes;
+
+		try {
+			bytes = populateWorkerImpl(cid, serviceRecord.getHandle(), attrIDs);
+		}
+		catch (Exception e) {
+			disconnectSDPImpl(cid);
+			return false;
+		}
+
+		if (bytes == null) {
+			return false;
+		}
+
+		boolean ret;
+
+		ret = setAttributes(serviceRecord, attrIDs, bytes);
+
+		disconnectSDPImpl(cid);
+
+		return ret;
 	}
 
 	// ---------------------- Client RFCOMM connections
