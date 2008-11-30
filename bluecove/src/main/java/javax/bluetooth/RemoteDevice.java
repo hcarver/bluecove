@@ -77,12 +77,11 @@ public class RemoteDevice {
 		if (address == null) {
 			throw new NullPointerException("address is null");
 		}
-		String errorMsg = "Malformed address: " + address;
 		if (address.length() != 12) {
-			throw new IllegalArgumentException(errorMsg);
+			throw new IllegalArgumentException("Malformed address: " + address + "; should be 12 characters");
 		}
 		if (address.startsWith("-")) {
-			throw new IllegalArgumentException(errorMsg);
+			throw new IllegalArgumentException("Malformed address: " + address + "; can't be negative");
 		}
 		DebugLog.debug("new RemoteDevice", address);
 		this.addressStr = RemoteDeviceHelper.formatBluetoothAddress(address);
@@ -91,8 +90,7 @@ public class RemoteDevice {
 				throw new IllegalArgumentException("can't use the LocalDevice address.");
 			}
 		} catch (BluetoothStateException e) {
-			throw (RuntimeException) UtilsJavaSE.initCause(new RuntimeException("Can't initialize bluetooth support"),
-					e);
+			throw (RuntimeException) UtilsJavaSE.initCause(new RuntimeException("Can't initialize bluetooth support"), e);
 		}
 		this.addressLong = RemoteDeviceHelper.getAddress(address);
 	}
