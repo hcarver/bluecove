@@ -554,7 +554,7 @@ public abstract class RemoteDeviceHelper {
 		try {
 			return Long.parseLong(bluetoothAddress, 16);
 		} catch (NumberFormatException e) {
-			throw new IllegalArgumentException("Illegal bluetoothAddress {" + bluetoothAddress + "}; " + e.getMessage());
+			throw new IllegalArgumentException("Illegal bluetoothAddress {" + bluetoothAddress + "}; should be hex number");
 		}
 	}
 
