@@ -1,6 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
+ *  Copyright (C) 2008 Trent Gamblin
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -22,6 +22,11 @@
  *  @version $Id$
  */
 
+
+// Toshiba stack not supported on CE
+#ifndef _WIN32_WCE
+
+
 #include "ToshibaStack.h"
 #include <process.h>
 
@@ -29,7 +34,6 @@
 #define CPP_FILE "ToshibaStack.cpp"
 #endif
 
-#ifndef _WIN32_WCE
 BOOL isToshibaBluetoothStackPresent(JNIEnv *env) {
 	HMODULE h = LoadLibrary(TOSHIBA_DLL);
 	if (h == NULL) {
@@ -38,7 +42,6 @@ BOOL isToshibaBluetoothStackPresent(JNIEnv *env) {
 	FreeLibrary(h);
 	return TRUE;
 }
-#endif
 
 #ifdef BLUECOVE_TOSHIBA
 
@@ -123,6 +126,7 @@ LRESULT CALLBACK WndProcBt(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	switch (message) 
 	{
 		case WM_CREATE:
+			btSuccess = btSuccess || BtExecBtMng(&lStatus);
 			btSuccess = btSuccess || BtOpenAPI(hWnd, "BLCV", &lStatus);
 			if (btSuccess) {
 				if (FALSE == BtGetLocalInfo2(&btLocalInfo, &lStatus)) {
@@ -596,3 +600,4 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_BluetoothStackToshiba_popu
 }
 
 #endif //  BLUECOVE_TOSHIBA
+#endif //  !_WIN32_WCE
