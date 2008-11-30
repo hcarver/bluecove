@@ -1429,15 +1429,18 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_setDisco
 }
 
 #ifndef _WIN32_WCE
-BOOL getBluetoothDeviceInfo(jlong address, BLUETOOTH_DEVICE_INFO* pbtdi) {
+BOOL getBluetoothDeviceInfo(jlong address, BLUETOOTH_DEVICE_INFO* pbtdi, BOOL issueInquiry) {
 	BLUETOOTH_DEVICE_SEARCH_PARAMS btsp;
 	memset(&btsp, 0, sizeof(btsp));
     btsp.dwSize = sizeof(btsp);
-    btsp.fIssueInquiry = false;
+    btsp.fIssueInquiry = issueInquiry;
 	btsp.fReturnAuthenticated = true;
     btsp.fReturnConnected     = true;
     btsp.fReturnRemembered    = true;
     btsp.fReturnUnknown       = true;
+    if (issueInquiry) {
+        btsp.cTimeoutMultiplier = 10;
+    }
 
     memset(pbtdi, 0, sizeof(BLUETOOTH_DEVICE_INFO));
 	pbtdi->dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
@@ -1469,9 +1472,12 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_auth
 	ULONG ulPasskeyLength;
 
 	BLUETOOTH_DEVICE_INFO btdi;
-	if (!getBluetoothDeviceInfo(address, &btdi)) {
-	    debug(("device not found"));
-	    return JNI_FALSE;
+	if (!getBluetoothDeviceInfo(address, &btdi, false)) {
+	    debug(("device not found; Issue Inquiry"));
+	    if (!getBluetoothDeviceInfo(address, &btdi, true)) {
+	        debug(("device not found"));
+	        return JNI_FALSE;
+	    }
 	}
 
 	if (passkey != NULL) {
@@ -1523,7 +1529,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_isRe
 (JNIEnv *env, jobject, jlong address) {
 #ifndef _WIN32_WCE
     BLUETOOTH_DEVICE_INFO btdi;
-	if (!getBluetoothDeviceInfo(address, &btdi)) {
+	if (!getBluetoothDeviceInfo(address, &btdi, false)) {
 	    debug(("device not found"));
 	    return JNI_FALSE;
 	}
@@ -1546,7 +1552,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_isRe
 (JNIEnv *env, jobject, jlong address) {
 #ifndef _WIN32_WCE
     BLUETOOTH_DEVICE_INFO btdi;
-	if (!getBluetoothDeviceInfo(address, &btdi)) {
+	if (!getBluetoothDeviceInfo(address, &btdi, false)) {
 	    debug(("device not found"));
 	    return JNI_FALSE;
 	}
