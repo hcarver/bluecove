@@ -80,14 +80,16 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 		return acceptAndOpen(handler, null);
 	}
 
-	public Connection acceptAndOpen(ServerRequestHandler handler, Authenticator auth) throws IOException {
+	public synchronized Connection acceptAndOpen(ServerRequestHandler handler, Authenticator auth) throws IOException {
 		if (notifier == null) {
 			throw new IOException("Session closed");
 		}
 		if (handler == null) {
 			throw new NullPointerException("handler is null");
 		}
-		return new OBEXServerSessionImpl(notifier.acceptAndOpen(), handler, auth, obexConnectionParams);
+		OBEXServerSessionImpl sessionImpl = new OBEXServerSessionImpl(notifier.acceptAndOpen(), handler, auth, obexConnectionParams);
+		sessionImpl.startSessionHandlerThread(this);
+		return sessionImpl;
 	}
 
 	public void close() throws IOException {

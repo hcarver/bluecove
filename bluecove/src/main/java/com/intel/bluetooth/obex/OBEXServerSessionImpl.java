@@ -53,6 +53,10 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 
 	private Object stackID;
 
+	private Thread handlerThread;
+	
+	private Object syncMonitor;
+	
 	private static int threadNumber;
 
 	private static synchronized int nextThreadNum() {
@@ -65,12 +69,20 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		this.handler = handler;
 		this.authenticator = authenticator;
 		stackID = BlueCoveImpl.getCurrentThreadBluetoothStackID();
-		Thread t = new Thread(this, "OBEXServerSessionThread-" + nextThreadNum());
-		UtilsJavaSE.threadSetDaemon(t);
-		t.start();
+		handlerThread = new Thread(this, "OBEXServerSessionThread-" + nextThreadNum());
+		UtilsJavaSE.threadSetDaemon(handlerThread);
+	}
+	
+	void startSessionHandlerThread(Object syncMonitor) {
+	    handlerThread.start();
+	    this.syncMonitor = syncMonitor;
 	}
 
 	public void run() {
+	    // Let the acceptAndOpen return to the caller.
+	    Thread.yield();
+	    synchronized (syncMonitor) {
+	    }
 		try {
 			if (stackID != null) {
 				BlueCoveImpl.setThreadBluetoothStackID(stackID);
