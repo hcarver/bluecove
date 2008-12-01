@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package net.sf.bluecove.awt;
@@ -61,7 +62,7 @@ import net.sf.bluecove.util.Storage;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
 /**
- * @author vlads
+ *
  * 
  */
 public class ClientConnectionDialog extends Dialog {

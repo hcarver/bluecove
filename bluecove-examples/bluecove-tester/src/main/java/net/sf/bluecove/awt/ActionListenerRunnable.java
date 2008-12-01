@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package net.sf.bluecove.awt;
@@ -28,7 +29,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * @author vlads
+ *
  * 
  */
 public abstract class ActionListenerRunnable implements ActionListener, Runnable {

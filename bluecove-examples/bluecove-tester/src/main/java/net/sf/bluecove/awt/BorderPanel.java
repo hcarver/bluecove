@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package net.sf.bluecove.awt;
@@ -30,7 +31,7 @@ import java.awt.Panel;
 import net.sf.bluecove.Configuration;
 
 /**
- * @author vlads
+ *
  * 
  */
 public class BorderPanel extends Panel {

@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package net.sf.bluecove.se;
@@ -33,7 +34,6 @@ import javax.bluetooth.RemoteDevice;
 import net.sf.bluecove.Logger;
 
 /**
- * @author vlads
  * 
  */
 public class RemoteDeviceManager {

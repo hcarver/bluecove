@@ -1,5 +1,5 @@
 /**
- * BlueCove BlueZ module - Java library for Bluetooth on Linux
+ *  BlueCove BlueZ module - Java library for Bluetooth on Linux
  *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
@@ -19,7 +19,8 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
- * @version $Id$
+ *  @author vlads
+ *  @version $Id$
  */
 package com.intel.bluetooth;
 
@@ -29,8 +30,6 @@ import junit.framework.TestCase;
  * Base class for test cases that are calling native function.
  * 
  * Native Debug automatically enabled when running tests in Eclipse
- * 
- * @author vlads
  * 
  */
 public abstract class NativeTestCase extends TestCase {

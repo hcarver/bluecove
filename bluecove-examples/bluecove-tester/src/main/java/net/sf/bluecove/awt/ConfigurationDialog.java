@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package net.sf.bluecove.awt;
@@ -52,7 +53,7 @@ import net.sf.bluecove.util.IntVar;
 import net.sf.bluecove.util.StringVar;
 
 /**
- * @author vlads
+ *
  * 
  */
 public class ConfigurationDialog extends OkCancelDialog {

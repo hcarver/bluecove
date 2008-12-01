@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package net.sf.bluecove.awt;
@@ -38,7 +39,6 @@ import net.sf.bluecove.util.CollectionUtils;
 import net.sf.bluecove.util.BluetoothTypesInfo.UUIDConsts;
 
 /**
- * @author vlads
  * 
  */
 public class ServiceRecords {
