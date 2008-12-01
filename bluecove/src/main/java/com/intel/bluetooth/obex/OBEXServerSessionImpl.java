@@ -74,8 +74,8 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 	}
 	
 	void startSessionHandlerThread(Object syncMonitor) {
+        this.syncMonitor = syncMonitor;
 	    handlerThread.start();
-	    this.syncMonitor = syncMonitor;
 	}
 
 	public void run() {
