@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -27,8 +28,6 @@ import java.io.IOException;
 
 /**
  * Thrown from JNI code.
- *
- * @author vlads
  *
  */
 class SearchServicesException extends IOException {

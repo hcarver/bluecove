@@ -35,8 +35,8 @@ import javax.bluetooth.UUID;
 import junit.framework.TestCase;
 
 /**
- * @author vlads
- * 
+ *
+ *
  */
 public class BluetoothStackWIDCOMMSDPInputStreamTest extends TestCase {
 

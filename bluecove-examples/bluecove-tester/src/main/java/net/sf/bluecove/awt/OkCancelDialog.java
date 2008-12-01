@@ -1,7 +1,7 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
- * 
+ *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
  *  distributed with this work for additional information
@@ -39,8 +39,8 @@ import java.awt.event.WindowEvent;
 import net.sf.bluecove.Configuration;
 
 /**
- * @author vlads
- * 
+ *
+ *
  */
 public abstract class OkCancelDialog extends Dialog {
 

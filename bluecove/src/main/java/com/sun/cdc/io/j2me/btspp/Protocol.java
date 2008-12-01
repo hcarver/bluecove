@@ -18,6 +18,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.sun.cdc.io.j2me.btspp;
@@ -35,8 +36,6 @@ import com.sun.cdc.io.ConnectionBaseInterface;
  *
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- *
- * @author vlads
  */
 public class Protocol implements ConnectionBaseInterface {
 

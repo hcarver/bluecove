@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -44,9 +45,6 @@ import com.ibm.oti.vm.VM;
  * If you wish to load library from default location in path e.g.
  * `%SystemRoot%\system32` or any other location in %PATH% use
  * `-Dbluecove.native.resource=false`
- *
- *
- * @author vlads
  *
  */
 public abstract class NativeLibLoader {

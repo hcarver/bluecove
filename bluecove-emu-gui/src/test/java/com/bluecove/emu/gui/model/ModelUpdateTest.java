@@ -11,8 +11,8 @@ import junit.framework.TestCase;
 import com.intel.bluetooth.emu.MonitorDevice;
 
 /**
- * @author vlads
- * 
+ *
+ *
  */
 public class ModelUpdateTest extends TestCase implements Observer {
 

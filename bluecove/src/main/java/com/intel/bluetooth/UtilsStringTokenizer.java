@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -28,12 +29,6 @@ import java.util.NoSuchElementException;
 /**
  * Simple implementation of java.util.StringTokenizer for J2ME Taken from
  * com.pyx4me.core.utils
- *
- * Created on 11-Jun-2006
- *
- * @author vlads
- * @version $Revision$ ($Author$) $Date: 2007-07-31
- *          16:15:58 -0400 (Tue, 31 Jul 2007) $
  */
 class UtilsStringTokenizer {
 

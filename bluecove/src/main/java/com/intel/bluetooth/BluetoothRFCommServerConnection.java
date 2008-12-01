@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -26,7 +27,7 @@ package com.intel.bluetooth;
 import java.io.IOException;
 
 /**
- * @author vlads
+ *
  *
  */
 class BluetoothRFCommServerConnection extends BluetoothRFCommConnection implements BluetoothServerConnection {

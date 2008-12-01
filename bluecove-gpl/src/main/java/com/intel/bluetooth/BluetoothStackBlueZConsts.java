@@ -1,5 +1,5 @@
 /**
- * BlueCove BlueZ module - Java library for Bluetooth on Linux
+ *  BlueCove BlueZ module - Java library for Bluetooth on Linux
  *  Copyright (C) 2008 Mina Shokry
  *  Copyright (C) 2007 Vlad Skarzhevskyy
  *
@@ -16,7 +16,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version $Id$
+ *  @author vlads
+ *  @version $Id$
  */
 package com.intel.bluetooth;
 
@@ -27,7 +28,6 @@ import javax.bluetooth.BluetoothConnectionException;
 import javax.bluetooth.ServiceRecord;
 
 /**
- * @author vlads
  *
  * Export constants to native code
  *

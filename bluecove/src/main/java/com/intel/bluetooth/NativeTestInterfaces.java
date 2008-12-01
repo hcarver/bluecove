@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -27,8 +28,6 @@ package com.intel.bluetooth;
  * Connection to native test functions.
  *
  * This functions are only executed during UnitTests.
- *
- * @author vlads
  */
 class NativeTestInterfaces {
 

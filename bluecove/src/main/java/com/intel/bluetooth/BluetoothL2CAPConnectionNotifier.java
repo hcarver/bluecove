@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -32,7 +33,7 @@ import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 
 /**
- * @author vlads
+ *
  *
  */
 class BluetoothL2CAPConnectionNotifier extends BluetoothConnectionNotifierBase implements L2CAPConnectionNotifier {

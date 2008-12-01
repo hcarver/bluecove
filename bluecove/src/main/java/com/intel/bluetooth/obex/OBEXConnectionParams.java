@@ -19,12 +19,12 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth.obex;
 
 /**
- * @author vlads
  * @since bluecove 2.0.2
  */
 public class OBEXConnectionParams {

@@ -30,8 +30,8 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 
 /**
- * @author vlads
- * 
+ *
+ *
  */
 class ConnectedInputStream extends InputStream {
 
@@ -64,7 +64,7 @@ class ConnectedInputStream extends InputStream {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.io.InputStream#read()
 	 */
 	@Override

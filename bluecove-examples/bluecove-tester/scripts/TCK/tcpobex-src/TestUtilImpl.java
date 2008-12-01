@@ -1,7 +1,7 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
- * 
+ *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
  *  distributed with this work for additional information
@@ -32,8 +32,8 @@ import javax.obex.SessionNotifier;
 import com.motorola.tck.tests.api.javax.obex.OBEX_TestCase;
 
 /**
- * @author vlads
- * 
+ *
+ *
  */
 public class TestUtilImpl extends com.motorola.tck.tests.api.javax.obex.TestUtil {
 
@@ -43,7 +43,7 @@ public class TestUtilImpl extends com.motorola.tck.tests.api.javax.obex.TestUtil
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.motorola.tck.tests.api.javax.obex.TestUtil#getHelperConnString(java.lang.String)
 	 */
 	public String getHelperConnString(String address) {
@@ -52,7 +52,7 @@ public class TestUtilImpl extends com.motorola.tck.tests.api.javax.obex.TestUtil
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.motorola.tck.tests.api.javax.obex.TestUtil#getSessionNotifier()
 	 */
 	public SessionNotifier getSessionNotifier() {
@@ -70,7 +70,7 @@ public class TestUtilImpl extends com.motorola.tck.tests.api.javax.obex.TestUtil
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.motorola.tck.tests.api.javax.obex.TestUtil#getSessionNotifierConnString(javax.obex.SessionNotifier)
 	 */
 	public String getSessionNotifierConnString(SessionNotifier service) {

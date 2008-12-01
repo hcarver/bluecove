@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -35,12 +36,9 @@ import javax.bluetooth.UUID;
 /**
  * New native stack support should ONLY implement this interface. No other classes should ideally be changed except
  * BlueCoveImpl where the instance of new class should be created.
- * 
+ *
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- * 
- * @author vlads
- * 
  */
 public interface BluetoothStack {
 
@@ -78,7 +76,7 @@ public interface BluetoothStack {
 
 	/**
 	 * List the native libraries that need to be loaded.
-	 * 
+	 *
 	 * @see java.lang.System#loadLibrary(java.lang.String)
 	 * @return array of library names used by implementation.
 	 */
@@ -87,7 +85,7 @@ public interface BluetoothStack {
 	/**
 	 * Used to verify native library version. versionMajor1 * 1000000 + versionMajor2 * 10000 + versionMinor * 100 +
 	 * versionBuild
-	 * 
+	 *
 	 * @return Version number in decimal presentation. e.g. 2030407 for version 2.3.4 build 7
 	 */
 	public int getLibraryVersion() throws BluetoothStateException;
@@ -95,13 +93,13 @@ public interface BluetoothStack {
 	/**
 	 * Used if OS Supports multiple Bluetooth stacks 0x01 winsock; 0x02 widcomm; 0x04 bluesoleil; 0x08 BlueZ; 0x10 OS X
 	 * stack;
-	 * 
+	 *
 	 * @return stackID
 	 */
 	public int detectBluetoothStack();
 
 	/**
-	 * 
+	 *
 	 * @param nativeDebugCallback
 	 *            DebugLog.class
 	 * @param on
@@ -119,7 +117,7 @@ public interface BluetoothStack {
 
 	/**
 	 * Called from long running native code to see if thread interrupted. If yes InterruptedIOException would be thrown.
-	 * 
+	 *
 	 * @return true if interrupted
 	 */
 	public boolean isCurrentThreadInterruptedCallback();
@@ -133,28 +131,28 @@ public interface BluetoothStack {
 
 	/**
 	 * Retrieves the Bluetooth address of the local device.
-	 * 
+	 *
 	 * @see javax.bluetooth.LocalDevice#getBluetoothAddress()
 	 */
 	public String getLocalDeviceBluetoothAddress() throws BluetoothStateException;
 
 	/**
 	 * Retrieves the name of the local device.
-	 * 
+	 *
 	 * @see javax.bluetooth.LocalDevice#getFriendlyName()
 	 */
 	public String getLocalDeviceName();
 
 	/**
 	 * Retrieves the class of the local device.
-	 * 
+	 *
 	 * @see javax.bluetooth.LocalDevice#getDeviceClass()
 	 */
 	public DeviceClass getLocalDeviceClass();
 
 	/**
 	 * Implementation for local device service class
-	 * 
+	 *
 	 * @see javax.bluetooth.ServiceRecord#setDeviceServiceClasses(int) and
 	 * @see javax.bluetooth.LocalDevice#updateRecord(javax.bluetooth.ServiceRecord)
 	 * @param classOfDevice
@@ -185,14 +183,14 @@ public interface BluetoothStack {
 
 	/**
 	 * Attempts to authenticate RemoteDevice. Return <code>false</code> if the stack does not support authentication.
-	 * 
+	 *
 	 * @see javax.bluetooth.RemoteDevice#authenticate()
 	 */
 	public boolean authenticateRemoteDevice(long address) throws IOException;
 
 	/**
 	 * Sends an authentication request to a remote Bluetooth device. Non JSR-82,
-	 * 
+	 *
 	 * @param address
 	 *            Remote Device address
 	 * @param passkey
@@ -205,7 +203,7 @@ public interface BluetoothStack {
 
 	/**
 	 * Removes authentication between local and remote bluetooth devices. Non JSR-82,
-	 * 
+	 *
 	 * @param address
 	 *            Remote Device address authentication.
 	 * @throws IOException
@@ -218,21 +216,21 @@ public interface BluetoothStack {
 
 	/**
 	 * called by JSR-82 code Device Inquiry
-	 * 
+	 *
 	 * @see javax.bluetooth.DiscoveryAgent#startInquiry(int, javax.bluetooth.DiscoveryListener)
 	 */
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException;
 
 	/**
 	 * called by JSR-82 code Device Inquiry
-	 * 
+	 *
 	 * @see javax.bluetooth.DiscoveryAgent#cancelInquiry(javax.bluetooth.DiscoveryListener)
 	 */
 	public boolean cancelInquiry(DiscoveryListener listener);
 
 	/**
 	 * called by implementation when device name is unknown or <code>alwaysAsk</code> is <code>true</code>
-	 * 
+	 *
 	 * @see javax.bluetooth.RemoteDevice#getFriendlyName(boolean)
 	 */
 	public String getRemoteDeviceFriendlyName(long address) throws IOException;
@@ -259,7 +257,7 @@ public interface BluetoothStack {
 
 	/**
 	 * called by JSR-82 code Service search
-	 * 
+	 *
 	 * @see javax.bluetooth.DiscoveryAgent#searchServices(int[],UUID[],javax.bluetooth.RemoteDevice,
 	 *      javax.bluetooth.DiscoveryListener)
 	 */
@@ -268,14 +266,14 @@ public interface BluetoothStack {
 
 	/**
 	 * called by JSR-82 code Service search
-	 * 
+	 *
 	 * @see javax.bluetooth.DiscoveryAgent#cancelServiceSearch(int)
 	 */
 	public boolean cancelServiceSearch(int transID);
 
 	/**
 	 * Called by ServiceRecord.populateRecord(int[] attrIDs) during Service search.
-	 * 
+	 *
 	 * @see javax.bluetooth.ServiceRecord#populateRecord(int[])
 	 */
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs)
@@ -285,7 +283,7 @@ public interface BluetoothStack {
 
 	/**
 	 * Used to create handle for {@link com.intel.bluetooth.BluetoothRFCommClientConnection}
-	 * 
+	 *
 	 * @see javax.microedition.io.Connector#open(String, int, boolean)
 	 */
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException;
@@ -296,7 +294,7 @@ public interface BluetoothStack {
 	 *            Value specified when connection was open ServiceRecord.xxAUTHENTICATE_xxENCRYPT
 	 * @return expected if not implemented by stack
 	 * @throws IOException
-	 * 
+	 *
 	 * @see javax.bluetooth.RemoteDevice#isAuthenticated()
 	 * @see javax.bluetooth.RemoteDevice#isEncrypted()
 	 */
@@ -318,7 +316,7 @@ public interface BluetoothStack {
 
 	/**
 	 * Used to create handle for {@link com.intel.bluetooth.BluetoothRFCommConnectionNotifier}
-	 * 
+	 *
 	 * @see javax.microedition.io.Connector#open(String, int, boolean)
 	 */
 	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord)
@@ -332,7 +330,7 @@ public interface BluetoothStack {
 
 	/**
 	 * Used to create handle for {@link com.intel.bluetooth.BluetoothRFCommServerConnection}
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothRFCommConnectionNotifier#acceptAndOpen()
 	 * @see javax.microedition.io.StreamConnectionNotifier#acceptAndOpen()
 	 */
@@ -397,14 +395,14 @@ public interface BluetoothStack {
 
 	/**
 	 * Closing {@link com.intel.bluetooth.BluetoothL2CAPClientConnection}
-	 * 
+	 *
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void l2CloseClientConnection(long handle) throws IOException;
 
 	/**
 	 * Used to create handle for {@link com.intel.bluetooth.BluetoothL2CAPConnectionNotifier}
-	 * 
+	 *
 	 * @see javax.microedition.io.Connector#open(String, int, boolean)
 	 */
 	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU,
@@ -418,7 +416,7 @@ public interface BluetoothStack {
 
 	/**
 	 * Used to create handle for {@link com.intel.bluetooth.BluetoothL2CAPServerConnection}
-	 * 
+	 *
 	 * @see com.intel.bluetooth.BluetoothL2CAPConnectionNotifier#acceptAndOpen()
 	 * @see javax.bluetooth.L2CAPConnectionNotifier#acceptAndOpen()
 	 */
@@ -426,7 +424,7 @@ public interface BluetoothStack {
 
 	/**
 	 * Closing {@link com.intel.bluetooth.BluetoothL2CAPServerConnection}
-	 * 
+	 *
 	 * @see #l2CloseClientConnection(long)
 	 */
 	public void l2CloseServerConnection(long handle) throws IOException;

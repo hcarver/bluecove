@@ -25,8 +25,8 @@
 package com.intel.bluetooth;
 
 /**
- * @author vlads
- * 
+ *
+ *
  */
 public class NativeConversionWIDCOMMTest extends NativeConversionTest {
 

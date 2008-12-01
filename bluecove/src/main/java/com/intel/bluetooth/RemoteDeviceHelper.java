@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -38,16 +39,14 @@ import com.intel.bluetooth.WeakVectorFactory.WeakVector;
 
 /**
  * Implementation of RemoteDevice.
- * 
+ *
  * Instance of RemoteDevice can be created by User. BlueCove should use only RemoteDeviceHelper class to create
  * RemoteDevice instances.
- * 
+ *
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- * 
+ *
  * The exceptions are authenticate(RemoteDevice device, String passkey) and removeAuthentication(RemoteDevice device).
- * 
- * @author vlads
  */
 public abstract class RemoteDeviceHelper {
 
@@ -202,7 +201,7 @@ public abstract class RemoteDeviceHelper {
 		/**
 		 * Determines if this RemoteDevice should be allowed to continue to access the local service provided by the
 		 * Connection.
-		 * 
+		 *
 		 * @see javax.bluetooth.RemoteDevice#authorize(javax.microedition.io.Connection)
 		 */
 		public boolean authorize(Connection conn) throws IOException {
@@ -219,7 +218,7 @@ public abstract class RemoteDeviceHelper {
 		}
 
 		/**
-		 * 
+		 *
 		 * @see javax.bluetooth.RemoteDevice#isAuthorized(javax.microedition.io.Connection)
 		 */
 		public boolean isAuthorized(Connection conn) throws IOException {
@@ -237,7 +236,7 @@ public abstract class RemoteDeviceHelper {
 
 		/**
 		 * Attempts to turn encryption on or off for an existing connection.
-		 * 
+		 *
 		 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection, boolean)
 		 */
 		public boolean encrypt(Connection conn, boolean on) throws IOException {
@@ -255,7 +254,7 @@ public abstract class RemoteDeviceHelper {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see javax.bluetooth.RemoteDevice#isAuthenticated()
 		 */
 		public boolean isAuthenticated() {
@@ -281,7 +280,7 @@ public abstract class RemoteDeviceHelper {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see javax.bluetooth.RemoteDevice#isEncrypted()
 		 */
 		public boolean isEncrypted() {
@@ -302,7 +301,7 @@ public abstract class RemoteDeviceHelper {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see javax.bluetooth.RemoteDevice#isTrustedDevice()
 		 */
 		public boolean isTrustedDevice() {
@@ -421,7 +420,7 @@ public abstract class RemoteDeviceHelper {
 
 	/**
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.bluetooth.DiscoveryAgent#retrieveDevices(int)
 	 */
 	public static RemoteDevice[] retrieveDevices(BluetoothStack bluetoothStack, int option) {
@@ -484,7 +483,7 @@ public abstract class RemoteDeviceHelper {
 
 	/**
 	 * Count total number of open connections to all devices.
-	 * 
+	 *
 	 * @return number of connections
 	 */
 	public static int openConnections() {
@@ -500,7 +499,7 @@ public abstract class RemoteDeviceHelper {
 
 	/**
 	 * Count number of open connections to or from specific device.
-	 * 
+	 *
 	 * @return number of connections
 	 */
 	public static int openConnections(long address) {
@@ -513,7 +512,7 @@ public abstract class RemoteDeviceHelper {
 
 	/**
 	 * Count number of device that have open connections to or from them.
-	 * 
+	 *
 	 * @return number of connections
 	 */
 	public static int connectedDevices() {
@@ -602,7 +601,7 @@ public abstract class RemoteDeviceHelper {
 
 	/**
 	 * Attempts to authenticate RemoteDevice. Return <code>false</code> if the stack does not support authentication.
-	 * 
+	 *
 	 * @see javax.bluetooth.RemoteDevice#authenticate()
 	 */
 	public static boolean authenticate(RemoteDevice device) throws IOException {
@@ -610,12 +609,12 @@ public abstract class RemoteDeviceHelper {
 	}
 
 	/**
-	 * 
+	 *
 	 * Sends an authentication request to a remote Bluetooth device. Non JSR-82, Return <code>false</code> if the stack
 	 * does not support authentication.
 	 * <p>
 	 * <b>PUBLIC JSR-82 extension</b>
-	 * 
+	 *
 	 * @param device
 	 *            Remote Device
 	 * @param passkey
@@ -629,14 +628,14 @@ public abstract class RemoteDeviceHelper {
 	}
 
 	/**
-	 * 
+	 *
 	 * Removes authentication between local and remote bluetooth devices. Non JSR-82.
 	 * <p>
 	 * <b>PUBLIC JSR-82 extension</b>
-	 * 
+	 *
 	 * @param device
 	 *            Remote Device
-	 * 
+	 *
 	 * @throws IOException
 	 *             if there are errors or not implemented.
 	 */
@@ -647,7 +646,7 @@ public abstract class RemoteDeviceHelper {
 	/**
 	 * Determines if this RemoteDevice should be allowed to continue to access the local service provided by the
 	 * Connection.
-	 * 
+	 *
 	 * @see javax.bluetooth.RemoteDevice#authorize(javax.microedition.io.Connection)
 	 */
 	public static boolean authorize(RemoteDevice device, Connection conn) throws IOException {
@@ -656,7 +655,7 @@ public abstract class RemoteDeviceHelper {
 
 	/**
 	 * Attempts to turn encryption on or off for an existing connection.
-	 * 
+	 *
 	 * @see javax.bluetooth.RemoteDevice#encrypt(javax.microedition.io.Connection, boolean)
 	 */
 	public static boolean encrypt(RemoteDevice device, Connection conn, boolean on) throws IOException {
@@ -671,7 +670,7 @@ public abstract class RemoteDeviceHelper {
 	 * <code>authenticate()</code> is performed when an L2CAP connection is made to device A, then
 	 * <code>isAuthenticated()</code> may return <code>true</code> when tested as part of making an RFCOMM connection to
 	 * device A.
-	 * 
+	 *
 	 * @return <code>true</code> if this <code>RemoteDevice</code> has previously been authenticated; <code>false</code>
 	 *         if it has not been authenticated or there are no open connections between the local device and this
 	 *         <code>RemoteDevice</code>
@@ -692,7 +691,7 @@ public abstract class RemoteDeviceHelper {
 	 * performed with the <code>on</code> parameter set to <code>true</code> when an L2CAP connection is made to device
 	 * A, then <code>isEncrypted()</code> may return <code>true</code> when tested as part of making an RFCOMM
 	 * connection to device A.
-	 * 
+	 *
 	 * @return <code>true</code> if data exchanges with this <code>RemoteDevice</code> are being encrypted;
 	 *         <code>false</code> if they are not being encrypted, or there are no open connections between the local
 	 *         device and this <code>RemoteDevice</code>

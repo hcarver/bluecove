@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -35,7 +36,6 @@ import javax.bluetooth.ServiceRegistrationException;
 import javax.microedition.io.Connection;
 
 /**
- * @author vlads
  *
  */
 abstract class BluetoothConnectionNotifierBase implements Connection, BluetoothConnectionNotifierServiceRecordAccess {

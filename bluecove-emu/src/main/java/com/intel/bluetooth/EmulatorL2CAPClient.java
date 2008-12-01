@@ -28,8 +28,8 @@ package com.intel.bluetooth;
 import java.io.IOException;
 
 /**
- * @author vlads
- * 
+ *
+ *
  */
 class EmulatorL2CAPClient extends EmulatorLinkedConnection {
 

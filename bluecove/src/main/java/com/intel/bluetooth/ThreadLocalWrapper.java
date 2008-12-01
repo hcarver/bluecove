@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -26,8 +27,6 @@ package com.intel.bluetooth;
 /**
  *
  * When ThreadLocal not available on Java 1.1 or MIDP will do nothing.
- *
- * @author vlads
  *
  */
 class ThreadLocalWrapper {

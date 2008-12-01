@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth.btgoep;
@@ -49,8 +50,6 @@ import com.intel.bluetooth.MicroeditionConnector;
  * not installing bluecove.jar to "%J9_HOME%\lib\jclMidp20\ext\
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- *
- * @author vlads
  *
  */
 public class Connection extends BluetoothConnectionAccessAdapter implements CreateConnection, ClientSession,

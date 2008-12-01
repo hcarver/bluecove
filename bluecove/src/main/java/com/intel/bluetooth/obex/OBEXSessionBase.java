@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth.obex;
@@ -44,8 +45,6 @@ import com.intel.bluetooth.DebugLog;
  * Base for Client and Server implementations. See <a
  * href="http://bluetooth.com/Bluetooth/Learn/Technology/Specifications/">Bluetooth
  * Specification Documents</A> for details.
- *
- * @author vlads
  *
  */
 abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess {

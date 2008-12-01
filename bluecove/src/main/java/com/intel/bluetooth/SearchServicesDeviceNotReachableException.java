@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -26,8 +27,6 @@ package com.intel.bluetooth;
 /**
  * Thrown from JNI code when service search could not be completed because the
  * remote device could not be reached.
- *
- * @author vlads
  */
 class SearchServicesDeviceNotReachableException extends SearchServicesException {
 

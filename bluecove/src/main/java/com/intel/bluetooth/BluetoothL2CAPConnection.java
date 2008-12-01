@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -30,7 +31,7 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 
 /**
- * @author vlads
+ *
  *
  */
 abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothConnectionAccess {

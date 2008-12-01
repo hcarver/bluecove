@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.ibm.oti.connection.btspp;
@@ -30,8 +31,6 @@ package com.ibm.oti.connection.btspp;
  *
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- *
- * @author vlads
  *
  */
 public class Connection extends com.intel.bluetooth.btspp.Connection {

@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -28,9 +29,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
 
 /**
- * Log4j wrapper
- *
- * @author vlads
+ * Log4j redirection wrapper
  *
  */
 class DebugLog4jAppender implements LoggerAppenderExt {

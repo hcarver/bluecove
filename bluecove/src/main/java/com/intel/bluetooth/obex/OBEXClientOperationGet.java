@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth.obex;
@@ -32,7 +33,7 @@ import javax.obex.HeaderSet;
 import com.intel.bluetooth.DebugLog;
 
 /**
- * @author vlads
+ *
  *
  */
 class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperationReceive, OBEXOperationDelivery {

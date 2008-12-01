@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth.obex;
@@ -27,7 +28,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * @author vlads
+ *
  *
  */
 class UnsupportedOutputStream extends OutputStream {

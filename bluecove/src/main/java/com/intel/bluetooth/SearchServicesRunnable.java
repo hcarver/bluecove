@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -29,7 +30,6 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.UUID;
 
 /**
- * @author vlads
  *
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>

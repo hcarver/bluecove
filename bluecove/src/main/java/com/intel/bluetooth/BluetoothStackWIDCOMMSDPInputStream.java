@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -31,8 +32,6 @@ import javax.bluetooth.UUID;
 
 /**
  * Read WIDCOMM SDP_DISC_ATTTR_VAL C struct and convert to DataElements
- *
- * @author vlads
  */
 class BluetoothStackWIDCOMMSDPInputStream extends InputStream {
 

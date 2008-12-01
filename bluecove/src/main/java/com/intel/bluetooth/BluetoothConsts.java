@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -30,8 +31,6 @@ import javax.bluetooth.UUID;
 
 /**
  * Constants defined by Bluetooth and JSR-82 specifications
- *
- * @author vlads
  *
  */
 public abstract class BluetoothConsts {

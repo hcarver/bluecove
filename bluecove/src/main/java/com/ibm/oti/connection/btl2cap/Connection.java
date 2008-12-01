@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.ibm.oti.connection.btl2cap;
@@ -29,8 +30,6 @@ package com.ibm.oti.connection.btl2cap;
  * No need to configure -Dmicroedition.connection.pkgs=com.intel.bluetooth when bluecove.jar installed to "%J9_HOME%\lib\jclMidp20\ext\
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- *
- * @author vlads
  *
  */
 public class Connection extends com.intel.bluetooth.btl2cap.Connection {

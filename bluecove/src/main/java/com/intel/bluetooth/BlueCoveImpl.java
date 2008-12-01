@@ -20,6 +20,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -65,8 +66,6 @@ import com.intel.bluetooth.BluetoothStack.LibraryInformation;
  * <p>
  * Use `LocalDevice.getProperty("bluecove.stack")` to find out which stack is
  * used.
- *
- * @author vlads
  *
  */
 public class BlueCoveImpl {

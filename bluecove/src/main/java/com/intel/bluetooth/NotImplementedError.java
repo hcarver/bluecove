@@ -19,14 +19,13 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
 
 /**
  * Thrown when current implementation do not implement the functionality.
- *
- * @author vlads
  *
  */
 public class NotImplementedError extends Error {

@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -34,8 +35,6 @@ import java.util.WeakHashMap;
  * available. e.g. on J2SE 1.2 and above For IBM J9 MIDP we will use Vector to
  * make application work. But connection can't be discarded by the garbage
  * collector.
- *
- * @author vlads
  *
  */
 class WeakVectorFactory {

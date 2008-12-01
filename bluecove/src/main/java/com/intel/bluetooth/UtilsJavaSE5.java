@@ -19,14 +19,13 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
 
 /**
  * Optional Java 5 compatibility module.
- *
- * @author vlads
  *
  */
 public class UtilsJavaSE5 implements UtilsJavaSE.JavaSE5Features {

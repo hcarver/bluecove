@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth;
@@ -35,13 +36,9 @@ import java.util.Vector;
  * debug. Alternatively if log4j is available in classpath Bluecove log would be
  * redirected to log4j and can be enable using log4j configuration.
  *
- * @author vlads
- *
- */
-/*
- * The methods of this calls would be removed automaticaly because they are
+ * The methods of this class would be removed automaticaly because they are
  * empty if debugCompiledOut = true. This class itself will disappear from
- * bytecode after obfuscation by proguard.
+ * bytecode after obfuscation by proguard in this case. Change to create mini jar.
  *
  */
 public abstract class DebugLog {
@@ -69,8 +66,6 @@ public abstract class DebugLog {
 	/**
 	 * Different log system can be injected in BlueCove using
 	 * DebugLog.addAppender(customLoggerAppender)
-	 *
-	 * @author vlads
 	 *
 	 */
 	public static interface LoggerAppender {

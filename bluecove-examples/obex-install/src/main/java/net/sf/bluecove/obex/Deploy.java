@@ -1,7 +1,7 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2008 Vlad Skarzhevskyy
- * 
+ *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
  *  distributed with this work for additional information
@@ -31,8 +31,8 @@ import java.io.InputStream;
 import java.net.URL;
 
 /**
- * @author vlads
- * 
+ *
+ *
  */
 public class Deploy implements UserInteraction {
 
@@ -121,7 +121,7 @@ public class Deploy implements UserInteraction {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.sf.bluecove.obex.UserInteraction#setProgressMaximum(int)
 	 */
 	public void setProgressMaximum(int n) {
@@ -130,7 +130,7 @@ public class Deploy implements UserInteraction {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.sf.bluecove.obex.UserInteraction#setProgressValue(int)
 	 */
 	public void setProgressValue(int n) {
@@ -140,7 +140,7 @@ public class Deploy implements UserInteraction {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.sf.bluecove.obex.UserInteraction#setProgressDone()
 	 */
 	public void setProgressDone() {
@@ -149,7 +149,7 @@ public class Deploy implements UserInteraction {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.sf.bluecove.obex.UserInteraction#showStatus(java.lang.String)
 	 */
 	public void showStatus(String message) {

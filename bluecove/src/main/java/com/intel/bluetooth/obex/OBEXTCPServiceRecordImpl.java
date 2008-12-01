@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth.obex;
@@ -34,7 +35,7 @@ import javax.microedition.io.SocketConnection;
 import com.intel.bluetooth.BluetoothConsts;
 
 /**
- * @author vlads
+ *
  *
  */
 class OBEXTCPServiceRecordImpl implements ServiceRecord {
