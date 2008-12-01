@@ -153,13 +153,13 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 		assertEquals("c.writePackets", expectedPackets, BlueCoveInternals.getPacketsCountWrite(clientSession));
 		assertEquals("c.readPackets", expectedPackets, BlueCoveInternals.getPacketsCountRead(clientSession));
 		assertEquals("s.writePackets", expectedPackets, BlueCoveInternals
-				.getPacketsCountWrite(serverAcceptedConnection));
-		assertEquals("s.readPackets", expectedPackets, BlueCoveInternals.getPacketsCountRead(serverAcceptedConnection));
+				.getPacketsCountWrite(getServerAcceptedConnection()));
+		assertEquals("s.readPackets", expectedPackets, BlueCoveInternals
+				.getPacketsCountRead(getServerAcceptedConnection()));
 	}
 
 	/**
-	 * Verify that server can read data without getting to the exact end of file
-	 * in InputStream
+	 * Verify that server can read data without getting to the exact end of file in InputStream
 	 */
 	public void testPUTOperationComplete() throws IOException {
 		byte data[] = simpleData;
@@ -313,7 +313,8 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 		assertEquals("c.writePackets", expectedPackets, BlueCoveInternals.getPacketsCountWrite(clientSession));
 		assertEquals("c.readPackets", expectedPackets, BlueCoveInternals.getPacketsCountRead(clientSession));
 		assertEquals("s.writePackets", expectedPackets, BlueCoveInternals
-				.getPacketsCountWrite(serverAcceptedConnection));
-		assertEquals("s.readPackets", expectedPackets, BlueCoveInternals.getPacketsCountRead(serverAcceptedConnection));
+				.getPacketsCountWrite(getServerAcceptedConnection()));
+		assertEquals("s.readPackets", expectedPackets, BlueCoveInternals
+				.getPacketsCountRead(getServerAcceptedConnection()));
 	}
 }

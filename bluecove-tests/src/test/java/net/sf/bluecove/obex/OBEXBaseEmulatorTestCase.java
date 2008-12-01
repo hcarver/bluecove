@@ -50,7 +50,9 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 
 	protected HeaderSet serverHeaders;
 
-	protected Connection serverAcceptedConnection;
+	private volatile Connection serverAcceptedConnection;
+
+	private final Object acceptedConnectionLock = new Object();
 
 	@Override
 	protected void setUp() throws Exception {
@@ -68,9 +70,17 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 			public void execute() throws Exception {
 				SessionNotifier serverConnection = (SessionNotifier) Connector.open("btgoep://localhost:" + serverUUID
 						+ ";name=ObexTest");
-				serverAcceptedConnection = serverConnection.acceptAndOpen(createRequestHandler());
+				synchronized (acceptedConnectionLock) {
+					serverAcceptedConnection = serverConnection.acceptAndOpen(createRequestHandler());
+				}
 			}
 		};
+	}
+
+	protected Connection getServerAcceptedConnection() {
+		synchronized (acceptedConnectionLock) {
+			return serverAcceptedConnection;
+		}
 	}
 
 	public static int longRequestPhasePackets() {

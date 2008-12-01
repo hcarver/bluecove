@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth.obex;
@@ -54,9 +55,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 	private Object stackID;
 
 	private Thread handlerThread;
-	
-	private Object syncMonitor;
-	
+
 	private static int threadNumber;
 
 	private static synchronized int nextThreadNum() {
@@ -72,17 +71,14 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		handlerThread = new Thread(this, "OBEXServerSessionThread-" + nextThreadNum());
 		UtilsJavaSE.threadSetDaemon(handlerThread);
 	}
-	
-	void startSessionHandlerThread(Object syncMonitor) {
-        this.syncMonitor = syncMonitor;
-	    handlerThread.start();
+
+	void startSessionHandlerThread() {
+		handlerThread.start();
 	}
 
 	public void run() {
-	    // Let the acceptAndOpen return to the caller.
-	    Thread.yield();
-	    synchronized (syncMonitor) {
-	    }
+		// Let the acceptAndOpen return to the caller.
+		Thread.yield();
 		try {
 			if (stackID != null) {
 				BlueCoveImpl.setThreadBluetoothStackID(stackID);

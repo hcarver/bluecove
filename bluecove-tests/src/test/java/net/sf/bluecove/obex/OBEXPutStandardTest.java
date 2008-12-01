@@ -139,9 +139,9 @@ public class OBEXPutStandardTest extends OBEXBaseEmulatorTestCase {
 
 		assertEquals("c.writePackets", expectedPackets, BlueCoveInternals.getPacketsCountWrite(clientSession));
 		assertEquals("c.readPackets", expectedPackets, BlueCoveInternals.getPacketsCountRead(clientSession));
-		int serverSentPackets = BlueCoveInternals.getPacketsCountWrite(serverAcceptedConnection);
+		int serverSentPackets = BlueCoveInternals.getPacketsCountWrite(getServerAcceptedConnection());
 		assertEquals("s.writePackets (" + serverSentPackets + ")", expectedPackets, serverSentPackets);
-		int serverReadPackets = BlueCoveInternals.getPacketsCountRead(serverAcceptedConnection);
+		int serverReadPackets = BlueCoveInternals.getPacketsCountRead(getServerAcceptedConnection());
 		assertEquals("s.readPackets (" + serverReadPackets + ")", expectedPackets, serverReadPackets);
 	}
 
@@ -187,8 +187,9 @@ public class OBEXPutStandardTest extends OBEXBaseEmulatorTestCase {
 		assertEquals("c.writePackets", expectedPackets, BlueCoveInternals.getPacketsCountWrite(clientSession));
 		assertEquals("c.readPackets", expectedPackets, BlueCoveInternals.getPacketsCountRead(clientSession));
 		assertEquals("s.writePackets", expectedPackets, BlueCoveInternals
-				.getPacketsCountWrite(serverAcceptedConnection));
-		assertEquals("s.readPackets", expectedPackets, BlueCoveInternals.getPacketsCountRead(serverAcceptedConnection));
+				.getPacketsCountWrite(getServerAcceptedConnection()));
+		assertEquals("s.readPackets", expectedPackets, BlueCoveInternals
+				.getPacketsCountRead(getServerAcceptedConnection()));
 	}
 
 	public void testPUTOperationBigData() throws IOException {

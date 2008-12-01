@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth.obex;
@@ -40,14 +41,12 @@ import com.intel.bluetooth.Utils;
 
 /**
  * SessionNotifier implementation. See <a
- * href="http://bluetooth.com/Bluetooth/Learn/Technology/Specifications/">Bluetooth
- * Specification Documents</A> for details.
- *
+ * href="http://bluetooth.com/Bluetooth/Learn/Technology/Specifications/">Bluetooth Specification Documents</A> for
+ * details.
+ * 
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- *
- * @author vlads
- *
+ * 
  */
 public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnectionNotifierServiceRecordAccess {
 
@@ -65,7 +64,7 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 
 	/**
 	 * Applications should not used this function.
-	 *
+	 * 
 	 * @exception Error
 	 *                if called from outside of BlueCove internal code.
 	 */
@@ -87,8 +86,9 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 		if (handler == null) {
 			throw new NullPointerException("handler is null");
 		}
-		OBEXServerSessionImpl sessionImpl = new OBEXServerSessionImpl(notifier.acceptAndOpen(), handler, auth, obexConnectionParams);
-		sessionImpl.startSessionHandlerThread(this);
+		OBEXServerSessionImpl sessionImpl = new OBEXServerSessionImpl(notifier.acceptAndOpen(), handler, auth,
+				obexConnectionParams);
+		sessionImpl.startSessionHandlerThread();
 		return sessionImpl;
 	}
 
@@ -102,7 +102,7 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#getServiceRecord()
 	 */
 	public ServiceRecord getServiceRecord() {
@@ -117,7 +117,7 @@ public class OBEXSessionNotifierImpl implements SessionNotifier, BluetoothConnec
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess#updateServiceRecord(boolean)
 	 */
 	public void updateServiceRecord(boolean acceptAndOpen) throws ServiceRegistrationException {
