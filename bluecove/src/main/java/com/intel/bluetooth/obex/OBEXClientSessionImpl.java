@@ -48,8 +48,6 @@ import com.intel.bluetooth.Utils;
  */
 public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSession {
 
-	private boolean isConnected;
-
 	private OBEXClientOperation operation;
 
 	private static final String FQCN = OBEXClientSessionImpl.class.getName();

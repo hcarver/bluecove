@@ -49,6 +49,8 @@ import com.intel.bluetooth.DebugLog;
  */
 abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess {
 
+    protected boolean isConnected;
+    
 	protected StreamConnection conn;
 
 	protected InputStream is;
@@ -71,6 +73,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		if (obexConnectionParams == null) {
 			throw new NullPointerException("obexConnectionParams is null");
 		}
+		this.isConnected = false;
 		this.conn = conn;
 		this.obexConnectionParams = obexConnectionParams;
 		this.mtu = obexConnectionParams.mtu;
@@ -358,4 +361,16 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	int getPacketSize() {
 		return this.mtu;
 	}
+	
+	/**
+	 * Function used to change the connection mtu
+	 * @param mtu
+	 * @throws IOException
+	 */
+	void setPacketSize(int mtu) throws IOException {
+	    if (isConnected) {
+            throw new IOException("Session already connected");
+        }
+	    obexConnectionParams.mtu = mtu;
+    }
 }

@@ -35,6 +35,8 @@ import javax.obex.HeaderSet;
 import javax.obex.Operation;
 import javax.obex.ResponseCodes;
 
+import com.intel.bluetooth.obex.BlueCoveOBEX;
+
 /**
  * 
  */
@@ -95,6 +97,9 @@ public class ObexBluetoothClient {
         }
         
         String bps(int size, long durationMsec) {
+            if (durationMsec == 0) {
+                return "";
+            }
             return formater.format((1000L * 8 * size) / durationMsec) + " bit/s";
         }
     }
@@ -119,6 +124,8 @@ public class ObexBluetoothClient {
 			if (hsConnectReply.getResponseCode() != ResponseCodes.OBEX_HTTP_OK) {
 				interaction.showStatus("Connect Error " + hsConnectReply.getResponseCode());
 			}
+			
+			Logger.debug("MTU selected " + BlueCoveOBEX.getPacketSize(clientSession));
 			
 			progress = new ProgressMonitor(data.length);
 			

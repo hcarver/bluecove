@@ -42,8 +42,6 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 
 	private ServerRequestHandler handler;
 
-	private boolean isConnected = false;
-
 	private OBEXServerOperation operation;
 
 	private boolean closeRequested = false;
