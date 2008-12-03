@@ -743,6 +743,9 @@ public class TestResponderClient extends TestResponderCommon implements Runnable
 					IOUtils.closeQuietly(conn);
 				}
 			}
+			if ((Configuration.clientTestStopOnErrorCount != 0) && (failure.countFailure >= Configuration.clientTestStopOnErrorCount)) {
+			    shutdown();
+			}
 			// Let the server restart
 			if (!stoped) {
 				try {

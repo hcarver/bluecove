@@ -152,6 +152,8 @@ public class Configuration {
 	public static int serverSleepB4ClosingConnection = 1000;
 
 	public static int clientTestTimeOutSec = 60;
+	
+	public static int clientTestStopOnErrorCount = 100;
 
 	public static int serverTestTimeOutSec = 60;
 
