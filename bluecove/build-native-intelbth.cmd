@@ -12,9 +12,21 @@
 
 @set CALLED_FROM_MAVEN=0
 @if /I '%1' EQU '-maven' (
-    set CALLED_FROM_MAVEN=1
+    @set CALLED_FROM_MAVEN=1
+    @shift
 )
-@echo CALLED_FROM_MAVEN=%CALLED_FROM_MAVEN%
+@set CRUISECONTROL_BUILD=0
+@set BUILD_ENV=manual
+@if /I '%1' EQU '-buildEnv' (
+    @set BUILD_ENV=%2
+    @shift
+    @shift
+)
+@echo BUILD_ENV=%BUILD_ENV%
+@if "%BUILD_ENV%" == "cruisecontrol" (
+    @set CRUISECONTROL_BUILD=1
+)
+
 
 @if exist %JAVA_HOME%/include/win32 goto java_found
 @echo WARN: JAVA_HOME Not Found
@@ -58,6 +70,7 @@ call "%p%\VCVARS32.BAT"
 @rem @echo Widcomm SDKs Found [%sdk_widcomm%]
 @rem @set CONFIGURATION=WIDCOMM
 
+set FIND_SDK=BlueSoleil
 @set sdk_BlueSoleil=%ProgramFiles%\IVT Corporation\BlueSoleil\api
 @if NOT exist "%sdk_BlueSoleil%" goto sdk_other_not_found
 @echo BlueSoleil SDKs Found [%sdk_BlueSoleil%]
@@ -66,7 +79,11 @@ call "%p%\VCVARS32.BAT"
 @goto DO_BUILD
 
 :sdk_other_not_found
-@echo WARNING: Some Supported SDK not found!
+@echo WARNING: SDK %FIND_SDK% not found!
+@if "%CRUISECONTROL_BUILD%" == "1" (
+    @echo ERROR: All SDKs required for build.
+    @goto :errormark
+)
 
 :DO_BUILD
 vcbuild /rebuild src\main\c\intelbth\intelbth.sln "%CONFIGURATION%|Win32"

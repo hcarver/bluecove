@@ -390,6 +390,7 @@
 
     <properties>
         <buildLabel>${version}</buildLabel>
+        <buildEnv>developer</buildEnv>
         <native.build.skip>false</native.build.skip>
     </properties>
 
@@ -404,6 +405,7 @@
             </activation>
             <properties>
                 <buildLabel>${label}</buildLabel>
+                <buildEnv>cruisecontrol</buildEnv>
             </properties>
         </profile>
 

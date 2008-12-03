@@ -12,10 +12,21 @@
 
 @set CALLED_FROM_MAVEN=0
 @if /I '%1' EQU '-maven' (
-    set CALLED_FROM_MAVEN=1
+    @set CALLED_FROM_MAVEN=1
+    @shift
 )
-@echo CALLED_FROM_MAVEN=%CALLED_FROM_MAVEN%
-    
+@set CRUISECONTROL_BUILD=0
+@set BUILD_ENV=manual
+@if /I '%1' EQU '-buildEnv' (
+    @set BUILD_ENV=%2
+    @shift
+    @shift
+)
+@echo BUILD_ENV=%BUILD_ENV%
+@if "%BUILD_ENV%" == "cruisecontrol" (
+    @set CRUISECONTROL_BUILD=1
+)
+
 @if exist %JAVA_HOME%/include/win32 goto java_found
 @echo WARN: JAVA_HOME Not Found
 :java_found
@@ -49,7 +60,7 @@ call "%p%\VCVARS32.BAT"
 @goto DO_BUILD
 
 :sdk_other_not_found
-@echo WARNING: Some Supported SDK not found!
+@echo ERROR: required SDK not found!
 @goto errormark
 
 :DO_BUILD
