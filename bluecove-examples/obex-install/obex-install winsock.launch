@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
-<booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/obex-install"/>
+<listEntry value="/obex-install/src/main/java/net/sf/bluecove/obex/Main.java"/>
 </listAttribute>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dbluecove.debug=true&#13;&#10;-Dbluecove.stack=winsock"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="obex-install"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="http://wintermute.de/wap/extended/5ud0ku.jar"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
-<listEntry value="4"/>
+<listEntry value="1"/>
 </listAttribute>
+<booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="net.sf.bluecove.obex.Main"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="obex-install"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dbluecove.stack=winsock"/>
 </launchConfiguration>

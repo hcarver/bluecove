@@ -27,6 +27,7 @@ package net.sf.bluecove.obex;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 
 import javax.microedition.io.Connector;
 import javax.obex.ClientSession;
@@ -45,6 +46,60 @@ public class ObexBluetoothClient {
 
 	private byte[] data;
 
+	private class ProgressMonitor {
+
+	    int total;
+
+        long startedTime;
+
+        int complete;
+
+        long printedTime;
+
+        static final long STEP_COUNT = 15;
+
+        static final long STEP_INTERVAL = 2 * 1000;
+
+        DecimalFormat formater = new DecimalFormat("#,000");
+        
+        ProgressMonitor(int total) {
+            this.startedTime = System.currentTimeMillis();
+            this.complete = 0;
+            this.total = total;
+            this.printedTime = 0;
+            formater.setMaximumFractionDigits(0);
+        }
+
+        void transferProgress(int sent) {
+            this.complete += sent;
+            interaction.setProgressValue(complete);
+            long now = System.currentTimeMillis();
+            if ((printedTime == 0) || ((now - printedTime) > STEP_INTERVAL)) {
+                StringBuffer b = new StringBuffer();
+                b.append("Transferring: ");
+                b.append(formater.format(complete / 1024)).append("/").append(formater.format(total / 1024)).append("K ");
+                b.append((long) (100 * complete / total)).append("% ");
+                b.append(bps(total, now - this.startedTime));
+                interaction.showStatus(b.toString());
+                printedTime = now;
+            }
+        }
+
+        void transferComplete(String message) {
+            if (printedTime != 0) {
+                long msec = System.currentTimeMillis() - this.startedTime;
+                String txt = message + " " + formater.format(total / 1024) + "K completed in " + (msec/1000) + " sec " + bps(total, msec);
+                Logger.debug(txt);
+                interaction.showStatus(txt);
+            }
+        }
+        
+        String bps(int size, long durationMsec) {
+            return formater.format((1000L * 8 * size) / durationMsec) + " bit/s";
+        }
+    }
+
+	
 	public ObexBluetoothClient(UserInteraction interaction, String fileName, byte[] data) {
 		super();
 		this.interaction = interaction;
@@ -54,6 +109,7 @@ public class ObexBluetoothClient {
 
 	public boolean obexPut(String serverURL) {
 		ClientSession clientSession = null;
+		ProgressMonitor progress = null;
 		try {
 			// System.setProperty("bluecove.debug", "true");
 			Logger.debug("Connecting", serverURL);
@@ -63,6 +119,9 @@ public class ObexBluetoothClient {
 			if (hsConnectReply.getResponseCode() != ResponseCodes.OBEX_HTTP_OK) {
 				interaction.showStatus("Connect Error " + hsConnectReply.getResponseCode());
 			}
+			
+			progress = new ProgressMonitor(data.length);
+			
 			HeaderSet hsOperation = clientSession.createHeaderSet();
 			hsOperation.setHeader(HeaderSet.NAME, fileName);
 			String type = ObexTypes.getObexFileType(fileName);
@@ -80,13 +139,13 @@ public class ObexBluetoothClient {
 			OutputStream os = po.openOutputStream();
 
 			ByteArrayInputStream is = new ByteArrayInputStream(data);
-			byte[] buffer = new byte[0xFF];
+			byte[] buffer = new byte[0x400];
 			int i = is.read(buffer);
-			int done = 0;
 			while (i != -1) {
 				os.write(buffer, 0, i);
-				done += i;
-				interaction.setProgressValue(done);
+                // Show progress
+                progress.transferProgress(i);
+                
 				i = is.read(buffer);
 			}
 			os.flush();
@@ -102,9 +161,10 @@ public class ObexBluetoothClient {
 			// log.debug("disconnect responseCode " + hs.getResponseCode());
 
 			if (hsDisconnect.getResponseCode() == ResponseCodes.OBEX_HTTP_OK) {
-				interaction.showStatus("Finished successfully");
+			    progress.transferComplete("Success");
 				return true;
 			} else {
+			    progress.transferComplete("Code " + hsDisconnect.getResponseCode());
 				return false;
 			}
 

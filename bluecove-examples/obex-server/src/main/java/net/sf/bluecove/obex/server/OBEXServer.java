@@ -106,7 +106,9 @@ public class OBEXServer implements Runnable {
 
 		try {
 			ServiceRecord record = localDevice.getRecord(serverConnection);
-
+			String url = record.getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
+			Logger.debug("BT server url: " + url);
+            
 			final int OBJECT_TRANSFER_SERVICE = 0x100000;
 
 			try {
