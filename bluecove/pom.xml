@@ -428,6 +428,7 @@
                                 </goals>
                                 <configuration>
                                     <executable>${basedir}/build-native-intelbth.cmd</executable>
+                                    <commandlineArgs>-maven</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -438,6 +439,7 @@
                                 </goals>
                                 <configuration>
                                     <executable>${basedir}/build-native-bluecove.cmd</executable>
+                                    <commandlineArgs>-maven</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>
@@ -511,6 +513,7 @@
                                 </goals>
                                 <configuration>
                                     <executable>${basedir}/build-native-osx.sh</executable>
+                                    <commandlineArgs>-maven</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>

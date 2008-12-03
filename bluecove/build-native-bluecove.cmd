@@ -10,8 +10,14 @@
 @rem get Parent Directory
 @rem for /f %%i in ("%DEFAULT_BUILD_HOME%..") do @set DEFAULT_BUILD_HOME=%%~fi
 
+@set CALLED_FROM_MAVEN=0
+@if /I '%1' EQU '-maven' (
+    set CALLED_FROM_MAVEN=1
+)
+@echo CALLED_FROM_MAVEN=%CALLED_FROM_MAVEN%
+    
 @if exist %JAVA_HOME%/include/win32 goto java_found
-@echo JAVA_HOME Not Found
+@echo WARN: JAVA_HOME Not Found
 :java_found
 
 @rem %JAVA_HOME%\bin\javah -d src\main\c\intelbth -classpath target\classes com.intel.bluetooth.BluetoothPeer
@@ -57,7 +63,12 @@ copy src\main\resources\bluecove.dll target\classes\
 @goto endmark
 :errormark
     @cd "%DEFAULT_BUILD_HOME%"
-	@ENDLOCAL
-	echo Error in build
+	@echo Error in build
+    @if "%CALLED_FROM_MAVEN%" == "1" (
+        @ENDLOCAL
+        exit 1
+    )
+    @ENDLOCAL
+    pause
 :endmark
 @ENDLOCAL
