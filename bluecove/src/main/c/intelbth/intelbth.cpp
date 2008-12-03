@@ -873,7 +873,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_socket(
 			return 0;
 		}
 	}
-	debug(("opened socket[%i]", (jlong)s));
+	debug(("socket[%u] opened", (int)s));
 	return s;
 }
 
@@ -905,13 +905,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getSecur
 */
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getsockaddress(JNIEnv *env, jobject peer, jlong socket) {
-	debug(("getsockaddress socket[%i]", socket));
+	debug(("socket[%u] getsockaddress", (int)socket));
 	// get socket name
-
 	SOCKADDR_BTH addr;
-
 	int size = sizeof(SOCKADDR_BTH);
-
 	if (getsockname((SOCKET)socket, (sockaddr *)&addr, &size)) {
 		throwIOExceptionWSAGetLastError(env, "Failed to get socket name");
 		return 0;
@@ -920,7 +917,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getsock
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getsockchannel(JNIEnv *env, jobject peer, jlong socket) {
-	debug(("getsockchannel socket[%i]", socket));
+	debug(("socket[%u] getsockchannel", (int)socket));
 	// get socket name
 
 	SOCKADDR_BTH addr;
@@ -935,7 +932,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getsockc
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_connect(JNIEnv *env, jobject peer, jlong socket, jlong address, jint channel) {
-    debug(("connect socket[%i]", socket));
+    debug(("socket[%u] connect", (int)socket));
 
 	SOCKADDR_BTH addr;
 
@@ -970,7 +967,7 @@ connectRety:
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_bind(JNIEnv *env, jobject peer, jlong socket) {
 	// bind socket
-	debug(("bind socket[%i]", socket));
+	debug(("socket[%u] bind", (int)socket));
 
 	SOCKADDR_BTH addr;
 	memset(&addr, 0, sizeof(addr));
@@ -987,16 +984,15 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_bind(JNI
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_listen(JNIEnv *env, jobject peer, jlong socket)
-{
-    debug(("listen socket[%i]", socket));
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_listen(JNIEnv *env, jobject peer, jlong socket) {
+    debug(("socket[%u] listen", (int)socket));
 	if (listen((SOCKET)socket, 10)) {
 		throwIOExceptionWSAGetLastError(env, "Failed to listen socket");
 	}
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_accept(JNIEnv *env, jobject peer, jlong socket) {
-	debug(("accept socket[%i]", socket));
+	debug(("socket[%u] accept", (int)socket));
 	SOCKADDR_BTH addr;
 
 	int size = sizeof(SOCKADDR_BTH);
@@ -1019,8 +1015,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_accept(
  * returns the amount of data that can be read in a single call to the recv function, which may not be the same as
  * the total amount of data queued on the socket.
  */
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recvAvailable(JNIEnv *env, jobject peer, jlong socket)
-{
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recvAvailable(JNIEnv *env, jobject peer, jlong socket) {
 	unsigned long arg = 0;
 	if (ioctlsocket((SOCKET)socket, FIONREAD, &arg) != 0) {
 		throwIOExceptionWSAGetLastError(env, "Failed to read available");
@@ -1030,9 +1025,30 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recvAvai
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J(JNIEnv *env, jobject peer, jlong socket) {
-	debug(("recv() socket[%i]", socket));
+	debug(("socket[%u] recv()", (int)socket));
+	// Use non blocking functions to see if we have one byte
+	struct timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 500 * 1000; //microseconds
+    while (TRUE) {
+        fd_set readfds;
+        fd_set exceptfds;
+        FD_ZERO(&readfds);
+        FD_SET((SOCKET)socket, &readfds);
+        FD_ZERO(&exceptfds);
+        FD_SET((SOCKET)socket, &exceptfds);
+        int ready_count = select(FD_SETSIZE, &readfds, NULL, &exceptfds, &timeout);
+        if (ready_count == SOCKET_ERROR) {
+	        throwIOExceptionWSAGetLastError(env, "Failed to read(int)/select");
+	        return -1;
+	    } else if (ready_count > 0) {
+            break;
+        } else if (isCurrentThreadInterrupted(env, peer)) {
+            return -1;
+        }
+    }
+    // Read the data when available
 	unsigned char c;
-
 	int rc = recv((SOCKET)socket, (char *)&c, 1, 0);
 	if (rc == SOCKET_ERROR) {
 		throwIOExceptionWSAGetLastError(env, "Failed to read(int)");
@@ -1046,30 +1062,54 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J(
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J_3BII(JNIEnv *env, jobject peer, jlong socket, jbyteArray b, jint off, jint len) {
-	debug(("recv socket[%i] (byte[],int,int=%i)", socket, len));
-	jbyte *bytes = env->GetByteArrayElements(b, 0);
-
-	int done = 0;
-
+	debug(("socket[%u] recv (byte[],int,int=%i)", (int)socket, len));
+	// Use non blocking functions to see if we have one byte
+    struct timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 500 * 1000; //microseconds
+    while (TRUE) {
+        fd_set readfds;
+        fd_set exceptfds;
+        FD_ZERO(&readfds);
+        FD_SET((SOCKET)socket, &readfds);
+        FD_ZERO(&exceptfds);
+        FD_SET((SOCKET)socket, &exceptfds);
+        int ready_count = select(FD_SETSIZE, &readfds, NULL, &exceptfds, &timeout);
+        if (ready_count == SOCKET_ERROR) {
+	        throwIOExceptionWSAGetLastError(env, "Failed to read(byte[])/select");
+	        return -1;
+	    } else if (ready_count > 0) {
+            break;
+        } else if (isCurrentThreadInterrupted(env, peer)) {
+            return -1;
+        }
+    }
+    // Read the data when available
+	jbyte *bytes = env->GetByteArrayElements(b, 0);    
+    int done = 0;
 	while(done < len) {
-		int count = recv((SOCKET)socket, (char *)(bytes+off+done), len-done, 0);
+		int count = recv((SOCKET)socket, (char *)(bytes + off + done), len - done, 0);
 		if (count == SOCKET_ERROR) {
-			env->ReleaseByteArrayElements(b, bytes, 0);
 			throwIOExceptionWSAGetLastError(env, "Failed to read(byte[])");
-			return 0;
+			done = -1;
+			break;
 		} else if (count == 0) {
 			debug(("Connection closed"));
 			if (done == 0) {
 				// See InputStream.read();
-				env->ReleaseByteArrayElements(b, bytes, 0);
-				return -1;
+				done = -1;
+			    break;
 			} else {
 				break;
 			}
 		}
 		done += count;
 		if (done != 0) {
-		    unsigned long available = 0;
+		    if (isCurrentThreadInterrupted(env, peer)) {
+			    done = -1;
+			    break;
+		    }
+            unsigned long available = 0;
 	        if (ioctlsocket((SOCKET)socket, FIONREAD, &available) != 0) {
 	            // error;
 	            break;
@@ -1078,42 +1118,38 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J_
 	        }
 		}
 	}
-
 	env->ReleaseByteArrayElements(b, bytes, 0);
-
 	return done;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_send__JI(JNIEnv *env, jobject peer, jlong socket, jint b) {
-	debug(("send socket[%i] (int)", socket));
+	debug(("socket[%u] send(int)", (int)socket));
 	char c = (char)b;
-
 	if (send((SOCKET)socket, &c, 1, 0) != 1) {
 		throwIOExceptionWSAGetLastError(env, "Failed to write");
 	}
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_send__J_3BII(JNIEnv *env, jobject peer, jlong socket, jbyteArray b, jint off, jint len) {
-	debug(("send socket[%i](byte[],int,int=%i)", socket, len));
+	debug(("socket[%u] send(byte[],int,int=%i)", (int)socket, len));
 	jbyte *bytes = env->GetByteArrayElements(b, 0);
-
 	int done = 0;
-
-	while(done < len) {
+	while (done < len) {
 		int count = send((SOCKET)socket, (char *)(bytes + off + done), len - done, 0);
 		if (count <= 0) {
-			env->ReleaseByteArrayElements(b, bytes, 0);
 			throwIOExceptionWSAGetLastError(env, "Failed to write");
-			return;
+			break;
 		}
 		done += count;
+		if ((done < len) && (isCurrentThreadInterrupted(env, peer))) {
+            break;
+        }
 	}
-
 	env->ReleaseByteArrayElements(b, bytes, 0);
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_close(JNIEnv *env, jobject peer, jlong socket) {
-	debug(("close socket[%i]", socket));
+	debug(("socket[%u] close", (int)socket));
 	if (closesocket((SOCKET)socket)) {
 		throwIOExceptionWSAGetLastError(env, "Failed to close socket");
 	}
@@ -1213,7 +1249,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getpe
 
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getpeeraddress(JNIEnv *env, jobject peer, jlong socket) {
-	debug(("getpeeraddress socket[%i]", socket));
+	debug(("socket[%u] getpeeraddress", (int)socket));
 	SOCKADDR_BTH addr;
 	int size = sizeof(addr);
 	if (getpeername((SOCKET) socket, (sockaddr*)&addr, &size)) {

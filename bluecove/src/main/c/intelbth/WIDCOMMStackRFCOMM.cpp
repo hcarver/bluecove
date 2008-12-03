@@ -342,7 +342,6 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			return 0;
 		}
 		if (isCurrentThreadInterrupted(env, peer)) {
-			debug(("Interrupted while reading"));
 			return 0;
 		}
 		/*

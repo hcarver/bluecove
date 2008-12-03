@@ -2,6 +2,9 @@
 
 * 2.1.0 to be released 2008-12-XX
 
+    2008-12-03
+    * Fixed thread.interrupt() will break read on MS stack
+
     2008-11-14
     * Implementation of DiscoveryAgent.retrieveDevices on MS stack
 

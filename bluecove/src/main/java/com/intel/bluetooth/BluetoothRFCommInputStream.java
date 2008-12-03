@@ -63,7 +63,15 @@ class BluetoothRFCommInputStream extends InputStream {
 		if (conn == null) {
 			throw new IOException("Stream closed");
 		} else {
-			return conn.bluetoothStack.connectionRfRead(conn.handle);
+			try {
+                return conn.bluetoothStack.connectionRfRead(conn.handle);
+            } catch (IOException e) {
+                if (isClosed()) {
+                    return -1;
+                } else {
+                    throw e;
+                }
+            }
 		}
 	}
 
@@ -127,7 +135,15 @@ class BluetoothRFCommInputStream extends InputStream {
 				return 0;
 			}
 			// otherwise, there is an attempt to read at least one byte.
-			return conn.bluetoothStack.connectionRfRead(conn.handle, b, off, len);
+			try {
+			    return conn.bluetoothStack.connectionRfRead(conn.handle, b, off, len);
+			} catch (IOException e) {
+                if (isClosed()) {
+                    return -1;
+                } else {
+                    throw e;
+                }
+            }
 		}
 	}
 

@@ -73,11 +73,13 @@ public class ClientConnectionThread extends Thread {
 
 	boolean rfcomm;
 
-	public static final int interpretDataChars = 0;
+	public static final int interpretDataChar = 0;
 
-	public static final int interpretDataStats = 1;
+	public static final int interpretDataCharArray = 1;
+	
+	public static final int interpretDataStats = 2;
 
-	int interpretData = interpretDataChars;
+	int interpretData = interpretDataChar;
 
 	long reported = 0;
 
@@ -119,13 +121,26 @@ public class ClientConnectionThread extends Thread {
 				cs.os = cs.conn.openOutputStream();
 				isRunning = true;
 				while (!stoped) {
-					int data = cs.is.read();
-					if (data == -1) {
-						Logger.debug("EOF recived");
-						break;
+					if (interpretData == interpretDataCharArray) {
+					    byte b[] = new byte[4];
+					    int readLen = cs.is.read(b);
+					    if (readLen == -1) {
+                            Logger.debug("EOF recived");
+                            break;
+                        }
+					    receivedCount += readLen;
+					    for (int k = 0; k < readLen; k++) {
+                            printdataReceivedRFCOMM(b[k]);
+                        }
+					} else {
+					    int data = cs.is.read();
+					    if (data == -1) {
+	                        Logger.debug("EOF recived");
+	                        break;
+	                    }
+	                    receivedCount++;
+	                    printdataReceivedRFCOMM(data);
 					}
-					receivedCount++;
-					printdataReceivedRFCOMM(data);
 				}
 				if (dataBuf.length() > 0) {
 					Logger.debug("cc:" + StringUtils.toBinaryText(dataBuf));
@@ -152,6 +167,8 @@ public class ClientConnectionThread extends Thread {
 		} catch (IOException e) {
 			if (!stoped) {
 				Logger.error("Communication error", e);
+			} else {
+			    Logger.debug("communication stopped", e);
 			}
 		} catch (Throwable e) {
 			Logger.error("Error", e);
@@ -166,7 +183,8 @@ public class ClientConnectionThread extends Thread {
 
 	private void printdataReceivedRFCOMM(int data) {
 		switch (interpretData) {
-		case interpretDataChars:
+		case interpretDataChar:
+		case interpretDataCharArray:    
 			char c = (char) data;
 			if ((!binaryData) && (c < ' ')) {
 				binaryData = true;
@@ -201,7 +219,7 @@ public class ClientConnectionThread extends Thread {
 
 	private void printdataReceivedL2CAP(byte[] data, int length) {
 		switch (interpretData) {
-		case interpretDataChars:
+		case interpretDataChar:
 			int messageLength = length;
 			if ((length > 0) && (data[length - 1] == '\n')) {
 				messageLength = length - 1;

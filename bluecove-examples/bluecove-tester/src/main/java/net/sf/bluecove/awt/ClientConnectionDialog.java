@@ -71,7 +71,7 @@ public class ClientConnectionDialog extends Dialog {
 
 	private static final String configConnectionURL = "connectionURL";
 
-	Button btnConnect, btnDisconnect, btnCancel, btnSend;
+	Button btnConnect, btnDisconnect, btnCancel, btnSend, btnInterrupt;
 
 	TextField tfURL;
 
@@ -108,6 +108,7 @@ public class ClientConnectionDialog extends Dialog {
 					btnDisconnect.setEnabled(false);
 					btnConnect.setEnabled(true);
 					btnSend.setEnabled(false);
+					btnInterrupt.setEnabled(false);
 					wasConnected = false;
 					wasStarted = false;
 					connectingCount = 0;
@@ -115,6 +116,7 @@ public class ClientConnectionDialog extends Dialog {
 			} else if (thread.isRunning) {
 				if (!wasConnected) {
 					btnSend.setEnabled(true);
+					btnInterrupt.setEnabled(true);
 				}
 				wasConnected = true;
 				if (thread.receivedCount == 0) {
@@ -227,7 +229,8 @@ public class ClientConnectionDialog extends Dialog {
 		gridbag.setConstraints(lReceive, c);
 
 		choiceDataReceiveType = new Choice();
-		choiceDataReceiveType.add("as Chars");
+		choiceDataReceiveType.add("as Char");
+		choiceDataReceiveType.add("as CharArray");
 		choiceDataReceiveType.add("stats only");
 		// choiceDataType.add("as byte list");
 		// choiceDataReceiveType.add("as Echo");
@@ -287,6 +290,14 @@ public class ClientConnectionDialog extends Dialog {
 		});
 		btnDisconnect.setEnabled(false);
 
+		panelBtns.add(btnInterrupt = new Button("Interrupt"));
+		btnInterrupt.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                interrupt();
+            }
+        });
+        btnInterrupt.setEnabled(false);
+		
 		if (Configuration.isBlueCove) {
 			Button btnBond = new Button("Bond");
 			panelBtns.add(btnBond);
@@ -414,6 +425,13 @@ public class ClientConnectionDialog extends Dialog {
 			thread = null;
 		}
 	}
+	
+	public void interrupt() {
+        if (thread != null) {
+            thread.interrupt();
+            Logger.debug("thread.interrupt() called");
+        }
+    }
 
 	protected void onClose() {
 		shutdown();
@@ -438,6 +456,10 @@ public class ClientConnectionDialog extends Dialog {
 		}
 		final String pin = pinStr;
 		final String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
+		if (deviceAddress == null) {
+            Logger.error("invalid url");
+            return;
+        }
 		final RemoteDevice device = new RemoteDeviceIheritance(deviceAddress);
 		Logger.debug("authenticate:" + deviceAddress + " pin:" + pin);
 		Thread t = new Thread("Authenticate") {
@@ -460,6 +482,10 @@ public class ClientConnectionDialog extends Dialog {
 	private void onUnBond() {
 		String url = tfURL.getText();
 		final String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
+		if (deviceAddress == null) {
+            Logger.error("invalid url");
+            return;
+        }
 		final RemoteDevice device = new RemoteDeviceIheritance(deviceAddress);
 		Logger.debug("removed authentication:" + deviceAddress);
 		Thread t = new Thread("UnAuthenticate") {
@@ -483,6 +509,10 @@ public class ClientConnectionDialog extends Dialog {
 		String url = tfURL.getText();
 		try {
 			String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
+			if (deviceAddress == null) {
+                Logger.error("invalid url");
+                return;
+            }
 			Logger.debug(deviceAddress + " setSniffMode : "
 					+ LocalDevice.getProperty("bluecove.nativeFunction:setSniffMode:" + deviceAddress));
 			// Logger.debug(deviceAddress + " cancelSniffMode : "
@@ -498,6 +528,10 @@ public class ClientConnectionDialog extends Dialog {
 		String url = tfURL.getText();
 		try {
 			String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
+			if (deviceAddress == null) {
+			    Logger.error("invalid url");
+			    return;
+			}
 			RemoteDevice device = new RemoteDeviceIheritance(deviceAddress);
 			Logger.debug(deviceAddress + " isAuthenticated", device.isAuthenticated());
 			Logger.debug(deviceAddress + " isTrustedDevice", device.isTrustedDevice());
