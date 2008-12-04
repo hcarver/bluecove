@@ -931,7 +931,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_getsockc
 	return addr.port;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_connect(JNIEnv *env, jobject peer, jlong socket, jlong address, jint channel) {
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_connect(JNIEnv *env, jobject peer, jlong socket, jlong address, jint channel, jint retryUnreachable) {
     debug(("socket[%u] connect", (int)socket));
 
 	SOCKADDR_BTH addr;
@@ -943,14 +943,13 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_connect(
 	addr.port = channel;
 
 	int retyCount = 0;
-	int retyMAX = 2;
 connectRety:
 	if (connect((SOCKET)socket, (sockaddr *)&addr, sizeof(SOCKADDR_BTH))) {
 		retyCount ++;
 		int last_error = WSAGetLastError();
 		//10051 - A socket operation was attempted to an unreachable network. / Error other than time-out at L2CAP or Bluetooth radio level.
 		if (last_error == WSAENETUNREACH) {
-			if (retyCount < retyMAX) {
+			if ((retyCount < retryUnreachable) && (retryUnreachable > 0)) {
 				debug(("connectRety %i", retyCount));
 				goto connectRety;
 			}

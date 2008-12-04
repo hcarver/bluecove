@@ -580,7 +580,7 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 
 	private native int getsockchannel(long socket) throws IOException;
 
-	private native void connect(long socket, long address, int channel) throws IOException;
+	private native void connect(long socket, long address, int channel, int retryUnreachable) throws IOException;
 
 	private native void bind(long socket) throws IOException;
 
@@ -614,9 +614,11 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	 */
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
 		long socket = socket(params.authenticate, params.encrypt);
+		int retryUnreachable = BlueCoveImpl.getConfigProperty(
+				BlueCoveConfigProperties.PROPERTY_CONNECT_UNREACHABLE_RETRY, 2);
 		boolean success = false;
 		try {
-			connect(socket, params.address, params.channel);
+			connect(socket, params.address, params.channel, retryUnreachable);
 			success = true;
 		} finally {
 			if (!success) {

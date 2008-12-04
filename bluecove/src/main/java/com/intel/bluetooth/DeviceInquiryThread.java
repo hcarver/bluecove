@@ -28,10 +28,10 @@ import javax.bluetooth.DiscoveryListener;
 
 /**
  * This is Common class to solve JNI call backs problem
- *
+ * 
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- *
+ * 
  */
 class DeviceInquiryThread extends Thread {
 
@@ -67,8 +67,7 @@ class DeviceInquiryThread extends Thread {
 	}
 
 	/**
-	 * Start DeviceInquiry and wait for startException or
-	 * deviceInquiryStartedCallback
+	 * Start DeviceInquiry and wait for startException or deviceInquiryStartedCallback
 	 */
 	static boolean startInquiry(BluetoothStack stack, DeviceInquiryRunnable inquiryRunnable, int accessCode,
 			DiscoveryListener listener) throws BluetoothStateException {
@@ -93,12 +92,8 @@ class DeviceInquiryThread extends Thread {
 	}
 
 	public static int getConfigDeviceInquiryDuration() {
-		String duration = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_INQUIRY_DURATION);
-		if (duration != null) {
-			return Integer.parseInt(duration);
-		} else {
-			return BlueCoveConfigProperties.PROPERTY_INQUIRY_DURATION_DEFAULT;
-		}
+		return BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_INQUIRY_DURATION,
+				BlueCoveConfigProperties.PROPERTY_INQUIRY_DURATION_DEFAULT);
 	}
 
 	public void run() {

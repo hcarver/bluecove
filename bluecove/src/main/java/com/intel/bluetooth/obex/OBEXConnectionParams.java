@@ -31,27 +31,27 @@ public class OBEXConnectionParams {
 
 	public static final int DEFAULT_TIMEOUT = 2 * 60 * 1000;
 
+	public static final int OBEX_DEFAULT_MTU = OBEXOperationCodes.OBEX_DEFAULT_MTU;
+
 	/**
 	 * Enables timeouts.
-	 *
+	 * 
 	 * @see javax.microedition.io.Connector#open(String,int,boolean)
 	 */
 	public boolean timeouts;
 
 	/**
-	 * The amount of time in milliseconds for which the implementation will
-	 * attempt to successfully transmit a packet before it throws
-	 * InterruptedIOException.
-	 *
-	 * Java System property "bluecove.obex.timeout" can be used to define the
-	 * value.
+	 * The amount of time in milliseconds for which the implementation will attempt to successfully transmit a packet
+	 * before it throws InterruptedIOException.
+	 * 
+	 * Java System property "bluecove.obex.timeout" can be used to define the value.
 	 */
 	public int timeout = DEFAULT_TIMEOUT;
 
 	/**
 	 * You can increase network speed by changing mtu to bigger value.
-	 *
+	 * 
 	 * Java System property "bluecove.obex.mtu" can be used to define the value.
 	 */
-	public int mtu = OBEXOperationCodes.OBEX_DEFAULT_MTU;
+	public int mtu = OBEX_DEFAULT_MTU;
 }

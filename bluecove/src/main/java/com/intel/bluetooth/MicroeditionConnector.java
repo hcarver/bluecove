@@ -48,13 +48,12 @@ import com.intel.bluetooth.obex.OBEXConnectionParams;
 import com.intel.bluetooth.obex.OBEXSessionNotifierImpl;
 
 /**
- *
+ * 
  * Implementation of javax.microedition.io.Connector
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
  * <p>
- * BlueCove specific JSR-82 extension <tt>bluecovepsm</tt> enables the use of
- * specific PSM channel in L2CAP service.
+ * BlueCove specific JSR-82 extension <tt>bluecovepsm</tt> enables the use of specific PSM channel in L2CAP service.
  * <tt>btl2cap://localhost;name=...;bluecovepsm=1007</tt>
  */
 public abstract class MicroeditionConnector {
@@ -153,13 +152,10 @@ public abstract class MicroeditionConnector {
 	}
 
 	/*
-	 * Create and open a Connection. Parameters: name - The URL for the
-	 * connection. Returns: A new Connection object. Throws:
-	 * IllegalArgumentException - If a parameter is invalid.
-	 * ConnectionNotFoundException - If the requested connection cannot be made,
-	 * or the protocol type does not exist. java.io.IOException - If some other
-	 * kind of I/O error occurs. SecurityException - If a requested protocol
-	 * handler is not permitted.
+	 * Create and open a Connection. Parameters: name - The URL for the connection. Returns: A new Connection object.
+	 * Throws: IllegalArgumentException - If a parameter is invalid. ConnectionNotFoundException - If the requested
+	 * connection cannot be made, or the protocol type does not exist. java.io.IOException - If some other kind of I/O
+	 * error occurs. SecurityException - If a requested protocol handler is not permitted.
 	 */
 
 	public static Connection open(String name) throws IOException {
@@ -356,10 +352,9 @@ public abstract class MicroeditionConnector {
 								"encryption requires authentication");
 					}
 				}
-				String timeout = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_CONNECT_TIMEOUT);
-				if (timeout != null) {
-					connectionParams.timeout = Integer.parseInt(timeout);
-				}
+				connectionParams.timeout = BlueCoveImpl.getConfigProperty(
+						BlueCoveConfigProperties.PROPERTY_CONNECT_TIMEOUT,
+						BluetoothConnectionParams.DEFAULT_CONNECT_TIMEOUT);
 			}
 		}
 		OBEXConnectionParams obexConnectionParams = null;
@@ -368,14 +363,10 @@ public abstract class MicroeditionConnector {
 				|| scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX)) {
 			obexConnectionParams = new OBEXConnectionParams();
 			obexConnectionParams.timeouts = timeouts;
-			String timeout = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_OBEX_TIMEOUT);
-			if (timeout != null) {
-				obexConnectionParams.timeout = Integer.parseInt(timeout);
-			}
-			String mtu = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_OBEX_MTU);
-			if (mtu != null) {
-				obexConnectionParams.mtu = Integer.parseInt(mtu);
-			}
+			obexConnectionParams.timeout = BlueCoveImpl.getConfigProperty(
+					BlueCoveConfigProperties.PROPERTY_OBEX_TIMEOUT, OBEXConnectionParams.DEFAULT_TIMEOUT);
+			obexConnectionParams.mtu = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_OBEX_MTU,
+					OBEXConnectionParams.OBEX_DEFAULT_MTU);
 		}
 
 		/*
@@ -500,13 +491,10 @@ public abstract class MicroeditionConnector {
 	}
 
 	/*
-	 * Create and open a Connection. Parameters: name - The URL for the
-	 * connection. mode - The access mode. Returns: A new Connection object.
-	 * Throws: IllegalArgumentException - If a parameter is invalid.
-	 * ConnectionNotFoundException - If the requested connection cannot be made,
-	 * or the protocol type does not exist. java.io.IOException - If some other
-	 * kind of I/O error occurs. SecurityException - If a requested protocol
-	 * handler is not permitted.
+	 * Create and open a Connection. Parameters: name - The URL for the connection. mode - The access mode. Returns: A
+	 * new Connection object. Throws: IllegalArgumentException - If a parameter is invalid. ConnectionNotFoundException
+	 * - If the requested connection cannot be made, or the protocol type does not exist. java.io.IOException - If some
+	 * other kind of I/O error occurs. SecurityException - If a requested protocol handler is not permitted.
 	 */
 
 	public static Connection open(String name, int mode) throws IOException {
@@ -514,14 +502,11 @@ public abstract class MicroeditionConnector {
 	}
 
 	/*
-	 * Create and open a Connection. Parameters: name - The URL for the
-	 * connection mode - The access mode timeouts - A flag to indicate that the
-	 * caller wants timeout exceptions Returns: A new Connection object Throws:
-	 * IllegalArgumentException - If a parameter is invalid.
-	 * ConnectionNotFoundException - if the requested connection cannot be made,
-	 * or the protocol type does not exist. java.io.IOException - If some other
-	 * kind of I/O error occurs. SecurityException - If a requested protocol
-	 * handler is not permitted.
+	 * Create and open a Connection. Parameters: name - The URL for the connection mode - The access mode timeouts - A
+	 * flag to indicate that the caller wants timeout exceptions Returns: A new Connection object Throws:
+	 * IllegalArgumentException - If a parameter is invalid. ConnectionNotFoundException - if the requested connection
+	 * cannot be made, or the protocol type does not exist. java.io.IOException - If some other kind of I/O error
+	 * occurs. SecurityException - If a requested protocol handler is not permitted.
 	 */
 
 	public static Connection open(String name, int mode, boolean timeouts) throws IOException {
@@ -529,12 +514,10 @@ public abstract class MicroeditionConnector {
 	}
 
 	/*
-	 * Create and open a connection input stream. Parameters: name - The URL for
-	 * the connection. Returns: A DataInputStream. Throws:
-	 * IllegalArgumentException - If a parameter is invalid.
-	 * ConnectionNotFoundException - If the connection cannot be found.
-	 * java.io.IOException - If some other kind of I/O error occurs.
-	 * SecurityException - If access to the requested stream is not permitted.
+	 * Create and open a connection input stream. Parameters: name - The URL for the connection. Returns: A
+	 * DataInputStream. Throws: IllegalArgumentException - If a parameter is invalid. ConnectionNotFoundException - If
+	 * the connection cannot be found. java.io.IOException - If some other kind of I/O error occurs. SecurityException -
+	 * If access to the requested stream is not permitted.
 	 */
 
 	public static DataInputStream openDataInputStream(String name) throws IOException {
@@ -542,12 +525,10 @@ public abstract class MicroeditionConnector {
 	}
 
 	/*
-	 * Create and open a connection output stream. Parameters: name - The URL
-	 * for the connection. Returns: A DataOutputStream. Throws:
-	 * IllegalArgumentException - If a parameter is invalid.
-	 * ConnectionNotFoundException - If the connection cannot be found.
-	 * java.io.IOException - If some other kind of I/O error occurs.
-	 * SecurityException - If access to the requested stream is not permitted.
+	 * Create and open a connection output stream. Parameters: name - The URL for the connection. Returns: A
+	 * DataOutputStream. Throws: IllegalArgumentException - If a parameter is invalid. ConnectionNotFoundException - If
+	 * the connection cannot be found. java.io.IOException - If some other kind of I/O error occurs. SecurityException -
+	 * If access to the requested stream is not permitted.
 	 */
 
 	public static DataOutputStream openDataOutputStream(String name) throws IOException {
@@ -555,12 +536,10 @@ public abstract class MicroeditionConnector {
 	}
 
 	/*
-	 * Create and open a connection input stream. Parameters: name - The URL for
-	 * the connection. Returns: An InputStream. Throws: IllegalArgumentException -
-	 * If a parameter is invalid. ConnectionNotFoundException - If the
-	 * connection cannot be found. java.io.IOException - If some other kind of
-	 * I/O error occurs. SecurityException - If access to the requested stream
-	 * is not permitted.
+	 * Create and open a connection input stream. Parameters: name - The URL for the connection. Returns: An
+	 * InputStream. Throws: IllegalArgumentException - If a parameter is invalid. ConnectionNotFoundException - If the
+	 * connection cannot be found. java.io.IOException - If some other kind of I/O error occurs. SecurityException - If
+	 * access to the requested stream is not permitted.
 	 */
 
 	public static InputStream openInputStream(String name) throws IOException {
@@ -573,12 +552,10 @@ public abstract class MicroeditionConnector {
 	}
 
 	/*
-	 * Create and open a connection output stream. Parameters: name - The URL
-	 * for the connection. Returns: An OutputStream. Throws:
-	 * IllegalArgumentException - If a parameter is invalid.
-	 * ConnectionNotFoundException - If the connection cannot be found.
-	 * java.io.IOException - If some other kind of I/O error occurs.
-	 * SecurityException - If access to the requested stream is not permitted.
+	 * Create and open a connection output stream. Parameters: name - The URL for the connection. Returns: An
+	 * OutputStream. Throws: IllegalArgumentException - If a parameter is invalid. ConnectionNotFoundException - If the
+	 * connection cannot be found. java.io.IOException - If some other kind of I/O error occurs. SecurityException - If
+	 * access to the requested stream is not permitted.
 	 */
 
 	public static OutputStream openOutputStream(String name) throws IOException {
