@@ -42,8 +42,10 @@ public class CollectionUtils {
 
 	public static Vector copy(Vector v) {
 		Vector copy = new Vector();
-		for (Enumeration en = v.elements(); en.hasMoreElements();) {
-			copy.addElement(en.nextElement());
+		synchronized (v) {
+			for (Enumeration en = v.elements(); en.hasMoreElements();) {
+				copy.addElement(en.nextElement());
+			}
 		}
 		return copy;
 	}

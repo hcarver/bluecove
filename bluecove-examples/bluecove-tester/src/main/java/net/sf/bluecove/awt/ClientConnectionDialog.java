@@ -236,6 +236,7 @@ public class ClientConnectionDialog extends Dialog {
 		choiceDataReceiveType.add("as charArray");
 		choiceDataReceiveType.add("stats only char");
 		choiceDataReceiveType.add("stats only charArray");
+		choiceDataReceiveType.add("do not read");
 		// choiceDataType.add("as byte list");
 		// choiceDataReceiveType.add("as Echo");
 		panelItems.add(choiceDataReceiveType);

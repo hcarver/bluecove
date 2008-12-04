@@ -44,6 +44,7 @@ import javax.microedition.io.StreamConnectionNotifier;
 
 import net.sf.bluecove.se.JavaSECommon;
 import net.sf.bluecove.util.BluetoothTypesInfo;
+import net.sf.bluecove.util.CollectionUtils;
 import net.sf.bluecove.util.CountStatistic;
 import net.sf.bluecove.util.IOUtils;
 import net.sf.bluecove.util.TimeStatistic;
@@ -277,16 +278,19 @@ public class TestResponderServer implements CanShutdown, Runnable {
 				countRunningConnections--;
 				concurrentStatistic.add(concurrentCount);
 				connectionDuration.add(TimeUtils.since(connectionStartTime));
-
-				IOUtils.closeQuietly(c.is);
-				IOUtils.closeQuietly(c.os);
-				IOUtils.closeQuietly(c.conn);
 				isRunning = false;
+				c.shutdown();
 				synchronized (this) {
 					notifyAll();
 				}
 			}
 			Logger.info("*Test Success:" + countSuccess + " Failure:" + failure.countFailure);
+		}
+
+		void shutdown() {
+			if (isRunning) {
+				c.shutdown();
+			}
 		}
 	}
 
@@ -454,6 +458,7 @@ public class TestResponderServer implements CanShutdown, Runnable {
 	}
 
 	private void closeServer() {
+		closeServerClientConnections();
 		if (serverConnection != null) {
 			synchronized (this) {
 				try {
@@ -476,8 +481,28 @@ public class TestResponderServer implements CanShutdown, Runnable {
 			responderOBEXServer.closeServer();
 			responderOBEXServer = null;
 		}
-
 		setNotDiscoverable();
+	}
+
+	public void closeServerClientConnections() {
+		Vector copy = CollectionUtils.copy(concurrentConnectionRunnable);
+		for (Enumeration iter = copy.elements(); iter.hasMoreElements();) {
+			ServerConnectionRunnable t = (ServerConnectionRunnable) iter.nextElement();
+			t.shutdown();
+		}
+	}
+
+	public int clientConnections() {
+		int count = 0;
+		synchronized (concurrentConnectionRunnable) {
+			for (Enumeration iter = concurrentConnectionRunnable.elements(); iter.hasMoreElements();) {
+				ServerConnectionRunnable t = (ServerConnectionRunnable) iter.nextElement();
+				if (t.isRunning) {
+					count++;
+				}
+			}
+		}
+		return count;
 	}
 
 	public static boolean setDiscoverable() {

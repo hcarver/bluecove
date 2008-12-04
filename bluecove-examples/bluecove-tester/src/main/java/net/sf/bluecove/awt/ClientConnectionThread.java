@@ -76,10 +76,12 @@ public class ClientConnectionThread extends Thread {
 	public static final int interpretDataChar = 0;
 
 	public static final int interpretDataCharArray = 1;
-	
+
 	public static final int interpretDataStats = 2;
-	
+
 	public static final int interpretDataStatsArray = 3;
+
+	public static final int interpretIgnore = 4;
 
 	int interpretData = interpretDataChar;
 
@@ -123,25 +125,27 @@ public class ClientConnectionThread extends Thread {
 				cs.os = cs.conn.openOutputStream();
 				isRunning = true;
 				while (!stoped) {
-					if ((interpretData == interpretDataCharArray) || (interpretData == interpretDataStatsArray)) {
-					    byte b[] = new byte[0xFF];
-					    int readLen = cs.is.read(b);
-					    if (readLen == -1) {
-                            Logger.debug("EOF recived");
-                            break;
-                        }
-					    receivedCount += readLen;
-					    for (int k = 0; k < readLen; k++) {
-                            printdataReceivedRFCOMM(b[k]);
-                        }
+					if (interpretData == interpretIgnore) {
+						Thread.sleep(777);
+					} else if ((interpretData == interpretDataCharArray) || (interpretData == interpretDataStatsArray)) {
+						byte b[] = new byte[0xFF];
+						int readLen = cs.is.read(b);
+						if (readLen == -1) {
+							Logger.debug("EOF recived");
+							break;
+						}
+						receivedCount += readLen;
+						for (int k = 0; k < readLen; k++) {
+							printdataReceivedRFCOMM(b[k]);
+						}
 					} else {
-					    int data = cs.is.read();
-					    if (data == -1) {
-	                        Logger.debug("EOF recived");
-	                        break;
-	                    }
-	                    receivedCount++;
-	                    printdataReceivedRFCOMM(data);
+						int data = cs.is.read();
+						if (data == -1) {
+							Logger.debug("EOF recived");
+							break;
+						}
+						receivedCount++;
+						printdataReceivedRFCOMM(data);
 					}
 				}
 				if (dataBuf.length() > 0) {
@@ -170,7 +174,7 @@ public class ClientConnectionThread extends Thread {
 			if (!stoped) {
 				Logger.error("Communication error", e);
 			} else {
-			    Logger.debug("communication stopped", e);
+				Logger.debug("communication stopped", e);
 			}
 		} catch (Throwable e) {
 			Logger.error("Error", e);
@@ -186,7 +190,7 @@ public class ClientConnectionThread extends Thread {
 	private void printdataReceivedRFCOMM(int data) {
 		switch (interpretData) {
 		case interpretDataChar:
-		case interpretDataCharArray:    
+		case interpretDataCharArray:
 			char c = (char) data;
 			if ((!binaryData) && (c < ' ')) {
 				binaryData = true;

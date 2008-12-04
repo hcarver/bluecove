@@ -114,6 +114,10 @@ public class Switcher implements Runnable {
 		return isTCKRunning() || ((server != null) && server.isRunning());
 	}
 
+	public static boolean isRunningServerClients() {
+		return ((server != null) && (server.clientConnections() > 0));
+	}
+
 	public void run() {
 		Logger.debug("Switcher started...");
 		isRunning = true;
@@ -521,6 +525,13 @@ public class Switcher implements Runnable {
 	public static void serverShutdownForce() {
 		if (server != null) {
 			server.shutdown();
+			server = null;
+		}
+	}
+
+	public static void closeServerClientConnections() {
+		if (server != null) {
+			server.closeServerClientConnections();
 			server = null;
 		}
 	}

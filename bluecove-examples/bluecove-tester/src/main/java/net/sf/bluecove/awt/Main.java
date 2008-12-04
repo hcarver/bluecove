@@ -152,6 +152,12 @@ public class Main extends Frame implements LoggerAppender {
 			}
 		}, KeyEvent.VK_6);
 
+		final MenuItem serverClientsStop = addMenu(menuBluetooth, "Server Clients close", new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Switcher.closeServerClientConnections();
+			}
+		});
+
 		final MenuItem clientStart = addMenu(menuBluetooth, "Client Start", new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Switcher.startClient();
@@ -450,6 +456,7 @@ public class Main extends Frame implements LoggerAppender {
 					if (isMainFrameActive()) {
 						serverStop.setEnabled(Switcher.isRunningServer());
 						serverStart.setEnabled(!Switcher.isRunningServer());
+						serverClientsStop.setEnabled(Switcher.isRunningServerClients());
 
 						clientStop.setEnabled(Switcher.isRunningClient());
 						clientStart.setEnabled(!Switcher.isRunningClient());
