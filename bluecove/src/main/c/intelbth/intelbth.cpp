@@ -1085,7 +1085,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J_
         }
     }
     // Read the data when available
-	jbyte *bytes = env->GetByteArrayElements(b, 0);    
+	jbyte *bytes = env->GetByteArrayElements(b, 0);
     int done = 0;
 	while(done < len) {
 		int count = recv((SOCKET)socket, (char *)(bytes + off + done), len - done, 0);
@@ -1150,6 +1150,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_send__J_
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_close(JNIEnv *env, jobject peer, jlong socket) {
 	debug(("socket[%u] close", (int)socket));
+	if (shutdown((SOCKET)socket, SD_BOTH) != 0) {
+	    int last_error = WSAGetLastError();
+	    debug(("shutdown error [%i] %S", last_error, getWinErrorMessage(last_error)));
+	}
 	if (closesocket((SOCKET)socket)) {
 		throwIOExceptionWSAGetLastError(env, "Failed to close socket");
 	}
