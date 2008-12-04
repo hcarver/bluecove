@@ -8,7 +8,7 @@
         ant -Dbuild.compiler=jikes
      -->
 
-    <property name="product_version" value="2.0.3"/>
+    <property name="product_version" value="2.1.0"/>
 
     <property name="bluecove_main_dist_dir" location="../bluecove/target"/>
     <property name="bluecove_main_jar" location="${bluecove_main_dist_dir}/bluecove-${product_version}.jar"/>
