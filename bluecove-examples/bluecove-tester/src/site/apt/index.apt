@@ -96,6 +96,10 @@ Server failure 0
 
         * <<<{{{./awt-bctest-device-2.jnlp}\u00bbStart with Local Bluetooth device 2}}>>>
 
+    Generic web start (Mac OS X/Windows/Linux)
+
+        * <<<{{{./awt-bctest.jnlp}\u00bbStart generic (auto detect stack) test application}}>>>
+
     If for some reason Java Web Start is not working for you. Try downloading this {{{./bluecove-tester-app.jar}bluecove-tester-app.jar}} application.
 
     Run it like this:
@@ -194,6 +198,8 @@ java -cp avetanaBluetooth.jar:bluecove-tester.jar:junit-3.8.1.jar net.sf.bluecov
         * <<<{{{./awt-bctest-2.0.1.jnlp}\u00bbStart with BlueCove v 2.0.1}}>>>
 
         * <<<{{{./awt-bctest-2.0.2.jnlp}\u00bbStart with BlueCove v 2.0.2}}>>>
+        
+        * <<<{{{./awt-bctest-2.0.3.jnlp}\u00bbStart with BlueCove v 2.0.3}}>>>
 
 * Servers in this application can be used as traffic generator
 
