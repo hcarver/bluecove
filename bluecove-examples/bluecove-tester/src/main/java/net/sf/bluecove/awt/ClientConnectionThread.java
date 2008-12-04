@@ -78,6 +78,8 @@ public class ClientConnectionThread extends Thread {
 	public static final int interpretDataCharArray = 1;
 	
 	public static final int interpretDataStats = 2;
+	
+	public static final int interpretDataStatsArray = 3;
 
 	int interpretData = interpretDataChar;
 
@@ -121,8 +123,8 @@ public class ClientConnectionThread extends Thread {
 				cs.os = cs.conn.openOutputStream();
 				isRunning = true;
 				while (!stoped) {
-					if (interpretData == interpretDataCharArray) {
-					    byte b[] = new byte[4];
+					if ((interpretData == interpretDataCharArray) || (interpretData == interpretDataStatsArray)) {
+					    byte b[] = new byte[0xFF];
 					    int readLen = cs.is.read(b);
 					    if (readLen == -1) {
                             Logger.debug("EOF recived");
@@ -195,6 +197,7 @@ public class ClientConnectionThread extends Thread {
 				dataBuf = new StringBuffer();
 			}
 			break;
+		case interpretDataStatsArray:
 		case interpretDataStats:
 			long now = System.currentTimeMillis();
 			if (now - reported > 5 * 1000) {
@@ -219,6 +222,7 @@ public class ClientConnectionThread extends Thread {
 
 	private void printdataReceivedL2CAP(byte[] data, int length) {
 		switch (interpretData) {
+		case interpretDataCharArray:
 		case interpretDataChar:
 			int messageLength = length;
 			if ((length > 0) && (data[length - 1] == '\n')) {
@@ -231,6 +235,7 @@ public class ClientConnectionThread extends Thread {
 			buf.append(" (").append(length).append(")");
 			Logger.debug("cc:" + buf.toString());
 			break;
+		case interpretDataStatsArray:
 		case interpretDataStats:
 			long now = System.currentTimeMillis();
 			if (now - reported > 5 * 1000) {

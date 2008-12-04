@@ -229,9 +229,10 @@ public class ClientConnectionDialog extends Dialog {
 		gridbag.setConstraints(lReceive, c);
 
 		choiceDataReceiveType = new Choice();
-		choiceDataReceiveType.add("as Char");
-		choiceDataReceiveType.add("as CharArray");
-		choiceDataReceiveType.add("stats only");
+		choiceDataReceiveType.add("as char");
+		choiceDataReceiveType.add("as charArray");
+		choiceDataReceiveType.add("stats only char");
+		choiceDataReceiveType.add("stats only charArray");
 		// choiceDataType.add("as byte list");
 		// choiceDataReceiveType.add("as Echo");
 		panelItems.add(choiceDataReceiveType);
