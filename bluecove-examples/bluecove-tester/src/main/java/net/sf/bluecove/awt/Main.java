@@ -246,9 +246,10 @@ public class Main extends Frame implements LoggerAppender {
 			}
 		});
 
-		addMenu(menuLogs, "Clear Log", new ActionListenerRunnable() {
-			public void run() {
+		addMenu(menuLogs, "Clear Log", new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				clear();
+
 			}
 		}, KeyEvent.VK_Z);
 
@@ -582,7 +583,7 @@ public class Main extends Frame implements LoggerAppender {
 			return;
 		}
 		synchronized (logLinesQueue) {
-		    logLinesQueue.clear();
+			logLinesQueue.clear();
 		}
 		output.setText("");
 		outputLines = 0;
@@ -677,26 +678,26 @@ public class Main extends Frame implements LoggerAppender {
 
 	private class AwtLogUpdater implements Runnable {
 
-	    boolean canRestart;
-	    
-	    AwtLogUpdater(boolean canRestart) {
-	        this.canRestart = canRestart;
-	    }
-	    
+		boolean canRestart;
+
+		AwtLogUpdater(boolean canRestart) {
+			this.canRestart = canRestart;
+		}
+
 		private String getNextLines() {
 			synchronized (logLinesQueue) {
 				if (logLinesQueue.isEmpty()) {
 					return null;
 				}
 				StringBuffer buf = new StringBuffer();
-				for(int i  = 0 ; i < 40; i ++) {
-				    try {
-                        buf.append((String) logLinesQueue.firstElement());
-                    } catch (Exception e) {
-                        // NoSuchElementException
-                        break;
-                    }
-				    logLinesQueue.removeElementAt(0);
+				for (int i = 0; i < 40; i++) {
+					try {
+						buf.append((String) logLinesQueue.firstElement());
+					} catch (Exception e) {
+						// NoSuchElementException
+						break;
+					}
+					logLinesQueue.removeElementAt(0);
 
 				}
 				return buf.toString();
@@ -712,26 +713,26 @@ public class Main extends Frame implements LoggerAppender {
 			String lines;
 			try {
 				while ((lines = getNextLines()) != null) {
-				    if (outputLines > 5000) {
-                        clear();
-                    }
-			        output.append(lines);
+					if (outputLines > 5000) {
+						clear();
+					}
+					output.append(lines);
 					outputLines++;
 					oneCallCount++;
 					if (oneCallCount > 10) {
-					    restart = true;
+						restart = true;
 						break;
 					}
 				}
 			} finally {
-			    if (restart && canRestart) {
-			        EventQueue.invokeLater(new AwtLogUpdater(true));
-                } else {
-                    synchronized (logLinesQueue) {
-                        logUpdaterRunning = false;
-                    }
-                }
-            }
+				if (restart && canRestart) {
+					EventQueue.invokeLater(new AwtLogUpdater(true));
+				} else {
+					synchronized (logLinesQueue) {
+						logUpdaterRunning = false;
+					}
+				}
+			}
 		}
 	}
 

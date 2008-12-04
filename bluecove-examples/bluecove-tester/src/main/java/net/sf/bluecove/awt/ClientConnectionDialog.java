@@ -28,6 +28,7 @@ import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Checkbox;
 import java.awt.Choice;
+import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.Frame;
@@ -115,6 +116,7 @@ public class ClientConnectionDialog extends Dialog {
 				}
 			} else if (thread.isRunning) {
 				if (!wasConnected) {
+					setCursorDefault();
 					btnSend.setEnabled(true);
 					btnInterrupt.setEnabled(true);
 				}
@@ -134,6 +136,7 @@ public class ClientConnectionDialog extends Dialog {
 					status.setText(progress.toString());
 					connectingCount++;
 				} else {
+					setCursorDefault();
 					status.setText("Disconnected");
 					connectingCount = 0;
 				}
@@ -293,12 +296,12 @@ public class ClientConnectionDialog extends Dialog {
 
 		panelBtns.add(btnInterrupt = new Button("Interrupt"));
 		btnInterrupt.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                interrupt();
-            }
-        });
-        btnInterrupt.setEnabled(false);
-		
+			public void actionPerformed(ActionEvent e) {
+				interrupt();
+			}
+		});
+		btnInterrupt.setEnabled(false);
+
 		if (Configuration.isBlueCove) {
 			Button btnBond = new Button("Bond");
 			panelBtns.add(btnBond);
@@ -355,6 +358,7 @@ public class ClientConnectionDialog extends Dialog {
 		if (Configuration.storage != null) {
 			Configuration.storage.storeData(configConnectionURL, tfURL.getText());
 		}
+		setCursorWait();
 		thread = new ClientConnectionThread(tfURL.getText());
 		thread.setDaemon(true);
 		thread.start();
@@ -426,13 +430,13 @@ public class ClientConnectionDialog extends Dialog {
 			thread = null;
 		}
 	}
-	
+
 	public void interrupt() {
-        if (thread != null) {
-            thread.interrupt();
-            Logger.debug("thread.interrupt() called");
-        }
-    }
+		if (thread != null) {
+			thread.interrupt();
+			Logger.debug("thread.interrupt() called");
+		}
+	}
 
 	protected void onClose() {
 		shutdown();
@@ -441,6 +445,14 @@ public class ClientConnectionDialog extends Dialog {
 		} catch (Throwable java11) {
 		}
 		setVisible(false);
+	}
+
+	private void setCursorWait() {
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+	}
+
+	private void setCursorDefault() {
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
 
 	private void onBond() {
@@ -458,20 +470,23 @@ public class ClientConnectionDialog extends Dialog {
 		final String pin = pinStr;
 		final String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
 		if (deviceAddress == null) {
-            Logger.error("invalid url");
-            return;
-        }
+			Logger.error("invalid url");
+			return;
+		}
 		final RemoteDevice device = new RemoteDeviceIheritance(deviceAddress);
 		Logger.debug("authenticate:" + deviceAddress + " pin:" + pin);
 		Thread t = new Thread("Authenticate") {
 			public void run() {
 				try {
+					setCursorWait();
 					boolean rc = RemoteDeviceHelper.authenticate(device, pin);
 					Logger.info("authenticate returns: " + rc);
 				} catch (IOException e) {
 					Logger.error("can't authenticate", e);
 				} catch (Throwable e) {
 					Logger.error("authenticate error", e);
+				} finally {
+					setCursorDefault();
 				}
 				Logger.debug(deviceAddress + " isAuthenticated", device.isAuthenticated());
 				Logger.debug(deviceAddress + " isTrustedDevice", device.isTrustedDevice());
@@ -484,20 +499,23 @@ public class ClientConnectionDialog extends Dialog {
 		String url = tfURL.getText();
 		final String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
 		if (deviceAddress == null) {
-            Logger.error("invalid url");
-            return;
-        }
+			Logger.error("invalid url");
+			return;
+		}
 		final RemoteDevice device = new RemoteDeviceIheritance(deviceAddress);
 		Logger.debug("removed authentication:" + deviceAddress);
 		Thread t = new Thread("UnAuthenticate") {
 			public void run() {
 				try {
+					setCursorWait();
 					RemoteDeviceHelper.removeAuthentication(device);
 					Logger.info("removed authentication");
 				} catch (IOException e) {
 					Logger.error("can't removed authentication", e);
 				} catch (Throwable e) {
 					Logger.error("removed authentication error", e);
+				} finally {
+					setCursorDefault();
 				}
 				Logger.debug(deviceAddress + " isAuthenticated", device.isAuthenticated());
 				Logger.debug(deviceAddress + " isTrustedDevice", device.isTrustedDevice());
@@ -511,9 +529,9 @@ public class ClientConnectionDialog extends Dialog {
 		try {
 			String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
 			if (deviceAddress == null) {
-                Logger.error("invalid url");
-                return;
-            }
+				Logger.error("invalid url");
+				return;
+			}
 			Logger.debug(deviceAddress + " setSniffMode : "
 					+ LocalDevice.getProperty("bluecove.nativeFunction:setSniffMode:" + deviceAddress));
 			// Logger.debug(deviceAddress + " cancelSniffMode : "
@@ -530,8 +548,8 @@ public class ClientConnectionDialog extends Dialog {
 		try {
 			String deviceAddress = BluetoothTypesInfo.extractBluetoothAddress(url);
 			if (deviceAddress == null) {
-			    Logger.error("invalid url");
-			    return;
+				Logger.error("invalid url");
+				return;
 			}
 			RemoteDevice device = new RemoteDeviceIheritance(deviceAddress);
 			Logger.debug(deviceAddress + " isAuthenticated", device.isAuthenticated());
