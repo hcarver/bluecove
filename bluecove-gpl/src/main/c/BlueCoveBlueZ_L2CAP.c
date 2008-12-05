@@ -150,10 +150,10 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2Ready
     fds.events = POLLIN | POLLHUP | POLLERR;// | POLLRDHUP;
     fds.revents = 0;
     if (poll(&fds, 1, timeout) > 0) {
-        if (fds.revents & POLLIN) {
-            return JNI_TRUE;
-        } else if (fds.revents & (POLLHUP | POLLERR /*| POLLRDHUP*/)) {
+        if (fds.revents & (POLLHUP | POLLERR /*| POLLRDHUP*/)) {
             throwIOException(env, "Peer closed connection");
+        } else if (fds.revents & POLLIN) {
+            return JNI_TRUE;
         }
     }
     return JNI_FALSE;
