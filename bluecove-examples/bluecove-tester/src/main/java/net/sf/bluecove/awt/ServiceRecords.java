@@ -58,7 +58,8 @@ public class ServiceRecords {
 			if (k == -1) {
 				continue;
 			}
-			String info = url.substring(0, k + 1);
+			String info = url.substring(0, k);
+			info += "|";
 			ServiceRecord serviceRecord = (ServiceRecord) RemoteDeviceInfo.services.get(url);
 			while (info.length() < 28) {
 				info += " ";
@@ -75,7 +76,7 @@ public class ServiceRecords {
 
 	public static String getChoiceURL(Choice choice) {
 		String info = choice.getSelectedItem();
-		int k = info.indexOf(';');
+		int k = info.indexOf('|');
 		if (k != -1) {
 			String url = info.substring(0, k);
 			if (Configuration.encrypt.booleanValue()) {
@@ -85,7 +86,7 @@ public class ServiceRecords {
 			}
 			return url;
 		}
-		return null;
+		return info;
 	}
 
 	public static String UUIDName(ServiceRecord serviceRecord) {

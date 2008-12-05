@@ -94,6 +94,14 @@ public class ClientConnectionDialog extends Dialog {
 
 	boolean inSendLoop = false;
 
+	private int connectionWindowID = 0;
+	
+	private static Vector openConnectionDialogs = new Vector();
+	
+	private static final String RECENT_RFCOMM_URLS = "recentRFCOMM";
+	
+	private static Vector recentConnections = new Vector();
+	
 	private class ConnectionMonitor extends TimerTask {
 
 		boolean wasConnected = false;
@@ -103,6 +111,9 @@ public class ClientConnectionDialog extends Dialog {
 		int connectingCount = 0;
 
 		public void run() {
+		    if (openConnectionDialogs.size() > 1) {
+		        ClientConnectionDialog.this.setTitle("Client Connection " + connectionWindowID);
+		    }
 			if (thread == null) {
 				if (wasConnected || wasStarted) {
 					status.setText("Idle");
@@ -144,7 +155,7 @@ public class ClientConnectionDialog extends Dialog {
 		}
 
 	}
-
+	
 	public ClientConnectionDialog(Frame owner) {
 		super(owner, "Client Connection", false);
 
@@ -186,6 +197,7 @@ public class ClientConnectionDialog extends Dialog {
 		choiceAllURLs.setFont(logFont);
 
 		ServiceRecords.populateChoice(choiceAllURLs, false);
+		populateRecentConnections(choiceAllURLs);
 		choiceAllURLs.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				selectURL();
@@ -342,6 +354,19 @@ public class ClientConnectionDialog extends Dialog {
 			}
 		});
 		this.pack();
+        
+		synchronized (openConnectionDialogs) {
+		    int maxId = 0;
+		    for (Enumeration iter = openConnectionDialogs.elements(); iter.hasMoreElements();) {
+		        ClientConnectionDialog w = (ClientConnectionDialog) iter.nextElement();
+                if (maxId < w.connectionWindowID ) {
+                    maxId = w.connectionWindowID;
+                }
+            }
+		    this.connectionWindowID = maxId + 1;
+            openConnectionDialogs.add(this);
+        }
+
 		OkCancelDialog.centerParent(this);
 
 		try {
@@ -351,14 +376,13 @@ public class ClientConnectionDialog extends Dialog {
 		}
 	}
 
-	protected void connect() {
+
+    protected void connect() {
 		if (thread != null) {
 			thread.shutdown();
 			thread = null;
 		}
-		if (Configuration.storage != null) {
-			Configuration.storage.storeData(configConnectionURL, tfURL.getText());
-		}
+	    storeRecentConnection(tfURL.getText());
 		setCursorWait();
 		thread = new ClientConnectionThread(tfURL.getText());
 		thread.setDaemon(true);
@@ -368,6 +392,56 @@ public class ClientConnectionDialog extends Dialog {
 		updateDataReceiveType();
 	}
 
+    private static void populateRecentConnections(Choice choice) {
+        loadRecentConnections();
+        for (Enumeration en = recentConnections.elements(); en.hasMoreElements();) {
+            choice.add((String) en.nextElement());
+        }
+    }
+    
+    static void loadRecentConnections() {
+	   synchronized (recentConnections) {
+	       if ((recentConnections.size() > 0) || (Configuration.storage == null)) {
+	           return;
+	       }
+	       String urls = Configuration.storage.retriveData(RECENT_RFCOMM_URLS);
+	       if (urls == null) {
+	           return;
+	       }
+	       J2MEStringTokenizer st = new J2MEStringTokenizer(urls, "|");
+	        if (st.hasMoreTokens()) {
+	            while (st.hasMoreTokens()) {
+	                String v = st.nextToken().trim();
+	                if (v.length() > 0) {
+	                    recentConnections.add(v);
+	                }
+	            }
+	        } else {
+	            if (urls.length() > 0) {
+	                recentConnections.add(urls);
+	            }
+	        }
+	   }
+	}
+    
+    static void storeRecentConnection(String url) {
+        if (recentConnections.contains(url)) {
+            recentConnections.remove(url);
+            recentConnections.add(url);
+        }
+        recentConnections.add(url);
+        if (Configuration.storage == null) {
+            return;
+        }
+        Configuration.storage.storeData(configConnectionURL, url);
+        StringBuffer h = new StringBuffer();
+        for (Enumeration iter = recentConnections.elements(); iter.hasMoreElements();) {
+            h.append((String) iter.nextElement()).append("|");
+        }
+        Configuration.storage.storeData(RECENT_RFCOMM_URLS, h.toString());
+    }
+
+	   
 	protected void updateDataReceiveType() {
 		if (thread != null) {
 			thread.updateDataReceiveType(choiceDataReceiveType.getSelectedIndex(), cbSaveToFile.getState());
@@ -440,6 +514,9 @@ public class ClientConnectionDialog extends Dialog {
 	}
 
 	protected void onClose() {
+	    synchronized (openConnectionDialogs) {
+            openConnectionDialogs.remove(this);
+        }
 		shutdown();
 		try {
 			monitorTimer.cancel();

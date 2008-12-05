@@ -392,7 +392,10 @@ public class TestResponderClient extends TestResponderCommon implements Runnable
 				}
 				servicesOnDeviceAddress = remoteDevice.getBluetoothAddress();
 				servicesOnDeviceName = niceDeviceName(servicesOnDeviceAddress);
-				Logger.debug(logID + "Search Services on " + servicesOnDeviceName + " " + name);
+				if (servicesOnDeviceName.equals(name)) {
+				    name = "";
+				}
+				Logger.debug(logID + "Search Services on "  + servicesOnDeviceAddress + " " + servicesOnDeviceName + " " + name);
 
 				int transID = -1;
 
