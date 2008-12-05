@@ -494,7 +494,7 @@ public class Main extends Frame implements LoggerAppender {
 		output.setFont(logFont);
 
 		if (screenSize.width > 600) {
-			screenSize.setSize(240, 320);
+			screenSize.setSize(600, 420);
 		}
 		if (this.isResizable()) {
 			Rectangle b = this.getBounds();
