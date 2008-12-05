@@ -392,8 +392,11 @@
         <buildLabel>${version}</buildLabel>
         <buildEnv>developer</buildEnv>
         <native.build.skip>false</native.build.skip>
+        <!-- See OS X profile -->
+        <javaRunTimeJar>${java.home}/lib/rt.jar</javaRunTimeJar>
+        <javaRunTimeSecurityJar>${java.home}/lib/jsse.jar</javaRunTimeSecurityJar>
     </properties>
-
+   
     <profiles>
 
         <profile>
@@ -406,6 +409,19 @@
             <properties>
                 <buildLabel>${label}</buildLabel>
                 <buildEnv>cruisecontrol</buildEnv>
+            </properties>
+        </profile>
+        
+        <profile>
+            <id>osx</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <javaRunTimeJar>${java.home}/../Classes/classes.jar</javaRunTimeJar>
+                <javaRunTimeSecurityJar>${java.home}/../Classes/jsse.jar</javaRunTimeSecurityJar>
             </properties>
         </profile>
 
