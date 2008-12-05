@@ -92,6 +92,8 @@ public class ClientConnectionDialog extends Dialog {
 
 	Timer monitorTimer;
 
+	Object threadLocalBluetoothStack;
+
 	ClientConnectionThread thread;
 
 	boolean inSendLoop = false;
@@ -394,10 +396,15 @@ public class ClientConnectionDialog extends Dialog {
 			thread.shutdown();
 			thread = null;
 		}
-		storeRecentConnection(tfURL.getText());
+		String url = tfURL.getText();
+		storeRecentConnection(url);
 		setCursorWait();
-		thread = new ClientConnectionThread(tfURL.getText());
+		thread = new ClientConnectionThread(url);
 		thread.setDaemon(true);
+		if (this.threadLocalBluetoothStack == null) {
+			this.threadLocalBluetoothStack = Configuration.threadLocalBluetoothStack;
+		}
+		thread.threadLocalBluetoothStack = this.threadLocalBluetoothStack;
 		thread.start();
 		btnDisconnect.setEnabled(true);
 		btnConnect.setEnabled(false);

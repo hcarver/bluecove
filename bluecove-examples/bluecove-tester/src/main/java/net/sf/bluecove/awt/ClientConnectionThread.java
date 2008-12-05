@@ -51,7 +51,7 @@ import net.sf.bluecove.util.TimeUtils;
  */
 public class ClientConnectionThread extends Thread {
 
-	private Object threadLocalBluetoothStack;
+	Object threadLocalBluetoothStack;
 
 	private static int connectionCount = 0;
 
@@ -98,7 +98,6 @@ public class ClientConnectionThread extends Thread {
 	ClientConnectionThread(String serverURL) {
 		super("ClientConnectionThread" + (++connectionCount));
 		this.serverURL = serverURL;
-		threadLocalBluetoothStack = Configuration.threadLocalBluetoothStack;
 	}
 
 	String getLocalBluetoothId() {
