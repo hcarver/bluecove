@@ -412,7 +412,7 @@ public class ClientConnectionDialog extends Dialog {
 	        if (st.hasMoreTokens()) {
 	            while (st.hasMoreTokens()) {
 	                String v = st.nextToken().trim();
-	                if (v.length() > 0) {
+	                if ((v.length() > 0) && (!recentConnections.contains(v))) {
 	                    recentConnections.add(v);
 	                }
 	            }
@@ -427,7 +427,6 @@ public class ClientConnectionDialog extends Dialog {
     static void storeRecentConnection(String url) {
         if (recentConnections.contains(url)) {
             recentConnections.remove(url);
-            recentConnections.add(url);
         }
         recentConnections.add(url);
         if (Configuration.storage == null) {
