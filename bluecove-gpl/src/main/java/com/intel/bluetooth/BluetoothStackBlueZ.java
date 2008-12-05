@@ -125,13 +125,10 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	private native int nativeOpenDevice(int deviceID) throws BluetoothStateException;
 
 	public void initialize() throws BluetoothStateException {
-		int findID = -1;
 		long findLocalDeviceBTAddress = -1;
-		String deviceIDStr = BlueCoveImpl.getConfigProperty("bluecove.deviceID");
-		if (deviceIDStr != null) {
-			findID = Integer.parseInt(deviceIDStr);
-		}
-		String deviceAddressStr = BlueCoveImpl.getConfigProperty("bluecove.deviceAddress");
+		int findID = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_LOCAL_DEVICE_ID, -1);
+		String deviceAddressStr = BlueCoveImpl
+				.getConfigProperty(BlueCoveConfigProperties.PROPERTY_LOCAL_DEVICE_ADDRESS);
 		if (deviceAddressStr != null) {
 			findLocalDeviceBTAddress = Long.parseLong(deviceAddressStr, 16);
 		}

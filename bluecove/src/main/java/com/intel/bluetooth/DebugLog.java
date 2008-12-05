@@ -31,15 +31,13 @@ import java.util.Vector;
 
 /**
  * BlueCove log system.
- *
- * If enabled "-Dbluecove.debug=true" System.out.println would be used for
- * debug. Alternatively if log4j is available in classpath Bluecove log would be
- * redirected to log4j and can be enable using log4j configuration.
- *
- * The methods of this class would be removed automaticaly because they are
- * empty if debugCompiledOut = true. This class itself will disappear from
- * bytecode after obfuscation by proguard in this case. Change to create mini jar.
- *
+ * 
+ * If enabled "-Dbluecove.debug=true" System.out.println would be used for debug. Alternatively if log4j is available in
+ * classpath Bluecove log would be redirected to log4j and can be enable using log4j configuration.
+ * 
+ * The methods of this class would be removed automaticaly because they are empty if debugCompiledOut = true. This class
+ * itself will disappear from bytecode after obfuscation by proguard in this case. Change to create mini jar.
+ * 
  */
 public abstract class DebugLog {
 
@@ -64,9 +62,8 @@ public abstract class DebugLog {
 	private static Vector loggerAppenders = new Vector();
 
 	/**
-	 * Different log system can be injected in BlueCove using
-	 * DebugLog.addAppender(customLoggerAppender)
-	 *
+	 * Different log system can be injected in BlueCove using DebugLog.addAppender(customLoggerAppender)
+	 * 
 	 */
 	public static interface LoggerAppender {
 		public void appendLog(int level, String message, Throwable throwable);
@@ -184,9 +181,9 @@ public abstract class DebugLog {
 
 	public static void debug(String message, long v) {
 		if (!debugCompiledOut && isDebugEnabled()) {
-			log(message, " ", String.valueOf(v));
+			log(message, " ", Long.toString(v));
 			printLocation();
-			callAppenders(DEBUG, message + " " + String.valueOf(v), null);
+			callAppenders(DEBUG, message + " " + Long.toString(v), null);
 		}
 	}
 

@@ -46,6 +46,7 @@ import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.bluetooth.BluetoothStateException;
@@ -410,17 +411,36 @@ public class Main extends Frame implements LoggerAppender {
 
 		addMenu(threadLocalStack, "Set 'deviceID=0'", new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				LocalDeviceManager.setUseDevice0();
+				LocalDeviceManager.setUseDevice(0);
 				updateTitle();
 			}
 		});
 
 		addMenu(threadLocalStack, "Set 'deviceID=1'", new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				LocalDeviceManager.setUseDevice1();
+				LocalDeviceManager.setUseDevice(1);
 				updateTitle();
 			}
 		});
+
+		if (Configuration.linux) {
+			try {
+				Vector ids = BlueCoveImpl.getLocalDevicesID();
+				for (Enumeration en = ids.elements(); en.hasMoreElements();) {
+					final int id = Integer.parseInt((String) en.nextElement());
+					if (id > 2) {
+						addMenu(threadLocalStack, "Set 'deviceID=" + id + "'", new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								LocalDeviceManager.setUseDevice(id);
+								updateTitle();
+							}
+						});
+					}
+				}
+			} catch (Throwable e) {
+				Logger.debug("get device list error", e);
+			}
+		}
 
 		addMenu(threadLocalStack, "shutdown", new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

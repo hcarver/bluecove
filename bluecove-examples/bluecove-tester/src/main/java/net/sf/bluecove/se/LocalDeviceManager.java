@@ -42,9 +42,7 @@ public class LocalDeviceManager {
 
 	private static Object threadLocalBluetoothStackWIDCOMM;
 
-	private static Object threadLocalBluetoothStack0;
-
-	private static Object threadLocalBluetoothStack1;
+	private static Object threadLocalBluetoothStack[] = new Object[7];
 
 	public static void setNotDiscoverable() {
 		TestResponderServer.setNotDiscoverable();
@@ -131,37 +129,20 @@ public class LocalDeviceManager {
 		setThreadLocalBluetoothStack(Configuration.threadLocalBluetoothStack);
 	}
 
-	public static void setUseDevice0() {
-		if (threadLocalBluetoothStack0 == null) {
+	public static void setUseDevice(int id) {
+		if (threadLocalBluetoothStack[id] == null) {
 			try {
 				BlueCoveImpl.useThreadLocalBluetoothStack();
 				BlueCoveImpl.setThreadBluetoothStackID(null);
-				BlueCoveImpl.setConfigProperty("bluecove.deviceID", "0");
-				threadLocalBluetoothStack0 = BlueCoveImpl.getThreadBluetoothStackID();
+				BlueCoveImpl.setConfigProperty("bluecove.deviceID", String.valueOf(id));
+				threadLocalBluetoothStack[id] = BlueCoveImpl.getThreadBluetoothStackID();
 			} catch (Throwable e) {
 				Logger.error("error", e);
 				return;
 			}
 		}
-		Logger.info("will use stack " + threadLocalBluetoothStack0);
-		Configuration.threadLocalBluetoothStack = threadLocalBluetoothStack0;
-		setThreadLocalBluetoothStack(Configuration.threadLocalBluetoothStack);
-	}
-
-	public static void setUseDevice1() {
-		if (threadLocalBluetoothStack1 == null) {
-			try {
-				BlueCoveImpl.useThreadLocalBluetoothStack();
-				BlueCoveImpl.setThreadBluetoothStackID(null);
-				BlueCoveImpl.setConfigProperty("bluecove.deviceID", "1");
-				threadLocalBluetoothStack1 = BlueCoveImpl.getThreadBluetoothStackID();
-			} catch (Throwable e) {
-				Logger.error("error", e);
-				return;
-			}
-		}
-		Logger.info("will use stack " + threadLocalBluetoothStack1);
-		Configuration.threadLocalBluetoothStack = threadLocalBluetoothStack1;
+		Logger.info("new Threads will use stack " + threadLocalBluetoothStack[id]);
+		Configuration.threadLocalBluetoothStack = threadLocalBluetoothStack[id];
 		setThreadLocalBluetoothStack(Configuration.threadLocalBluetoothStack);
 	}
 

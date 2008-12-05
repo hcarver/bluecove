@@ -87,6 +87,8 @@ public class ClientConnectionThread extends Thread {
 
 	long reported = 0;
 
+	String logPrefix = "";
+
 	private StringBuffer dataBuf = new StringBuffer();
 
 	private boolean binaryData = false;
@@ -99,21 +101,29 @@ public class ClientConnectionThread extends Thread {
 		threadLocalBluetoothStack = Configuration.threadLocalBluetoothStack;
 	}
 
+	String getLocalBluetoothId() {
+		if (threadLocalBluetoothStack == null) {
+			return "";
+		} else {
+			return threadLocalBluetoothStack.toString();
+		}
+	}
+
 	public void run() {
 		try {
 			rfcomm = BluetoothTypesInfo.isRFCOMM(serverURL);
 			if (!rfcomm && !BluetoothTypesInfo.isL2CAP(serverURL)) {
-				Logger.error("unsupported connection type " + serverURL);
+				Logger.error(logPrefix + "unsupported connection type " + serverURL);
 				return;
 			}
 			Configuration.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
 			Connection conn = null;
 			try {
 				isConnecting = true;
-				Logger.debug("Connecting:" + serverURL + " ...");
+				Logger.debug(logPrefix + "Connecting:" + serverURL + " ...");
 				conn = Connector.open(serverURL);
 			} catch (IOException e) {
-				Logger.error("Connection error", e);
+				Logger.error(logPrefix + "Connection error", e);
 				return;
 			} finally {
 				isConnecting = false;
@@ -131,7 +141,7 @@ public class ClientConnectionThread extends Thread {
 						byte b[] = new byte[0xFF];
 						int readLen = cs.is.read(b);
 						if (readLen == -1) {
-							Logger.debug("EOF recived");
+							Logger.debug(logPrefix + "EOF recived");
 							break;
 						}
 						receivedCount += readLen;
@@ -141,7 +151,7 @@ public class ClientConnectionThread extends Thread {
 					} else {
 						int data = cs.is.read();
 						if (data == -1) {
-							Logger.debug("EOF recived");
+							Logger.debug(logPrefix + "EOF recived");
 							break;
 						}
 						receivedCount++;
@@ -149,7 +159,7 @@ public class ClientConnectionThread extends Thread {
 					}
 				}
 				if (dataBuf.length() > 0) {
-					Logger.debug("cc:" + StringUtils.toBinaryText(dataBuf));
+					Logger.debug(logPrefix + "cc:" + StringUtils.toBinaryText(dataBuf));
 				}
 			} else { // l2cap
 				ConnectionHolderL2CAP lc = new ConnectionHolderL2CAP((L2CAPConnection) conn);
@@ -172,12 +182,12 @@ public class ClientConnectionThread extends Thread {
 			}
 		} catch (IOException e) {
 			if (!stoped) {
-				Logger.error("Communication error", e);
+				Logger.error(logPrefix + "Communication error", e);
 			} else {
-				Logger.debug("communication stopped", e);
+				Logger.debug(logPrefix + "communication stopped", e);
 			}
 		} catch (Throwable e) {
-			Logger.error("Error", e);
+			Logger.error(logPrefix + "Error", e);
 		} finally {
 			isRunning = false;
 			if (c != null) {
@@ -207,7 +217,7 @@ public class ClientConnectionThread extends Thread {
 			if (now - reported > 5 * 1000) {
 				int size = (int) (receivedCount - reportedSize);
 				reportedSize = receivedCount;
-				Logger.debug("Received " + receivedCount + " bytes " + TimeUtils.bps(size, reported));
+				Logger.debug(logPrefix + "Received " + receivedCount + " bytes " + TimeUtils.bps(size, reported));
 				reported = now;
 			}
 			break;
@@ -217,7 +227,7 @@ public class ClientConnectionThread extends Thread {
 				try {
 					fileOut.write((char) data);
 				} catch (IOException e) {
-					Logger.debug("file write error", e);
+					Logger.debug(logPrefix + "file write error", e);
 					closeFile();
 				}
 			}
@@ -233,11 +243,12 @@ public class ClientConnectionThread extends Thread {
 				messageLength = length - 1;
 			}
 			StringBuffer buf = new StringBuffer();
+			buf.append(logPrefix).append("cc:");
 			if (messageLength != 0) {
 				buf.append(StringUtils.toBinaryText(new StringBuffer(new String(data, 0, messageLength))));
 			}
 			buf.append(" (").append(length).append(")");
-			Logger.debug("cc:" + buf.toString());
+			Logger.debug(buf.toString());
 			break;
 		case interpretDataStatsArray:
 		case interpretDataStats:
@@ -245,8 +256,8 @@ public class ClientConnectionThread extends Thread {
 			if (now - reported > 5 * 1000) {
 				int size = (int) (receivedCount - reportedSize);
 				reportedSize = receivedCount;
-				Logger.debug("Received " + receivedPacketsCount + " packet(s), " + receivedCount + " bytes "
-						+ TimeUtils.bps(size, reported));
+				Logger.debug(logPrefix + "Received " + receivedPacketsCount + " packet(s), " + receivedCount
+						+ " bytes " + TimeUtils.bps(size, reported));
 				reported = now;
 			}
 			break;
@@ -256,7 +267,7 @@ public class ClientConnectionThread extends Thread {
 				try {
 					fileOut.write(data, 0, length);
 				} catch (IOException e) {
-					Logger.debug("file write error", e);
+					Logger.debug(logPrefix + "file write error", e);
 					closeFile();
 				}
 			}
@@ -294,7 +305,7 @@ public class ClientConnectionThread extends Thread {
 					+ fmt.format(new Date()) + ".bin");
 			try {
 				fileOut = new FileOutputStream(file);
-				Logger.info("saving data to file " + file.getAbsolutePath());
+				Logger.info(logPrefix + "saving data to file " + file.getAbsolutePath());
 			} catch (IOException e) {
 			}
 		}
@@ -309,9 +320,9 @@ public class ClientConnectionThread extends Thread {
 					} else {
 						((ConnectionHolderL2CAP) c).channel.send(data);
 					}
-					Logger.debug("data " + data.length + " sent");
+					Logger.debug(logPrefix + "data " + data.length + " sent");
 				} catch (IOException e) {
-					Logger.error("Communication error", e);
+					Logger.error(logPrefix + "Communication error", e);
 				}
 			}
 		};

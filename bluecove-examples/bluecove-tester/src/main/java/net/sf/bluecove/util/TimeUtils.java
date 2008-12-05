@@ -76,7 +76,8 @@ public abstract class TimeUtils {
 		if (duration == 0) {
 			return "n/a";
 		}
-		return "" + ((1000 * 8 * size) / (duration)) + " bit/s";
+		long bps = ((1000 * 8 * size) / (duration));
+		return StringUtils.formatLong(bps) + " bit/s";
 	}
 
 	public static String timeNowToString() {

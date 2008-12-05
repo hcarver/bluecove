@@ -76,6 +76,20 @@ public class StringUtils {
 		}
 	}
 
+	public static String formatLong(long l) {
+		if (l < 1000) {
+			return Long.toString(l);
+		}
+		long l1K = (l / 1000);
+		if (l1K < 1000) {
+			return Long.toString(l1K) + "," + StringUtils.d000((int) (l - 1000L * l1K));
+		} else {
+			long l1M = (l1K / 1000);
+			return Long.toString(l1M) + "," + StringUtils.d000((int) (l1K - 1000L * l1M)) + ","
+					+ StringUtils.d000((int) (l - 1000L * l1K));
+		}
+	}
+
 	public static String toHex00String(int c) {
 		String s = Integer.toHexString(c);
 		if (s.length() == 1) {
