@@ -40,8 +40,7 @@ import net.sf.bluecove.util.Storage;
 
 /**
  * 
- * This define different client and server work patterns to identify problem in
- * native code.
+ * This define different client and server work patterns to identify problem in native code.
  * 
  */
 public class Configuration {
@@ -136,9 +135,8 @@ public class Configuration {
 	public static int tgDurationMin = 2;
 
 	/**
-	 * Apparently Motorola Service Attribute STRING is not working. INT_4 not
-	 * working on some Nokia and breakers its discovery by Motorola. INT_16 are
-	 * truncated in discovery by WIDCOMM Service attributes are not supported on
+	 * Apparently Motorola Service Attribute STRING is not working. INT_4 not working on some Nokia and breakers its
+	 * discovery by Motorola. INT_16 are truncated in discovery by WIDCOMM Service attributes are not supported on
 	 * BlueSoleil
 	 */
 	public static BooleanVar testIgnoreNotWorkingServiceAttributes = new BooleanVar(true);
@@ -152,7 +150,7 @@ public class Configuration {
 	public static int serverSleepB4ClosingConnection = 1000;
 
 	public static int clientTestTimeOutSec = 60;
-	
+
 	public static int clientTestStopOnErrorCount = 100;
 
 	public static int serverTestTimeOutSec = 60;
@@ -175,8 +173,7 @@ public class Configuration {
 	public static final boolean likedTCKAgent = true;
 
 	/**
-	 * Apparently on Motorola iDEN serverConnection.acceptAndOpen() never
-	 * returns.
+	 * Apparently on Motorola iDEN serverConnection.acceptAndOpen() never returns.
 	 */
 	public static boolean canCloseServer = true;
 
@@ -197,6 +194,8 @@ public class Configuration {
 	public static boolean macOSx = false;
 
 	public static boolean stackWIDCOMM = false;
+
+	public static boolean hasManyDevices = false;
 
 	public static boolean supportL2CAP = true;
 

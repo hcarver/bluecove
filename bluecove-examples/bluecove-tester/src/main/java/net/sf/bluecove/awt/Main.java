@@ -428,6 +428,9 @@ public class Main extends Frame implements LoggerAppender {
 				Vector ids = BlueCoveImpl.getLocalDevicesID();
 				for (Enumeration en = ids.elements(); en.hasMoreElements();) {
 					final int id = Integer.parseInt((String) en.nextElement());
+					if (id > 1) {
+						Configuration.hasManyDevices = true;
+					}
 					if (id >= 2) {
 						addMenu(threadLocalStack, "Set 'deviceID=" + id + "'", new ActionListener() {
 							public void actionPerformed(ActionEvent e) {

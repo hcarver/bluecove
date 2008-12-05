@@ -49,6 +49,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
+import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 
@@ -94,6 +95,8 @@ public class ClientConnectionDialog extends Dialog {
 
 	Object threadLocalBluetoothStack;
 
+	String localBluetoothStackAddress = "";
+
 	ClientConnectionThread thread;
 
 	boolean inSendLoop = false;
@@ -115,8 +118,8 @@ public class ClientConnectionDialog extends Dialog {
 		int connectingCount = 0;
 
 		public void run() {
-			if (openConnectionDialogs.size() > 1) {
-				String title = "Client Connection " + connectionWindowID;
+			if ((openConnectionDialogs.size() > 1) || (Configuration.hasManyDevices)) {
+				String title = localBluetoothStackAddress + " Client Connection " + connectionWindowID;
 				if (thread != null) {
 					thread.logPrefix = "[" + connectionWindowID + "]";
 					title += " " + thread.getLocalBluetoothId();
@@ -405,6 +408,21 @@ public class ClientConnectionDialog extends Dialog {
 			this.threadLocalBluetoothStack = Configuration.threadLocalBluetoothStack;
 		}
 		thread.threadLocalBluetoothStack = this.threadLocalBluetoothStack;
+
+		if (localBluetoothStackAddress.length() == 0) {
+			try {
+				LocalDevice localDevice = LocalDevice.getLocalDevice();
+				String bluetoothAddress = localDevice.getBluetoothAddress();
+				localBluetoothStackAddress = bluetoothAddress;
+				String w = TestResponderCommon.getWhiteDeviceName(bluetoothAddress);
+				if (w != null) {
+					localBluetoothStackAddress += "[" + w + "]";
+				}
+			} catch (BluetoothStateException e) {
+				Logger.debug("local error", e);
+			}
+		}
+
 		thread.start();
 		btnDisconnect.setEnabled(true);
 		btnConnect.setEnabled(false);
