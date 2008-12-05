@@ -37,6 +37,7 @@ import javax.microedition.io.StreamConnection;
 import junit.framework.Assert;
 import net.sf.bluecove.tests.RfTrafficGenerator;
 import net.sf.bluecove.tests.TwoThreadsPerConnection;
+import net.sf.bluecove.tests.RfTrafficGenerator.Config;
 import net.sf.bluecove.util.TimeUtils;
 import net.sf.bluecove.util.ValueHolder;
 
@@ -919,8 +920,11 @@ public class CommunicationTester extends CommunicationData {
 		case TRAFFIC_GENERATOR_WRITE:
 			testStatus.setName("RFgenW");
 			if (server) {
-				RfTrafficGenerator.trafficGeneratorStatusReadStart(c, testStatus);
-				RfTrafficGenerator.trafficGeneratorWrite(c, server, testStatus);
+				Config cfg = RfTrafficGenerator.getConfig(c, server, "RF write");
+				if (cfg != null) {
+					RfTrafficGenerator.trafficGeneratorStatusReadStart(c, testStatus);
+					RfTrafficGenerator.trafficGeneratorWrite(c, cfg, testStatus);
+				}
 			} else {
 				RfTrafficGenerator.trafficGeneratorClientInit(c);
 				RfTrafficGenerator.trafficGeneratorRead(c, server, testStatus);
@@ -932,8 +936,11 @@ public class CommunicationTester extends CommunicationData {
 				RfTrafficGenerator.trafficGeneratorRead(c, server, testStatus);
 			} else {
 				RfTrafficGenerator.trafficGeneratorClientInit(c);
-				RfTrafficGenerator.trafficGeneratorStatusReadStart(c, testStatus);
-				RfTrafficGenerator.trafficGeneratorWrite(c, server, testStatus);
+				Config cfg = RfTrafficGenerator.getConfig(c, server, "RF write");
+				if (cfg != null) {
+					RfTrafficGenerator.trafficGeneratorStatusReadStart(c, testStatus);
+					RfTrafficGenerator.trafficGeneratorWrite(c, cfg, testStatus);
+				}
 			}
 			break;
 		case TRAFFIC_GENERATOR_READ_WRITE:
@@ -941,8 +948,11 @@ public class CommunicationTester extends CommunicationData {
 			if (!server) {
 				RfTrafficGenerator.trafficGeneratorClientInit(c);
 			}
-			RfTrafficGenerator.trafficGeneratorReadStart(c, server, testStatus);
-			RfTrafficGenerator.trafficGeneratorWrite(c, server, testStatus);
+			Config cfg = RfTrafficGenerator.getConfig(c, server, "RF write");
+			if (cfg != null) {
+				RfTrafficGenerator.trafficGeneratorReadStart(c, server, testStatus);
+				RfTrafficGenerator.trafficGeneratorWrite(c, cfg, testStatus);
+			}
 			break;
 		case TEST_SERVER_TERMINATE:
 			return;

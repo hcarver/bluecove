@@ -43,7 +43,7 @@ public class RfTrafficGenerator {
 
 	public static final byte END_MARKER = -1;
 
-	private static class Config {
+	public static class Config {
 
 		int sequenceSleep;
 
@@ -107,6 +107,15 @@ public class RfTrafficGenerator {
 		}
 	}
 
+	public static Config getConfig(ConnectionHolderStream c, boolean server, String messagePrefix) throws IOException {
+		Config cf = new Config();
+		if (cf.init(c, server, messagePrefix)) {
+			return cf;
+		} else {
+			return null;
+		}
+	}
+
 	public static void trafficGeneratorClientInit(ConnectionHolderStream c) throws IOException {
 		byte sequenceSleep = (byte) (Configuration.tgSleep & 0xFF);
 		byte sequenceSize = (byte) (Configuration.tgSize & 0xFF);
@@ -117,14 +126,10 @@ public class RfTrafficGenerator {
 		c.os.flush();
 	}
 
-	public static void trafficGeneratorWrite(ConnectionHolderStream c, boolean server, TestStatus testStatus)
+	public static void trafficGeneratorWrite(ConnectionHolderStream c, Config cfg, TestStatus testStatus)
 			throws IOException {
-		Config cf = new Config();
-		if (!cf.init(c, server, "RF write")) {
-			return;
-		}
-		if (cf.sequenceSleep > 0) {
-			Logger.debug("RF write sleep selected " + cf.sequenceSleep + " msec");
+		if (cfg.sequenceSleep > 0) {
+			Logger.debug("RF write sleep selected " + cfg.sequenceSleep + " msec");
 		} else {
 			Logger.debug("RF write no sleep");
 		}
@@ -132,8 +137,8 @@ public class RfTrafficGenerator {
 		int reportedSize = 0;
 
 		// Create test data
-		byte[] data = new byte[cf.sequenceSize];
-		for (int i = 1; i < cf.sequenceSize; i++) {
+		byte[] data = new byte[cfg.sequenceSize];
+		for (int i = 1; i < cfg.sequenceSize; i++) {
 			data[i] = (byte) i;
 		}
 
@@ -145,15 +150,15 @@ public class RfTrafficGenerator {
 				long sendTime = System.currentTimeMillis();
 				IOUtils.long2Bytes(sendTime, 8, data, 8);
 				boolean finalArray = false;
-				if ((cf.durationMSec != 0) && (sendTime > start + cf.durationMSec)) {
+				if ((cfg.durationMSec != 0) && (sendTime > start + cfg.durationMSec)) {
 					finalArray = true;
-					data[cf.sequenceSize - 2] = END_MARKER;
-					data[cf.sequenceSize - 1] = END_MARKER;
+					data[cfg.sequenceSize - 2] = END_MARKER;
+					data[cfg.sequenceSize - 1] = END_MARKER;
 				}
 
 				c.os.write(data);
 				sequenceSentCount++;
-				reportedSize += cf.sequenceSize;
+				reportedSize += cfg.sequenceSize;
 				c.active();
 				long now = System.currentTimeMillis();
 				if (now - reported > 5 * 1000) {
@@ -164,9 +169,9 @@ public class RfTrafficGenerator {
 				if (finalArray) {
 					break;
 				}
-				if (cf.sequenceSleep > 0) {
+				if (cfg.sequenceSleep > 0) {
 					try {
-						Thread.sleep(cf.sequenceSleep);
+						Thread.sleep(cfg.sequenceSleep);
 					} catch (InterruptedException e) {
 						break mainLoop;
 					}
@@ -181,7 +186,7 @@ public class RfTrafficGenerator {
 			testStatus.addReplyMessage(m);
 			Logger.debug(m);
 
-			long totalB = sequenceSentCount * cf.sequenceSize;
+			long totalB = sequenceSentCount * cfg.sequenceSize;
 			m = "RF Total " + (totalB / 1024) + " KBytes";
 			testStatus.addReplyMessage(m);
 			Logger.debug(m);
