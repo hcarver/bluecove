@@ -140,6 +140,16 @@
             </roles>
             <timezone>-5</timezone>
         </developer>
+        <developer>
+            <name>Trent Gamblin</name>
+            <id>trent@gamblin.ca</id>
+            <email>trent@gamblin.ca</email>
+            <roles>
+                <role>developer</role>
+                <role>developer-Toshiba</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
     </developers>
 
     <contributors>

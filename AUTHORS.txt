@@ -8,10 +8,10 @@ BlueCove was written and maintained by:
  2008 Mina Shokry - Lnux BlueZ GPL module
  2008 Mark Swanson - Lnux BlueZ D-Bus module
  2008 Michael Lifshits - Emulator GUI
+ 2008 Trent Gamblin - Bluetooth TOSHIBA Stack
 
 Important bug fixes/reports and other suggestions from:
  Kobus Grobler
  Hakan Lager
  Eric Wagner (Initial OS X)
  Remco Poortinga
- Sam Halliday (OS X distribution build)

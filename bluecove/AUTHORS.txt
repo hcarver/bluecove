@@ -11,3 +11,4 @@ Important bug fixes/reports and other suggestions from:
  Eric Wagner (Initial OS X)
  Remco Poortinga
  Sam Halliday (OS X distribution build)
+ Trent Gamblin (Bluetooth TOSHIBA Stack)
