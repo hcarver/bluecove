@@ -391,8 +391,10 @@ export BLUECOVE_VERSION=${project.version}
                                     <jarPath>${project.build.directory}/${project.build.finalName}-app.${project.packaging}</jarPath>
                                     <signedjar>${project.build.directory}/site/bluecove-tester-app.jar</signedjar>
                                     <!--
-                                    <jarPath>src\site\resources\bluecove-2.0.0.jar</jarPath>
-                                    <signedjar>src\site\resources\bluecove-2.0.0-signed.jar</signedjar>
+                                    <jarPath>src\site\resources\bluecove-2.1.0.jar</jarPath>
+                                    <signedjar>src\site\resources\bluecove-2.1.0-signed.jar</signedjar>
+                                    <jarPath>src\site\resources\bluecove-gpl-2.1.0.jar</jarPath>
+                                    <signedjar>src\site\resources\bluecove-gpl-2.1.0-signed.jar</signedjar>
                                     -->
                                     <keystore>${user.home}/.m2/MicroEmulator.keystore</keystore>
                                     <keypass>${MicroEmulator-keystore-pwd}</keypass>
