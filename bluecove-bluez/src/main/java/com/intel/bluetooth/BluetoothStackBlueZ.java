@@ -160,7 +160,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	public int getLibraryVersion() throws BluetoothStateException {
 		int version = getLibraryVersionNative();
 		if (version != BLUECOVE_DBUS_VERSION) {
-			DebugLog.fatal("BlueCove native library version mismatch " + version + " expected " + NATIVE_LIBRARY_VERSION);
+			DebugLog.fatal("BlueCove native library version mismatch " + version + " expected " + BLUECOVE_DBUS_VERSION);
 			throw new BluetoothStateException("BlueCove native library version mismatch");
 		}
 		return version;
