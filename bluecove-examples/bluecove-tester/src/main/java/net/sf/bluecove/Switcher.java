@@ -115,7 +115,7 @@ public class Switcher implements Runnable {
 	}
 
 	public static boolean isRunningServerClients() {
-		return ((server != null) && (server.clientConnections() > 0));
+		return ((server != null) && (server.countClientConnections() > 0));
 	}
 
 	public void run() {
@@ -532,7 +532,6 @@ public class Switcher implements Runnable {
 	public static void closeServerClientConnections() {
 		if (server != null) {
 			server.closeServerClientConnections();
-			server = null;
 		}
 	}
 

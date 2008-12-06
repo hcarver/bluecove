@@ -490,9 +490,12 @@ public class TestResponderServer implements CanShutdown, Runnable {
 			ServerConnectionRunnable t = (ServerConnectionRunnable) iter.nextElement();
 			t.shutdown();
 		}
+		if (responderL2CAPServerThread != null) {
+		    responderL2CAPServerThread.closeServerClientConnections();
+		}
 	}
 
-	public int clientConnections() {
+	public int countClientConnections() {
 		int count = 0;
 		synchronized (concurrentConnectionRunnable) {
 			for (Enumeration iter = concurrentConnectionRunnable.elements(); iter.hasMoreElements();) {
@@ -502,6 +505,9 @@ public class TestResponderServer implements CanShutdown, Runnable {
 				}
 			}
 		}
+		if (responderL2CAPServerThread != null) {
+		    count += responderL2CAPServerThread.countClientConnections();
+        }
 		return count;
 	}
 

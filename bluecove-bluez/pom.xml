@@ -148,6 +148,43 @@
                     </execution>
                 </executions>
             </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependency</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <stripVersion>true</stripVersion>
+                            <includeScope>runtime</includeScope>
+                            <outputDirectory>target</outputDirectory>
+                            <!--artifactItems>
+                                <artifactItem>
+                                    <groupId>org.freedesktop.dbus</groupId>
+                                    <artifactId>dbus</artifactId>
+                                    <outputDirectory>target</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>cx.ath.matthew</groupId>
+                                    <artifactId>debug-disable</artifactId>
+                                    <outputDirectory>target</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>cx.ath.matthew</groupId>
+                                    <artifactId>unixsockets</artifactId>
+                                    <outputDirectory>target</outputDirectory>
+                                </artifactItem>
+                            </artifactItems-->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
         </plugins>
 
     </build>

@@ -26,6 +26,8 @@ package net.sf.bluecove;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import javax.bluetooth.L2CAPConnection;
 import javax.bluetooth.L2CAPConnectionNotifier;
@@ -35,6 +37,7 @@ import javax.bluetooth.ServiceRecord;
 import javax.microedition.io.Connector;
 
 import net.sf.bluecove.util.BluetoothTypesInfo;
+import net.sf.bluecove.util.CollectionUtils;
 import net.sf.bluecove.util.IOUtils;
 import net.sf.bluecove.util.TimeUtils;
 
@@ -51,27 +54,45 @@ public class TestResponderServerL2CAP extends Thread {
 
 	private boolean isRunning = false;
 
+	private Vector concurrentConnectionsThreads = new Vector();
+	
 	private class ServerConnectionTread extends Thread {
 
 		L2CAPConnection channel;
 
+		boolean isRunning;
+		
 		ServerConnectionTread(L2CAPConnection channel) {
 			this.channel = channel;
+			this.isRunning = true;
+			synchronized (concurrentConnectionsThreads) {
+			    concurrentConnectionsThreads.addElement(this);
+            }
 		}
 
 		public void run() {
 			try {
 				receive(channel);
-				if (!isStoped) {
+				if ((!isStoped) && (isRunning)) {
 					try {
 						Thread.sleep(Configuration.serverSleepB4ClosingConnection);
 					} catch (InterruptedException e) {
 					}
 				}
 			} finally {
-				IOUtils.closeQuietly(channel);
+			    this.isRunning = false;
+			    IOUtils.closeQuietly(channel);
+                synchronized (concurrentConnectionsThreads) {
+                    concurrentConnectionsThreads.removeElement(this);
+                }
 			}
 		}
+		
+		void shutdown() {
+            if (isRunning) {
+                IOUtils.closeQuietly(channel);
+            }
+        }
 	}
 
 	private TestResponderServerL2CAP() {
@@ -313,7 +334,28 @@ public class TestResponderServerL2CAP extends Thread {
 	}
 
 	void closeServer() {
-		isStoped = true;
-		close();
-	}
+        isStoped = true;
+        close();
+    }
+
+    public void closeServerClientConnections() {
+        Vector copy = CollectionUtils.copy(concurrentConnectionsThreads);
+        for (Enumeration iter = copy.elements(); iter.hasMoreElements();) {
+            ServerConnectionTread t = (ServerConnectionTread) iter.nextElement();
+            t.shutdown();
+        }
+    }
+
+    public int countClientConnections() {
+        int count = 0;
+        synchronized (concurrentConnectionsThreads) {
+            for (Enumeration iter = concurrentConnectionsThreads.elements(); iter.hasMoreElements();) {
+                ServerConnectionTread t = (ServerConnectionTread) iter.nextElement();
+                if (t.isRunning) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
 }
