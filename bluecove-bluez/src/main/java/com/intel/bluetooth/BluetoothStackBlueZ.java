@@ -86,7 +86,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	// The current Manager.
 	Manager dbusManager = null;
 
-	static final int BLUECOVE_DBUS_VERSION = 2000300;
+	static final int BLUECOVE_DBUS_VERSION = BlueCoveImpl.nativeLibraryVersionExpected;
 
 	// private int deviceID;
 
@@ -155,11 +155,15 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 		return new LibraryInformation[] { new LibraryInformation(NATIVE_BLUECOVE_LIB_BLUEZ), unixSocketLib };
 	}
 
-	public native int getLibraryVersionNative();
+	private native int getLibraryVersionNative();
 
 	public int getLibraryVersion() throws BluetoothStateException {
-		DebugLog.debug("for breakpoint");
-		return BLUECOVE_DBUS_VERSION;
+		int version = getLibraryVersionNative();
+		if (version != BLUECOVE_DBUS_VERSION) {
+			DebugLog.fatal("BlueCove native library version mismatch " + version + " expected " + NATIVE_LIBRARY_VERSION);
+			throw new BluetoothStateException("BlueCove native library version mismatch");
+		}
+		return version;
 	}
 
 	public int detectBluetoothStack() {
