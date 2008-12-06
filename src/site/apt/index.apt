@@ -70,6 +70,8 @@ BlueCove
 
     API-Documentation for BlueCove {{{bluecove/apidocs/index.html}Java docs}}. For application it is not recommended to use any classes or API other than defined in JSR-82.
 
+    For more limitations on different stacks see {{{http://code.google.com/p/bluecove/wiki/stacks}BlueCove supported stacks}}. 
+
     Main project website {{{http://bluecove.googlecode.com}http://bluecove.googlecode.com}}
 
 [images/stack-diagram.png] JSR-82 and Bluetooth stack diagram

@@ -1,0 +1,12 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/doxia/references/apt-format.html
+
+                                    ------------------
+                                    BlueCove Core
+                                    ------------------
+
+BlueCove Core module
+
+   This is main BlueCove module. Native libraies to support for Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth are inclused in its build.
+   
+   For more information see  {{{../}Main project page}}

@@ -12,7 +12,7 @@ This module distributed as different jar because of the License differences.
 
   Compiled for i386 and x86-64 versions of the native code (shared library) is included in jar distribution. Native shared library have been tested and should work on Ubuntu, OpenSUSE and Fedora. For other Linux distributions you may need to compile it yourself.
 
-  N.B. This is experimental module. Another module bluecove-bluez (Apache Software License) that is using D-Bus is in developement. {{{http://groups.google.com/group/bluecove-developers}Help us make it}}.
+  N.B. This is stable module. Another experimental module {{{../bluecove-bluez}bluecove-bluez}} (Apache Software License) that is using D-Bus is in developement. {{{http://groups.google.com/group/bluecove-developers}Help us make it}}.
 
 * Usage
 
