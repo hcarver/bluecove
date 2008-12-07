@@ -334,17 +334,17 @@ class BluetoothStackWIDCOMM implements BluetoothStack, DeviceInquiryRunnable, Se
 
 	// --- Some testing functions accessible by LocalDevice.getProperty
 
-	public native boolean isRemoteDeviceConnected(long address);
+	private native boolean isRemoteDeviceConnected(long address);
 
-	public native String getRemoteDeviceLinkMode(long address);
+	private native String getRemoteDeviceLinkMode(long address);
 
-	public native String getRemoteDeviceVersionInfo(long address);
+	private native String getRemoteDeviceVersionInfo(long address);
 
-	public native boolean setSniffMode(long address);
+	private native boolean setSniffMode(long address);
 
-	public native boolean cancelSniffMode(long address);
+	private native boolean cancelSniffMode(long address);
 
-	public native int getRemoteDeviceRSSI(long address);
+	private native int getRemoteDeviceRSSI(long address);
 
 	// --- Device Inquiry
 

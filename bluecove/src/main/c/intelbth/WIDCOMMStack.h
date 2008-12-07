@@ -27,6 +27,9 @@
 
 #ifdef _WIN32_WCE
 	#define WIDCOMM_CE30
+	// Even so some the function declared in BTW-CE, use of one will not allow to load dll on our test device Dell Axim X30 
+	#define WIDCOMM_CE_MINUMUM
+	
 	#ifdef WIDCOMM_CE30
 		#define WIDCOMM_DLL L"BtSdkCE30.dll"
 	#else

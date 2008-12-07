@@ -582,6 +582,9 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_removeAuth
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isRemoteDeviceConnected
   (JNIEnv *env, jobject, jlong address) {
+#ifdef WIDCOMM_CE_MINUMUM
+    return false;
+#else    
     if (stack == NULL) {
         throwRuntimeException(env, cSTACK_CLOSED);
         return FALSE;
@@ -589,10 +592,14 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isRemo
     BD_ADDR bda;
     LongToBcAddr(address, bda);
     return stack->IsRemoteDeviceConnected(bda);
+#endif
 }
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteDeviceLinkMode
   (JNIEnv *env, jobject, jlong address) {
+#ifdef WIDCOMM_CE_MINUMUM
+    return NULL;
+#else    
     if (stack == NULL) {
         throwRuntimeException(env, cSTACK_CLOSED);
         return NULL;
@@ -640,11 +647,12 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemo
         throwRuntimeException(env, "Can't read link mode");
         return NULL;
     }
+#endif    
 }
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteDeviceVersionInfo
   (JNIEnv *env, jobject, jlong address) {
-    // TODO
+#ifndef WIDCOMM_CE_MINUMUM
     if (stack == NULL) {
         throwRuntimeException(env, cSTACK_CLOSED);
         return NULL;
@@ -660,23 +668,33 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemo
         sprintf_s(info, 256, "manufacturer=%i,lmp_version=%i,lmp_sub_version=%i", devVerInfo.manufacturer, devVerInfo.lmp_version, devVerInfo.lmp_sub_version);
         return env->NewStringUTF(info);
     }
+#else        
+    return NULL;
+#endif     
 }
 
-#ifndef WIDCOMM_CE30
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_setSniffMode
   (JNIEnv *env, jobject, jlong address) {
+#ifndef WIDCOMM_CE30
     BD_ADDR bda;
     LongToBcAddr(address, bda);
     return CBtIf::SetSniffMode(bda);
+#else        
+    return JNI_FALSE;
+#endif
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_cancelSniffMode
   (JNIEnv *env, jobject, jlong address) {
+#ifndef WIDCOMM_CE30
     BD_ADDR bda;
     LongToBcAddr(address, bda);
     return CBtIf::CancelSniffMode(bda);
+#else        
+    return JNI_FALSE;
+#endif        
 }
-#endif
+
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteDeviceRSSI
   (JNIEnv *env, jobject, jlong address) {
@@ -684,6 +702,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteD
         throwRuntimeException(env, cSTACK_CLOSED);
         return NULL;
     }
+#ifndef WIDCOMM_CE_MINUMUM
     BD_ADDR bda;
     LongToBcAddr(address, bda);
     tBT_CONN_STATS conn_stats;
@@ -691,6 +710,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteD
         return -1;
     }
     return conn_stats.Rssi;
+#else        
+    return -1;
+#endif            
 }
 
 jboolean isDevicePaired(JNIEnv *env, jlong address, DEV_CLASS devClass) {
