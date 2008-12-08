@@ -95,7 +95,10 @@ copy src\main\resources\intelbth.dll target\classes\
 @if exist "%VCINSTALLDIR%\ce" goto ce_sdk_found
 
 @echo Microsoft Windows CE SDKs Not Found
-
+@if "%CRUISECONTROL_BUILD%" == "1" (
+    @echo ERROR: Windows CE SDKs required for build.
+    @goto :errormark
+)
 @goto endmark
 :ce_sdk_found
 
