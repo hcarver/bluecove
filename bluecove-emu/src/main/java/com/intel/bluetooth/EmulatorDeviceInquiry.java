@@ -40,7 +40,7 @@ import com.intel.bluetooth.emu.DeviceDescriptor;
  */
 class EmulatorDeviceInquiry implements DeviceInquiryRunnable {
 
-	private static final int MIN_DISCOVERY_DURATION = 200;
+	private static final int MIN_DISCOVERY_DURATION = 500;
 
 	private EmulatorLocalDevice localDevice;
 
@@ -64,8 +64,8 @@ class EmulatorDeviceInquiry implements DeviceInquiryRunnable {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.intel.bluetooth.DeviceInquiryRunnable#runDeviceInquiry(com.intel.bluetooth.DeviceInquiryThread,
-	 *      int, javax.bluetooth.DiscoveryListener)
+	 * @see com.intel.bluetooth.DeviceInquiryRunnable#runDeviceInquiry(com.intel.bluetooth.DeviceInquiryThread, int,
+	 * javax.bluetooth.DiscoveryListener)
 	 */
 	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException {
@@ -89,6 +89,8 @@ class EmulatorDeviceInquiry implements DeviceInquiryRunnable {
 				}
 				if (reportedIndex < devices.length) {
 					DeviceDescriptor d = devices[reportedIndex];
+					// Device may be updated.
+					d = localDevice.getDeviceManagerService().getDeviceDescriptor(d.getAddress());
 					reportedIndex++;
 					RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(bluetoothStack, d.getAddress(), d
 							.getName(), false);
@@ -180,8 +182,8 @@ class EmulatorDeviceInquiry implements DeviceInquiryRunnable {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.intel.bluetooth.DeviceInquiryRunnable#deviceDiscoveredCallback(javax.bluetooth.DiscoveryListener,
-	 *      long, int, java.lang.String, boolean)
+	 * @see com.intel.bluetooth.DeviceInquiryRunnable#deviceDiscoveredCallback(javax.bluetooth.DiscoveryListener, long,
+	 * int, java.lang.String, boolean)
 	 */
 	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
 			String deviceName, boolean paired) {

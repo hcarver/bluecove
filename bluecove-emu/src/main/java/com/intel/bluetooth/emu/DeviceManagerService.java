@@ -42,7 +42,7 @@ public interface DeviceManagerService /* extends RoHService */{
 
 	public void releaseDevice(long localAddress);
 
-	public DeviceDescriptor getDeviceDescriptor(long localAddress);
+	public DeviceDescriptor getDeviceDescriptor(long address);
 
 	public DeviceCommand pollCommand(long localAddress);
 
