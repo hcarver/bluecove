@@ -64,8 +64,6 @@ import com.intel.bluetooth.SelectServiceHandler;
  * set of remote devices.
  * 
  * 
- * @version 1.0 February 11, 2002
- * 
  */
 
 public class DiscoveryAgent {
@@ -131,30 +129,42 @@ public class DiscoveryAgent {
 		this.bluetoothStack = bluetoothStack;
 	}
 
-	/**
-	 * Returns an array of Bluetooth devices that have either been found by the
-	 * local device during previous inquiry requests or been specified as a
-	 * pre-known device depending on the argument. The list of previously found
-	 * devices is maintained by the implementation of this API. (In other words,
-	 * maintenance of the list of previously found devices is an implementation
-	 * detail.) A device can be set as a pre-known device in the Bluetooth
-	 * Control Center.
-	 * 
-	 * @param option
-	 *            <code>CACHED</code> if previously found devices should be
-	 *            returned; <code>PREKNOWN</code> if pre-known devices should
-	 *            be returned
-	 * 
-	 * @return an array containing the Bluetooth devices that were previously
-	 *         found if <code>option</code> is <code>CACHED</code>; an
-	 *         array of devices that are pre-known devices if
-	 *         <code>option</code> is <code>PREKNOWN</code>;
-	 *         <code>null</code> if no devices meet the criteria
-	 * 
-	 * @exception IllegalArgumentException
-	 *                if <code>option</code> is not <code>CACHED</code> or
-	 *                <code>PREKNOWN</code>
-	 */
+    /**
+     * Returns an array of Bluetooth devices that have either been found by the
+     * local device during previous inquiry requests or been specified as a
+     * pre-known device, depending on the argument. The list of previously found
+     * devices is maintained by the implementation of this API. A device can be
+     * set as a pre-known device in the Bluetooth Control Center.
+     * 
+     * While maintenance of the list of previously found devices is an
+     * implementation detail, it is essential to ensure a consistent user
+     * experience in what constitutes a list of cached Bluetooth devices. Thus,
+     * a Bluetooth API implementation MUST read the list of cached devices from
+     * the native side every time the
+     * <code>DiscoveryAgent.retrieveDevices()</code> method, if access to the
+     * native list is available. If the native Bluetooth implementation does not
+     * maintain the list of cached devices, or if the list is not readily
+     * available, a Bluetooth API implementation MUST maintain a similar list
+     * itself and return this list from the
+     * <code>DiscoveryAgent.retrieveDevices()</code> method when asked for
+     * CACHED devices. The returned list in either case MUST contain no more
+     * than one entry for an individual remote device.
+     * 
+     * @param option
+     *            <code>CACHED</code> if previously found devices should be
+     *            returned; <code>PREKNOWN</code> if pre-known devices should be
+     *            returned
+     * 
+     * @return an array containing the Bluetooth devices that were previously
+     *         found if <code>option</code> is <code>CACHED</code>; an array of
+     *         devices that are pre-known devices if <code>option</code> is
+     *         <code>PREKNOWN</code>; <code>null</code> if no devices meet the
+     *         criteria
+     * 
+     * @exception IllegalArgumentException
+     *                if <code>option</code> is not <code>CACHED</code> or
+     *                <code>PREKNOWN</code>
+     */
 	public RemoteDevice[] retrieveDevices(int option) {
 		return RemoteDeviceHelper.retrieveDevices(this.bluetoothStack, option);
 	}
@@ -346,52 +356,58 @@ public class DiscoveryAgent {
 		return this.bluetoothStack.cancelServiceSearch(transID);
 	}
 
-	/**
-	 * Attempts to locate a service that contains <code>uuid</code> in the
-	 * ServiceClassIDList of its service record. This method will return a
-	 * string that may be used in <code>Connector.open()</code> to establish a
-	 * connection to the service. How the service is selected if there are
-	 * multiple services with <code>uuid</code> and which devices to search is
-	 * implementation dependent.
-	 * 
-	 * @see ServiceRecord#NOAUTHENTICATE_NOENCRYPT
-	 * @see ServiceRecord#AUTHENTICATE_NOENCRYPT
-	 * @see ServiceRecord#AUTHENTICATE_ENCRYPT
-	 * 
-	 * @param uuid
-	 *            the UUID to search for in the ServiceClassIDList
-	 * 
-	 * @param security
-	 *            specifies the security requirements for a connection to this
-	 *            service; must be one of
-	 *            <code>ServiceRecord.NOAUTHENTICATE_NOENCRYPT</code>,
-	 *            <code>ServiceRecord.AUTHENTICATE_NOENCRYPT</code>, or
-	 *            <code>ServiceRecord.AUTHENTICATE_ENCRYPT</code>
-	 * 
-	 * @param master
-	 *            determines if this client must be the master of the
-	 *            connection; <code>true</code> if the client must be the
-	 *            master; <code>false</code> if the client can be the master
-	 *            or the slave
-	 * 
-	 * @return the connection string used to connect to the service with a UUID
-	 *         of <code>uuid</code>; or <code>null</code> if no service
-	 *         could be found with a UUID of <code>uuid</code> in the
-	 *         ServiceClassIDList
-	 * 
-	 * @exception BluetoothStateException
-	 *                if the Bluetooth system cannot start the request due to
-	 *                the current state of the Bluetooth system
-	 * 
-	 * @exception NullPointerException
-	 *                if <code>uuid</code> is <code>null</code>
-	 * 
-	 * @exception IllegalArgumentException
-	 *                if <code>security</code> is not
-	 *                <code>ServiceRecord.NOAUTHENTICATE_NOENCRYPT</code>,
-	 *                <code>ServiceRecord.AUTHENTICATE_NOENCRYPT</code>, or
-	 *                <code>ServiceRecord.AUTHENTICATE_ENCRYPT</code>
-	 */
+    /**
+     * Attempts to locate a service that contains <code>uuid</code> in the
+     * ServiceClassIDList of its service record. This method will return a
+     * string that may be used in <code>Connector.open()</code> to establish a
+     * connection to the service.
+     * 
+     * This method MUST return immediately after a suitable service (i.e. a
+     * service that matches the specified UUID) is found. The Bluetooth inquiry
+     * or the Bluetooth service discovery MUST NOT continue after a suitable
+     * service is found. Note that if there are several suitable services in the
+     * vicinity, different invocations of this method MAY produce different
+     * results (i.e. return connection strings pointing at different services).
+     * This is because Bluetooth inquiry and service discovery processes are
+     * non-deterministic by their nature.
+     * 
+     * @see ServiceRecord#NOAUTHENTICATE_NOENCRYPT
+     * @see ServiceRecord#AUTHENTICATE_NOENCRYPT
+     * @see ServiceRecord#AUTHENTICATE_ENCRYPT
+     * 
+     * @param uuid
+     *            the UUID to search for in the ServiceClassIDList
+     * 
+     * @param security
+     *            specifies the security requirements for a connection to this
+     *            service; must be one of
+     *            <code>ServiceRecord.NOAUTHENTICATE_NOENCRYPT</code>,
+     *            <code>ServiceRecord.AUTHENTICATE_NOENCRYPT</code>, or
+     *            <code>ServiceRecord.AUTHENTICATE_ENCRYPT</code>
+     * 
+     * @param master
+     *            determines if this client must be the master of the
+     *            connection; <code>true</code> if the client must be the
+     *            master; <code>false</code> if the client can be the master or
+     *            the slave
+     * 
+     * @return the connection string used to connect to the service with a UUID
+     *         of <code>uuid</code>; or <code>null</code> if no service could be
+     *         found with a UUID of <code>uuid</code> in the ServiceClassIDList
+     * 
+     * @exception BluetoothStateException
+     *                if the Bluetooth system cannot start the request due to
+     *                the current state of the Bluetooth system
+     * 
+     * @exception NullPointerException
+     *                if <code>uuid</code> is <code>null</code>
+     * 
+     * @exception IllegalArgumentException
+     *                if <code>security</code> is not
+     *                <code>ServiceRecord.NOAUTHENTICATE_NOENCRYPT</code>,
+     *                <code>ServiceRecord.AUTHENTICATE_NOENCRYPT</code>, or
+     *                <code>ServiceRecord.AUTHENTICATE_ENCRYPT</code>
+     */
 	public String selectService(UUID uuid, int security, boolean master) throws BluetoothStateException {
 		return (new SelectServiceHandler(this)).selectService(uuid, security, master);
 	}

@@ -37,7 +37,6 @@ import java.io.IOException;
  * inquiry mode if a connection is established.  This exception would be
  * thrown if <code>startInquiry()</code> were called.
  *
- * @version 1.0 February 11, 2002
  */
 public class BluetoothStateException extends IOException {
 

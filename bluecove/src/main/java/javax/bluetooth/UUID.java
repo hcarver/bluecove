@@ -30,55 +30,114 @@ import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.Utils;
 
 /**
- * The <code>UUID</code> class defines universally
- * unique identifiers. These 128-bit unsigned integers are guaranteed
- * to be unique across all time and space. Accordingly, an instance of
- * this class is immutable.
- *
- * The Bluetooth specification provides an algorithm describing how a
- * 16-bit or 32-bit UUID could be promoted to a 128-bit UUID.
- * Accordingly, this class provides an interface that assists
- * applications in creating 16-bit, 32-bit, and 128-bit long UUIDs. The
- * methods supported by this class allow equality testing of two UUID
- * objects.
- *
+ * The <code>UUID</code> class defines universally unique identifiers. These
+ * 128-bit unsigned integers are guaranteed to be unique across all time and
+ * space. Accordingly, an instance of this class is immutable.
+ * 
+ * The Bluetooth specification provides an algorithm describing how a 16-bit or
+ * 32-bit UUID could be promoted to a 128-bit UUID. Accordingly, this class
+ * provides an interface that assists applications in creating 16-bit, 32-bit,
+ * and 128-bit long UUIDs. The methods supported by this class allow equality
+ * testing of two UUID objects.
+ * 
  * <p>
- *
- * The Bluetooth Assigned Numbers document (<A
- * HREF="http://www.bluetooth.org/assigned-numbers/sdp.htm">
- * http://www.bluetooth.org/assigned-numbers/sdp.htm</A>)
- * defines a large number of UUIDs for protocols and service classes.
- * The table below provides a short list of the most common UUIDs
- * defined in the Bluetooth Assigned Numbers document.
+ * 
+ * The Bluetooth Assigned Numbers document (<A HREF=
+ * "http://www.bluetooth.org/foundry/assignnumb/document/service_discovery"
+ * >http://www.bluetooth.org/foundry/assignnumb/document/service_discovery</A>)
+ * defines a large number of UUIDs for protocols and service classes. The table
+ * below provides a short list of the most common UUIDs defined in the Bluetooth
+ * Assigned Numbers document.
  * <TABLE>
- * <TR><TH>Name</TH><TH>Value</TH><TH>Size</TH></TR>
- * <TR><TD>Base UUID Value (Used in promoting 16-bit and 32-bit UUIDs to
- * 128-bit UUIDs)</TD><TD>0x0000000000001000800000805F9B34FB</TD>
- * <TD>128-bit</TD></TR>
- * <TR><TD>SDP</TD><TD>0x0001</TD><TD>16-bit</TD></TR>
- * <TR><TD>RFCOMM</TD><TD>0x0003</TD><TD>16-bit</TD></TR>
- * <TR><TD>OBEX</TD><TD>0x0008</TD><TD>16-bit</TD></TR>
- * <TR><TD>HTTP</TD><TD>0x000C</TD><TD>16-bit</TD></TR>
- * <TR><TD>L2CAP</TD><TD>0x0100</TD><TD>16-bit</TD></TR>
- * <TR><TD>BNEP</TD><TD>0x000F</TD><TD>16-bit</TD></TR>
- * <TR><TD>Serial Port</TD><TD>0x1101</TD><TD>16-bit</TD></TR>
- * <TR><TD>ServiceDiscoveryServerServiceClassID</TD><TD>0x1000</TD>
- * <TD>16-bit</TD></TR>
- * <TR><TD>BrowseGroupDescriptorServiceClassID</TD><TD>0x1001</TD>
- * <TD>16-bit</TD></TR>
- * <TR><TD>PublicBrowseGroup</TD><TD>0x1002</TD><TD>16-bit</TD></TR>
- * <TR><TD>OBEX Object Push
- * Profile</TD><TD>0x1105</TD><TD>16-bit</TD></TR>
- * <TR><TD>OBEX File Transfer
- * Profile</TD><TD>0x1106</TD><TD>16-bit</TD></TR>
- * <TR><TD>Personal Area Networking User</TD><TD>0x1115</TD>
- * <TD>16-bit</TD></TR>
- * <TR><TD>Network Access Point</TD><TD>0x1116</TD><TD>16-bit</TD></TR>
- * <TR><TD>Group Network</TD><TD>0x1117</TD><TD>16-bit</TD></TR>
+ * <TR>
+ * <TH>Name</TH>
+ * <TH>Value</TH>
+ * <TH>Size</TH>
+ * </TR>
+ * <TR>
+ * <TD>Base UUID Value (Used in promoting 16-bit and 32-bit UUIDs to 128-bit
+ * UUIDs)</TD>
+ * <TD>0x0000000000001000800000805F9B34FB</TD>
+ * <TD>128-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>SDP</TD>
+ * <TD>0x0001</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>RFCOMM</TD>
+ * <TD>0x0003</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>OBEX</TD>
+ * <TD>0x0008</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>HTTP</TD>
+ * <TD>0x000C</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>L2CAP</TD>
+ * <TD>0x0100</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>BNEP</TD>
+ * <TD>0x000F</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>Serial Port</TD>
+ * <TD>0x1101</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>ServiceDiscoveryServerServiceClassID</TD>
+ * <TD>0x1000</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>BrowseGroupDescriptorServiceClassID</TD>
+ * <TD>0x1001</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>PublicBrowseGroup</TD>
+ * <TD>0x1002</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>OBEX Object Push Profile</TD>
+ * <TD>0x1105</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>OBEX File Transfer Profile</TD>
+ * <TD>0x1106</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>Personal Area Networking User</TD>
+ * <TD>0x1115</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>Network Access Point</TD>
+ * <TD>0x1116</TD>
+ * <TD>16-bit</TD>
+ * </TR>
+ * <TR>
+ * <TD>Group Network</TD>
+ * <TD>0x1117</TD>
+ * <TD>16-bit</TD>
+ * </TR>
  * </TABLE>
- *
- * @version 1.0 February 11, 2002
- *
+ * 
+ * 
  */
 public class UUID {
 
@@ -173,16 +232,18 @@ public class UUID {
 	}
 
 	/**
-	 * Returns the string representation of the 128-bit UUID object.
-	 * The string being returned represents a UUID
-	 * that contains characters from the hexadecimal set, [0-9,
-	 * A-F]. It does not include the prefix "0x" that is generally
-	 * used for hex representation of numbers. The return value will
-	 * never be <code>null</code>.
-	 *
-	 * @return the string representation of the UUID
-	 *
-	 */
+     * Returns the string representation of the 128-bit UUID object. The string
+     * being returned represents a UUID that contains characters from the
+     * hexadecimal set, [0-9, A-F]. It does not include the prefix "0x" that is
+     * generally used for hex representation of numbers. Leading zeros MUST be
+     * removed; for example, the string
+     * <code>00000000000000000000000000000000</code> will not be returned to
+     * represent <code>0</code>. The return value will never be
+     * <code>null</code>.
+     * 
+     * @return the string representation of the UUID
+     * 
+     */
 	public String toString() {
 		return Utils.UUIDByteArrayToString(uuidValue);
 	}

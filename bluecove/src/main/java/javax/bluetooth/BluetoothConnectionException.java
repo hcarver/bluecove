@@ -36,8 +36,6 @@ import java.io.IOException;
  * security problem. This reason is passed on to the application through 
  * this class.
  *
- * @version 1.0 February 11, 2002
- *
  */
 public class BluetoothConnectionException extends IOException {
 

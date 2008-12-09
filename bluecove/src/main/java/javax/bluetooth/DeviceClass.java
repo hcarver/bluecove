@@ -36,12 +36,9 @@ import com.intel.bluetooth.DebugLog;
  * and contains information on the type of the device and the type of services
  * available on the device.
  * <P>
- * The Bluetooth Assigned Numbers document
- * (<A HREF="http://www.bluetooth.org/assigned-numbers/baseband.htm">
- * http://www.bluetooth.org/assigned-numbers/baseband.htm</A>)
- * defines the service class, major device class, and minor device class.  The
- * table below provides some examples of possible return values and their
- * meaning:
+ *  The Bluetooth Assigned Numbers document defines the service class, major
+ * device class, and minor device class.  The table below provides some
+ * examples of possible return values and their meaning:
  * <TABLE>
  * <TR><TH>Method</TH><TH>Return Value</TH><TH>Class of Device</TH></TR>
  * <TR><TD><code>getServiceClasses()</code></TD>
@@ -64,7 +61,6 @@ import com.intel.bluetooth.DebugLog;
  *   Cellular Minor Device Class</TD></TR>
  * </TABLE>
  *
- * @version 1.0 February 11, 2002
  */
 
 public class DeviceClass {
@@ -132,6 +128,8 @@ public class DeviceClass {
 	}
 
 	/**
+	 * Non JSR-82 function.
+	 * 
 	 * @deprecated Use ((Object)deviceClass).toString() if you want your application to run in MDIP profile
 	 */
 	public String toString() {

@@ -114,7 +114,6 @@ import com.intel.bluetooth.Utils;
  * </TR>
  * </TABLE>
  * 
- * @version 1.0 February 11, 2002
  * 
  */
 
@@ -870,6 +869,8 @@ public class DataElement {
 	}
 
 	/**
+	 * Non JSR-82 function.
+	 * 
 	 * @deprecated Use ((Object)dataElement).toString() if you want your
 	 *             application to run in MDIP profile
 	 */

@@ -39,7 +39,6 @@ import com.intel.bluetooth.UtilsJavaSE;
  * It provides basic information about a remote device including the device's
  * Bluetooth address and its friendly name.
  * 
- * @version 1.0 February 11, 2002
  */
 public class RemoteDevice {
 

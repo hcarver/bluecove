@@ -51,7 +51,6 @@ import javax.microedition.io.Connection;
  * send. An example of a valid L2CAP client connection string is:<BR>
  * <code>btl2cap://0050CD00321B:1003;ReceiveMTU=512;TransmitMTU=512</code>
  *
- * @version 1.0 February 11, 2002
  */
 public interface L2CAPConnection extends Connection {
 

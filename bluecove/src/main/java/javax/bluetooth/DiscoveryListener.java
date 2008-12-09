@@ -27,26 +27,22 @@
 package javax.bluetooth;
 
 /**
- * The <code>DiscoveryListener</code> interface allows an application to
- * receive device discovery and service discovery events. This interface
- * provides four methods, two for discovering devices and two for discovering
- * services.
+ * The <code>DiscoveryListener</code> interface allows an application to receive
+ * device discovery and service discovery events. This interface provides four
+ * methods, two for discovering devices and two for discovering services.
  * 
- * @version 1.0 February 11, 2002
- * 
- * @since 1.1 The JSR 82 specification does not require that implementations
- *        create individual threads for event delivery. Thus, if a
- *        DiscoveryListener method does not return or the return is delayed, the
- *        system may be blocked. So the following note is given for application
- *        developers :
- *        <p>
+ * The JSR 82 specification does not require that implementations create
+ * individual threads for event delivery. Thus, if a DiscoveryListener method
+ * does not return or the return is delayed, the system may be blocked. So the
+ * following note is given for application developers :
+ * <p>
  * 
  * The following DiscoveryListener methods SHOULD return immediately :
  * <ul>
- * <li>DiscoveryListener.deviceDiscovered</li>
- * <li>DiscoveryListener.inquiryCompleted</li>
- * <li>DiscoveryListener.servicesDiscovered</li>
- * <li>DiscoveryListener.serviceSearchCompleted</li>
+ * <li><code>DiscoveryListener.deviceDiscovered</code></li>
+ * <li><code>DiscoveryListener.inquiryCompleted</code></li>
+ * <li><code>DiscoveryListener.servicesDiscovered</code></li>
+ * <li><code>DiscoveryListener.serviceSearchCompleted</code></li>
  * </ul>
  * 
  */
@@ -150,16 +146,21 @@ public interface DiscoveryListener {
 	 */
 	public static final int SERVICE_SEARCH_DEVICE_NOT_REACHABLE = 0x06;
 
-	/**
-	 * Called when a device is found during an inquiry. An inquiry searches for
-	 * devices that are discoverable. The same device may be returned multiple
-	 * times. 
-	 * 
-	 * @param btDevice the device that was found during the inquiry 
-	 * @param cod - the service classes, major device class, and minor device
-	 * class of the remote device 
-	 * @see DiscoveryAgent#startInquiry(int, javax.bluetooth.DiscoveryListener)
-	 */
+    /**
+     * Called when a device is found during an inquiry. An inquiry searches for
+     * devices that are discoverable. During Bluetooth inquiry, a Bluetooth API
+     * implementation MUST report each discovered remote Bluetooth device only
+     * once. In other words, a Bluetooth API implementation MUST call the
+     * <code>DiscoveryListener.deviceDiscovered()</code> method only once for each
+     * individual discovered remote device.
+     * 
+     * @param btDevice
+     *            the device that was found during the inquiry
+     * @param cod
+     *            - the service classes, major device class, and minor device
+     *            class of the remote device
+     * @see DiscoveryAgent#startInquiry(int, javax.bluetooth.DiscoveryListener)
+     */
 	public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod);
 
 	/**
