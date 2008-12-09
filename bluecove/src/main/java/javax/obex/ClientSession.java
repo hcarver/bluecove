@@ -120,7 +120,6 @@ import javax.microedition.io.Connection;
  * }
  * </pre>
  * 
- * @version 1.0 February 11, 2002
  */
 public interface ClientSession extends Connection {
 
@@ -239,69 +238,71 @@ public interface ClientSession extends Connection {
 	public HeaderSet disconnect(HeaderSet headers) throws IOException;
 
 	/**
-	 * Completes an OBEX SETPATH operation. This method will never return
-	 * <code>null</code>.
-	 * 
-	 * @param backup
-	 *            if <code>true</code>, instructs the server to back up one
-	 *            directory before moving to the directory specified in name
-	 *            (similar to cd .. on PCs); if <code>false</code>, apply
-	 *            <code>name</code> to the current directory
-	 * 
-	 * @param create
-	 *            if <code>true</code>, instructs the server to create the
-	 *            directory if it does not exist; if <code>false</code>,
-	 *            instruct the server to return an error code if the directory
-	 *            does not exist
-	 * 
-	 * @param headers
-	 *            the headers to include in the SETPATH request
-	 * 
-	 * @return the headers that were returned from the server
-	 * 
-	 * @exception IOException
-	 *                if an error occurred in the transport layer; if the client
-	 *                is already in an operation; if an OBEX connection does not
-	 *                exist because <code>connect()</code> has not been
-	 *                called; if <code>disconnect()</code> had been called and
-	 *                a response code of <code>OBEX_HTTP_OK</code> was
-	 *                received; if the headers defined in <code>headers</code>
-	 *                exceed the max packet length
-	 * 
-	 * @exception IllegalArgumentException
-	 *                if <code>headers</code> were not created by a call to
-	 *                <code>createHeaderSet()</code>
-	 */
+     * Completes an OBEX SETPATH operation. If the headers argument is null, no
+     * headers will be sent in the request. This method will never return
+     * <code>null</code>.
+     * 
+     * @param backup
+     *            if <code>true</code>, instructs the server to back up one
+     *            directory before moving to the directory specified in name
+     *            (similar to cd .. on PCs); if <code>false</code>, apply
+     *            <code>name</code> to the current directory
+     * 
+     * @param create
+     *            if <code>true</code>, instructs the server to create the
+     *            directory if it does not exist; if <code>false</code>,
+     *            instruct the server to return an error code if the directory
+     *            does not exist
+     * 
+     * @param headers
+     *            the headers to include in the SETPATH request
+     * 
+     * @return the headers that were returned from the server
+     * 
+     * @exception IOException
+     *                if an error occurred in the transport layer; if the client
+     *                is already in an operation; if an OBEX connection does not
+     *                exist because <code>connect()</code> has not been called;
+     *                if <code>disconnect()</code> had been called and a
+     *                response code of <code>OBEX_HTTP_OK</code> was received;
+     *                if the headers defined in <code>headers</code> exceed the
+     *                max packet length
+     * 
+     * @exception IllegalArgumentException
+     *                if <code>headers</code> were not created by a call to
+     *                <code>createHeaderSet()</code>
+     */
 	public HeaderSet setPath(HeaderSet headers, boolean backup, boolean create) throws IOException;
 
 	/**
-	 * Performs an OBEX DELETE operation. This method will never return
-	 * <code>null</code>.
-	 * 
-	 * @param headers
-	 *            the header to send in the DELETE request
-	 * 
-	 * @return the headers returned by the server
-	 * 
-	 * @exception IOException
-	 *                if an error occurred in the transport layer; if the client
-	 *                is already in an operation; if an OBEX connection does not
-	 *                exist because <code>connect()</code> has not been
-	 *                called; if <code>disconnect()</code> had been called and
-	 *                a response code of <code>OBEX_HTTP_OK</code> was
-	 *                received; if the headers defined in <code>headers</code>
-	 *                exceed the max packet length
-	 * 
-	 * @exception IllegalArgumentException
-	 *                if <code>headers</code> were not created by a call to
-	 *                <code>createHeaderSet()</code>
-	 */
+     * Performs an OBEX DELETE operation. If the headers argument is null, no
+     * headers will be sent in the request. This method will never return
+     * <code>null</code>.
+     * 
+     * @param headers
+     *            the header to send in the DELETE request
+     * 
+     * @return the headers returned by the server
+     * 
+     * @exception IOException
+     *                if an error occurred in the transport layer; if the client
+     *                is already in an operation; if an OBEX connection does not
+     *                exist because <code>connect()</code> has not been called;
+     *                if <code>disconnect()</code> had been called and a
+     *                response code of <code>OBEX_HTTP_OK</code> was received;
+     *                if the headers defined in <code>headers</code> exceed the
+     *                max packet length
+     * 
+     * @exception IllegalArgumentException
+     *                if <code>headers</code> were not created by a call to
+     *                <code>createHeaderSet()</code>
+     */
 	public HeaderSet delete(HeaderSet headers) throws IOException;
 
 	/**
 	 * Performs an OBEX GET operation. This method will send the OBEX headers
 	 * provided to the server and return an <code>Operation</code> object to
-	 * continue with the operation. This method will never return
+	 * continue with the operation. The headers argument may be null. This method will never return
 	 * <code>null</code>.
 	 * 
 	 * @see Operation
@@ -329,7 +330,7 @@ public interface ClientSession extends Connection {
 	/**
 	 * Performs an OBEX PUT operation. This method will send the OBEX headers
 	 * provided to the server and return an <code>Operation</code> object to
-	 * continue with the PUT operation. This method will never return
+	 * continue with the PUT operation. The headers argument may be null. This method will never return
 	 * <code>null</code>.
 	 * 
 	 * @see Operation

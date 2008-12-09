@@ -151,7 +151,6 @@ import java.io.IOException;
  * </TR>
  * </TABLE>
  * 
- * @version 1.0 February 11, 2002
  */
 public interface HeaderSet {
 
