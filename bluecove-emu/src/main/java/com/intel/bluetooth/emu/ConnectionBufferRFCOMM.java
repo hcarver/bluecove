@@ -34,8 +34,8 @@ import java.io.OutputStream;
  */
 class ConnectionBufferRFCOMM extends ConnectionBuffer {
 
-	ConnectionBufferRFCOMM(long remoteAddress, InputStream is, OutputStream os) {
-		super(remoteAddress, is, os);
+	ConnectionBufferRFCOMM(long remoteAddress, String portID, InputStream is, OutputStream os) {
+		super(remoteAddress, portID, is, os);
 	}
 
 	void rfWrite(byte[] b) throws IOException {

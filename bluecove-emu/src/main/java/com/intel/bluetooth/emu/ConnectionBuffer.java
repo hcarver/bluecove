@@ -33,13 +33,15 @@ import java.io.OutputStream;
  */
 abstract class ConnectionBuffer {
 
-	protected long remoteAddress;
+	private final String portID;
+
+	protected final long remoteAddress;
 
 	protected int securityOpt;
 
-	protected InputStream is;
+	protected final InputStream is;
 
-	protected OutputStream os;
+	protected final OutputStream os;
 
 	protected boolean closed;
 
@@ -51,9 +53,9 @@ abstract class ConnectionBuffer {
 
 	protected MonitorConnectionBuffer monitor;
 
-	protected ConnectionBuffer(long remoteAddress, InputStream is, OutputStream os) {
-		super();
+	protected ConnectionBuffer(long remoteAddress, String portID, InputStream is, OutputStream os) {
 		this.remoteAddress = remoteAddress;
+		this.portID = portID;
 		this.is = is;
 		this.os = os;
 	}
@@ -116,6 +118,10 @@ abstract class ConnectionBuffer {
 
 	boolean isClosed() {
 		return closed;
+	}
+
+	public String getPortID() {
+		return this.portID;
 	}
 
 }

@@ -36,10 +36,10 @@ import java.io.OutputStream;
  */
 class ConnectionBufferL2CAP extends ConnectionBuffer {
 
-	private int remoteReceiveMTU;
+	private final int remoteReceiveMTU;
 
-	ConnectionBufferL2CAP(long remoteAddress, InputStream is, OutputStream os, int remoteReceiveMTU) {
-		super(remoteAddress, is, os);
+	ConnectionBufferL2CAP(long remoteAddress, String portID, InputStream is, OutputStream os, int remoteReceiveMTU) {
+		super(remoteAddress, portID, is, os);
 		this.remoteReceiveMTU = remoteReceiveMTU;
 	}
 

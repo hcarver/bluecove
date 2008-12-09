@@ -360,6 +360,11 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 			throw new BluetoothConnectionException(BluetoothConnectionException.FAILED_NOINFO, "No such device "
 					+ RemoteDeviceHelper.getBluetoothAddress(localAddress));
 		}
+		if (localDevice.getConnectionBuffer(remoteAddress, portID) != null) {
+			throw new BluetoothConnectionException(BluetoothConnectionException.FAILED_NOINFO,
+					"Already connected to the same port " + portID + " on "
+							+ RemoteDeviceHelper.getBluetoothAddress(remoteAddress));
+		}
 		ServiceListener sl = remoteDevice.connectService(portID, timeout);
 		if (sl == null) {
 			throw new BluetoothConnectionException(BluetoothConnectionException.UNKNOWN_PSM, "No such service "

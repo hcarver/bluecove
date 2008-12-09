@@ -176,6 +176,19 @@ class Device {
 		return (ConnectionBuffer) connections.get(new Long(connectionId));
 	}
 
+	ConnectionBuffer getConnectionBuffer(long remoteAddress, String portID) {
+		synchronized (connections) {
+			for (Enumeration<ConnectionBuffer> iterator = connections.elements(); iterator.hasMoreElements();) {
+				ConnectionBuffer c = (ConnectionBuffer) iterator.nextElement();
+				if ((c.remoteAddress == remoteAddress) && (c.getPortID().equals(portID))) {
+					return c;
+				}
+			}
+			connections.clear();
+		}
+		return null;
+	}
+
 	void closeConnection(long connectionId) throws IOException {
 		ConnectionBuffer c;
 		synchronized (connections) {

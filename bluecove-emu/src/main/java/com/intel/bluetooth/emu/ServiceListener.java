@@ -43,7 +43,7 @@ class ServiceListener {
 
 	private static final String L2CAP_PREFIX = "l2cap-";
 
-	private String portID;
+	private final String portID;
 
 	private boolean rfcomm;
 
@@ -87,7 +87,7 @@ class ServiceListener {
 		this.serverReceiveMTU = serverReceiveMTU;
 		this.serverSecurityOpt = Utils.securityOpt(authenticate, encrypt);
 
-		serverDevice.serviceListenerAccepting(this.portID);
+		serverDevice.serviceListenerAccepting(getPortID());
 		while ((!closed) && (!interrupted) && (!connected)) {
 			synchronized (lock) {
 				try {
@@ -122,12 +122,13 @@ class ServiceListener {
 
 			ConnectionBuffer sb;
 			if (this.rfcomm) {
-				cb = new ConnectionBufferRFCOMM(serverDevice.getDescriptor().getAddress(), cis, cos);
-				sb = new ConnectionBufferRFCOMM(clientDevice.getDescriptor().getAddress(), sis, sos);
+				cb = new ConnectionBufferRFCOMM(serverDevice.getDescriptor().getAddress(), getPortID(), cis, cos);
+				sb = new ConnectionBufferRFCOMM(clientDevice.getDescriptor().getAddress(), getPortID(), sis, sos);
 			} else {
-				cb = new ConnectionBufferL2CAP(serverDevice.getDescriptor().getAddress(), cis, cos,
+				cb = new ConnectionBufferL2CAP(serverDevice.getDescriptor().getAddress(), getPortID(), cis, cos,
 						this.serverReceiveMTU);
-				sb = new ConnectionBufferL2CAP(clientDevice.getDescriptor().getAddress(), sis, sos, cilentReceiveMTU);
+				sb = new ConnectionBufferL2CAP(clientDevice.getDescriptor().getAddress(), getPortID(), sis, sos,
+						cilentReceiveMTU);
 			}
 			cb.connect(sb);
 			cb.setSecurityOpt(securityOpt);
@@ -141,7 +142,7 @@ class ServiceListener {
 				id = connectionCount;
 			}
 			MonitorConnection monitor = new MonitorConnection(clientDevice.getDescriptor().getAddress(), serverDevice
-					.getDescriptor().getAddress(), portID, id);
+					.getDescriptor().getAddress(), getPortID(), id);
 			cb.setMonitor(monitor.getClientBuffer());
 			sb.setMonitor(monitor.getServerBuffer());
 
@@ -155,8 +156,8 @@ class ServiceListener {
 			while ((!sb.isServerAccepted()) && (!sb.isClosed())) {
 				long timeleft = endOfDellay - System.currentTimeMillis();
 				if (timeleft <= 0) {
-					throw new BluetoothConnectionException(BluetoothConnectionException.TIMEOUT, "Service " + portID
-							+ " not ready");
+					throw new BluetoothConnectionException(BluetoothConnectionException.TIMEOUT, "Service "
+							+ getPortID() + " not ready");
 				}
 				synchronized (sb) {
 					try {
@@ -179,7 +180,7 @@ class ServiceListener {
 			logMsg.append(RemoteDeviceHelper.getBluetoothAddress(clientDevice.getDescriptor().getAddress()));
 			logMsg.append(" connected to ");
 			logMsg.append(RemoteDeviceHelper.getBluetoothAddress(serverDevice.getDescriptor().getAddress()));
-			logMsg.append(" ").append(this.portID);
+			logMsg.append(" ").append(this.getPortID());
 			DebugLog.debug(logMsg.toString());
 
 			return id;
