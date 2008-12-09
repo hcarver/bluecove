@@ -12,19 +12,21 @@ JSR 82 Technology Compatibility Kit
     JSR-82 project website {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.jsr82}https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.jsr82}}
 
 
-* BlueCove TCK Tests on Windows and Mac OS X
+* BlueCove TCK Tests on Windows, Linux and Mac OS X
 
-    Latest test reports for Bluetooth_1-1_007_TCK can be found {{{Bluetooth_1-1_007_TCK/}here}}. See Description of {{{#failures}failures}}.
+    Latest test reports for Bluetooth_1-1-1_002_TCK can be found {{{Bluetooth_1-1-1_002_TCK/}here}}. See Description of {{{#failures}failures}}.
 
-    Latest test reports for OBEX_1-1_007_TCK can be found {{{OBEX_1-1_007_TCK/}here}}.
+    Latest test reports for OBEX_1-1-1_002_TCK can be found {{{OBEX_1-1-1_002_TCK/}here}}.
+
+    {{{#previous} TCK tests for previous releases of BlueCove}}
 
     L2CAP connection can't be implemented on Microsoft stack. Because of this BlueCove JSR-82 implementation can't be certified on  Microsoft stack. L2CAP tests has been excluded from run on this stack to save time
 
     To run TCK we are using:
 
-    * {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.gatling}Gatling}} v1.0.04 test harness
+    * {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.gatling}Gatling}} v1.0.05 test harness
 
-    * {{{http://www.microemu.org/}MicroEmulator}} v2.0.2 as MIDP container.
+    * {{{http://www.microemu.org/}MicroEmulator}} v2.0.3 as MIDP container.
 
     * BlueCove on WIDCOMM stack as TCK agent for Microsoft stack and Mac OS X tests
 
@@ -38,7 +40,7 @@ JSR 82 Technology Compatibility Kit
 
     Test environment
 
-    * Sun Java(TM) SE Runtime Environment (build 1.5.0_14-b03)
+    * Sun Java(TM) SE Runtime Environment (build 1.6.0_11-b03)
 
     * System 1 TCK Client, WinXP SP2, Intel Pentium M 1.7 GHz, RAM 1.25 GB, WIDCOMM (Broadcom Bluetooth stack) v5.1.0.4200, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
@@ -72,4 +74,18 @@ JSR 82 Technology Compatibility Kit
 
  You will need a TCK agent running on another bluetooth device use  {{{../bluecove-examples/bluecove-tester}bluecove-tester Web Start}}.
 
+
+* TCK tests for {previous} releases of BlueCove
+
+    * {{{Bluetooth_1-1_005_TCK/}Bluetooth_1-1_005_TCK bluecove-2.0.1}}
+
+    * {{{OBEX_1-1_005_TCK/}OBEX_1-1_005_TCK bluecove-2.0.1}}
+
+    * {{{Bluetooth_1-1_006_TCK/}Bluetooth_1-1_006_TCK bluecove-2.0.2}}
+
+    * {{{OBEX_1-1_006_TCK/}OBEX_1-1_006_TCK bluecove-2.0.2}}
+
+    * {{{Bluetooth_1-1_007_TCK/}Bluetooth_1-1_007_TCK bluecove-2.0.3}}
+
+    * {{{OBEX_1-1_007_TCK/}OBEX_1-1_007_TCK bluecove-2.0.3}}
 

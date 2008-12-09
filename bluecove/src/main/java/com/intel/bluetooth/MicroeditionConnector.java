@@ -429,12 +429,24 @@ public abstract class MicroeditionConnector {
 			// PSM 1 discovery, 3 RFCOMM
 			throw new IllegalArgumentException("PCM " + channelAsString);
 		}
+		if ((channel < BluetoothConsts.L2CAP_PSM_MIN_JSR_82)
+				&& (!BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_JSR_82_PSM_MINIMUM_OFF, false))) {
+			throw new IllegalArgumentException("PCM values restricted by JAR82 to minimum "
+					+ BluetoothConsts.L2CAP_PSM_MIN_JSR_82);
+		}
+
 		// has the 9th bit (0x100) set to zero
 		if ((channel & 0x100) != 0) {
 			throw new IllegalArgumentException("9th bit set in PCM " + channelAsString);
 		}
-		if ((channel % 2) == 0) {
-			throw new IllegalArgumentException("PSM value " + channelAsString + " should be odd");
+		// The least significant byte must be odd
+		byte lsByte = (byte) (0xFF & channel);
+		if ((lsByte % 2) == 0) {
+			throw new IllegalArgumentException("PSM value " + channelAsString + " least significant byte must be odd");
+		}
+		byte msByte = (byte) ((0xFF00 & channel) >> 8);
+		if ((msByte % 2) == 1) {
+			throw new IllegalArgumentException("PSM value " + channelAsString + " most significant byte must be even");
 		}
 	}
 

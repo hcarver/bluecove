@@ -53,7 +53,7 @@ public class TCKAgentUtil {
         }
     }
 
-    public static int getServiceClass(String btAddress) {
+    public static int getServiceClass(String btAddress, int timeout) {
         LocalDevice device;
         DiscoveryAgent da;
         DiscoveryListenerImpl listen;
@@ -73,7 +73,10 @@ public class TCKAgentUtil {
 
               synchronized (synch) {
                 try {
-                    synch.wait(60000);
+                	// the default maximum time allocated for querying the remote
+                	// device is one minute if the config timeout is not set by the user.
+                	// User can adjust this time by setting the timeout.
+                    synch.wait(timeout * 30);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return -1;

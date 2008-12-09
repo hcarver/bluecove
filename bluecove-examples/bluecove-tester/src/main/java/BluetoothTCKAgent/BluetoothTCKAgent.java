@@ -61,8 +61,14 @@ public class BluetoothTCKAgent extends MIDlet {
         if (agentMtu == null) {
         	agentMtu = getAppProperty(L2CAPThread.BLUETOOTH_AGENT_MTU);
         }
+        
+        // Get the "timeout" configuration
+        String timeout = System.getProperty(L2CAPThread.TIMEOUT);
+        if (timeout == null) {
+        	timeout = getAppProperty(L2CAPThread.TIMEOUT);
+        }
         rfcommthread = new RFCOMMThread("RFCOMM Thread");
-        l2capthread = new L2CAPThread("L2CAP Thread", agentMtu);
+        l2capthread = new L2CAPThread("L2CAP Thread", agentMtu, timeout);
         goepthread = new GOEPThread("GOEP Thread");
 
         // Retreive the port number on which the PushBTConnectionThread should
@@ -100,7 +106,7 @@ public class BluetoothTCKAgent extends MIDlet {
             port = DEFAULT_PORT;
         }
 
-        pushThread = new PushBTConnectionThread("Push Thread", port);
+        pushThread = new PushBTConnectionThread("Push Thread", port, timeout);
 
         rfcommthread.start();
         l2capthread.start();

@@ -62,7 +62,12 @@ public class PushBTConnectionThread extends Thread {
 
     private static final String MSG_TERMINATOR = "\n";
 
-    public PushBTConnectionThread(String str, String port) {
+    /**
+	 * Default timeout value if not set by the user
+	 */
+	private int configTimeout = TCKAgentUtil.SHORT;
+
+    public PushBTConnectionThread(String str, String port, final String customTimeout) {
         super(str);
         try {           
             this.port = port;
@@ -71,6 +76,7 @@ public class PushBTConnectionThread extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        this.setConfigTimeout(customTimeout);
     }
 
     public void run() {
@@ -287,7 +293,7 @@ public class PushBTConnectionThread extends Thread {
                             + "Command called.");
                     String address = data.substring(0, 12);
                     TCKAgentUtil.pause(TCKAgentUtil.SHORT);
-                    int serviceClasses = TCKAgentUtil.getServiceClass(address);
+                    int serviceClasses = TCKAgentUtil.getServiceClass(address, this.configTimeout);
                     String srvClassesStr = Integer.toString(serviceClasses);
                     try {
                         out.write(srvClassesStr.getBytes());
@@ -614,5 +620,24 @@ public class PushBTConnectionThread extends Thread {
 
         return false;
     }
+    /**
+	 * @return the configTimeout
+	 */
+	public int getConfigTimeout() {
+		return configTimeout;
+	}
+
+	/**
+	 * @param configTimeout the configTimeout to set
+	 */
+	private void setConfigTimeout(String customizedTimeout) {
+		if ( customizedTimeout != null ) {
+			configTimeout = Integer.parseInt(customizedTimeout.trim());
+			System.out.println("Push Use customized timeout sets to: " + configTimeout );
+		} else {
+			System.out.println("Push Use default timeout: " + configTimeout);
+		}
+	
+	}
     
 } // Class PushBTConnectionThread

@@ -21,15 +21,21 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.microemu</groupId>
+            <artifactId>microemulator</artifactId>
+            <version>${me2Version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>net.sf.bluecove</groupId>
             <artifactId>bluecove</artifactId>
             <version>${version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.microemu</groupId>
-            <artifactId>microemulator</artifactId>
-            <version>${me2Version}</version>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove-emu</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
     </dependencies>

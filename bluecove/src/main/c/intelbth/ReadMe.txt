@@ -37,6 +37,11 @@ WIDCOMM:  bluecove.dll
     Make all the files read only if you will ever uninstall WIDCOMM drivers the SDK files should remain.
     You don't need to have bluetooth WIDCOMM drivers installed to build the dll.
 
+WIDCOMM Windows Mobile:  bluecove_ce.dll
+    Get Broadcom development kits from:  http://www.broadcom.com/products/bluetooth_sdk.php
+    BTW-CE SDK  Version 1.7.1.5201
+    Install it to default directory. e.g. "$(ProgramFiles)\Widcomm\WIDCOMM BTW-CE SDK"
+
 BlueSoleil:  intelbth.dll
     Get BlueSoleil™ PC Platform Software Development Kit (SDK), 0.83 free version from this location:
     http://www.bluesoleil.com/download/index.asp?topic=bluesoleil_sdk

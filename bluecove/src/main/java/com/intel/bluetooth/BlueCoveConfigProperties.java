@@ -143,4 +143,11 @@ public interface BlueCoveConfigProperties {
 	 */
 	public static final String PROPERTY_OBEX_TIMEOUT = "bluecove.obex.timeout";
 
+	/**
+	 * Remove JSR-82 1.1 restriction for legal PSM values are in the range (0x1001..0xFFFF).
+	 * 
+	 * For JSR-82 1.2 Reserved Ranges @see <A HREF="https://opensource.motorola.com/sf/discussion/do/listPosts/projects.jsr82/discussion.jsr_82_1_2_open_discussion.topc1808"
+	 * >JSR-82 1.2</A>
+	 */
+	public static final String PROPERTY_JSR_82_PSM_MINIMUM_OFF = "bluecove.jsr82.psm_minimum_off";
 }

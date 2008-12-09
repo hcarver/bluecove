@@ -9,7 +9,7 @@ BlueCove JSR-82 Emulator module
 
    bluecove-emu is additional module for BlueCove to simulate Bluetooth stack.
 
-   bluecove-emu is a pure Java implementation of JSR-82. Fully tested using TCK {{{../tck/Bluetooth_1-1_007_TCK/bluecove-jsr082-emulator/}JSR-82 TCK test results}}
+   bluecove-emu is a pure Java implementation of JSR-82. Fully tested using TCK {{{../tck/}JSR-82 TCK test results}}
 
    bluecove-emu requires Java 5 Standard Edition and uses RMI for interprocess communication.
 

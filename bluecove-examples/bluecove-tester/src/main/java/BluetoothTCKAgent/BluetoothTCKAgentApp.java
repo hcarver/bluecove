@@ -54,15 +54,18 @@ public class BluetoothTCKAgentApp {
 		}
 
 		String agentMtu = System.getProperty(L2CAPThread.BLUETOOTH_AGENT_MTU);
+		String timeout = System.getProperty(L2CAPThread.TIMEOUT);
 		for (int i = 0; i < args.length - 1; i++) {
 			System.out.println("args[" + i + "] is: " + args[i]);
 			if (args[i].equals(L2CAPThread.BLUETOOTH_AGENT_MTU)) {
 				agentMtu = args[i + 1];
+			} else if (args[i].equals(L2CAPThread.TIMEOUT)) {
+				timeout = args[i + 1];
 			}
 		}
 
 		rfcommthread = new RFCOMMThread("RFCOMM Thread");
-		l2capthread = new L2CAPThread("L2CAP Thread", agentMtu);
+		l2capthread = new L2CAPThread("L2CAP Thread", agentMtu, timeout);
 		goepthread = new GOEPThread("GOEP Thread");
 
 		rfcommthread.start();

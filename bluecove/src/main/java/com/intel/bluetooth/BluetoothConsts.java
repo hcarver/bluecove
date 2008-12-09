@@ -31,7 +31,7 @@ import javax.bluetooth.UUID;
 
 /**
  * Constants defined by Bluetooth and JSR-82 specifications
- *
+ * 
  */
 public abstract class BluetoothConsts {
 
@@ -58,6 +58,8 @@ public abstract class BluetoothConsts {
 	public static final int RFCOMM_CHANNEL_MAX = 30;
 
 	public static final int L2CAP_PSM_MIN = 5;
+
+	public static final int L2CAP_PSM_MIN_JSR_82 = 0x1001;
 
 	public static final int L2CAP_PSM_MAX = 0xFFFF;
 

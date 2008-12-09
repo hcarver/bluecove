@@ -239,7 +239,8 @@ public class Switcher implements Runnable {
 
 				try {
 					String agentMtu = System.getProperty("bluetooth.agent_mtu");
-					tckL2CALthread = new BluetoothTCKAgent.L2CAPThread("L2CAPThread", agentMtu);
+					String timeout = System.getProperty("timeout");
+					tckL2CALthread = new BluetoothTCKAgent.L2CAPThread("L2CAPThread", agentMtu, timeout);
 					if (tckL2CALthread != null) {
 						tckL2CALthread.start();
 					}

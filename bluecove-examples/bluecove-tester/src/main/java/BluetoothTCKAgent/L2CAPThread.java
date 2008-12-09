@@ -32,7 +32,9 @@ import java.io.InterruptedIOException;
 import javax.bluetooth.DataElement;
 import javax.bluetooth.L2CAPConnection;
 import javax.bluetooth.L2CAPConnectionNotifier;
+import javax.bluetooth.LocalDevice;
 import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 import BluetoothTCKAgent.Connector;
 
@@ -47,6 +49,8 @@ public class L2CAPThread extends Thread {
 	 */
 	static final String BLUETOOTH_AGENT_MTU = "bluetooth.agent_mtu";
 
+	static final String TIMEOUT = "timeout";
+
 	/**
 	 * This variable refers to the value the parameters ReceiveMTU and
 	 * TransmitMTU have in the L2CAP service that this thread starts up. The
@@ -54,6 +58,11 @@ public class L2CAPThread extends Thread {
 	 * "bluetooth.agent_mtu" when this thread is started.
 	 */
 	private int agentMtu = 512;
+
+	/**
+	 * Default timeout value if not set by the user
+	 */
+	private int configTimeout = TCKAgentUtil.SHORT;
 
 	public static String message;
 
@@ -71,16 +80,45 @@ public class L2CAPThread extends Thread {
 
 	private String connString;
 
-	public L2CAPThread(String str, final String mtu) {
+	private LocalDevice localdevice;
+
+	public L2CAPThread(String str, final String mtu, final String customTimeout) {
 		super(str);
 		this.setAgentMtu(mtu);
-
+		this.setConfigTimeout(customTimeout);
 		try {
-			System.out.println("L2CAPThread: Starting L2CAP Service using agentMtu: " + agentMtu);
+			System.out.println("L2CAPThread: Starting L2CAP Service using agentMtu: " + agentMtu + " and timeout: " + configTimeout);
 			connString = "btl2cap://localhost:"
 					+ "3B9FA89520078C303355AAA694238F07;" + "ReceiveMTU="
 					+ agentMtu + ";TransmitMTU=" + agentMtu;
 			server = (L2CAPConnectionNotifier) Connector.open(connString);
+			
+			//Adding an attribute value to the service record with a DataElement
+			//of type DataElement.URL 
+			try{
+				localdevice = LocalDevice.getLocalDevice();
+				System.out.println("Local Device bluetooth address is = "
+						+ localdevice.getBluetoothAddress());						 
+				ServiceRecord srv_record = 
+							localdevice.getRecord(server);					
+				DataElement docURL = new DataElement(DataElement.URL,
+										"http://www.motorola.com/");
+				srv_record.setAttributeValue(0x000A, docURL);
+				
+				
+				localdevice.updateRecord(srv_record);	
+				DataElement tmp = srv_record.getAttributeValue(0x000A);
+				System.out.println("The URL attribute added is = " + 
+						(String)tmp.getValue());
+				
+			}catch (Exception e){
+				System.out.println("Error updating the service record in " +
+						"the local device running the agent. " +
+						"WARNING: Tests trying to retreive service record " +
+						" with an attribute value of dataelement type " +
+						"DataElement.URL will fail.");						
+			}//attribute value added to the service record				
+			
 		} catch (Exception e) {
 			System.out.println("L2CAPThread: Error starting L2CAP"
 					+ "service. Aborting service.");
@@ -154,16 +192,20 @@ public class L2CAPThread extends Thread {
 				// command
 				message = (new String(buffer));
 				System.out.println("L2CAPThread.run(): Message \"" + message
-						+ "\"");
+						+ "\" and message size: " + message.length());
 				int space = message.indexOf(" ");
+				if ( space != -1 ) {
 				command = message.substring(0, space);
 				data = message.substring(space + 1);
+					System.out.println("data: " + data + " data len: " + data.length());
 				// since the buffer was allocated with size more than the
 				// client message sent
 				// trim it to get rid of access before sending to client
 				data = data.trim();
 				System.out.println(" data size after trim: "
 						+ data.length() + " data: " + data);
+				}
+			
 				if (command.equals("ECHO")) {
 					System.out.println("L2CAPThread: ECHO Command Called");
 					TCKAgentUtil.pause(TCKAgentUtil.SHORT);
@@ -248,7 +290,7 @@ public class L2CAPThread extends Thread {
 								+ " existing connection.");
 					}
 
-					sdClass = TCKAgentUtil.getServiceClass(btAddress);
+					sdClass = TCKAgentUtil.getServiceClass(btAddress, this.configTimeout);
 					System.out.println("L2CAPThread: Retrieved the service "
 							+ "classes for " + btAddress + " : "
 							+ Integer.toString(sdClass, 16));
@@ -280,7 +322,7 @@ public class L2CAPThread extends Thread {
 					System.out.println("L2CAPThread: GETSRHANDLE "
 							+ "Command Called");
 					System.out.println("L2CAPThread: WITH DATA " + data);
-					int recordHandle = -1;
+					long recordHandle = -1;
 					String msg = null, btAddress;
 
 					space = data.indexOf(' ');
@@ -331,11 +373,11 @@ public class L2CAPThread extends Thread {
 							System.out.println("L2CAPThread: Missing Record "
 									+ "handle for service record.");
 						} else {
-							recordHandle = (int) elem.getLong();
+							recordHandle = elem.getLong();
 						}
 					}
 
-					msg = Integer.toString(recordHandle);
+					msg = Long.toString(recordHandle);
 					System.out.println("L2CAPThread.run(): Retreived handle "
 							+ recordHandle);
 
@@ -396,4 +438,25 @@ public class L2CAPThread extends Thread {
 			System.out.println("Use default agent MTU: " + this.agentMtu);
 		}
 	}
+
+	/**
+	 * @return the configTimeout
+	 */
+	public int getConfigTimeout() {
+		return configTimeout;
+	}
+
+	/**
+	 * @param configTimeout the configTimeout to set
+	 */
+	private void setConfigTimeout(String customizedTimeout) {
+		if ( customizedTimeout != null ) {
+			configTimeout = Integer.parseInt(customizedTimeout.trim());
+			System.out.println("Use customized timeout sets to: " + configTimeout );
+		} else {
+			System.out.println("Use default timeout: " + configTimeout);
+		}
+	
+	}
+
 } // class L2CAPThread

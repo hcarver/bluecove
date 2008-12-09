@@ -112,7 +112,11 @@ public class RFCOMMThread extends Thread {
                         TCKAgentUtil.pause(TCKAgentUtil.SHORT);
                         timeout++;
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                	System.out.println("Exception calling availble(): " + e + " and timout: " + timeout);
+                	command = "CLOSE";
+                    continue;
+                }
 
                 if (timeout == 10) {
                     counter = buffersize;
@@ -126,7 +130,8 @@ public class RFCOMMThread extends Thread {
                 } catch (Exception e) {
                     System.out.println("RFCOMMThread: Error while" +
                                         " reading InputStream " + e);
-                    ch = -1;
+                    command = "CLOSE";
+                    continue;
                 }
 
                 if (ch == -1 || counter==buffersize || counter==0) {
