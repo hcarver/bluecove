@@ -173,24 +173,24 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 	}
 
 	public String getLocalDeviceProperty(String property) {
-		if ("bluetooth.connected.devices.max".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX.equals(property)) {
 			return "7";
 		}
-		if ("bluetooth.sd.trans.max".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX.equals(property)) {
 			return "1";
 		}
-		if ("bluetooth.connected.inquiry.scan".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY_SCAN.equals(property)) {
 			return BlueCoveImpl.TRUE;
 		}
-		if ("bluetooth.connected.page.scan".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE_SCAN.equals(property)) {
 			return BlueCoveImpl.TRUE;
 		}
-		if ("bluetooth.connected.inquiry".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY.equals(property)) {
 			return BlueCoveImpl.TRUE;
 		}
 
 		// service attributes are not supported.
-		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX.equals(property)) {
 			return "0";
 		}
 

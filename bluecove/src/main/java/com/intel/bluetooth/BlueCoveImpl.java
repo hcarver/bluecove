@@ -64,6 +64,10 @@ import com.intel.bluetooth.BluetoothStack.LibraryInformation;
  */
 public class BlueCoveImpl {
 
+    public static final String BLUETOOTH_API_VERSION = "1.1.1";
+
+    public static final String OBEX_API_VERSION = BLUETOOTH_API_VERSION;
+    
 	public static final int versionMajor1 = 2;
 
 	public static final int versionMajor2 = 1;
@@ -819,16 +823,17 @@ public class BlueCoveImpl {
 	}
 
 	static String[] getSystemPropertiesList() {
-		String[] p = { "bluetooth.master.switch", "bluetooth.sd.attr.retrievable.max",
-				"bluetooth.connected.devices.max", "bluetooth.l2cap.receiveMTU.max", "bluetooth.sd.trans.max",
-				"bluetooth.connected.inquiry.scan", "bluetooth.connected.page.scan", "bluetooth.connected.inquiry",
-				"bluetooth.connected.page" };
-		return p;
-	}
+        String[] p = { BluetoothConsts.PROPERTY_BLUETOOTH_MASTER_SWITCH, BluetoothConsts.PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX,
+                BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX, BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX,
+                BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX, BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY_SCAN,
+                BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE_SCAN, BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY,
+                BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE };
+        return p;
+    }
 
 	static void clearSystemProperties() {
-		UtilsJavaSE.setSystemProperty("bluetooth.api.version", null);
-		UtilsJavaSE.setSystemProperty("obex.api.version", null);
+		UtilsJavaSE.setSystemProperty(BluetoothConsts.PROPERTY_BLUETOOTH_API_VERSION, null);
+		UtilsJavaSE.setSystemProperty(BluetoothConsts.PROPERTY_OBEX_API_VERSION, null);
 		String[] property = getSystemPropertiesList();
 		for (int i = 0; i < property.length; i++) {
 			UtilsJavaSE.setSystemProperty(property[i], null);
@@ -836,8 +841,8 @@ public class BlueCoveImpl {
 	}
 
 	void copySystemProperties(BluetoothStack bluetoothStack) {
-		UtilsJavaSE.setSystemProperty("bluetooth.api.version", "1.1");
-		UtilsJavaSE.setSystemProperty("obex.api.version", "1.1");
+		UtilsJavaSE.setSystemProperty(BluetoothConsts.PROPERTY_BLUETOOTH_API_VERSION, BlueCoveImpl.BLUETOOTH_API_VERSION);
+		UtilsJavaSE.setSystemProperty(BluetoothConsts.PROPERTY_OBEX_API_VERSION, BlueCoveImpl.OBEX_API_VERSION);
 		if (bluetoothStack != null) {
 			String[] property = getSystemPropertiesList();
 			for (int i = 0; i < property.length; i++) {

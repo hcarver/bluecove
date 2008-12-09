@@ -29,6 +29,8 @@ import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Map;
 
+import com.intel.bluetooth.BluetoothConsts;
+
 /**
  * 
  */
@@ -62,15 +64,15 @@ public class EmulatorConfiguration implements Serializable {
 		propertiesMap = new Hashtable<String, String>();
 		final String TRUE = "true";
 		final String FALSE = "false";
-		propertiesMap.put("bluetooth.connected.devices.max", "7");
-		propertiesMap.put("bluetooth.sd.trans.max", "7");
-		propertiesMap.put("bluetooth.connected.inquiry.scan", TRUE);
-		propertiesMap.put("bluetooth.connected.page.scan", TRUE);
-		propertiesMap.put("bluetooth.connected.inquiry", TRUE);
-		propertiesMap.put("bluetooth.connected.page", TRUE);
-		propertiesMap.put("bluetooth.sd.attr.retrievable.max", "255");
-		propertiesMap.put("bluetooth.master.switch", FALSE);
-		propertiesMap.put("bluetooth.l2cap.receiveMTU.max", "2048");
+		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX, "7");
+		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX, "7");
+		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY_SCAN, TRUE);
+		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE_SCAN, TRUE);
+		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY, TRUE);
+		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE, TRUE);
+		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX, "255");
+		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_MASTER_SWITCH, FALSE);
+		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX, "2048");
 	}
 
 	public int getDurationLIAC() {

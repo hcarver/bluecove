@@ -97,7 +97,7 @@ class SearchServicesThread extends Thread {
 		SearchServicesThread t;
 		synchronized (threads) {
 			int runningCount = countRunningSearchServicesThreads(stack);
-			int concurrentAllow = Integer.valueOf(stack.getLocalDeviceProperty("bluetooth.sd.trans.max")).intValue();
+			int concurrentAllow = Integer.valueOf(stack.getLocalDeviceProperty(BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX)).intValue();
 			if (runningCount >= concurrentAllow) {
 				throw new BluetoothStateException("Already running " + runningCount + " service discovery transactions");
 			}

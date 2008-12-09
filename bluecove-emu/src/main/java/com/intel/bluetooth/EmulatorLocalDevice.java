@@ -89,18 +89,18 @@ class EmulatorLocalDevice {
 
 	void updateConfiguration() throws BluetoothStateException {
 		configuration = service.getEmulatorConfiguration(deviceDescriptor.getAddress());
-		bluetooth_sd_attr_retrievable_max = configuration.getIntProperty("bluetooth.sd.attr.retrievable.max");
-		bluetooth_l2cap_receiveMTU_max = configuration.getIntProperty("bluetooth.l2cap.receiveMTU.max");
-		bluetooth_connected_devices_max = configuration.getIntProperty("bluetooth.connected.devices.max");
+		bluetooth_sd_attr_retrievable_max = configuration.getIntProperty(BluetoothConsts.PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX);
+		bluetooth_l2cap_receiveMTU_max = configuration.getIntProperty(BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX);
+		bluetooth_connected_devices_max = configuration.getIntProperty(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX);
 
 		if (bluetooth_l2cap_receiveMTU_max + 2 > configuration.getConnectionBufferSize()) {
 			throw new BluetoothStateException("l2cap.receiveMTU.max larger then connection buffer");
 		}
 
-		String[] property = { "bluetooth.master.switch", "bluetooth.sd.attr.retrievable.max",
-				"bluetooth.connected.devices.max", "bluetooth.l2cap.receiveMTU.max", "bluetooth.sd.trans.max",
-				"bluetooth.connected.inquiry.scan", "bluetooth.connected.page.scan", "bluetooth.connected.inquiry",
-				"bluetooth.connected.page" };
+		String[] property = { BluetoothConsts.PROPERTY_BLUETOOTH_MASTER_SWITCH, BluetoothConsts.PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX,
+				BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX, BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX, BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX,
+				BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY_SCAN, BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE_SCAN, BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY,
+				BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE };
 		for (int i = 0; i < property.length; i++) {
 			propertiesMap.put(property[i], configuration.getProperty(property[i]));
 		}

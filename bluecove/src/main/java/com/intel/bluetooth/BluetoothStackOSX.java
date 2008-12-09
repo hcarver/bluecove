@@ -223,33 +223,33 @@ class BluetoothStackOSX implements BluetoothStack, DeviceInquiryRunnable, Search
 	private native String getLocalDeviceVersion();
 
 	public String getLocalDeviceProperty(String property) {
-		if ("bluetooth.connected.devices.max".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX.equals(property)) {
 			return isLocalDeviceFeatureParkMode() ? "255" : "7";
 		}
-		if ("bluetooth.sd.trans.max".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX.equals(property)) {
 			return "7";
 		}
-		if ("bluetooth.connected.inquiry.scan".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY_SCAN.equals(property)) {
 			return BlueCoveImpl.TRUE;
 		}
-		if ("bluetooth.connected.page.scan".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE_SCAN.equals(property)) {
 			return BlueCoveImpl.TRUE;
 		}
-		if ("bluetooth.connected.inquiry".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY.equals(property)) {
 			return BlueCoveImpl.TRUE;
 		}
-		if ("bluetooth.connected.page".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE.equals(property)) {
 			return BlueCoveImpl.TRUE;
 		}
 
-		if ("bluetooth.sd.attr.retrievable.max".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX.equals(property)) {
 			return String.valueOf(ATTR_RETRIEVABLE_MAX);
 		}
-		if ("bluetooth.master.switch".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_MASTER_SWITCH.equals(property)) {
 			// return isLocalDeviceFeatureSwitchRoles() ? TRUE : FALSE;
 			return BlueCoveImpl.FALSE;
 		}
-		if ("bluetooth.l2cap.receiveMTU.max".equals(property)) {
+		if (BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX.equals(property)) {
 			return String.valueOf(receiveMTUMAX());
 		}
 

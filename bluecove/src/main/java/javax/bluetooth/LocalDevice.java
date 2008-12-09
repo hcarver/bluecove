@@ -33,6 +33,7 @@ import javax.microedition.io.Connection;
 import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BlueCoveLocalDeviceProperties;
 import com.intel.bluetooth.BluetoothConnectionNotifierServiceRecordAccess;
+import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.BluetoothStack;
 import com.intel.bluetooth.RemoteDeviceHelper;
 import com.intel.bluetooth.ServiceRecordsRegistry;
@@ -265,10 +266,10 @@ public class LocalDevice {
 	 */
 	public static String getProperty(String property) {
 		try {
-			if ("bluetooth.api.version".equals(property)) {
-				return "1.1.1";
-			} else if ("obex.api.version".equals(property)) {
-				return "1.1.1";
+			if (BluetoothConsts.PROPERTY_BLUETOOTH_API_VERSION.equals(property)) {
+				return BlueCoveImpl.BLUETOOTH_API_VERSION;
+			} else if (BluetoothConsts.PROPERTY_OBEX_API_VERSION.equals(property)) {
+				return BlueCoveImpl.OBEX_API_VERSION;
 			} else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_BLUECOVE_VERSION.equals(property)) {
 				return BlueCoveImpl.version;
 			} else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_STACK.equals(property)) {

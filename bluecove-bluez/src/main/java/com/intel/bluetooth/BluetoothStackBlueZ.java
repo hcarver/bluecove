@@ -315,9 +315,8 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 		address2DiscoveryData = new HashMap<Long, DiscoveryData>();
 
 		propertiesMap = new TreeMap<String, String>();
-		propertiesMap.put("bluetooth.api.version", "1.1");
 		// required or service discovery will fail with NPE
-		propertiesMap.put("bluetooth.sd.trans.max", "1");
+		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX, "1");
 	}
 
 	// private native void nativeCloseDevice(int deviceDescriptor);
