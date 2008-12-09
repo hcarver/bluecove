@@ -40,7 +40,9 @@ import com.intel.bluetooth.emu.DeviceDescriptor;
  */
 class EmulatorDeviceInquiry implements DeviceInquiryRunnable {
 
-	private static final int MIN_DISCOVERY_DURATION = 500;
+	private static final int DISCOVERY_DURATION_ALWAYS = 200;
+
+	private static final int DISCOVERY_DURATION_MINIMUM = 500;
 
 	private EmulatorLocalDevice localDevice;
 
@@ -134,7 +136,7 @@ class EmulatorDeviceInquiry implements DeviceInquiryRunnable {
 	private boolean randomWait(long start, int device) {
 		long duration = localDevice.getConfiguration().getDeviceInquiryDuration() * 1000;
 		if (duration <= 0) {
-			duration = MIN_DISCOVERY_DURATION;
+			duration = DISCOVERY_DURATION_MINIMUM;
 		}
 		long now = System.currentTimeMillis();
 		if ((duration == 0) || (now > start + duration)) {
@@ -149,6 +151,9 @@ class EmulatorDeviceInquiry implements DeviceInquiryRunnable {
 			if (timeleft > 0) {
 				timeout = rnd.nextInt((int) timeleft);
 			}
+		}
+		if (device == 0) {
+			timeout += DISCOVERY_DURATION_ALWAYS;
 		}
 
 		// Limit wait till the end of the duration period
