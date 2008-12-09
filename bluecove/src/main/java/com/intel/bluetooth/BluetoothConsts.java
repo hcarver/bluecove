@@ -65,6 +65,28 @@ public abstract class BluetoothConsts {
 
 	public static final int TCP_OBEX_DEFAULT_PORT = 650;
 
+	public static final String PROPERTY_BLUETOOTH_API_VERSION = "bluetooth.api.version";
+
+    public static final String PROPERTY_OBEX_API_VERSION = "obex.api.version";
+
+    public static final String PROPERTY_BLUETOOTH_MASTER_SWITCH = "bluetooth.master.switch";
+
+    public static final String PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX = "bluetooth.sd.attr.retrievable.max";
+
+    public static final String PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX = "bluetooth.connected.devices.max";
+
+    public static final String PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX = "bluetooth.l2cap.receiveMTU.max";
+
+    public static final String PROPERTY_BLUETOOTH_SD_TRANS_MAX = "bluetooth.sd.trans.max";
+
+    public static final String PROPERTY_BLUETOOTH_CONNECTED_INQUIRY_SCAN = "bluetooth.connected.inquiry.scan";
+
+    public static final String PROPERTY_BLUETOOTH_CONNECTED_PAGE_SCAN = "bluetooth.connected.page.scan";
+
+    public static final String PROPERTY_BLUETOOTH_CONNECTED_INQUIRY = "bluetooth.connected.inquiry";
+
+    public static final String PROPERTY_BLUETOOTH_CONNECTED_PAGE = "bluetooth.connected.page";
+    
 	static Hashtable obexUUIDs = new Hashtable();
 
 	private BluetoothConsts() {
