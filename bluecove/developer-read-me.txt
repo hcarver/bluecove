@@ -41,7 +41,10 @@
 
     * Build bluecove-examples project the same way. No need to Upload resulting jars! Only site.
 
-    * Upload the context of /home/apache/bluecove to http://bluecove.sourceforge.net/
+    * Upload the context of /home/apache/bluecove to bluecove.org (http://bluecove.sourceforge.net/)
+        sftp web.sourceforge.net; cd /home/groups/b/bl/bluecove/htdocs
+
+    * Copy files src/site/resources/tck/.htaccess  to each directory with the list of TCK tests
 
     * Upload the distribution jars bluecove-2.X.X.jar and bluecove-2.X.X-sources.tar.gz to http://code.google.com/p/bluecove/ and http://sourceforge.net/projects/bluecove/
 
