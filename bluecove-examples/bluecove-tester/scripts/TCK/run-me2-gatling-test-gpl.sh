@@ -8,6 +8,12 @@ if [[ ! -d ${MICROEMULATOR_HOME} ]] ; then
   exit 1
 fi
 
+
+if [[ ! -f ${BLUECOVE_GPL_JAR} ]] ; then
+  echo "BlueCove-GPL not found ${BLUECOVE_GPL_JAR}"
+  exit 1
+fi
+
 BLUECOVE_TCK_CP="${MICROEMULATOR_HOME}/microemulator.jar"
 BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_JAR}:${BLUECOVE_GPL_JAR}"
 
