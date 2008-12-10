@@ -1,11 +1,17 @@
 @echo off
 rem @version $Revision$ ($Author$)  $Date$
 SETLOCAL
-call %~dp0..\environment.cmd
+call "%~dp0..\environment.cmd"
 if errorlevel 1 goto endmark
 
 
 @set CDCTK_HOME=%ProgramFiles%\CDCTK10
+
+@if exist "%CDCTK_HOME%\bin" goto 3p_found
+@echo Error: CDC TK not found in folder [%CDCTK_HOME%]
+pause
+goto :endmark
+:3p_found
 
 set JVM_ARGS=
 rem set JVM_ARGS=%JVM_ARGS% -Dbluecove.debug=1
@@ -31,7 +37,7 @@ set JVM_ARGS=%JVM_ARGS% -Xbootclasspath:%BOOTCLASSPATH%
 set START_ARGS=-cp %CP% %BLUECOVE_MAIN%
 rem set START_ARGS=-jar %BLUECOVE_TESTER_APP_JAR%
 
-%CDCTK_HOME%\bin\emulator %JVM_ARGS% %START_ARGS%
+"%CDCTK_HOME%\bin\emulator" %JVM_ARGS% %START_ARGS%
 
 pause
 :endmark

@@ -2,7 +2,7 @@
 rem @version $Revision$ ($Author$)  $Date$
 SETLOCAL
 
-call %~dp0tck-environment.cmd %*
+call "%~dp0tck-environment.cmd" %*
 if errorlevel 1 (
     echo Error calling tck-environment.cmd
     endlocal
@@ -12,7 +12,7 @@ if errorlevel 1 (
 
 SET STACK=widcomm
 title %STACK%-BluetoothTCKAgent
-java -Dbluecove.stack=%STACK% -cp %TCK_JSR82_HOME%\Bluetooth_1-1_005_TCK\BluetoothTCKAgent.zip;%BLUECOVE_JAR% BluetoothTCKAgent.BluetoothTCKAgentApp
+java -Dbluecove.stack=%STACK% -cp "%TCK_JSR82_HOME%\Bluetooth_%TCK_VERSION_ID%_TCK\BluetoothTCKAgent.zip;%BLUECOVE_JAR%" BluetoothTCKAgent.BluetoothTCKAgentApp
 
 if errorlevel 1 goto errormark
 echo [Launched OK]

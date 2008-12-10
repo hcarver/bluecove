@@ -1,11 +1,18 @@
 @echo off
 rem @version $Revision$ ($Author$)  $Date$
 SETLOCAL
-call %~dp0..\environment.cmd
+call "%~dp0..\environment.cmd"
 if errorlevel 1 goto endmark
 
 
 @set JAVA_HOME=%ProgramFiles%\IBM\DeviceDeveloper\wsdd5.0\ive-2.2
+
+@if exist "%JAVA_HOME%\bin" goto 3p_found
+@echo Error: JAVA not found in folder [%JAVA_HOME%]
+pause
+goto :endmark
+:3p_found
+
 
 set JVM_ARGS=
 
@@ -18,7 +25,7 @@ rem set JVM_ARGS=%JVM_ARGS% -Dbluecove.native.path=%~dp0..\..\bluecove\src\main\
 
 rem set JVM_ARGS=%JVM_ARGS% -Dbluecove.debug=1
 
-call %~dp0..\set-stack.cmd
+call "%~dp0..\set-stack.cmd"
 
 copy %BLUECOVE_JAR% "%JAVA_HOME%\lib\jclMidp20\ext\bluecove.jar"
 

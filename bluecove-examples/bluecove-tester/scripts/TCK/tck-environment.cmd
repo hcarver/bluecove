@@ -1,7 +1,7 @@
 @echo off
 rem @version $Revision$ ($Author$)  $Date$
 
-call %~dp0..\environment.cmd
+call "%~dp0..\environment.cmd"
 if errorlevel 1 (
     echo Error calling environment.cmd
     exit /b 1

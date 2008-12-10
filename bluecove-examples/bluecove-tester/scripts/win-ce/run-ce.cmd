@@ -2,7 +2,7 @@
 rem @version $Revision$ ($Author$)  $Date$
 SETLOCAL
 
-call %~dp0scripts\environment.cmd %*
+call "%~dp0scripts\environment.cmd" %*
 if errorlevel 1 (
     echo Error calling environment.cmd
     endlocal

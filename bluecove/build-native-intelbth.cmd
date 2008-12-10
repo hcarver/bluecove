@@ -8,7 +8,7 @@
 @rem %~dp0 is expanded pathname of the current script under NT
 @set DEFAULT_BUILD_HOME=%~dp0
 @rem get Parent Directory
-@for /f %%i in ("%DEFAULT_BUILD_HOME%..") do @set DEFAULT_BUILD_HOME=%%~fi
+@for /f "delims=" %%i in ("%DEFAULT_BUILD_HOME%..") do @set DEFAULT_BUILD_HOME=%%~fi
 
 @set CALLED_FROM_MAVEN=0
 @if /I '%1' EQU '-maven' (

@@ -1,15 +1,21 @@
 @echo off
 rem @version $Revision$ ($Author$)  $Date$
 
-call %~dp0version.cmd
+call "%~dp0version.cmd"
 if errorlevel 1 goto errormark
 
 set DEFAULT_BUILD_HOME=%~dp0
-for /f %%i in ("%DEFAULT_BUILD_HOME%..") do @set DEFAULT_BUILD_HOME=%%~fi
+for /f "delims=" %%i in ("%DEFAULT_BUILD_HOME%..") do @set DEFAULT_BUILD_HOME=%%~fi
 
 set BLUECOVE_TESTER_HOME=%DEFAULT_BUILD_HOME%
-set BLUECOVE_HOME=%DEFAULT_BUILD_HOME%\..\..
+rem echo BLUECOVE_TESTER_HOME=[%BLUECOVE_TESTER_HOME%]
+
+rem set BLUECOVE_HOME=%BLUECOVE_TESTER_HOME%\..\..
+for /f "delims=" %%i in ("%BLUECOVE_TESTER_HOME%\..") do @set BLUECOVE_HOME=%%~fi
+for /f "delims=" %%i in ("%BLUECOVE_HOME%\..") do @set BLUECOVE_HOME=%%~fi
+
 set BLUECOVE_PROJECT_HOME=%BLUECOVE_HOME%\bluecove
+rem echo BLUECOVE_PROJECT_HOME=[%BLUECOVE_PROJECT_HOME%]
 
 set BLUECOVE_JAR=%BLUECOVE_PROJECT_HOME%\target\bluecove-%BLUECOVE_VERSION%.jar
 set BLUECOVE_EMU_JAR=%BLUECOVE_HOME%\bluecove-emu\target\bluecove-emu-%BLUECOVE_VERSION%.jar
@@ -19,9 +25,12 @@ set BLUECOVE_TESTER_APP_JAR=%BLUECOVE_TESTER_HOME%\target\bluecove-tester-%BLUEC
 rem set BLUECOVE_MAIN=net.sf.bluecove.awt.Main
 set BLUECOVE_MAIN=net.sf.bluecove.se.Main
 
-set BLUECOVE_3RDPARTY_HOME=%DEFAULT_BUILD_HOME%\..\..\..\3p
+rem set BLUECOVE_3RDPARTY_HOME=%BLUECOVE_HOME%\..\3p
+for /f "delims=" %%i in ("%BLUECOVE_HOME%\..") do @set BLUECOVE_3RDPARTY_HOME=%%~fi\3p
 
 set JVM_ARGS=
+
+set ALL_JAVA_BASE=D:
 
 rem set JAVA_HOME=D:\jdk1.5.0
 rem set JAVA_HOME=D:\harmony-jdk-629320
@@ -55,10 +64,6 @@ if '%WIN_CE_PHONE%' EQU 'true' (
 )
 
 rem set BLUECOVE_INSTALL_DIR=\Storage Card\bluecove
-
-
-rem @for /f "tokens=*" %%I in ('CD') do @set CurDir=%%~nI
-rem @title %CurDir%
 
 goto endmark
 :errormark
