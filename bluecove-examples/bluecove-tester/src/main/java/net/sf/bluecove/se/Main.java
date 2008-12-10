@@ -39,7 +39,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		for (int i = 0; i < args.length; i++) {
-			if (args[i].equalsIgnoreCase("--agui")) {
+		    if (args[i].equalsIgnoreCase("--debug") || args[i].equals("-d")) {
+		        System.setProperty("bluecove.debug", "true");
+            } else if (args[i].equalsIgnoreCase("--agui")) {
 				runAGUI(args);
 				return;
 			} else if (args[i].equalsIgnoreCase("--swing") || args[i].equals("-s")) {
@@ -52,7 +54,7 @@ public class Main {
 				runConsole(args);
 				return;
 			} else if (args[i].equalsIgnoreCase("--help") || args[i].equals("-h")) {
-				System.out.println(" --swing|--agui|-s\n --console|-c\n --awt|-a");
+				System.out.println(" --swing|--agui|-s\n --console|-c\n --awt|-a  (--debug)");
 				return;
 			}
 		}
