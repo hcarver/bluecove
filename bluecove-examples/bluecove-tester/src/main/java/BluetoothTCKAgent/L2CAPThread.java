@@ -284,7 +284,9 @@ public class L2CAPThread extends Thread {
 
 					try {
 						channel.close();
-						TCKAgentUtil.pause(TCKAgentUtil.SHORT);
+						//https://opensource.motorola.com/sf/discussion/do/listPosts/projects.jsr82/discussion.google_jsr_82_support.topc1845
+						//TCKAgentUtil.pause(TCKAgentUtil.SHORT);
+						TCKAgentUtil.pause(TCKAgentUtil.MEDIUM);
 					} catch (Exception e) {
 						System.out.println("L2CAPThread: Error closing"
 								+ " existing connection.");
