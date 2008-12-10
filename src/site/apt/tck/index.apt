@@ -28,6 +28,8 @@ JSR 82 Technology Compatibility Kit
 
     * {{{http://www.microemu.org/}MicroEmulator}} v2.0.3 as MIDP container.
 
+    * BlueCove GPL on Fedora 9 32-bit as Main TCK agent
+    
     * BlueCove on WIDCOMM stack as TCK agent for Microsoft stack and Mac OS X tests
 
     * BlueCove on Mac OS X as TCK agent for WIDCOMM stack tests
@@ -48,13 +50,19 @@ JSR 82 Technology Compatibility Kit
 
     * System 2 TCK Agent, WinXP SP2, Intel Core 2 Duo 1.5 GHz, RAM 1GB, WIDCOMM (Broadcom Bluetooth stack) v5.1.0.4200, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
-    * System 3 TCK Client, Mac OS X 10.5.2 i386, Java: Apple Computer Inc. 1.5.0_13, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
+    * System 3 TCK Client, Mac OS X 10.5.5 i386, Two 2.8GHz Quad-Core Intel Xeon, Java: Apple Computer Inc. 1.5.0_16,  Integrated Cambridge Silicon Radio Firmware 3.1965
+    
+    ~~ {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
+    * System 4 TCK Client, Fedora 9 32-bit, BlueZ v3.36, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
+    
     []
 
 * Description of {failures}
 
     * ServiceRecord.setDeviceServiceClassesTest: Function ServiceRecord.setDeviceServiceClasses not implemented because there are no such API in WIDCOMM native stack
+
+    * L2CAPConnection.receiveTest.L2CAPConnectionTest0035 and L2CAPConnection.sendTest.L2CAPConnectionTest0025 are test for an empty L2CAP packet; Only wors on Linux BlueZ, other native stacks do not support this.
 
     []
 
