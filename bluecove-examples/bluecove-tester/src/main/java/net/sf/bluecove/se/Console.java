@@ -91,6 +91,9 @@ public class Console {
 						System.out.println("BlueCove Debug OFF");
 					}
 					break;
+				case 'T':
+				    Switcher.startTCKAgent();
+				    break;
 				}
 			} catch (IOException e) {
 				return;
@@ -115,6 +118,7 @@ public class Console {
 		System.out.println("\t* - Run Discovery");
 		System.out.println("\t7 - Services Search");
 		System.out.println("\td - toggle BlueCove Debug");
+		System.out.println("\tT - Start TCK Agent");
 		System.out.println("\tq - Quit");
 		System.out.flush();
 	}
