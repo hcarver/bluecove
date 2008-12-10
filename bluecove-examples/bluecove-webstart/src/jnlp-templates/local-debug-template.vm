@@ -15,18 +15,20 @@
 
   <security>
       <all-permissions/>
-      <!--property name="bluecove.debug" value="true" /-->
   </security>
   <update check="always"/>
 
   <resources>
     <j2se version="1.4+"/>
+    <!--property name="bluecove.debug" value="true" /-->
+    <!--propertyRewrite-->
     $dependencies
   </resources>
 
   <application-desc main-class="$mainClass">
         <argument>--impl</argument>
         <argument>com.intel.bluetooth.BlueCoveImpl</argument>
+        <!--jadRewrite-->
   </application-desc>
 
 </jnlp>
