@@ -62,7 +62,7 @@ JSR 82 Technology Compatibility Kit
 
     * ServiceRecord.setDeviceServiceClassesTest: Function ServiceRecord.setDeviceServiceClasses not implemented because there are no such API in WIDCOMM native stack
 
-    * L2CAPConnection.receiveTest.L2CAPConnectionTest0035 and L2CAPConnection.sendTest.L2CAPConnectionTest0025 are test for an empty L2CAP packet; Only wors on Linux BlueZ, other native stacks do not support this.
+    * L2CAPConnection.receiveTest.L2CAPConnectionTest0035 and L2CAPConnection.sendTest.L2CAPConnectionTest0025 are test for an empty L2CAP packet; Only works on Linux BlueZ, other native stacks do not support this.
 
     []
 
@@ -82,6 +82,8 @@ JSR 82 Technology Compatibility Kit
 
  You will need a TCK agent running on another bluetooth device use  {{{../bluecove-examples/bluecove-tester}bluecove-tester Web Start}}.
 
+ Illustrated guide {{{tck4dev.html}Running Gatling and TCK for bluecove developers}}
+ 
 
 * TCK tests for {previous} releases of BlueCove
 

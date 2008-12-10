@@ -1,0 +1,93 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/guides/mini/guide-apt-format.html
+
+                                    ------------------
+                                    Running TCK for bluecove developers
+                                    ------------------
+                                    
+Running TCK for bluecove developers
+
+
+* Start TCK agent, (Preferably on Linux)
+    
+    'bluecove-tester' can run in console mod from telnet.
+    
+    ** cd bluecove-examples/bluecove-tester/scripts/linux
+        
+    ** ./bluecove-gpl.sh or bluecove-gpl-device1.sh 
+        
+    ** Press 'T'
+
+
+* Start Gatling (on Windows or Linux)
+
+        
+    ** Import tests to run
+    
+        Unzip Bluetooth_1-1-1_002_TCK.zip or OBEX_1-1-1_002_TCK.zip
+
+[gatling-import-tests.png] Import tests to run
+
+        
+    ** Select 'Server Host' as 'tckhost'
+        
+        We will use tckhost in scripts
+        
+[gatling-select-server-host.png] Server Host
+
+        
+    ** Enter bluetooth address of TCK agent 
+    
+        File -> Open Metadata Config
+
+[gatling-change-metadata.png] Metadata Config
+        
+---        
+    bluetooth.goep_enabled=true
+    bluetooth.agent_mtu=512
+    device.platform=MIDP
+    timeout_short=2000
+    timeout_medium=5000
+    timeout_long=10000
+    bluetooth.master.switch=false
+    bluetooth.connected.page=true
+    bluetooth.connected.inquiry=true
+    bluetooth.connected.inquiry.scan=true
+    bluetooth.connected.page.scan=true
+    obex.permissions.enabled=true
+    bluetooth.permissions.enabled=true
+--- 
+
+[gatling-metadata-config.png]  Metadata Config
+
+        
+    ** Select tests you want to run ...
+
+      ...
+
+[gatling-select-tests.png]  Select tests
+
+
+    ** Tests -> Start      
+
+     ...
+        
+[gatling-ready.png] Gatling is ready
+
+        
+        
+* Start TCK client on your test system
+    
+    ** vi /etc/hosts (C:\WINDOWS\system32\drivers\etc\hosts) and add tckhost as IP of your Gatling computer
+        
+    ** Copy microemulator distribution to ../3p/microemulator; 
+    
+        3p directory is the same level as bluecove
+        
+[dir-struct.png] Build directory
+
+    ** cd bluecove-examples/bluecove-tester/scripts/TCK
+        
+    ** ./run-me2-gatling-test-gpl.sh (run-me2-gatling-test-widcomm.cmd)
+    
+                                             
