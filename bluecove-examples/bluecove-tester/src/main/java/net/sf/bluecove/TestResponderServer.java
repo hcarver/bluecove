@@ -309,10 +309,14 @@ public class TestResponderServer implements CanShutdown, Runnable {
 		Configuration.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
 		try {
 			LocalDevice localDevice = LocalDevice.getLocalDevice();
-			if ((localDevice.getDiscoverable() == DiscoveryAgent.NOT_DISCOVERABLE)
-					|| (Configuration.testServerForceDiscoverable.booleanValue())) {
-				setDiscoverable();
-			}
+			try {
+                if ((localDevice.getDiscoverable() == DiscoveryAgent.NOT_DISCOVERABLE)
+                		|| (Configuration.testServerForceDiscoverable.booleanValue())) {
+                	setDiscoverable();
+                }
+            } catch (Throwable ignore) {
+                Logger.warn("Error: " + ignore.toString());
+            }
 
 			if (Configuration.testRFCOMM.booleanValue()) {
 
