@@ -165,18 +165,24 @@ public class ClientConnectionThread extends Thread {
 				isRunning = true;
 				c = lc;
 				while (!stoped) {
-					while ((!lc.channel.ready()) && (!stoped)) {
-						Thread.sleep(100);
+					if (interpretData == interpretIgnore) {
+						Thread.sleep(777);
+					} else {
+						if ((interpretData != interpretDataCharArray) || (interpretData != interpretDataStatsArray)) {
+							while ((!lc.channel.ready()) && (!stoped)) {
+								Thread.sleep(100);
+							}
+						}
+						if (stoped) {
+							break;
+						}
+						int receiveMTU = lc.channel.getReceiveMTU();
+						byte[] data = new byte[receiveMTU];
+						int length = lc.channel.receive(data);
+						receivedCount += length;
+						receivedPacketsCount++;
+						printdataReceivedL2CAP(data, length);
 					}
-					if (stoped) {
-						break;
-					}
-					int receiveMTU = lc.channel.getReceiveMTU();
-					byte[] data = new byte[receiveMTU];
-					int length = lc.channel.receive(data);
-					receivedCount += length;
-					receivedPacketsCount++;
-					printdataReceivedL2CAP(data, length);
 				}
 			}
 		} catch (IOException e) {
