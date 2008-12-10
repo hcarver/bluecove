@@ -1,8 +1,12 @@
 #!/bin/sh
 # @version $Revision$ ($Author$) $Date$
 #
-SCRIPTS_DIR=`dirname ${0}`/..
-. ${SCRIPTS_DIR}/environment.sh
+SCRIPTS_DIR=`dirname "${0}"`/..
+. "${SCRIPTS_DIR}/environment.sh"
+if [[ ! "$?" = "0" ]]; then
+    echo Error calling environment.sh
+    exit 1
+fi
 
 JVM_ARGS=
 ERRORS=0
@@ -18,7 +22,7 @@ echo "-----------------------------"
 echo "--- SUCCESS=${SUCCESS} ERRORS=${ERRORS} ---"
 echo "-----------------------------"
 
-java ${JVM_ARGS} -cp ${BLUECOVE_TESTER_APP_JAR} net.sf.bluecove.awt.Main --runonce  >>  run-continuous.log
+java ${JVM_ARGS} -cp "${BLUECOVE_TESTER_APP_JAR}" ${BLUECOVE_MAIN} --runonce  >>  run-continuous.log
 rc=$?
 #echo "rc=[${rc}]"
 if [ "${rc}" = "2" ]; then

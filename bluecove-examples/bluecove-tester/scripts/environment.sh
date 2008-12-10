@@ -5,15 +5,20 @@
 #make absolute path
 #pushd ${SCRIPTS_DIR}
 SAVE_DIR=`pwd`
-cd ${SCRIPTS_DIR}
+cd "${SCRIPTS_DIR}"
 SCRIPTS_DIR=`pwd`
 #popd
-cd ${SAVE_DIR}
+cd "${SAVE_DIR}"
 # echo SCRIPTS_DIR=${SCRIPTS_DIR}
-. ${SCRIPTS_DIR}/version.sh
-BLUECOVE_TESTER_HOME=`dirname ${SCRIPTS_DIR}`
-BLUECOVE_HOME=`dirname ${BLUECOVE_TESTER_HOME}`
-BLUECOVE_HOME=`dirname ${BLUECOVE_HOME}`
+. "${SCRIPTS_DIR}/version.sh"
+if [[ ! "$?" = "0" ]]; then
+    echo Error calling version.sh
+    exit 1
+fi
+
+BLUECOVE_TESTER_HOME=`dirname "${SCRIPTS_DIR}"`
+BLUECOVE_HOME=`dirname "${BLUECOVE_TESTER_HOME}"`
+BLUECOVE_HOME=`dirname "${BLUECOVE_HOME}"`
 BLUECOVE_PROJECT_HOME=${BLUECOVE_HOME}/bluecove
 BLUECOVE_JAR="${BLUECOVE_PROJECT_HOME}/target/bluecove-${BLUECOVE_VERSION}.jar"
 BLUECOVE_GPL_PROJECT_HOME=${BLUECOVE_HOME}/bluecove-gpl
@@ -24,7 +29,7 @@ BLUECOVE_BLUEZ_JAR="${BLUECOVE_BLUEZ_PROJECT_HOME}/target/bluecove-bluez-${BLUEC
 
 BLUECOVE_TESTER_JAR="${BLUECOVE_TESTER_HOME}/target/bluecove-tester-${BLUECOVE_VERSION}.jar"
 BLUECOVE_TESTER_APP_JAR="${BLUECOVE_TESTER_HOME}/target/bluecove-tester-${BLUECOVE_VERSION}-app.jar"
-BLUECOVE_3RDPARTY_HOME=`dirname ${BLUECOVE_HOME}`/3p
+BLUECOVE_3RDPARTY_HOME=`dirname "${BLUECOVE_HOME}"`/3p
 BLUECOVE_MAIN=net.sf.bluecove.se.Main
 #echo BLUECOVE_TESTER_APP_JAR=${BLUECOVE_TESTER_APP_JAR}
 

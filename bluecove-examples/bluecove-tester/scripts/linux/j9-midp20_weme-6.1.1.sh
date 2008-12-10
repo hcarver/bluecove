@@ -1,8 +1,12 @@
 #!/bin/sh
 # @version $Revision$ ($Author$) $Date$
 #
-SCRIPTS_DIR=`dirname ${0}`/..
-. ${SCRIPTS_DIR}/environment.sh
+SCRIPTS_DIR=`dirname "${0}"`/..
+. "${SCRIPTS_DIR}/environment.sh"
+if [[ ! "$?" = "0" ]]; then
+    echo Error calling environment.sh
+    exit 1
+fi
 
 export JAVA_HOME=/opt/IBM/WEME/runtimes/61/lnx-x86-midp20
 export PATH=${JAVA_HOME}/bin/:${PATH}

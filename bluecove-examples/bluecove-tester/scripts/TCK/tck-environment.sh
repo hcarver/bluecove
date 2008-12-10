@@ -1,8 +1,12 @@
 #!/bin/sh
 # @version $Revision$ ($Author$) $Date$
 #
-SCRIPTS_DIR=`dirname ${0}`/..
-. ${SCRIPTS_DIR}/environment.sh
+SCRIPTS_DIR=`dirname "${0}"`/..
+. "${SCRIPTS_DIR}/environment.sh"
+if [[ ! "$?" = "0" ]]; then
+    echo Error calling environment.sh
+    exit 1
+fi
 
 BLUECOVE_TCK_HOST=tckhost
 BLUECOVE_TCK_PORT=8080
