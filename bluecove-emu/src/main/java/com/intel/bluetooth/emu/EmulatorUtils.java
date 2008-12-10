@@ -30,6 +30,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.bluetooth.DiscoveryAgent;
+
 /**
  * 
  */
@@ -55,5 +57,17 @@ public class EmulatorUtils {
 			}
 		}
 		return ((Long) handles[handles.length - 1]).longValue() + step;
+	}
+
+	public static String discoverableModeString(int mode) {
+		if (DiscoveryAgent.GIAC == mode) {
+			return "GIAC";
+		} else if (DiscoveryAgent.LIAC == mode) {
+			return "LIAC";
+		} else if (DiscoveryAgent.NOT_DISCOVERABLE == mode) {
+			return "NOT_DISCOVERABLE";
+		} else {
+			return "0x" + Integer.toHexString(mode);
+		}
 	}
 }

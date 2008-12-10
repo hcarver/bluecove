@@ -37,6 +37,7 @@ import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.ServiceRegistrationException;
 
+import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
 public class DeviceManagerServiceImpl implements DeviceManagerService {
@@ -187,13 +188,16 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 		case DiscoveryAgent.LIAC:
 			if (device.getLimitedDiscoverableStart() + configuration.getDurationLIAC() * 1000 * 60 < System
 					.currentTimeMillis()) {
+				DebugLog.debug(RemoteDeviceHelper.getBluetoothAddress(device.getAddress())
+						+ " LIAC -> NOT_DISCOVERABLE");
 				device.setDiscoverableMode(DiscoveryAgent.NOT_DISCOVERABLE);
 				return false;
 			} else {
 				return true;
 			}
 		default:
-			return false;
+			// No idea what are other modes are.
+			return true;
 		}
 	}
 
@@ -224,11 +228,14 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 		if (!dd.isPoweredOn()) {
 			throw new BluetoothStateException("Device power is off");
 		}
+		DebugLog.debug(RemoteDeviceHelper.getBluetoothAddress(localAddress) + " setDiscoverableMode", EmulatorUtils
+				.discoverableModeString(mode));
 		dd.setDiscoverableMode(mode);
 		return true;
 	}
 
 	public void setLocalDeviceServiceClasses(long localAddress, int classOfDevice) {
+		DebugLog.debug(RemoteDeviceHelper.getBluetoothAddress(localAddress) + " setServiceClasses ", classOfDevice);
 		getDeviceDescriptor(localAddress).setDeviceClass(classOfDevice);
 	}
 
