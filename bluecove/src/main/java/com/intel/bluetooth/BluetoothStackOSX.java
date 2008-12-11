@@ -343,7 +343,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
     public native String getRemoteDeviceFriendlyName(long address) throws IOException;
 
-    private native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, int duration, DiscoveryListener listener)
+    private native int runDeviceInquiryImpl(DeviceInquiryRunnable inquiryRunnable, DeviceInquiryThread startedNotify, int accessCode, int duration, DiscoveryListener listener)
             throws BluetoothStateException;
 
     public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
@@ -365,7 +365,7 @@ class BluetoothStackOSX implements BluetoothStack {
 
             public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
                 try {
-                    return runDeviceInquiryImpl(startedNotify, accessCode, DeviceInquiryThread.getConfigDeviceInquiryDuration(), listener);
+                    return runDeviceInquiryImpl(this, startedNotify, accessCode, DeviceInquiryThread.getConfigDeviceInquiryDuration(), listener);
                 } finally {
                     lastDeviceDiscoveryTime = System.currentTimeMillis();
                     deviceDiscoveryListeners.removeElement(listener);

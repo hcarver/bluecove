@@ -362,7 +362,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
     // --- Device Inquiry
 
-    private native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int deviceID, int deviceDescriptor, int accessCode, int inquiryLength,
+    private native int runDeviceInquiryImpl(DeviceInquiryRunnable inquiryRunnable, DeviceInquiryThread startedNotify, int deviceID, int deviceDescriptor, int accessCode, int inquiryLength,
             int maxResponses, DiscoveryListener listener) throws BluetoothStateException;
 
     public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
@@ -376,7 +376,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
             public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
                 try {
-                    int discType = runDeviceInquiryImpl(startedNotify, deviceID, deviceDescriptor, accessCode, 8, 20, listener);
+                    int discType = runDeviceInquiryImpl(this, startedNotify, deviceID, deviceDescriptor, accessCode, 8, 20, listener);
                     if (deviceInquiryCanceled) {
                         return DiscoveryListener.INQUIRY_TERMINATED;
                     }
