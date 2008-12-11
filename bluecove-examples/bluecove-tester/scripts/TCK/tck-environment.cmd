@@ -17,7 +17,7 @@ set MICROEMULATOR_HOME=%BLUECOVE_3RDPARTY_HOME%\microemulator
 set MICROEMULATOR_MAIN=org.microemu.app.Main
 rem set MICROEMULATOR_MAIN=org.microemu.app.Headless
 
-set MICROEMULATOR_ARGS
+set MICROEMULATOR_ARGS=
 rem set MICROEMULATOR_ARGS=--logCallLocation --headless
 
 rem set BLUECOVE_TCK_HOST=localhost

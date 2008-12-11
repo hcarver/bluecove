@@ -19,5 +19,7 @@ fi
 MICROEMULATOR_HOME=${BLUECOVE_3RDPARTY_HOME}/microemulator
 
 MICROEMULATOR_MAIN=org.microemu.app.Main
+MICROEMULATOR_ARGS=
 #since 2.0.3
 #MICROEMULATOR_MAIN=org.microemu.app.Headless
+#MICROEMULATOR_ARGS=--logCallLocation --headless
