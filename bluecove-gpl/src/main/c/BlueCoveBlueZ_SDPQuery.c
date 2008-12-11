@@ -52,6 +52,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_runSearchSer
     // convert uuid set from java array to bluez sdp_list_t
     jsize uuidSetSize = (*env)->GetArrayLength(env, uuidValues);
     jsize i;
+    debug("runSearchServicesImpl uuidSetSize %i", uuidSetSize);
     for(i = 0; i < uuidSetSize; i++) {
         jbyteArray byteArray = (jbyteArray)(*env)->GetObjectArrayElement(env, uuidValues, i);
         uuid_t* uuid =  (uuid_t*)malloc(sizeof(uuid_t));
@@ -74,8 +75,6 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_runSearchSer
         rc = SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
         goto searchServicesImplEnd;
     }
-
-
 
     // then ask the device for service record handles
     error = sdp_service_search_req(session, uuidList, max_rec_num, &(rsp_list));
