@@ -310,13 +310,13 @@ public class TestResponderServer implements CanShutdown, Runnable {
 		try {
 			LocalDevice localDevice = LocalDevice.getLocalDevice();
 			try {
-                if ((localDevice.getDiscoverable() == DiscoveryAgent.NOT_DISCOVERABLE)
-                		|| (Configuration.testServerForceDiscoverable.booleanValue())) {
-                	setDiscoverable();
-                }
-            } catch (Throwable ignore) {
-                Logger.warn("Error: " + ignore.toString());
-            }
+				if ((localDevice.getDiscoverable() == DiscoveryAgent.NOT_DISCOVERABLE)
+						|| (Configuration.testServerForceDiscoverable.booleanValue())) {
+					setDiscoverable();
+				}
+			} catch (Throwable ignore) {
+				Logger.warn("Error: " + ignore.toString());
+			}
 
 			if (Configuration.testRFCOMM.booleanValue()) {
 
@@ -495,7 +495,7 @@ public class TestResponderServer implements CanShutdown, Runnable {
 			t.shutdown();
 		}
 		if (responderL2CAPServerThread != null) {
-		    responderL2CAPServerThread.closeServerClientConnections();
+			responderL2CAPServerThread.closeServerClientConnections();
 		}
 	}
 
@@ -510,8 +510,8 @@ public class TestResponderServer implements CanShutdown, Runnable {
 			}
 		}
 		if (responderL2CAPServerThread != null) {
-		    count += responderL2CAPServerThread.countClientConnections();
-        }
+			count += responderL2CAPServerThread.countClientConnections();
+		}
 		return count;
 	}
 
@@ -557,7 +557,7 @@ public class TestResponderServer implements CanShutdown, Runnable {
 			Logger.debug("Set Not Discoverable");
 			discoverable = false;
 		} catch (Throwable e) {
-			Logger.error("Stop server error", e);
+			Logger.error("set NotDiscoverable error", e);
 		}
 	}
 
