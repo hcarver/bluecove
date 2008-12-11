@@ -38,6 +38,7 @@
             <groupId>net.sf.bluecove</groupId>
             <artifactId>bluecove-emu</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -140,7 +141,7 @@
                     <appendClassifier>false</appendClassifier>
                     <jarfile>${mainjarname}</jarfile>
                     <jadfile>${mainjarname}</jadfile>
-                   <!--proguardInclude>${basedir}/proguard.conf</proguardInclude-->
+                    <!--proguardInclude>${basedir}/proguard.conf</proguardInclude-->
                     <proguardInclude></proguardInclude>
                     <proguardOptions>
                         <options>
@@ -190,11 +191,6 @@
                         <dependency>
                             <groupId>net.sf.bluecove</groupId>
                             <artifactId>bluecove-emu</artifactId>
-                            <exclude>true</exclude>
-                        </dependency>
-                        <dependency>
-                            <groupId>log4j</groupId>
-                            <artifactId>log4j</artifactId>
                             <exclude>true</exclude>
                         </dependency>
                         <dependency>

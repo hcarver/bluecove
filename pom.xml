@@ -184,20 +184,31 @@
         -->
     </contributors>
 
+    <dependencyManagement>
+        <dependencies>
+                <dependency>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                    <version>1.2.14</version>
+                </dependency>
+               <dependency>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                    <version>3.8.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>net.sf.jour</groupId>
+                    <artifactId>jour-instrument</artifactId>
+                    <version>2.0.2</version>
+                </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
-
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>1.2.14</version>
-                <optional>true</optional>
-            </dependency>
 
            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>3.8.1</version>
                 <scope>test</scope>
                 <optional>true</optional>
             </dependency>
@@ -205,7 +216,6 @@
             <dependency>
                 <groupId>net.sf.jour</groupId>
                 <artifactId>jour-instrument</artifactId>
-                <version>2.0.2</version>
                 <scope>test</scope>
                 <optional>true</optional>
             </dependency>
@@ -406,7 +416,7 @@
         <javaRunTimeJar>${java.home}/lib/rt.jar</javaRunTimeJar>
         <javaRunTimeSecurityJar>${java.home}/lib/jsse.jar</javaRunTimeSecurityJar>
     </properties>
-   
+
     <profiles>
 
         <profile>
@@ -421,7 +431,7 @@
                 <buildEnv>cruisecontrol</buildEnv>
             </properties>
         </profile>
-        
+
         <profile>
             <id>osx</id>
             <activation>
