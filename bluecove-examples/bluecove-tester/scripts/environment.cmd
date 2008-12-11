@@ -22,6 +22,11 @@ set BLUECOVE_EMU_JAR=%BLUECOVE_HOME%\bluecove-emu\target\bluecove-emu-%BLUECOVE_
 set BLUECOVE_TESTER_JAR=%BLUECOVE_TESTER_HOME%\target\bluecove-tester-%BLUECOVE_VERSION%.jar
 set BLUECOVE_TESTER_APP_JAR=%BLUECOVE_TESTER_HOME%\target\bluecove-tester-%BLUECOVE_VERSION%-app.jar
 
+@if exist "%BLUECOVE_JAR%" goto bluecove_jar_found
+@echo Error: BLUECOVE_JAR [%BLUECOVE_JAR%] Not found
+goto :errormark
+:bluecove_jar_found
+
 rem set BLUECOVE_MAIN=net.sf.bluecove.awt.Main
 set BLUECOVE_MAIN=net.sf.bluecove.se.Main
 
