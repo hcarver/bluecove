@@ -466,6 +466,7 @@ public class ClientConnectionDialog extends Dialog {
 			recentConnections.remove(url);
 		}
 		recentConnections.add(url);
+		Configuration.setLastServerURL(url);
 		if (Configuration.storage == null) {
 			return;
 		}
