@@ -50,8 +50,8 @@
     </pluginRepositories>
 
     <properties>
-        <me2Version>2.0.2</me2Version>
-        <pyx4meVersion>2.0.2</pyx4meVersion>
+        <me2Version>2.0.3-SNAPSHOT</me2Version>
+        <pyx4meVersion>2.0.3-SNAPSHOT</pyx4meVersion>
     </properties>
 
     <modules>

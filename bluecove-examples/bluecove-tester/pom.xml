@@ -208,6 +208,14 @@
                         <artifactId>midpapi20</artifactId>
                         <version>${me2Version}</version>
                     </dependency>
+
+                    <dependency>
+                        <groupId>net.sf.proguard</groupId>
+                        <artifactId>proguard</artifactId>
+                        <version>4.1</version>
+                        <scope>runtime</scope>
+                    </dependency>
+
                 </dependencies>
 
             </plugin>
