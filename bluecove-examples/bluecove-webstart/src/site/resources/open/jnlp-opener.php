@@ -26,8 +26,6 @@
     $appURL = $_GET['app-url'];
     $jadURL = 'http://' . $appURL . '.jad';
 
-    $patern = '<!--jadRewrite-->';
-
     $jnlpFileName = "demo.jnlp";
 
     $jnlpRewritDir = "open/";
@@ -36,7 +34,7 @@
     $fh = fopen($jnlpFilePath, 'r');
     $xml = fread($fh, filesize($jnlpFilePath));
     fclose($fh);
-    $xml = ereg_replace($patern . '.+' . $patern, '<argument>' . $jadURL . '</argument>', $xml);
+    $xml = ereg_replace('<!--jadRewrite-->', '<argument>' . $jadURL . '</argument>', $xml);
 
     if (strlen($appURL) > 0) {
         $patern_href = 'href="' . $jnlpFileName . '"';

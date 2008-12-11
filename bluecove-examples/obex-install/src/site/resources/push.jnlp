@@ -25,7 +25,7 @@
   </resources>
 
   <application-desc main-class="net.sf.bluecove.obex.Main">
-        <!--jadRewrite--> <!--jadRewrite-->
+        <!--jadRewrite-->
   </application-desc>
 
 </jnlp>

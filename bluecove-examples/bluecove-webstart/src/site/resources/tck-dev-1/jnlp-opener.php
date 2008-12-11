@@ -36,8 +36,8 @@
     $fh = fopen($jnlpFilePath, 'r');
     $xml = fread($fh, filesize($jnlpFilePath));
     fclose($fh);
-    $xml = ereg_replace($patern . '.+' . $patern, '<argument>-Xautotest:' . $jadURL . '</argument>', $xml);
-    $xml = ereg_replace($patern . '.+' . '<!--propertyRewrite-->', '<property name="bluecove.deviceID" value="1" />', $xml);
+    $xml = ereg_replace('<!--jadRewrite-->', '<argument>-Xautotest:' . $jadURL . '</argument>', $xml);
+    $xml = ereg_replace('<!--propertyRewrite-->', '<property name="bluecove.deviceID" value="1" />', $xml);
 
     if (strlen($appURL) > 0) {
         $patern_href = 'href="' . $jnlpFileName . '"';
