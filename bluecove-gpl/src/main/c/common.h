@@ -69,7 +69,7 @@ bool isCurrentThreadInterrupted(JNIEnv *env, jobject peer);
 bool threadSleep(JNIEnv *env, jlong millis);
 
 struct DeviceInquiryCallback {
-    jobject peer;
+    jobject inquiryRunnable;
     jmethodID deviceDiscoveredCallbackMethod;
 
     jobject startedNotify;

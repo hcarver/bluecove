@@ -26,10 +26,10 @@
 #include <sys/ioctl.h>
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_runDeviceInquiryImpl
-(JNIEnv *env, jobject peer, jobject startedNotify, jint deviceID, jint deviceDescriptor, jint accessCode, jint inquiryLength, jint maxResponses, jobject listener) {
+(JNIEnv *env, jobject peer, jobject inquiryRunnable, jobject startedNotify, jint deviceID, jint deviceDescriptor, jint accessCode, jint inquiryLength, jint maxResponses, jobject listener) {
     struct DeviceInquiryCallback callback;
     DeviceInquiryCallback_Init(&callback);
-    if (!DeviceInquiryCallback_builDeviceInquiryCallbacks(env, &callback, peer, startedNotify)) {
+    if (!DeviceInquiryCallback_builDeviceInquiryCallbacks(env, &callback, inquiryRunnable, startedNotify)) {
         return INQUIRY_ERROR;
     }
     if (!DeviceInquiryCallback_callDeviceInquiryStartedCallback(env, &callback)) {

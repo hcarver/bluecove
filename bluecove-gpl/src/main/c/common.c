@@ -233,21 +233,21 @@ jmethodID getGetMethodID(JNIEnv * env, jclass clazz, const char *name, const cha
 }
 
 void DeviceInquiryCallback_Init(struct DeviceInquiryCallback* callback) {
-    callback->peer = NULL;
+    callback->inquiryRunnable = NULL;
     callback->deviceDiscoveredCallbackMethod = NULL;
     callback->startedNotify = NULL;
     callback->startedNotifyNotifyMethod = NULL;
 }
 
-bool DeviceInquiryCallback_builDeviceInquiryCallbacks(JNIEnv * env, struct DeviceInquiryCallback* callback, jobject peer, jobject startedNotify) {
-    jclass peerClass = (*env)->GetObjectClass(env, peer);
+bool DeviceInquiryCallback_builDeviceInquiryCallbacks(JNIEnv * env, struct DeviceInquiryCallback* callback, jobject inquiryRunnable, jobject startedNotify) {
+    jclass inquiryRunnableClass = (*env)->GetObjectClass(env, inquiryRunnable);
 
-    if (peerClass == NULL) {
+    if (inquiryRunnableClass == NULL) {
         throwRuntimeException(env, "Fail to get Object Class");
         return false;
     }
 
-    jmethodID deviceDiscoveredCallbackMethod = (*env)->GetMethodID(env, peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
+    jmethodID deviceDiscoveredCallbackMethod = (*env)->GetMethodID(env, inquiryRunnableClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
     if (deviceDiscoveredCallbackMethod == NULL) {
         throwRuntimeException(env, "Fail to get MethodID deviceDiscoveredCallback");
         return false;
@@ -264,7 +264,7 @@ bool DeviceInquiryCallback_builDeviceInquiryCallbacks(JNIEnv * env, struct Devic
         return false;
     }
 
-    callback->peer = peer;
+    callback->inquiryRunnable = inquiryRunnable;
     callback->deviceDiscoveredCallbackMethod = deviceDiscoveredCallbackMethod;
     callback->startedNotify = startedNotify;
     callback->startedNotifyNotifyMethod = notifyMethod;
@@ -286,11 +286,11 @@ bool DeviceInquiryCallback_callDeviceInquiryStartedCallback(JNIEnv * env, struct
 }
 
 bool DeviceInquiryCallback_callDeviceDiscovered(JNIEnv * env, struct DeviceInquiryCallback* callback, jobject listener, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired) {
-    if ((callback->peer == NULL) || (callback->deviceDiscoveredCallbackMethod == NULL)) {
+    if ((callback->inquiryRunnable == NULL) || (callback->deviceDiscoveredCallbackMethod == NULL)) {
         throwRuntimeException(env, "DeviceInquiryCallback not initialized");
         return false;
     }
-    (*env)->CallVoidMethod(env, callback->peer, callback->deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, name, paired);
+    (*env)->CallVoidMethod(env, callback->inquiryRunnable, callback->deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, name, paired);
     if ((*env)->ExceptionCheck(env)) {
         return false;
     } else {
