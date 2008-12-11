@@ -71,6 +71,8 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 
 	private boolean deviceInquiryCanceled = false;
 
+	private final int l2cap_receiveMTU_max = 65535;
+	
 	BluetoothStackBlueZ() {
 	}
 
@@ -152,7 +154,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE, TRUE);
 		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX, String.valueOf(ATTR_RETRIEVABLE_MAX));
 		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_MASTER_SWITCH, FALSE);
-		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX, "65535");
+		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX, String.valueOf(l2cap_receiveMTU_max));
 		// propertiesMap.put("bluecove.radio.version", );
 		// propertiesMap.put("bluecove.radio.manufacturer", );
 		// propertiesMap.put("bluecove.stack.version", );
@@ -652,6 +654,12 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 
 	// --- Client and Server L2CAP connections
 
+	private void validateMTU(int receiveMTU, int transmitMTU) {
+        if (receiveMTU > l2cap_receiveMTU_max) {
+            throw new IllegalArgumentException("invalid ReceiveMTU value " + receiveMTU);
+        }
+    }
+	
 	private native long l2OpenClientConnectionImpl(long localDeviceBTAddress, long address, int channel,
 			boolean authenticate, boolean encrypt, int receiveMTU, int transmitMTU, int timeout) throws IOException;
 
@@ -663,6 +671,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	 */
 	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU)
 			throws IOException {
+	    validateMTU(receiveMTU, transmitMTU);
 		return l2OpenClientConnectionImpl(this.localDeviceBTAddress, params.address, params.channel,
 				params.authenticate, params.encrypt, receiveMTU, transmitMTU, params.timeout);
 	}
@@ -688,7 +697,8 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	 */
 	public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU,
 			ServiceRecordImpl serviceRecord) throws IOException {
-		long socket = l2ServerOpenImpl(this.localDeviceBTAddress, params.authorize, params.authenticate,
+	    validateMTU(receiveMTU, transmitMTU);
+	    long socket = l2ServerOpenImpl(this.localDeviceBTAddress, params.authorize, params.authenticate,
 				params.encrypt, params.master, params.timeouts, LISTEN_BACKLOG_L2CAP, receiveMTU, transmitMTU,
 				params.bluecove_ext_psm);
 		boolean success = false;
