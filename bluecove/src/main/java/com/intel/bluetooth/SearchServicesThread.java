@@ -92,7 +92,7 @@ class SearchServicesThread extends Thread {
 	 * Start Services Search and wait for startException or
 	 * searchServicesStartedCallback
 	 */
-	static int startSearchServices(BluetoothStack stack, SearchServicesRunnable serachRunnable, int[] attrSet,
+	static int startSearchServices(BluetoothStack stack, SearchServicesRunnable searchRunnable, int[] attrSet,
 			UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
 		SearchServicesThread t;
 		synchronized (threads) {
@@ -101,7 +101,7 @@ class SearchServicesThread extends Thread {
 			if (runningCount >= concurrentAllow) {
 				throw new BluetoothStateException("Already running " + runningCount + " service discovery transactions");
 			}
-			t = (new SearchServicesThread(nextThreadNum(), stack, serachRunnable, attrSet, uuidSet, device, listener));
+			t = (new SearchServicesThread(nextThreadNum(), stack, searchRunnable, attrSet, uuidSet, device, listener));
 			threads.put(new Integer(t.getTransID()), t);
 		}
 		// In case the BTStack hangs, exit JVM anyway
