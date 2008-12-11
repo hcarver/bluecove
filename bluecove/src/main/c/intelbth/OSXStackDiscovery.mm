@@ -348,7 +348,7 @@ RUNNABLE(DeviceInquiryRelease, "DeviceInquiryRelease") {
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInquiryImpl
-  (JNIEnv* env, jobject peer, jobject startedNotify, jint accessCode, jint duration, jobject listener) {
+  (JNIEnv* env, jobject peer, jobject inquiryRunnable, jobject startedNotify, jint accessCode, jint duration, jobject listener) {
 
     OSXJNIHelper allocHelper;
 
@@ -364,7 +364,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
     }
     stack->deviceInquiryTerminated = FALSE;
 
-    if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
+    if (!callback.builDeviceInquiryCallbacks(env, inquiryRunnable, startedNotify)) {
         stack->deviceInquiryUnlock();
         return INQUIRY_ERROR;
     }

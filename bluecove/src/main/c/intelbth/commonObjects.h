@@ -135,7 +135,7 @@ public:
 
 class DeviceInquiryCallback {
 private:
-    jobject peer;
+    jobject inquiryRunnable;
     jmethodID deviceDiscoveredCallbackMethod;
 
     jobject startedNotify;
@@ -143,7 +143,7 @@ private:
 
 public:
     DeviceInquiryCallback();
-    BOOL builDeviceInquiryCallbacks(JNIEnv * env, jobject peer, jobject startedNotify);
+    BOOL builDeviceInquiryCallbacks(JNIEnv * env, jobject inquiryRunnable, jobject startedNotify);
     BOOL callDeviceInquiryStartedCallback(JNIEnv * env);
     BOOL callDeviceDiscovered(JNIEnv * env, jobject listener, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired);
 };

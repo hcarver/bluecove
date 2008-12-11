@@ -842,21 +842,21 @@ void ObjectPool::removeObject(PoolableObject* obj) {
 }
 
 DeviceInquiryCallback::DeviceInquiryCallback() {
-    this->peer = NULL;
+    this->inquiryRunnable = NULL;
     this->deviceDiscoveredCallbackMethod = NULL;
     this->startedNotify = NULL;
     this->startedNotifyNotifyMethod = NULL;
 }
 
-BOOL DeviceInquiryCallback::builDeviceInquiryCallbacks(JNIEnv * env, jobject peer, jobject startedNotify) {
-    jclass peerClass = env->GetObjectClass(peer);
+BOOL DeviceInquiryCallback::builDeviceInquiryCallbacks(JNIEnv * env, jobject inquiryRunnable, jobject startedNotify) {
+    jclass inquiryRunnableClass = env->GetObjectClass(inquiryRunnable);
 
-    if (peerClass == NULL) {
+    if (inquiryRunnableClass == NULL) {
         throwRuntimeException(env, "Fail to get Object Class");
         return FALSE;
     }
 
-    jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
+    jmethodID deviceDiscoveredCallbackMethod = env->GetMethodID(inquiryRunnableClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
     if (deviceDiscoveredCallbackMethod == NULL) {
         throwRuntimeException(env, "Fail to get MethodID deviceDiscoveredCallback");
         return FALSE;
@@ -873,7 +873,7 @@ BOOL DeviceInquiryCallback::builDeviceInquiryCallbacks(JNIEnv * env, jobject pee
         return FALSE;
     }
 
-    this->peer = peer;
+    this->inquiryRunnable = inquiryRunnable;
     this->deviceDiscoveredCallbackMethod = deviceDiscoveredCallbackMethod;
     this->startedNotify = startedNotify;
     this->startedNotifyNotifyMethod = notifyMethod;
@@ -895,11 +895,11 @@ BOOL DeviceInquiryCallback::callDeviceInquiryStartedCallback(JNIEnv * env) {
 }
 
 BOOL DeviceInquiryCallback::callDeviceDiscovered(JNIEnv * env, jobject listener, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired) {
-    if ((this->peer == NULL) || (this->deviceDiscoveredCallbackMethod == NULL)) {
+    if ((this->inquiryRunnable == NULL) || (this->deviceDiscoveredCallbackMethod == NULL)) {
         throwRuntimeException(env, "DeviceInquiryCallback not initialized");
         return FALSE;
     }
-    env->CallVoidMethod(this->peer, this->deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, name, paired);
+    env->CallVoidMethod(this->inquiryRunnable, this->deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, name, paired);
     if (ExceptionCheckCompatible(env)) {
         return FALSE;
     } else {

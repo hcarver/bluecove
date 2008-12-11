@@ -769,7 +769,7 @@ void WIDCOMMStack::OnInquiryComplete(BOOL success, short num_responses) {
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceInquiryImpl
-(JNIEnv * env, jobject peer, jobject startedNotify, jint accessCode, jobject listener) {
+(JNIEnv * env, jobject peer, jobject inquiryRunnable, jobject startedNotify, jint accessCode, jobject listener) {
     if (stack == NULL) {
         throwIOException(env, cSTACK_CLOSED);
         return 0;
@@ -786,7 +786,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_runDeviceI
     stack->deviceRespondedIdx = -1;
 
     DeviceInquiryCallback callback;
-    if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
+    if (!callback.builDeviceInquiryCallbacks(env, inquiryRunnable, startedNotify)) {
         if (stack != NULL) {
             stack->deviceInquiryInProcess = FALSE;
         }
