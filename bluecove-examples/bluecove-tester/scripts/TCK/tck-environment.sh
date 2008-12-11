@@ -18,4 +18,6 @@ fi
 
 MICROEMULATOR_HOME=${BLUECOVE_3RDPARTY_HOME}/microemulator
 
-
+MICROEMULATOR_MAIN=org.microemu.app.Main
+#since 2.0.3
+#MICROEMULATOR_MAIN=org.microemu.app.Headless

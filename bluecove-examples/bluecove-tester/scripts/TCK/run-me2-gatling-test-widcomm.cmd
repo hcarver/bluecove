@@ -15,7 +15,7 @@ title %STACK%-BluetoothTCK
 
 set CP=%MICROEMULATOR_HOME%\microemulator.jar;%BLUECOVE_JAR%
 
-java -Dbluecove.stack=%STACK% -cp "%CP%" org.microemu.app.Main -Xautotest:http://%BLUECOVE_TCK_HOST%:%BLUECOVE_TCK_PORT%/getNextApp.jad >  run-%STACK%.cmd.log
+java -Dbluecove.stack=%STACK% -cp "%CP%" %MICROEMULATOR_MAIN% -Xautotest:http://%BLUECOVE_TCK_HOST%:%BLUECOVE_TCK_PORT%/getNextApp.jad >  run-%STACK%.cmd.log
 
 if errorlevel 1 goto errormark
 echo [Launched OK]
