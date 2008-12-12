@@ -13,12 +13,21 @@ goto :errormark
 :3p_found
 
 set MICROEMULATOR_HOME=%BLUECOVE_3RDPARTY_HOME%\microemulator
+set MICROEMULATOR_HOME=%D:\corp\me2\microemulator\microemulator\target
+
+set MICROEMULATOR_JAR=%MICROEMULATOR_HOME%\microemulator.jar
+set MICROEMULATOR_JAR=%MICROEMULATOR_HOME%\microemulator-2.0.3-SNAPSHOT.jar
 
 set MICROEMULATOR_MAIN=org.microemu.app.Main
 rem set MICROEMULATOR_MAIN=org.microemu.app.Headless
+rem since 2.0.3
+rem set MICROEMULATOR_ARGS=
+rem set MICROEMULATOR_ARGS=--logCallLocation true --headless
 
-set MICROEMULATOR_ARGS=
-rem set MICROEMULATOR_ARGS=--logCallLocation --headless
+@if exist "%MICROEMULATOR_JAR%" goto me2_found
+@echo "Microemulator jar not found in directory %MICROEMULATOR_HOME%
+goto :errormark
+:me2_found
 
 rem set BLUECOVE_TCK_HOST=localhost
 set BLUECOVE_TCK_HOST=tckhost

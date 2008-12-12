@@ -22,4 +22,4 @@ MICROEMULATOR_MAIN=org.microemu.app.Main
 MICROEMULATOR_ARGS=
 #since 2.0.3
 #MICROEMULATOR_MAIN=org.microemu.app.Headless
-#MICROEMULATOR_ARGS=--logCallLocation --headless
+#MICROEMULATOR_ARGS="--logCallLocation true --headless"

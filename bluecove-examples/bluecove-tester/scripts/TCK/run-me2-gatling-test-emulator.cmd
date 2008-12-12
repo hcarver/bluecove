@@ -13,12 +13,13 @@ if errorlevel 1 (
 SET STACK=emulator
 title %STACK%-BluetoothTCK
 
-set CP=%MICROEMULATOR_HOME%\microemulator.jar
+set CP=%MICROEMULATOR_JAR%
 set CP=%CP%;%BLUECOVE_JAR%
 set CP=%CP%;%BLUECOVE_EMU_JAR%
 
+rem >  run-%STACK%.cmd.log
 
-java -Dbluecove.stack=%STACK% -cp "%CP%" %MICROEMULATOR_MAIN% %MICROEMULATOR_ARGS% -Xautotest:http://%BLUECOVE_TCK_HOST%:%BLUECOVE_TCK_PORT%/getNextApp.jad >  run-%STACK%.cmd.log
+java -Dbluecove.stack=%STACK% -cp "%CP%" %MICROEMULATOR_MAIN% %MICROEMULATOR_ARGS% -Xautotest:http://%BLUECOVE_TCK_HOST%:%BLUECOVE_TCK_PORT%/getNextApp.jad
 
 if errorlevel 1 goto errormark
 echo [Launched OK]
