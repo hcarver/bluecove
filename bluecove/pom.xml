@@ -95,14 +95,12 @@
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
-                <version>1.2.14</version>
                 <optional>true</optional>
             </dependency>
 
            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>3.8.1</version>
                 <scope>test</scope>
                 <optional>true</optional>
             </dependency>
@@ -110,7 +108,6 @@
             <dependency>
                 <groupId>net.sf.jour</groupId>
                 <artifactId>jour-instrument</artifactId>
-                <version>2.0.3</version>
                 <scope>test</scope>
                 <optional>true</optional>
             </dependency>

@@ -26,7 +26,6 @@
         <dependency>
             <groupId>org.microemu</groupId>
             <artifactId>microemulator</artifactId>
-            <version>${me2Version}</version>
         </dependency>
 
         <dependency>

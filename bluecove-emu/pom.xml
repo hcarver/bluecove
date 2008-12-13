@@ -20,22 +20,6 @@
 
     <description>BlueCove JSR-82 Emulator</description>
 
-    <!--4snapshot-->
-    <!--
-    <repositories>
-        <repository>
-            <id>pyx4me-web-repo</id>
-            <url>http://www.pyx4me.com/maven2-snapshot</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
-    -->
-
     <developers>
         <developer>
             <name>Vlad Skarzhevskyy</name>
@@ -76,18 +60,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>3.8.1</version>
             <scope>test</scope>
             <optional>true</optional>
         </dependency>
 
         <!--
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.14</version>
-        </dependency>
-
         <dependency>
             <groupId>com.pyx4j</groupId>
             <artifactId>pyx4j-rpc-over-http</artifactId>
