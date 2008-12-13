@@ -7,7 +7,7 @@
         <param name="Threshold" value="debug" />
         <layout class="org.apache.log4j.PatternLayout">
             <!-- Line# clickable in eclipse -->
-            <param name="ConversionPattern" value="%-5p [%-33t %m \n\t\t\t\t\t\t\t\t{ %l}\n" />
+            <param name="ConversionPattern" value="%d{HH:mm:ss,SSS} %-5p [%-33t %m\n\t\t\t\t\t\t\t\t{ %l}\n" />
         </layout>
     </appender>
 

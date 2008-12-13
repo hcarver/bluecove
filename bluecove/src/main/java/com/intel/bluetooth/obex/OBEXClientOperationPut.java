@@ -29,6 +29,8 @@ import java.io.OutputStream;
 
 import javax.obex.HeaderSet;
 
+import com.intel.bluetooth.DebugLog;
+
 class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperationDelivery {
 
 	OBEXClientOperationPut(OBEXClientSessionImpl session, HeaderSet sendHeaders) throws IOException {
@@ -60,9 +62,8 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean,
-	 *      byte[])
+	 * 
+	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean, byte[])
 	 */
 	public void deliverPacket(boolean finalPacket, byte buffer[]) throws IOException {
 		if (requestEnded) {
@@ -76,6 +77,7 @@ class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperatio
 		if (finalPacket) {
 			this.operationId |= OBEXOperationCodes.FINAL_BIT;
 			dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY_END;
+			DebugLog.debug("client Request Phase ended");
 			requestEnded = true;
 		}
 		HeaderSet dataHeaders = session.createHeaderSet();

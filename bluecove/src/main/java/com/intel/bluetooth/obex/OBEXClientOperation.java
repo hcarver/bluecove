@@ -35,12 +35,11 @@ import com.intel.bluetooth.DebugLog;
 abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
 	/**
-	 * This is not 100% by JSR-82 doc. But some know implementations of OBEX are
-	 * working this way. This solves the problems for Samsung phones that are
-	 * sending nothing in response to GET request without final bit.
-	 *
-	 * Basically instead of sending at least two packets 'initial' and 'final'
-	 * we are sending just 'final' one when applicable.
+	 * This is not 100% by JSR-82 doc. But some know implementations of OBEX are working this way. This solves the
+	 * problems for Samsung phones that are sending nothing in response to GET request without final bit.
+	 * 
+	 * Basically instead of sending at least two packets 'initial' and 'final' we are sending just 'final' one when
+	 * applicable.
 	 */
 	final static boolean SHORT_REQUEST_PHASE = true;
 
@@ -97,7 +96,7 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 		if (requestEnded) {
 			return;
 		}
-		DebugLog.debug("client end Request Phase");
+		DebugLog.debug("client ends Request Phase");
 		this.operationInProgress = false;
 		this.requestEnded = true;
 		this.operationId |= OBEXOperationCodes.FINAL_BIT;
@@ -172,7 +171,7 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.obex.Operation#abort()
 	 */
 	public void abort() throws IOException {
@@ -213,7 +212,7 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.obex.Operation#getReceivedHeaders()
 	 */
 	public HeaderSet getReceivedHeaders() throws IOException {
@@ -224,11 +223,10 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.obex.Operation#getResponseCode()
-	 *
-	 * A call will do an implicit close on the Stream and therefore signal that
-	 * the request is done.
+	 * 
+	 * A call will do an implicit close on the Stream and therefore signal that the request is done.
 	 */
 	public int getResponseCode() throws IOException {
 		validateOperationIsOpen();
@@ -255,9 +253,9 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see javax.microedition.io.ContentConnection#getEncoding() <code>getEncoding()</code>
-	 *      will always return <code>null</code>
+	 * 
+	 * @see javax.microedition.io.ContentConnection#getEncoding() <code>getEncoding()</code> will always return
+	 * <code>null</code>
 	 */
 	public String getEncoding() {
 		return null;
@@ -265,10 +263,9 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see javax.microedition.io.ContentConnection#getLength() <code>getLength()</code>
-	 *      will return the length specified by the OBEX Length header or -1 if
-	 *      the OBEX Length header was not included.
+	 * 
+	 * @see javax.microedition.io.ContentConnection#getLength() <code>getLength()</code> will return the length
+	 * specified by the OBEX Length header or -1 if the OBEX Length header was not included.
 	 */
 	public long getLength() {
 		Long len;
@@ -285,10 +282,9 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see javax.microedition.io.ContentConnection#getType() <code>getType()</code>
-	 *      will return the value specified in the OBEX Type header or <code>null</code>
-	 *      if the OBEX Type header was not included.
+	 * 
+	 * @see javax.microedition.io.ContentConnection#getType() <code>getType()</code> will return the value specified in
+	 * the OBEX Type header or <code>null</code> if the OBEX Type header was not included.
 	 */
 	public String getType() {
 		try {
@@ -308,7 +304,7 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {

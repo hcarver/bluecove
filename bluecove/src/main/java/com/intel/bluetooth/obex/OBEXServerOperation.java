@@ -77,7 +77,7 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 	protected abstract boolean readRequestPacket() throws IOException;
 
 	void writeResponse(int responseCode) throws IOException {
-		DebugLog.debug("server operation reply final");
+		DebugLog.debug0x("server operation reply final", responseCode);
 		session.writeOperation(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));
 		sendHeaders = null;
 		if (responseCode == ResponseCodes.OBEX_HTTP_OK) {
@@ -112,7 +112,7 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.obex.Operation#abort()
 	 */
 	public void abort() throws IOException {
@@ -121,7 +121,7 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.obex.Operation#getReceivedHeaders()
 	 */
 	public HeaderSet getReceivedHeaders() throws IOException {
@@ -130,7 +130,7 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.obex.Operation#getResponseCode()
 	 */
 	public int getResponseCode() throws IOException {
@@ -139,7 +139,7 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.obex.Operation#sendHeaders(javax.obex.HeaderSet)
 	 */
 	public void sendHeaders(HeaderSet headers) throws IOException {
@@ -148,9 +148,9 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see javax.microedition.io.ContentConnection#getEncoding() <code>getEncoding()</code>
-	 *      will always return <code>null</code>
+	 * 
+	 * @see javax.microedition.io.ContentConnection#getEncoding() <code>getEncoding()</code> will always return
+	 * <code>null</code>
 	 */
 	public String getEncoding() {
 		return null;
@@ -158,10 +158,9 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see javax.microedition.io.ContentConnection#getLength() <code>getLength()</code>
-	 *      will return the length specified by the OBEX Length header or -1 if
-	 *      the OBEX Length header was not included.
+	 * 
+	 * @see javax.microedition.io.ContentConnection#getLength() <code>getLength()</code> will return the length
+	 * specified by the OBEX Length header or -1 if the OBEX Length header was not included.
 	 */
 	public long getLength() {
 		Long len;
@@ -178,10 +177,9 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see javax.microedition.io.ContentConnection#getType() <code>getType()</code>
-	 *      will return the value specified in the OBEX Type header or <code>null</code>
-	 *      if the OBEX Type header was not included.
+	 * 
+	 * @see javax.microedition.io.ContentConnection#getType() <code>getType()</code> will return the value specified in
+	 * the OBEX Type header or <code>null</code> if the OBEX Type header was not included.
 	 */
 	public String getType() {
 		try {
@@ -193,7 +191,7 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.microedition.io.InputConnection#openDataInputStream()
 	 */
 	public DataInputStream openDataInputStream() throws IOException {
@@ -202,7 +200,7 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.microedition.io.OutputConnection#openDataOutputStream()
 	 */
 	public DataOutputStream openDataOutputStream() throws IOException {
@@ -211,7 +209,7 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {

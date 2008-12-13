@@ -46,7 +46,7 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.microedition.io.InputConnection#openInputStream()
 	 */
 	public InputStream openInputStream() throws IOException {
@@ -73,7 +73,7 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.microedition.io.OutputConnection#openOutputStream()
 	 */
 	public OutputStream openOutputStream() throws IOException {
@@ -91,7 +91,7 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.obex.OBEXOperationReceive#receiveData(com.intel.bluetooth.obex.OBEXOperationInputStream)
 	 */
 	public void receiveData(OBEXOperationInputStream is) throws IOException {
@@ -105,9 +105,8 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean,
-	 *      byte[])
+	 * 
+	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean, byte[])
 	 */
 	public void deliverPacket(boolean finalPacket, byte[] buffer) throws IOException {
 		if (requestEnded) {
@@ -121,6 +120,7 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 		if (finalPacket) {
 			this.operationId |= OBEXOperationCodes.FINAL_BIT;
 			dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY_END;
+			DebugLog.debug("client Request Phase ended");
 			requestEnded = true;
 		}
 		HeaderSet dataHeaders = session.createHeaderSet();
