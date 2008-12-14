@@ -29,7 +29,7 @@ package com.intel.bluetooth.obex;
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
  */
-public interface OBEXOperation {
+interface OBEXOperation {
 
 	boolean isClosed();
 

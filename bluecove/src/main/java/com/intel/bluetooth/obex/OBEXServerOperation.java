@@ -48,6 +48,8 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	protected boolean isClosed = false;
 
+	protected boolean isAborted = false;
+	
 	protected boolean finalPacketReceived = false;
 
 	protected boolean requestEnded = false;
@@ -69,8 +71,8 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 		this.receivedHeaders = receivedHeaders;
 	}
 
-	public boolean exchangeRequestPhasePackets() throws IOException {
-		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, null);
+	boolean exchangeRequestPhasePackets() throws IOException {
+		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, null);
 		return readRequestPacket();
 	}
 
@@ -78,14 +80,14 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	void writeResponse(int responseCode) throws IOException {
 		DebugLog.debug0x("server operation reply final", responseCode);
-		session.writeOperation(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		session.writePacket(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));
 		sendHeaders = null;
 		if (responseCode == ResponseCodes.OBEX_HTTP_OK) {
 			while ((!finalPacketReceived) && (!session.isClosed())) {
 				DebugLog.debug("server waits to receive final packet");
 				readRequestPacket();
 				if (!errorReceived) {
-					session.writeOperation(responseCode, null);
+					session.writePacket(responseCode, null);
 				}
 			}
 		} else {

@@ -61,15 +61,16 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 	}
 
 	public void closeStream() throws IOException {
-		this.operationInProgress = false;
-		// try {
-		// while (!isClosed() && (!finalBodyReceived) && (!errorReceived)) {
-		// receiveData(this.inputStream);
-		// }
-		// } finally {
-		inputStream.close();
-		// }
-	}
+        try {
+            while (!isClosed() && (operationInContinue) ) {
+                DebugLog.debug("operation expects operation end");
+                receiveData(this.inputStream);
+            }
+        } finally {
+            this.operationInProgress = false;
+            inputStream.close();
+        }
+    }
 
 	/*
 	 * (non-Javadoc)

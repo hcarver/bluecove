@@ -67,4 +67,13 @@ public abstract class BlueCoveOBEX {
         throw new IllegalArgumentException("Not a BlueCove OBEX Session " + c.getClass().getName());
     }
     
+    /**
+     * ConvertOBEX SUCCESS response code to human readable string, useful for debugging applications.
+     * 
+     * @param responseCode
+     * @return String representation of javax.obex.ResponseCodes
+     */
+    public static String obexResponseCodes(int responseCode) {
+       return OBEXUtils.toStringObexResponseCodes(responseCode);
+    }
 }

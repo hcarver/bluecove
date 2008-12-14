@@ -68,6 +68,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 			Error {
 		super(conn, obexConnectionParams);
 		Utils.isLegalAPICall(fqcnSet);
+		this.requestSent = false;
 		this.isConnected = false;
 		this.operation = null;
 	}
@@ -95,9 +96,9 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		connectRequest[1] = 0; /* Flags */
 		connectRequest[2] = OBEXUtils.hiByte(obexConnectionParams.mtu);
 		connectRequest[3] = OBEXUtils.loByte(obexConnectionParams.mtu);
-		writeOperation(OBEXOperationCodes.CONNECT, connectRequest, OBEXHeaderSetImpl.toByteArray(headers));
+		writePacketWithFlags(OBEXOperationCodes.CONNECT, connectRequest, OBEXHeaderSetImpl.toByteArray(headers));
 
-		byte[] b = readOperation();
+		byte[] b = readPacket();
 		if (b.length < 6) {
 			if (b.length == 3) {
 				throw new IOException("Invalid response from OBEX server " + OBEXUtils.toStringObexResponseCodes(b[0]));
@@ -139,8 +140,8 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		if (!isConnected) {
 			throw new IOException("Session not connected");
 		}
-		writeOperation(OBEXOperationCodes.DISCONNECT, OBEXHeaderSetImpl.toByteArray(headers));
-		byte[] b = readOperation();
+		writePacket(OBEXOperationCodes.DISCONNECT, OBEXHeaderSetImpl.toByteArray(headers));
+		byte[] b = readPacket();
 		this.isConnected = false;
 		if (this.operation != null) {
 			this.operation.close();
@@ -179,10 +180,9 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		request[0] = (byte) ((backup ? 1 : 0) | (create ? 0 : 2));
 		request[1] = 0;
 		// DebugLog.debug("setPath b[3]", request[0]);
-		writeOperation(OBEXOperationCodes.SETPATH | OBEXOperationCodes.FINAL_BIT, request, OBEXHeaderSetImpl
-				.toByteArray(headers));
+		writePacketWithFlags(OBEXOperationCodes.SETPATH_FINAL, request, OBEXHeaderSetImpl.toByteArray(headers));
 
-		byte[] b = readOperation();
+		byte[] b = readPacket();
 		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 	}
 
@@ -207,8 +207,8 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 	}
 
 	HeaderSet deleteImp(HeaderSet headers) throws IOException {
-		writeOperation(OBEXOperationCodes.PUT_FINAL, OBEXHeaderSetImpl.toByteArray(headers));
-		byte[] b = readOperation();
+		writePacket(OBEXOperationCodes.PUT_FINAL, OBEXHeaderSetImpl.toByteArray(headers));
+		byte[] b = readPacket();
 		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 	}
 

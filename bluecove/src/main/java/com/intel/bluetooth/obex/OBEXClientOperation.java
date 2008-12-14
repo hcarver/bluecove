@@ -52,6 +52,8 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 	protected boolean isClosed;
 
 	protected boolean operationInProgress;
+	
+	protected boolean operationInContinue;
 
 	protected OBEXOperationOutputStream outputStream;
 
@@ -111,24 +113,26 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 	protected void exchangePacket(byte[] data) throws IOException {
 		boolean success = false;
 		try {
-			session.writeOperation(this.operationId, data);
-			byte[] b = session.readOperation();
+			session.writePacket(this.operationId, data);
+			byte[] b = session.readPacket();
 			HeaderSet dataHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 			int responseCode = dataHeaders.getResponseCode();
-			DebugLog.debug0x("client operation got reply", OBEXUtils.toStringObexResponseCodes(responseCode),
-					responseCode);
+			DebugLog.debug0x("client operation got reply", OBEXUtils.toStringObexResponseCodes(responseCode), responseCode);
 			switch (responseCode) {
 			case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
 				processIncommingHeaders(dataHeaders);
 				processIncommingData(dataHeaders, true);
 				this.operationInProgress = false;
+				this.operationInContinue = false;
 				break;
 			case OBEXOperationCodes.OBEX_RESPONSE_CONTINUE:
 				processIncommingHeaders(dataHeaders);
 				processIncommingData(dataHeaders, false);
+				this.operationInContinue = true;
 				break;
 			default:
-				errorReceived = true;
+			    this.errorReceived = true;
+			    this.operationInContinue = false;
 				// responseCode may be reported by getResponseCode()
 				processIncommingHeaders(dataHeaders);
 				if ((this.operationId & OBEXOperationCodes.FINAL_BIT) == 0) {
@@ -146,9 +150,11 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 
 	protected void processIncommingHeaders(HeaderSet dataHeaders) throws IOException {
 		if (replyHeaders != null) {
+		    // accumulate all received headers. 
 			OBEXHeaderSetImpl.appendHeaders(dataHeaders, replyHeaders);
 		}
 		// replyHeaders will contain responseCode from last reply
+		// The Body values are removed by cloneHeaders in getReceivedHeaders()
 		this.replyHeaders = dataHeaders;
 	}
 
@@ -176,7 +182,7 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 	 */
 	public void abort() throws IOException {
 		validateOperationIsOpen();
-		if (!this.operationInProgress) {
+		if ((!this.operationInProgress) && (!this.operationInContinue)) {
 			throw new IOException("the transaction has already ended");
 		}
 		synchronized (lock) {
@@ -188,10 +194,11 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation {
 		writeAbort();
 	}
 
-	protected void writeAbort() throws IOException {
+	private void writeAbort() throws IOException {
 		try {
-			session.writeOperation(OBEXOperationCodes.ABORT, null);
-			byte[] b = session.readOperation();
+			session.writePacket(OBEXOperationCodes.ABORT, null);
+			requestEnded = true;
+			byte[] b = session.readPacket();
 			HeaderSet dataHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 			if (dataHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_SUCCESS) {
 				throw new IOException("Fails to abort operation");

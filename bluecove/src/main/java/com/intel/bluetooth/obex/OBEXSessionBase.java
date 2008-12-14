@@ -51,11 +51,11 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
     protected boolean isConnected;
     
-	protected StreamConnection conn;
+    private StreamConnection conn;
 
-	protected InputStream is;
+	private InputStream is;
 
-	protected OutputStream os;
+	private OutputStream os;
 
 	protected long connectionID;
 
@@ -68,6 +68,12 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	protected int packetsCountWrite;
 
 	protected int packetsCountRead;
+	
+	/**
+	 * Each request packet flowed by response.
+	 * This flag is from Client point of view
+	 */
+	protected boolean requestSent;
 
 	public OBEXSessionBase(StreamConnection conn, OBEXConnectionParams obexConnectionParams) throws IOException {
 		if (obexConnectionParams == null) {
@@ -123,11 +129,15 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		OBEXHeaderSetImpl.validateCreatedHeaderSet(headers);
 	}
 
-	protected void writeOperation(int commId, byte[] data) throws IOException {
-		writeOperation(commId, null, data);
-	}
-
-	protected void writeOperation(int commId, byte[] headerFlagsData, byte[] data) throws IOException {
+	protected void writePacket(int commId, byte[] data) throws IOException {
+	    writePacketWithFlags(commId, null, data);
+    }
+	
+	protected synchronized void writePacketWithFlags(int commId, byte[] headerFlagsData, byte[] data) throws IOException {
+	    if (this.requestSent) {
+	        throw new IOException("Write packet out of order");
+	    }
+	    this.requestSent = true;
 		int len = 3;
 		if (this.connectionID != -1) {
 			len += 5;
@@ -153,19 +163,21 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		if (data != null) {
 			buf.write(data);
 		}
-		DebugLog.debug0x("obex send (" + this.packetsCountWrite + ")", OBEXUtils.toStringObexResponseCodes(commId),
-				commId);
+		DebugLog.debug0x("obex send (" + this.packetsCountWrite + ")", OBEXUtils.toStringObexResponseCodes(commId), commId);
 		os.write(buf.toByteArray());
 		os.flush();
 		DebugLog.debug("obex sent (" + this.packetsCountWrite + ") len", len);
 	}
 
-	protected byte[] readOperation() throws IOException {
+	protected synchronized byte[] readPacket() throws IOException {
+	    if (!this.requestSent) {
+	        throw new IOException("Read packet out of order");
+	    }
+	    this.requestSent = false;
 		byte[] header = new byte[3];
 		OBEXUtils.readFully(is, obexConnectionParams, header);
 		this.packetsCountRead++;
-		DebugLog.debug0x("obex received (" + this.packetsCountRead + ")", OBEXUtils
-				.toStringObexResponseCodes(header[0]), header[0] & 0xFF);
+		DebugLog.debug0x("obex received (" + this.packetsCountRead + ")", OBEXUtils.toStringObexResponseCodes(header[0]), header[0] & 0xFF);
 		int lenght = OBEXUtils.bytesToShort(header[1], header[2]);
 		if (lenght == 3) {
 			return header;

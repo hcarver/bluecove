@@ -87,7 +87,7 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 	}
 
 	protected boolean readRequestPacket() throws IOException {
-		byte[] b = session.readOperation();
+		byte[] b = session.readPacket();
 		int opcode = b[0] & 0xFF;
 		boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
 		if (finalPacket) {
@@ -107,7 +107,7 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 		default:
 			errorReceived = true;
 			DebugLog.debug0x("server operation invalid request", OBEXUtils.toStringObexResponseCodes(opcode), opcode);
-			session.writeOperation(ResponseCodes.OBEX_HTTP_BAD_REQUEST, null);
+			session.writePacket(ResponseCodes.OBEX_HTTP_BAD_REQUEST, null);
 		}
 		return finalPacket;
 	}
@@ -123,13 +123,14 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 			return;
 		}
 		DebugLog.debug("server operation reply continue");
-		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
 		sendHeaders = null;
 		readRequestPacket();
 	}
 
 	private void processAbort() throws IOException {
-		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);
+	    isAborted = true;
+		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);
 		close();
 		throw new IOException("Operation aborted by client");
 	}

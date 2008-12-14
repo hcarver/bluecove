@@ -37,6 +37,7 @@ import javax.obex.ResponseCodes;
 import javax.obex.ServerRequestHandler;
 
 import com.intel.bluetooth.DebugLog;
+import com.intel.bluetooth.obex.BlueCoveOBEX;
 
 /**
  * 
@@ -49,6 +50,7 @@ public class OBEXGetStandardTest extends OBEXBaseEmulatorTestCase {
 		public int onGet(Operation op) {
 			try {
 				serverRequestHandlerInvocations++;
+				DebugLog.debug("==TEST==  serverRequestHandlerInvocations", serverRequestHandlerInvocations);
 				serverHeaders = op.getReceivedHeaders();
 				String params = (String) serverHeaders.getHeader(OBEX_HDR_USER);
 				if (params == null) {
@@ -57,9 +59,12 @@ public class OBEXGetStandardTest extends OBEXBaseEmulatorTestCase {
 
 				HeaderSet hs = createHeaderSet();
 				hs.setHeader(HeaderSet.LENGTH, new Long(simpleData.length));
+				DebugLog.debug("==TEST== Server sendHeaders");
 				op.sendHeaders(hs);
 
+				DebugLog.debug("==TEST== Server openOutputStream");
 				OutputStream os = op.openOutputStream();
+				DebugLog.debug("==TEST== Server write(..)");
 				os.write(simpleData);
 				if (params.contains("flush")) {
 					os.flush();
@@ -114,12 +119,12 @@ public class OBEXGetStandardTest extends OBEXBaseEmulatorTestCase {
 		}
 		byte serverData[] = buf.toByteArray();
 
+        DebugLog.debug("==TEST== Client getResponseCode");
+        int responseCode = getOp.getResponseCode();
+        DebugLog.debug0x("==TEST== Client ResponseCode " + BlueCoveOBEX.obexResponseCodes(responseCode) + " = ", responseCode);
+        
 		DebugLog.debug("==TEST== Client close io");
 		is.close();
-		DebugLog.debug("==TEST== Client getResponseCode");
-		int responseCode = getOp.getResponseCode();
-		DebugLog.debug0x("==TEST== Client ResponseCode = ", responseCode);
-		// assertEquals("ResponseCodes.OBEX_HTTP_OK", ResponseCodes.OBEX_HTTP_OK, responseCode);
 
 		getOp.close();
 
@@ -127,17 +132,20 @@ public class OBEXGetStandardTest extends OBEXBaseEmulatorTestCase {
 
 		clientSession.close();
 
+	    assertEquals("invocations", 1, serverRequestHandlerInvocations);
 		assertEquals("NAME", name, serverHeaders.getHeader(HeaderSet.NAME));
 		assertEquals("LENGTH", new Long(serverData.length), headers.getHeader(HeaderSet.LENGTH));
 		assertEquals("data", simpleData, serverData);
-		assertEquals("invocations", 1, serverRequestHandlerInvocations);
+		
+        //see TCK Operation0401
+        assertEquals("ResponseCodes.OBEX_HTTP_OK", ResponseCodes.OBEX_HTTP_OK, responseCode);
 	}
 
 	public void testGETOperation() throws IOException {
 		runGETOperation("");
 	}
 
-	public void xtestGETOperationFlush() throws IOException {
+	public void testGETOperationFlush() throws IOException {
 		runGETOperation("flush");
 	}
 }

@@ -63,6 +63,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 	OBEXServerSessionImpl(StreamConnection connection, ServerRequestHandler handler, Authenticator authenticator,
 			OBEXConnectionParams obexConnectionParams) throws IOException {
 		super(connection, obexConnectionParams);
+		this.requestSent = true;
 		this.handler = handler;
 		this.authenticator = authenticator;
 		stackID = BlueCoveImpl.getCurrentThreadBluetoothStackID();
@@ -129,7 +130,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		delayClose = false;
 		byte[] b;
 		try {
-			b = readOperation();
+			b = readPacket();
 		} catch (EOFException e) {
 			if (isConnected) {
 				throw e;
@@ -168,7 +169,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 				processGet(b, finalPacket);
 				break;
 			default:
-				writeOperation(ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED, null);
+				writePacket(ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED, null);
 			}
 		} finally {
 			delayClose = false;
@@ -209,7 +210,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		connectResponse[1] = 0; /* Flags */
 		connectResponse[2] = OBEXUtils.hiByte(obexConnectionParams.mtu);
 		connectResponse[3] = OBEXUtils.loByte(obexConnectionParams.mtu);
-		writeOperation(rc, connectResponse, OBEXHeaderSetImpl.toByteArray(replyHeaders));
+		writePacketWithFlags(rc, connectResponse, OBEXHeaderSetImpl.toByteArray(replyHeaders));
 		if (rc == ResponseCodes.OBEX_HTTP_OK) {
 			this.isConnected = true;
 		}
@@ -219,7 +220,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		if (this.isConnected) {
 			return true;
 		}
-		writeOperation(ResponseCodes.OBEX_HTTP_BAD_REQUEST, null);
+		writePacket(ResponseCodes.OBEX_HTTP_BAD_REQUEST, null);
 		return false;
 	}
 
@@ -238,7 +239,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			DebugLog.error("onDisconnect", e);
 		}
 		this.isConnected = false;
-		writeOperation(rc, OBEXHeaderSetImpl.toByteArray(replyHeaders));
+		writePacket(rc, OBEXHeaderSetImpl.toByteArray(replyHeaders));
 	}
 
 	private void processDelete(HeaderSet requestHeaders) throws IOException {
@@ -251,7 +252,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			rc = ResponseCodes.OBEX_HTTP_UNAVAILABLE;
 			DebugLog.error("onDelete", e);
 		}
-		writeOperation(rc, OBEXHeaderSetImpl.toByteArray(replyHeaders));
+		writePacket(rc, OBEXHeaderSetImpl.toByteArray(replyHeaders));
 	}
 
 	private void processPut(byte[] b, boolean finalPacket) throws IOException {
@@ -281,7 +282,9 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 				rc = ResponseCodes.OBEX_HTTP_UNAVAILABLE;
 				DebugLog.error("onPut", e);
 			}
-			operation.writeResponse(rc);
+			if (!operation.isAborted) {
+			    operation.writeResponse(rc);
+			}
 		} finally {
 			operation.close();
 			operation = null;
@@ -309,7 +312,9 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 				rc = ResponseCodes.OBEX_HTTP_UNAVAILABLE;
 				DebugLog.error("onGet", e);
 			}
-			operation.writeResponse(rc);
+			if (!operation.isAborted) {
+			    operation.writeResponse(rc);
+			}
 		} finally {
 			operation.close();
 			operation = null;
@@ -322,10 +327,11 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			return;
 		}
 		if (operation != null) {
-			operation.close();
+            operation.isAborted = true;
+		    operation.close();
 			operation = null;
 		}
-		writeOperation(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);
+		writePacket(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);
 	}
 
 	private void processSetPath(byte[] b, boolean finalPacket) throws IOException {
@@ -352,7 +358,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			rc = ResponseCodes.OBEX_HTTP_UNAVAILABLE;
 			DebugLog.error("onSetPath", e);
 		}
-		writeOperation(rc, OBEXHeaderSetImpl.toByteArray(replyHeaders));
+		writePacket(rc, OBEXHeaderSetImpl.toByteArray(replyHeaders));
 	}
 
 }

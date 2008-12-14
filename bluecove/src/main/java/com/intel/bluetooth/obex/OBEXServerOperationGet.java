@@ -79,7 +79,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		}
 		requestEnded = true;
 		outputStream = new OBEXOperationOutputStream(session.mtu, this);
-		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
 		sendHeaders = null;
 		return outputStream;
 	}
@@ -99,7 +99,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 	}
 
 	protected boolean readRequestPacket() throws IOException {
-		byte[] b = session.readOperation();
+		byte[] b = session.readPacket();
 		int opcode = b[0] & 0xFF;
 		boolean finalPacket = ((opcode & OBEXOperationCodes.FINAL_BIT) != 0);
 		if (finalPacket) {
@@ -122,7 +122,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		default:
 			errorReceived = true;
 			DebugLog.debug0x("server operation invalid request", OBEXUtils.toStringObexResponseCodes(opcode), opcode);
-			session.writeOperation(ResponseCodes.OBEX_HTTP_BAD_REQUEST, null);
+			session.writePacket(ResponseCodes.OBEX_HTTP_BAD_REQUEST, null);
 		}
 		return finalPacket;
 	}
@@ -138,18 +138,26 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 			return;
 		}
 		DebugLog.debug("server operation reply continue");
-		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
 		sendHeaders = null;
 		readRequestPacket();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean,
-	 *      byte[])
-	 */
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean,
+     * byte[])
+     */
 	public void deliverPacket(boolean finalPacket, byte[] buffer) throws IOException {
+	    if (session.requestSent) {
+	        // TODO Consider moving readRequestPacket() to the begging of the function
+	        readRequestPacket();
+	        if (session.requestSent) {
+	            throw new IOException("Client not requesting data");
+	        }
+	    }
 		HeaderSet dataHeaders = OBEXSessionBase.createOBEXHeaderSet();
 		int opcode = OBEXOperationCodes.OBEX_RESPONSE_CONTINUE;
 		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
@@ -162,7 +170,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 			OBEXHeaderSetImpl.appendHeaders(dataHeaders, sendHeaders);
 			sendHeaders = null;
 		}
-		session.writeOperation(opcode, OBEXHeaderSetImpl.toByteArray(dataHeaders));
+		session.writePacket(opcode, OBEXHeaderSetImpl.toByteArray(dataHeaders));
 		readRequestPacket();
 	}
 
@@ -170,7 +178,8 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		// TODO proper abort + UnitTests
 		finalPacketReceived = true;
 		requestEnded = true;
-		session.writeOperation(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);
+		isAborted = true;
+		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);
 		throw new IOException("Operation aborted");
 	}
 

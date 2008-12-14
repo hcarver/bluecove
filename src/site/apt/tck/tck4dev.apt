@@ -43,6 +43,7 @@ Running TCK for bluecove developers
 [gatling-change-metadata.png] Metadata Config
         
 ---        
+    bluetooth.address=0B1000000002 (address of device with running TCK agent)
     bluetooth.goep_enabled=true
     bluetooth.agent_mtu=512
     device.platform=MIDP
@@ -60,6 +61,15 @@ Running TCK for bluecove developers
 
 [gatling-metadata-config.png]  Metadata Config
 
+    For OBEX tests:
+    
+---
+    obex.address=0B1000000002  (address of device with running TCK agent)
+    obex.scheme=btgoep
+    timeout_short=2000
+    timeout_medium=5000
+    timeout_long=10000
+---
         
     ** Select tests you want to run ...
 

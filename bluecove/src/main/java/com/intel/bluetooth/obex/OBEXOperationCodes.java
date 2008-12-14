@@ -60,6 +60,8 @@ interface OBEXOperationCodes {
 
 	public static final char SETPATH = 0x05;
 
+	public static final char SETPATH_FINAL = SETPATH | FINAL_BIT;
+	
 	public static final char SESSION = 0x07;
 
 	public static final char ABORT = 0xFF;
