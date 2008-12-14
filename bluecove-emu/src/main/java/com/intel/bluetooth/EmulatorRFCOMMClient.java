@@ -84,6 +84,7 @@ class EmulatorRFCOMMClient extends EmulatorLinkedConnection {
 	}
 
 	void flush() throws IOException {
+	    localDevice.getDeviceManagerService().rfFlush(localDevice.getAddress(), this.connectionHandle);
 	}
 
 }

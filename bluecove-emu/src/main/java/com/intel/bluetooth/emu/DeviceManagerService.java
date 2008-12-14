@@ -103,6 +103,8 @@ public interface DeviceManagerService /* extends RoHService */{
 	public void rfWrite(long localAddress, long connectionId, byte[] b) throws IOException;
 
 	public int rfAvailable(long localAddress, long connectionId) throws IOException;
+	
+	public void rfFlush(long localAddress, long connectionId) throws IOException;
 
 	public byte[] rfRead(long localAddress, long connectionId, int len) throws IOException;
 

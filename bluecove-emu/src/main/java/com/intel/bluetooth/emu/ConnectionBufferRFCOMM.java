@@ -43,7 +43,13 @@ class ConnectionBufferRFCOMM extends ConnectionBuffer {
 		monitor.writeOperations++;
 		monitor.writeBytes += b.length;
 		os.write(b);
-		os.flush();
+	}
+	
+	/**
+	 * Block till client reads all data.
+	 */
+	void rfFlush() throws IOException {
+	    os.flush();
 	}
 
 	int rfAvailable() throws IOException {

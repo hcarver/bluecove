@@ -90,6 +90,7 @@ class ConnectedInputStream extends InputStream {
 			read = 0;
 		}
 		available--;
+		notifyAll();
 		return r;
 	}
 
@@ -124,6 +125,7 @@ class ConnectedInputStream extends InputStream {
 				read = 0;
 			}
 			available--;
+			notifyAll();
 		}
 		return rlen;
 	}
@@ -132,6 +134,31 @@ class ConnectedInputStream extends InputStream {
 		return available;
 	}
 
+	/**
+     * Block sender till client reads all.
+     */
+	void receiveFlush() throws IOException {
+	    receiveFlushBlock();
+	}
+	
+	void receiveFlushBlock() throws IOException {
+	    while (available != 0) {
+	        if (closed) {
+                throw new IOException("Stream closed");
+            }
+            if (receiverClosed) {
+                throw new IOException("Connection closed");
+            }
+            synchronized (this) {
+                try {
+                    wait(1000);
+                } catch (InterruptedException e) {
+                    throw new InterruptedIOException();
+                }
+            }
+	    }
+	}
+	
 	synchronized void receive(int b) throws IOException {
 		if (closed) {
 			throw new IOException("Connection closed");
@@ -144,9 +171,7 @@ class ConnectedInputStream extends InputStream {
 			write = 0;
 		}
 		available++;
-		synchronized (this) {
-			notifyAll();
-		}
+		notifyAll();
 	}
 
 	synchronized public void receive(byte b[], int off, int len) throws IOException {
@@ -163,9 +188,7 @@ class ConnectedInputStream extends InputStream {
 			}
 			available++;
 		}
-		synchronized (this) {
-			notifyAll();
-		}
+		notifyAll();
 	}
 
 	private void waitFreeBuffer() throws IOException {

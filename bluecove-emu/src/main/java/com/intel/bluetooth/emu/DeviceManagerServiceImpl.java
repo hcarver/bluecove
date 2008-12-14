@@ -428,6 +428,10 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 		((ConnectionBufferRFCOMM) getConnectionBuffer(localAddress, connectionId)).rfWrite(b);
 	}
 
+	public void rfFlush(long localAddress, long connectionId) throws IOException {
+	    ((ConnectionBufferRFCOMM) getConnectionBuffer(localAddress, connectionId)).rfFlush();
+	}
+	
 	public int rfAvailable(long localAddress, long connectionId) throws IOException {
 		return ((ConnectionBufferRFCOMM) getConnectionBuffer(localAddress, connectionId)).rfAvailable();
 	}

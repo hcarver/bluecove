@@ -58,6 +58,10 @@ class ConnectedOutputStream extends OutputStream {
 	public void write(int b) throws IOException {
 		receiver.receive(b);
 	}
+	
+	public void flush() throws IOException {
+	    receiver.receiveFlush();
+    }
 
 	@Override
 	public void close() throws IOException {
