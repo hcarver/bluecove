@@ -138,7 +138,8 @@ class ConnectedInputStream extends InputStream {
      * Block sender till client reads all.
      */
 	void receiveFlush() throws IOException {
-	    receiveFlushBlock();
+	    //TODO make this configurable
+	    //receiveFlushBlock();
 	}
 	
 	void receiveFlushBlock() throws IOException {
