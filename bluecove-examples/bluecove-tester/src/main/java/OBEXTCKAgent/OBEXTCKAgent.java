@@ -29,11 +29,8 @@
 
 package OBEXTCKAgent;
 
-import java.lang.*;
-import java.io.*;
-import javax.obex.*;
-import javax.microedition.io.*;
-import javax.microedition.midlet.*;
+import javax.microedition.midlet.MIDlet;
+import javax.microedition.midlet.MIDletStateChangeException;
 
 /**
  * The OBEXTCKAgent class contains the main method of the OBEX TCK

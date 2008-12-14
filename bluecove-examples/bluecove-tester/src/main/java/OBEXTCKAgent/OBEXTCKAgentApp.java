@@ -151,8 +151,16 @@ public class OBEXTCKAgentApp extends Thread {
 					+ " protocol is used.");
 		}
 	}
-
+	
 	public void run() {
+	    try {
+	        runOriginal();
+	    } catch (Throwable e) {
+	        System.out.println("Fatal Error:" + e.getClass().getName() + " " + e.getMessage());
+	    }
+	}
+	
+	public void runOriginal() {
 		boolean canRun = true;
 		SessionNotifier server = null;
 		Connection session = null;
@@ -403,7 +411,7 @@ public class OBEXTCKAgentApp extends Thread {
 		/**
 		 * Called when the client issues a DISCONNECT request.
 		 * 
-		 * @param request
+		 * @param headers
 		 *            the headers received in the request
 		 * 
 		 * @param reply
@@ -435,7 +443,7 @@ public class OBEXTCKAgentApp extends Thread {
 		 * Called when the client issues a CONNECT request. Tests the headers and sends the proper response to the
 		 * server.
 		 * 
-		 * @param request
+		 * @param requestSent
 		 *            the headers received in the request
 		 * 
 		 * @param reply

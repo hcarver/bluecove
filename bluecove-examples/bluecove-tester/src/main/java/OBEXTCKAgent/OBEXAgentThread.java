@@ -29,10 +29,6 @@
 
 package OBEXTCKAgent;
 
-import java.io.*;
-import javax.bluetooth.*;
-import javax.obex.*;
-import javax.microedition.io.*;
 
 /**
  * This class assists the OBEX TCK Agent my terminating old

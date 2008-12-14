@@ -29,9 +29,9 @@
 
 package OBEXTCKAgent;
 
-import java.io.*;
-import javax.obex.*;
-import javax.microedition.io.*;
+//import javax.microedition.io.Connector;
+import BluetoothTCKAgent.Connector;
+import javax.obex.ClientSession;
 
 /**
  * The OBEXClientThread class is used with the CLIENT command.

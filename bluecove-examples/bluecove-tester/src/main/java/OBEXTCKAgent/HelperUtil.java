@@ -29,8 +29,6 @@
 
 package OBEXTCKAgent;
 
-import java.lang.*;
-import java.io.*;
 
 /**
  * This class is used to intialize the transport protocol to begin
