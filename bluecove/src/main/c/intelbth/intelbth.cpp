@@ -950,6 +950,9 @@ connectRety:
 		//10051 - A socket operation was attempted to an unreachable network. / Error other than time-out at L2CAP or Bluetooth radio level.
 		if (last_error == WSAENETUNREACH) {
 			if ((retyCount < retryUnreachable) && (retryUnreachable > 0)) {
+			    if (isCurrentThreadInterrupted(env, peer)) {
+                    return;
+                }
 				debug(("connectRety %i", retyCount));
 				goto connectRety;
 			}
@@ -1151,7 +1154,9 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_close(JN
 	debug(("socket[%u] close", (int)socket));
 	if (shutdown((SOCKET)socket, SD_BOTH) != 0) {
 	    int last_error = WSAGetLastError();
-	    debug(("shutdown error [%i] %S", last_error, getWinErrorMessage(last_error)));
+	    if (last_error != WSAENOTCONN) {
+	        debug(("shutdown error [%i] %S", last_error, getWinErrorMessage(last_error)));
+	    }
 	}
 	if (closesocket((SOCKET)socket)) {
 		throwIOExceptionWSAGetLastError(env, "Failed to close socket");

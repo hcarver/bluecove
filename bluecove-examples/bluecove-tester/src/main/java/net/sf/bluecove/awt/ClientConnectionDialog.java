@@ -141,7 +141,6 @@ public class ClientConnectionDialog extends Dialog {
 				if (!wasConnected) {
 					setCursorDefault();
 					btnSend.setEnabled(true);
-					btnInterrupt.setEnabled(true);
 				}
 				wasConnected = true;
 				if (thread.receivedCount == 0) {
@@ -425,6 +424,7 @@ public class ClientConnectionDialog extends Dialog {
 
 		thread.start();
 		btnDisconnect.setEnabled(true);
+		btnInterrupt.setEnabled(true);
 		btnConnect.setEnabled(false);
 		updateDataReceiveType();
 	}

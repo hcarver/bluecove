@@ -25,10 +25,12 @@ package com.intel.bluetooth;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.bluetooth.BluetoothConnectionException;
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DataElement;
 import javax.bluetooth.DeviceClass;
@@ -63,6 +65,12 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 	private final static int ATTR_RETRIEVABLE_MAX = 256;
 
 	private Hashtable deviceDiscoveryDevices;
+
+	private static int connectThreadNumber;
+
+	private static synchronized int nextConnectThreadNum() {
+		return connectThreadNumber++;
+	}
 
 	BluetoothStackMicrosoft() {
 	}
@@ -606,23 +614,99 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 
 	// ---------------------- Client RFCOMM connections
 
+	private class ConnectThread extends Thread {
+
+		final Object event;
+
+		final long socket;
+
+		final BluetoothConnectionParams params;
+
+		final int retryUnreachable;
+
+		volatile IOException error;
+
+		volatile boolean success = false;
+
+		volatile boolean connecting = true;
+
+		ConnectThread(Object event, long socket, BluetoothConnectionParams params) {
+			super("ConnectThread-" + nextConnectThreadNum());
+			this.event = event;
+			this.socket = socket;
+			this.params = params;
+			retryUnreachable = BlueCoveImpl.getConfigProperty(
+					BlueCoveConfigProperties.PROPERTY_CONNECT_UNREACHABLE_RETRY, 2);
+
+		}
+
+		public void run() {
+			try {
+				connect(socket, params.address, params.channel, retryUnreachable);
+				success = true;
+			} catch (IOException e) {
+				error = e;
+			} finally {
+				connecting = false;
+				synchronized (event) {
+					event.notifyAll();
+				}
+			}
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth .BluetoothConnectionParams,
 	 * int, int)
 	 */
-	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
-		long socket = socket(params.authenticate, params.encrypt);
-		int retryUnreachable = BlueCoveImpl.getConfigProperty(
-				BlueCoveConfigProperties.PROPERTY_CONNECT_UNREACHABLE_RETRY, 2);
-		boolean success = false;
-		try {
-			connect(socket, params.address, params.channel, retryUnreachable);
-			success = true;
-		} finally {
-			if (!success) {
+	public long connectionRfOpenClientConnection(final BluetoothConnectionParams params) throws IOException {
+		final long socket = socket(params.authenticate, params.encrypt);
+
+		// Allow to interrupt connection thread
+		final Object event = new Object();
+		ConnectThread connectThread = new ConnectThread(event, socket, params);
+		UtilsJavaSE.threadSetDaemon(connectThread);
+
+		boolean timeoutHappend = false;
+
+		synchronized (event) {
+			connectThread.start();
+			while (connectThread.connecting) {
+				try {
+					if (params.timeouts) {
+						event.wait(params.timeout);
+						timeoutHappend = connectThread.connecting;
+						connectThread.interrupt();
+						break;
+					} else {
+						event.wait();
+					}
+				} catch (InterruptedException e) {
+					try {
+						close(socket);
+					} catch (Exception ignore) {
+					}
+					throw new InterruptedIOException();
+				}
+			}
+		}
+		if (!connectThread.success) {
+			try {
 				close(socket);
+			} catch (Exception ignore) {
+			}
+		}
+		if (connectThread.error != null) {
+			throw connectThread.error;
+		}
+
+		if (!connectThread.success) {
+			if (timeoutHappend) {
+				throw new BluetoothConnectionException(BluetoothConnectionException.TIMEOUT);
+			} else {
+				throw new BluetoothConnectionException(BluetoothConnectionException.FAILED_NOINFO);
 			}
 		}
 		return socket;

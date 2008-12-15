@@ -127,6 +127,7 @@ public class ClientConnectionThread extends Thread {
 			} finally {
 				isConnecting = false;
 			}
+			Logger.info(logPrefix + "Connected");
 			if (rfcomm) {
 				ConnectionHolderStream cs = new ConnectionHolderStream((StreamConnection) conn);
 				c = cs;
