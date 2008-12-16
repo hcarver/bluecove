@@ -184,7 +184,8 @@
         -->
     </contributors>
 
-    <!--4snapshot-->
+    <!--4snapshot dependencies -->
+    <!--
     <repositories>
         <repository>
             <id>pyx4me-web-repo</id>
@@ -197,8 +198,9 @@
             </releases>
         </repository>
     </repositories>
-    
-    <!--4snapshot-->
+    -->
+
+    <!--4snapshot plugin dependencies -->
     <!--
     <pluginRepositories>
 
@@ -220,13 +222,13 @@
         <buildLabel>${version}</buildLabel>
         <buildEnv>developer</buildEnv>
         <native.build.skip>false</native.build.skip>
-        <me2Version>2.0.3-SNAPSHOT</me2Version>
+        <me2Version>2.0.3</me2Version>
         <pyx4meVersion>2.0.3</pyx4meVersion>
         <!-- See OS X profile -->
         <javaRunTimeJar>${java.home}/lib/rt.jar</javaRunTimeJar>
         <javaRunTimeSecurityJar>${java.home}/lib/jsse.jar</javaRunTimeSecurityJar>
     </properties>
-    
+
     <dependencyManagement>
         <dependencies>
                 <dependency>
