@@ -55,19 +55,19 @@ public class TestResponderServerL2CAP extends Thread {
 	private boolean isRunning = false;
 
 	private Vector concurrentConnectionsThreads = new Vector();
-	
+
 	private class ServerConnectionTread extends Thread {
 
 		L2CAPConnection channel;
 
 		boolean isRunning;
-		
+
 		ServerConnectionTread(L2CAPConnection channel) {
 			this.channel = channel;
 			this.isRunning = true;
 			synchronized (concurrentConnectionsThreads) {
-			    concurrentConnectionsThreads.addElement(this);
-            }
+				concurrentConnectionsThreads.addElement(this);
+			}
 		}
 
 		public void run() {
@@ -80,19 +80,19 @@ public class TestResponderServerL2CAP extends Thread {
 					}
 				}
 			} finally {
-			    this.isRunning = false;
-			    IOUtils.closeQuietly(channel);
-                synchronized (concurrentConnectionsThreads) {
-                    concurrentConnectionsThreads.removeElement(this);
-                }
+				this.isRunning = false;
+				IOUtils.closeQuietly(channel);
+				synchronized (concurrentConnectionsThreads) {
+					concurrentConnectionsThreads.removeElement(this);
+				}
 			}
 		}
-		
+
 		void shutdown() {
-            if (isRunning) {
-                IOUtils.closeQuietly(channel);
-            }
-        }
+			if (isRunning) {
+				IOUtils.closeQuietly(channel);
+			}
+		}
 	}
 
 	private TestResponderServerL2CAP() {
@@ -195,6 +195,8 @@ public class TestResponderServerL2CAP extends Thread {
 					t.start();
 				}
 			}
+		} catch (Throwable e) {
+			Logger.error("L2CAP Server run error", e);
 		} finally {
 			close();
 			Logger.info("L2CAP Server finished! " + TimeUtils.timeNowToString());
@@ -334,28 +336,28 @@ public class TestResponderServerL2CAP extends Thread {
 	}
 
 	void closeServer() {
-        isStoped = true;
-        close();
-    }
+		isStoped = true;
+		close();
+	}
 
-    public void closeServerClientConnections() {
-        Vector copy = CollectionUtils.copy(concurrentConnectionsThreads);
-        for (Enumeration iter = copy.elements(); iter.hasMoreElements();) {
-            ServerConnectionTread t = (ServerConnectionTread) iter.nextElement();
-            t.shutdown();
-        }
-    }
+	public void closeServerClientConnections() {
+		Vector copy = CollectionUtils.copy(concurrentConnectionsThreads);
+		for (Enumeration iter = copy.elements(); iter.hasMoreElements();) {
+			ServerConnectionTread t = (ServerConnectionTread) iter.nextElement();
+			t.shutdown();
+		}
+	}
 
-    public int countClientConnections() {
-        int count = 0;
-        synchronized (concurrentConnectionsThreads) {
-            for (Enumeration iter = concurrentConnectionsThreads.elements(); iter.hasMoreElements();) {
-                ServerConnectionTread t = (ServerConnectionTread) iter.nextElement();
-                if (t.isRunning) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
+	public int countClientConnections() {
+		int count = 0;
+		synchronized (concurrentConnectionsThreads) {
+			for (Enumeration iter = concurrentConnectionsThreads.elements(); iter.hasMoreElements();) {
+				ServerConnectionTread t = (ServerConnectionTread) iter.nextElement();
+				if (t.isRunning) {
+					count++;
+				}
+			}
+		}
+		return count;
+	}
 }
