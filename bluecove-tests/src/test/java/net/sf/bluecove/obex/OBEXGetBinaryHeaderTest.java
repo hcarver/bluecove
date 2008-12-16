@@ -36,6 +36,9 @@ import javax.obex.Operation;
 import javax.obex.ResponseCodes;
 import javax.obex.ServerRequestHandler;
 
+import com.intel.bluetooth.DebugLog;
+import com.intel.bluetooth.obex.BlueCoveOBEX;
+
 /**
  * 
  * This tests OBEX Operation get and OutputStream.
@@ -51,6 +54,8 @@ public class OBEXGetBinaryHeaderTest extends OBEXBaseEmulatorTestCase {
 	private byte[] serverHeaderData;
 
 	private byte[] serverReplyBigData;
+
+	private int serverResponseCode = ResponseCodes.OBEX_HTTP_ACCEPTED;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -91,7 +96,7 @@ public class OBEXGetBinaryHeaderTest extends OBEXBaseEmulatorTestCase {
 				os.close();
 
 				op.close();
-				return ResponseCodes.OBEX_HTTP_ACCEPTED;
+				return serverResponseCode;
 			} catch (IOException e) {
 				e.printStackTrace();
 				return ResponseCodes.OBEX_HTTP_UNAVAILABLE;
@@ -122,16 +127,16 @@ public class OBEXGetBinaryHeaderTest extends OBEXBaseEmulatorTestCase {
 		hs.setHeader(OBEX_HDR_USER, testParams);
 
 		// Create GET Operation
-		Operation get = clientSession.get(hs);
+		Operation getOp = clientSession.get(hs);
 
-		OutputStream osHeader = get.openOutputStream();
+		OutputStream osHeader = getOp.openOutputStream();
 		osHeader.write(sendHeaderData);
 		osHeader.close();
 
 		// request portion is done
-		HeaderSet headers = get.getReceivedHeaders();
+		HeaderSet headers = getOp.getReceivedHeaders();
 
-		InputStream is = get.openInputStream();
+		InputStream is = getOp.openInputStream();
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
 		int data;
 		while ((data = is.read()) != -1) {
@@ -141,7 +146,11 @@ public class OBEXGetBinaryHeaderTest extends OBEXBaseEmulatorTestCase {
 
 		is.close();
 
-		get.close();
+		int responseCode = getOp.getResponseCode();
+		DebugLog.debug0x("==TEST== Client ResponseCode " + BlueCoveOBEX.obexResponseCodes(responseCode) + " = ",
+				responseCode);
+
+		getOp.close();
 
 		clientSession.disconnect(null);
 
@@ -152,6 +161,10 @@ public class OBEXGetBinaryHeaderTest extends OBEXBaseEmulatorTestCase {
 		assertEquals("data in responce", expectServerData, serverData);
 		assertEquals("LENGTH", new Long(serverData.length), headers.getHeader(HeaderSet.LENGTH));
 		assertEquals("invocations", 1, serverRequestHandlerInvocations);
+
+		assertEquals("ResponseCodes." + BlueCoveOBEX.obexResponseCodes(serverResponseCode), serverResponseCode,
+				responseCode);
+
 		assertServerErrors();
 	}
 

@@ -37,6 +37,7 @@ import javax.obex.ServerRequestHandler;
 
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.obex.BlueCoveInternals;
+import com.intel.bluetooth.obex.BlueCoveOBEX;
 
 /**
  * 
@@ -49,11 +50,14 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 
 	private static long LENGTH_NO_DATA = 0xffffffffl;
 
+	private volatile int serverResponseCode = ResponseCodes.OBEX_HTTP_OK;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		serverDataLength = -1;
 		serverData = null;
+		serverResponseCode = 0;
 	}
 
 	private class RequestHandler extends ServerRequestHandler {
@@ -62,14 +66,15 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 		public int onPut(Operation op) {
 			try {
 				serverRequestHandlerInvocations++;
-				DebugLog.debug("serverRequestHandlerInvocations", serverRequestHandlerInvocations);
+				DebugLog.debug("==TEST== serverRequestHandlerInvocations", serverRequestHandlerInvocations);
 				if (serverRequestHandlerInvocations > 1) {
 					return ResponseCodes.OBEX_HTTP_BAD_REQUEST;
 				}
 				serverHeaders = op.getReceivedHeaders();
 				Long dataLength = (Long) serverHeaders.getHeader(HeaderSet.LENGTH);
 				if (dataLength == null) {
-					return ResponseCodes.OBEX_HTTP_LENGTH_REQUIRED;
+					serverResponseCode = ResponseCodes.OBEX_HTTP_LENGTH_REQUIRED;
+					return serverResponseCode;
 				}
 				long length = dataLength.longValue();
 				int len = (int) length;
@@ -89,7 +94,8 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 					serverDataLength = got;
 				}
 				op.close();
-				return ResponseCodes.OBEX_HTTP_OK;
+				serverResponseCode = ResponseCodes.OBEX_HTTP_OK;
+				return serverResponseCode;
 			} catch (IOException e) {
 				e.printStackTrace();
 				return ResponseCodes.OBEX_HTTP_UNAVAILABLE;
@@ -114,15 +120,15 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 
 		hsOperation.setHeader(HeaderSet.LENGTH, new Long(length));
 
-		DebugLog.debug("test client start put");
+		DebugLog.debug("==TEST== client start put");
 		// Create PUT Operation
 		Operation putOperation = clientSession.put(hsOperation);
 
-		DebugLog.debug("test client openOutputStream");
+		DebugLog.debug("==TEST== client openOutputStream");
 		OutputStream os = putOperation.openOutputStream();
 		os.write(data1);
 		if (flush) {
-			DebugLog.debug("test client flush 1");
+			DebugLog.debug("==TEST== client flush 1");
 			os.flush();
 		}
 		if (data2 != null) {
@@ -132,16 +138,20 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 				os.flush();
 			}
 		}
-		DebugLog.debug("test client OutputStream close");
+		DebugLog.debug("==TEST== client OutputStream close");
 		os.close();
 
-		DebugLog.debug("test client Operation close");
+		int responseCode = putOperation.getResponseCode();
+		DebugLog.debug0x("==TEST== Client ResponseCode " + BlueCoveOBEX.obexResponseCodes(responseCode) + " = ",
+				responseCode);
+
+		DebugLog.debug("==TEST== client Operation close");
 		putOperation.close();
 
-		DebugLog.debug("test client PUT packets", BlueCoveInternals.getPacketsCountWrite(clientSession)
+		DebugLog.debug("==TEST== client PUT packets", BlueCoveInternals.getPacketsCountWrite(clientSession)
 				- writePacketsConnect);
 
-		DebugLog.debug("test client Session disconnect");
+		DebugLog.debug("==TEST== client Session disconnect");
 		clientSession.disconnect(null);
 
 		clientSession.close();
@@ -149,6 +159,9 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 		assertEquals("invocations", 1, serverRequestHandlerInvocations);
 		assertEquals("LENGTH", new Long(length), serverHeaders.getHeader(HeaderSet.LENGTH));
 		assertEquals("data.length", data1.length, serverDataLength);
+
+		assertEquals("ResponseCodes." + BlueCoveOBEX.obexResponseCodes(serverResponseCode), serverResponseCode,
+				responseCode);
 
 		assertEquals("c.writePackets", expectedPackets, BlueCoveInternals.getPacketsCountWrite(clientSession));
 		assertEquals("c.readPackets", expectedPackets, BlueCoveInternals.getPacketsCountRead(clientSession));
@@ -297,6 +310,10 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 		OutputStream os = putOperation.openOutputStream();
 		os.close();
 
+		int responseCode = putOperation.getResponseCode();
+		DebugLog.debug0x("==TEST== Client ResponseCode " + BlueCoveOBEX.obexResponseCodes(responseCode) + " = ",
+				responseCode);
+
 		putOperation.close();
 
 		DebugLog.debug("PUT packets", BlueCoveInternals.getPacketsCountWrite(clientSession) - writePacketsConnect);
@@ -308,6 +325,9 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 		assertEquals("NAME", name, serverHeaders.getHeader(HeaderSet.NAME));
 		assertNull("data", serverData);
 		assertEquals("invocations", 1, serverRequestHandlerInvocations);
+
+		assertEquals("ResponseCodes." + BlueCoveOBEX.obexResponseCodes(serverResponseCode), serverResponseCode,
+				responseCode);
 
 		int expectedPackets = 1 + 2 + 1;
 

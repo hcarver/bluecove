@@ -48,7 +48,7 @@ public class OBEXPutInputStreamTest extends OBEXBaseEmulatorTestCase {
 
 	private final byte[] serverReplyData = "Ask for data!".getBytes();;
 
-	private int serverResponseCode = ResponseCodes.OBEX_HTTP_OK;
+	private final int serverResponseCode = ResponseCodes.OBEX_HTTP_OK;
 
 	private IOException serverIOException;
 
