@@ -141,12 +141,10 @@ public class OBEXPutInputStreamTest extends OBEXBaseEmulatorTestCase {
 		assertEquals("NAME", name, serverHeaders.getHeader(HeaderSet.NAME));
 		assertEquals("data", simpleData, serverReceiveData);
 		assertEquals("data in responce", serverReplyData, serverRepliedData);
-		// TODO
-		// assertEquals("ResponseCodes." + BlueCoveOBEX.obexResponseCodes(serverResponseCode), serverResponseCode,
-		// responseCode);
 
-		// assertServerErrors();
-		ingoreServerErrors();
+		assertEquals("ResponseCodes." + BlueCoveOBEX.obexResponseCodes(serverResponseCode), serverResponseCode,
+				responseCode);
+		assertServerErrors();
 	}
 
 }

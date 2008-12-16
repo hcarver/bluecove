@@ -19,6 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  @author vlads
  *  @version $Id$
  */
 package com.intel.bluetooth.obex;
@@ -31,70 +32,42 @@ import javax.obex.HeaderSet;
 
 import com.intel.bluetooth.DebugLog;
 
-class OBEXClientOperationPut extends OBEXClientOperation implements OBEXOperationDelivery {
+class OBEXClientOperationPut extends OBEXClientOperation {
 
 	OBEXClientOperationPut(OBEXClientSessionImpl session, HeaderSet sendHeaders) throws IOException {
-		super(session, OBEXOperationCodes.PUT);
-		this.inputStream = new OBEXOperationInputStream(this);
-		startOperation(sendHeaders);
-	}
-
-	public InputStream openInputStream() throws IOException {
-		validateOperationIsOpen();
-		if (inputStreamOpened) {
-			throw new IOException("input stream already open");
-		}
-		this.inputStreamOpened = true;
-		this.operationInProgress = true;
-		return this.inputStream;
-	}
-
-	public OutputStream openOutputStream() throws IOException {
-		validateOperationIsOpen();
-		if (outputStreamOpened) {
-			throw new IOException("output already open");
-		}
-		outputStreamOpened = true;
-		outputStream = new OBEXOperationOutputStream(session.mtu, this);
-		this.operationInProgress = true;
-		return outputStream;
+		super(session, OBEXOperationCodes.PUT, sendHeaders);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean, byte[])
+	 * @see javax.microedition.io.InputConnection#openInputStream()
 	 */
-	public void deliverPacket(boolean finalPacket, byte buffer[]) throws IOException {
-		if (requestEnded) {
-			return;
+	public InputStream openInputStream() throws IOException {
+		validateOperationIsOpen();
+		if (this.inputStreamOpened) {
+			throw new IOException("input stream already open");
 		}
-		if (SHORT_REQUEST_PHASE && (this.startOperationHeaders != null)) {
-			exchangePacket(OBEXHeaderSetImpl.toByteArray(this.startOperationHeaders));
-			this.startOperationHeaders = null;
-		}
-		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
-		if (finalPacket) {
-			this.operationId |= OBEXOperationCodes.FINAL_BIT;
-			dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY_END;
-			DebugLog.debug("client Request Phase ended");
-			requestEnded = true;
-		}
-		HeaderSet dataHeaders = session.createHeaderSet();
-		dataHeaders.setHeader(dataHeaderID, buffer);
-		exchangePacket(OBEXHeaderSetImpl.toByteArray(dataHeaders));
+		DebugLog.debug("openInputStream");
+		this.inputStreamOpened = true;
+		this.operationInProgress = true;
+		return this.inputStream;
 	}
 
-	public void closeStream() throws IOException {
-		this.operationInProgress = false;
-		if (outputStream != null) {
-			synchronized (lock) {
-				if (outputStream != null) {
-					outputStream.close();
-				}
-				outputStream = null;
-			}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.microedition.io.OutputConnection#openOutputStream()
+	 */
+	public OutputStream openOutputStream() throws IOException {
+		validateOperationIsOpen();
+		if (outputStreamOpened) {
+			throw new IOException("output already open");
 		}
+		this.outputStreamOpened = true;
+		this.outputStream = new OBEXOperationOutputStream(session.mtu, this);
+		this.operationInProgress = true;
+		return this.outputStream;
 	}
 
 }

@@ -55,9 +55,12 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 
 	private final Object acceptedConnectionLock = new Object();
 
+	private boolean ingoreServerErrors = false;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		ingoreServerErrors = false;
 		serverRequestHandlerInvocations = 0;
 		serverHeaders = null;
 		serverAcceptedConnection = null;
@@ -69,7 +72,9 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 		int errors = BlueCoveInternals.readServerErrorCount();
 		if (errors != 0) {
 			DebugLog.error("Test Server errors " + errors);
-			throw new Error("Test Server errors " + errors);
+			if (!ingoreServerErrors) {
+				throw new Error("Test Server errors " + errors);
+			}
 		}
 	}
 
@@ -89,6 +94,7 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 	}
 
 	protected void ingoreServerErrors() {
+		ingoreServerErrors = true;
 		BlueCoveInternals.readServerErrorCount();
 	}
 

@@ -32,16 +32,10 @@ import javax.obex.HeaderSet;
 
 import com.intel.bluetooth.DebugLog;
 
-/**
- *
- *
- */
-class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperationReceive, OBEXOperationDelivery {
+class OBEXClientOperationGet extends OBEXClientOperation {
 
 	OBEXClientOperationGet(OBEXClientSessionImpl session, HeaderSet sendHeaders) throws IOException {
-		super(session, OBEXOperationCodes.GET);
-		this.inputStream = new OBEXOperationInputStream(this);
-		startOperation(sendHeaders);
+		super(session, OBEXOperationCodes.GET, sendHeaders);
 	}
 
 	/*
@@ -60,18 +54,6 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 		return this.inputStream;
 	}
 
-	public void closeStream() throws IOException {
-        try {
-            while (!isClosed() && (operationInContinue) ) {
-                DebugLog.debug("operation expects operation end");
-                receiveData(this.inputStream);
-            }
-        } finally {
-            this.operationInProgress = false;
-            inputStream.close();
-        }
-    }
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -88,45 +70,6 @@ class OBEXClientOperationGet extends OBEXClientOperation implements OBEXOperatio
 		this.outputStreamOpened = true;
 		this.outputStream = new OBEXOperationOutputStream(session.mtu, this);
 		return this.outputStream;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.intel.bluetooth.obex.OBEXOperationReceive#receiveData(com.intel.bluetooth.obex.OBEXOperationInputStream)
-	 */
-	public void receiveData(OBEXOperationInputStream is) throws IOException {
-		if (SHORT_REQUEST_PHASE) {
-			exchangePacket(OBEXHeaderSetImpl.toByteArray(this.startOperationHeaders));
-			this.startOperationHeaders = null;
-		} else {
-			exchangePacket(null);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean, byte[])
-	 */
-	public void deliverPacket(boolean finalPacket, byte[] buffer) throws IOException {
-		if (requestEnded) {
-			return;
-		}
-		if (SHORT_REQUEST_PHASE && (this.startOperationHeaders != null)) {
-			exchangePacket(OBEXHeaderSetImpl.toByteArray(this.startOperationHeaders));
-			this.startOperationHeaders = null;
-		}
-		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
-		if (finalPacket) {
-			this.operationId |= OBEXOperationCodes.FINAL_BIT;
-			dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY_END;
-			DebugLog.debug("client Request Phase ended");
-			requestEnded = true;
-		}
-		HeaderSet dataHeaders = session.createHeaderSet();
-		dataHeaders.setHeader(dataHeaderID, buffer);
-		exchangePacket(OBEXHeaderSetImpl.toByteArray(dataHeaders));
 	}
 
 }
