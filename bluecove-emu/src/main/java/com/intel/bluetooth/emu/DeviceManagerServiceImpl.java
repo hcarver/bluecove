@@ -40,7 +40,7 @@ import javax.bluetooth.ServiceRegistrationException;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
-class DeviceManagerServiceImpl implements DeviceManagerService {
+public class DeviceManagerServiceImpl implements DeviceManagerService {
 
 	public static final int MAJOR_COMPUTER = 0x0100;
 
