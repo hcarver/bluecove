@@ -56,12 +56,12 @@ public class TestConcurrent {
 
 						TestResponderClient client = Switcher.createClient(true);
 
-						client.searchServiceRetry = false;
-						client.discoveryOnce = true;
-						client.useDiscoveredDevices = false;
-						client.connectDevice = dev.remoteDevice.getBluetoothAddress();
-						client.searchOnlyBluecoveUuid = Configuration.discoverySearchOnlyBluecoveUuid;
-						client.logID = "CSS-" + ccount + " ";
+						client.config.searchServiceRetry = false;
+						client.config.discoveryOnce = true;
+						client.config.useDiscoveredDevices = false;
+						client.config.connectDevice = dev.remoteDevice.getBluetoothAddress();
+						client.config.searchOnlyBluecoveUuid = Configuration.discoverySearchOnlyBluecoveUuid;
+						client.config.logID = "CSS-" + ccount + " ";
 						ccount++;
 
 						client.configured();
@@ -86,7 +86,7 @@ public class TestConcurrent {
 						if (c.isAnyServiceFound()) {
 							cerviceFound++;
 						} else {
-							Logger.debug("No srvc on " + TestResponderClient.niceDeviceName(c.connectDevice));
+							Logger.debug("No srvc on " + TestResponderClient.niceDeviceName(c.config.connectDevice));
 						}
 					}
 

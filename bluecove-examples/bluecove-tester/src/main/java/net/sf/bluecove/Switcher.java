@@ -303,13 +303,13 @@ public class Switcher implements Runnable {
 				c = client;
 			}
 			if (!c.isRunning) {
-				c.logID = "";
+				c.config.logID = "";
 				c.configured = false;
-				c.discoveryOnce = false;
-				c.connectDevice = null;
-				c.searchServiceRetry = true;
-				c.useDiscoveredDevices = false;
-				c.searchOnlyBluecoveUuid = Configuration.searchOnlyBluecoveUuid;
+				c.config.discoveryOnce = false;
+				c.config.connectDevice = null;
+				c.config.searchServiceRetry = true;
+				c.config.useDiscoveredDevices = false;
+				c.config.searchOnlyBluecoveUuid = Configuration.searchOnlyBluecoveUuid;
 				String name = "Client" + clientStartCount++;
 				c.thread = Configuration.cldcStub.createNamedThread(c, name);
 				c.thread.start();
@@ -332,17 +332,17 @@ public class Switcher implements Runnable {
 		try {
 			client = new TestResponderClient();
 			client.configured = false;
-			client.discoveryOnce = false;
-			client.useDiscoveredDevices = false;
-			client.searchOnlyBluecoveUuid = Configuration.searchOnlyBluecoveUuid;
+			client.config.discoveryOnce = false;
+			client.config.useDiscoveredDevices = false;
+			client.config.searchOnlyBluecoveUuid = Configuration.searchOnlyBluecoveUuid;
 			client.thread = new Thread(client);
 			client.configured();
 
 			TestResponderClient client2 = new TestResponderClient();
 			client2.configured = false;
-			client2.discoveryOnce = false;
-			client2.useDiscoveredDevices = false;
-			client2.searchOnlyBluecoveUuid = Configuration.searchOnlyBluecoveUuid;
+			client2.config.discoveryOnce = false;
+			client2.config.useDiscoveredDevices = false;
+			client2.config.searchOnlyBluecoveUuid = Configuration.searchOnlyBluecoveUuid;
 			client2.thread = new Thread(client2);
 			client2.configured();
 
@@ -356,9 +356,9 @@ public class Switcher implements Runnable {
 	public static void startDiscovery() {
 		TestResponderClient client = createClient();
 		if (client != null) {
-			client.discoveryOnce = true;
-			client.useDiscoveredDevices = false;
-			client.searchOnlyBluecoveUuid = Configuration.discoverySearchOnlyBluecoveUuid;
+			client.config.discoveryOnce = true;
+			client.config.useDiscoveredDevices = false;
+			client.config.searchOnlyBluecoveUuid = Configuration.discoverySearchOnlyBluecoveUuid;
 			client.configured();
 		}
 	}
@@ -366,9 +366,9 @@ public class Switcher implements Runnable {
 	public static void startServicesSearch() {
 		TestResponderClient client = createClient();
 		if (client != null) {
-			client.discoveryOnce = true;
-			client.useDiscoveredDevices = true;
-			client.searchOnlyBluecoveUuid = Configuration.discoverySearchOnlyBluecoveUuid;
+			client.config.discoveryOnce = true;
+			client.config.useDiscoveredDevices = true;
+			client.config.searchOnlyBluecoveUuid = Configuration.discoverySearchOnlyBluecoveUuid;
 			client.configured();
 		}
 	}
@@ -387,7 +387,7 @@ public class Switcher implements Runnable {
 	public static int runClient() {
 		createClient();
 		if (client != null) {
-			client.connectOnce = true;
+			client.config.connectOnce = true;
 			client.configured();
 			try {
 				client.thread.join();
@@ -430,7 +430,7 @@ public class Switcher implements Runnable {
 		if (lastURL != null) {
 			createClient();
 			if (client != null) {
-				client.connectURL = lastURL;
+				client.config.connectURL = lastURL;
 				client.configured();
 			}
 		} else {
@@ -445,7 +445,7 @@ public class Switcher implements Runnable {
 		}
 		createClient();
 		if (client != null) {
-			client.connectURL = "";
+			client.config.connectURL = "";
 			client.configured();
 		}
 	}
@@ -463,7 +463,7 @@ public class Switcher implements Runnable {
 		if (lastURL != null) {
 			createClient();
 			if (client != null) {
-				client.connectDevice = BluetoothTypesInfo.extractBluetoothAddress(lastURL);
+				client.config.connectDevice = BluetoothTypesInfo.extractBluetoothAddress(lastURL);
 				client.configured();
 			}
 		} else {
