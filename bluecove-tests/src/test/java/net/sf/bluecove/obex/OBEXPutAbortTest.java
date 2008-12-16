@@ -39,116 +39,118 @@ import javax.obex.ServerRequestHandler;
 import com.intel.bluetooth.DebugLog;
 
 public class OBEXPutAbortTest extends OBEXBaseEmulatorTestCase {
-    
-    private int serverResponseCode = ResponseCodes.OBEX_HTTP_OK;
-    
-    private volatile boolean abortCalled = false;
-    
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        serverResponseCode = ResponseCodes.OBEX_HTTP_OK;
-    }
-    
-    private class RequestHandler extends ServerRequestHandler {
 
-        @Override
-        public int onPut(Operation op) {
-            try {
-                serverRequestHandlerInvocations++;
-                DebugLog.debug("==TEST== serverRequestHandlerInvocations", serverRequestHandlerInvocations);
-                serverHeaders = op.getReceivedHeaders();
-                InputStream is = op.openInputStream();
-                ByteArrayOutputStream buf = new ByteArrayOutputStream();
-                int data;
-                while ((data = is.read()) != -1) {
-                    buf.write(data);
-                }
-                op.close();
-                return serverResponseCode;
-            } catch (IOException e) {
-                if (!abortCalled) {
-                    e.printStackTrace();
-                }
-                return ResponseCodes.OBEX_HTTP_UNAVAILABLE;
-            }
-        }
-    }
-    
-    @Override
-    protected ServerRequestHandler createRequestHandler() {
-        return new RequestHandler();
-    }
-    
-    public void testPUTAbort() throws IOException {
+	private int serverResponseCode = ResponseCodes.OBEX_HTTP_OK;
 
-        ClientSession clientSession = (ClientSession) Connector.open(selectService(serverUUID));
-        HeaderSet hsConnectReply = clientSession.connect(null);
-        assertEquals("connect", ResponseCodes.OBEX_HTTP_OK, hsConnectReply.getResponseCode());
+	private volatile boolean abortCalled = false;
 
-        HeaderSet hsOperation = clientSession.createHeaderSet();
-        String name = "Hello.txt";
-        hsOperation.setHeader(HeaderSet.NAME, name);
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		serverResponseCode = ResponseCodes.OBEX_HTTP_OK;
+	}
 
-        // Create PUT Operation
-        Operation putOperation = clientSession.put(hsOperation);
+	private class RequestHandler extends ServerRequestHandler {
 
-        // Send some text to server
-        OutputStream os = putOperation.openOutputStream();
-        for (int i = 0; i < 2024; i++) {
-            os.write(i);
-        }
+		@Override
+		public int onPut(Operation op) {
+			try {
+				serverRequestHandlerInvocations++;
+				DebugLog.debug("==TEST== serverRequestHandlerInvocations", serverRequestHandlerInvocations);
+				serverHeaders = op.getReceivedHeaders();
+				InputStream is = op.openInputStream();
+				ByteArrayOutputStream buf = new ByteArrayOutputStream();
+				int data;
+				while ((data = is.read()) != -1) {
+					buf.write(data);
+				}
+				op.close();
+				return serverResponseCode;
+			} catch (IOException e) {
+				if (!abortCalled) {
+					e.printStackTrace();
+				}
+				return ResponseCodes.OBEX_HTTP_UNAVAILABLE;
+			}
+		}
+	}
 
-        abortCalled = true;
-        putOperation.abort();
-        
-        putOperation.close();
+	@Override
+	protected ServerRequestHandler createRequestHandler() {
+		return new RequestHandler();
+	}
 
-        clientSession.disconnect(null);
+	public void testPUTAbort() throws IOException {
 
-        clientSession.close();
+		ClientSession clientSession = (ClientSession) Connector.open(selectService(serverUUID));
+		HeaderSet hsConnectReply = clientSession.connect(null);
+		assertEquals("connect", ResponseCodes.OBEX_HTTP_OK, hsConnectReply.getResponseCode());
 
-        assertEquals("NAME", name, serverHeaders.getHeader(HeaderSet.NAME));
-        assertEquals("invocations", 1, serverRequestHandlerInvocations);
-    }
-    
-    public void testPUTAbortReceivedHeaders() throws IOException {
+		HeaderSet hsOperation = clientSession.createHeaderSet();
+		String name = "Hello.txt";
+		hsOperation.setHeader(HeaderSet.NAME, name);
 
-        ClientSession clientSession = (ClientSession) Connector.open(selectService(serverUUID));
-        HeaderSet hsConnectReply = clientSession.connect(null);
-        assertEquals("connect", ResponseCodes.OBEX_HTTP_OK, hsConnectReply.getResponseCode());
+		// Create PUT Operation
+		Operation putOperation = clientSession.put(hsOperation);
 
-        HeaderSet hsOperation = clientSession.createHeaderSet();
-        String name = "Hello.txt";
-        hsOperation.setHeader(HeaderSet.NAME, name);
+		// Send some text to server
+		OutputStream os = putOperation.openOutputStream();
+		for (int i = 0; i < 2024; i++) {
+			os.write(i);
+		}
 
-        // Create PUT Operation
-        Operation putOperation = clientSession.put(hsOperation);
+		abortCalled = true;
+		putOperation.abort();
 
-        // Send some text to server
-        OutputStream os = putOperation.openOutputStream();
-        for (int i = 0; i < 0x1FFF; i++) {
-            os.write(i);
-        }
-        os.flush();
-        
-        abortCalled = true;
-        putOperation.abort();
+		putOperation.close();
 
-        try {
-            putOperation.getReceivedHeaders();
-            fail("Operation was not closed");
-        } catch (IOException e) {
-        }
-        
-        putOperation.close();
+		clientSession.disconnect(null);
 
-        clientSession.disconnect(null);
+		clientSession.close();
 
-        clientSession.close();
+		assertEquals("NAME", name, serverHeaders.getHeader(HeaderSet.NAME));
+		assertEquals("invocations", 1, serverRequestHandlerInvocations);
+		assertServerErrors();
+	}
 
-        assertEquals("NAME", name, serverHeaders.getHeader(HeaderSet.NAME));
-        assertEquals("invocations", 1, serverRequestHandlerInvocations);
-    }
-    
+	public void testPUTAbortReceivedHeaders() throws IOException {
+
+		ClientSession clientSession = (ClientSession) Connector.open(selectService(serverUUID));
+		HeaderSet hsConnectReply = clientSession.connect(null);
+		assertEquals("connect", ResponseCodes.OBEX_HTTP_OK, hsConnectReply.getResponseCode());
+
+		HeaderSet hsOperation = clientSession.createHeaderSet();
+		String name = "Hello.txt";
+		hsOperation.setHeader(HeaderSet.NAME, name);
+
+		// Create PUT Operation
+		Operation putOperation = clientSession.put(hsOperation);
+
+		// Send some text to server
+		OutputStream os = putOperation.openOutputStream();
+		for (int i = 0; i < 0x1FFF; i++) {
+			os.write(i);
+		}
+		os.flush();
+
+		abortCalled = true;
+		putOperation.abort();
+
+		try {
+			putOperation.getReceivedHeaders();
+			fail("Operation was not closed");
+		} catch (IOException e) {
+		}
+
+		putOperation.close();
+
+		clientSession.disconnect(null);
+
+		clientSession.close();
+
+		assertEquals("NAME", name, serverHeaders.getHeader(HeaderSet.NAME));
+		assertEquals("invocations", 1, serverRequestHandlerInvocations);
+		assertServerErrors();
+	}
+
 }

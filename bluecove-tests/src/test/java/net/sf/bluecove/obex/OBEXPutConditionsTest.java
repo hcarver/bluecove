@@ -156,6 +156,7 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 				.getPacketsCountWrite(getServerAcceptedConnection()));
 		assertEquals("s.readPackets", expectedPackets, BlueCoveInternals
 				.getPacketsCountRead(getServerAcceptedConnection()));
+		assertServerErrors();
 	}
 
 	/**
@@ -316,5 +317,6 @@ public class OBEXPutConditionsTest extends OBEXBaseEmulatorTestCase {
 				.getPacketsCountWrite(getServerAcceptedConnection()));
 		assertEquals("s.readPackets", expectedPackets, BlueCoveInternals
 				.getPacketsCountRead(getServerAcceptedConnection()));
+		assertServerErrors();
 	}
 }

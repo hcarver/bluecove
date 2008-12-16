@@ -95,14 +95,13 @@ public class OBEXGetHeaderTest extends OBEXBaseEmulatorTestCase {
 		clientSession.close();
 
 		assertEquals("invocations", 1, serverRequestHandlerInvocations);
+		assertServerErrors();
 	}
 
 	/**
-	 * duplicate for TCK test
-	 * com.motorola.tck.tests.api.javax.obex.ClientSession.getTests.ClientSession9003
+	 * duplicate for TCK test com.motorola.tck.tests.api.javax.obex.ClientSession.getTests.ClientSession9003
 	 * 
-	 * Tests that server waits for FINAL packet in request before sending reply.
-	 * e.g waits for request to end.
+	 * Tests that server waits for FINAL packet in request before sending reply. e.g waits for request to end.
 	 */
 
 	public void testGETNoStreamJustHeader() throws IOException {

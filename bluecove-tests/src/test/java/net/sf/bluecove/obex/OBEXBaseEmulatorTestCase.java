@@ -33,6 +33,7 @@ import javax.obex.SessionNotifier;
 import net.sf.bluecove.BaseEmulatorTestCase;
 import net.sf.bluecove.TestCaseRunnable;
 
+import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.obex.BlueCoveInternals;
 
 /**
@@ -60,6 +61,16 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 		serverRequestHandlerInvocations = 0;
 		serverHeaders = null;
 		serverAcceptedConnection = null;
+		BlueCoveInternals.readServerErrorCount();
+	}
+
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		int errors = BlueCoveInternals.readServerErrorCount();
+		if (errors != 0) {
+			DebugLog.error("Test Server errors " + errors);
+			throw new Error("Test Server errors " + errors);
+		}
 	}
 
 	protected abstract ServerRequestHandler createRequestHandler();
@@ -75,6 +86,14 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 				}
 			}
 		};
+	}
+
+	protected void ingoreServerErrors() {
+		BlueCoveInternals.readServerErrorCount();
+	}
+
+	protected void assertServerErrors() {
+		assertEquals("OBEX Server Errors", 0, BlueCoveInternals.readServerErrorCount());
 	}
 
 	protected Connection getServerAcceptedConnection() {

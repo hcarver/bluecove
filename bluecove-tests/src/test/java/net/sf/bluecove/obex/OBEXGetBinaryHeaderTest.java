@@ -152,6 +152,7 @@ public class OBEXGetBinaryHeaderTest extends OBEXBaseEmulatorTestCase {
 		assertEquals("data in responce", expectServerData, serverData);
 		assertEquals("LENGTH", new Long(serverData.length), headers.getHeader(HeaderSet.LENGTH));
 		assertEquals("invocations", 1, serverRequestHandlerInvocations);
+		assertServerErrors();
 	}
 
 	public void testGETBinaryHeader() throws IOException {

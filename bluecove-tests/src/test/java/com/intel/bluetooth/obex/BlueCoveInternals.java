@@ -36,6 +36,15 @@ public abstract class BlueCoveInternals {
 		return OBEXClientOperation.isShortRequestPhase();
 	}
 
+	public static int readServerErrorCount() {
+		synchronized (OBEXServerSessionImpl.class) {
+			int count = OBEXServerSessionImpl.errorCount;
+			OBEXServerSessionImpl.errorCount = 0;
+			return count;
+		}
+
+	}
+
 	/**
 	 * @return the packetsCountWrite
 	 */

@@ -60,6 +60,8 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		return threadNumber++;
 	}
 
+	static int errorCount = 0;
+
 	OBEXServerSessionImpl(StreamConnection connection, ServerRequestHandler handler, Authenticator authenticator,
 			OBEXConnectionParams obexConnectionParams) throws IOException {
 		super(connection, obexConnectionParams);
@@ -88,6 +90,9 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 				}
 			}
 		} catch (Throwable e) {
+			synchronized (OBEXServerSessionImpl.class) {
+				errorCount++;
+			}
 			if (this.isConnected) {
 				DebugLog.error("OBEXServerSession error", e);
 			}
@@ -283,7 +288,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 				DebugLog.error("onPut", e);
 			}
 			if (!operation.isAborted) {
-			    operation.writeResponse(rc);
+				operation.writeResponse(rc);
 			}
 		} finally {
 			operation.close();
@@ -313,7 +318,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 				DebugLog.error("onGet", e);
 			}
 			if (!operation.isAborted) {
-			    operation.writeResponse(rc);
+				operation.writeResponse(rc);
 			}
 		} finally {
 			operation.close();
@@ -327,8 +332,8 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			return;
 		}
 		if (operation != null) {
-            operation.isAborted = true;
-		    operation.close();
+			operation.isAborted = true;
+			operation.close();
 			operation = null;
 		}
 		writePacket(OBEXOperationCodes.OBEX_RESPONSE_SUCCESS, null);

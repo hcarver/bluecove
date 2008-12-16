@@ -119,10 +119,11 @@ public class OBEXGetStandardTest extends OBEXBaseEmulatorTestCase {
 		}
 		byte serverData[] = buf.toByteArray();
 
-        DebugLog.debug("==TEST== Client getResponseCode");
-        int responseCode = getOp.getResponseCode();
-        DebugLog.debug0x("==TEST== Client ResponseCode " + BlueCoveOBEX.obexResponseCodes(responseCode) + " = ", responseCode);
-        
+		DebugLog.debug("==TEST== Client getResponseCode");
+		int responseCode = getOp.getResponseCode();
+		DebugLog.debug0x("==TEST== Client ResponseCode " + BlueCoveOBEX.obexResponseCodes(responseCode) + " = ",
+				responseCode);
+
 		DebugLog.debug("==TEST== Client close io");
 		is.close();
 
@@ -132,13 +133,14 @@ public class OBEXGetStandardTest extends OBEXBaseEmulatorTestCase {
 
 		clientSession.close();
 
-	    assertEquals("invocations", 1, serverRequestHandlerInvocations);
+		assertEquals("invocations", 1, serverRequestHandlerInvocations);
 		assertEquals("NAME", name, serverHeaders.getHeader(HeaderSet.NAME));
 		assertEquals("LENGTH", new Long(serverData.length), headers.getHeader(HeaderSet.LENGTH));
 		assertEquals("data", simpleData, serverData);
-		
-        //see TCK Operation0401
-        assertEquals("ResponseCodes.OBEX_HTTP_OK", ResponseCodes.OBEX_HTTP_OK, responseCode);
+
+		// see TCK Operation0401
+		assertEquals("ResponseCodes.OBEX_HTTP_OK", ResponseCodes.OBEX_HTTP_OK, responseCode);
+		assertServerErrors();
 	}
 
 	public void testGETOperation() throws IOException {
