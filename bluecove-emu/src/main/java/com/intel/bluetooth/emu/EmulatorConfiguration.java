@@ -25,38 +25,114 @@
  */
 package com.intel.bluetooth.emu;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Properties;
 
 import com.intel.bluetooth.BluetoothConsts;
+import com.intel.bluetooth.DebugLog;
+import com.intel.bluetooth.RemoteDeviceHelper;
 
 /**
+ * Defines Emulator configuration properties.
  * 
+ * See properties defined in javax.bluetooth.LocalDevice.getProperty();
  */
 public class EmulatorConfiguration implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private long firstDeviceAddress = 0x0B1000000000L;
+	/**
+	 * Name of configuration file or resource.
+	 * 
+	 * Defaults to "bluecove.emulator.properties". Can be changed using system property "bluecove.emulator.properties"
+	 * 
+	 */
+	public static final String CONFIG_FILE_NAME = "bluecove.emulator.properties";
 
-	private String deviceNamePrefix = "EmuDevice";
+	/**
+	 * Allow to define device name. <br/>
+	 * Example
+	 * 
+	 * <pre>
+	 * 0B1000000000.deviceName=My Device Server
+	 * # Device is Computer
+	 * 0B1000000000.deviceClass=0x0100
+	 * 
+	 * 0B1000000001.deviceName=My Device Client
+	 * # Device is Phone
+	 * 0B1000000001.deviceClass=0x0200
+	 * 
+	 * <pre>
+	 */
+	public static final String deviceName = "deviceName";
 
-	private boolean deviceDiscoverable = true;
+	/**
+	 * Allow to define device class.
+	 * 
+	 * @see deviceName
+	 */
+	public static final String deviceClass = "deviceClass";
 
-	private int durationLIAC = 3;
+	/**
+	 * Defaults to '0B1000000000'.
+	 */
+	protected long firstDeviceAddress = 0x0B1000000000L;
 
-	private int deviceInquiryDuration = 0;// 5;
+	/**
+	 * Defaults to "EmuDevice".
+	 * 
+	 */
+	protected String deviceNamePrefix = "EmuDevice";
 
-	private boolean deviceInquiryRandomDelay = true;
+	/**
+	 * Created Devices are initially discoverable.
+	 */
+	protected boolean deviceDiscoverable = true;
 
-	private int connectionBufferSize = 8 * 1024;
+	/**
+	 * Discoverable duration in seconds for LIAC. Defaults to <code>3</code>.
+	 */
+	protected int durationLIAC = 3;
 
-	private boolean linkEncryptionSupported = true;
+	/**
+	 * deviceInquiryDuration in seconds, Defaults to <code>11</code>.
+	 */
+	protected int deviceInquiryDuration = 11;
 
-	// RMI timeout is up to 10 minutes. This enables killing application and
-	// recovery faster.
-	private int keepAliveSeconds = 5;
+	/**
+	 * Device Inquiry Duration is random. Defaults to <code>false</code>.
+	 */
+	protected boolean deviceInquiryRandomDelay = true;
+
+	/**
+	 * Defaults to 8K.
+	 */
+	protected int connectionBufferSize = 8 * 1024;
+
+	/**
+	 * Defaults to <code>true</code>.
+	 */
+	protected boolean linkEncryptionSupported = true;
+
+	/**
+	 * stream.flush() will Block sender till client reads all data.
+	 */
+	protected boolean senderFlushBlock = false;
+
+	/**
+	 * Monitor if client device is active.
+	 * 
+	 * RMI timeout is up to 10 minutes. This property enables killing application and recovery faster.
+	 */
+	protected int keepAliveSeconds = 5;
 
 	private Map<String, String> propertiesMap;
 
@@ -75,36 +151,153 @@ public class EmulatorConfiguration implements Serializable {
 		propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX, "2048");
 	}
 
-	public int getDurationLIAC() {
-		return durationLIAC;
+	public void loadConfigFile() {
+		String configName = System.getProperty(CONFIG_FILE_NAME, CONFIG_FILE_NAME);
+		// Try file to find the file first
+		File file = new File(configName);
+		if (file.exists()) {
+			try {
+				load(new FileInputStream(file));
+			} catch (IOException e) {
+				DebugLog.error("Error loading properties from file " + file.getAbsolutePath(), e);
+			}
+		} else {
+			// find the resource in the classPath
+			if (!configName.startsWith("/")) {
+				configName = "/" + configName;
+			}
+			InputStream input = this.getClass().getResourceAsStream(configName);
+			if (input != null) {
+				try {
+					load(input);
+				} catch (IOException e) {
+					DebugLog.error("Error loading properties from resource " + configName, e);
+				}
+			}
+		}
 	}
 
-	public void setDurationLIAC(int durationLIAC) {
-		this.durationLIAC = durationLIAC;
+	private void load(InputStream input) throws IOException {
+		Properties values = new Properties();
+		try {
+			values.load(input);
+		} finally {
+			input.close();
+		}
+		for (Map.Entry<Object, Object> me : values.entrySet()) {
+			Object value = me.getValue();
+			if (value == null) {
+				continue;
+			}
+			String txt = value.toString().trim();
+			if (txt.length() == 0) {
+				continue;
+			}
+			propertiesMap.put(me.getKey().toString(), txt);
+		}
+		copyPertiesToFields();
+	}
+
+	private void copyPertiesToFields() {
+		Field[] fields = this.getClass().getDeclaredFields();
+		for (Field field : fields) {
+			if (field.getModifiers() == Modifier.STATIC) {
+				continue;
+			}
+			String value = propertiesMap.get(field.getName());
+			if (value == null) {
+				continue;
+			}
+			Class<?> type = field.getType();
+			try {
+				if (String.class.isAssignableFrom(type)) {
+					field.set(this, value);
+				} else if (boolean.class.isAssignableFrom(type)) {
+					field.setBoolean(this, valueToBoolean(value));
+				} else if (int.class.isAssignableFrom(type)) {
+					field.setInt(this, valueToInt(value));
+				} else if (long.class.isAssignableFrom(type)) {
+					field.setLong(this, valueToLong(value));
+				}
+			} catch (Throwable e) {
+				DebugLog.error("Error setting property " + field.getName(), e);
+			}
+		}
+	}
+
+	private boolean valueToBoolean(String value) {
+		if (value.equalsIgnoreCase("true") || "1".equals(value)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static int valueToInt(String value) {
+		if (value.startsWith("0x")) {
+			return Integer.parseInt(value.substring(2), 16);
+		} else {
+			return Integer.parseInt(value);
+		}
+	}
+
+	public static long valueToLong(String value) {
+		if (value.startsWith("0x")) {
+			return Long.parseLong(value.substring(2), 16);
+		} else {
+			return Long.parseLong(value);
+		}
+	}
+
+	public EmulatorConfiguration clone(long localAddress) {
+		String namePrefix = RemoteDeviceHelper.getBluetoothAddress(localAddress) + ".";
+		EmulatorConfiguration deviceConfig = new EmulatorConfiguration();
+		for (Map.Entry<String, String> me : this.propertiesMap.entrySet()) {
+			String key = me.getKey();
+			String value = me.getValue();
+			deviceConfig.propertiesMap.put(key, value);
+			if (key.startsWith(namePrefix)) {
+				deviceConfig.propertiesMap.put(key.substring(namePrefix.length()), value);
+			}
+		}
+		deviceConfig.copyPertiesToFields();
+		return deviceConfig;
+	}
+
+	public int getDurationLIAC() {
+		return durationLIAC;
 	}
 
 	public int getDeviceInquiryDuration() {
 		return deviceInquiryDuration;
 	}
 
-	public void setDeviceInquiryDuration(int deviceInquiryDuration) {
-		this.deviceInquiryDuration = deviceInquiryDuration;
-	}
-
 	public boolean isDeviceInquiryRandomDelay() {
 		return deviceInquiryRandomDelay;
-	}
-
-	public void setDeviceInquiryRandomDelay(boolean deviceInquiryRandomDelay) {
-		this.deviceInquiryRandomDelay = deviceInquiryRandomDelay;
 	}
 
 	public long getFirstDeviceAddress() {
 		return firstDeviceAddress;
 	}
 
-	public void setFirstDeviceAddress(long firstDeviceAddress) {
-		this.firstDeviceAddress = firstDeviceAddress;
+	/**
+	 * Get specific device property.
+	 * 
+	 * If specific not found, return global value.
+	 * 
+	 * @param address
+	 *            device address
+	 * @param property
+	 * @return value or null
+	 */
+	public String getProperty(long address, String property) {
+		String addressString = RemoteDeviceHelper.getBluetoothAddress(address);
+		String v = getProperty(addressString + "." + property);
+		if (v != null) {
+			return v;
+		} else {
+			return getProperty(property);
+		}
 	}
 
 	public String getProperty(String property) {
@@ -119,46 +312,23 @@ public class EmulatorConfiguration implements Serializable {
 		return deviceNamePrefix;
 	}
 
-	public void setDeviceNamePrefix(String deviceNamePrefix) {
-		this.deviceNamePrefix = deviceNamePrefix;
-	}
-
 	public boolean isDeviceDiscoverable() {
 		return this.deviceDiscoverable;
-	}
-
-	public void setDeviceDiscoverable(boolean deviceDiscoverable) {
-		this.deviceDiscoverable = deviceDiscoverable;
 	}
 
 	public int getConnectionBufferSize() {
 		return connectionBufferSize;
 	}
 
-	public void setConnectionBufferSize(int connectionBufferSize) {
-		this.connectionBufferSize = connectionBufferSize;
-	}
-
 	public boolean isLinkEncryptionSupported() {
 		return this.linkEncryptionSupported;
 	}
 
-	public void setLinkEncryptionSupported(boolean linkEncryptionSupported) {
-		this.linkEncryptionSupported = linkEncryptionSupported;
-	}
-
-	/**
-	 * @return the keepAliveSeconds
-	 */
 	public int getKeepAliveSeconds() {
 		return keepAliveSeconds;
 	}
 
-	/**
-	 * @param keepAliveSeconds
-	 *            the keepAliveSeconds to set
-	 */
-	public void setKeepAliveSeconds(int keepAliveSeconds) {
-		this.keepAliveSeconds = keepAliveSeconds;
+	public boolean isSenderFlushBlock() {
+		return this.senderFlushBlock;
 	}
 }

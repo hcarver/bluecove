@@ -33,7 +33,7 @@ import java.util.WeakHashMap;
 /**
  * 
  */
-public class MonitoringServiceImpl implements MonitoringService {
+class MonitoringServiceImpl implements MonitoringService {
 
 	private static Map<MonitorConnection, Object> connections = new WeakHashMap<MonitorConnection, Object>();
 

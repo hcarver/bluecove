@@ -45,26 +45,27 @@ class ConnectedInputStream extends InputStream {
 	private boolean receiverClosed = false;
 
 	/**
-	 * The index of the position in the circular buffer at which the byte of
-	 * data will be stored.
+	 * The index of the position in the circular buffer at which the byte of data will be stored.
 	 */
 	private int write = 0;
 
 	/**
-	 * The index of the position in the circular buffer from which the next byte
-	 * of data will be read.
+	 * The index of the position in the circular buffer from which the next byte of data will be read.
 	 */
 	private int read = 0;
 
 	private int available = 0;
 
-	public ConnectedInputStream(int size) {
+	private final boolean senderFlushBlock;
+
+	public ConnectedInputStream(int size, boolean senderFlushBlock) {
 		buffer = new byte[size];
+		this.senderFlushBlock = senderFlushBlock;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.io.InputStream#read()
 	 */
 	@Override
@@ -95,10 +96,9 @@ class ConnectedInputStream extends InputStream {
 	}
 
 	/**
-	 * Reads up to <code>len</code> bytes of data from this input stream into
-	 * an array of bytes. Less than <code>len</code> bytes will be read if the
-	 * end of the data stream is reached. This method blocks until at least one
-	 * byte of input is available.
+	 * Reads up to <code>len</code> bytes of data from this input stream into an array of bytes. Less than
+	 * <code>len</code> bytes will be read if the end of the data stream is reached. This method blocks until at least
+	 * one byte of input is available.
 	 */
 	@Override
 	public synchronized int read(byte b[], int off, int len) throws IOException {
@@ -135,31 +135,32 @@ class ConnectedInputStream extends InputStream {
 	}
 
 	/**
-     * Block sender till client reads all.
-     */
+	 * Block sender till client reads all.
+	 */
 	void receiveFlush() throws IOException {
-	    //TODO make this configurable
-	    //receiveFlushBlock();
+		if (this.senderFlushBlock) {
+			receiveFlushBlock();
+		}
 	}
-	
+
 	void receiveFlushBlock() throws IOException {
-	    while (available != 0) {
-	        if (closed) {
-                throw new IOException("Stream closed");
-            }
-            if (receiverClosed) {
-                throw new IOException("Connection closed");
-            }
-            synchronized (this) {
-                try {
-                    wait(1000);
-                } catch (InterruptedException e) {
-                    throw new InterruptedIOException();
-                }
-            }
-	    }
+		while (available != 0) {
+			if (closed) {
+				throw new IOException("Stream closed");
+			}
+			if (receiverClosed) {
+				throw new IOException("Connection closed");
+			}
+			synchronized (this) {
+				try {
+					wait(1000);
+				} catch (InterruptedException e) {
+					throw new InterruptedIOException();
+				}
+			}
+		}
 	}
-	
+
 	synchronized void receive(int b) throws IOException {
 		if (closed) {
 			throw new IOException("Connection closed");

@@ -30,9 +30,6 @@ import java.util.Random;
 
 import junit.framework.TestCase;
 
-import com.intel.bluetooth.emu.ConnectedInputStream;
-import com.intel.bluetooth.emu.ConnectedOutputStream;
-
 /**
  * 
  */
@@ -48,7 +45,7 @@ public class ConnectedInputStreamTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		is = new ConnectedInputStream(TEST_BUFFER_SIZE);
+		is = new ConnectedInputStream(TEST_BUFFER_SIZE, false);
 		os = new ConnectedOutputStream(is);
 	}
 

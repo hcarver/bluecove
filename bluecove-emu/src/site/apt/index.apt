@@ -9,7 +9,7 @@ BlueCove JSR-82 Emulator module
 
    bluecove-emu is additional module for BlueCove to simulate Bluetooth stack.
 
-   bluecove-emu is a pure Java implementation of JSR-82. Fully tested using TCK {{{../tck/}JSR-82 TCK test results}}
+   bluecove-emu is a pure Java implementation of JSR-82 without Bluetooth hardware. Fully tested using TCK {{{../tck/}JSR-82 TCK test results}}
 
    bluecove-emu requires Java 5 Standard Edition and uses RMI for interprocess communication.
 
@@ -61,8 +61,10 @@ java -Dbluecove.stack=emulator -cp microemulator.jar;bluecove-#version#.jar;blue
 
         * `bluecove.emu.rmiRegistry=true` air simulator server and RMI registry can be started inside client JVM
 
-    (TODO) Emulator Configuration properties:
+    Emulator Configuration properties:
 
         This is the resource file 'bluecove.emulator.properties' loaded by air simulator server.
-        Defines devices address and names auto assignment.
-        It also can define LocalDevice properties returned to the client application
+        Defines devices address and names assignment.
+        It also can define LocalDevice properties returned to the client application.
+
+        See {{{apidocs/com/intel/bluetooth/emu/EmulatorConfiguration.html}EmulatorConfiguration}}

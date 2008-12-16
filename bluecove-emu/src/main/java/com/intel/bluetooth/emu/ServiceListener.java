@@ -114,10 +114,11 @@ class ServiceListener {
 			}
 
 			int bsize = DeviceManagerServiceImpl.configuration.getConnectionBufferSize();
-			ConnectedInputStream cis = new ConnectedInputStream(bsize);
+			boolean senderFlushBlock = DeviceManagerServiceImpl.configuration.isSenderFlushBlock();
+			ConnectedInputStream cis = new ConnectedInputStream(bsize, senderFlushBlock);
 			ConnectedOutputStream sos = new ConnectedOutputStream(cis);
 
-			ConnectedInputStream sis = new ConnectedInputStream(bsize);
+			ConnectedInputStream sis = new ConnectedInputStream(bsize, senderFlushBlock);
 			ConnectedOutputStream cos = new ConnectedOutputStream(sis);
 
 			ConnectionBuffer sb;

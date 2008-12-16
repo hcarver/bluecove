@@ -40,16 +40,20 @@ import javax.bluetooth.ServiceRegistrationException;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
-public class DeviceManagerServiceImpl implements DeviceManagerService {
+class DeviceManagerServiceImpl implements DeviceManagerService {
 
 	public static final int MAJOR_COMPUTER = 0x0100;
 
-	static final EmulatorConfiguration configuration = new EmulatorConfiguration();
+	static final EmulatorConfiguration configuration;
 
 	private static Map<Long, Device> devices = new Hashtable<Long, Device>();
 
-	public DeviceManagerServiceImpl() {
+	static {
+		configuration = new EmulatorConfiguration();
+		configuration.loadConfigFile();
+	}
 
+	public DeviceManagerServiceImpl() {
 	}
 
 	public void shutdown() {
@@ -65,8 +69,17 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 	public DeviceDescriptor createNewDevice(String deviceID, String deviceAddress) throws BluetoothStateException {
 		synchronized (devices) {
 			long address = getNextAvailableBTAddress(deviceID, deviceAddress);
-			DeviceDescriptor descriptor = new DeviceDescriptor(address, configuration.getDeviceNamePrefix()
-					+ RemoteDeviceHelper.getBluetoothAddress(address), MAJOR_COMPUTER);
+
+			String name = configuration.getProperty(address, EmulatorConfiguration.deviceName);
+			if (name == null) {
+				name = configuration.getDeviceNamePrefix() + RemoteDeviceHelper.getBluetoothAddress(address);
+			}
+			int deviceClass = MAJOR_COMPUTER;
+			String cod = configuration.getProperty(address, EmulatorConfiguration.deviceClass);
+			if (cod != null) {
+				deviceClass = EmulatorConfiguration.valueToInt(cod);
+			}
+			DeviceDescriptor descriptor = new DeviceDescriptor(address, name, deviceClass);
 
 			if (!configuration.isDeviceDiscoverable()) {
 				descriptor.setDiscoverableMode(DiscoveryAgent.NOT_DISCOVERABLE);
@@ -78,8 +91,7 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 	}
 
 	public EmulatorConfiguration getEmulatorConfiguration(long localAddress) {
-		// TODO create device specific properties
-		return configuration;
+		return configuration.clone(localAddress);
 	}
 
 	public void releaseDevice(long address) {
@@ -429,9 +441,9 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 	}
 
 	public void rfFlush(long localAddress, long connectionId) throws IOException {
-	    ((ConnectionBufferRFCOMM) getConnectionBuffer(localAddress, connectionId)).rfFlush();
+		((ConnectionBufferRFCOMM) getConnectionBuffer(localAddress, connectionId)).rfFlush();
 	}
-	
+
 	public int rfAvailable(long localAddress, long connectionId) throws IOException {
 		return ((ConnectionBufferRFCOMM) getConnectionBuffer(localAddress, connectionId)).rfAvailable();
 	}
