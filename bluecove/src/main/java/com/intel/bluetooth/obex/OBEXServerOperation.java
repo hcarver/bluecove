@@ -49,7 +49,7 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 	protected boolean isClosed = false;
 
 	protected boolean isAborted = false;
-	
+
 	protected boolean finalPacketReceived = false;
 
 	protected boolean requestEnded = false;
@@ -96,6 +96,10 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 	}
 
 	protected void processIncommingData(HeaderSet dataHeaders, boolean eof) throws IOException {
+		// If this operation closing
+		if (this.inputStream == null) {
+			return;
+		}
 		byte[] data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY);
 		if (data == null) {
 			data = (byte[]) dataHeaders.getHeader(OBEXHeaderSetImpl.OBEX_HDR_BODY_END);

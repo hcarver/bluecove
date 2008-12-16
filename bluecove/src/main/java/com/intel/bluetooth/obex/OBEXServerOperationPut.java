@@ -86,11 +86,10 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 	 */
 	public void close() throws IOException {
 		DebugLog.debug("server close put operation");
-		// TODO Fix this!
-		// if (inputStream != null) {
-		inputStream.close();
-		// inputStream = null;
-		// }
+		if (inputStream != null) {
+			inputStream.close();
+			inputStream = null;
+		}
 		if (outputStream != null) {
 			outputStream.close();
 			outputStream = null;
