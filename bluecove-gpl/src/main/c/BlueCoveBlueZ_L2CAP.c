@@ -169,13 +169,24 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2Receive
     }
 #endif //BLUECOVE_L2CAP_MTU_TRUNCATE
 
-    struct pollfd fds;
-    int timeout = 10; // milliseconds
-    fds.fd = handle;
-    fds.events = POLLHUP | POLLERR;
-    fds.revents = 0;
-    if (poll(&fds, 1, timeout) > 0) {
-        throwIOException(env, "Connection closed");
+    bool dataReady = false;
+    while(!dataReady) {
+        struct pollfd fds;
+        int timeout = 10; // milliseconds
+        fds.fd = handle;
+        fds.events = POLLIN | POLLHUP | POLLERR;// | POLLRDHUP;
+        fds.revents = 0;
+        if (poll(&fds, 1, timeout) > 0) {
+            if (fds.revents & (POLLHUP | POLLERR /*| POLLRDHUP*/)) {
+                throwIOException(env, "Peer closed connection");
+                return 0;
+            } else if (fds.revents & POLLIN) {
+                dataReady = true;
+            }
+        }
+        if(isCurrentThreadInterrupted(env, peer)) {
+            return 0;
+        }
     }
 
     jbyte *bytes = (*env)->GetByteArrayElements(env, inBuf, 0);
