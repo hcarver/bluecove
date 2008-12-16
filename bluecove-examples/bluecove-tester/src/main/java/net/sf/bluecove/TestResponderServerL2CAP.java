@@ -112,95 +112,103 @@ public class TestResponderServerL2CAP extends Thread {
 	public void run() {
 		isStoped = false;
 		try {
-			Configuration.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
-			StringBuffer url = new StringBuffer(BluetoothTypesInfo.PROTOCOL_SCHEME_L2CAP);
-			url.append("://localhost:").append(Configuration.blueCoveL2CAPUUID());
-			url.append(";name=").append(Consts.RESPONDER_SERVERNAME).append("_l2");
-			if (Configuration.useShortUUID.booleanValue()) {
-				url.append("s");
-			}
-			url.append(Configuration.serverURLParams());
-			url.append(";TransmitMTU=").append(TestResponderCommon.receiveMTU_max);
-			url.append(";ReceiveMTU=").append(TestResponderCommon.receiveMTU_max);
-			if ((Configuration.isBlueCove) && (Configuration.bluecovepsm != null)
-					&& (Configuration.bluecovepsm.length() > 0)) {
-				url.append(";bluecovepsm=").append(Configuration.bluecovepsm);
-			}
-			serverConnection = (L2CAPConnectionNotifier) Connector.open(url.toString());
-			if (Configuration.testServiceAttributes.booleanValue()) {
-				ServiceRecord record = LocalDevice.getLocalDevice().getRecord(serverConnection);
-				if (record == null) {
-					Logger.warn("Bluetooth ServiceRecord is null");
-				} else {
-					TestResponderServer.buildServiceRecord(record);
-					try {
-						LocalDevice.getLocalDevice().updateRecord(record);
-						Logger.debug("L2CAP ServiceRecord updated");
-					} catch (Throwable e) {
-						Logger.error("L2CAP Service Record update error", e);
-					}
-				}
-			}
+			runCreateConnectionNotifier();
 		} catch (Throwable e) {
 			Logger.error("L2CAP Server start error", e);
 			isStoped = true;
 			return;
 		}
 		try {
-			int errorCount = 0;
-			isRunning = true;
-			boolean showServiceRecordOnce = true;
-			serviceRunLoop: while (!isStoped) {
-				L2CAPConnection channel;
-				try {
-					Logger.info("Accepting L2CAP connections");
-					if (showServiceRecordOnce) {
-						Logger.debug("L2Url:"
-								+ LocalDevice.getLocalDevice().getRecord(serverConnection).getConnectionURL(
-										Configuration.getRequiredSecurity(), false));
-						showServiceRecordOnce = false;
-					}
-					channel = serverConnection.acceptAndOpen();
-				} catch (InterruptedIOException e) {
-					isStoped = true;
-					break;
-				} catch (Throwable e) {
-					Logger.error("acceptAndOpen ", e);
-					if (!(isStoped) && (errorCount > 3)) {
-						isStoped = true;
-						Logger.error("L2CAP Server stoped, too many errors");
-					}
-					if (isStoped) {
-						break serviceRunLoop;
-					}
-					errorCount++;
-					continue;
-				}
-				errorCount = 0;
-				Logger.info("Received L2CAP connection");
-				if (!Configuration.serverAcceptWhileConnected.booleanValue()) {
-					try {
-						receive(channel);
-						if (!isStoped) {
-							try {
-								Thread.sleep(Configuration.serverSleepB4ClosingConnection);
-							} catch (InterruptedException e) {
-							}
-						}
-					} finally {
-						IOUtils.closeQuietly(channel);
-					}
-				} else {
-					ServerConnectionTread t = new ServerConnectionTread(channel);
-					t.start();
-				}
-			}
+			runAcceptAndOpen();
 		} catch (Throwable e) {
 			Logger.error("L2CAP Server run error", e);
 		} finally {
 			close();
 			Logger.info("L2CAP Server finished! " + TimeUtils.timeNowToString());
 			isRunning = false;
+		}
+	}
+
+	private void runCreateConnectionNotifier() throws IOException {
+		Configuration.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
+		StringBuffer url = new StringBuffer(BluetoothTypesInfo.PROTOCOL_SCHEME_L2CAP);
+		url.append("://localhost:").append(Configuration.blueCoveL2CAPUUID());
+		url.append(";name=").append(Consts.RESPONDER_SERVERNAME).append("_l2");
+		if (Configuration.useShortUUID.booleanValue()) {
+			url.append("s");
+		}
+		url.append(Configuration.serverURLParams());
+		url.append(";TransmitMTU=").append(TestResponderCommon.receiveMTU_max);
+		url.append(";ReceiveMTU=").append(TestResponderCommon.receiveMTU_max);
+		if ((Configuration.isBlueCove) && (Configuration.bluecovepsm != null)
+				&& (Configuration.bluecovepsm.length() > 0)) {
+			url.append(";bluecovepsm=").append(Configuration.bluecovepsm);
+		}
+		serverConnection = (L2CAPConnectionNotifier) Connector.open(url.toString());
+		if (Configuration.testServiceAttributes.booleanValue()) {
+			ServiceRecord record = LocalDevice.getLocalDevice().getRecord(serverConnection);
+			if (record == null) {
+				Logger.warn("Bluetooth ServiceRecord is null");
+			} else {
+				TestResponderServer.buildServiceRecord(record);
+				try {
+					LocalDevice.getLocalDevice().updateRecord(record);
+					Logger.debug("L2CAP ServiceRecord updated");
+				} catch (Throwable e) {
+					Logger.error("L2CAP Service Record update error", e);
+				}
+			}
+		}
+	}
+
+	private void runAcceptAndOpen() {
+		int errorCount = 0;
+		isRunning = true;
+		boolean showServiceRecordOnce = true;
+		serviceRunLoop: while (!isStoped) {
+			L2CAPConnection channel;
+			try {
+				Logger.info("Accepting L2CAP connections");
+				if (showServiceRecordOnce) {
+					Logger.debug("L2Url:"
+							+ LocalDevice.getLocalDevice().getRecord(serverConnection).getConnectionURL(
+									Configuration.getRequiredSecurity(), false));
+					showServiceRecordOnce = false;
+				}
+				channel = serverConnection.acceptAndOpen();
+			} catch (InterruptedIOException e) {
+				isStoped = true;
+				break;
+			} catch (Throwable e) {
+				Logger.error("acceptAndOpen ", e);
+				if (!(isStoped) && (errorCount > 3)) {
+					isStoped = true;
+					Logger.error("L2CAP Server stoped, too many errors");
+				}
+				if (isStoped) {
+					break serviceRunLoop;
+				}
+				errorCount++;
+				continue;
+			}
+			errorCount = 0;
+			Logger.info("Received L2CAP connection");
+			if (!Configuration.serverAcceptWhileConnected.booleanValue()) {
+				try {
+					receive(channel);
+					if (!isStoped) {
+						try {
+							Thread.sleep(Configuration.serverSleepB4ClosingConnection);
+						} catch (InterruptedException e) {
+						}
+					}
+				} finally {
+					IOUtils.closeQuietly(channel);
+				}
+			} else {
+				ServerConnectionTread t = new ServerConnectionTread(channel);
+				t.start();
+			}
 		}
 	}
 
