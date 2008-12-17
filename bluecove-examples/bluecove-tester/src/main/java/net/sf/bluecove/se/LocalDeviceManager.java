@@ -27,8 +27,9 @@ package net.sf.bluecove.se;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.LocalDevice;
 
+import org.bluecove.tester.log.Logger;
+
 import net.sf.bluecove.Configuration;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.TestResponderServer;
 
 import com.intel.bluetooth.BlueCoveImpl;

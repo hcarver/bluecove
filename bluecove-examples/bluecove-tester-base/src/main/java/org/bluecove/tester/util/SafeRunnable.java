@@ -1,7 +1,7 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
- * 
+ *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
  *  distributed with this work for additional information
@@ -22,38 +22,32 @@
  *  @author vlads
  *  @version $Id$
  */
-package net.sf.bluecove.util;
+package org.bluecove.tester.util;
 
-/**
- * 
- */
-public class CLDC10 implements CLDCStub {
+import org.bluecove.tester.log.Logger;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.bluecove.util.CLDCStub#interruptThread(java.lang.Thread)
-	 */
-	public void interruptThread(Thread t) {
-		// Not available on CLDC10
+public class SafeRunnable implements Runnable {
+
+	private final String name;
+
+	private final Runnable target;
+
+	public SafeRunnable(Runnable target, String name) {
+		this.target = target;
+		this.name = name;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.bluecove.util.CLDCStub#createNamedThread(java.lang.Runnable,
-	 *      java.lang.String)
-	 */
-	public Thread createNamedThread(Runnable target, String name) {
-		return new Thread(target);
+	public SafeRunnable(Runnable target) {
+		this(target, "");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.bluecove.util.CLDCStub#setThreadLocalBluetoothStack(java.lang.Object)
-	 */
-	public void setThreadLocalBluetoothStack(Object id) {
+	public void run() {
+		try {
+			target.run();
+		} catch (Throwable e) {
+			Logger.error(name + ".run()", e);
+		}
+
 	}
 
 }

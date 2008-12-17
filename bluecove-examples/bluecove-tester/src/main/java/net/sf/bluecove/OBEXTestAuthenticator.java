@@ -27,6 +27,8 @@ package net.sf.bluecove;
 import javax.obex.Authenticator;
 import javax.obex.PasswordAuthentication;
 
+import org.bluecove.tester.log.Logger;
+
 /**
  *
  */

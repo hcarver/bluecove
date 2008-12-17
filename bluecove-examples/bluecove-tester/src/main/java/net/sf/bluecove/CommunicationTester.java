@@ -34,11 +34,14 @@ import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.StreamConnection;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.TimeUtils;
+
 import junit.framework.Assert;
 import net.sf.bluecove.tests.RfTrafficGenerator;
 import net.sf.bluecove.tests.TwoThreadsPerConnection;
 import net.sf.bluecove.tests.RfTrafficGenerator.Config;
-import net.sf.bluecove.util.TimeUtils;
 import net.sf.bluecove.util.ValueHolder;
 
 public class CommunicationTester extends CommunicationData {
@@ -339,7 +342,7 @@ public class CommunicationTester extends CommunicationData {
 		try {
 			Assert.assertEquals("EOF expected", -1, c.is.read());
 		} catch (IOException e) {
-			if (Configuration.isBlueCove) {
+			if (RuntimeDetect.isBlueCove) {
 				Logger.error("EOF IOException not expected", e);
 				Assert.fail("EOF IOException not expected [" + e.toString() + "]");
 			}
@@ -542,7 +545,7 @@ public class CommunicationTester extends CommunicationData {
 				}
 			}
 		};
-		Thread t = Configuration.cldcStub.createNamedThread(r, "ReciveStreamCloser");
+		Thread t = RuntimeDetect.cldcStub.createNamedThread(r, "ReciveStreamCloser");
 		t.start();
 
 		testStatus.streamClosed = true;

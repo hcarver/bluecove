@@ -24,7 +24,7 @@
  */
 package net.sf.bluecove.se;
 
-import net.sf.bluecove.Logger.LoggerAppender;
+import org.bluecove.tester.log.LoggerAppender;
 
 /**
  * Enables indirect connection to BlueCove internals if one present
@@ -38,7 +38,7 @@ public class BlueCoveSpecific {
 		} catch (Throwable ignore) {
 		}
 	}
-	
+
 	public static boolean changeDebug() {
 		try {
 			return BlueCoveLoggerAppender.changeDebug();
@@ -46,7 +46,7 @@ public class BlueCoveSpecific {
 			return false;
 		}
 	}
-	
+
 	public static void removeAppender() {
 		try {
 			BlueCoveLoggerAppender.removeAppender();

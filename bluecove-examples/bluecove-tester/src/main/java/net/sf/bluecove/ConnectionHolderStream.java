@@ -29,7 +29,8 @@ import java.io.OutputStream;
 
 import javax.microedition.io.StreamConnection;
 
-import net.sf.bluecove.util.IOUtils;
+import org.bluecove.tester.util.IOUtils;
+
 
 /**
  * 

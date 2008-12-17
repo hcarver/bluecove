@@ -32,6 +32,9 @@ import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.LocalDevice;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.RuntimeDetect;
+
 import net.sf.bluecove.util.BluetoothTypesInfo;
 import net.sf.bluecove.util.CollectionUtils;
 import BluetoothTCKAgent.System;
@@ -204,8 +207,8 @@ public class Switcher implements Runnable {
 	}
 
 	public static void interruptThread(Thread thread) {
-		if (Configuration.cldcStub != null) {
-			Configuration.cldcStub.interruptThread(thread);
+		if (RuntimeDetect.cldcStub != null) {
+			RuntimeDetect.cldcStub.interruptThread(thread);
 		}
 	}
 
@@ -311,11 +314,11 @@ public class Switcher implements Runnable {
 				c.config.useDiscoveredDevices = false;
 				c.config.searchOnlyBluecoveUuid = Configuration.searchOnlyBluecoveUuid;
 				String name = "Client" + clientStartCount++;
-				c.thread = Configuration.cldcStub.createNamedThread(c, name);
+				c.thread = RuntimeDetect.cldcStub.createNamedThread(c, name);
 				c.thread.start();
 				return c;
 			} else {
-				if (Configuration.isJ2ME) {
+				if (RuntimeDetect.isJ2ME) {
 					BlueCoveTestMIDlet.message("Warn", "Client is already Running");
 				} else {
 					Logger.warn("Client is already Running");
@@ -490,11 +493,11 @@ public class Switcher implements Runnable {
 			}
 			if (!server.isRunning()) {
 				String name = "Server" + serverStartCount++;
-				server.thread = Configuration.cldcStub.createNamedThread(server, name);
+				server.thread = RuntimeDetect.cldcStub.createNamedThread(server, name);
 				server.thread.start();
 			} else {
 				if (Configuration.canCloseServer) {
-					if (Configuration.isJ2ME) {
+					if (RuntimeDetect.isJ2ME) {
 						BlueCoveTestMIDlet.message("Warn", "Server is already running");
 					} else {
 						Logger.warn("Server is already running");

@@ -33,6 +33,9 @@ import javax.bluetooth.LocalDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.RuntimeDetect;
+
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 import net.sf.bluecove.util.BluetoothTypesInfo;
@@ -56,7 +59,7 @@ public class ServiceRecordTester {
 		if ((attrDataElement == null) || (attrDataElement.getDataType() != DataElement.DATSEQ)
 				|| attrDataElement.getSize() == 0) {
 			Logger.warn("Bogus ServiceClassIDList");
-			if (Configuration.isBlueCove) {
+			if (RuntimeDetect.isBlueCove) {
 				return false;
 			}
 

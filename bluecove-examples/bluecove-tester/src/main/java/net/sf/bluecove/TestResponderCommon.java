@@ -28,9 +28,12 @@ import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.L2CAPConnection;
 import javax.bluetooth.LocalDevice;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.StringUtils;
+
 import junit.framework.Assert;
 import net.sf.bluecove.util.BluetoothTypesInfo;
-import net.sf.bluecove.util.StringUtils;
 
 /**
  * 
@@ -64,7 +67,7 @@ public class TestResponderCommon {
 	}
 
 	private static void initLocalDeviceConfig() throws BluetoothStateException {
-		Configuration.cldcStub.setThreadLocalBluetoothStack(Configuration.threadLocalBluetoothStack);
+		RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(Configuration.threadLocalBluetoothStack);
 		LocalDevice localDevice = LocalDevice.getLocalDevice();
 		Logger.info("address:" + localDevice.getBluetoothAddress());
 		Logger.info("name:" + localDevice.getFriendlyName());
@@ -81,7 +84,7 @@ public class TestResponderCommon {
 
 		String bluecoveVersion = LocalDevice.getProperty("bluecove");
 		if (StringUtils.isStringSet(bluecoveVersion)) {
-			Configuration.isBlueCove = true;
+			RuntimeDetect.isBlueCove = true;
 
 			Logger.info("bluecove:" + bluecoveVersion);
 			Logger.info("stack:" + LocalDevice.getProperty("bluecove.stack"));

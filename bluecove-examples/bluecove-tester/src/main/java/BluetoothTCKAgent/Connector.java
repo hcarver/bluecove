@@ -28,7 +28,8 @@ import java.io.IOException;
 
 import javax.bluetooth.BluetoothConnectionException;
 import javax.microedition.io.Connection;
-import net.sf.bluecove.Logger;
+
+import org.bluecove.tester.log.Logger;
 
 /**
  * Small hack to enable connection retry while working on other implementations.

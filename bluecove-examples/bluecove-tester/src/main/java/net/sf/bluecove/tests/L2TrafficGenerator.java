@@ -26,14 +26,16 @@ package net.sf.bluecove.tests;
 
 import java.io.IOException;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.IOUtils;
+import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.TimeUtils;
+
 import net.sf.bluecove.CommunicationTesterL2CAP;
 import net.sf.bluecove.Configuration;
 import net.sf.bluecove.ConnectionHolderL2CAP;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.TestStatus;
-import net.sf.bluecove.util.IOUtils;
 import net.sf.bluecove.util.TimeStatistic;
-import net.sf.bluecove.util.TimeUtils;
 
 /**
  *
@@ -185,7 +187,7 @@ public class L2TrafficGenerator {
 				}
 			}
 		};
-		Thread t = Configuration.cldcStub.createNamedThread(r, "L2tgStatusReciver");
+		Thread t = RuntimeDetect.cldcStub.createNamedThread(r, "L2tgStatusReciver");
 		t.start();
 	}
 
@@ -222,7 +224,7 @@ public class L2TrafficGenerator {
 				}
 			}
 		};
-		Thread t = Configuration.cldcStub.createNamedThread(r, "L2tgReciver");
+		Thread t = RuntimeDetect.cldcStub.createNamedThread(r, "L2tgReciver");
 		t.start();
 	}
 

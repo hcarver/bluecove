@@ -53,8 +53,10 @@ import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.RuntimeDetect;
+
 import net.sf.bluecove.Configuration;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.RemoteDeviceIheritance;
 import net.sf.bluecove.TestResponderCommon;
 import net.sf.bluecove.util.BluetoothTypesInfo;
@@ -332,7 +334,7 @@ public class ClientConnectionDialog extends Dialog {
 		});
 		btnInterrupt.setEnabled(false);
 
-		if (Configuration.isBlueCove) {
+		if (RuntimeDetect.isBlueCove) {
 			Button btnBond = new Button("Bond");
 			panelBtns.add(btnBond);
 			btnBond.addActionListener(new ActionListener() {

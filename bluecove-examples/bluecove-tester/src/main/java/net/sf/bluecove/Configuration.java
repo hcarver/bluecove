@@ -31,9 +31,9 @@ import java.util.Hashtable;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
+import org.bluecove.tester.util.IOUtils;
+
 import net.sf.bluecove.util.BooleanVar;
-import net.sf.bluecove.util.CLDCStub;
-import net.sf.bluecove.util.IOUtils;
 import net.sf.bluecove.util.IntVar;
 import net.sf.bluecove.util.J2MEStringTokenizer;
 import net.sf.bluecove.util.Storage;
@@ -165,8 +165,6 @@ public class Configuration {
 
 	private static String lastServerURL = null;
 
-	public static CLDCStub cldcStub;
-
 	/**
 	 * We can't add Motorola TCKAgent to this MIDlet.
 	 */
@@ -177,11 +175,7 @@ public class Configuration {
 	 */
 	public static boolean canCloseServer = true;
 
-	public static boolean isJ2ME = false;
-
 	public static boolean isConfigured = false;
-
-	public static boolean isBlueCove = false;
 
 	public static boolean windows = false;
 
@@ -198,8 +192,6 @@ public class Configuration {
 	public static boolean hasManyDevices = false;
 
 	public static boolean supportL2CAP = true;
-
-	public static boolean CLDC_1_0 = false;
 
 	public static boolean logTimeStamp = false;
 

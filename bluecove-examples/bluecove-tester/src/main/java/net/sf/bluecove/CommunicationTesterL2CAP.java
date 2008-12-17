@@ -26,9 +26,11 @@ package net.sf.bluecove;
 
 import java.io.IOException;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.IOUtils;
+
 import junit.framework.Assert;
 import net.sf.bluecove.tests.L2TrafficGenerator;
-import net.sf.bluecove.util.IOUtils;
 
 /**
  * 

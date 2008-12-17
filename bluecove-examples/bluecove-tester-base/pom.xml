@@ -63,10 +63,15 @@
                     <source>1.3</source>
                     <target>1.1</target>
                     <compilerArguments>
-                        <bootclasspath>${settings.localRepository}/org/microemu/cldcapi10/${me2Version}/cldcapi10-${me2Version}.jar${path.separator}${settings.localRepository}/org/microemu/midpapi20/${me2Version}/midpapi20-${me2Version}.jar</bootclasspath>
+                        <bootclasspath>${settings.localRepository}/org/microemu/cldcapi11/${me2Version}/cldcapi11-${me2Version}.jar${path.separator}${settings.localRepository}/org/microemu/midpapi20/${me2Version}/midpapi20-${me2Version}.jar</bootclasspath>
                     </compilerArguments>
                 </configuration>
                 <dependencies>
+                    <dependency>
+                        <groupId>org.microemu</groupId>
+                        <artifactId>cldcapi11</artifactId>
+                        <version>${me2Version}</version>
+                    </dependency>
                     <dependency>
                         <groupId>org.microemu</groupId>
                         <artifactId>midpapi20</artifactId>

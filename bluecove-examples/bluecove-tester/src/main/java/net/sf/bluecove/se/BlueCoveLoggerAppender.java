@@ -24,30 +24,30 @@
  */
 package net.sf.bluecove.se;
 
+import org.bluecove.tester.log.LoggerAppender;
+
 import com.intel.bluetooth.DebugLog;
 
-import net.sf.bluecove.Logger.LoggerAppender;
-
 class BlueCoveLoggerAppender implements com.intel.bluetooth.DebugLog.LoggerAppender {
-	
+
 	static Object blueCoveLoggerAppender;
-	
-	net.sf.bluecove.Logger.LoggerAppender appender;
-	
+
+	org.bluecove.tester.log.LoggerAppender appender;
+
 	public BlueCoveLoggerAppender(LoggerAppender appender) {
 		this.appender = appender;
 		DebugLog.addAppender(this);
 		blueCoveLoggerAppender = this;
 	}
-	
+
 	public void appendLog(int level, String message, Throwable throwable) {
 		appender.appendLog(level, message, throwable);
 	}
-	
+
 	public static void removeAppender() {
-		DebugLog.removeAppender((BlueCoveLoggerAppender)blueCoveLoggerAppender);
+		DebugLog.removeAppender((BlueCoveLoggerAppender) blueCoveLoggerAppender);
 	}
-	
+
 	public static boolean changeDebug() {
 		boolean dbg = !com.intel.bluetooth.DebugLog.isDebugEnabled();
 		if (!dbg) {

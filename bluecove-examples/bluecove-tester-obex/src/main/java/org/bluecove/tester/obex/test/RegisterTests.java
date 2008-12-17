@@ -22,16 +22,18 @@
  *  @author vlads
  *  @version $Id$
  */
-package net.sf.bluecove.util;
+package org.bluecove.tester.obex.test;
 
-/**
- *
- */
-public interface CLDCStub {
+import org.bluecove.tester.obex.TestSelector;
 
-	public void interruptThread(Thread t);
+public class RegisterTests {
 
-	public Thread createNamedThread(Runnable target, String name);
+	public static void register() {
+		add("PutOutput", new OBEXPutOutputStream());
+		add("PutInput", new OBEXPutInputStream());
+	}
 
-	public void setThreadLocalBluetoothStack(Object id);
+	public static void add(String name, Runnable test) {
+		TestSelector.add(name, test);
+	}
 }

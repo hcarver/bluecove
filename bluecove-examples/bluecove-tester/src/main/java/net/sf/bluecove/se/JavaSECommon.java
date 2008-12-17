@@ -32,10 +32,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.CLDCStub;
+import org.bluecove.tester.util.IOUtils;
+import org.bluecove.tester.util.RuntimeDetect;
+
 import net.sf.bluecove.Configuration;
-import net.sf.bluecove.Logger;
-import net.sf.bluecove.util.CLDCStub;
-import net.sf.bluecove.util.IOUtils;
 
 public class JavaSECommon implements CLDCStub {
 
@@ -54,7 +56,7 @@ public class JavaSECommon implements CLDCStub {
 			// Configuration.testIgnoreNotWorkingServiceAttributes = false;
 		}
 
-		Configuration.cldcStub = new JavaSECommon();
+		RuntimeDetect.cldcStub = new JavaSECommon();
 	}
 
 	public void interruptThread(Thread t) {

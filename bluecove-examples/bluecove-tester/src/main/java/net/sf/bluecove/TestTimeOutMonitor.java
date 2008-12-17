@@ -24,6 +24,9 @@
  */
 package net.sf.bluecove;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.RuntimeDetect;
+
 /**
  * 
  */
@@ -51,7 +54,7 @@ public class TestTimeOutMonitor implements Runnable {
 		TestTimeOutMonitor monitor = new TestTimeOutMonitor(name, testThread, gracePeriodSeconds);
 
 		if (gracePeriodSeconds != 0) {
-			monitor.monitorThread = Configuration.cldcStub.createNamedThread(monitor, name + "Monitor");
+			monitor.monitorThread = RuntimeDetect.cldcStub.createNamedThread(monitor, name + "Monitor");
 			monitor.monitorThread.start();
 		}
 		return monitor;

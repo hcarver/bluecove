@@ -24,6 +24,8 @@
  */ 
 package net.sf.bluecove.util;
 
+import org.bluecove.tester.util.StringUtils;
+
 /**
  *
  */

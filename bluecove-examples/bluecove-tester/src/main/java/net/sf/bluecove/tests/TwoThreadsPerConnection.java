@@ -28,12 +28,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.TimeUtils;
+
 import junit.framework.Assert;
 
 import net.sf.bluecove.CommunicationData;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.ConnectionHolderStream;
-import net.sf.bluecove.util.TimeUtils;
 
 /**
  * Test two directional Stream. Create Second Thread to Write to connection.

@@ -22,12 +22,12 @@
  *  @author vlads
  *  @version $Id$
  */
-package net.sf.bluecove;
+package org.bluecove.tester.log;
 
 import java.util.Enumeration;
 import java.util.Vector;
 
-import net.sf.bluecove.util.TimeUtils;
+import org.bluecove.tester.util.TimeUtils;
 
 public class Logger {
 
@@ -39,14 +39,12 @@ public class Logger {
 
 	public final static int ERROR = 4;
 
+	public static boolean logTimeStamp = false;
+
 	private static Vector loggerAppenders = new Vector();
 
-	public static interface LoggerAppender {
-		public void appendLog(int level, String message, Throwable throwable);
-	}
-
 	private static void systemOutTimeStamp() {
-		if (Configuration.logTimeStamp) {
+		if (logTimeStamp) {
 			System.out.print(TimeUtils.timeStampNowToString());
 			System.out.print(" ");
 		}

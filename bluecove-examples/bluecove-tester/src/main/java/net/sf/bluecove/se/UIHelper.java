@@ -27,13 +27,14 @@ package net.sf.bluecove.se;
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.LocalDevice;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.StringUtils;
+
 import net.sf.bluecove.Configuration;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.RemoteDeviceInfo;
 import net.sf.bluecove.Switcher;
 import net.sf.bluecove.TestResponderClient;
 import net.sf.bluecove.TestResponderServer;
-import net.sf.bluecove.util.StringUtils;
 
 /**
  * 

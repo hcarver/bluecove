@@ -45,10 +45,13 @@ import javax.obex.ResponseCodes;
 import javax.obex.ServerRequestHandler;
 import javax.obex.SessionNotifier;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.IOUtils;
+import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.StringUtils;
+import org.bluecove.tester.util.TimeUtils;
+
 import net.sf.bluecove.util.BluetoothTypesInfo;
-import net.sf.bluecove.util.IOUtils;
-import net.sf.bluecove.util.StringUtils;
-import net.sf.bluecove.util.TimeUtils;
 
 public class TestResponderServerOBEX implements Runnable {
 
@@ -73,7 +76,7 @@ public class TestResponderServerOBEX implements Runnable {
 	public static TestResponderServerOBEX startServer() {
 		TestResponderServerOBEX srv = new TestResponderServerOBEX();
 		srv.threadLocalBluetoothStack = Configuration.threadLocalBluetoothStack;
-		srv.thread = Configuration.cldcStub.createNamedThread(srv, "ServerOBEX");
+		srv.thread = RuntimeDetect.cldcStub.createNamedThread(srv, "ServerOBEX");
 		srv.thread.start();
 		return srv;
 	}
@@ -85,7 +88,7 @@ public class TestResponderServerOBEX implements Runnable {
 	public void run() {
 		isStoped = false;
 		boolean deviceServiceClassesUpdated = false;
-		Configuration.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
+		RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
 		LocalDevice localDevice;
 		try {
 			localDevice = LocalDevice.getLocalDevice();

@@ -44,9 +44,10 @@ import java.util.Vector;
 
 import javax.bluetooth.UUID;
 
+import org.bluecove.tester.log.Logger;
+
 import net.sf.bluecove.Configuration;
 import net.sf.bluecove.Consts;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.util.BluetoothTypesInfo;
 import net.sf.bluecove.util.BooleanVar;
 import net.sf.bluecove.util.IntVar;

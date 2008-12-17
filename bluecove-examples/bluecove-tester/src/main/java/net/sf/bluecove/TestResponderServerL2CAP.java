@@ -36,10 +36,13 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.microedition.io.Connector;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.IOUtils;
+import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.TimeUtils;
+
 import net.sf.bluecove.util.BluetoothTypesInfo;
 import net.sf.bluecove.util.CollectionUtils;
-import net.sf.bluecove.util.IOUtils;
-import net.sf.bluecove.util.TimeUtils;
 
 /**
  *
@@ -130,7 +133,7 @@ public class TestResponderServerL2CAP extends Thread {
 	}
 
 	private void runCreateConnectionNotifier() throws IOException {
-		Configuration.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
+		RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
 		StringBuffer url = new StringBuffer(BluetoothTypesInfo.PROTOCOL_SCHEME_L2CAP);
 		url.append("://localhost:").append(Configuration.blueCoveL2CAPUUID());
 		url.append(";name=").append(Consts.RESPONDER_SERVERNAME).append("_l2");
@@ -140,7 +143,7 @@ public class TestResponderServerL2CAP extends Thread {
 		url.append(Configuration.serverURLParams());
 		url.append(";TransmitMTU=").append(TestResponderCommon.receiveMTU_max);
 		url.append(";ReceiveMTU=").append(TestResponderCommon.receiveMTU_max);
-		if ((Configuration.isBlueCove) && (Configuration.bluecovepsm != null)
+		if ((RuntimeDetect.isBlueCove) && (Configuration.bluecovepsm != null)
 				&& (Configuration.bluecovepsm.length() > 0)) {
 			url.append(";bluecovepsm=").append(Configuration.bluecovepsm);
 		}

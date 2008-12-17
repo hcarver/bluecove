@@ -30,6 +30,8 @@ import java.io.IOException;
 import javax.microedition.io.Connection;
 import javax.microedition.io.StreamConnection;
 
+import org.bluecove.tester.log.Logger;
+
 import junit.framework.Assert;
 
 /**

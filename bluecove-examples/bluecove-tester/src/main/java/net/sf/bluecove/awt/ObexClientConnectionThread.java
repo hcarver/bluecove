@@ -33,11 +33,13 @@ import javax.obex.ClientSession;
 import javax.obex.HeaderSet;
 import javax.obex.Operation;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.IOUtils;
+import org.bluecove.tester.util.RuntimeDetect;
+
 import net.sf.bluecove.Configuration;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.OBEXTestAuthenticator;
 import net.sf.bluecove.util.BluetoothTypesInfo;
-import net.sf.bluecove.util.IOUtils;
 
 public class ObexClientConnectionThread extends Thread {
 
@@ -78,7 +80,7 @@ public class ObexClientConnectionThread extends Thread {
 
 		isRunning = true;
 		try {
-			Configuration.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
+			RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
 
 			status = "Connecting...";
 			clientSession = (ClientSession) Connector.open(serverURL, Connector.READ_WRITE, timeouts);

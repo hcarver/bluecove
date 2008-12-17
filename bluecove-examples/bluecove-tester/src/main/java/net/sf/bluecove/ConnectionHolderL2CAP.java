@@ -26,7 +26,8 @@ package net.sf.bluecove;
 
 import javax.bluetooth.L2CAPConnection;
 
-import net.sf.bluecove.util.IOUtils;
+import org.bluecove.tester.util.IOUtils;
+
 
 /**
  * 

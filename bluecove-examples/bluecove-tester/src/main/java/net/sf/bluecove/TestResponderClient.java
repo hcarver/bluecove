@@ -36,15 +36,18 @@ import javax.bluetooth.UUID;
 import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.IOUtils;
+import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.StringUtils;
+import org.bluecove.tester.util.TimeUtils;
+
 import net.sf.bluecove.se.JavaSECommon;
 import net.sf.bluecove.util.BluetoothTypesInfo;
 import net.sf.bluecove.util.CollectionUtils;
 import net.sf.bluecove.util.CountStatistic;
-import net.sf.bluecove.util.IOUtils;
 import net.sf.bluecove.util.IntVar;
-import net.sf.bluecove.util.StringUtils;
 import net.sf.bluecove.util.TimeStatistic;
-import net.sf.bluecove.util.TimeUtils;
 
 /**
  * 
@@ -125,7 +128,7 @@ public class TestResponderClient extends TestResponderCommon implements Runnable
 		String v = LocalDevice.getProperty("bluetooth.sd.attr.retrievable.max");
 		if (v != null) {
 			sdAttrRetrievableMax = Integer.valueOf(v).intValue();
-			if ((sdAttrRetrievableMax > 7) && (Configuration.isJ2ME)) {
+			if ((sdAttrRetrievableMax > 7) && (RuntimeDetect.isJ2ME)) {
 				sdAttrRetrievableMax = 7;
 			}
 		}
@@ -329,7 +332,7 @@ public class TestResponderClient extends TestResponderCommon implements Runnable
 		}
 
 		public void run() {
-			Configuration.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
+			RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
 			started = connectAndTest(url);
 		}
 	}
@@ -417,7 +420,7 @@ public class TestResponderClient extends TestResponderCommon implements Runnable
 				}
 			}
 		}
-		Configuration.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
+		RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
 
 		Logger.debug(config.logID + "Client started..." + TimeUtils.timeNowToString());
 		isRunning = true;
@@ -530,8 +533,8 @@ public class TestResponderClient extends TestResponderCommon implements Runnable
 		if (bluetoothInquirer != null) {
 			bluetoothInquirer.shutdown();
 		}
-		if (Configuration.cldcStub != null) {
-			Configuration.cldcStub.interruptThread(thread);
+		if (RuntimeDetect.cldcStub != null) {
+			RuntimeDetect.cldcStub.interruptThread(thread);
 		}
 		Vector concurrentConnectionsCopy = CollectionUtils.copy(concurrentConnections);
 		for (Enumeration iter = concurrentConnectionsCopy.elements(); iter.hasMoreElements();) {

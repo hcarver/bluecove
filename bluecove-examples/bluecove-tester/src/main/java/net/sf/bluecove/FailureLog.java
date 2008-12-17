@@ -27,7 +27,9 @@ package net.sf.bluecove;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import net.sf.bluecove.util.TimeUtils;
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.TimeUtils;
+
 
 /**
  *

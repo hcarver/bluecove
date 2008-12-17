@@ -22,7 +22,7 @@
  *  @author vlads
  *  @version $Id$
  */
-package net.sf.bluecove.util;
+package org.bluecove.tester.util;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,18 +30,16 @@ import java.io.Writer;
 
 import javax.microedition.io.Connection;
 
-import net.sf.bluecove.Configuration;
-import net.sf.bluecove.Logger;
+import org.bluecove.tester.log.Logger;
 
 /**
- * General IO stream manipulation utilities. closeQuietly functions are based on
- * org.apache.commons.io and used here for J2ME
+ * General IO stream manipulation utilities. closeQuietly functions are based on org.apache.commons.io and used here for
+ * J2ME
  * 
  * <p>
  * This class provides static utility methods for input/output operations.
  * <ul>
- * <li>closeQuietly - these methods close a stream ignoring nulls and all
- * exceptions
+ * <li>closeQuietly - these methods close a stream ignoring nulls and all exceptions
  * </ul>
  * <p>
  */
@@ -49,10 +47,9 @@ import net.sf.bluecove.Logger;
 public class IOUtils {
 
 	/**
-	 * Unconditionally close an <code>InputStream</code>.
+	 * Close an <code>InputStream</code>.
 	 * <p>
-	 * Equivalent to {@link InputStream#close()}, except any exceptions will be
-	 * ignored. This is typically used in finally blocks.
+	 * Calls {@link InputStream#close()}, any exceptions will be ignored. This is used in finally blocks.
 	 * 
 	 * @param input
 	 *            the InputStream to close, may be null or already closed
@@ -63,17 +60,16 @@ public class IOUtils {
 				input.close();
 			}
 		} catch (Throwable e) {
-			if (Configuration.isBlueCove) {
+			if (RuntimeDetect.isBlueCove) {
 				Logger.error("InputStream.close()", e);
 			}
 		}
 	}
 
 	/**
-	 * Unconditionally close an <code>OutputStream</code>.
+	 * Close an <code>OutputStream</code>.
 	 * <p>
-	 * Equivalent to {@link OutputStream#close()}, except any exceptions will
-	 * be ignored. This is typically used in finally blocks.
+	 * Calls {@link OutputStream#close()}, any exceptions will be ignored. This is used in finally blocks.
 	 * 
 	 * @param output
 	 *            the OutputStream to close, may be null or already closed
@@ -84,17 +80,16 @@ public class IOUtils {
 				output.close();
 			}
 		} catch (Throwable e) {
-			if (Configuration.isBlueCove) {
+			if (RuntimeDetect.isBlueCove) {
 				Logger.error("OutputStream.close()", e);
 			}
 		}
 	}
 
 	/**
-	 * Unconditionally close a <code>Writer</code>.
+	 * Close a <code>Writer</code>.
 	 * <p>
-	 * Equivalent to {@link Writer#close()}, except any exceptions will be
-	 * ignored. This is typically used in finally blocks.
+	 * Calls {@link Writer#close()}, any exceptions will be ignored. This is used in finally blocks.
 	 * 
 	 * @param output
 	 *            the Writer to close, may be null or already closed
@@ -109,13 +104,13 @@ public class IOUtils {
 		}
 	}
 
-	public static void closeQuietly(Connection com) {
+	public static void closeQuietly(Connection con) {
 		try {
-			if (com != null) {
-				com.close();
+			if (con != null) {
+				con.close();
 			}
 		} catch (Throwable e) {
-			if (Configuration.isBlueCove) {
+			if (RuntimeDetect.isBlueCove) {
 				Logger.error("Connection.close()", e);
 			}
 		}

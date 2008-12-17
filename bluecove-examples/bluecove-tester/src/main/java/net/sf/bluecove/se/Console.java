@@ -26,8 +26,9 @@ package net.sf.bluecove.se;
 
 import java.io.IOException;
 
+import org.bluecove.tester.log.Logger;
+
 import net.sf.bluecove.Configuration;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.Switcher;
 
 /**

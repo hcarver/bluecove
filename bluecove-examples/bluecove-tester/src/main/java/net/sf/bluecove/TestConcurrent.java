@@ -27,6 +27,9 @@ package net.sf.bluecove;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.RuntimeDetect;
+
 /**
  * 
  */
@@ -118,8 +121,8 @@ public class TestConcurrent {
 		 */
 		public void shutdown() {
 			stoped = true;
-			if (Configuration.cldcStub != null) {
-				Configuration.cldcStub.interruptThread(thread);
+			if (RuntimeDetect.cldcStub != null) {
+				RuntimeDetect.cldcStub.interruptThread(thread);
 			}
 		}
 
@@ -127,7 +130,7 @@ public class TestConcurrent {
 
 	public static void startConcurrentServicesSearchClients() {
 		ServicesSearchClientsThread cclient = new ServicesSearchClientsThread();
-		cclient.thread = Configuration.cldcStub.createNamedThread(cclient, "ConcurrentSS");
+		cclient.thread = RuntimeDetect.cldcStub.createNamedThread(cclient, "ConcurrentSS");
 		cclient.thread.start();
 	}
 }

@@ -20,8 +20,22 @@
 
     <description>BlueCove examples demos and Web Start</description>
 
+    <distributionManagement>
+        <!-- no-deployment -->
+        <repository>
+            <id>pyx4j.com-no-deployment</id>
+            <url>file:///${basedir}/target/tmp</url>
+        </repository>
+        <snapshotRepository>
+            <id>pyx4j.com-no-deployment</id>
+            <url>file:///${basedir}/target/tmp</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <modules>
+        <module>bluecove-tester-base</module>
         <module>bluecove-tester</module>
+        <module>bluecove-tester-obex</module>
         <module>bluecove-webstart</module>
         <module>bluecove-microemu-starter</module>
         <module>obex-install</module>

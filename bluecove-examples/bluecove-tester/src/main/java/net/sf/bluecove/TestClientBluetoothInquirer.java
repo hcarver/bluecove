@@ -37,9 +37,12 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.StringUtils;
+import org.bluecove.tester.util.TimeUtils;
+
 import net.sf.bluecove.util.BluetoothTypesInfo;
-import net.sf.bluecove.util.StringUtils;
-import net.sf.bluecove.util.TimeUtils;
 
 public class TestClientBluetoothInquirer implements DiscoveryListener {
 
@@ -270,7 +273,7 @@ public class TestClientBluetoothInquirer implements DiscoveryListener {
 		}
 		String name = "";
 		try {
-			if ((Configuration.discoveryGetDeviceFriendlyName.booleanValue()) || Configuration.isBlueCove) {
+			if ((Configuration.discoveryGetDeviceFriendlyName.booleanValue()) || RuntimeDetect.isBlueCove) {
 				name = " [" + remoteDevice.getFriendlyName(false) + "]";
 			}
 		} catch (IOException e) {
@@ -300,7 +303,7 @@ public class TestClientBluetoothInquirer implements DiscoveryListener {
 			long start = System.currentTimeMillis();
 			RemoteDevice remoteDevice = (RemoteDevice) iter.nextElement();
 			String name = "";
-			if ((Configuration.discoveryGetDeviceFriendlyName.booleanValue()) || Configuration.isBlueCove) {
+			if ((Configuration.discoveryGetDeviceFriendlyName.booleanValue()) || RuntimeDetect.isBlueCove) {
 				try {
 					name = remoteDevice.getFriendlyName(false);
 					if ((name != null) && (name.length() > 0)) {

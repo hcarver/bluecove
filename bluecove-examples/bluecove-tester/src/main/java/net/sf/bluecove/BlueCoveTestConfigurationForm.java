@@ -36,6 +36,8 @@ import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.TextField;
 
+import org.bluecove.tester.log.Logger;
+
 import net.sf.bluecove.util.BooleanVar;
 import net.sf.bluecove.util.IntVar;
 import net.sf.bluecove.util.StringVar;

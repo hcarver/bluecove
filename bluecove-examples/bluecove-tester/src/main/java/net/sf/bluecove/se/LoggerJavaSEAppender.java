@@ -24,7 +24,7 @@
  */
 package net.sf.bluecove.se;
 
-import net.sf.bluecove.Logger.LoggerAppender;
+import org.bluecove.tester.log.LoggerAppender;
 
 public class LoggerJavaSEAppender implements LoggerAppender {
 

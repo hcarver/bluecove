@@ -27,7 +27,8 @@ package net.sf.bluecove.util;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
 
-import net.sf.bluecove.Logger;
+import org.bluecove.tester.log.Logger;
+
 
 /**
  *

@@ -54,18 +54,20 @@ import javax.bluetooth.DiscoveryAgent;
 
 import net.sf.bluecove.Configuration;
 import net.sf.bluecove.Consts;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.Switcher;
 import net.sf.bluecove.TestConcurrent;
-import net.sf.bluecove.Logger.LoggerAppender;
 import net.sf.bluecove.se.BlueCoveSpecific;
 import net.sf.bluecove.se.FileStorage;
 import net.sf.bluecove.se.JavaSECommon;
 import net.sf.bluecove.se.LocalDeviceManager;
 import net.sf.bluecove.se.RemoteDeviceManager;
 import net.sf.bluecove.se.UIHelper;
-import net.sf.bluecove.util.IOUtils;
-import net.sf.bluecove.util.TimeUtils;
+
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.log.LoggerAppender;
+import org.bluecove.tester.util.IOUtils;
+import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.TimeUtils;
 
 import com.intel.bluetooth.BlueCoveImpl;
 
@@ -491,7 +493,7 @@ public class Main extends Frame implements LoggerAppender {
 				}
 			}
 		};
-		Thread statusUpdate = Configuration.cldcStub.createNamedThread(statusUpdateRunnable, "StatusUpdate");
+		Thread statusUpdate = RuntimeDetect.cldcStub.createNamedThread(statusUpdateRunnable, "StatusUpdate");
 		statusUpdate.start();
 
 		output.addKeyListener(new KeyListener() {

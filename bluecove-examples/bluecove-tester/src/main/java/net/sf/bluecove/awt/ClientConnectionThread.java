@@ -35,15 +35,16 @@ import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
-import net.sf.bluecove.Configuration;
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.IOUtils;
+import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.StringUtils;
+import org.bluecove.tester.util.TimeUtils;
+
 import net.sf.bluecove.ConnectionHolder;
 import net.sf.bluecove.ConnectionHolderL2CAP;
 import net.sf.bluecove.ConnectionHolderStream;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.util.BluetoothTypesInfo;
-import net.sf.bluecove.util.IOUtils;
-import net.sf.bluecove.util.StringUtils;
-import net.sf.bluecove.util.TimeUtils;
 
 /**
  *
@@ -115,7 +116,7 @@ public class ClientConnectionThread extends Thread {
 				Logger.error(logPrefix + "unsupported connection type " + serverURL);
 				return;
 			}
-			Configuration.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
+			RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
 			Connection conn = null;
 			try {
 				isConnecting = true;

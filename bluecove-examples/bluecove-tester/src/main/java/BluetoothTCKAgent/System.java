@@ -24,7 +24,7 @@
  */ 
 package BluetoothTCKAgent;
 
-import net.sf.bluecove.Logger;
+import org.bluecove.tester.log.Logger;
 
 /**
  * 

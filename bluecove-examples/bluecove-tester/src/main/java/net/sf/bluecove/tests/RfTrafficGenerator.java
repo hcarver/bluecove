@@ -26,12 +26,14 @@ package net.sf.bluecove.tests;
 
 import java.io.IOException;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.IOUtils;
+import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.TimeUtils;
+
 import net.sf.bluecove.Configuration;
 import net.sf.bluecove.ConnectionHolderStream;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.TestStatus;
-import net.sf.bluecove.util.IOUtils;
-import net.sf.bluecove.util.TimeUtils;
 
 /**
  *
@@ -207,7 +209,7 @@ public class RfTrafficGenerator {
 				}
 			}
 		};
-		Thread t = Configuration.cldcStub.createNamedThread(r, "RFtgStatusReciver");
+		Thread t = RuntimeDetect.cldcStub.createNamedThread(r, "RFtgStatusReciver");
 		t.start();
 	}
 
@@ -252,7 +254,7 @@ public class RfTrafficGenerator {
 				}
 			}
 		};
-		Thread t = Configuration.cldcStub.createNamedThread(r, "RFtgReciver");
+		Thread t = RuntimeDetect.cldcStub.createNamedThread(r, "RFtgReciver");
 		t.start();
 	}
 

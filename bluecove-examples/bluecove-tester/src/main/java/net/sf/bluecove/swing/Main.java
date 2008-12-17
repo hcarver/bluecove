@@ -44,14 +44,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import net.sf.bluecove.Configuration;
-import net.sf.bluecove.Logger;
 import net.sf.bluecove.Switcher;
-import net.sf.bluecove.Logger.LoggerAppender;
 import net.sf.bluecove.se.BlueCoveSpecific;
 import net.sf.bluecove.se.FileStorage;
 import net.sf.bluecove.se.JavaSECommon;
 import net.sf.bluecove.se.UIHelper;
-import net.sf.bluecove.util.TimeUtils;
+
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.log.LoggerAppender;
+import org.bluecove.tester.util.TimeUtils;
 
 /**
  *

@@ -35,6 +35,9 @@ import javax.obex.HeaderSet;
 import javax.obex.Operation;
 import javax.obex.ResponseCodes;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.RuntimeDetect;
+
 import net.sf.bluecove.util.BluetoothTypesInfo;
 
 /**
@@ -45,7 +48,7 @@ public class TestOBEXCilent implements Runnable {
 	public static final boolean obexEnabled = true;
 
 	public static void obexPut() {
-		Thread thread = Configuration.cldcStub.createNamedThread(new TestOBEXCilent(0), "ObexClinet");
+		Thread thread = RuntimeDetect.cldcStub.createNamedThread(new TestOBEXCilent(0), "ObexClinet");
 		thread.start();
 	}
 

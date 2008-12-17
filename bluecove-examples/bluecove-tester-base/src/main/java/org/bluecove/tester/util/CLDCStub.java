@@ -22,39 +22,16 @@
  *  @author vlads
  *  @version $Id$
  */
-package net.sf.bluecove.util;
+package org.bluecove.tester.util;
 
 /**
- * 
+ *
  */
-public class CLDC11 implements CLDCStub {
+public interface CLDCStub {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.bluecove.util.CLDCStub#interruptThread(java.lang.Thread)
-	 */
-	public void interruptThread(Thread t) {
-		if (t != null) {
-			t.interrupt();
-		}
-	}
+	public void interruptThread(Thread t);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.bluecove.util.CLDCStub#createNamedThread(java.lang.Runnable,
-	 *      java.lang.String)
-	 */
-	public Thread createNamedThread(Runnable target, String name) {
-		return new Thread(target, name);
-	}
+	public Thread createNamedThread(Runnable target, String name);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.bluecove.util.CLDCStub#setThreadLocalBluetoothStack(java.lang.Object)
-	 */
-	public void setThreadLocalBluetoothStack(Object id) {
-	}
+	public void setThreadLocalBluetoothStack(Object id);
 }

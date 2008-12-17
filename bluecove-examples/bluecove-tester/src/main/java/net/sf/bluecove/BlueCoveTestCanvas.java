@@ -25,20 +25,19 @@
 package net.sf.bluecove;
 
 import java.util.Enumeration;
-import java.util.Vector;
 
-import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.Font;
-import javax.microedition.lcdui.Graphics;
 
-import net.sf.bluecove.Logger.LoggerAppender;
 import net.sf.bluecove.util.StorageRMS;
-import net.sf.bluecove.util.TimeUtils;
 
-public class BlueCoveTestCanvas extends Canvas implements CommandListener, LoggerAppender {
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.me.LoggerCanvas;
+import org.bluecove.tester.util.ThreadUtils;
+import org.bluecove.tester.util.TimeUtils;
+
+public class BlueCoveTestCanvas extends LoggerCanvas implements CommandListener {
 
 	static final Command exitCommand = new Command("Exit", Command.EXIT, 0);
 
@@ -76,31 +75,9 @@ public class BlueCoveTestCanvas extends Canvas implements CommandListener, Logge
 
 	static final Command obexPutCommand = new Command("ObexPut", Command.ITEM, 14);
 
-	private boolean showLogDebug = true;
-
-	private int line;
-
-	private int lineOffsetY;
-
-	private int lineOffsetX;
-
 	private Switcher switcher;
 
-	private Vector logMessages = new Vector();
-
 	private int errorCount = 0;
-
-	private int logLine = 0;
-
-	private int logScrollX;
-
-	private int logVisibleLines = 0;
-
-	private int logMessagesSownSize = 0;
-
-	private boolean movingCursor = false;
-
-	private boolean logLastEvenVisible = true;
 
 	public BlueCoveTestCanvas() {
 		super();
@@ -129,36 +106,15 @@ public class BlueCoveTestCanvas extends Canvas implements CommandListener, Logge
 			addCommand(obexPutCommand);
 		}
 		setCommandListener(this);
-		Logger.addAppender(this);
+
 		Configuration.storage = new StorageRMS();
 	}
 
-	public int writeln(Graphics g, String s) {
-		int h = (g.getFont().getHeight() + 1);
-		int y = lineOffsetY + h * line;
-		g.drawString(s, lineOffsetX, y, Graphics.LEFT | Graphics.TOP);
-		line++;
-		return y + h;
+	protected String getCanvasTitleText() {
+		return "BlueCove Tester";
 	}
 
-	protected void paint(Graphics g) {
-		lineOffsetY = 0;
-		lineOffsetX = 0;
-		line = 0;
-		int width = getWidth();
-		int height = getHeight();
-
-		g.setGrayScale(255);
-		g.fillRect(0, 0, width, height);
-
-		g.setColor(0);
-		int lastY = writeln(g, "BlueCove Tester");
-
-		line = 0;
-		lineOffsetY = lastY;
-		Font font = Font.getFont(Font.FACE_PROPORTIONAL, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-		g.setFont(font);
-
+	protected String getCanvasStatusText() {
 		StringBuffer msg = new StringBuffer();
 		msg.append("(");
 		msg.append("srv:").append((Switcher.isRunningServer()) ? "ON" : "off").append(" ").append(
@@ -169,88 +125,7 @@ public class BlueCoveTestCanvas extends Canvas implements CommandListener, Logge
 		msg.append(" dc:").append(TestResponderClient.discoveryCount);
 		msg.append(" er:").append(errorCount);
 		msg.append(")");
-		lastY = writeln(g, msg.toString());
-
-		int lineHeight = g.getFont().getHeight() + 1;
-		logVisibleLines = (height - lastY) / lineHeight;
-		lineOffsetX = logScrollX;
-
-		if (!movingCursor && logLastEvenVisible) {
-			if (((logLine + logVisibleLines) < logMessages.size())) {
-				setLogEndLine();
-			}
-		}
-		movingCursor = false;
-		logMessagesSownSize = logMessages.size();
-		int logIndex = logLine;
-		while (((lastY) < height) && (logIndex < logMessagesSownSize)) {
-			try {
-				String message = (String) logMessages.elementAt(logIndex);
-				lastY = writeln(g, message);
-				logIndex++;
-			} catch (ArrayIndexOutOfBoundsException e) {
-				logLastEvenVisible = true;
-				return;
-			}
-		}
-		logLastEvenVisible = (logIndex == logMessagesSownSize);
-	}
-
-	public void appendLog(int level, String message, Throwable throwable) {
-		if (!showLogDebug && (level == Logger.DEBUG)) {
-			return;
-		}
-		StringBuffer buf = new StringBuffer();
-		switch (level) {
-		case Logger.ERROR:
-			errorCount++;
-			buf.append("e.");
-			break;
-		case Logger.WARN:
-			buf.append("w.");
-			break;
-		case Logger.INFO:
-			buf.append("i.");
-			break;
-		}
-		buf.append(message);
-		if (throwable != null) {
-			buf.append(' ');
-			String className = throwable.getClass().getName();
-			buf.append(className.substring(1 + className.lastIndexOf('.')));
-			buf.append(':');
-			buf.append(throwable.getMessage());
-		}
-		String m = buf.toString().replace('\t', ' ');
-		int cr = m.indexOf("\n");
-		while (cr != -1) {
-			logMessages.addElement(m.substring(0, cr));
-			m = m.substring(cr + 1);
-			cr = m.indexOf("\n");
-		}
-		logMessages.addElement(m);
-
-		int logMax = 1000;
-		if (logMessages.size() >= logMax) {
-			Vector newLogMessages = new Vector();
-			for (int i = logMax - 5; i < logMax; i++) {
-				newLogMessages.addElement(logMessages.elementAt(i));
-			}
-			logMessages = newLogMessages;
-			logLine = 0;
-		}
-
-		if (logLastEvenVisible) {
-			// BlueCoveTestMIDlet.display.flashBacklight(0);
-			repaint();
-		}
-	}
-
-	private void setLogEndLine() {
-		logLine = logMessages.size() - logVisibleLines;
-		if (logLine < 0) {
-			logLine = 0;
-		}
+		return msg.toString();
 	}
 
 	protected void keyPressed(int keyCode) {
@@ -262,8 +137,7 @@ public class BlueCoveTestCanvas extends Canvas implements CommandListener, Logge
 			printFailureLog();
 			break;
 		case '0':
-			logScrollX = 0;
-			setLogEndLine();
+			logScrollBottom();
 			break;
 		case '*':
 			Switcher.startDiscovery();
@@ -293,61 +167,13 @@ public class BlueCoveTestCanvas extends Canvas implements CommandListener, Logge
 			clear();
 			break;
 		default:
-			int action = getGameAction(keyCode);
-			switch (action) {
-			case UP:
-				if (logLine > 0) {
-					logLine--;
-					movingCursor = true;
-				}
-				break;
-			case DOWN:
-				if ((logLine + logVisibleLines - 1) < logMessages.size()) {
-					logLine++;
-				}
-				break;
-			case RIGHT:
-				if (logScrollX > -500) {
-					logScrollX -= 20;
-				}
-				break;
-			case LEFT:
-				if (logScrollX < 0) {
-					logScrollX += 20;
-				}
-				break;
-			}
+			logLinesMove(getGameAction(keyCode));
 		}
 		repaint();
 	}
 
 	protected void keyRepeated(int keyCode) {
-		int action = getGameAction(keyCode);
-		switch (action) {
-		case UP:
-			if (logLine > 0) {
-				logLine--;
-			}
-			break;
-		case DOWN:
-			if ((logLine + logVisibleLines - 1) < logMessages.size()) {
-				logLine++;
-			}
-			break;
-		case RIGHT:
-			if (logScrollX > -500) {
-				logScrollX -= 20;
-			}
-			break;
-		case LEFT:
-			if (logScrollX < 0) {
-				logScrollX += 20;
-			}
-			break;
-		default:
-			return;
-		}
-		repaint();
+		logLinesMove(getGameAction(keyCode));
 	}
 
 	private void stopSwitcher() {
@@ -415,7 +241,7 @@ public class BlueCoveTestCanvas extends Canvas implements CommandListener, Logge
 				+ TestResponderClient.failure.countFailure);
 		Logger.info("*Server Success:" + TestResponderServer.countSuccess + " Failure:"
 				+ TestResponderServer.failure.countFailure);
-		setLogEndLine();
+		logScrollBottom();
 	}
 
 	private void printFailureLog() {
@@ -433,14 +259,11 @@ public class BlueCoveTestCanvas extends Canvas implements CommandListener, Logge
 		Logger.debug("Server avg conn time " + TestResponderServer.connectionDuration.avg() + " msec");
 
 		TestResponderServer.failure.writeToLog();
-		setLogEndLine();
+		logScrollBottom();
 	}
 
 	private void clear() {
-		logMessages.removeAllElements();
-		errorCount = 0;
-		logLine = 0;
-		logScrollX = 0;
+		clearLog();
 		TestResponderClient.clear();
 		TestResponderServer.clear();
 		Switcher.clear();
@@ -512,7 +335,7 @@ public class BlueCoveTestCanvas extends Canvas implements CommandListener, Logge
 				}
 			}
 		};
-		BlueCoveTestMIDlet.invokeLater(r);
+		ThreadUtils.invokeLater(r, c.getLabel());
 	}
 
 }

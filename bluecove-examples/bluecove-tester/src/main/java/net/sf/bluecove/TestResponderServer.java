@@ -42,13 +42,16 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.IOUtils;
+import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.TimeUtils;
+
 import net.sf.bluecove.se.JavaSECommon;
 import net.sf.bluecove.util.BluetoothTypesInfo;
 import net.sf.bluecove.util.CollectionUtils;
 import net.sf.bluecove.util.CountStatistic;
-import net.sf.bluecove.util.IOUtils;
 import net.sf.bluecove.util.TimeStatistic;
-import net.sf.bluecove.util.TimeUtils;
 
 public class TestResponderServer implements CanShutdown, Runnable {
 
@@ -306,7 +309,7 @@ public class TestResponderServer implements CanShutdown, Runnable {
 			lastActivityTime = System.currentTimeMillis();
 			monitorServer = TestTimeOutMonitor.create("ServerUp", this, Consts.serverUpTimeOutSec);
 		}
-		Configuration.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
+		RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
 		try {
 			LocalDevice localDevice = LocalDevice.getLocalDevice();
 			try {
@@ -399,7 +402,7 @@ public class TestResponderServer implements CanShutdown, Runnable {
 						}
 						lastActivityTime = System.currentTimeMillis();
 						ServerConnectionRunnable r = new ServerConnectionRunnable(conn);
-						Thread t = Configuration.cldcStub.createNamedThread(r, r.getName());
+						Thread t = RuntimeDetect.cldcStub.createNamedThread(r, r.getName());
 						t.start();
 						if (!Configuration.serverAcceptWhileConnected.booleanValue()) {
 							while (r.isRunning) {
@@ -564,8 +567,8 @@ public class TestResponderServer implements CanShutdown, Runnable {
 	public void shutdown() {
 		Logger.info("shutdownServer");
 		stoped = true;
-		if (Configuration.cldcStub != null) {
-			Configuration.cldcStub.interruptThread(thread);
+		if (RuntimeDetect.cldcStub != null) {
+			RuntimeDetect.cldcStub.interruptThread(thread);
 		}
 		closeServer();
 	}
