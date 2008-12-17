@@ -95,6 +95,8 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			}
 			if (this.isConnected) {
 				DebugLog.error("OBEXServerSession error", e);
+			} else {
+				DebugLog.debug("OBEXServerSession error", e);
 			}
 		} finally {
 			DebugLog.debug("OBEXServerSession ends");

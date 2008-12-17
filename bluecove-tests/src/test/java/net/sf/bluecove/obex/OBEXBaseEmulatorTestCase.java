@@ -26,6 +26,7 @@ package net.sf.bluecove.obex;
 
 import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
+import javax.obex.Authenticator;
 import javax.obex.HeaderSet;
 import javax.obex.ServerRequestHandler;
 import javax.obex.SessionNotifier;
@@ -55,7 +56,7 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 
 	private final Object acceptedConnectionLock = new Object();
 
-	private boolean ingoreServerErrors = false;
+	private volatile boolean ingoreServerErrors = false;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -80,6 +81,10 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 
 	protected abstract ServerRequestHandler createRequestHandler();
 
+	protected Authenticator getServerAuthenticator() {
+		return null;
+	}
+
 	@Override
 	protected Runnable createTestServer() {
 		return new TestCaseRunnable() {
@@ -87,7 +92,8 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 				SessionNotifier serverConnection = (SessionNotifier) Connector.open("btgoep://localhost:" + serverUUID
 						+ ";name=ObexTest");
 				synchronized (acceptedConnectionLock) {
-					serverAcceptedConnection = serverConnection.acceptAndOpen(createRequestHandler());
+					serverAcceptedConnection = serverConnection.acceptAndOpen(createRequestHandler(),
+							getServerAuthenticator());
 				}
 			}
 		};

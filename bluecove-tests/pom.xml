@@ -16,7 +16,7 @@
     <artifactId>bluecove-tests</artifactId>
     <name>bluecove-tests</name>
 
-    <description>Project contains Unit Tests used to test bluecove using Emulator</description>
+    <description>Project contains Unit Tests used to test bluecove OBEX using Emulator</description>
 
     <distributionManagement>
         <!-- no-deployment -->
