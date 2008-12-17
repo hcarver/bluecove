@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0">
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.sf.bluecove</groupId>
+        <artifactId>bluecove-examples</artifactId>
+        <version>2.1.0-SNAPSHOT</version><!--bluecove-version-->
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>bluecove-tester-base</artifactId>
+    <name>bluecove-tester-base</name>
+
+    <description>Common module used for tests in J2ME and J2SE environments</description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.microemu</groupId>
+            <artifactId>microemulator</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pyx4me</groupId>
+            <artifactId>cldcunit</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pyx4me</groupId>
+            <artifactId>cldcunit-se</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.3</source>
+                    <target>1.1</target>
+                    <compilerArguments>
+                        <bootclasspath>${settings.localRepository}/org/microemu/cldcapi10/${me2Version}/cldcapi10-${me2Version}.jar${path.separator}${settings.localRepository}/org/microemu/midpapi20/${me2Version}/midpapi20-${me2Version}.jar</bootclasspath>
+                    </compilerArguments>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.microemu</groupId>
+                        <artifactId>midpapi20</artifactId>
+                        <version>${me2Version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
