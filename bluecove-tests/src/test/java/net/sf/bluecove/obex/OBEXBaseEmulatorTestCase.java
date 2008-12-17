@@ -56,12 +56,12 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 
 	private final Object acceptedConnectionLock = new Object();
 
-	private volatile boolean ingoreServerErrors = false;
+	private volatile boolean ingoreServerErrors = true;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		ingoreServerErrors = false;
+		ingoreServerErrors = true;
 		serverRequestHandlerInvocations = 0;
 		serverHeaders = null;
 		serverAcceptedConnection = null;
@@ -74,6 +74,7 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 		if (errors != 0) {
 			DebugLog.error("Test Server errors " + errors);
 			if (!ingoreServerErrors) {
+			    // This may hide the assert message
 				throw new Error("Test Server errors " + errors);
 			}
 		}
@@ -81,7 +82,7 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 
 	protected abstract ServerRequestHandler createRequestHandler();
 
-	protected Authenticator getServerAuthenticator() {
+	protected Authenticator getServerAuthenticator(ServerRequestHandler handler) {
 		return null;
 	}
 
@@ -92,8 +93,8 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 				SessionNotifier serverConnection = (SessionNotifier) Connector.open("btgoep://localhost:" + serverUUID
 						+ ";name=ObexTest");
 				synchronized (acceptedConnectionLock) {
-					serverAcceptedConnection = serverConnection.acceptAndOpen(createRequestHandler(),
-							getServerAuthenticator());
+				    ServerRequestHandler handler = createRequestHandler();
+					serverAcceptedConnection = serverConnection.acceptAndOpen(handler, getServerAuthenticator(handler));
 				}
 			}
 		};
@@ -105,6 +106,7 @@ public abstract class OBEXBaseEmulatorTestCase extends BaseEmulatorTestCase {
 	}
 
 	protected void assertServerErrors() {
+	    ingoreServerErrors = false;
 		assertEquals("OBEX Server Errors", 0, BlueCoveInternals.readServerErrorCount());
 	}
 

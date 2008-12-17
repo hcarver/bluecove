@@ -251,6 +251,10 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		return this.responseCode;
 	}
 
+	boolean hasIncommingData() {
+	    return headerValues.contains(new Integer(OBEX_HDR_BODY)) ||  headerValues.contains(new Integer(OBEX_HDR_BODY_END));
+	}
+	
 	static HeaderSet cloneHeaders(HeaderSet headers) throws IOException {
 		if (headers == null) {
 			return null;

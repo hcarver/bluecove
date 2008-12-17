@@ -33,10 +33,6 @@ import javax.obex.ResponseCodes;
 
 import com.intel.bluetooth.DebugLog;
 
-/**
- *
- *
- */
 class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperationReceive, OBEXOperationDelivery {
 
 	protected OBEXServerOperationPut(OBEXServerSessionImpl session, HeaderSet receivedHeaders, boolean finalPacket)
@@ -108,9 +104,14 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 		switch (opcode) {
 		case OBEXOperationCodes.PUT_FINAL:
 		case OBEXOperationCodes.PUT:
-			HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
-			OBEXHeaderSetImpl.appendHeaders(this.receivedHeaders, requestHeaders);
-			processIncommingData(requestHeaders, finalPacket);
+		    OBEXHeaderSetImpl requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+			if (!session.handleAuthenticationResponse(requestHeaders)) {
+			    errorReceived = true;
+			    session.writePacket(ResponseCodes.OBEX_HTTP_UNAUTHORIZED, null);
+	        } else {
+	            OBEXHeaderSetImpl.appendHeaders(this.receivedHeaders, requestHeaders);
+			    processIncommingData(requestHeaders, finalPacket);
+	        }
 			break;
 		case OBEXOperationCodes.ABORT:
 			processAbort();

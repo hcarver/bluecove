@@ -70,7 +70,7 @@ abstract class OBEXUtils {
 			}
 			int rc = is.read(b, off + got, len - got);
 			if (rc < 0) {
-				throw new EOFException();
+				throw new EOFException("EOF while reading OBEX packet");
 			}
 			got += rc;
 		}

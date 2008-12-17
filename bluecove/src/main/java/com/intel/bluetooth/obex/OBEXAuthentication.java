@@ -35,10 +35,6 @@ import javax.obex.ServerRequestHandler;
 
 import com.intel.bluetooth.DebugLog;
 
-/**
- *
- *
- */
 class OBEXAuthentication {
 
 	private static byte[] privateKey;
@@ -225,7 +221,7 @@ class OBEXAuthentication {
 		return challenge.write();
 	}
 
-	static void handleAuthenticationResponse(OBEXHeaderSetImpl incomingHeaders, Authenticator authenticator,
+	static boolean handleAuthenticationResponse(OBEXHeaderSetImpl incomingHeaders, Authenticator authenticator,
 			ServerRequestHandler serverHandler) throws IOException {
 		for (Enumeration iter = incomingHeaders.getAuthenticationResponses(); iter.hasMoreElements();) {
 			byte[] authResponse = (byte[]) iter.nextElement();
@@ -245,11 +241,14 @@ class OBEXAuthentication {
 				} else {
 					throw new IOException("Authentication failure");
 				}
+			} else {
+			    return true;
 			}
 		}
+		return false;
 	}
 
-	public static void handleAuthenticationChallenge(OBEXHeaderSetImpl incomingHeaders, OBEXHeaderSetImpl replyHeaders,
+	static void handleAuthenticationChallenge(OBEXHeaderSetImpl incomingHeaders, OBEXHeaderSetImpl replyHeaders,
 			Authenticator authenticator) throws IOException {
 		for (Enumeration iter = incomingHeaders.getAuthenticationChallenges(); iter.hasMoreElements();) {
 			byte[] authChallenge = (byte[]) iter.nextElement();
