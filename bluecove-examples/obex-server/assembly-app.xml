@@ -13,6 +13,7 @@
             <outputFileNameMapping></outputFileNameMapping>
             <includes>
                 <include>net.sf.bluecove:bluecove</include>
+                <include>net.sf.bluecove:bluecove-gpl</include>
             </includes>
         </dependencySet>
     </dependencySets>
