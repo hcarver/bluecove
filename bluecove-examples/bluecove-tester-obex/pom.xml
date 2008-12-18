@@ -121,6 +121,7 @@
                     <appendClassifier>false</appendClassifier>
                     <jarfile>${mainjarname}</jarfile>
                     <jadfile>${mainjarname}</jadfile>
+                    <midletName>BlueCoveO</midletName>
                     <!--proguardInclude>${basedir}/proguard.conf</proguardInclude-->
                     <proguardInclude></proguardInclude>
                     <proguardOptions>

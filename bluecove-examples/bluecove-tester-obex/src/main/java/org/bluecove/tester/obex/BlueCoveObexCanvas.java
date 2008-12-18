@@ -54,6 +54,8 @@ public class BlueCoveObexCanvas extends LoggerCanvas implements CommandListener,
 
 		TestSelector.testControl = this;
 
+		logTimeStamp = true;
+
 		addCommand(exitCommand);
 		addCommand(startRunCommand);
 		addCommand(selectTestCommand);
@@ -68,7 +70,7 @@ public class BlueCoveObexCanvas extends LoggerCanvas implements CommandListener,
 
 	public void pause(String mesage) {
 		addCommand(continueCommand);
-		Logger.info("pause:" + mesage);
+		Logger.info("pause: " + mesage);
 		pauseOn = true;
 		while (pauseOn) {
 			synchronized (pauseLock) {

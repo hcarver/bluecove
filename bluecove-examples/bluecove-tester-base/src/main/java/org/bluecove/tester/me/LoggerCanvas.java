@@ -32,10 +32,13 @@ import javax.microedition.lcdui.Graphics;
 
 import org.bluecove.tester.log.Logger;
 import org.bluecove.tester.log.LoggerAppender;
+import org.bluecove.tester.util.TimeUtils;
 
 public class LoggerCanvas extends Canvas implements LoggerAppender {
 
 	protected boolean showLogDebug = true;
+
+	public static boolean logTimeStamp = false;
 
 	private int line;
 
@@ -169,6 +172,9 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 			return;
 		}
 		StringBuffer buf = new StringBuffer();
+		if (logTimeStamp) {
+			buf.append(TimeUtils.timeStampNowToString()).append(" ");
+		}
 		switch (level) {
 		case Logger.ERROR:
 			errorCount++;

@@ -26,6 +26,8 @@ package org.bluecove.tester.obex.test;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.obex.ClientSession;
 import javax.obex.HeaderSet;
@@ -46,10 +48,14 @@ public class OBEXPutOutputStream extends OBEXClientBase {
 		header.setHeader(HeaderSet.NAME, "READ");
 		header.setHeader(HeaderSet.LENGTH, new Long(0x10000));
 		pause("put");
+		Calendar c = Calendar.getInstance();
+		c.setTime(new Date());
+		header.setHeader(HeaderSet.TIME_ISO_8601, c);
 		Operation op = con.put(header);
 
 		pause("openOutputStream");
 		OutputStream out = op.openOutputStream();
+		pause("write");
 		for (int i = 0; i < 0xF; i++) {
 			out.write(i);
 		}
