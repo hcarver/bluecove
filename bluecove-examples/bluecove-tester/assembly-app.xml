@@ -17,6 +17,7 @@
             <outputDirectory></outputDirectory>
             <outputFileNameMapping></outputFileNameMapping>
             <includes>
+                <include>net.sf.bluecove:bluecove-tester-base</include>
                 <include>net.sf.bluecove:bluecove</include>
                 <include>net.sf.bluecove:bluecove-gpl</include>
                 <include>com.pyx4me:cldcunit</include>
