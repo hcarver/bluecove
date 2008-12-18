@@ -9,12 +9,7 @@ title BlueCove-tester-console
 set JVM_ARGS=
 set JVM_ARGS=%JVM_ARGS% -Dbluecove.connect.timeout=10000
 
-set CP=%BLUECOVE_TESTER_HOME%\target\classes
-set CP=%CP%;%BLUECOVE_PROJECT_HOME%\target\classes
-set CP=%CP%;%BLUECOVE_TESTER_HOME%\target\cldcunit.jar
-set CP=%CP%;%BLUECOVE_TESTER_HOME%\target\cldcunit-se.jar
-
-set START_ARGS=-cp "%CP%" -Dbluecove.native.path="%BLUECOVE_PROJECT_HOME%/src/main/resources" %BLUECOVE_MAIN%
+set START_ARGS=-cp "%BLUECOVE_TESTER_CP%" -Dbluecove.native.path="%BLUECOVE_PROJECT_HOME%/src/main/resources" %BLUECOVE_MAIN%
 rem set START_ARGS=-jar target\bluecove-tester-%VERSION%-app.jar
 
 echo %START_ARGS%

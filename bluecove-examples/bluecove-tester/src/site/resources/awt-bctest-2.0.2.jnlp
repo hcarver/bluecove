@@ -21,7 +21,6 @@
   <resources>
     <j2se version="1.1+"/>
     <jar href="bluecove-2.0.2-signed.jar"/>
-    <jar href="junit-3.8.1-signed.jar"/>
     <jar href="bluecove-tester-signed.jar" main="true"/>
   </resources>
 

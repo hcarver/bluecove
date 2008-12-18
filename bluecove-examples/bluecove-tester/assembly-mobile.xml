@@ -11,6 +11,19 @@
             <unpack>true</unpack>
             <unpackOptions>
                 <excludes>
+                    <exclude>META-INF/**</exclude>
+                </excludes>
+            </unpackOptions>
+            <outputDirectory></outputDirectory>
+            <outputFileNameMapping></outputFileNameMapping>
+            <includes>
+                <include>net.sf.bluecove:bluecove-tester-base</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <excludes>
                     <exclude>bluecove.dll</exclude>
                     <exclude>intelbth.dll</exclude>
                     <exclude>libbluecove.jnilib</exclude>
@@ -24,7 +37,6 @@
             <outputDirectory></outputDirectory>
             <outputFileNameMapping></outputFileNameMapping>
             <includes>
-                <include>net.sf.bluecove:bluecove-tester-base</include>
                 <include>net.sf.bluecove:bluecove</include>
                 <include>com.pyx4me:cldcunit</include>
             </includes>

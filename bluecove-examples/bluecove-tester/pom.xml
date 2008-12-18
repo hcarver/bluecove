@@ -254,6 +254,31 @@
                        <phase>package</phase>
                        <goals><goal>single</goal></goals>
                        <configuration>
+                           <attach>false</attach>
+                           <appendAssemblyId>false</appendAssemblyId>
+                           <descriptors>
+                               <descriptor>assembly.xml</descriptor>
+                           </descriptors>
+                           <archive>
+                                <manifest>
+                                    <mainClass>net.sf.bluecove.se.Main</mainClass>
+                                </manifest>
+                                <!-- this does not work, bug http://jira.codehaus.org/browse/MASSEMBLY-188 -->
+                                <manifestEntries>
+                                    <Version>${label}</Version>
+                                    <Build-Time>${cctimestamp}</Build-Time>
+                                    <Build-Time>${cctimestamp}</Build-Time>
+                                    <Implementation-Version2>${pom.version}</Implementation-Version2>
+                                    <SVN-Revision>${scm.revision}</SVN-Revision>
+                                </manifestEntries>
+                            </archive>
+                       </configuration>
+                    </execution>
+                    <execution>
+                       <id>jar-with-dependencies-bluecove</id>
+                       <phase>package</phase>
+                       <goals><goal>single</goal></goals>
+                       <configuration>
                            <attach>true</attach>
                            <appendAssemblyId>true</appendAssemblyId>
                            <descriptors>

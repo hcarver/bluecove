@@ -19,11 +19,6 @@ rem set JVM_ARGS=%JVM_ARGS% -Xdebug -Xrunjdwp:transport=dt_socket,server=y,addre
 
 title CDCTK 1.0
 
-set CP=%BLUECOVE_TESTER_HOME%\target\classes
-rem set CP=%CP%;%BLUECOVE_PROJECT_HOME%\target\classes
-set CP=%CP%;%BLUECOVE_TESTER_HOME%\target\cldcunit.jar
-set CP=%CP%;%BLUECOVE_TESTER_HOME%\target\cldcunit-se.jar
-
 
 set JVM_ARGS=%JVM_ARGS% -Dbluecove.native.resource=false
 rem set JVM_ARGS=%JVM_ARGS% -Dbluecove.native.path=%BLUECOVE_PROJECT_HOME%\src\main\resources
@@ -34,7 +29,7 @@ set BOOTCLASSPATH=%BOOTCLASSPATH%;%BLUECOVE_PROJECT_HOME%\target\classes
 
 set JVM_ARGS=%JVM_ARGS% -Xbootclasspath:%BOOTCLASSPATH%
 
-set START_ARGS=-cp %CP% %BLUECOVE_MAIN%
+set START_ARGS=-cp %BLUECOVE_TESTER_CP% %BLUECOVE_MAIN%
 rem set START_ARGS=-jar %BLUECOVE_TESTER_APP_JAR%
 
 "%CDCTK_HOME%\bin\emulator" %JVM_ARGS% %START_ARGS%

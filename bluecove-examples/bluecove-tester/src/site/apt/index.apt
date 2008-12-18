@@ -123,14 +123,14 @@ java -cp avetanaBluetooth.jar;bluecove-tester-app.jar net.sf.bluecove.se.Main
     You can download the {{{./bluecove-tester.jar}bluecove-tester.jar}} application jar and run it with or without BlueCove JSR-82 in calsspath.
 
 ---
-java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:bluecove-tester.jar:junit-3.8.1.jar net.sf.bluecove.se.Main
+java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:bluecove-tester.jar net.sf.bluecove.se.Main
 ---
 
 ---
-java -cp avetanaBluetooth.jar:bluecove-tester.jar:junit-3.8.1.jar net.sf.bluecove.se.Main
+java -cp avetanaBluetooth.jar:bluecove-tester.jar net.sf.bluecove.se.Main
 ---
 
-    bluecove-tester-app.jar is the same application as bluecove-tester.jar only JUnit and BlueCove classes are included.
+    bluecove-tester-app.jar is the same application as bluecove-tester.jar only BlueCove classes are included.
 
 
 * This is the test {MIDlet}. It can run on a {{{http://code.google.com/p/bluecove/wiki/phones} cell phone with JSR-82}}
@@ -198,7 +198,7 @@ java -cp avetanaBluetooth.jar:bluecove-tester.jar:junit-3.8.1.jar net.sf.bluecov
         * <<<{{{./awt-bctest-2.0.1.jnlp}\u00bbStart with BlueCove v 2.0.1}}>>>
 
         * <<<{{{./awt-bctest-2.0.2.jnlp}\u00bbStart with BlueCove v 2.0.2}}>>>
-        
+
         * <<<{{{./awt-bctest-2.0.3.jnlp}\u00bbStart with BlueCove v 2.0.3}}>>>
 
 * Servers in this application can be used as traffic generator
