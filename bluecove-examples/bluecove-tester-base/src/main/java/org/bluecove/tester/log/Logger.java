@@ -68,7 +68,7 @@ public class Logger {
 	}
 
 	public static void debug(String message, int data) {
-		debug(message, data);
+		debug(message, String.valueOf(data));
 	}
 
 	public static void debug(String message, boolean data) {

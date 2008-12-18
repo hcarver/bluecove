@@ -62,6 +62,10 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 
 	private boolean logLastEvenVisible = true;
 
+	protected int backgroundColor = 255;
+	
+	protected int fontColor = 0;
+	
 	public LoggerCanvas() {
 		Logger.addAppender(this);
 	}
@@ -73,6 +77,10 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 	protected String getCanvasStatusText() {
 		return null;
 	}
+	
+	protected void paintBackground(Graphics g, int width, int height) {
+	    
+	}
 
 	public int writeln(Graphics g, String s) {
 		int h = (g.getFont().getHeight() + 1);
@@ -82,6 +90,7 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 		return y + h;
 	}
 
+	
 	protected void paint(Graphics g) {
 		lineOffsetY = 0;
 		lineOffsetX = 0;
@@ -89,10 +98,10 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 		int width = getWidth();
 		int height = getHeight();
 
-		g.setGrayScale(255);
+		g.setGrayScale(backgroundColor);
 		g.fillRect(0, 0, width, height);
-
-		g.setColor(0);
+		paintBackground(g, width, height);
+		g.setColor(fontColor);
 		int lastY = 0;
 		String title = getCanvasTitleText();
 		if (title != null) {
