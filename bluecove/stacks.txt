@@ -1,5 +1,7 @@
 #summary BlueCove supported stacks.
 
+  !!!! NOTE This page in not updated see http://code.google.com/p/bluecove/wiki/stacks for recent information !!!!!
+
 = BlueCove supported stacks =
 
    On Windows WIDCOMM and BlueSoleil stacks are added in BlueCove version 2.0.0.
@@ -48,8 +50,8 @@
       So ServiceSearch *may* return service even when it is down.
     * L2CAP unable to send and receive empty L2CAP packet
 
-    * `ServiceRecord` attributes of `DataElement` types U_INT_8, INT_8, INT_16 and UINT_16 are not properly discovered (fixed in BTW-6_1_0_1501-SDK, you should make your binaries)
-    * On Vista WIDCOMM stack detected as Microsoft with all the benefits of one. If you need L2CAP support on Vista and Broadcom v6 use [http://snapshot.bluecove.org/special-build/ custom bluecove.dll build]
+    * For BlueCove v2.0.x: `ServiceRecord` attributes of `DataElement` types U_INT_8, INT_8, INT_16 and UINT_16 are not properly discovered (fixed in BTW-6_1_0_1501-SDK, you should make your binaries)
+    * For BlueCove v2.0.x: On Vista WIDCOMM stack detected as Microsoft with all the benefits of one. If you need L2CAP support on Vista and Broadcom v6 use [http://snapshot.bluecove.org/special-build/ custom bluecove.dll build]
 
 == Winsock (Microsoft) ==
 

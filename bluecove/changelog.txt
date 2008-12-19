@@ -1,5 +1,7 @@
 @version $Id$
 
+!!!! NOTE This page in not updated see http://code.google.com/p/bluecove/wiki/Changelog for recent information !!!!!
+
 * 2.1.0 to be released 2008-12-XX
 
     2008-12-03
