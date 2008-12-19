@@ -29,6 +29,7 @@
     </distributionManagement>
 
     <modules>
+        <module>dependency-fix</module>
         <module>bluecove-tester-base</module>
         <module>bluecove-tester</module>
         <module>bluecove-tester-obex</module>
