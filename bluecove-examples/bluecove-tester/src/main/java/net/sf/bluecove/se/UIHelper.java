@@ -34,6 +34,7 @@ import net.sf.bluecove.Configuration;
 import net.sf.bluecove.RemoteDeviceInfo;
 import net.sf.bluecove.Switcher;
 import net.sf.bluecove.TestResponderClient;
+import net.sf.bluecove.TestResponderCommon;
 import net.sf.bluecove.TestResponderServer;
 
 /**
@@ -96,7 +97,8 @@ public class UIHelper {
 	}
 
 	public static void configurationForSpeedTest(int testNumber, boolean l2cap) {
-		Configuration.tgSize = 251;
+	    TestResponderCommon.receiveMTU_max = 1024;
+	    Configuration.tgSize = 251;
 		Configuration.tgSleep = 0;
 		Configuration.clientContinuous.setValue(false);
 		Configuration.TEST_CASE_FIRST.setValue(testNumber);
