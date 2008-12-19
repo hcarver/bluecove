@@ -8,14 +8,14 @@
 
 BlueCove Bluetooth speed test results
 
- The bluecove-tester traffic generator test #100 and #101 with 1024 bytes buffer was used, test duration 2 minutes
+ The bluecove-tester traffic generator test #100 and #101 with 1024 bytes buffer, test duration 2 minutes
 
 *--------------------------------+--------------------------------+----------------------------------------------+
 | <<Sending Device>>             | <<Reciving Device>>            |  RFCOMM transfer speed
 *--------------------------------+--------------------------------+-
-| Winsock,  MS BT v2             | Winsock, D-Link DBT-120        |   260,000 bit/s
+| Winsock,  MS BT v2             | Winsock,  D-Link DBT-120       |   260,000 bit/s
 *--------------------------------+--------------------------------+-
-| Winsock,  MS BT v2             | WIDCOMM, TRUST BT-2210Tp       |   300,000 bit/s
+| Winsock,  MS BT v2             | WIDCOMM,  TRUST BT-2210Tp      |   300,000 bit/s
 *--------------------------------+--------------------------------+-
 | Winsock,  D-Link DBT-120       | WIDCOMM,  TRUST BT-2210Tp      |   290,000 bit/s
 *--------------------------------+--------------------------------+-
@@ -26,8 +26,14 @@ BlueCove Bluetooth speed test results
 | Winsock,  D-Link DBT-120       | BlueZ,    TRUST BT-2210Tp      |   530,000 bit/s {{{#*}*}}
 *--------------------------------+--------------------------------+-
 | BlueZ,    TRUST BT-2210Tp      | Winsock,  D-Link DBT-120       |   360,000 bit/s {{{#*}*}}
-*--------------------------------+--------------------------------+
-| BlueZ,    TRUST BT-2210Tp      | Winsock,  Tiny EDR             | 1,200,000 bit/s
+*--------------------------------+--------------------------------+-
+| BlueZ,    TRUST BT-2210Tp      | Winsock,  Tiny EDR             | 1,150,000 bit/s
+*--------------------------------+--------------------------------+-
+| Winsock,  Tiny EDR             | BlueZ,    TRUST BT-2210Tp      |   790,000 bit/s
+*--------------------------------+--------------------------------+-
+| BlueZ,    TRUST BT-2210Tp      | BlueZ,    Tiny EDR             |   910,000 bit/s
+*--------------------------------+--------------------------------+-
+| BlueZ,    Tiny EDR             | BlueZ,    TRUST BT-2210Tp      |   660,000 bit/s
 *--------------------------------+--------------------------------+-
 | WIDCOMM,  TRUST BT-2210Tp      | WIDCOMM,  TRUST BT-2210Tp      |   330,000 bit/s
 *--------------------------------+--------------------------------+-
@@ -43,6 +49,12 @@ BlueCove Bluetooth speed test results
 *--------------------------------+--------------------------------+-
 | Winsock,  D-Link DBT-120       | Mac OS X, TRUST BT-2210Tp      |   360,000 bit/s {{{#*}*}}
 *--------------------------------+--------------------------------+-
+| Mac OS X, Apple Integrated     | Winsock,  Tiny EDR             |   TODO
+*--------------------------------+--------------------------------+-
+| Winsock,  Tiny EDR             | Mac OS X, Apple Integrated     |   TODO
+*--------------------------------+--------------------------------+-
+| BlueZ,    TRUST BT-2210Tp      | Mac OS X, Apple Integrated     |   TODO
+*--------------------------------+--------------------------------+-
 | WIDCOMM,  TRUST BT-2210Tp      | SE K790                        |   230,000 bit/s
 *--------------------------------+--------------------------------+-
 | Winsock,  D-Link DBT-120       | SE K790                        |   510,000 bit/s {{{#*}*}}
@@ -51,9 +63,15 @@ BlueCove Bluetooth speed test results
 *--------------------------------+--------------------------------+-
 | SE K790                        | Winsock,  D-Link DBT-120       |   250,000 bit/s {{{#*}*}}
 *--------------------------------+--------------------------------+-
+| BlueZ,    Tiny EDR             | SE K790                        |   530,000 bit/s {{{#*}*}}
+*--------------------------------+--------------------------------+-
+| SE K790                        | BlueZ,    Tiny EDR             |   130,000 bit/s {{{#*}*}}
+*--------------------------------+--------------------------------+-
 | Winsock,  Tiny EDR             | Nokia 5310 XM                  |   880,000 bit/s
 *--------------------------------+--------------------------------+-
 | Nokia 5310 XM                  | Winsock,  Tiny EDR             | 1,200,000 bit/s
+*--------------------------------+--------------------------------+-
+| Nokia 5310 XM                  | BlueZ,    Tiny EDR             |   777,000 bit/s
 *--------------------------------+--------------------------------+-
 | Winsock,  Tiny EDR             | SE K790                        |   550,000 bit/s {{{#*}*}}
 *--------------------------------+--------------------------------+-
@@ -72,6 +90,8 @@ The reciving speed was measured since sent L2CAP pakets may be lost.
 | WIDCOMM,  TRUST BT-2210Tp      | WIDCOMM,  TRUST BT-2210Tp      |  1,200,000 bit/s
 *--------------------------------+--------------------------------+-
 | WIDCOMM,  TRUST BT-2210Tp      | BlueZ,    TRUST BT-2210Tp      |  1,300,000 bit/s
+*--------------------------------+--------------------------------+-
+| WIDCOMM,  TRUST BT-2210Tp      | BlueZ,    Tiny EDR             |   800,000 bit/s
 *--------------------------------+--------------------------------+-
 | BlueZ,    MS BT v2             | BlueZ,    TRUST BT-2210Tp      |  650,000 bit/s
 *--------------------------------+--------------------------------+-
@@ -99,4 +119,6 @@ The reciving speed was measured since sent L2CAP pakets may be lost.
         * BlueCove with BlueZ Bluetooth stack on Linux Fedora Core 9  32 bit, all above adapters
 
         * BlueCove with Mac OS X 10.5.2, TRUST BT-2210Tp or D-Link DBT-120 USB Bluetooth Adapter
+
+        * BlueCove with Mac OS X 10.5.5 i386, Two 2.8GHz Quad-Core Intel Xeon, Apple Integrated Cambridge Silicon Radio
 
