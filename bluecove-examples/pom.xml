@@ -33,7 +33,8 @@
         <module>bluecove-tester-base</module>
         <module>bluecove-tester</module>
         <module>bluecove-tester-obex</module>
-        <module>bluecove-webstart</module>
+        <!-- only buildByMicroEmulatorTeam or build server edit settings.xml to enable -->
+        <!--module>bluecove-webstart</module-->
         <module>bluecove-microemu-starter</module>
         <module>obex-install</module>
         <module>obex-server</module>
@@ -87,7 +88,17 @@
 
     <profiles>
         <profile>
+            <id>buildByMicroEmulatorTeam</id>
+            <modules>
+                <module>bluecove-webstart</module>
+            </modules>
+        </profile>            
+        
+        <profile>
             <id>build</id>
+            <modules>
+                <module>bluecove-webstart</module>
+            </modules>
             <build>
                 <plugins>
                     <plugin>

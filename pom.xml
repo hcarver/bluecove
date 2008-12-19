@@ -486,6 +486,18 @@
         </profile>
 
         <profile>
+            <id>buildByMicroEmulatorTeam</id>
+            <activation>
+                <property>
+                    <name>MicroEmulator-keystore-pwd</name>
+                </property>
+            </activation>
+            <properties>
+                <buildByMicroEmulatorTeam>true</buildByMicroEmulatorTeam>
+            </properties>
+        </profile>
+        
+        <profile>
             <id>osx</id>
             <activation>
                 <os>
