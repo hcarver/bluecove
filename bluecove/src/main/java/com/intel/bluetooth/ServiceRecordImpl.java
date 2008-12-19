@@ -262,9 +262,9 @@ class ServiceRecordImpl implements ServiceRecord {
 			if (sortIDs[i] == sortIDs[i + 1]) {
 				throw new IllegalArgumentException();
 			}
-			DebugLog.debug0x("query for ", sortIDs[i]);
+			DebugLog.debug0x("srvRec query for attr", sortIDs[i]);
 		}
-		DebugLog.debug0x("query for ", sortIDs[sortIDs.length - 1]);
+		DebugLog.debug0x("srvRec query for attr", sortIDs[sortIDs.length - 1]);
 
 		return this.bluetoothStack.populateServicesRecordAttributeValues(this, sortIDs);
 	}
