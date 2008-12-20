@@ -24,8 +24,9 @@
     <property name="build_native" location="${target}/native"/>
     <property name="dist" location="${target}"/>
 
+    <property name="libs-universal" value="${basedir}/libs-universal"/>
+
     <property name="CC" value="gcc"/>
-    <property name="link" value="gcc"/>
     <property name="CC_compiler_options" value="-fPIC -fno-stack-protector"/>
 
     <target name="default" depends="compile, jni-headers, native-lib"/>
@@ -37,8 +38,9 @@
         <echo message="java.home ${java.home}"/>
         <available property="java-home.exists" file="${java.home}" type="dir"/>
         <antcall target="verify-java-home"/>
+        <antcall target="verify-cruisecontrol"/>
     </target>
-    
+
     <target name="init" depends="init-native">
         <!-- Create the time stamp -->
         <tstamp/>
@@ -55,10 +57,25 @@
              Download or build main BlueCove jar.
         </fail>
     </target>
-    
+
     <target name="verify-java-home" unless="java-home.exists">
         <fail>
              The path "${java.home}" does not exist.
+        </fail>
+    </target>
+
+    <target name="verify-cruisecontrol" unless="bluecove-main.exists">
+        <condition property="universal-bluez.not-found">
+            <and>
+                <equals arg1="${buildEnv}" arg2="cruisecontrol" />
+                <not>
+                    <available property="universal-bluez.exists" file="${libs-universal}/libbluetooth.so" type="file"/>
+                </not>
+            </and>
+        </condition>
+        <fail if="universal-bluez.not-found">.
+             Expected libs directory [${libs-universal}].
+             The universal-bluez does not exist on build server.
         </fail>
     </target>
 
@@ -126,8 +143,18 @@
         <property name="library_name" value="libbluecove${library_sufix}.so"/>
 
         <echo message="linking    .o -> ${library_name}"/>
-        <apply executable="${link}" parallel="true" failonerror="true">
+        <apply executable="${CC}" parallel="true" failonerror="true">
              <arg value="-shared"/>
+             <!--
+                This is used on Build Server to create Universal binary
+                 ldd libbluecove.so
+                     linux-gate.so.1 =>
+                     libbluetooth.so =>
+                The directory should contain libbluetooth.so binary edited to remove version from name e.g.
+                   libbluetooth.so.2 -> libbluetooth.so
+                   libbluetooth.so.3 -> libbluetooth.so
+             -->
+             <arg value="-L${libs-universal}"/>
              <arg value="-lbluetooth"/>
              <arg value="-nodefaultlibs"/>
              <arg value="-o"/>

@@ -24,18 +24,6 @@
     To build native library libbluecove-${os.arch}.so and bluecove-gpl-${version}.jar:
         ant all
 
-* Build server Hack for BlueZ 3 and BlueZ 4 compatibility.
-
-    On build server: 
-       we are binary editing /usr/lib/libbluetooth.so to remove version information:
-    
-    This way: ldd libbluecove.so
-         linux-gate.so.1 =>  (0xb7f12000)
-         libbluetooth.so => /usr/lib/libbluetooth.so (0xb7ee0000)
-         libc.so.6 => /lib/libc.so.6 (0xb7d6c000)
-         /lib/ld-linux.so.2 (0x007b9000)
-    
-
 * Native Library Compilation Requirements
 
     - GCC compiler (4.1 or newer)
@@ -59,3 +47,15 @@
             //for now create .h on another computer
             ant -Dbuild.compiler=jikes -Djni_headers_skip=true all
 
+* Build server Hack for BlueZ 3 and BlueZ 4 compatibility.
+
+    On build server:
+       We are binary editing libbluetooth.so to remove version information:
+
+    This way: ldd libbluecove.so
+         linux-gate.so.1 =>  (0xb7f12000)
+         libbluetooth.so => /usr/lib/libbluetooth.so (0xb7ee0000)
+         libc.so.6 => /lib/libc.so.6 (0xb7d6c000)
+         /lib/ld-linux.so.2 (0x007b9000)
+
+    And will run on BlueZ v3 and BlueZ v4.

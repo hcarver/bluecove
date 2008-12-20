@@ -162,6 +162,7 @@
                                     <tasks>
                                         <ant antfile="${basedir}/build.xml" target="compile-native-lib">
                                             <property name="basedir" value="${basedir}"/>
+                                            <property name="buildEnv" value="${buildEnv}"/>
                                             <property name="java.home" value="${java.home}"/>
                                         </ant>
                                     </tasks>
