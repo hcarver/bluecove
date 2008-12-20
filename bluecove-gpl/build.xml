@@ -8,10 +8,12 @@
         ant -Dbuild.compiler=jikes
      -->
 
-    <property name="product_version" value="2.1.0"/>
+    <property name="product_version" value="2.1.0-SNAPSHOT"/>
 
     <property name="bluecove_main_dist_dir" location="../bluecove/target"/>
     <property name="bluecove_main_jar" location="${bluecove_main_dist_dir}/bluecove-${product_version}.jar"/>
+
+    <property name="basedir" value="."/>
 
     <!-- set global properties for this build -->
     <property name="src" location="src/main/java"/>
@@ -23,11 +25,21 @@
     <property name="dist" location="${target}"/>
 
     <property name="CC" value="gcc"/>
+    <property name="link" value="gcc"/>
     <property name="CC_compiler_options" value="-fPIC -fno-stack-protector"/>
 
     <target name="default" depends="compile, jni-headers, native-lib"/>
 
-    <target name="init">
+    <target name="init-native">
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build_classes}"/>
+        <mkdir dir="${build_native}"/>
+        <echo message="java.home ${java.home}"/>
+        <available property="java-home.exists" file="${java.home}" type="dir"/>
+        <antcall target="verify-java-home"/>
+    </target>
+    
+    <target name="init" depends="init-native">
         <!-- Create the time stamp -->
         <tstamp/>
         <!-- Create the build directory structure used by compile -->
@@ -41,6 +53,12 @@
         <fail>
              The path "${bluecove_main_jar}" does not exist.
              Download or build main BlueCove jar.
+        </fail>
+    </target>
+    
+    <target name="verify-java-home" unless="java-home.exists">
+        <fail>
+             The path "${java.home}" does not exist.
         </fail>
     </target>
 
@@ -73,11 +91,14 @@
 
     </target>
 
-    <target name="native-lib" depends="jni-headers"
+    <target name="native-lib" depends="jni-headers, compile-native-lib"
         description="Create Native shared library">
+    </target>
 
+    <target name="compile-native-lib"  depends="init-native"
+        description="Create Native shared library">
         <echo message="compiling  .c -> .o"/>
-        <apply executable="${CC}" dest="${build_native}" parallel="false">
+        <apply executable="${CC}" dest="${build_native}" parallel="false" failonerror="true">
              <arg line="${CC_compiler_options}"/>
              <arg value="-I${java.home}/../include" />
              <arg value="-I${java.home}/../include/linux" />
@@ -105,15 +126,21 @@
         <property name="library_name" value="libbluecove${library_sufix}.so"/>
 
         <echo message="linking    .o -> ${library_name}"/>
-        <apply failonerror="true" executable="${CC}" parallel="true">
-             <fileset dir='${build_native}' includes="*.o"/>
+        <apply executable="${link}" parallel="true" failonerror="true">
              <arg value="-shared"/>
              <arg value="-lbluetooth"/>
              <arg value="-nodefaultlibs"/>
              <arg value="-o"/>
              <arg value="${target}/${library_name}"/>
+             <fileset dir='${build_native}' includes="*.o"/>
              <srcfile/>
         </apply>
+
+        <echo message="ldd ${library_name}"/>
+        <exec executable="ldd" failonerror="true">
+            <arg value="-v"/>
+            <arg value="${target}/${library_name}"/>
+        </exec>
 
         <copy file="${target}/${library_name}" todir="${resources}"/>
 
