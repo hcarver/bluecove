@@ -143,6 +143,7 @@
         </exec>
 
         <copy file="${target}/${library_name}" todir="${resources}"/>
+        <copy file="${target}/${library_name}" todir="${build_classes}"/>
 
     </target>
 
