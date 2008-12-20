@@ -90,7 +90,7 @@
                         <inclusions>
                             <inclusion>
                                 <groupId>net.sf.bluecove</groupId><artifactId>bluecove</artifactId>
-                                <filter>!**_ce.dll</filter>
+                                <filter>!**_ce.dll,!com/sun/cdc/io/**,!com/ibm/oti/connection/**,!com/intel/bluetooth/btspp/**,!com/intel/bluetooth/btl2cap/**,!com/intel/bluetooth/tcpobex/**,!com/intel/bluetooth/btgoep/**</filter>
                             </inclusion>
                             <inclusion>
                                 <groupId>net.sf.bluecove</groupId><artifactId>bluecove-gpl</artifactId>
