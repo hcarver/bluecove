@@ -233,12 +233,12 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_isWi
 #ifdef _BTWINSOCKLIB
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runDeviceInquiryImpl
-    (JNIEnv *env, jobject peer, jobject startedNotify, jint accessCode, jint duration, jobject listener) {
+    (JNIEnv *env, jobject peer, jobject inquiryRunnable, jobject inquiryThread, jint accessCode, jint duration, jobject listener) {
 
     debug(("runDeviceInquiry, duration=%i", duration));
 
     DeviceInquiryCallback callback;
-    if (!callback.builDeviceInquiryCallbacks(env, peer, startedNotify)) {
+    if (!callback.builDeviceInquiryCallbacks(env, inquiryRunnable, inquiryThread)) {
         return INQUIRY_ERROR;
     }
 
@@ -428,7 +428,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_canc
 }
 
 
-JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runSearchServices
+JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_runSearchServicesImpl
     (JNIEnv *env, jobject peer, jobjectArray uuidSet, jlong address) {
 	debug(("runSearchServices"));
 

@@ -41,7 +41,7 @@ import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
-class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
+class BluetoothStackMicrosoft implements BluetoothStack {
 
 	private static final int BTH_MODE_POWER_OFF = 1;
 
@@ -396,13 +396,62 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 
 	// ---------------------- Device Inquiry
 
+	/*
+     * perform synchronous inquiry
+     */
+    private native int runDeviceInquiryImpl(DeviceInquiryRunnable inquiryRunnable, DeviceInquiryThread inquiryThread, int accessCode, int duration,
+            DiscoveryListener listener) throws BluetoothStateException;
+    
 	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
 		initialized();
 		if (currentDeviceDiscoveryListener != null) {
 			throw new BluetoothStateException("Another inquiry already running");
 		}
 		currentDeviceDiscoveryListener = listener;
-		return DeviceInquiryThread.startInquiry(this, this, accessCode, listener);
+		
+		DeviceInquiryRunnable inquiryRunnable = new DeviceInquiryRunnable() {
+
+            public int runDeviceInquiry(DeviceInquiryThread inquiryThread, int accessCode, DiscoveryListener listener) throws BluetoothStateException {
+                try {
+                    deviceDiscoveryDevices = new Hashtable();
+                    int discType = runDeviceInquiryImpl(this, inquiryThread, accessCode, DeviceInquiryThread
+                            .getConfigDeviceInquiryDuration(), listener);
+                    if (discType == DiscoveryListener.INQUIRY_COMPLETED) {
+                        for (Enumeration en = deviceDiscoveryDevices.keys(); en.hasMoreElements();) {
+                            RemoteDevice remoteDevice = (RemoteDevice) en.nextElement();
+                            DeviceClass deviceClass = (DeviceClass) deviceDiscoveryDevices.get(remoteDevice);
+                            listener.deviceDiscovered(remoteDevice, deviceClass);
+                            // If cancelInquiry has been called
+                            if (currentDeviceDiscoveryListener == null) {
+                                return DiscoveryListener.INQUIRY_TERMINATED;
+                            }
+                        }
+                    }
+                    return discType;
+                } finally {
+                    deviceDiscoveryDevices = null;
+                    currentDeviceDiscoveryListener = null;
+                }
+            }
+
+            /**
+             * This is called when all device discoved by stack. To avoid problems with getpeername we will postpone the calls
+             * to User deviceDiscovered function until runDeviceInquiry is finished.
+             */
+            public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
+                RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(BluetoothStackMicrosoft.this, deviceAddr, deviceName, paired);
+                if ((currentDeviceDiscoveryListener == null) || (deviceDiscoveryDevices == null)
+                        || (currentDeviceDiscoveryListener != listener)) {
+                    return;
+                }
+                DeviceClass cod = new DeviceClass(deviceClass);
+                DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
+                DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
+                deviceDiscoveryDevices.put(remoteDevice, cod);
+                
+            }
+		};
+		return DeviceInquiryThread.startInquiry(this, inquiryRunnable, accessCode, listener);
 	}
 
 	/*
@@ -419,59 +468,12 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 		return cancelInquiry();
 	}
 
-	/*
-	 * perform synchronous inquiry
-	 */
-	private native int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, int duration,
-			DiscoveryListener listener) throws BluetoothStateException;
-
-	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
-			throws BluetoothStateException {
-		try {
-			deviceDiscoveryDevices = new Hashtable();
-			int discType = runDeviceInquiryImpl(startedNotify, accessCode, DeviceInquiryThread
-					.getConfigDeviceInquiryDuration(), listener);
-			if (discType == DiscoveryListener.INQUIRY_COMPLETED) {
-				for (Enumeration en = deviceDiscoveryDevices.keys(); en.hasMoreElements();) {
-					RemoteDevice remoteDevice = (RemoteDevice) en.nextElement();
-					DeviceClass deviceClass = (DeviceClass) deviceDiscoveryDevices.get(remoteDevice);
-					listener.deviceDiscovered(remoteDevice, deviceClass);
-					// If cancelInquiry has been called
-					if (currentDeviceDiscoveryListener == null) {
-						return DiscoveryListener.INQUIRY_TERMINATED;
-					}
-				}
-			}
-			return discType;
-		} finally {
-			deviceDiscoveryDevices = null;
-			currentDeviceDiscoveryListener = null;
-		}
-	}
-
-	/**
-	 * This is called when all device discoved by stack. To avoid problems with getpeername we will postpone the calls
-	 * to User deviceDiscovered function until runDeviceInquiry is finished.
-	 */
-	public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass,
-			String deviceName, boolean paired) {
-		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(this, deviceAddr, deviceName, paired);
-		if ((currentDeviceDiscoveryListener == null) || (deviceDiscoveryDevices == null)
-				|| (currentDeviceDiscoveryListener != listener)) {
-			return;
-		}
-		DeviceClass cod = new DeviceClass(deviceClass);
-		DebugLog.debug("deviceDiscoveredCallback address", remoteDevice.getBluetoothAddress());
-		DebugLog.debug("deviceDiscoveredCallback deviceClass", cod);
-		deviceDiscoveryDevices.put(remoteDevice, cod);
-	}
-
 	// ---------------------- Service search
 
 	/*
 	 * perform synchronous service discovery
 	 */
-	public native int[] runSearchServices(UUID[] uuidSet, long address) throws SearchServicesException;
+	private native int[] runSearchServicesImpl(UUID[] uuidSet, long address) throws SearchServicesException;
 
 	/*
 	 * get service attributes
@@ -480,54 +482,58 @@ class BluetoothStackMicrosoft implements BluetoothStack, DeviceInquiryRunnable, 
 
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
 			throws BluetoothStateException {
-		return SearchServicesThread.startSearchServices(this, this, attrSet, uuidSet, device, listener);
-	}
+	    
+	    SearchServicesRunnable searchRunnable = new SearchServicesRunnable() {
 
-	public int runSearchServices(SearchServicesThread startedNotify, int[] attrSet, UUID[] uuidSet,
-			RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
-		startedNotify.searchServicesStartedCallback();
-		int[] handles;
-		try {
-			handles = runSearchServices(uuidSet, RemoteDeviceHelper.getAddress(device));
-		} catch (SearchServicesDeviceNotReachableException e) {
-			return DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
-		} catch (SearchServicesTerminatedException e) {
-			return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
-		} catch (SearchServicesException e) {
-			return DiscoveryListener.SERVICE_SEARCH_ERROR;
-		}
-		if (handles == null) {
-			return DiscoveryListener.SERVICE_SEARCH_ERROR;
-		} else if (handles.length > 0) {
-			ServiceRecord[] records = new ServiceRecordImpl[handles.length];
-			int[] requiredAttrIDs = new int[] { BluetoothConsts.ServiceRecordHandle,
-					BluetoothConsts.ServiceClassIDList, BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID,
-					BluetoothConsts.ProtocolDescriptorList };
-			boolean hasError = false;
-			for (int i = 0; i < handles.length; i++) {
-				records[i] = new ServiceRecordImpl(this, device, handles[i]);
-				try {
-					records[i].populateRecord(requiredAttrIDs);
-					if (attrSet != null) {
-						records[i].populateRecord(attrSet);
-					}
-				} catch (Exception e) {
-					DebugLog.debug("populateRecord error", e);
-					hasError = true;
-				}
-				if (startedNotify.isTerminated()) {
-					return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
-				}
-			}
-			listener.servicesDiscovered(startedNotify.getTransID(), records);
-			if (hasError) {
-				return DiscoveryListener.SERVICE_SEARCH_ERROR;
-			} else {
-				return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
-			}
-		} else {
-			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
-		}
+            public int runSearchServices(SearchServicesThread sst, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
+                    throws BluetoothStateException {
+                sst.searchServicesStartedCallback();
+                int[] handles;
+                try {
+                    handles = runSearchServicesImpl(uuidSet, RemoteDeviceHelper.getAddress(device));
+                } catch (SearchServicesDeviceNotReachableException e) {
+                    return DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
+                } catch (SearchServicesTerminatedException e) {
+                    return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
+                } catch (SearchServicesException e) {
+                    return DiscoveryListener.SERVICE_SEARCH_ERROR;
+                }
+                if (handles == null) {
+                    return DiscoveryListener.SERVICE_SEARCH_ERROR;
+                } else if (handles.length > 0) {
+                    ServiceRecord[] records = new ServiceRecordImpl[handles.length];
+                    int[] requiredAttrIDs = new int[] { BluetoothConsts.ServiceRecordHandle,
+                            BluetoothConsts.ServiceClassIDList, BluetoothConsts.ServiceRecordState, BluetoothConsts.ServiceID,
+                            BluetoothConsts.ProtocolDescriptorList };
+                    boolean hasError = false;
+                    for (int i = 0; i < handles.length; i++) {
+                        records[i] = new ServiceRecordImpl(BluetoothStackMicrosoft.this, device, handles[i]);
+                        try {
+                            records[i].populateRecord(requiredAttrIDs);
+                            if (attrSet != null) {
+                                records[i].populateRecord(attrSet);
+                            }
+                        } catch (Exception e) {
+                            DebugLog.debug("populateRecord error", e);
+                            hasError = true;
+                        }
+                        if (sst.isTerminated()) {
+                            return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
+                        }
+                    }
+                    listener.servicesDiscovered(sst.getTransID(), records);
+                    if (hasError) {
+                        return DiscoveryListener.SERVICE_SEARCH_ERROR;
+                    } else {
+                        return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
+                    }
+                } else {
+                    return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
+                }
+            }
+	        
+	    };
+		return SearchServicesThread.startSearchServices(this, searchRunnable, attrSet, uuidSet, device, listener);
 	}
 
 	public boolean cancelServiceSearch(int transID) {
