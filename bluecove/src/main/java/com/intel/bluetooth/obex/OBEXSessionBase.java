@@ -28,6 +28,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
@@ -40,6 +42,7 @@ import javax.obex.ServerRequestHandler;
 import com.intel.bluetooth.BluetoothConnectionAccess;
 import com.intel.bluetooth.BluetoothStack;
 import com.intel.bluetooth.DebugLog;
+import com.intel.bluetooth.obex.OBEXAuthentication.Challenge;
 
 /**
  * Base for Client and Server implementations. See <a
@@ -68,6 +71,8 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	protected int packetsCountWrite;
 
 	protected int packetsCountRead;
+
+	private Vector authChallengesSent;
 
 	/**
 	 * Each request packet flowed by response. This flag is from Client point of view
@@ -175,6 +180,17 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 		os.write(buf.toByteArray());
 		os.flush();
 		DebugLog.debug("obex sent (" + this.packetsCountWrite + ") len", len);
+
+		if ((headers != null) && (headers.hasAuthenticationChallenge())) {
+			if (authChallengesSent == null) {
+				authChallengesSent = new Vector();
+			}
+			for (Enumeration iter = headers.getAuthenticationChallenges(); iter.hasMoreElements();) {
+				byte[] authChallenge = (byte[]) iter.nextElement();
+				Challenge challenge = new Challenge(authChallenge);
+				authChallengesSent.addElement(challenge);
+			}
+		}
 	}
 
 	protected synchronized byte[] readPacket() throws IOException {
@@ -212,7 +228,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 	void validateAuthenticationResponse(OBEXHeaderSetImpl requestHeaders, OBEXHeaderSetImpl incomingHeaders)
 			throws IOException {
 		if ((requestHeaders != null) && requestHeaders.hasAuthenticationChallenge()
-				&& (!incomingHeaders.hasAuthenticationResponse())) {
+				&& (!incomingHeaders.hasAuthenticationResponses())) {
 			// TODO verify that this appropriate Exception
 			throw new IOException("Authentication response is missing");
 		}
@@ -221,12 +237,27 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	boolean handleAuthenticationResponse(OBEXHeaderSetImpl incomingHeaders, ServerRequestHandler serverHandler)
 			throws IOException {
-		if (incomingHeaders.hasAuthenticationResponse()) {
+		if (incomingHeaders.hasAuthenticationResponses()) {
 			if (authenticator == null) {
 				throw new IOException("Authenticator required for authentication");
 			}
-			return OBEXAuthentication.handleAuthenticationResponse(incomingHeaders, authenticator, serverHandler);
+			if ((authChallengesSent == null) && (authChallengesSent.size() == 0)) {
+				throw new IOException("Authentication challenges had not been sent");
+			}
+			boolean authenticated = false;
+			try {
+				authenticated = OBEXAuthentication.handleAuthenticationResponse(incomingHeaders, authenticator,
+						serverHandler, authChallengesSent);
+			} finally {
+				if ((authenticated) && (authChallengesSent != null)) {
+					authChallengesSent.removeAllElements();
+				}
+			}
+			return authenticated;
 		} else {
+			if ((authChallengesSent != null) && (authChallengesSent.size() > 0)) {
+				throw new IOException("Authentication response is missing");
+			}
 			return true;
 		}
 	}

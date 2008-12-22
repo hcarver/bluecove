@@ -287,6 +287,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		// If Client re-send the command packet with an Authenticate Response
 		if (!handleAuthenticationResponse(requestHeaders, handler)) {
 			writePacket(ResponseCodes.OBEX_HTTP_UNAUTHORIZED, null);
+			return;
 		}
 
 		// A PUT operation with NO Body or End-of-Body headers whatsoever should
@@ -323,6 +324,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		// If Client re-send the command packet with an Authenticate Response
 		if (!handleAuthenticationResponse(requestHeaders, handler)) {
 			writePacket(ResponseCodes.OBEX_HTTP_UNAUTHORIZED, null);
+			return;
 		}
 
 		operation = new OBEXServerOperationGet(this, requestHeaders, finalPacket);
@@ -374,13 +376,18 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		if (b.length < 5) {
 			throw new IOException("Corrupted OBEX data");
 		}
-		HeaderSet requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 5);
+		OBEXHeaderSetImpl requestHeaders = OBEXHeaderSetImpl.readHeaders(b, 5);
 		// DebugLog.debug("setPath b[3]", b[3]);
 		// b[4] = (byte) ((backup?1:0) | (create?0:2));
 		boolean backup = ((b[3] & 1) != 0);
 		boolean create = ((b[3] & 2) == 0);
 		DebugLog.debug("setPath backup", backup);
 		DebugLog.debug("setPath create", create);
+
+		if (!handleAuthenticationResponse(requestHeaders, handler)) {
+			writePacket(ResponseCodes.OBEX_HTTP_UNAUTHORIZED, null);
+			return;
+		}
 
 		OBEXHeaderSetImpl replyHeaders = createOBEXHeaderSetImpl();
 		int rc = ResponseCodes.OBEX_HTTP_OK;

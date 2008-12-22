@@ -44,6 +44,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		super(session, receivedHeaders);
 		if (finalPacket) {
 			requestEnded = true;
+			finalPacketReceived = true;
 		}
 		this.inputStream = new OBEXOperationInputStream(this);
 		processIncommingData(receivedHeaders, finalPacket);

@@ -121,7 +121,8 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		}
 
 		validateAuthenticationResponse((OBEXHeaderSetImpl) headers, responseHeaders);
-		if ((!retry) && (responseHeaders.getResponseCode() == ResponseCodes.OBEX_HTTP_UNAUTHORIZED)) {
+		if ((!retry) && (responseHeaders.getResponseCode() == ResponseCodes.OBEX_HTTP_UNAUTHORIZED)
+				&& (responseHeaders.hasAuthenticationChallenge())) {
 			HeaderSet replyHeaders = OBEXHeaderSetImpl.cloneHeaders(headers);
 			handleAuthenticationChallenge(responseHeaders, (OBEXHeaderSetImpl) replyHeaders);
 			return connectImpl(replyHeaders, true);
@@ -175,6 +176,11 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 	public HeaderSet setPath(HeaderSet headers, boolean backup, boolean create) throws IOException {
 		validateCreatedHeaderSet(headers);
 		canStartOperation();
+		return setPathImpl(headers, backup, create, false);
+	}
+
+	private HeaderSet setPathImpl(HeaderSet headers, boolean backup, boolean create, boolean authentRetry)
+			throws IOException {
 		byte[] request = new byte[2];
 		request[0] = (byte) ((backup ? 1 : 0) | (create ? 0 : 2));
 		request[1] = 0;
@@ -182,7 +188,16 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		writePacketWithFlags(OBEXOperationCodes.SETPATH_FINAL, request, (OBEXHeaderSetImpl) headers);
 
 		byte[] b = readPacket();
-		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+		OBEXHeaderSetImpl responseHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+
+		if (!authentRetry && (responseHeaders.getResponseCode() == ResponseCodes.OBEX_HTTP_UNAUTHORIZED)
+				&& (responseHeaders.hasAuthenticationChallenge())) {
+			OBEXHeaderSetImpl retryHeaders = OBEXHeaderSetImpl.cloneHeaders(headers);
+			handleAuthenticationChallenge(responseHeaders, retryHeaders);
+			return setPathImpl(retryHeaders, backup, create, true);
+		} else {
+			return responseHeaders;
+		}
 	}
 
 	public Operation get(HeaderSet headers) throws IOException {
@@ -202,13 +217,22 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 	public HeaderSet delete(HeaderSet headers) throws IOException {
 		validateCreatedHeaderSet(headers);
 		canStartOperation();
-		return deleteImp(headers);
+		return deleteImp(headers, false);
 	}
 
-	HeaderSet deleteImp(HeaderSet headers) throws IOException {
+	HeaderSet deleteImp(HeaderSet headers, boolean authentRetry) throws IOException {
 		writePacket(OBEXOperationCodes.PUT_FINAL, (OBEXHeaderSetImpl) headers);
 		byte[] b = readPacket();
-		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+		OBEXHeaderSetImpl responseHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+		validateAuthenticationResponse((OBEXHeaderSetImpl) headers, responseHeaders);
+		if (!authentRetry && (responseHeaders.getResponseCode() == ResponseCodes.OBEX_HTTP_UNAUTHORIZED)
+				&& (responseHeaders.hasAuthenticationChallenge())) {
+			OBEXHeaderSetImpl retryHeaders = OBEXHeaderSetImpl.cloneHeaders(headers);
+			handleAuthenticationChallenge(responseHeaders, retryHeaders);
+			return deleteImp(retryHeaders, true);
+		} else {
+			return responseHeaders;
+		}
 	}
 
 	public void setAuthenticator(Authenticator auth) {

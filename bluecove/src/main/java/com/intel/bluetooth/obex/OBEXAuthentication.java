@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
+import java.util.Vector;
 
 import javax.obex.Authenticator;
 import javax.obex.PasswordAuthentication;
@@ -41,7 +42,7 @@ class OBEXAuthentication {
 
 	private static long uniqueTimestamp = 0;
 
-	private static final byte column[] = { ':' };
+	private static final byte COLUMN[] = { ':' };
 
 	static class Challenge {
 
@@ -222,27 +223,50 @@ class OBEXAuthentication {
 	}
 
 	static boolean handleAuthenticationResponse(OBEXHeaderSetImpl incomingHeaders, Authenticator authenticator,
-			ServerRequestHandler serverHandler) throws IOException {
+			ServerRequestHandler serverHandler, Vector authChallengesSent) throws IOException {
+		if (!incomingHeaders.hasAuthenticationResponses()) {
+			return false;
+		}
 		for (Enumeration iter = incomingHeaders.getAuthenticationResponses(); iter.hasMoreElements();) {
 			byte[] authResponse = (byte[]) iter.nextElement();
 			DigestResponse dr = new DigestResponse();
 			dr.read(authResponse);
+			DebugLog.debug("got nonce", dr.nonce);
+
+			// Verify that we did sent the Challenge that triggered this Responses
+			Challenge challengeSent = null;
+			for (Enumeration challengeIter = authChallengesSent.elements(); challengeIter.hasMoreElements();) {
+				Challenge c = (Challenge) challengeIter.nextElement();
+				if (equals(c.nonce, dr.nonce)) {
+					challengeSent = c;
+					break;
+				}
+			}
+			if (challengeSent == null) {
+				throw new IOException("Authentication response for unknown challenge");
+			}
+
 			byte[] password = authenticator.onAuthenticationResponse(dr.userName);
 			if (password == null) {
-				throw new IOException("authentication request failed");
+				throw new IOException("Authentication request failed, password is not supplied");
 			}
+			// DebugLog.debug("authenticate using password", new String(password));
+			// DebugLog.debug("password used", password);
 			MD5DigestWrapper md5 = new MD5DigestWrapper();
 			md5.update(dr.nonce);
-			md5.update(column);
+			md5.update(COLUMN);
 			md5.update(password);
-			if (!equals(dr.requestDigest, md5.digest())) {
+			byte[] claulated = md5.digest();
+			if (!equals(dr.requestDigest, claulated)) {
+				DebugLog.debug("got digest", dr.requestDigest);
+				DebugLog.debug("  expected", claulated);
 				if (serverHandler != null) {
 					serverHandler.onAuthenticationFailure(dr.userName);
 				} else {
 					throw new IOException("Authentication failure");
 				}
 			} else {
-			    return true;
+				return true;
 			}
 		}
 		return false;
@@ -250,6 +274,9 @@ class OBEXAuthentication {
 
 	static void handleAuthenticationChallenge(OBEXHeaderSetImpl incomingHeaders, OBEXHeaderSetImpl replyHeaders,
 			Authenticator authenticator) throws IOException {
+		if (!incomingHeaders.hasAuthenticationChallenge()) {
+			return;
+		}
 		for (Enumeration iter = incomingHeaders.getAuthenticationChallenges(); iter.hasMoreElements();) {
 			byte[] authChallenge = (byte[]) iter.nextElement();
 			Challenge challenge = new Challenge(authChallenge);
@@ -257,14 +284,18 @@ class OBEXAuthentication {
 					.isUserIdRequired(), challenge.isFullAccess());
 			DigestResponse dr = new DigestResponse();
 			dr.nonce = challenge.nonce;
+			DebugLog.debug("got nonce", dr.nonce);
 			if (challenge.isUserIdRequired()) {
 				dr.userName = pwd.getUserName();
 			}
 			MD5DigestWrapper md5 = new MD5DigestWrapper();
 			md5.update(dr.nonce);
-			md5.update(column);
+			md5.update(COLUMN);
 			md5.update(pwd.getPassword());
 			dr.requestDigest = md5.digest();
+			// DebugLog.debug("password", new String(pwd.getPassword()));
+			// DebugLog.debug("password used", pwd.getPassword());
+			DebugLog.debug("send digest", dr.requestDigest);
 			replyHeaders.addAuthenticationResponse(dr.write());
 		}
 	}
@@ -272,7 +303,7 @@ class OBEXAuthentication {
 	private static synchronized byte[] createNonce() {
 		MD5DigestWrapper md5 = new MD5DigestWrapper();
 		md5.update(createTimestamp());
-		md5.update(column);
+		md5.update(COLUMN);
 		md5.update(getPrivateKey());
 		return md5.digest();
 	}

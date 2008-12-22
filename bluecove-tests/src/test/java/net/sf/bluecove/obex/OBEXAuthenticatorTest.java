@@ -229,7 +229,7 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 
 		public byte[] onAuthenticationResponse(byte[] userName) {
 			serverOnAuthenticationResponseCalled++;
-			DebugLog.debug("==TEST== Server authenticate user", (userName != null) ? new String(userName) : "null");
+			DebugLog.debug("==TEST== Server authenticate user", (userName != null) ? new String(userName) : "{null}");
 			return getUserPassword(userName);
 		}
 
@@ -267,7 +267,13 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 				clientChallenge.access = isFullAccess;
 				DebugLog.debug("==TEST== Client challenge " + (isUserIdRequired ? "U" : "") + (isFullAccess ? "A" : "")
 						+ " " + description);
-				return new PasswordAuthentication(userName.getBytes(), getUserPassword(userName));
+				byte[] password;
+				if (isUserIdRequired) {
+					password = getUserPassword(userName);
+				} else {
+					password = getUserPassword((String) null);
+				}
+				return new PasswordAuthentication(userName.getBytes(), password);
 			}
 
 			public byte[] onAuthenticationResponse(byte[] userName) {
@@ -377,7 +383,7 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 	}
 
 	public void testChallengeOnConnectFalseFalse() throws IOException {
-		serverChallenge = new ChallengeData("FalseFalse", false, false);
+		serverChallenge = new ChallengeData("RealmFalseFalse", false, false);
 		runPUTOperation(When.onConnect, false);
 	}
 
