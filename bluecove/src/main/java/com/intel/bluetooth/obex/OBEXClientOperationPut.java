@@ -28,13 +28,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.obex.HeaderSet;
-
 import com.intel.bluetooth.DebugLog;
 
 class OBEXClientOperationPut extends OBEXClientOperation {
 
-	OBEXClientOperationPut(OBEXClientSessionImpl session, HeaderSet sendHeaders) throws IOException {
+	OBEXClientOperationPut(OBEXClientSessionImpl session, OBEXHeaderSetImpl sendHeaders) throws IOException {
 		super(session, OBEXOperationCodes.PUT, sendHeaders);
 	}
 

@@ -38,13 +38,12 @@ import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.Utils;
 
 /**
- * ClientSession implementation. See <a
- * href="http://bluetooth.com/Bluetooth/Learn/Technology/Specifications/">Bluetooth
+ * ClientSession implementation. See <a href="http://bluetooth.com/Bluetooth/Learn/Technology/Specifications/">Bluetooth
  * Specification Documents</A> for details.
- *
+ * 
  * <p>
  * <b><u>Your application should not use this class directly.</u></b>
- *
+ * 
  */
 public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSession {
 
@@ -60,7 +59,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 
 	/**
 	 * Applications should not used this function.
-	 *
+	 * 
 	 * @exception Error
 	 *                if called from outside of BlueCove internal code.
 	 */
@@ -79,7 +78,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.obex.ClientSession#connect(javax.obex.HeaderSet)
 	 */
 	public HeaderSet connect(HeaderSet headers) throws IOException {
@@ -96,7 +95,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		connectRequest[1] = 0; /* Flags */
 		connectRequest[2] = OBEXUtils.hiByte(obexConnectionParams.mtu);
 		connectRequest[3] = OBEXUtils.loByte(obexConnectionParams.mtu);
-		writePacketWithFlags(OBEXOperationCodes.CONNECT, connectRequest, OBEXHeaderSetImpl.toByteArray(headers));
+		writePacketWithFlags(OBEXOperationCodes.CONNECT, connectRequest, (OBEXHeaderSetImpl) headers);
 
 		byte[] b = readPacket();
 		if (b.length < 6) {
@@ -140,7 +139,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		if (!isConnected) {
 			throw new IOException("Session not connected");
 		}
-		writePacket(OBEXOperationCodes.DISCONNECT, OBEXHeaderSetImpl.toByteArray(headers));
+		writePacket(OBEXOperationCodes.DISCONNECT, (OBEXHeaderSetImpl) headers);
 		byte[] b = readPacket();
 		this.isConnected = false;
 		if (this.operation != null) {
@@ -180,7 +179,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		request[0] = (byte) ((backup ? 1 : 0) | (create ? 0 : 2));
 		request[1] = 0;
 		// DebugLog.debug("setPath b[3]", request[0]);
-		writePacketWithFlags(OBEXOperationCodes.SETPATH_FINAL, request, OBEXHeaderSetImpl.toByteArray(headers));
+		writePacketWithFlags(OBEXOperationCodes.SETPATH_FINAL, request, (OBEXHeaderSetImpl) headers);
 
 		byte[] b = readPacket();
 		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
@@ -189,14 +188,14 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 	public Operation get(HeaderSet headers) throws IOException {
 		validateCreatedHeaderSet(headers);
 		canStartOperation();
-		this.operation = new OBEXClientOperationGet(this, headers);
+		this.operation = new OBEXClientOperationGet(this, (OBEXHeaderSetImpl) headers);
 		return this.operation;
 	}
 
 	public Operation put(HeaderSet headers) throws IOException {
 		validateCreatedHeaderSet(headers);
 		canStartOperation();
-		this.operation = new OBEXClientOperationPut(this, headers);
+		this.operation = new OBEXClientOperationPut(this, (OBEXHeaderSetImpl) headers);
 		return this.operation;
 	}
 
@@ -207,7 +206,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 	}
 
 	HeaderSet deleteImp(HeaderSet headers) throws IOException {
-		writePacket(OBEXOperationCodes.PUT_FINAL, OBEXHeaderSetImpl.toByteArray(headers));
+		writePacket(OBEXOperationCodes.PUT_FINAL, (OBEXHeaderSetImpl) headers);
 		byte[] b = readPacket();
 		return OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 	}

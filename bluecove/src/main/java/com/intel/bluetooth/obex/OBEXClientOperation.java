@@ -70,13 +70,14 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation, OBEXOper
 
 	protected boolean finalBodyReceived = false;
 
-	protected HeaderSet startOperationHeaders = null;
+	protected OBEXHeaderSetImpl startOperationHeaders = null;
 
 	private boolean authenticationChallengeCreated = false;
-	
+
 	protected Object lock;
 
-	OBEXClientOperation(OBEXClientSessionImpl session, char operationId, HeaderSet sendHeaders) throws IOException {
+	OBEXClientOperation(OBEXClientSessionImpl session, char operationId, OBEXHeaderSetImpl sendHeaders)
+			throws IOException {
 		this.session = session;
 		this.operationId = operationId;
 		this.isClosed = false;
@@ -90,7 +91,7 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation, OBEXOper
 		return SHORT_REQUEST_PHASE;
 	}
 
-	protected void startOperation(HeaderSet sendHeaders) throws IOException {
+	protected void startOperation(OBEXHeaderSetImpl sendHeaders) throws IOException {
 		if (SHORT_REQUEST_PHASE) {
 			this.startOperationHeaders = sendHeaders;
 		} else {
@@ -133,7 +134,7 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation, OBEXOper
 			DebugLog.debug("client Request Phase ended");
 			requestEnded = true;
 		}
-		HeaderSet dataHeaders = session.createHeaderSet();
+		OBEXHeaderSetImpl dataHeaders = OBEXSessionBase.createOBEXHeaderSetImpl();
 		dataHeaders.setHeader(dataHeaderID, buffer);
 		exchangePacket(dataHeaders);
 	}
@@ -154,28 +155,29 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation, OBEXOper
 		}
 	}
 
-	private void exchangePacket(HeaderSet headers) throws IOException {
+	private void exchangePacket(OBEXHeaderSetImpl headers) throws IOException {
 		boolean success = false;
 		try {
-			session.writePacket(this.operationId, OBEXHeaderSetImpl.toByteArray(headers));
+			session.writePacket(this.operationId, headers);
 			byte[] b = session.readPacket();
 			OBEXHeaderSetImpl dataHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 			int responseCode = dataHeaders.getResponseCode();
-			DebugLog.debug0x("client operation got reply", OBEXUtils.toStringObexResponseCodes(responseCode), responseCode);
+			DebugLog.debug0x("client operation got reply", OBEXUtils.toStringObexResponseCodes(responseCode),
+					responseCode);
 			switch (responseCode) {
 			case ResponseCodes.OBEX_HTTP_UNAUTHORIZED:
-			    if (!authenticationChallengeCreated) {
-			        // Send the original data again, since it is not accepted
-			        session.handleAuthenticationChallenge(dataHeaders, (OBEXHeaderSetImpl)headers);
-			        authenticationChallengeCreated = true;
-			        exchangePacket(headers);
-			    } else {
-			        this.errorReceived = true;
-	                this.operationInContinue = false;
-	                processIncommingHeaders(dataHeaders);
-	                throw new IOException("Authentication Failure");
-			    }
-			    break;
+				if (!authenticationChallengeCreated) {
+					// Send the original data again, since it is not accepted
+					session.handleAuthenticationChallenge(dataHeaders, (OBEXHeaderSetImpl) headers);
+					authenticationChallengeCreated = true;
+					exchangePacket(headers);
+				} else {
+					this.errorReceived = true;
+					this.operationInContinue = false;
+					processIncommingHeaders(dataHeaders);
+					throw new IOException("Authentication Failure");
+				}
+				break;
 			case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
 				processIncommingHeaders(dataHeaders);
 				processIncommingData(dataHeaders, true);
@@ -194,12 +196,12 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation, OBEXOper
 				processIncommingHeaders(dataHeaders);
 				processIncommingData(dataHeaders, true);
 
-				//OFF; Rely on getResponseCode() to report the error to the application.
-//				if ((this.operationId & OBEXOperationCodes.FINAL_BIT) == 0) {
-//					throw new IOException("Operation error, 0x" + Integer.toHexString(responseCode) + " "
-//							+ OBEXUtils.toStringObexResponseCodes(responseCode));
-//				}
-				
+				// OFF; Rely on getResponseCode() to report the error to the application.
+				// if ((this.operationId & OBEXOperationCodes.FINAL_BIT) == 0) {
+				// throw new IOException("Operation error, 0x" + Integer.toHexString(responseCode) + " "
+				// + OBEXUtils.toStringObexResponseCodes(responseCode));
+				// }
+
 			}
 			success = true;
 		} finally {
@@ -262,7 +264,8 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation, OBEXOper
 			byte[] b = session.readPacket();
 			HeaderSet dataHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 			if (dataHeaders.getResponseCode() != OBEXOperationCodes.OBEX_RESPONSE_SUCCESS) {
-				throw new IOException("Fails to abort operation, received " + OBEXUtils.toStringObexResponseCodes(dataHeaders.getResponseCode()));
+				throw new IOException("Fails to abort operation, received "
+						+ OBEXUtils.toStringObexResponseCodes(dataHeaders.getResponseCode()));
 			}
 		} finally {
 			this.isClosed = true;
@@ -343,7 +346,7 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation, OBEXOper
 			exchangePacket(this.startOperationHeaders);
 			this.startOperationHeaders = null;
 		}
-		exchangePacket(headers);
+		exchangePacket((OBEXHeaderSetImpl) headers);
 	}
 
 	/*

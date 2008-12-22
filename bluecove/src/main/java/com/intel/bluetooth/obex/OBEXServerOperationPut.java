@@ -104,14 +104,14 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 		switch (opcode) {
 		case OBEXOperationCodes.PUT_FINAL:
 		case OBEXOperationCodes.PUT:
-		    OBEXHeaderSetImpl requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+			OBEXHeaderSetImpl requestHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 			if (!session.handleAuthenticationResponse(requestHeaders)) {
-			    errorReceived = true;
-			    session.writePacket(ResponseCodes.OBEX_HTTP_UNAUTHORIZED, null);
-	        } else {
-	            OBEXHeaderSetImpl.appendHeaders(this.receivedHeaders, requestHeaders);
-			    processIncommingData(requestHeaders, finalPacket);
-	        }
+				errorReceived = true;
+				session.writePacket(ResponseCodes.OBEX_HTTP_UNAUTHORIZED, null);
+			} else {
+				OBEXHeaderSetImpl.appendHeaders(this.receivedHeaders, requestHeaders);
+				processIncommingData(requestHeaders, finalPacket);
+			}
 			break;
 		case OBEXOperationCodes.ABORT:
 			processAbort();
@@ -135,7 +135,7 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 			return;
 		}
 		DebugLog.debug("server operation reply continue");
-		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, sendHeaders);
 		sendHeaders = null;
 		readRequestPacket();
 	}
@@ -153,7 +153,7 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 				throw new IOException("Client not requesting data");
 			}
 		}
-		HeaderSet dataHeaders = OBEXSessionBase.createOBEXHeaderSet();
+		OBEXHeaderSetImpl dataHeaders = OBEXSessionBase.createOBEXHeaderSetImpl();
 		int opcode = OBEXOperationCodes.OBEX_RESPONSE_CONTINUE;
 		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
 		if (finalPacket) {
@@ -165,7 +165,7 @@ class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperatio
 			OBEXHeaderSetImpl.appendHeaders(dataHeaders, sendHeaders);
 			sendHeaders = null;
 		}
-		session.writePacket(opcode, OBEXHeaderSetImpl.toByteArray(dataHeaders));
+		session.writePacket(opcode, dataHeaders);
 		readRequestPacket();
 	}
 

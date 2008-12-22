@@ -51,7 +51,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.microedition.io.InputConnection#openInputStream()
 	 */
 	public InputStream openInputStream() throws IOException {
@@ -67,7 +67,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.microedition.io.OutputConnection#openOutputStream()
 	 */
 	public OutputStream openOutputStream() throws IOException {
@@ -79,14 +79,14 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 		}
 		requestEnded = true;
 		outputStream = new OBEXOperationOutputStream(session.mtu, this);
-		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, sendHeaders);
 		sendHeaders = null;
 		return outputStream;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.microedition.io.Connection#close()
 	 */
 	public void close() throws IOException {
@@ -129,7 +129,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.intel.bluetooth.obex.OBEXOperationReceive#receiveData(com.intel.bluetooth.obex.OBEXOperationInputStream)
 	 */
 	public void receiveData(OBEXOperationInputStream is) throws IOException {
@@ -138,27 +138,25 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 			return;
 		}
 		DebugLog.debug("server operation reply continue");
-		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		session.writePacket(OBEXOperationCodes.OBEX_RESPONSE_CONTINUE, sendHeaders);
 		sendHeaders = null;
 		readRequestPacket();
 	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean,
-     * byte[])
-     */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.bluetooth.obex.OBEXOperationDelivery#deliverPacket(boolean, byte[])
+	 */
 	public void deliverPacket(boolean finalPacket, byte[] buffer) throws IOException {
-	    if (session.requestSent) {
-	        // TODO Consider moving readRequestPacket() to the begging of the function
-	        readRequestPacket();
-	        if (session.requestSent) {
-	            throw new IOException("Client not requesting data");
-	        }
-	    }
-		HeaderSet dataHeaders = OBEXSessionBase.createOBEXHeaderSet();
+		if (session.requestSent) {
+			// TODO Consider moving readRequestPacket() to the begging of the function
+			readRequestPacket();
+			if (session.requestSent) {
+				throw new IOException("Client not requesting data");
+			}
+		}
+		OBEXHeaderSetImpl dataHeaders = OBEXSessionBase.createOBEXHeaderSetImpl();
 		int opcode = OBEXOperationCodes.OBEX_RESPONSE_CONTINUE;
 		int dataHeaderID = OBEXHeaderSetImpl.OBEX_HDR_BODY;
 		if (finalPacket) {
@@ -170,7 +168,7 @@ class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperatio
 			OBEXHeaderSetImpl.appendHeaders(dataHeaders, sendHeaders);
 			sendHeaders = null;
 		}
-		session.writePacket(opcode, OBEXHeaderSetImpl.toByteArray(dataHeaders));
+		session.writePacket(opcode, dataHeaders);
 		readRequestPacket();
 	}
 

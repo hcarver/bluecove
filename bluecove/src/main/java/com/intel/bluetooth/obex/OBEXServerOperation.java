@@ -34,17 +34,13 @@ import javax.obex.ResponseCodes;
 
 import com.intel.bluetooth.DebugLog;
 
-/**
- *
- *
- */
 abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	protected OBEXServerSessionImpl session;
 
 	protected HeaderSet receivedHeaders;
 
-	protected HeaderSet sendHeaders;
+	protected OBEXHeaderSetImpl sendHeaders;
 
 	protected boolean isClosed = false;
 
@@ -80,7 +76,7 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	void writeResponse(int responseCode) throws IOException {
 		DebugLog.debug0x("server operation reply final", responseCode);
-		session.writePacket(responseCode, OBEXHeaderSetImpl.toByteArray(sendHeaders));
+		session.writePacket(responseCode, sendHeaders);
 		sendHeaders = null;
 		if (responseCode == ResponseCodes.OBEX_HTTP_OK) {
 			while ((!finalPacketReceived) && (!session.isClosed())) {
@@ -149,7 +145,14 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 	 * @see javax.obex.Operation#sendHeaders(javax.obex.HeaderSet)
 	 */
 	public void sendHeaders(HeaderSet headers) throws IOException {
-		sendHeaders = headers;
+		if (headers == null) {
+			throw new NullPointerException("headers are null");
+		}
+		OBEXHeaderSetImpl.validateCreatedHeaderSet(headers);
+		if (isClosed) {
+			throw new IOException("operation closed");
+		}
+		sendHeaders = (OBEXHeaderSetImpl) headers;
 	}
 
 	/*
