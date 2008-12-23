@@ -32,12 +32,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.sf.bluecove.Configuration;
+
 import org.bluecove.tester.log.Logger;
 import org.bluecove.tester.util.CLDCStub;
 import org.bluecove.tester.util.IOUtils;
 import org.bluecove.tester.util.RuntimeDetect;
-
-import net.sf.bluecove.Configuration;
 
 public class JavaSECommon implements CLDCStub {
 
@@ -59,6 +59,10 @@ public class JavaSECommon implements CLDCStub {
 		RuntimeDetect.cldcStub = new JavaSECommon();
 	}
 
+	public boolean canInterruptThread() {
+		return true;
+	}
+
 	public void interruptThread(Thread t) {
 		if (t != null) {
 			t.interrupt();
@@ -68,8 +72,7 @@ public class JavaSECommon implements CLDCStub {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.sf.bluecove.util.CLDCStub#createNamedThread(java.lang.Runnable,
-	 *      java.lang.String)
+	 * @see net.sf.bluecove.util.CLDCStub#createNamedThread(java.lang.Runnable, java.lang.String)
 	 */
 	public Thread createNamedThread(Runnable target, String name) {
 		return new Thread(target, name);

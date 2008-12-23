@@ -29,6 +29,10 @@ package org.bluecove.tester.util;
  */
 public class CLDC10 implements CLDCStub {
 
+	public boolean canInterruptThread() {
+		return false;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -41,8 +45,7 @@ public class CLDC10 implements CLDCStub {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.sf.bluecove.util.CLDCStub#createNamedThread(java.lang.Runnable,
-	 *      java.lang.String)
+	 * @see net.sf.bluecove.util.CLDCStub#createNamedThread(java.lang.Runnable, java.lang.String)
 	 */
 	public Thread createNamedThread(Runnable target, String name) {
 		return new Thread(target);

@@ -29,6 +29,13 @@
 
         <dependency>
             <groupId>net.sf.bluecove</groupId>
+            <artifactId>tck-agent</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
             <artifactId>bluecove</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>

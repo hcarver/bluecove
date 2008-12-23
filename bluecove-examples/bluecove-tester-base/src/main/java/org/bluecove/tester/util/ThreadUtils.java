@@ -26,6 +26,10 @@ package org.bluecove.tester.util;
 
 public class ThreadUtils {
 
+	public static boolean canInterruptThread() {
+		return RuntimeDetect.cldcStub.canInterruptThread();
+	}
+
 	public static void interruptThread(Thread t) {
 		RuntimeDetect.cldcStub.interruptThread(t);
 	}

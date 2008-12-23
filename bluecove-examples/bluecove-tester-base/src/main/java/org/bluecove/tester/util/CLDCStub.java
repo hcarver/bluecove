@@ -29,6 +29,8 @@ package org.bluecove.tester.util;
  */
 public interface CLDCStub {
 
+	public boolean canInterruptThread();
+
 	public void interruptThread(Thread t);
 
 	public Thread createNamedThread(Runnable target, String name);

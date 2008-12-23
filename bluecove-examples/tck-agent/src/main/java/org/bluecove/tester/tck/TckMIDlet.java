@@ -22,42 +22,16 @@
  *  @author vlads
  *  @version $Id$
  */
-package org.bluecove.tester.util;
+package org.bluecove.tester.tck;
 
-/**
- * 
- */
-public class CLDC11 implements CLDCStub {
+import javax.microedition.lcdui.Displayable;
 
-	public boolean canInterruptThread() {
-		return true;
+import org.bluecove.tester.me.BaseTestMIDlet;
+
+public class TckMIDlet extends BaseTestMIDlet {
+
+	protected Displayable createMainDisplayable() {
+		return new TckCanvas();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.bluecove.util.CLDCStub#interruptThread(java.lang.Thread)
-	 */
-	public void interruptThread(Thread t) {
-		if (t != null) {
-			t.interrupt();
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.bluecove.util.CLDCStub#createNamedThread(java.lang.Runnable, java.lang.String)
-	 */
-	public Thread createNamedThread(Runnable target, String name) {
-		return new Thread(target, name);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.bluecove.util.CLDCStub#setThreadLocalBluetoothStack(java.lang.Object)
-	 */
-	public void setThreadLocalBluetoothStack(Object id) {
-	}
 }
