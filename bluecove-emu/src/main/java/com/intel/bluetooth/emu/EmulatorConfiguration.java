@@ -201,7 +201,7 @@ public class EmulatorConfiguration implements Serializable {
 	private void copyPertiesToFields() {
 		Field[] fields = this.getClass().getDeclaredFields();
 		for (Field field : fields) {
-			if (field.getModifiers() == Modifier.STATIC) {
+			if (Modifier.isStatic(field.getModifiers())) {
 				continue;
 			}
 			String value = propertiesMap.get(field.getName());
