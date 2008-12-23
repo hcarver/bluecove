@@ -72,7 +72,7 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation, OBEXOper
 
 	protected OBEXHeaderSetImpl startOperationHeaders = null;
 
-	private boolean authenticationChallengeCreated = false;
+	private boolean authenticationResponseCreated = false;
 
 	protected Object lock;
 
@@ -163,22 +163,23 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation, OBEXOper
 			OBEXHeaderSetImpl dataHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
 			session.handleAuthenticationResponse(dataHeaders, null);
 			int responseCode = dataHeaders.getResponseCode();
-			DebugLog.debug0x("client operation got reply", OBEXUtils.toStringObexResponseCodes(responseCode),
-					responseCode);
+			DebugLog.debug0x("client operation got reply", OBEXUtils.toStringObexResponseCodes(responseCode), responseCode);
 			switch (responseCode) {
 			case ResponseCodes.OBEX_HTTP_UNAUTHORIZED:
-				if (!authenticationChallengeCreated) {
-					// Send the original data again, since it is not accepted
-					session.handleAuthenticationChallenge(dataHeaders, (OBEXHeaderSetImpl) headers);
-					authenticationChallengeCreated = true;
-					exchangePacket(headers);
-				} else {
-					this.errorReceived = true;
-					this.operationInContinue = false;
-					processIncommingHeaders(dataHeaders);
-					throw new IOException("Authentication Failure");
-				}
-				break;
+                if ((!authenticationResponseCreated) && (dataHeaders.hasAuthenticationChallenge())) {
+                    DebugLog.debug("client resend request with auth response");
+                    // Send the original data again, since it is not accepted
+                    OBEXHeaderSetImpl retryHeaders = OBEXHeaderSetImpl.cloneHeaders(headers);
+                    session.handleAuthenticationChallenge(dataHeaders, retryHeaders);
+                    authenticationResponseCreated = true;
+                    exchangePacket(retryHeaders);
+                } else {
+                    this.errorReceived = true;
+                    this.operationInContinue = false;
+                    processIncommingHeaders(dataHeaders);
+                    throw new IOException("Authentication Failure");
+                }
+                break;
 			case OBEXOperationCodes.OBEX_RESPONSE_SUCCESS:
 				processIncommingHeaders(dataHeaders);
 				processIncommingData(dataHeaders, true);
@@ -189,6 +190,14 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation, OBEXOper
 				processIncommingHeaders(dataHeaders);
 				processIncommingData(dataHeaders, false);
 				this.operationInContinue = true;
+//				if ((!authenticationResponseCreated) && (dataHeaders.hasAuthenticationChallenge())) {
+//                    // Send the original data again, since it is not accepted = This is bug On Sony Ericsson  
+//				    DebugLog.debug("client resend request with auth response");
+//                    OBEXHeaderSetImpl retryHeaders = OBEXHeaderSetImpl.cloneHeaders(headers);
+//                    session.handleAuthenticationChallenge(dataHeaders, retryHeaders);
+//                    authenticationResponseCreated = true;
+//                    exchangePacket(retryHeaders);
+//                }
 				break;
 			default:
 				this.errorReceived = true;
