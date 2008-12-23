@@ -219,7 +219,10 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 			for (int i = logMax - 5; i < logMax; i++) {
 				newLogMessages.addElement(logMessages.elementAt(i));
 			}
+			Vector prevLogMessages = logMessages;
 			logMessages = newLogMessages;
+			// GC helper
+			prevLogMessages.removeAllElements();
 			logLine = 0;
 		}
 
