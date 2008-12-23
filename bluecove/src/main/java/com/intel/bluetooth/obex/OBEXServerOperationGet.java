@@ -33,14 +33,10 @@ import javax.obex.ResponseCodes;
 
 import com.intel.bluetooth.DebugLog;
 
-/**
- *
- *
- */
 class OBEXServerOperationGet extends OBEXServerOperation implements OBEXOperationDelivery, OBEXOperationReceive {
 
-	protected OBEXServerOperationGet(OBEXServerSessionImpl session, HeaderSet receivedHeaders, boolean finalPacket)
-			throws IOException {
+	protected OBEXServerOperationGet(OBEXServerSessionImpl session, OBEXHeaderSetImpl receivedHeaders,
+			boolean finalPacket) throws IOException {
 		super(session, receivedHeaders);
 		if (finalPacket) {
 			requestEnded = true;

@@ -29,7 +29,6 @@ import java.io.IOException;
 
 import javax.microedition.io.StreamConnection;
 import javax.obex.Authenticator;
-import javax.obex.HeaderSet;
 import javax.obex.ResponseCodes;
 import javax.obex.ServerRequestHandler;
 
@@ -257,9 +256,10 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		writePacket(rc, replyHeaders);
 	}
 
-	private void processDelete(HeaderSet requestHeaders) throws IOException {
+	private void processDelete(OBEXHeaderSetImpl requestHeaders) throws IOException {
 		DebugLog.debug("Delete operation");
 		OBEXHeaderSetImpl replyHeaders = createOBEXHeaderSetImpl();
+		handleAuthenticationChallenge(requestHeaders, replyHeaders);
 		int rc = ResponseCodes.OBEX_HTTP_OK;
 		try {
 			rc = handler.onDelete(requestHeaders, replyHeaders);
@@ -289,7 +289,6 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 			writePacket(ResponseCodes.OBEX_HTTP_UNAUTHORIZED, null);
 			return;
 		}
-
 		// A PUT operation with NO Body or End-of-Body headers whatsoever should
 		// be treated as a delete request.
 		if (finalPacket && (!requestHeaders.hasIncommingData())) {
@@ -390,6 +389,7 @@ class OBEXServerSessionImpl extends OBEXSessionBase implements Runnable, Bluetoo
 		}
 
 		OBEXHeaderSetImpl replyHeaders = createOBEXHeaderSetImpl();
+		handleAuthenticationChallenge(requestHeaders, replyHeaders);
 		int rc = ResponseCodes.OBEX_HTTP_OK;
 		try {
 			rc = handler.onSetPath(requestHeaders, replyHeaders, backup, create);

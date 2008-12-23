@@ -62,9 +62,13 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 
 	protected boolean inputStreamOpened = false;
 
-	protected OBEXServerOperation(OBEXServerSessionImpl session, HeaderSet receivedHeaders) {
+	protected OBEXServerOperation(OBEXServerSessionImpl session, OBEXHeaderSetImpl receivedHeaders) throws IOException {
 		this.session = session;
 		this.receivedHeaders = receivedHeaders;
+		if (receivedHeaders.hasAuthenticationChallenge()) {
+			sendHeaders = OBEXSessionBase.createOBEXHeaderSetImpl();
+			this.session.handleAuthenticationChallenge(receivedHeaders, sendHeaders);
+		}
 	}
 
 	boolean exchangeRequestPhasePackets() throws IOException {
@@ -152,7 +156,11 @@ abstract class OBEXServerOperation implements Operation, OBEXOperation {
 		if (isClosed) {
 			throw new IOException("operation closed");
 		}
-		sendHeaders = (OBEXHeaderSetImpl) headers;
+		if (sendHeaders != null) {
+			OBEXHeaderSetImpl.appendHeaders(sendHeaders, headers);
+		} else {
+			sendHeaders = (OBEXHeaderSetImpl) headers;
+		}
 	}
 
 	/*

@@ -28,15 +28,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.obex.HeaderSet;
 import javax.obex.ResponseCodes;
 
 import com.intel.bluetooth.DebugLog;
 
 class OBEXServerOperationPut extends OBEXServerOperation implements OBEXOperationReceive, OBEXOperationDelivery {
 
-	protected OBEXServerOperationPut(OBEXServerSessionImpl session, HeaderSet receivedHeaders, boolean finalPacket)
-			throws IOException {
+	protected OBEXServerOperationPut(OBEXServerSessionImpl session, OBEXHeaderSetImpl receivedHeaders,
+			boolean finalPacket) throws IOException {
 		super(session, receivedHeaders);
 		this.inputStream = new OBEXOperationInputStream(this);
 		processIncommingData(receivedHeaders, finalPacket);
