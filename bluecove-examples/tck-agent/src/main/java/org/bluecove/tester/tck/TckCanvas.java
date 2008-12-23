@@ -43,6 +43,8 @@ public class TckCanvas extends LoggerCanvas implements CommandListener {
 
 	static final Command stopAgentCommand = new Command("Stop Agent", Command.ITEM, 3);
 
+	static final Command runGarbageCollectoCommand = new Command("Run GC", Command.ITEM, 4);
+
 	static final Command clearCommand = new Command("#-Clear", Command.ITEM, 8);
 
 	public TckCanvas() {
@@ -57,6 +59,7 @@ public class TckCanvas extends LoggerCanvas implements CommandListener {
 		if (ThreadUtils.canInterruptThread()) {
 			addCommand(stopAgentCommand);
 		}
+		addCommand(runGarbageCollectoCommand);
 		addCommand(clearCommand);
 
 		setCommandListener(this);
@@ -79,6 +82,8 @@ public class TckCanvas extends LoggerCanvas implements CommandListener {
 					TckStarter.startObexTCK(false);
 				} else if (c == stopAgentCommand) {
 					TckStarter.stopAgent();
+				} else if (c == runGarbageCollectoCommand) {
+					Runtime.getRuntime().gc();
 				} else {
 					if (c != null) {
 						Logger.info("Command " + c.getLabel() + " not found");

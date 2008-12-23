@@ -63,9 +63,13 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 	private boolean logLastEvenVisible = true;
 
 	protected int backgroundColor = 255;
-	
+
 	protected int fontColor = 0;
-	
+
+	private long nextMemroyUpdate = 0;
+
+	private int nextMemroyStatusLen = 0;
+
 	public LoggerCanvas() {
 		Logger.addAppender(this);
 	}
@@ -77,9 +81,22 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 	protected String getCanvasStatusText() {
 		return null;
 	}
-	
+
 	protected void paintBackground(Graphics g, int width, int height) {
-	    
+
+	}
+
+	protected void paintMemoryStatus(Graphics g, int y, int width, int height) {
+		long now = System.currentTimeMillis();
+		if (nextMemroyUpdate < now) {
+			// Next Update in 5 secons
+			nextMemroyUpdate = now + 1000 * 5;
+			Runtime r = Runtime.getRuntime();
+			long total = r.totalMemory();
+			long used = total - r.freeMemory();
+			nextMemroyStatusLen = (int) ((used * width) / total);
+		}
+		g.drawLine(0, y, nextMemroyStatusLen, y);
 	}
 
 	public int writeln(Graphics g, String s) {
@@ -90,7 +107,6 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 		return y + h;
 	}
 
-	
 	protected void paint(Graphics g) {
 		lineOffsetY = 0;
 		lineOffsetX = 0;
@@ -107,9 +123,10 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 		if (title != null) {
 			lastY = writeln(g, title);
 		}
+		paintMemoryStatus(g, lastY, width, height);
 
 		line = 0;
-		lineOffsetY = lastY;
+		lineOffsetY = lastY + 2;
 		Font font = Font.getFont(Font.FACE_PROPORTIONAL, Font.STYLE_PLAIN, Font.SIZE_SMALL);
 		g.setFont(font);
 
