@@ -189,7 +189,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 
 		byte[] b = readPacket();
 		OBEXHeaderSetImpl responseHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
-
+		validateAuthenticationResponse((OBEXHeaderSetImpl) headers, responseHeaders);
 		if (!authentRetry && (responseHeaders.getResponseCode() == ResponseCodes.OBEX_HTTP_UNAUTHORIZED)
 				&& (responseHeaders.hasAuthenticationChallenge())) {
 			OBEXHeaderSetImpl retryHeaders = OBEXHeaderSetImpl.cloneHeaders(headers);

@@ -161,6 +161,7 @@ abstract class OBEXClientOperation implements Operation, OBEXOperation, OBEXOper
 			session.writePacket(this.operationId, headers);
 			byte[] b = session.readPacket();
 			OBEXHeaderSetImpl dataHeaders = OBEXHeaderSetImpl.readHeaders(b[0], b, 3);
+			session.handleAuthenticationResponse(dataHeaders, null);
 			int responseCode = dataHeaders.getResponseCode();
 			DebugLog.debug0x("client operation got reply", OBEXUtils.toStringObexResponseCodes(responseCode),
 					responseCode);

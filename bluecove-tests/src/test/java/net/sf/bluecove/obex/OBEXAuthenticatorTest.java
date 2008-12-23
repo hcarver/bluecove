@@ -41,45 +41,10 @@ import javax.obex.ServerRequestHandler;
 import com.intel.bluetooth.DebugLog;
 import com.intel.bluetooth.obex.BlueCoveOBEX;
 
-public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
-
-	private String userName = "bob";
-
-	private static String userPasswordSufix = "_Pwd";
+public class OBEXAuthenticatorTest extends OBEXAuthenticationBaseTestCase {
 
 	private byte[] serverData;
-
-	private int serverResponseCode;
-
-	private volatile int serverOnAuthenticationResponseCalled;
-
-	private volatile int clientOnAuthenticationResponseCalled;
-
-	private final int testHeaderID = 0xF0;
-
-	private enum When {
-		Never, onConnect, onPut, onGet
-	}
-
-	private class ChallengeData {
-
-		String realm;
-
-		boolean userID;
-
-		boolean access;
-
-		ChallengeData() {
-			this(null, false, false);
-		}
-
-		ChallengeData(String realm, boolean userID, boolean access) {
-			this.realm = realm;
-			this.userID = userID;
-			this.access = access;
-		}
-	}
-
+	
 	private volatile ChallengeData serverChallenge;
 
 	@Override
@@ -87,25 +52,6 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 		super.setUp();
 		serverData = null;
 		serverChallenge = new ChallengeData("SrvTest", true, true);
-		serverResponseCode = ResponseCodes.OBEX_HTTP_OK;
-		serverOnAuthenticationResponseCalled = 0;
-		clientOnAuthenticationResponseCalled = 0;
-	}
-
-	private static byte[] getUserPassword(byte[] userName) {
-		if (userName == null) {
-			return getUserPassword((String) null);
-		} else {
-			return getUserPassword(new String(userName));
-		}
-	}
-
-	private static byte[] getUserPassword(String userName) {
-		if (userName == null) {
-			return "secret".getBytes();
-		} else {
-			return (userName + userPasswordSufix).getBytes();
-		}
 	}
 
 	private class RequestHandler extends ServerRequestHandler {
@@ -208,6 +154,27 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 			}
 		}
 
+		public int onSetPath(HeaderSet request, HeaderSet reply, boolean backup, boolean create) {
+		    serverRequestHandlerInvocations++;
+		    serverHeaders = request;
+            Long when;
+            try {
+                when = (Long) request.getHeader(testHeaderID);
+            } catch (IOException e) {
+                DebugLog.error("==TEST== Server", e);
+                return ResponseCodes.OBEX_HTTP_UNAVAILABLE;
+            }
+            if (!authenticationRequested && When.onSetPath.ordinal() == when) {
+                reply.createAuthenticationChallenge(serverChallenge.realm, serverChallenge.userID,
+                        serverChallenge.access);
+                authenticationRequested = true;
+                return ResponseCodes.OBEX_HTTP_UNAUTHORIZED;
+            }
+		    serverResponseCode = ResponseCodes.OBEX_HTTP_OK;
+            DebugLog.debug("==TEST== Server returns " + BlueCoveOBEX.obexResponseCodes(serverResponseCode));
+            return serverResponseCode;
+	    }
+		
 		public void onAuthenticationFailure(byte[] userName) {
 			DebugLog.debug("==TEST== Server onAuthenticationFailure");
 			authenticationRequested = false;
@@ -222,6 +189,7 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 
 		public PasswordAuthentication onAuthenticationChallenge(String description, boolean isUserIdRequired,
 				boolean isFullAccess) {
+		    serverOnAuthenticationChallengeCalled++;
 			DebugLog.debug("==TEST== Server challenge " + (isUserIdRequired ? "U" : "") + (isFullAccess ? "A" : "")
 					+ " " + description);
 			return new PasswordAuthentication(userName.getBytes(), getUserPassword(userName));
@@ -245,10 +213,6 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 		return new RequestHandler();
 	}
 
-	private When now = When.Never;
-
-	private When authenticatorCalled = When.Never;
-
 	private void runPUTOperation(final When whenChallenge, boolean empty) throws IOException {
 
 		now = When.Never;
@@ -262,6 +226,7 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 			public PasswordAuthentication onAuthenticationChallenge(String description, boolean isUserIdRequired,
 					boolean isFullAccess) {
 				authenticatorCalled = now;
+				clientOnAuthenticationChallengeCalled ++;
 				clientChallenge.realm = description;
 				clientChallenge.userID = isUserIdRequired;
 				clientChallenge.access = isFullAccess;
@@ -313,6 +278,10 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 
 			getOperation.close();
 
+		} else if (whenChallenge == When.onSetPath) {
+		    now = When.onSetPath;
+		    HeaderSet reply = clientSession.setPath(hsOperation, true, true);
+		    responseCode = reply.getResponseCode();
 		} else {
 			now = When.onPut;
 			// Create PUT Operation
@@ -346,13 +315,12 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 		assertEquals("NAME", name, serverHeaders.getHeader(HeaderSet.NAME));
 
 		int invocationsExpected = 1;
-		if ((When.onPut == whenChallenge) || (When.onGet == whenChallenge)) {
+		if ((When.onPut == whenChallenge) || (When.onGet == whenChallenge) || (When.onSetPath == whenChallenge)) {
 			invocationsExpected++;
 		}
 		assertEquals("invocations", invocationsExpected, serverRequestHandlerInvocations);
 
 		assertEquals("onAuthenticationChallenge", whenChallenge.name(), authenticatorCalled.name());
-		assertEquals("clientOnAuthenticationResponseCalled", 0, clientOnAuthenticationResponseCalled);
 
 		if (When.Never != whenChallenge) {
 			assertEquals("Challenge.realm", serverChallenge.realm, clientChallenge.realm);
@@ -360,14 +328,19 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 			assertEquals("Challenge.access", serverChallenge.access, clientChallenge.access);
 		}
 
-		int serverOnAuthenticationResponseCalledExpected = 1;
+		int challengeCalledExpected = 1;
 		if (When.Never == whenChallenge) {
-			serverOnAuthenticationResponseCalledExpected = 0;
+			challengeCalledExpected = 0;
 		}
 
-		assertEquals("serverOnAuthenticationResponseCalled", serverOnAuthenticationResponseCalledExpected,
+		assertEquals("serverOnAuthenticationResponseCalled", challengeCalledExpected,
 				serverOnAuthenticationResponseCalled);
+		
+		assertEquals("clientOnAuthenticationChallengeCalled", challengeCalledExpected, clientOnAuthenticationChallengeCalled);
 
+		assertEquals("serverOnAuthenticationChallengeCalled", 0, serverOnAuthenticationChallengeCalled);
+        assertEquals("clientOnAuthenticationResponseCalled", 0, clientOnAuthenticationResponseCalled);
+        
 		assertEquals("ResponseCodes." + BlueCoveOBEX.obexResponseCodes(serverResponseCode), serverResponseCode,
 				responseCode);
 		assertServerErrors();
@@ -398,4 +371,8 @@ public class OBEXAuthenticatorTest extends OBEXBaseEmulatorTestCase {
 	public void testChallengeOnGet() throws IOException {
 		runPUTOperation(When.onGet, false);
 	}
+
+    public void testChallengeOnSetPath() throws IOException {
+        runPUTOperation(When.onSetPath, false);
+    }
 }
