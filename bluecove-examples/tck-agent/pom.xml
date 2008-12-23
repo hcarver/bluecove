@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0">
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.sf.bluecove</groupId>
+        <artifactId>bluecove-examples</artifactId>
+        <version>2.1.0-SNAPSHOT</version><!--bluecove-version-->
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>tck-agent</artifactId>
+    <name>tck-agent</name>
+
+    <description>Compiled JSR 82 TCK agent for J2ME</description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove-tester-base</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove-gpl</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.bluecove</groupId>
+            <artifactId>bluecove-emu</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.microemu</groupId>
+            <artifactId>microemulator</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pyx4me</groupId>
+            <artifactId>cldcunit-se</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+
+    </dependencies>
+
+    <properties>
+        <!--wtk.bluetooth.enabled>true</wtk.bluetooth.enabled-->
+        <!-- short name for Motorola iDEN phones -->
+        <mainjarname>tck-agent</mainjarname>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.3</source>
+                    <target>1.1</target>
+                    <compilerArguments>
+                        <bootclasspath>${settings.localRepository}/org/microemu/cldcapi11/${me2Version}/cldcapi11-${me2Version}.jar${path.separator}${settings.localRepository}/org/microemu/midpapi20/${me2Version}/midpapi20-${me2Version}.jar</bootclasspath>
+                    </compilerArguments>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.microemu</groupId>
+                        <artifactId>cldcapi11</artifactId>
+                        <version>${me2Version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.microemu</groupId>
+                        <artifactId>midpapi20</artifactId>
+                        <version>${me2Version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- Create application loadable on the phone -->
+            <plugin>
+                <groupId>com.pyx4me</groupId>
+                <artifactId>j2me-maven-plugin</artifactId>
+                <version>${pyx4meVersion}</version>
+                <executions>
+                   <execution>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <j2meConfiguration>CLDC-1.1</j2meConfiguration>
+                    <proguard>true</proguard>
+                    <obfuscate>false</obfuscate>
+                    <proguardPreverify>true</proguardPreverify>
+                    <appendClassifier>false</appendClassifier>
+                    <jarfile>${mainjarname}</jarfile>
+                    <jadfile>${mainjarname}</jadfile>
+                    <midletName>tck-Agent</midletName>
+                    <!--proguardInclude>${basedir}/proguard.conf</proguardInclude-->
+                    <proguardInclude></proguardInclude>
+                    <proguardOptions>
+                        <options>
+                            <option>-ignorewarnings</option>
+                            <option>-dontusemixedcaseclassnames</option>
+                        </options>
+                    </proguardOptions>
+                    <jadAttributes>
+                        <!--FlipInsensitive>true</FlipInsensitive-->
+                        <MIDlet-Permissions>javax.microedition.io.Connector.bluetooth.client,javax.microedition.io.Connector.bluetooth.server</MIDlet-Permissions>
+                    </jadAttributes>
+                    <midlets>
+                        <MIDlet>
+                            <name>tck-Agent</name>
+                            <class>org.bluecove.tester.tck.TckMIDlet</class>
+                        </MIDlet>
+                    </midlets>
+                    <useWtkLibs>false</useWtkLibs>
+                    <libs>
+                        <lib>${settings.localRepository}/org/microemu/cldcapi11/${me2Version}/cldcapi11-${me2Version}.jar</lib>
+                        <lib>${settings.localRepository}/org/microemu/midpapi20/${me2Version}/midpapi20-${me2Version}.jar</lib>
+                    </libs>
+
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.microemu</groupId>
+                            <artifactId>microemulator</artifactId>
+                            <exclude>true</exclude>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sf.bluecove</groupId>
+                            <artifactId>bluecove</artifactId>
+                            <filter>!javax/microedition/io/**,!com/intel/bluetooth/**</filter>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sf.bluecove</groupId>
+                            <artifactId>bluecove-gpl</artifactId>
+                            <exclude>true</exclude>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sf.bluecove</groupId>
+                            <artifactId>bluecove-emu</artifactId>
+                            <exclude>true</exclude>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.pyx4me</groupId>
+                            <artifactId>cldcunit-se</artifactId>
+                            <exclude>true</exclude>
+                        </dependency>
+                    </dependencies>
+
+                </configuration>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.microemu</groupId>
+                        <artifactId>midpapi20</artifactId>
+                        <version>${me2Version}</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>net.sf.proguard</groupId>
+                        <artifactId>proguard</artifactId>
+                        <version>4.1</version>
+                        <scope>runtime</scope>
+                    </dependency>
+
+                </dependencies>
+
+            </plugin>
+
+            <plugin>
+                <groupId>com.pyx4me</groupId>
+                <artifactId>obex-maven-plugin</artifactId>
+                <version>${pyx4meVersion}</version>
+                <configuration>
+                    <jarfile>${mainjarname}.jar</jarfile>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
