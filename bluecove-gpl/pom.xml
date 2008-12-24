@@ -100,6 +100,48 @@
                     </archive>
                 </configuration>
             </plugin>
+            
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>build-jni-headers</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>javah</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${native.source.dir}</outputDirectory>
+                            <classNames>
+                                <className>com.intel.bluetooth.BluetoothStackBlueZ</className> 
+                                <className>com.intel.bluetooth.BluetoothStackBlueZConsts</className> 
+                                <className>com.intel.bluetooth.BluetoothStackBlueZNativeTests</className> 
+                            </classNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>clean-remove-generated-hreaders</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <delete>
+                                    <fileset dir="${native.source.dir}" includes="com_intel_*.h"/>
+                                </delete>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>

@@ -114,6 +114,11 @@
 
     </dependencies>
 
+    <properties>
+        <native.build.skip>false</native.build.skip>
+        <native.source.dir>${basedir}/src/main/c/intelbth</native.source.dir>
+    </properties>
+    
     <build>
 
         <defaultGoal>install</defaultGoal>
@@ -138,7 +143,7 @@
                             <goal>javah</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>src/main/c/intelbth</outputDirectory>
+                            <outputDirectory>${native.source.dir}</outputDirectory>
                             <classNames>
                                 <className>com.intel.bluetooth.NativeTestInterfaces</className>
                                 <className>com.intel.bluetooth.BluetoothStackMicrosoft</className>
@@ -233,6 +238,20 @@
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
+                    <execution>
+                        <id>clean-remove-generated-hreaders</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <delete>
+                                    <fileset dir="${native.source.dir}" includes="com_intel_*.h"/>
+                                </delete>
+                            </tasks>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>site-fix-manifest</id>
                         <phase>process-classes</phase>
@@ -379,10 +398,6 @@
             </plugin>
        </plugins>
     </reporting>
-
-    <properties>
-        <native.build.skip>false</native.build.skip>
-    </properties>
 
     <profiles>
         <profile>
