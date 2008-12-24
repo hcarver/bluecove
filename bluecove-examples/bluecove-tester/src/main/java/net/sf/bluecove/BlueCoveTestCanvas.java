@@ -194,8 +194,8 @@ public class BlueCoveTestCanvas extends LoggerCanvas implements CommandListener 
 			StringBuffer buf = new StringBuffer();
 			buf.append(TestResponderClient.niceDeviceName(dev.remoteDevice.getBluetoothAddress()));
 			buf.append(" dc:").append(dev.serviceDiscovered.count);
-			buf.append(" first:").append(TimeUtils.timeToString(dev.serviceDiscoveredFirstTime));
-			buf.append(" last:").append(TimeUtils.timeToString(dev.serviceDiscoveredLastTime));
+			buf.append(" first:"); TimeUtils.appendTime(buf, dev.serviceDiscoveredFirstTime, false);
+			buf.append(" last:"); TimeUtils.appendTime(buf, dev.serviceDiscoveredLastTime, false);
 			Logger.info(buf.toString());
 			buf = new StringBuffer();
 			buf.append(" avg ddf:").append(dev.avgDiscoveryFrequencySec());

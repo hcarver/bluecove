@@ -53,6 +53,15 @@ public class StringUtils {
 			return "0" + String.valueOf(i);
 		}
 	}
+	
+	public static StringBuffer appendD00(StringBuffer sb, int i) {
+	    if ((i > 9) || (i < 0)) {
+            sb.append(String.valueOf(i));
+        } else {
+            sb.append('0').append(String.valueOf(i));
+        }
+	    return sb;
+	}
 
 	public static String d000(int i) {
 		if ((i > 99) || (i < 0)) {
@@ -64,6 +73,17 @@ public class StringUtils {
 		}
 	}
 
+	public static StringBuffer appendD000(StringBuffer sb, int i) {
+	    if ((i > 99) || (i < 0)) {
+            sb.append(String.valueOf(i));
+	    } else if (i > 9) {
+	        sb.append('0').append(String.valueOf(i));
+	    } else {
+            sb.append('0').append('0').append(String.valueOf(i));
+        }
+        return sb;
+	}
+	
 	public static String d0000(int i) {
 		if ((i > 999) || (i < 0)) {
 			return String.valueOf(i);

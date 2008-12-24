@@ -32,6 +32,10 @@ import java.util.Date;
  */
 public abstract class TimeUtils {
 
+    private static Calendar singleCalendar;
+    
+    private static Date singleDate;
+    
 	public static String secSince(long start) {
 		if (start == 0) {
 			return "n/a";
@@ -81,38 +85,45 @@ public abstract class TimeUtils {
 	}
 
 	public static String timeNowToString() {
-		return timeToString(System.currentTimeMillis());
+	    StringBuffer sb = new StringBuffer();
+        appendTime(sb, System.currentTimeMillis(), false);
+        return sb.toString();
 	}
+	
 
 	public static String timeStampNowToString() {
-		return timeStampToString(System.currentTimeMillis(), true);
-	}
-
-	public static String timeToString(Calendar calendar, boolean millisecond) {
-		StringBuffer sb;
-		sb = new StringBuffer();
-		sb.append(StringUtils.d00(calendar.get(Calendar.HOUR_OF_DAY))).append(":");
-		sb.append(StringUtils.d00(calendar.get(Calendar.MINUTE))).append(":");
-		sb.append(StringUtils.d00(calendar.get(Calendar.SECOND)));
-		if (millisecond) {
-			sb.append(".");
-			sb.append(StringUtils.d000(calendar.get(Calendar.MILLISECOND)));
-		}
+	    StringBuffer sb = new StringBuffer();
+		appendTime(sb, System.currentTimeMillis(), true);
 		return sb.toString();
 	}
 
-	public static String timeToString(long timeStamp) {
-		return timeStampToString(timeStamp, false);
+	public static StringBuffer appendTimeStampNow(StringBuffer sb, boolean millisecond) {
+	    return appendTime(sb,System.currentTimeMillis(),  millisecond);
 	}
+	
+	public static synchronized StringBuffer appendTime(StringBuffer sb, long timeStamp, boolean millisecond) {
+        if (timeStamp == 0) {
+            sb.append("n/a");
+            return sb;
 
-	public static synchronized String timeStampToString(long timeStamp, boolean millisecond) {
-		if (timeStamp == 0) {
-			return "n/a";
-		}
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Date(timeStamp));
-		return timeToString(calendar, millisecond);
-	}
+        }
+        if (singleCalendar == null) {
+            singleCalendar = Calendar.getInstance();
+            singleDate = new Date();
+        }
+        singleDate.setTime(timeStamp);
+        singleCalendar.setTime(singleDate);
+
+        StringUtils.appendD00(sb, singleCalendar.get(Calendar.HOUR_OF_DAY)).append(':');
+        StringUtils.appendD00(sb, singleCalendar.get(Calendar.MINUTE)).append(':');
+        StringUtils.appendD00(sb, singleCalendar.get(Calendar.SECOND));
+        if (millisecond) {
+            sb.append('.');
+           StringUtils.appendD000(sb, singleCalendar.get(Calendar.MILLISECOND));
+        }
+
+        return sb;
+    }
 
 	public static boolean sleep(long millis) {
 		try {

@@ -40,6 +40,8 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 
 	public static boolean logTimeStamp = false;
 
+	public static boolean logTimeStampMillisecond = true;
+	
 	private int line;
 
 	private int lineOffsetY;
@@ -199,7 +201,7 @@ public class LoggerCanvas extends Canvas implements LoggerAppender {
 		}
 		StringBuffer buf = new StringBuffer();
 		if (logTimeStamp) {
-			buf.append(TimeUtils.timeStampNowToString()).append(" ");
+		    TimeUtils.appendTimeStampNow(buf, logTimeStampMillisecond).append(' ');
 		}
 		switch (level) {
 		case Logger.ERROR:

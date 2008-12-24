@@ -179,9 +179,9 @@ public class Logger {
         }
         long free = runtime.freeMemory();
         long total = runtime.totalMemory();
-        Logger.info("Mem Total  " + StringUtils.formatLong(total));
-        Logger.info("Mem Used   " + StringUtils.formatLong(total - free));
-        Logger.info("Mem GC rel " + StringUtils.formatLong(initialFree - free));
+        Logger.info("Mem Total " + StringUtils.formatLong(total));
+        Logger.info("Mem Used  " + StringUtils.formatLong(total - free));
+        Logger.info("Mem GC    " + StringUtils.formatLong(free - initialFree));
     }
 }
 
