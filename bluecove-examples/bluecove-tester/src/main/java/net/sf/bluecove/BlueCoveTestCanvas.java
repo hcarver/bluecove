@@ -269,6 +269,7 @@ public class BlueCoveTestCanvas extends LoggerCanvas implements CommandListener 
 		Switcher.clear();
 		RemoteDeviceInfo.clear();
 		repaint();
+		Logger.runGarbageCollector();
 	}
 
 	private void startSwitcher() {

@@ -27,6 +27,7 @@ package org.bluecove.tester.log;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import org.bluecove.tester.util.StringUtils;
 import org.bluecove.tester.util.TimeUtils;
 
 public class Logger {
@@ -165,6 +166,22 @@ public class Logger {
 			LoggerAppender a = (LoggerAppender) iter.nextElement();
 			a.appendLog(level, message, throwable);
 		}
-		;
 	}
+	
+    public static void runGarbageCollector() {
+        Runtime runtime = Runtime.getRuntime();
+        long initialFree = runtime.freeMemory();
+        runtime.gc();
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            return;
+        }
+        long free = runtime.freeMemory();
+        long total = runtime.totalMemory();
+        Logger.info("Mem Total  " + StringUtils.formatLong(total));
+        Logger.info("Mem Used   " + StringUtils.formatLong(total - free));
+        Logger.info("Mem GC rel " + StringUtils.formatLong(initialFree - free));
+    }
 }
+

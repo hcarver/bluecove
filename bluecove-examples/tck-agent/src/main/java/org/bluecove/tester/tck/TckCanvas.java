@@ -76,6 +76,7 @@ public class TckCanvas extends LoggerCanvas implements CommandListener {
 					BaseTestMIDlet.exit();
 				} else if (c == clearCommand) {
 					clearLog();
+					Logger.runGarbageCollector();
 				} else if (c == startBluetoothTCKCommand) {
 					TckStarter.startBluetoothTCK();
 				} else if (c == startObexTCKCommand) {
@@ -83,7 +84,7 @@ public class TckCanvas extends LoggerCanvas implements CommandListener {
 				} else if (c == stopAgentCommand) {
 					TckStarter.stopAgent();
 				} else if (c == runGarbageCollectoCommand) {
-					Runtime.getRuntime().gc();
+				    Logger.runGarbageCollector();
 				} else {
 					if (c != null) {
 						Logger.info("Command " + c.getLabel() + " not found");
@@ -101,6 +102,7 @@ public class TckCanvas extends LoggerCanvas implements CommandListener {
 			break;
 		case '#':
 			clearLog();
+			Logger.runGarbageCollector();
 			break;
 		default:
 			logLinesMove(getGameAction(keyCode));
