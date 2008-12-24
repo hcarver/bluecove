@@ -37,11 +37,7 @@ import org.bluecove.tester.util.RuntimeDetect;
 
 import net.sf.bluecove.util.BluetoothTypesInfo;
 import net.sf.bluecove.util.CollectionUtils;
-import BluetoothTCKAgent.System;
 
-/**
- * 
- */
 public class Switcher implements Runnable {
 
 	public static TestResponderClient client;
@@ -66,13 +62,13 @@ public class Switcher implements Runnable {
 
 	Random random = new Random();
 
-	private static Thread tckRFCOMMThread;
+	static Thread tckRFCOMMThread;
 
-	private static Thread tckL2CALthread;
+	static Thread tckL2CALthread;
 
-	private static Thread tckGOEPThread;
+	static Thread tckGOEPThread;
 
-	private static Thread tckOBEXThread;
+	static Thread tckOBEXThread;
 
 	public Switcher() {
 		instance = this;
@@ -231,45 +227,15 @@ public class Switcher implements Runnable {
 			localDevice.setDiscoverable(DiscoveryAgent.GIAC);
 		} catch (BluetoothStateException e) {
 			Logger.error("start", e);
+			return;
 		}
 
 		if (Configuration.likedTCKAgent) {
-			tckRFCOMMThread = new BluetoothTCKAgent.RFCOMMThread("RFCOMMThread");
-			if (tckRFCOMMThread == null) {
-				Logger.info("Due to the License we do not include the TCK agent in distribution");
-			} else {
-				tckRFCOMMThread.start();
-
-				try {
-					String agentMtu = System.getProperty("bluetooth.agent_mtu");
-					String timeout = System.getProperty("timeout");
-					tckL2CALthread = new BluetoothTCKAgent.L2CAPThread("L2CAPThread", agentMtu, timeout);
-					if (tckL2CALthread != null) {
-						tckL2CALthread.start();
-					}
-				} catch (Throwable e) {
-					Logger.debug("Fail to start L2CAP", e);
-				}
-
-				try {
-					tckGOEPThread = new BluetoothTCKAgent.GOEPThread("GOEPThread");
-					if (tckGOEPThread != null) {
-						tckGOEPThread.start();
-					}
-				} catch (Throwable e) {
-					Logger.debug("Fail to start GOEP srv", e);
-				}
-
-				try {
-					tckOBEXThread = new OBEXTCKAgent.OBEXTCKAgentApp("10", Configuration.testServerOBEX_TCP
-							.booleanValue() ? "tcpobex" : "btgoep");
-					if (tckOBEXThread != null) {
-						tckOBEXThread.start();
-					}
-				} catch (Throwable e) {
-					Logger.debug("Fail to start OBEX srv", e);
-				}
-			}
+		    try {
+                SwitcherTck.startTCKAgent();
+            } catch (Throwable e) {
+                Logger.error("Error", e);
+            }
 		}
 	}
 

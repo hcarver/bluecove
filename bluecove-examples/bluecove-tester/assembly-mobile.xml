@@ -18,6 +18,7 @@
             <outputFileNameMapping></outputFileNameMapping>
             <includes>
                 <include>net.sf.bluecove:bluecove-tester-base</include>
+                <include>net.sf.bluecove:tck-agent</include>
             </includes>
         </dependencySet>
         <dependencySet>
