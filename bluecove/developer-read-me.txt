@@ -43,10 +43,10 @@
 
     * On build server (CruiseControl) https://pyx4j.com/cruisecontrol/ start "bluecove-release"
       It will execute:
-        mvn clean --fail-never -P build -P release
-        mvn scm:update -P build -P release
-        mvn clean deploy -P build -P release -DperformRelease=true
-        mvn site-deploy -P build -P release -DperformRelease=true
+        mvn clean --fail-never -P build,release
+        mvn scm:update -P build,release
+        mvn clean deploy -P build,release -DperformRelease=true
+        mvn site-deploy -P build,release -DperformRelease=true
 
     * repository "pyx4j.com-file-release" (http://pyx4j.com/maven2-release/) on build server will sync with http://repo1.maven.org/maven2
 
@@ -72,7 +72,7 @@
     This enables additional errors handling for official builds.
 
     "bluecove-nightly" 4AM EST
-        mvn clean --fail-never -P build;mvn scm:update -P build;mvn clean deploy -P build -P build-snapshot;mvn site-deploy -P build -P build-snapshot
+        mvn clean --fail-never -P build;mvn scm:update -P build;mvn clean deploy -P build,build-snapshot;mvn site-deploy -P build,build-snapshot
 
     cruisecontrol runs only on Unix (Linux 32but) now
       Windows and OS X dll are taken from SVN http://bluecove.googlecode.com/svn/build/win-dlls/

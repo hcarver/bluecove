@@ -10,11 +10,11 @@
       <changefreq>weekly</changefreq>
    </url>
    <url>
-      <loc>http://snapshot-bluecove.pyx4j.com/bluecove/apidocs/index.html</loc>
+      <loc>http://www.bluecove.org/bluecove/apidocs/index.html</loc>
       <changefreq>monthly</changefreq>
    </url>
    <url>
-      <loc>http://snapshot-bluecove.pyx4j.com/bluecove-examples/</loc>
+      <loc>http://www.bluecove.org/bluecove-examples/</loc>
       <changefreq>weekly</changefreq>
    </url>
    <url>
@@ -30,28 +30,28 @@
         <loc>http://bluecove.googlecode.com/svn/trunk/bluecove/src/test/java/com/intel/bluetooth/javadoc/OBEXPutServer.java</loc>
         <codesearch:codesearch>
             <codesearch:filetype>java</codesearch:filetype>
-            <codesearch:license>LGPL</codesearch:license>
+            <codesearch:license>The Apache License, Version 2.0</codesearch:license>
         </codesearch:codesearch>
     </url>
     <url>
         <loc>http://bluecove.googlecode.com/svn/trunk/bluecove/src/test/java/com/intel/bluetooth/javadoc/ObexPutClient.java</loc>
         <codesearch:codesearch>
             <codesearch:filetype>java</codesearch:filetype>
-            <codesearch:license>LGPL</codesearch:license>
+            <codesearch:license>The Apache License, Version 2.0</codesearch:license>
         </codesearch:codesearch>
     </url>
     <url>
         <loc>http://bluecove.googlecode.com/svn/trunk/bluecove/src/test/java/com/intel/bluetooth/javadoc/RemoteDeviceDiscovery.java</loc>
         <codesearch:codesearch>
             <codesearch:filetype>java</codesearch:filetype>
-            <codesearch:license>LGPL</codesearch:license>
+            <codesearch:license>The Apache License, Version 2.0</codesearch:license>
         </codesearch:codesearch>
     </url>
     <url>
         <loc>http://bluecove.googlecode.com/svn/trunk/bluecove/src/test/java/com/intel/bluetooth/javadoc/ServicesSearch.java</loc>
         <codesearch:codesearch>
             <codesearch:filetype>java</codesearch:filetype>
-            <codesearch:license>LGPL</codesearch:license>
+            <codesearch:license>The Apache License, Version 2.0</codesearch:license>
         </codesearch:codesearch>
     </url>
 </urlset>
