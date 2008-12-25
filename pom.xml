@@ -67,7 +67,7 @@
 
     <distributionManagement>
         <site>
-            <id>test-pyx4j-site</id>
+            <id>bluecove-snapshot-site</id>
             <url>file:///home/apache/bluecove</url>
         </site>
         <repository>
@@ -485,6 +485,22 @@
             </properties>
         </profile>
 
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <distributionManagement>
+                <site>
+                    <id>bluecove-release-site</id>
+                    <url>file:///home/apache/bluecove/release-site</url>
+                </site>
+            </distributionManagement>
+        </profile>
+        
         <profile>
             <id>buildByMicroEmulatorTeam</id>
             <activation>

@@ -17,7 +17,7 @@
 
    build-native-bluecove.cmd and build-native-intelbth.cmd can be used to build dlls on windows.
 
-   build-native-osx.sh can be used to build  jnilib on Mac OS X
+   build-native-osx.sh can be used to build jnilib on Mac OS X
 
 * Building Release
 
@@ -28,23 +28,27 @@
         mvn source:jar javadoc:jar repository:bundle-create
 
     * Remove all -SNAPSHOT and verify version from pom.xml, BlueCoveImpl.java, build.version, common.h, bluecove.rc, intelbth.rc
+      Update versionBuild for native code to the last build # we had in snapshot.
 
     * Comment out sections marked <!--4release--> and <!--4snapshot--> in src/site/site.xml
 
     * SVN commit
 
-    * run java and c/c++ build again.
+    * run java and c/c++ build again.  (Win, OSX and Linux 64 Bit needs to done manually)
 
-    * Upload bluecove-2.X.X-bundle.jar to maven Central Repository
+    * On build server (CruiseControl) https://pyx4j.com/cruisecontrol/ start "bluecove-release"
+      It will execute:
+        mvn clean --fail-never -P build -P release
+        mvn scm:update -P build -P release
+        mvn clean deploy -P build -P release -DperformRelease=true
+        mvn site-deploy -P build -P release -DperformRelease=true
 
-        http://maven.apache.org/guides/mini/guide-central-repository-upload.html
+    * repository "pyx4j.com-file-release" (http://pyx4j.com/maven2-release/) on build server will sync with http://repo1.maven.org/maven2
 
-    * Build bluecove-examples project the same way. No need to Upload resulting jars! Only site.
-
-    * Upload the context of /home/apache/bluecove to bluecove.org (http://bluecove.sourceforge.net/)
+    * Upload the context of /home/apache/bluecove/release-site to bluecove.org (http://bluecove.sourceforge.net/)
         sftp web.sourceforge.net; cd /home/groups/b/bl/bluecove/htdocs
 
-    * Copy files src/site/resources/tck/.htaccess  to each directory with the list of TCK tests
+    * Copy files src/site/resources/tck/.htaccess to each directory with the list of TCK tests
 
     * Upload the distribution jars bluecove-2.X.X.jar and bluecove-2.X.X-sources.tar.gz to http://code.google.com/p/bluecove/ and http://sourceforge.net/projects/bluecove/
 
@@ -56,11 +60,11 @@
 
 * cruisecontrol
 
-    "bluecove-nightly" 1AM EST
-        mvn clean --fail-never -P build|scm:update -P build|clean deploy site-deploy -P build
+    "bluecove-nightly" 4AM EST
+        mvn clean --fail-never -P build;mvn scm:update -P build;mvn clean deploy -P build -P build-snapshot;mvn site-deploy -P build -P build-snapshot
 
-    cruisecontrol runs only on Unix now
-      windows and OS X dll are taken from SVN http://bluecove.googlecode.com/svn/build/win-dlls/
+    cruisecontrol runs only on Unix (Linux 32but) now
+      Windows and OS X dll are taken from SVN http://bluecove.googlecode.com/svn/build/win-dlls/
 
       If you made modification to C/C++ code place compiled library in SVN
 
