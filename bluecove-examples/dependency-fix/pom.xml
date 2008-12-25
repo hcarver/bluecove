@@ -8,10 +8,9 @@
 
     <parent>
         <groupId>net.sf.bluecove</groupId>
-        <!-- hack to remove this from site -->
-        <artifactId>bluecove-parent</artifactId>
+        <artifactId>bluecove-examples</artifactId>
         <version>2.1.0</version><!--bluecove-version-->
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>dependency-fix</artifactId>
