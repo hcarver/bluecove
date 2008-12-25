@@ -8,12 +8,16 @@
 BlueCove Linux D-Bus module
 
    BlueCove-bluez is additional module for BlueCove to support bluecove on Linux using D-Bus interfaces.
+   
+   This module is not part of BlueCove release 2.1.0!
 
-   Compiled for i386 and x86-64 versions of the native code (shared library) is included in jar distribution. Native shared library have been tested and should work on Ubuntu, OpenSUSE and Fedora. For other Linux distributions you may need to compile it yourself.
+   Compiled for i386 of the native code (shared library) is included in SNAPSHOT jar distribution. Native shared library have been tested and should work on Ubuntu, OpenSUSE and Fedora. For other Linux distributions you may need to compile it yourself.
 
    This module require additional library {{{http://dbus.freedesktop.org/doc/dbus-java/}Java D-Bus}} and its dependencies.
 
    N.B. This is experimental module. Another stable module {{{../bluecove-gpl}bluecove-gpl}} available.
+   
+   N.B. This module has not been updated to support BlueZ version 4.
 
 * Usage
 
@@ -25,7 +29,7 @@ java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus.jar:unixsocket
 
     * BlueCove library of the same mojor version
 
-    * On 64-bit Linux platform 64-bit java should be used
+    * On 64-bit Linux platform 64-bit java should be used (You need to compile library yourself)
 
 
 * Configuration options
