@@ -2,7 +2,7 @@
 
 * Build
 
-   We are using maven2 to build project.
+   We are using maven2 to build project.  Maven version 2.0.9 will build complete project.
 
    Ant can be used as well but the jar created has extra classes that are not supposed to be there.
 
@@ -21,20 +21,25 @@
 
 * Building Release
 
+    Release procesure is nearly fully automated on build server. But still manual work is require.
+
     * Test locally
 
         mvn clean deploy site-deploy
 
-        mvn source:jar javadoc:jar repository:bundle-create
-
     * Remove all -SNAPSHOT and verify version from pom.xml, BlueCoveImpl.java, build.version, common.h, bluecove.rc, intelbth.rc
-      Update versionBuild for native code to the last build # we had in snapshot.
+      
+      Update versionBuild for native code to the last build # +2 we had in snapshot.
 
     * Comment out sections marked <!--4release--> and <!--4snapshot--> in src/site/site.xml
 
     * SVN commit
 
     * run java and c/c++ build again.  (Win, OSX and Linux 64 Bit needs to done manually)
+
+    * On build server (CruiseControl) https://pyx4j.com/cruisecontrol/ start "bluecove-nightly"
+    
+      Verify that the site is OK and there are no errors when runnning results on OS X/Windows/Linux.
 
     * On build server (CruiseControl) https://pyx4j.com/cruisecontrol/ start "bluecove-release"
       It will execute:
@@ -59,6 +64,12 @@
     * Update src/site/site.xml reverse changes for <!--4release--> and <!--4snapshot-->
 
 * cruisecontrol
+
+    File ./m2/settings.xml  has:
+    
+        <activeProfile>cruisecontrol</activeProfile>
+    
+    This enables additional errors handling for official builds.
 
     "bluecove-nightly" 4AM EST
         mvn clean --fail-never -P build;mvn scm:update -P build;mvn clean deploy -P build -P build-snapshot;mvn site-deploy -P build -P build-snapshot

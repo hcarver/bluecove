@@ -1,5 +1,5 @@
 1 VERSIONINFO
- FILEVERSION 2,1,0,0
+ FILEVERSION 2,1,0,51
  PRODUCTVERSION 2,1,0,0
 BEGIN
     BLOCK "StringFileInfo"
@@ -9,7 +9,7 @@ BEGIN
             VALUE "Comments", "BlueCove WIDCOMM support\0"
             VALUE "CompanyName", "BlueCove Open Source\0"
             VALUE "FileDescription", "BlueCove JSR-82, WIDCOMM support\0"
-            VALUE "FileVersion", "2,1,0,0\0"
+            VALUE "FileVersion", "2,1,0,51\0"
             VALUE "InternalName", "bluecove.dll\0"
             VALUE "LegalCopyright", "The Apache Software License, Version 2.0\0"
             VALUE "LegalTrademarks", "BlueCove\0"

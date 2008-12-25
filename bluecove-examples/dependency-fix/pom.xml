@@ -10,7 +10,7 @@
         <groupId>net.sf.bluecove</groupId>
         <!-- hack to remove this from site -->
         <artifactId>bluecove-parent</artifactId>
-        <version>2.1.0-SNAPSHOT</version><!--bluecove-version-->
+        <version>2.1.0</version><!--bluecove-version-->
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
