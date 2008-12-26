@@ -13,6 +13,7 @@
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>
                 <exclude>target/**</exclude>
+                <exclude>libs-universal/**</exclude>
                 <exclude>build/**</exclude>
                 <exclude>src/main/resources/**</exclude>
                 <exclude>src/main/c/com_*.h</exclude>

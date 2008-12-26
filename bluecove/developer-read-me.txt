@@ -53,6 +53,8 @@
     * Upload the context of /home/apache/bluecove/release-site to bluecove.org (http://bluecove.sourceforge.net/)
         sftp web.sourceforge.net; cd /home/groups/b/bl/bluecove/htdocs
 
+    * Verify that all Webstart Applications are working, especialy open and obex-install/push
+
     * Copy files src/site/resources/tck/.htaccess to each directory with the list of TCK tests
 
     * Upload the distribution jars bluecove-2.X.X.jar and bluecove-2.X.X-sources.tar.gz to http://code.google.com/p/bluecove/ and http://sourceforge.net/projects/bluecove/

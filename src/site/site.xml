@@ -30,12 +30,13 @@
         <menu ref="parent" />
 
         <!--4release-->
-        <menu name="Ver #version#">
-        <!--4snapshot-->
         <!--
-        <menu name="Ver #build#" inherit="top">
-            <item name="Release 2.0.3" href="http://bluecove.org/"/>
+        <menu name="Ver #version#">
         -->
+        
+        <!--4snapshot-->
+        <menu name="Ver #build#" inherit="top">
+            <item name="Release 2.1.0" href="http://www.bluecove.org/"/>
         
             <item name="Project site" href="#remove#http://bluecove.googlecode.com" />
             <item name="sf.net" href="http://sourceforge.net/projects/bluecove/" />
@@ -48,9 +49,7 @@
             <item name="Download" href="#">
                 <item name="Releases" href="http://sourceforge.net/project/showfiles.php?group_id=114020"/>
                 <!--4snapshot-->
-                <!--
                 <item name="Snapshot" href="http://www.pyx4me.com/maven2-snapshot/net/sf/bluecove/bluecove/#version#/"/>
-                -->
 
                 <item name="SVN Access" href="source-repository.html"/>
                 <item name="Browse SVN" href="http://code.google.com/p/bluecove/source/browse/trunk"/>
@@ -61,7 +60,9 @@
             <item name="Examples" href="#remove#/bluecove-examples/index.html"/>
 
             <!--4release-->
+            <!--
             <item name="Preview 2.1.1" href="http://snapshot.bluecove.org/"/>
+            -->
         </menu>
 
         <menu ref="modules" collapse="true" />

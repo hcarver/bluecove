@@ -9,7 +9,7 @@
     <parent>
         <groupId>net.sf.bluecove</groupId>
         <artifactId>bluecove-parent</artifactId>
-        <version>2.1.0</version><!--bluecove-version-->
+        <version>2.1.1-SNAPSHOT</version><!--bluecove-version-->
         <relativePath>../pom.xml</relativePath>
     </parent>
 

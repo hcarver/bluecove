@@ -25,11 +25,11 @@
 #pragma once
 
 #ifndef BLUECOVE_BUILD
-#define BLUECOVE_BUILD 51
+#define BLUECOVE_BUILD 0
 #endif
 
 #ifndef BLUECOVE_VERSION
-#define BLUECOVE_VERSION 20100
+#define BLUECOVE_VERSION 20101
 #endif
 
 #ifdef _WIN32_WCE

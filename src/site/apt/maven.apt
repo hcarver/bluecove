@@ -14,6 +14,22 @@ Building project using maven
                 <artifactId>bluecove</artifactId>
                 <version>2.1.0</version>
             </dependency>
+            
+            <!-- If you plan to run application on Linux -->
+            <dependency>
+                <groupId>net.sf.bluecove</groupId>
+                <artifactId>bluecove-gpl</artifactId>
+                <version>2.1.0</version>
+                <scope>runtime</scope>
+            </dependency>
+            
+            <!-- If you plan to test your application in emulated Bluetooth  mode -->
+            <dependency>
+                <groupId>net.sf.bluecove</groupId>
+                <artifactId>bluecove-emu</artifactId>
+                <version>2.1.0</version>
+                <scope>test</scope>
+            </dependency>              
 ---
 
 
