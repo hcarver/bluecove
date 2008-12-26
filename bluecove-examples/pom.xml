@@ -96,6 +96,13 @@
         </profile>
 
         <profile>
+            <id>build</id>
+            <modules>
+                <module>bluecove-webstart</module>
+            </modules>
+        </profile>
+        
+        <profile>
             <id>build-snapshot</id>
             <modules>
                 <module>bluecove-webstart</module>
