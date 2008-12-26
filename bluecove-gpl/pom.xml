@@ -100,7 +100,7 @@
                     </archive>
                 </configuration>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>native-maven-plugin</artifactId>
@@ -114,15 +114,15 @@
                         <configuration>
                             <outputDirectory>${native.source.dir}</outputDirectory>
                             <classNames>
-                                <className>com.intel.bluetooth.BluetoothStackBlueZ</className> 
-                                <className>com.intel.bluetooth.BluetoothStackBlueZConsts</className> 
-                                <className>com.intel.bluetooth.BluetoothStackBlueZNativeTests</className> 
+                                <className>com.intel.bluetooth.BluetoothStackBlueZ</className>
+                                <className>com.intel.bluetooth.BluetoothStackBlueZConsts</className>
+                                <className>com.intel.bluetooth.BluetoothStackBlueZNativeTests</className>
                             </classNames>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
@@ -146,18 +146,18 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
-                   <execution>
-                       <id>all-sources-gz</id>
-                       <phase>install</phase>
-                       <goals><goal>single</goal></goals>
-                       <configuration>
-                           <attach>false</attach>
-                           <tarLongFileMode>gnu</tarLongFileMode>
-                           <descriptors>
-                               <descriptor>assembly-distr-sources.xml</descriptor>
-                           </descriptors>
-                       </configuration>
-                   </execution>
+                    <execution>
+                        <id>all-sources-gz</id>
+                        <phase>install</phase>
+                        <goals><goal>single</goal></goals>
+                        <configuration>
+                            <attach>false</attach>
+                            <tarLongFileMode>gnu</tarLongFileMode>
+                            <descriptors>
+                                <descriptor>assembly-distr-sources.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
@@ -167,10 +167,13 @@
                 <artifactId>maven-source-plugin</artifactId>
                 <executions>
                     <execution>
-                    <id>attach-sources</id>
-                    <goals>
-                        <goal>jar</goal>
-                    </goals>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <excludeResources>false</excludeResources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

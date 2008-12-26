@@ -118,7 +118,7 @@
         <native.build.skip>false</native.build.skip>
         <native.source.dir>${basedir}/src/main/c/intelbth</native.source.dir>
     </properties>
-    
+
     <build>
 
         <defaultGoal>install</defaultGoal>
@@ -571,10 +571,13 @@
                         <artifactId>maven-source-plugin</artifactId>
                         <executions>
                             <execution>
-                            <id>attach-sources</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <excludeResources>false</excludeResources>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
