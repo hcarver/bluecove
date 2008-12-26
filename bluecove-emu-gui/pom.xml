@@ -114,5 +114,16 @@
         </plugins>
 
     </build>
+    
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <configuration>
+                    <targetJdk>1.5</targetJdk>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 
 </project>
