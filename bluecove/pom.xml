@@ -576,7 +576,7 @@
                                     <goal>jar</goal>
                                 </goals>
                                 <configuration>
-                                    <excludeResources>false</excludeResources>
+                                    <excludeResources>true</excludeResources>
                                 </configuration>
                             </execution>
                         </executions>
