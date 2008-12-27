@@ -85,17 +85,23 @@ public abstract class TimeUtils {
 	}
 
 	public static String timeNowToString() {
-	    StringBuffer sb = new StringBuffer();
-        appendTime(sb, System.currentTimeMillis(), false);
-        return sb.toString();
+	    return timeToString(System.currentTimeMillis(), false);
 	}
 	
 
 	public static String timeStampNowToString() {
-	    StringBuffer sb = new StringBuffer();
-		appendTime(sb, System.currentTimeMillis(), true);
-		return sb.toString();
+		return timeToString(System.currentTimeMillis(), true);
 	}
+	
+	public static String timeToString(long timeStamp) {
+        return timeToString(timeStamp, false);
+    }
+	
+	public static String timeToString(long timeStamp, boolean millisecond) {
+        StringBuffer sb = new StringBuffer();
+        appendTime(sb, timeStamp, false);
+        return sb.toString();
+    }
 
 	public static StringBuffer appendTimeStampNow(StringBuffer sb, boolean millisecond) {
 	    return appendTime(sb,System.currentTimeMillis(),  millisecond);
