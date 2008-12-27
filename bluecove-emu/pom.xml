@@ -20,6 +20,13 @@
 
     <description>BlueCove JSR-82 Emulator</description>
 
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    
     <developers>
         <developer>
             <name>Vlad Skarzhevskyy</name>
@@ -93,7 +100,7 @@
                     <archive>
                         <manifestEntries>
                             <Description>BlueCove JSR-82 implementation, JSR-82 Emulator module</Description>
-                            <License>GNU Library or Lesser General Public License (LGPL)</License>
+                            <License>The Apache Software License, Version 2.0</License>
                             <Implementation-Version>${pom.version}</Implementation-Version>
                             <Implementation-Build>${buildLabel}</Implementation-Build>
                         </manifestEntries>
