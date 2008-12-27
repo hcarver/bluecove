@@ -39,9 +39,9 @@ import org.bluecove.tester.util.RuntimeDetect;
  */
 public abstract class BaseTestMIDlet extends MIDlet {
 
-	static BaseTestMIDlet instance;
+	protected static BaseTestMIDlet instance;
 
-	static Display display;
+	protected static Display display;
 
 	private Displayable mainDisplayable;
 
