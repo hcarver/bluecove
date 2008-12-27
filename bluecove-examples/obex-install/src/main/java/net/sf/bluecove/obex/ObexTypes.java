@@ -34,9 +34,11 @@ public class ObexTypes {
 		types.put("jpg", "image/jpeg");
 		types.put("jpeg", "image/jpeg");
 		types.put("gif", "image/gif");
+		types.put("png", "image/png");
 		types.put("mp3", "audio/mpeg");
 		types.put("txt", "text/plain");
 		types.put("jar", "application/java-archive");
+		types.put("jad", "text/vnd.sun.j2me.app-descriptor"); 
 	}
 
 	static String getFileExtension(String fileName) {
