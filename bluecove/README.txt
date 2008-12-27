@@ -5,9 +5,11 @@
 
 == About ==
 
-BlueCove is a LGPL licensed JSR-82 implementation on Java Standard Edition (J2SE) that currently interfaces with
+BlueCove is a JSR-82 implementation on Java Standard Edition (J2SE) that currently interfaces with
 the Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack. Originally developed by Intel Research and
-currently maintained by volunteers. The LGPL license allow to link and distribute commercial software with BlueCove.
+currently maintained by volunteers.
+
+Since version 2.1 BlueCove distributed under the Apache Software License, Version 2.0
 
 Support for Linux BlueZ is added in BlueCove version 2.0.3 as additional [http://www.gnu.org/licenses/gpl.html GNU General Public License] module `bluecove-gpl`.
 

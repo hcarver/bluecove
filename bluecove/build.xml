@@ -83,7 +83,7 @@
         <jar jarfile="${dist}/bluecove-${product_version}.jar">
             <manifest>
                 <attribute name="Description" value="BlueCove JSR-82 implementation"/>
-                <attribute name="License" value="GNU Library or Lesser General Public License (LGPL)"/>
+                <attribute name="License" value="The Apache Software License, Version 2.0"/>
                 <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Implementation-Version" value="${product_version}"/>
                 <attribute name="Build-Date" value="${today}"/>

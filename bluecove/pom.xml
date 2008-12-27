@@ -177,7 +177,7 @@
                     <archive>
                         <manifestEntries>
                             <Description>BlueCove JSR-82 implementation</Description>
-                            <License>GNU Library or Lesser General Public License (LGPL)</License>
+                            <License>The Apache Software License, Version 2.0</License>
                             <Implementation-Version>${pom.version}</Implementation-Version>
                             <Implementation-Build>${buildLabel}</Implementation-Build>
                         </manifestEntries>
@@ -213,7 +213,7 @@
                                <!-- this does not work, bug http://jira.codehaus.org/browse/MASSEMBLY-188
                                <manifestEntries>
                                    <Description>BlueCove JSR-82 implementation</Description>
-                                   <License>GNU Library or Lesser General Public License (LGPL)</License>
+                                   <License>The Apache Software License, Version 2.0</License>
                                    <Implementation-Version>${pom.version}</Implementation-Version>
                                </manifestEntries>
                                -->
