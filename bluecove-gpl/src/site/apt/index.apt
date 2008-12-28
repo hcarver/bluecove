@@ -10,7 +10,7 @@ BlueCove Linux module
    BlueCove-gpl is additional module for BlueCove to support bluecove on Linux.
 This module distributed as different jar because of the License differences.
 
-  Compiled for i386 and x86-64 versions of the native code (shared library) is included in jar distribution. Native shared library have been tested and should work on Ubuntu, OpenSUSE and Fedora. For other Linux distributions you may need to compile it yourself.
+  Compiled for i386 and x86-64 versions of the native code (jni shared library) is included in jar distribution. Native shared library have been tested and should work on Ubuntu, OpenSUSE and Fedora. For other Linux distributions you may need to compile it yourself.
 
   N.B. This is stable module. Another experimental module {{{../bluecove-bluez}bluecove-bluez}} (Apache Software License) that is using D-Bus is in developement. {{{http://groups.google.com/group/bluecove-developers}Help us make it}}.
 
@@ -25,6 +25,16 @@ java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:yourApp.jar org.your.
     * BlueCove library of the same mojor version
 
     * Package bluez-libs 3.7 or later should be installed on your system
+    
+    * We linked JNI library with <libbluetooth.so> (Not libbluetooth.so.3 or libbluetooth.so.2) to be able to use same build with Bluez Version 3 and Version 4
+      
+        * You need package/rpm that creates a link libbluetooth.so to already installed libbluetooth.so.3 or libbluetooth.so.2
+        
+        * <libbluetooth-dev> on Ubuntu
+        
+        * <bluez-libs-devel> on Fedora
+        
+        * <bluez-devel> on openSUSE 
 
     * To change Discoverable mode of the device you should be root
 
@@ -43,6 +53,10 @@ java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:yourApp.jar org.your.
 
     * This is not complete list! For other Linux distributions you may need to compile it yourself using maven or ant.
 
+
+* Compile it yourself
+
+    You may build BlueCove JNI library on your system using ant or maven. See developer-read-me.txt in sources folder for details.
 
 * Configuration options
 
