@@ -431,8 +431,8 @@ public abstract class MicroeditionConnector {
 		}
 		if ((channel < BluetoothConsts.L2CAP_PSM_MIN_JSR_82)
 				&& (!BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_JSR_82_PSM_MINIMUM_OFF, false))) {
-			throw new IllegalArgumentException("PCM values restricted by JAR82 to minimum "
-					+ BluetoothConsts.L2CAP_PSM_MIN_JSR_82);
+			throw new IllegalArgumentException("PCM " + channelAsString + ", PCM values restricted by JSR-82 to minimum "
+					+ BluetoothConsts.L2CAP_PSM_MIN_JSR_82 + ", see BlueCoveConfigProperties.PROPERTY_JSR_82_PSM_MINIMUM_OFF");
 		}
 
 		// has the 9th bit (0x100) set to zero
