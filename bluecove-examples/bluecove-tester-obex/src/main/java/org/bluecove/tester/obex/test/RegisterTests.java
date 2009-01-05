@@ -31,6 +31,7 @@ public class RegisterTests {
 	public static void register() {
 		add("PutOutput", new OBEXPutOutputStream());
 		add("PutInput", new OBEXPutInputStream());
+		add("GetInput", new OBEXGetInputStream());
 	}
 
 	public static void add(String name, Runnable test) {

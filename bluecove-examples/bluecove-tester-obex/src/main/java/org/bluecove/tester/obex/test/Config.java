@@ -27,6 +27,6 @@ package org.bluecove.tester.obex.test;
 public class Config {
 
 	public static String getTestObexServerURL() {
-		return "btgoep://0050F2E8D4A6:2";
+		return "btgoep://000D3AA5E36C:2";
 	}
 }
