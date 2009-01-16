@@ -197,6 +197,12 @@ public abstract class NativeLibLoader {
 		if ((!state.libraryAvailable) && (useResource) && (!UtilsJavaSE.ibmJ9midp)) {
 			state.libraryAvailable = loadAsSystemResource(libFileName, stackClass);
 		}
+		
+		// Try load bluecove from package private location installed on the system
+		if ((getOS() == OS_LINUX) && (!UtilsJavaSE.ibmJ9midp)) {
+            state.libraryAvailable = tryloadPath(createLinuxPackagePath(sysArch), libFileName);
+		}
+		
 		if (!state.libraryAvailable) {
 			if (!UtilsJavaSE.ibmJ9midp) {
 				state.libraryAvailable = tryload(libName);
@@ -213,6 +219,14 @@ public abstract class NativeLibLoader {
 		return state.libraryAvailable;
 	}
 
+	private static String createLinuxPackagePath(String sysArch) {
+	    if (sysArch.indexOf("64") != -1) {
+	        return "/usr/lib64/bluecove/" + BlueCoveImpl.version;
+	    } else {
+	        return "/usr/lib/bluecove/" + BlueCoveImpl.version;
+	    }
+	}
+	
 	private static boolean tryload(String name) {
 		try {
 			System.loadLibrary(name);
