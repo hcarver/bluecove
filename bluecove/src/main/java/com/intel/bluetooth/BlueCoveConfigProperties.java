@@ -78,7 +78,7 @@ public interface BlueCoveConfigProperties {
     /**
      * Load library (.dll) from specified location. Initialization property.
      * 
-     * Path separated by path separator of file name accepted.
+     * Path separated by system-dependent path-separator (: or ;) accepted.
      */
     public static final String PROPERTY_NATIVE_PATH = "bluecove.native.path";
 

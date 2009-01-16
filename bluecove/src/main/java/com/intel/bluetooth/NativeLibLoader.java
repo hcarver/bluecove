@@ -250,19 +250,33 @@ public abstract class NativeLibLoader {
 	}
 
 	private static boolean tryloadPath(String path, String name) {
+        UtilsStringTokenizer tok = new UtilsStringTokenizer(path, File.pathSeparator);
+        while (tok.hasMoreTokens()) {
+            String dirPath = tok.nextToken();
+            File dir = new File(dirPath);
+            if (dir.isDirectory()) {
+                if (tryloadFile(dir, name)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+	   
+	private static boolean tryloadFile(File path, String name) {
 		try {
 			File f = new File(path, name);
 			if (!f.canRead()) {
-				DebugLog.fatal("Native Library " + f.getAbsolutePath() + " not found");
+				DebugLog.debug("Native Library " + f.getAbsolutePath() + " not found");
 				return false;
 			}
 			System.load(f.getAbsolutePath());
 			DebugLog.debug("Library loaded", f.getAbsolutePath());
+		     return true;
 		} catch (Throwable e) {
 			DebugLog.error("Can't load library from path " + path, e);
 			return false;
 		}
-		return true;
 	}
 
 	private static boolean tryloadPathIBMj9MIDP(String path, String name) {
