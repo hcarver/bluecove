@@ -9,6 +9,9 @@
         
         You may skip adding shared library to jar file
         ant -Dbluecove.native.resources.skip=true  jar
+        
+        You may change linker options if you need to
+        and -Dbluecove.native.linker.options= 
      -->
 
     <property name="product_version" value="2.1.1-SNAPSHOT"/>
@@ -31,6 +34,7 @@
 
     <property name="CC" value="gcc"/>
     <property name="CC_compiler_options" value="-fPIC -fno-stack-protector"/>
+    <property name="bluecove.native.linker.options" value="-nodefaultlibs"/>
 
     <target name="default" depends="compile, jni-headers, native-lib"/>
 
@@ -167,7 +171,8 @@
              -->
              <arg value="-L${libs-universal}"/>
              <arg value="-lbluetooth"/>
-             <arg value="-nodefaultlibs"/>
+             <arg line="${bluecove.native.linker.options}"/>
+             <arg value="-Wl,-soname,libbluecove${library_sufix}-${product_version}"/>
              <arg value="-o"/>
              <arg value="${target}/${library_name}"/>
              <fileset dir='${build_native}' includes="*.o"/>
