@@ -6,6 +6,9 @@
     <!--
         You may use to build the project
         ant -Dbuild.compiler=jikes
+        
+        You may skip adding shared library to jar file
+        ant -Dbluecove.native.resources.skip=true  jar
      -->
 
     <property name="product_version" value="2.1.1-SNAPSHOT"/>
@@ -82,7 +85,7 @@
     <target name="compile" depends="init"
         description="Compile the source">
 
-        <echo message="compiling on java ${java.version}"/>
+        <echo message="compiling on java ${java.version}, OS ${os.name} ${os.version} ${os.arch}"/>
         <javac source="1.3" target="1.1" debug="true"
                srcdir="${src}" destdir="${build_classes}">
             <classpath>
@@ -115,6 +118,7 @@
     <target name="compile-native-lib"  depends="init-native"
         description="Create Native shared library">
         <echo message="compiling  .c -> .o"/>
+
         <apply executable="${CC}" dest="${build_native}" parallel="false" failonerror="true">
              <arg line="${CC_compiler_options}"/>
              <arg value="-I${java.home}/../include" />
@@ -131,8 +135,14 @@
         <condition property="library_sufix" value="">
             <os arch="i386"/>
         </condition>
+        <condition property="library_sufix" value="">
+            <os arch="x86"/>
+        </condition>
         <condition property="library_sufix" value="_x64">
             <os arch="amd64"/>
+        </condition>
+        <condition property="library_sufix" value="_x64">
+            <os arch="x86_64"/>
         </condition>
         <condition property="library_sufix" value="_${os.arch}">
             <not>
@@ -143,6 +153,7 @@
         <property name="library_name" value="libbluecove${library_sufix}.so"/>
 
         <echo message="linking    .o -> ${library_name}"/>
+
         <apply executable="${CC}" parallel="true" failonerror="true">
              <arg value="-shared"/>
              <!--
@@ -169,11 +180,14 @@
             <arg value="${target}/${library_name}"/>
         </exec>
 
-        <copy file="${target}/${library_name}" todir="${resources}"/>
-        <copy file="${target}/${library_name}" todir="${build_classes}"/>
+        <antcall target="native-lib-resources"/>
 
     </target>
 
+    <target name="native-lib-resources" unless="bluecove.native.resources.skip">
+        <copy file="${target}/${library_name}" todir="${resources}"/>
+        <copy file="${target}/${library_name}" todir="${build_classes}"/>
+    </target>
 
     <target name="jar" depends="compile, native-lib"
             description="Create the distribution jar">
