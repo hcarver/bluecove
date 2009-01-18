@@ -11,7 +11,7 @@
         ant -Dbluecove.native.resources.skip=true  jar
         
         You may change linker options if you need to
-        and -Dbluecove.native.linker.options= 
+        ant -Dbluecove.native.linker.options= 
      -->
 
     <property name="product_version" value="2.1.1-SNAPSHOT"/>
@@ -121,7 +121,7 @@
 
     <target name="compile-native-lib"  depends="init-native"
         description="Create Native shared library">
-        <echo message="compiling  .c -> .o"/>
+        <echo message="compiling  .c -> .o  (${CC_compiler_options})"/>
 
         <apply executable="${CC}" dest="${build_native}" parallel="false" failonerror="true">
              <arg line="${CC_compiler_options}"/>
@@ -156,7 +156,7 @@
 
         <property name="library_name" value="libbluecove${library_sufix}.so"/>
 
-        <echo message="linking    .o -> ${library_name}"/>
+        <echo message="linking    .o -> ${library_name}  (${bluecove.native.linker.options})"/>
 
         <apply executable="${CC}" parallel="true" failonerror="true">
              <arg value="-shared"/>
