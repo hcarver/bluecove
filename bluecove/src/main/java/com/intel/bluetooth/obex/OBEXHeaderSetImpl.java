@@ -124,7 +124,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 	/** 1 byte quantity */
 	static final int OBEX_BYTE = 0x80;
 
-	/** 4 byte quantity – transmitted in network byte order (high byte first) */
+	/** 4 byte quantity - transmitted in network byte order (high byte first) */
 	static final int OBEX_INT = 0xC0;
 
 	private static final int OBEX_MAX_FIELD_LEN = 0xFF;

@@ -395,8 +395,8 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
             }
 
             /*
-             * This function may trigger multiple times per inquiry – even
-             * multiple times per device – once for the address alone, and once
+             * This function may trigger multiple times per inquiry - even
+             * multiple times per device - once for the address alone, and once
              * for the address and the user-friendly name.
              */
             public void deviceDiscoveredCallback(DiscoveryListener listener, long deviceAddr, int deviceClass, String deviceName, boolean paired) {
