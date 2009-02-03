@@ -25,12 +25,12 @@
 #define MAGIC_1 0xBC1AA01
 #define MAGIC_2 0xBC2BB02
 
-#define RECEIVE_BUFFER_MAX 0x10000
+#define RECEIVE_BUFFER_MAX 0x40000
 // This is extra precaution, may be unnecessary
 #define RECEIVE_BUFFER_SAFE TRUE
 /*
-* FIFO with no memory allocations in write, can be overflown but not with BT communication speed.
-*/
+ * FIFO with no memory allocations in write, 256K size can be overflown but not with BT communication speed we tested.
+ */
 class ReceiveBuffer {
 private:
 	BOOL safe;
