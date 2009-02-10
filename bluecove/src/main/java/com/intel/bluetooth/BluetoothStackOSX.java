@@ -300,22 +300,42 @@ class BluetoothStackOSX implements BluetoothStack {
         }
     }
 
+    private native boolean retrieveDevicesImpl(int option, RetrieveDevicesCallback retrieveDevicesCallback);
+
     public RemoteDevice[] retrieveDevices(int option) {
-        return null;
+        final Vector devices = new Vector();
+        RetrieveDevicesCallback retrieveDevicesCallback = new RetrieveDevicesCallback() {
+            public void deviceFoundCallback(long deviceAddr, int deviceClass, String deviceName, boolean paired) {
+                DebugLog.debug("device found", deviceAddr);
+                RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(BluetoothStackOSX.this, deviceAddr, deviceName, paired);
+                devices.add(remoteDevice);
+            }
+        };
+        if (retrieveDevicesImpl(option, retrieveDevicesCallback)) {
+            return RemoteDeviceHelper.remoteDeviceListToArray(devices);
+        } else {
+            return null;
+        }
     }
+
+    private native boolean isRemoteDeviceTrustedImpl(long address);
 
     public Boolean isRemoteDeviceTrusted(long address) {
-        return null;
+        return new Boolean(isRemoteDeviceTrustedImpl(address));
     }
 
+    private native boolean isRemoteDeviceAuthenticatedImpl(long address);
+
     public Boolean isRemoteDeviceAuthenticated(long address) {
-        return null;
+        return new Boolean(isRemoteDeviceAuthenticatedImpl(address));
     }
 
     // ---------------------- Remote Device authentication
 
+    private native boolean authenticateRemoteDeviceImpl(long address) throws IOException;
+
     public boolean authenticateRemoteDevice(long address) throws IOException {
-        return false;
+        return authenticateRemoteDeviceImpl(address);
     }
 
     /*
@@ -343,8 +363,8 @@ class BluetoothStackOSX implements BluetoothStack {
 
     public native String getRemoteDeviceFriendlyName(long address) throws IOException;
 
-    private native int runDeviceInquiryImpl(DeviceInquiryRunnable inquiryRunnable, DeviceInquiryThread startedNotify, int accessCode, int duration, DiscoveryListener listener)
-            throws BluetoothStateException;
+    private native int runDeviceInquiryImpl(DeviceInquiryRunnable inquiryRunnable, DeviceInquiryThread startedNotify, int accessCode, int duration,
+            DiscoveryListener listener) throws BluetoothStateException;
 
     public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
         // Inquiries are throttled if they are called too quickly in succession.

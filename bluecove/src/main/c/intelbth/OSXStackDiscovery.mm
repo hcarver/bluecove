@@ -551,3 +551,23 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getRemoteDe
     }
     return env->NewString(runnable.uData, runnable.iData);
 }
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_retrieveDevicesImpl
+  (JNIEnv *env, jobject, jint option, jobject retrieveDevicesCallback) {
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isRemoteDeviceTrustedImpl
+  (JNIEnv *env, jobject, jlong address) {
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isRemoteDeviceAuthenticatedImpl
+  (JNIEnv *env, jobject, jlong address) {
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_authenticateRemoteDeviceImpl
+  (JNIEnv *env, jobject, jlong address) {
+    return JNI_FALSE;
+}
