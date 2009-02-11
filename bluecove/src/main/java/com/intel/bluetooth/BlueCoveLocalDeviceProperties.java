@@ -25,7 +25,7 @@ package com.intel.bluetooth;
 
 /**
  * BlueCove specific LocalDevice properties.
- *
+ * 
  * @see javax.bluetooth.LocalDevice#getProperty(String)
  */
 public interface BlueCoveLocalDeviceProperties {
@@ -36,14 +36,12 @@ public interface BlueCoveLocalDeviceProperties {
 	public static final String LOCAL_DEVICE_PROPERTY_BLUECOVE_VERSION = "bluecove";
 
 	/**
-	 * <code>"bluecove.stack"</code> The Bluetooth Stack: "winsock", "widcomm"
-	 * or "bluesoleil" on windows.
+	 * <code>"bluecove.stack"</code> The Bluetooth Stack: "winsock", "widcomm" or "bluesoleil" on windows.
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_STACK = BlueCoveConfigProperties.PROPERTY_STACK;
 
 	/**
-	 * <code>"bluecove.feature.l2cap"</code> Does the current Bluetooth Stack
-	 * support L2CAP: "true" or "false"
+	 * <code>"bluecove.feature.l2cap"</code> Does the current Bluetooth Stack support L2CAP: "true" or "false"
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_L2CAP = "bluecove.feature.l2cap";
 
@@ -58,22 +56,19 @@ public interface BlueCoveLocalDeviceProperties {
 	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_SET_DEVICE_SERVICE_CLASSES = "bluecove.feature.set_device_service_classes";
 
 	/**
-	 * <code>"bluecove.connections"</code> The number of open connections by
-	 * current Bluetooth Stack.
+	 * <code>"bluecove.connections"</code> The number of open connections by current Bluetooth Stack.
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_OPEN_CONNECTIONS = "bluecove.connections";
 
 	/**
-	 * If Stack support multiple bluetooth adapters return selected one ID.
-	 * (Linux BlueZ and Emulator)
-	 *
+	 * If Stack support multiple bluetooth adapters return selected one ID. (Linux BlueZ and Emulator)
+	 * 
 	 * @see com.intel.bluetooth.BlueCoveConfigProperties#PROPERTY_LOCAL_DEVICE_ID
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_DEVICE_ID = BlueCoveConfigProperties.PROPERTY_LOCAL_DEVICE_ID;
 
 	/**
-	 * List the local adapters supported by the system. Returns comma separated
-	 * integer list.
+	 * List the local adapters supported by the system. Returns comma separated String list.
 	 */
 	public static final String LOCAL_DEVICE_DEVICES_LIST = "bluecove.local_devices_ids";
 

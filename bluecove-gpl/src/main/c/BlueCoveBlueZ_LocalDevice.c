@@ -86,8 +86,8 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_getLoca
 }
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_nativeGetDeviceID
-(JNIEnv *env, jobject peer, jint id, jlong findLocalDeviceBTAddress) {
-    bool findDevice = (id >= 0) || (findLocalDeviceBTAddress > 0);
+(JNIEnv *env, jobject peer, jint findNumber, jint findBlueZDeviceID, jlong findLocalDeviceBTAddress) {
+    bool findDevice = (findNumber >= 0) || (findLocalDeviceBTAddress > 0);
     if (findDevice) {
         int s = socket(AF_BLUETOOTH, SOCK_RAW, BTPROTO_HCI);
         if (s < 0) {
@@ -115,7 +115,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_nativeGetDev
         int i;
         for (i = 0; i < dl->dev_num; i++, dr++) {
             if (hci_test_bit(flag, &dr->dev_opt)) {
-                if (id == i) {
+                if (findNumber == i) {
+                    dev_id = dr->dev_id;
+                    break;
+                }
+                if (findBlueZDeviceID == dr->dev_id) {
                     dev_id = dr->dev_id;
                     break;
                 }
