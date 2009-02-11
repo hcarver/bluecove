@@ -308,7 +308,9 @@ class BluetoothStackOSX implements BluetoothStack {
             public void deviceFoundCallback(long deviceAddr, int deviceClass, String deviceName, boolean paired) {
                 DebugLog.debug("device found", deviceAddr);
                 RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(BluetoothStackOSX.this, deviceAddr, deviceName, paired);
-                devices.add(remoteDevice);
+                if (!devices.contains(remoteDevice)) {
+                    devices.add(remoteDevice);
+                }
             }
         };
         if (retrieveDevicesImpl(option, retrieveDevicesCallback)) {
