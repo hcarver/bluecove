@@ -78,3 +78,15 @@ public:
 
     virtual void run();
 };
+
+
+class RetrieveDevices: public Runnable {
+public:
+    NSArray *pairedDevices;
+    NSArray *favoriteDevices;
+    NSArray *recentDevices;
+
+    RetrieveDevices();
+
+    virtual void run();
+};

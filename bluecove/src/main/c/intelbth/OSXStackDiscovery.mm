@@ -552,22 +552,96 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getRemoteDe
     return env->NewString(runnable.uData, runnable.iData);
 }
 
+RetrieveDevices::RetrieveDevices() {
+    name = "RetrieveDevices";
+    pairedDevices = NULL;
+    favoriteDevices = NULL;
+    recentDevices = NULL;
+}
+
+void RetrieveDevices::run() {
+    pairedDevices = [IOBluetoothDevice pairedDevices];
+    favoriteDevices = [IOBluetoothDevice favoriteDevices];
+    recentDevices = [IOBluetoothDevice recentDevices:0];
+}
+
+jboolean callDeviceFound(JNIEnv *env, RetrieveDevicesCallback *callback, NSArray *devices) {
+    jboolean result = JNI_TRUE;
+    if (devices == NULL) {
+        return JNI_TRUE;
+    }
+    NSEnumerator* devicesEnum = [devices objectEnumerator];
+    id device = nil;
+    while ( device = (IOBluetoothDevice*) [devicesEnum nextObject]) {
+        jlong deviceAddr = OSxAddrToLong([device getAddress]);
+        jint deviceClass = (jint)[device getClassOfDevice];
+        jstring deviceName = OSxNewJString(env, [device getName]);
+        jboolean paired = [device isPaired];
+		if (!callback->callDeviceFoundCallback(env, deviceAddr, deviceClass, deviceName, paired)) {
+		    result = JNI_FALSE;
+		    break;
+		}
+    }
+    return result;
+}
+
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_retrieveDevicesImpl
-  (JNIEnv *env, jobject, jint option, jobject retrieveDevicesCallback) {
-    return JNI_FALSE;
+  (JNIEnv *env, jobject peer, jint option, jobject retrieveDevicesCallback) {
+    if (stack == NULL) {
+        throwRuntimeException(env, cSTACK_CLOSED);
+        return JNI_FALSE;
+    }
+    RetrieveDevicesCallback callback;
+    if (!callback.builCallback(env, peer, retrieveDevicesCallback)) {
+        return JNI_FALSE;
+    }
+    
+    RetrieveDevices runnable;
+    synchronousBTOperation(&runnable);
+    if (RETRIEVEDEVICES_OPTION_CACHED == option) {
+        return callDeviceFound(env, &callback, runnable.recentDevices);
+    } else {
+        jboolean result = callDeviceFound(env, &callback, runnable.pairedDevices);
+        if (result == JNI_TRUE) {
+            return callDeviceFound(env, &callback, runnable.favoriteDevices);
+        } else {
+            return result;
+        }
+    }
+}
+
+RUNNABLE(IsRemoteDeviceTrusted, "IsRemoteDeviceTrusted") {
+    BluetoothDeviceAddress btAddress;
+    LongToOSxBTAddr(jlData, &btAddress);
+    IOBluetoothDevice *device = [IOBluetoothDevice withAddress:&btAddress];
+    bData = [device isPaired];
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isRemoteDeviceTrustedImpl
   (JNIEnv *env, jobject, jlong address) {
-    return JNI_FALSE;
+    IsRemoteDeviceTrusted runnable;
+    runnable.jlData = address;
+    synchronousBTOperation(&runnable);
+    return (runnable.bData)?JNI_TRUE:JNI_FALSE;
+}
+
+RUNNABLE(IsRemoteDeviceAuthenticated, "IsRemoteDeviceAuthenticated") {
+    BluetoothDeviceAddress btAddress;
+    LongToOSxBTAddr(jlData, &btAddress);
+    IOBluetoothDevice *device = [IOBluetoothDevice withAddress:&btAddress];
+    bData = [device isPaired] && [device isConnected];
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isRemoteDeviceAuthenticatedImpl
   (JNIEnv *env, jobject, jlong address) {
-    return JNI_FALSE;
+    IsRemoteDeviceAuthenticated runnable;
+    runnable.jlData = address;
+    synchronousBTOperation(&runnable);
+    return (runnable.bData)?JNI_TRUE:JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_authenticateRemoteDeviceImpl
   (JNIEnv *env, jobject, jlong address) {
+    //TODO
     return JNI_FALSE;
 }

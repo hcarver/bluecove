@@ -69,6 +69,7 @@ public:
     int iData;
     long lData;
     bool bData;
+    jlong jlData;
     void* pData[RUNNABLE_DATA_MAX];
 
     long magic1e;
