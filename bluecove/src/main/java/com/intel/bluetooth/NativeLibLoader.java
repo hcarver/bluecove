@@ -199,7 +199,7 @@ public abstract class NativeLibLoader {
 		}
 		
 		// Try load bluecove from package private location installed on the system
-		if ((getOS() == OS_LINUX) && (!UtilsJavaSE.ibmJ9midp)) {
+		if ((!state.libraryAvailable) && (getOS() == OS_LINUX) && (!UtilsJavaSE.ibmJ9midp)) {
             state.libraryAvailable = tryloadPath(createLinuxPackagePath(sysArch), libFileName);
 		}
 		
