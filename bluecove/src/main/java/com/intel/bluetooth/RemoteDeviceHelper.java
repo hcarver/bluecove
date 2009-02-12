@@ -390,103 +390,6 @@ public abstract class RemoteDeviceHelper {
 		}
 	}
 
-	/**
-	 * Returns the name of the device.
-	 * 
-	 * <P>
-	 * Internal BlueCove function. Use javax.bluetooth.RemoteDevice.getFriendlyName(...).
-	 * <P>
-	 */
-	public static String implGetFriendlyName(RemoteDevice device, long address, boolean alwaysAsk) throws IOException {
-		String name = null;
-		if (!(device instanceof RemoteDeviceWithExtendedInfo)) {
-			device = createRemoteDevice(null, device);
-		}
-		name = ((RemoteDeviceWithExtendedInfo) device).name;
-		if (alwaysAsk || (!Utils.isStringSet(name))) {
-			name = ((RemoteDeviceWithExtendedInfo) device).bluetoothStack.getRemoteDeviceFriendlyName(address);
-			if (Utils.isStringSet(name)) {
-				((RemoteDeviceWithExtendedInfo) device).name = name;
-			} else {
-				throw new IOException("Can't query remote device");
-			}
-		}
-		return name;
-	}
-
-	/**
-	 * Retrieves the Bluetooth device that is at the other end of the Bluetooth connection.
-	 * <P>
-	 * Internal BlueCove function. Use javax.bluetooth.RemoteDevice.getRemoteDevice(...).
-	 * <P>
-	 * 
-	 * @see javax.bluetooth.RemoteDevice#getRemoteDevice(Connection)
-	 */
-	public static RemoteDevice implGetRemoteDevice(Connection conn) throws IOException {
-		if (!(conn instanceof BluetoothConnectionAccess)) {
-			throw new IllegalArgumentException("Not a Bluetooth connection " + conn.getClass().getName());
-		}
-		return createRemoteDevice(((BluetoothConnectionAccess) conn).getBluetoothStack(),
-				((BluetoothConnectionAccess) conn).getRemoteAddress(), null, false);
-	}
-
-	/**
-	 * Returns an array of Bluetooth devices.
-	 * <P>
-	 * Internal BlueCove function. Use javax.bluetooth.RemoteDevice.retrieveDevices(...).
-	 * <P>
-	 * 
-	 * @see javax.bluetooth.DiscoveryAgent#retrieveDevices(int)
-	 */
-	public static RemoteDevice[] implRetrieveDevices(BluetoothStack bluetoothStack, int option) {
-		if ((option != DiscoveryAgent.PREKNOWN) && (option != DiscoveryAgent.CACHED)) {
-			throw new IllegalArgumentException("invalid option");
-		}
-		RemoteDevice[] impl = bluetoothStack.retrieveDevices(option);
-		if (impl != null) {
-			if (impl.length == 0) {
-				// Spec: null if no devices meet the criteria
-				return null;
-			} else {
-				return impl;
-			}
-		}
-
-		Hashtable devicesCashed = devicesCashed(bluetoothStack);
-		switch (option) {
-		case DiscoveryAgent.PREKNOWN:
-			if (devicesCashed.size() == 0) {
-				// Spec: null if no devices meet the criteria
-				return null;
-			}
-			Vector devicesPaired = new Vector();
-			for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
-				RemoteDeviceWithExtendedInfo d = (RemoteDeviceWithExtendedInfo) en.nextElement();
-				if (d.isTrustedDevice()) {
-					devicesPaired.addElement(d);
-				}
-			}
-			if (devicesPaired.size() == 0) {
-				// Spec: null if no devices meet the criteria
-				return null;
-			}
-			return remoteDeviceListToArray(devicesPaired);
-		case DiscoveryAgent.CACHED:
-			if (devicesCashed.size() == 0) {
-				// Spec: null if no devices meet the criteria
-				return null;
-			}
-			RemoteDevice[] devices = new RemoteDevice[devicesCashed.size()];
-			int k = 0;
-			for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
-				devices[k++] = (RemoteDevice) en.nextElement();
-			}
-			return devices;
-		default:
-			throw new IllegalArgumentException("invalid option");
-		}
-	}
-
 	static RemoteDevice[] remoteDeviceListToArray(Vector devices) {
 		RemoteDevice[] devicesArray = new RemoteDevice[devices.size()];
 		int i = 0;
@@ -628,6 +531,35 @@ public abstract class RemoteDeviceHelper {
 	}
 
 	/**
+	 * Gets the RSSI (Receive Signal Strength Indicator) value for a remote Bluetooth device. Non JSR-82.
+	 * <p>
+	 * <b>PUBLIC JSR-82 extension</b>
+	 * <p>
+	 * Bluetooth connection with the peer device should exist to receive a value.
+	 * <p>
+	 * Value 0 indicates that the connected Bluetooth devices are at optimal separation, the golden zone.
+	 * <p>
+	 * Increasingly positive values are reported as the devices are moved closer to each other. Increasingly negative
+	 * values are reported as the devices are moved apart.
+	 * <p>
+	 * RSSI ranges from -128 to 127.
+	 * 
+	 * @param device
+	 *            Remote Device
+	 * @return RSSI value
+	 * @throws IOException
+	 *             if there are error reading value.
+	 */
+	public static int readRSSI(RemoteDevice device) throws IOException {
+		RemoteDeviceWithExtendedInfo deviceImpl = remoteDeviceImpl(device);
+		if (deviceImpl.bluetoothStack instanceof BluetoothStackExtension) {
+			return ((BluetoothStackExtension) deviceImpl.bluetoothStack).readRemoteDeviceRSSI(deviceImpl.addressLong);
+		} else {
+			throw new NotSupportedIOException(deviceImpl.bluetoothStack.getStackID());
+		}
+	}
+
+	/**
 	 * Attempts to authenticate RemoteDevice. Return <code>false</code> if the stack does not support authentication.
 	 * <P>
 	 * Internal BlueCove function. Use javax.bluetooth.RemoteDevice.authenticate().
@@ -672,6 +604,103 @@ public abstract class RemoteDeviceHelper {
 	 */
 	public static void removeAuthentication(RemoteDevice device) throws IOException {
 		remoteDeviceImpl(device).removeAuthentication();
+	}
+
+	/**
+	 * Returns the name of the device.
+	 * 
+	 * <P>
+	 * Internal BlueCove function. Use javax.bluetooth.RemoteDevice.getFriendlyName(...).
+	 * <P>
+	 */
+	public static String implGetFriendlyName(RemoteDevice device, long address, boolean alwaysAsk) throws IOException {
+		String name = null;
+		if (!(device instanceof RemoteDeviceWithExtendedInfo)) {
+			device = createRemoteDevice(null, device);
+		}
+		name = ((RemoteDeviceWithExtendedInfo) device).name;
+		if (alwaysAsk || (!Utils.isStringSet(name))) {
+			name = ((RemoteDeviceWithExtendedInfo) device).bluetoothStack.getRemoteDeviceFriendlyName(address);
+			if (Utils.isStringSet(name)) {
+				((RemoteDeviceWithExtendedInfo) device).name = name;
+			} else {
+				throw new IOException("Can't query remote device");
+			}
+		}
+		return name;
+	}
+
+	/**
+	 * Retrieves the Bluetooth device that is at the other end of the Bluetooth connection.
+	 * <P>
+	 * Internal BlueCove function. Use javax.bluetooth.RemoteDevice.getRemoteDevice(...).
+	 * <P>
+	 * 
+	 * @see javax.bluetooth.RemoteDevice#getRemoteDevice(Connection)
+	 */
+	public static RemoteDevice implGetRemoteDevice(Connection conn) throws IOException {
+		if (!(conn instanceof BluetoothConnectionAccess)) {
+			throw new IllegalArgumentException("Not a Bluetooth connection " + conn.getClass().getName());
+		}
+		return createRemoteDevice(((BluetoothConnectionAccess) conn).getBluetoothStack(),
+				((BluetoothConnectionAccess) conn).getRemoteAddress(), null, false);
+	}
+
+	/**
+	 * Returns an array of Bluetooth devices.
+	 * <P>
+	 * Internal BlueCove function. Use javax.bluetooth.RemoteDevice.retrieveDevices(...).
+	 * <P>
+	 * 
+	 * @see javax.bluetooth.DiscoveryAgent#retrieveDevices(int)
+	 */
+	public static RemoteDevice[] implRetrieveDevices(BluetoothStack bluetoothStack, int option) {
+		if ((option != DiscoveryAgent.PREKNOWN) && (option != DiscoveryAgent.CACHED)) {
+			throw new IllegalArgumentException("invalid option");
+		}
+		RemoteDevice[] impl = bluetoothStack.retrieveDevices(option);
+		if (impl != null) {
+			if (impl.length == 0) {
+				// Spec: null if no devices meet the criteria
+				return null;
+			} else {
+				return impl;
+			}
+		}
+
+		Hashtable devicesCashed = devicesCashed(bluetoothStack);
+		switch (option) {
+		case DiscoveryAgent.PREKNOWN:
+			if (devicesCashed.size() == 0) {
+				// Spec: null if no devices meet the criteria
+				return null;
+			}
+			Vector devicesPaired = new Vector();
+			for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
+				RemoteDeviceWithExtendedInfo d = (RemoteDeviceWithExtendedInfo) en.nextElement();
+				if (d.isTrustedDevice()) {
+					devicesPaired.addElement(d);
+				}
+			}
+			if (devicesPaired.size() == 0) {
+				// Spec: null if no devices meet the criteria
+				return null;
+			}
+			return remoteDeviceListToArray(devicesPaired);
+		case DiscoveryAgent.CACHED:
+			if (devicesCashed.size() == 0) {
+				// Spec: null if no devices meet the criteria
+				return null;
+			}
+			RemoteDevice[] devices = new RemoteDevice[devicesCashed.size()];
+			int k = 0;
+			for (Enumeration en = devicesCashed.elements(); en.hasMoreElements();) {
+				devices[k++] = (RemoteDevice) en.nextElement();
+			}
+			return devices;
+		default:
+			throw new IllegalArgumentException("invalid option");
+		}
 	}
 
 	/**
