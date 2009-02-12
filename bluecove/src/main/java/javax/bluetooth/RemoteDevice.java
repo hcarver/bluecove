@@ -101,7 +101,7 @@ public class RemoteDevice {
 	 *         <code>false</code>
 	 */
 	public boolean isTrustedDevice() {
-		return RemoteDeviceHelper.isTrustedDevice(this);
+		return RemoteDeviceHelper.implIsTrustedDevice(this);
 	}
 
 	/**
@@ -127,7 +127,7 @@ public class RemoteDevice {
 	 *                device could not provide its name
 	 */
 	public String getFriendlyName(boolean alwaysAsk) throws IOException {
-		return RemoteDeviceHelper.getFriendlyName(this, this.addressLong, alwaysAsk);
+		return RemoteDeviceHelper.implGetFriendlyName(this, this.addressLong, alwaysAsk);
 	}
 
 	/**
@@ -195,7 +195,7 @@ public class RemoteDevice {
 	 *                if <code>conn</code> is <code>null</code>
 	 */
 	public static RemoteDevice getRemoteDevice(Connection conn) throws IOException {
-		return RemoteDeviceHelper.getRemoteDevice(conn);
+		return RemoteDeviceHelper.implGetRemoteDevice(conn);
 	}
 
 	/**
@@ -279,7 +279,7 @@ public class RemoteDevice {
 	 *                if <code>conn</code> is closed
 	 */
 	public boolean authorize(javax.microedition.io.Connection conn) throws IOException {
-		return RemoteDeviceHelper.authorize(this, conn);
+		return RemoteDeviceHelper.implAuthorize(this, conn);
 	}
 
 	/**
@@ -366,7 +366,7 @@ public class RemoteDevice {
 	 *                connection to this <code>RemoteDevice</code>
 	 */
 	public boolean encrypt(javax.microedition.io.Connection conn, boolean on) throws IOException {
-		return RemoteDeviceHelper.encrypt(this, conn, on);
+		return RemoteDeviceHelper.implEncrypt(this, conn, on);
 	}
 
 	/**
@@ -386,7 +386,7 @@ public class RemoteDevice {
 	 *         local device and this <code>RemoteDevice</code>
 	 */
 	public boolean isAuthenticated() {
-		return RemoteDeviceHelper.isAuthenticated(this);
+		return RemoteDeviceHelper.implIsAuthenticated(this);
 	}
 
 	/**
@@ -419,7 +419,7 @@ public class RemoteDevice {
 	 *                if <code>conn</code> is closed
 	 */
 	public boolean isAuthorized(javax.microedition.io.Connection conn) throws IOException {
-		return RemoteDeviceHelper.isAuthorized(this, conn);
+		return RemoteDeviceHelper.implIsAuthorized(this, conn);
 	}
 
 	/**
@@ -441,7 +441,7 @@ public class RemoteDevice {
 	 *         <code>RemoteDevice</code>
 	 */
 	public boolean isEncrypted() {
-		return RemoteDeviceHelper.isEncrypted(this);
+		return RemoteDeviceHelper.implIsEncrypted(this);
 	}
 
 }
