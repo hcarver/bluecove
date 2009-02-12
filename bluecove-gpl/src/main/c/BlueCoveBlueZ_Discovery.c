@@ -131,7 +131,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_getRemoteDev
     conn_info->type = ACL_LINK;
     if (ioctl((int)deviceDescriptor, HCIGETCONNINFO, (unsigned long) conn_info) < 0) {
         free(conn_info);
-        throwRuntimeException(env, "Fail to get connection info");
+        throwIOException(env, "Fail to get connection info");
         return -1;
     }
 
@@ -145,7 +145,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_getRemoteDev
 
     if ((hci_send_req((int)deviceDescriptor, &rq, READ_REMOTE_NAME_TIMEOUT) < 0) || rssi_rp.status) {
         free(conn_info);
-        throwRuntimeException(env, "Fail to send hci request");
+        throwIOException(env, "Fail to send hci request");
         return -1;
     }
     free(conn_info);

@@ -37,7 +37,7 @@ import javax.bluetooth.UUID;
  * Property "bluecove.deviceID" or "bluecove.deviceAddress" can be used to select Local Bluetooth device.
  * 
  */
-class BluetoothStackBlueZ implements BluetoothStack {
+class BluetoothStackBlueZ implements BluetoothStack, BluetoothStackExtension {
 
 	public static final String NATIVE_BLUECOVE_LIB_BLUEZ = "bluecove";
 
@@ -276,7 +276,11 @@ class BluetoothStackBlueZ implements BluetoothStack {
 			if ("getRemoteDeviceVersionInfo".equals(function)) {
 				return getRemoteDeviceVersionInfo(address);
 			} else if ("getRemoteDeviceRSSI".equals(function)) {
-				return String.valueOf(getRemoteDeviceRSSI(address));
+				try {
+					return String.valueOf(readRemoteDeviceRSSI(address));
+				} catch (IOException e) {
+					throw new RuntimeException(e.getMessage());
+				}
 			}
 			return null;
 		}
@@ -354,9 +358,9 @@ class BluetoothStackBlueZ implements BluetoothStack {
 		return getRemoteDeviceVersionInfoImpl(this.deviceDescriptor, address);
 	}
 
-	private native int getRemoteDeviceRSSIImpl(int deviceDescriptor, long address);
+	private native int getRemoteDeviceRSSIImpl(int deviceDescriptor, long address) throws IOException;
 
-	public int getRemoteDeviceRSSI(long address) {
+	public int readRemoteDeviceRSSI(long address) throws IOException {
 		return getRemoteDeviceRSSIImpl(this.deviceDescriptor, address);
 	}
 
