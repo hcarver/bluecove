@@ -436,7 +436,7 @@ public class Main extends Frame implements LoggerAppender {
 					if (countDevices > 1) {
 						Configuration.hasManyDevices = true;
 					}
-					if (countDevices >= 2) {
+					if (countDevices > 2) {
 						addMenu(threadLocalStack, "Set 'deviceID=" + id + "'", new ActionListener() {
 							public void actionPerformed(ActionEvent e) {
 								LocalDeviceManager.setUseDevice(deviceID);

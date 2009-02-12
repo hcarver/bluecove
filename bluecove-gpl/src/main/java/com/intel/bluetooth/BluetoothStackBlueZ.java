@@ -52,7 +52,7 @@ class BluetoothStackBlueZ implements BluetoothStack {
 
 	private final static Vector devicesUsed = new Vector();
 
-	private final static String BLUEZ_DEVICEID_PREFIX = "BlueZ";
+	private final static String BLUEZ_DEVICEID_PREFIX = "hci";
 
 	private int deviceID = -1;
 
