@@ -56,6 +56,11 @@ public class Main {
 			} else if (args[i].equalsIgnoreCase("--help") || args[i].equals("-h")) {
 				System.out.println(" --swing|--agui|-s\n --console|-c\n --awt|-a  (--debug)");
 				return;
+			} else if (args[i].startsWith("-D")) {
+			    int idx = args[i].indexOf('=');
+			    if (idx != -1) {
+			        System.setProperty(args[i].substring(2, idx), args[i].substring(idx + 1));
+			    }
 			}
 		}
 
