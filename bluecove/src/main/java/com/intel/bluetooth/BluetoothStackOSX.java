@@ -254,13 +254,13 @@ class BluetoothStackOSX implements BluetoothStack {
             return String.valueOf(receiveMTUMAX());
         }
 
-        if ("bluecove.radio.version".equals(property)) {
+        if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_RADIO_VERSION.equals(property)) {
             return getLocalDeviceVersion();
         }
-        if ("bluecove.radio.manufacturer".equals(property)) {
+        if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_RADIO_MANUFACTURER.equals(property)) {
             return String.valueOf(getLocalDeviceManufacturer());
         }
-        if ("bluecove.stack.version".equals(property)) {
+        if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_STACK_VERSION.equals(property)) {
             return getLocalDeviceSoftwareVersionInfo();
         }
 

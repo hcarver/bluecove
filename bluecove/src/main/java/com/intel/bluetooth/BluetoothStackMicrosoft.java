@@ -310,10 +310,10 @@ class BluetoothStackMicrosoft implements BluetoothStack {
 			return "0";
 		}
 
-		if ("bluecove.radio.version".equals(property)) {
+		if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_RADIO_VERSION.equals(property)) {
 			return String.valueOf(getDeviceVersion(localBluetoothAddress));
 		}
-		if ("bluecove.radio.manufacturer".equals(property)) {
+		if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_RADIO_MANUFACTURER.equals(property)) {
 			return String.valueOf(getDeviceManufacturer(localBluetoothAddress));
 		}
 		return null;

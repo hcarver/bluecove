@@ -65,8 +65,40 @@ public class TestResponderCommon {
 		}
 		initLocalDeviceConfig();
 	}
-
+	
 	private static void initLocalDeviceConfig() throws BluetoothStateException {
+        RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(Configuration.threadLocalBluetoothStack);
+        LocalDevice localDevice = LocalDevice.getLocalDevice();
+        printLocalDeviceInfo();
+        String bluecoveVersion = LocalDevice.getProperty("bluecove");
+        if (StringUtils.isStringSet(bluecoveVersion)) {
+            RuntimeDetect.isBlueCove = true;
+            Assert.assertNotNull("BT Address is null", localDevice.getBluetoothAddress());
+            if (!Configuration.windowsCE) {
+                Assert.assertNotNull("BT Name is null", localDevice.getFriendlyName());
+            }
+            Configuration.stackWIDCOMM = StringUtils.equalsIgnoreCase("WIDCOMM", LocalDevice.getProperty("bluecove.stack"));
+            String featureL2cap = LocalDevice.getProperty("bluecove.feature.l2cap");
+            if (featureL2cap == null) {
+                Configuration.supportL2CAP = Configuration.stackWIDCOMM || Configuration.macOSx || Configuration.linux;
+            } else {
+                Configuration.supportL2CAP = "true".equals(featureL2cap);
+            }
+        }
+        String receiveMTUstr = LocalDevice.getProperty("bluetooth.l2cap.receiveMTU.max");
+        if ((receiveMTUstr != null) && (receiveMTUstr.length() > 0)) {
+            try {
+                int max = Integer.valueOf(receiveMTUstr).intValue();
+                if (max < receiveMTU_max) {
+                    receiveMTU_max = max;
+                }
+            } catch (NumberFormatException ignore) {
+            }
+        }
+        Configuration.isConfigured = true;
+    }
+
+	public static void printLocalDeviceInfo() throws BluetoothStateException {
 		RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(Configuration.threadLocalBluetoothStack);
 		LocalDevice localDevice = LocalDevice.getLocalDevice();
 		Logger.info("address:" + localDevice.getBluetoothAddress());
@@ -84,28 +116,16 @@ public class TestResponderCommon {
 
 		String bluecoveVersion = LocalDevice.getProperty("bluecove");
 		if (StringUtils.isStringSet(bluecoveVersion)) {
-			RuntimeDetect.isBlueCove = true;
-
-			Logger.info("bluecove:" + bluecoveVersion);
+			Logger.info("bluecove version:" + bluecoveVersion);
 			Logger.info("stack:" + LocalDevice.getProperty("bluecove.stack"));
-
-			Assert.assertNotNull("BT Address is null", localDevice.getBluetoothAddress());
-			if (!Configuration.windowsCE) {
-				Assert.assertNotNull("BT Name is null", localDevice.getFriendlyName());
-			}
-
 			Logger.info("stack version:" + LocalDevice.getProperty("bluecove.stack.version"));
 			Logger.info("radio manufacturer:" + LocalDevice.getProperty("bluecove.radio.manufacturer"));
 			Logger.info("radio version:" + LocalDevice.getProperty("bluecove.radio.version"));
 
-			Configuration.stackWIDCOMM = StringUtils.equalsIgnoreCase("WIDCOMM", LocalDevice
-					.getProperty("bluecove.stack"));
-			String featureL2cap = LocalDevice.getProperty("bluecove.feature.l2cap");
-			if (featureL2cap == null) {
-				Configuration.supportL2CAP = Configuration.stackWIDCOMM || Configuration.macOSx || Configuration.linux;
-			} else {
-				Configuration.supportL2CAP = "true".equals(featureL2cap);
-			}
+			Logger.info("feature L2CAP:" + LocalDevice.getProperty("bluecove.feature.l2cap"));
+			Logger.info("feature setDeviceServiceClasses:" + LocalDevice.getProperty("bluecove.feature.set_device_service_classes"));
+			
+			printProperty("bluecove.connections");
 			String id = LocalDevice.getProperty("bluecove.deviceID");
 			if (id != null) {
 				Logger.info("bluecove.deviceID:" + id);
@@ -115,18 +135,6 @@ public class TestResponderCommon {
 				Logger.info("local devices ID:" + ids);
 			}
 		}
-
-		String receiveMTUstr = LocalDevice.getProperty("bluetooth.l2cap.receiveMTU.max");
-		if ((receiveMTUstr != null) && (receiveMTUstr.length() > 0)) {
-			try {
-				int max = Integer.valueOf(receiveMTUstr).intValue();
-				if (max < receiveMTU_max) {
-					receiveMTU_max = max;
-				}
-			} catch (NumberFormatException ignore) {
-			}
-		}
-		Configuration.isConfigured = true;
 	}
 
 	public static String niceDeviceName(String bluetoothAddress) {

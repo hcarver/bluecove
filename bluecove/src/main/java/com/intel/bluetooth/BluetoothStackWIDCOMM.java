@@ -246,10 +246,10 @@ class BluetoothStackWIDCOMM implements BluetoothStack {
             return String.valueOf(RECEIVE_MTU_MAX);
         }
 
-        if ("bluecove.radio.version".equals(property)) {
+        if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_RADIO_VERSION.equals(property)) {
             return String.valueOf(getDeviceVersion());
         }
-        if ("bluecove.radio.manufacturer".equals(property)) {
+        if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_RADIO_MANUFACTURER.equals(property)) {
             return String.valueOf(getDeviceManufacturer());
         }
         if ("bluecove.stack.version".equals(property)) {

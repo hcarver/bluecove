@@ -56,6 +56,7 @@ import net.sf.bluecove.Configuration;
 import net.sf.bluecove.Consts;
 import net.sf.bluecove.Switcher;
 import net.sf.bluecove.TestConcurrent;
+import net.sf.bluecove.TestResponderCommon;
 import net.sf.bluecove.se.BlueCoveSpecific;
 import net.sf.bluecove.se.FileStorage;
 import net.sf.bluecove.se.JavaSECommon;
@@ -354,6 +355,16 @@ public class Main extends Frame implements LoggerAppender {
 		menuMore.add(menuSpeedTests);
 
 		Menu menuLocalDevice = new Menu("LocalDevice");
+		addMenu(menuLocalDevice, "LocalDevice.getProperties", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    TestResponderCommon.printLocalDeviceInfo();
+                } catch (BluetoothStateException t) {
+                    Logger.error("can't read LocalDevice", t);
+                }
+            }
+        });
+		
 		addMenu(menuLocalDevice, "Get discoverable", new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				LocalDeviceManager.getDiscoverable();

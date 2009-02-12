@@ -36,10 +36,16 @@ public interface BlueCoveLocalDeviceProperties {
 	public static final String LOCAL_DEVICE_PROPERTY_BLUECOVE_VERSION = "bluecove";
 
 	/**
-	 * <code>"bluecove.stack"</code> The Bluetooth Stack: "winsock", "widcomm" or "bluesoleil" on windows.
+	 * <code>"bluecove.stack"</code> The Bluetooth Stack: "winsock", "widcomm" or "bluesoleil" on windows. "mac", "bluez" or "emulator".
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_STACK = BlueCoveConfigProperties.PROPERTY_STACK;
 
+	/**
+     * <code>"bluecove"</code> The version of native stack.
+     */
+	public static final String LOCAL_DEVICE_PROPERTY_STACK_VERSION = "bluecove.stack.version";
+	
+	
 	/**
 	 * <code>"bluecove.feature.l2cap"</code> Does the current Bluetooth Stack support L2CAP: "true" or "false"
 	 */
@@ -69,7 +75,19 @@ public interface BlueCoveLocalDeviceProperties {
 
 	/**
 	 * List the local adapters supported by the system. Returns comma separated String list.
+	 * <code>"bluecove.local_devices_ids"</code>.
+	 * 
+	 * @see com.intel.bluetooth.BlueCoveConfigProperties#PROPERTY_LOCAL_DEVICE_ID
 	 */
 	public static final String LOCAL_DEVICE_DEVICES_LIST = "bluecove.local_devices_ids";
 
+	/**
+     * <code>"bluecove.radio.version"</code>.
+     */
+	public static final String LOCAL_DEVICE_RADIO_VERSION = "bluecove.radio.version";
+	
+	/**
+     * <code>"bluecove.radio.manufacturer"</code>.
+     */
+	public static final String LOCAL_DEVICE_RADIO_MANUFACTURER = "bluecove.radio.manufacturer";
 }
