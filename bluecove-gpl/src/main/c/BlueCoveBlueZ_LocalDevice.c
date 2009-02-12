@@ -142,8 +142,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_nativeGetDev
         free(dl);
         close(s);
         if (dev_id < 0) {
-            if (id >= 0) {
-                throwBluetoothStateException(env, "Bluetooth Device %i not found", id);
+            if (findNumber >= 0) {
+                throwBluetoothStateException(env, "Bluetooth Device %i not found", findNumber);
+            } else if (findBlueZDeviceID >=0) {
+                throwBluetoothStateException(env, "Bluetooth BlueZ Device %i not found", findBlueZDeviceID);
             } else {
                 throwBluetoothStateException(env, "Bluetooth Device %X not found", findLocalDeviceBTAddress);
             }
