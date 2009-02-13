@@ -212,7 +212,7 @@ class BluetoothStackBlueZ implements BluetoothStack, BluetoothStackExtension {
 	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
 	 */
 	public int getFeatureSet() {
-		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP;
+		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP | FEATURE_RSSI;
 	}
 
 	// --- LocalDevice

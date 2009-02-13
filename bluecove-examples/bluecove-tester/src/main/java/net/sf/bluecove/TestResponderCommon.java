@@ -124,6 +124,7 @@ public class TestResponderCommon {
 
 			Logger.info("feature L2CAP:" + LocalDevice.getProperty("bluecove.feature.l2cap"));
 			Logger.info("feature setDeviceServiceClasses:" + LocalDevice.getProperty("bluecove.feature.set_device_service_classes"));
+			Logger.info("feature RSSI:" + LocalDevice.getProperty("bluecove.feature.rssi"));
 			
 			printProperty("bluecove.connections");
 			String id = LocalDevice.getProperty("bluecove.deviceID");

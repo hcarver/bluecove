@@ -48,6 +48,8 @@ public interface BluetoothStack {
 
 	public static final int FEATURE_SET_DEVICE_SERVICE_CLASSES = 1 << 2;
 
+	public static final int FEATURE_RSSI = 1 << 3;
+	
 	public static class LibraryInformation {
 
 		public String libraryName;

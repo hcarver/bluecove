@@ -292,6 +292,8 @@ public class LocalDevice {
                 return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_SERVICE_ATTRIBUTES);
             } else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_FEATURE_SET_DEVICE_SERVICE_CLASSES.equals(property)) {
                 return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_SET_DEVICE_SERVICE_CLASSES);
+            } else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_FEATURE_RSSI.equals(property)) {
+                return BlueCoveImpl.instance().getLocalDeviceFeature(BluetoothStack.FEATURE_RSSI);
             } else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_OPEN_CONNECTIONS.equals(property)) {
                 return String.valueOf(RemoteDeviceHelper.openConnections());
             }

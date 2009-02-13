@@ -93,7 +93,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, BluetoothStackExtension {
 	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
 	 */
 	public int getFeatureSet() {
-		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP;
+		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP | FEATURE_RSSI;
 	}
 
 	// ---------------------- Library initialization
@@ -251,7 +251,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, BluetoothStackExtension {
 		if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_RADIO_MANUFACTURER.equals(property)) {
 			return String.valueOf(getDeviceManufacturer());
 		}
-		if ("bluecove.stack.version".equals(property)) {
+		if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_STACK_VERSION.equals(property)) {
 			return getBTWVersionInfo();
 		}
 		// Some Hack and testing functions, not documented

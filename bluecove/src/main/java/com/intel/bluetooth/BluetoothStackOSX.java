@@ -41,7 +41,7 @@ import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
-class BluetoothStackOSX implements BluetoothStack {
+class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
 
     public static final boolean debug = false;
 
@@ -103,7 +103,7 @@ class BluetoothStackOSX implements BluetoothStack {
      */
     public int getFeatureSet() {
         if (localDeviceSupportedSoftwareVersion >= BLUETOOTH_SOFTWARE_VERSION_2_0_0) {
-            return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES;
+            return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES | FEATURE_RSSI;
         } else {
             return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES;
         }
@@ -332,6 +332,17 @@ class BluetoothStackOSX implements BluetoothStack {
         return new Boolean(isRemoteDeviceAuthenticatedImpl(address));
     }
 
+    private native int readRemoteDeviceRSSIImpl(long address) throws IOException;
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.intel.bluetooth.BluetoothStackExtension#readRemoteDeviceRSSI(long)
+     */
+    public int readRemoteDeviceRSSI(long address) throws IOException {
+        return readRemoteDeviceRSSIImpl(address);
+    }
+    
     // ---------------------- Remote Device authentication
 
     private native boolean authenticateRemoteDeviceImpl(long address) throws IOException;

@@ -62,6 +62,13 @@ public interface BlueCoveLocalDeviceProperties {
 	public static final String LOCAL_DEVICE_PROPERTY_FEATURE_SET_DEVICE_SERVICE_CLASSES = "bluecove.feature.set_device_service_classes";
 
 	/**
+	 * If function RemoteDeviceHelper.readRSSI(RemoteDevice device) available on native stack.
+	 * 
+     * <code>"bluecove.feature.rssi"</code>
+     */
+    public static final String LOCAL_DEVICE_PROPERTY_FEATURE_RSSI = "bluecove.feature.rssi";
+    
+	/**
 	 * <code>"bluecove.connections"</code> The number of open connections by current Bluetooth Stack.
 	 */
 	public static final String LOCAL_DEVICE_PROPERTY_OPEN_CONNECTIONS = "bluecove.connections";
