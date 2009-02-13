@@ -34,6 +34,14 @@
 
     The native library are build during maven or ant build.
 
+* Build Native Library using make or shell script
+
+    For your convenience we createated Makefile and build.sh shell script so you may build the libbluecove.so even when ant or maven is not available
+
+    1. Make sure you have main bluecove library ../bluecove/target/bluecove-${version}.jar
+
+    2. Run:  make all  or  build.sh in bluecove-gpl directory
+
 * JVM specific notes
 
     *  sablevm on debian (in particular for NSLU2)
