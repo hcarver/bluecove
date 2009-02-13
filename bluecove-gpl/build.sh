@@ -4,29 +4,61 @@
 # Created by Francois Kooman
 #
 # Use this file in case you don't have ant or maven installed on the system
-
+#
 # requirements: gcc, javac, javah, bluez
+
+BUILD_DIR=`pwd`
 
 BLUECOVE_VERSION=2.1.1-SNAPSHOT
 
-mkdir -p target/classes
+SRC_JAVA_DIR=${BUILD_DIR}/src/main/java
+SRC_C_DIR=${BUILD_DIR}/src/main/c
+CLASSES_DIR=${BUILD_DIR}/target/classes
+OBJ_DIR=${BUILD_DIR}/target/native
 
-# compile the bluez stack java files
-javac -d target/classes -cp ../bluecove/target/bluecove-${BLUECOVE_VERSION}.jar src/main/java/com/intel/bluetooth/BluetoothStackBlueZ*.java
+BLUECOVE_JAR="${BUILD_DIR}/../bluecove/target/bluecove-${BLUECOVE_VERSION}.jar"
+if [[ ! -f ${BLUECOVE_JAR} ]] ; then
+  echo "BlueCove jar not found ${BLUECOVE_JAR}"
+  exit 1
+fi
 
-# generate the C header files from these java files
-javah -d src/main/c -classpath src/main/java -d src/main/c/ com.intel.bluetooth.BluetoothStackBlueZ com.intel.bluetooth.BluetoothStackBlueZConsts com.intel.bluetooth.BluetoothStackBlueZNativeTests
+mkdir -p ${CLASSES_DIR}
 
-# compile the C files
-mkdir -p target/native
-cd target/native
-gcc -fPIC -c ../../src/main/c/*.c ../../src/main/c/*.h
-cd ../../
+echo "=== Compile the bluez stack java files ==="
+javac -d ${CLASSES_DIR} -cp ${BLUECOVE_JAR} ${SRC_JAVA_DIR}/com/intel/bluetooth/BluetoothStackBlueZ*.java
+if [[ ! "$?" = "0" ]]; then
+    echo Error in Java compilation
+    exit 1
+fi
 
-# link them into the library
-gcc -shared -lbluetooth -Wl,-soname,libbluecove-${BLUECOVE_VERSION} -o target/libbluecove.so target/native/*.o
+echo "=== Generate the JNI C header files from these java files ==="
+javah -d ${SRC_C_DIR} -classpath ${CLASSES_DIR} com.intel.bluetooth.BluetoothStackBlueZ com.intel.bluetooth.BluetoothStackBlueZConsts com.intel.bluetooth.BluetoothStackBlueZNativeTests
+if [[ ! "$?" = "0" ]]; then
+    echo Error in JNI haders creation
+    exit 1
+fi
 
-# copy the shared library to root
-cp target/libbluecove.so target/classes
+echo "=== Compile the C files ==="
+mkdir -p ${OBJ_DIR}
+cd ${OBJ_DIR}
+gcc -fPIC -c ${SRC_C_DIR}/*.c ${SRC_C_DIR}/*.h
+if [[ ! "$?" = "0" ]]; then
+    echo Error in C compilation
+    cd ${BUILD_DIR}
+    exit 1
+fi
+cd ${BUILD_DIR}
+
+echo "=== Link object file into the library ==="
+gcc -shared -lbluetooth -Wl,-soname,libbluecove-${BLUECOVE_VERSION} -o ${BUILD_DIR}/target/libbluecove.so ${OBJ_DIR}/*.o
+if [[ ! "$?" = "0" ]]; then
+    echo Error in linking
+    exit 1
+fi
+
+# copy the shared library to classes directory
+cp ${BUILD_DIR}/target/libbluecove.so ${CLASSES_DIR}
+
+echo "Native library ${BUILD_DIR}/target/libbluecove.so created"
 
 
