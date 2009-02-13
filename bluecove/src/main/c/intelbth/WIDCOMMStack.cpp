@@ -584,7 +584,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_isRemo
   (JNIEnv *env, jobject, jlong address) {
 #ifdef WIDCOMM_CE_MINUMUM
     return false;
-#else    
+#else
     if (stack == NULL) {
         throwRuntimeException(env, cSTACK_CLOSED);
         return FALSE;
@@ -599,7 +599,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemo
   (JNIEnv *env, jobject, jlong address) {
 #ifdef WIDCOMM_CE_MINUMUM
     return NULL;
-#else    
+#else
     if (stack == NULL) {
         throwRuntimeException(env, cSTACK_CLOSED);
         return NULL;
@@ -647,7 +647,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemo
         throwRuntimeException(env, "Can't read link mode");
         return NULL;
     }
-#endif    
+#endif
 }
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteDeviceVersionInfo
@@ -668,9 +668,9 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemo
         sprintf_s(info, 256, "manufacturer=%i,lmp_version=%i,lmp_sub_version=%i", devVerInfo.manufacturer, devVerInfo.lmp_version, devVerInfo.lmp_sub_version);
         return env->NewStringUTF(info);
     }
-#else        
+#else
     return NULL;
-#endif     
+#endif
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_setSniffMode
@@ -679,7 +679,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_setSni
     BD_ADDR bda;
     LongToBcAddr(address, bda);
     return CBtIf::SetSniffMode(bda);
-#else        
+#else
     return JNI_FALSE;
 #endif
 }
@@ -690,9 +690,9 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_cancel
     BD_ADDR bda;
     LongToBcAddr(address, bda);
     return CBtIf::CancelSniffMode(bda);
-#else        
+#else
     return JNI_FALSE;
-#endif        
+#endif
 }
 
 
@@ -707,12 +707,14 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_getRemoteD
     LongToBcAddr(address, bda);
     tBT_CONN_STATS conn_stats;
     if (!stack->GetConnectionStats(bda, &conn_stats)) {
+        throwIOException(env, "Fail to get connection info");
         return -1;
     }
     return conn_stats.Rssi;
-#else        
+#else
+    throwIOException(env, "Not Supported on WinCE");
     return -1;
-#endif            
+#endif
 }
 
 jboolean isDevicePaired(JNIEnv *env, jlong address, DEV_CLASS devClass) {
@@ -1455,46 +1457,46 @@ BOOL WIDCOMMStackServerConnectionBase::finalizeSDPRecord(JNIEnv *env) {
 
     SDP_RETURN_CODE rc;
     rc = sdpService->AddServiceClassIdList(this->service_guids_len, this->service_guids);
-	if (rc != SDP_OK) {
-		throwServiceRegistrationException(env, "Failed to addServiceClassIdList (%i)", (int)rc);
-		return FALSE;
-	}
+    if (rc != SDP_OK) {
+        throwServiceRegistrationException(env, "Failed to addServiceClassIdList (%i)", (int)rc);
+        return FALSE;
+    }
     rc = sdpService->AddServiceName(this->service_name);
-	if (rc != SDP_OK) {
-		throwServiceRegistrationException(env, "Failed to addServiceName (%i)", (int)rc);
-		return FALSE;
-	}
+    if (rc != SDP_OK) {
+        throwServiceRegistrationException(env, "Failed to addServiceName (%i)", (int)rc);
+        return FALSE;
+    }
 
     rc = sdpService->AddProtocolList(this->proto_num_elem, this->proto_elem_list);
-	if (rc != SDP_OK) {
-		throwServiceRegistrationException(env, "Failed to addProtocolList (%i)", (int)rc);
-		return FALSE;
-	}
+    if (rc != SDP_OK) {
+        throwServiceRegistrationException(env, "Failed to addProtocolList (%i)", (int)rc);
+        return FALSE;
+    }
 
-	UINT32 service_name_len;
-	#ifdef _WIN32_WCE
-		service_name_len = wcslen((wchar_t*)this->service_name);
-	#else // _WIN32_WCE
-		service_name_len = (UINT32)strlen(this->service_name);
-	#endif // #else // _WIN32_WCE
+    UINT32 service_name_len;
+    #ifdef _WIN32_WCE
+        service_name_len = wcslen((wchar_t*)this->service_name);
+    #else // _WIN32_WCE
+        service_name_len = (UINT32)strlen(this->service_name);
+    #endif // #else // _WIN32_WCE
 
     rc = sdpService->AddAttribute(0x0100, TEXT_STR_DESC_TYPE, service_name_len, (UINT8*)this->service_name);
-	if (rc != SDP_OK) {
-		throwServiceRegistrationException(env, "Failed to addAttribute ServiceName (%i)", (int)rc);
-		return FALSE;
-	}
-	debug(("service_name assigned [%s]", this->service_name));
+    if (rc != SDP_OK) {
+        throwServiceRegistrationException(env, "Failed to addAttribute ServiceName (%i)", (int)rc);
+        return FALSE;
+    }
+    debug(("service_name assigned [%s]", this->service_name));
 
     /*
-	rc = sdpService->MakePublicBrowseable();
-	if (rc != SDP_OK) {
-		throwIOException(env, "Failed to MakePublicBrowseable (%i)", (int)rc);
-		return FALSE;
-	}
-	sdpService->SetAvailability(255);
-	*/
+    rc = sdpService->MakePublicBrowseable();
+    if (rc != SDP_OK) {
+        throwIOException(env, "Failed to MakePublicBrowseable (%i)", (int)rc);
+        return FALSE;
+    }
+    sdpService->SetAvailability(255);
+    */
 
-	return TRUE;
+    return TRUE;
 }
 
 WIDCOMMStackServerConnectionBase* getServerConnection(JNIEnv *env, jlong handle, jchar handleType) {
@@ -1582,16 +1584,16 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_sdpService
     }
     for(int i = 0; i < service_guids_len; i++) {
         jbyteArray uuidValue = (jbyteArray) env->GetObjectArrayElement(uuidArray, i);
-	    jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
-	    convertUUIDBytesToGUID(bytes, &(service_guids[i]));
-	    env->ReleaseByteArrayElements(uuidValue, bytes, 0);
-	}
+        jbyte *bytes = env->GetByteArrayElements(uuidValue, 0);
+        convertUUIDBytesToGUID(bytes, &(service_guids[i]));
+        env->ReleaseByteArrayElements(uuidValue, bytes, 0);
+    }
 
-	if (srv->service_guids != NULL) {
-	    delete srv->service_guids;
-	}
-	srv->service_guids = service_guids;
-	srv->service_guids_len = service_guids_len;
+    if (srv->service_guids != NULL) {
+        delete srv->service_guids;
+    }
+    srv->service_guids = service_guids;
+    srv->service_guids_len = service_guids_len;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testWIDCOMMConstants

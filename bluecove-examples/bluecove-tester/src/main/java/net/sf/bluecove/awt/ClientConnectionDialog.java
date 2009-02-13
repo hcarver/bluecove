@@ -678,8 +678,15 @@ public class ClientConnectionDialog extends Dialog {
 					+ LocalDevice.getProperty("bluecove.nativeFunction:getRemoteDeviceLinkMode:" + deviceAddress));
 			Logger.debug(deviceAddress + " info:"
 					+ LocalDevice.getProperty("bluecove.nativeFunction:getRemoteDeviceVersionInfo:" + deviceAddress));
-			Logger.debug(deviceAddress + " RSSI:"
-					+ LocalDevice.getProperty("bluecove.nativeFunction:getRemoteDeviceRSSI:" + deviceAddress));
+
+			//B4 BlueCove 2.1.1
+			//			Logger.debug(deviceAddress + " RSSI:"
+			//					+ LocalDevice.getProperty("bluecove.nativeFunction:getRemoteDeviceRSSI:" + deviceAddress));
+			try {
+                Logger.debug(deviceAddress + " RSSI:", RemoteDeviceHelper.readRSSI(device));
+            } catch (IOException e) {
+                Logger.debug(deviceAddress + " RSSI:", e.getMessage());
+            }
 		} catch (Throwable e) {
 			Logger.error("error", e);
 		}
