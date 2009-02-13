@@ -479,7 +479,7 @@ GetRemoteDeviceFriendlyName::~GetRemoteDeviceFriendlyName() {
 
 void GetRemoteDeviceFriendlyName::run() {
     BluetoothDeviceAddress btAddress;
-    LongToOSxBTAddr(lData, &btAddress);
+    LongToOSxBTAddr(jlData, &btAddress);
     deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
     if (deviceRef == NULL) {
         error = 1;
@@ -535,7 +535,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getRemoteDe
     //    return NULL;
     //}
     GetRemoteDeviceFriendlyName runnable;
-    runnable.lData = address;
+    runnable.jlData = address;
     synchronousBTOperation(&runnable);
 
     while ((stack != NULL) && (runnable.error == 0) && (!runnable.bData)) {
@@ -577,10 +577,10 @@ jboolean callDeviceFound(JNIEnv *env, RetrieveDevicesCallback *callback, NSArray
         jint deviceClass = (jint)[device getClassOfDevice];
         jstring deviceName = OSxNewJString(env, [device getName]);
         jboolean paired = [device isPaired];
-		if (!callback->callDeviceFoundCallback(env, deviceAddr, deviceClass, deviceName, paired)) {
-		    result = JNI_FALSE;
-		    break;
-		}
+        if (!callback->callDeviceFoundCallback(env, deviceAddr, deviceClass, deviceName, paired)) {
+            result = JNI_FALSE;
+            break;
+        }
     }
     return result;
 }
@@ -595,7 +595,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_retrieveDe
     if (!callback.builCallback(env, peer, retrieveDevicesCallback)) {
         return JNI_FALSE;
     }
-    
+
     RetrieveDevices runnable;
     synchronousBTOperation(&runnable);
     if (RETRIEVEDEVICES_OPTION_CACHED == option) {
@@ -638,6 +638,127 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isRemoteDe
     runnable.jlData = address;
     synchronousBTOperation(&runnable);
     return (runnable.bData)?JNI_TRUE:JNI_FALSE;
+}
+
+//  -------- read RSSI --------
+
+#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
+@implementation RemoteDeviceRSSIHostControllerDelegate
+
+- (id)initWithRunnable:(GetRemoteDeviceRSSI*)runnable {
+    _runnable = runnable;
+    return self;
+}
+
+- (void)readRSSIForDeviceComplete:(id)controller device:(IOBluetoothDevice*)device  info:(BluetoothHCIRSSIInfo*)info    error:(IOReturn)error {
+    if (!isRunnableCorrupted(_runnable)) {
+        if (_runnable->bluetoothDevice && [_runnable->bluetoothDevice isEqual:device]) {
+            if ((error != kIOReturnSuccess) || (info == NULL)) {
+                ndebug(("ERROR: readRSSIForDeviceComplete return error"));
+                _runnable->error = 1;
+                _runnable->lData = error;
+            } else if (info->handle == kBluetoothConnectionHandleNone) {
+                ndebug(("ERROR: readRSSIForDeviceComplete no connection"));
+                _runnable->error = 2;
+            } else {
+                _runnable->bData = TRUE;
+                _runnable->iData = info->RSSIValue;
+            }
+            MPSetEvent(_runnable->inquiryFinishedEvent, 0);
+        }
+    }
+}
+
+@end
+
+GetRemoteDeviceRSSI::GetRemoteDeviceRSSI() {
+    name = "GetRemoteDeviceRSSI";
+    delegate = NULL;
+    MPCreateEvent(&inquiryFinishedEvent);
+}
+
+GetRemoteDeviceRSSI::~GetRemoteDeviceRSSI() {
+    MPDeleteEvent(inquiryFinishedEvent);
+}
+
+void GetRemoteDeviceRSSI::run() {
+    BluetoothDeviceAddress btAddress;
+    LongToOSxBTAddr(jlData, &btAddress);
+    bluetoothDevice = [IOBluetoothDevice withAddress:&btAddress];
+    if (bluetoothDevice == NULL) {
+        this->error = 1;
+        this->lData = 0;
+        return;
+    }
+    IOBluetoothHostController* controller = [IOBluetoothHostController defaultController];
+    if (controller == NULL) {
+        this->error = 1;
+        this->lData = 0;
+        return;
+    }
+    orig_delegate = [controller delegate];
+    delegate = [[RemoteDeviceRSSIHostControllerDelegate alloc] initWithRunnable:this];
+    [delegate retain];
+    [controller setDelegate:delegate];
+    IOReturn rc = [controller readRSSIForDevice:bluetoothDevice];
+    if (rc != noErr) {
+        ndebug(("ERROR: call readRSSIForDevice failed"));
+        this->error = 1;
+        this->lData = rc;
+    }
+}
+
+ void GetRemoteDeviceRSSI::release() {
+    if (delegate != NULL) {
+        IOBluetoothHostController* controller = [IOBluetoothHostController defaultController];
+        [controller setDelegate:orig_delegate];
+        [delegate release];
+        delegate = NULL;
+    }
+ }
+
+RUNNABLE(GetRemoteDeviceRSSIRelease, "GetRemoteDeviceRSSIRelease") {
+    GetRemoteDeviceRSSI* r = (GetRemoteDeviceRSSI*)pData[0];
+    r->release();
+}
+
+#endif
+
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_readRemoteDeviceRSSIImpl
+  (JNIEnv *env, jobject, jlong address) {
+#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
+    GetRemoteDeviceRSSI runnable;
+    runnable.jlData = address;
+    synchronousBTOperation(&runnable);
+
+    if ((stack != NULL) && (runnable.error == 0) && (!runnable.bData)) {
+        MPEventFlags flags;
+        MPWaitForEvent(runnable.inquiryFinishedEvent, &flags, kDurationMillisecond * 700);
+    }
+
+    GetRemoteDeviceRSSIRelease release;
+    release.pData[0] = &runnable;
+    synchronousBTOperation(&release);
+
+    if (runnable.error) {
+        switch (runnable.error) {
+        case 2:
+            throwIOException(env, "Error reading remote device RSSI, no connection");
+            break;
+        default:
+            throwIOException(env, "Error reading remote device RSSI [0x%08x]", runnable.lData);
+        }
+        return -1;
+    } else if (!runnable.bData) {
+        throwIOException(env, "Error reading remote device RSSI timeout");
+        return -1;
+    } else {
+        return runnable.iData;
+    }
+#else
+    throwIOException(env, "Not Supported on OS X Bluetooth API before 2.0");
+    return -1;
+#endif
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_authenticateRemoteDeviceImpl

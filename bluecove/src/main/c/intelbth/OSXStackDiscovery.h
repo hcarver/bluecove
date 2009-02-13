@@ -22,12 +22,17 @@
  *  @version $Id$
  */
 
+#include "OSXStack.h"
+
 #import <Cocoa/Cocoa.h>
 
 #import <IOBluetooth/objc/IOBluetoothDevice.h>
 #import <IOBluetooth/objc/IOBluetoothDeviceInquiry.h>
 
-#include "OSXStack.h"
+#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
+#import <IOBluetooth/objc/IOBluetoothHostController.h>
+#endif
+
 
 /**
  * OS x BUG. If discovery has been cancelled by stop. For next discovery deviceInquiryComplete function is called for previous Delegate Object, not for current
@@ -90,3 +95,29 @@ public:
 
     virtual void run();
 };
+
+#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
+class GetRemoteDeviceRSSI: public Runnable {
+public:
+    MPEventID inquiryFinishedEvent;
+    IOBluetoothDevice *bluetoothDevice;
+
+    NSObject*   delegate;
+    NSObject*   orig_delegate;
+
+    GetRemoteDeviceRSSI();
+    virtual ~GetRemoteDeviceRSSI();
+
+    virtual void run();
+    
+    void release();
+};
+
+@interface RemoteDeviceRSSIHostControllerDelegate : NSObject {
+    GetRemoteDeviceRSSI* _runnable;
+}
+- (id)initWithRunnable:(GetRemoteDeviceRSSI*)runnable;
+    // See IOBluetoothHostControllerDelegate
+- (void)readRSSIForDeviceComplete:(id)controller device:(IOBluetoothDevice*)device	info:(BluetoothHCIRSSIInfo*)info	error:(IOReturn)error;
+@end
+#endif

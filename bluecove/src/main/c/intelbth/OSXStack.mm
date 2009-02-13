@@ -480,6 +480,18 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDev
     return (kBluetoothFeatureSwitchRoles & runnable.lData)?JNI_TRUE:JNI_FALSE;
 }
 
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDeviceFeatureRSSI
+(JNIEnv *env, jobject) {
+    Edebug(("isLocalDeviceFeatureSwitchRoles"));
+    GetBluetoothHCISupportedFeatures runnable;
+    runnable.iData = 6;
+    synchronousBTOperation(&runnable);
+    if (runnable.error) {
+        return JNI_FALSE;
+    }
+    return (kBluetoothFeatureRSSI & runnable.lData)?JNI_TRUE:JNI_FALSE;
+}
+
 JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isLocalDeviceFeatureParkMode
 (JNIEnv *env, jobject) {
     Edebug(("isLocalDeviceFeatureParkMode"));
