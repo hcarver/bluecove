@@ -31,6 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.bluetooth.L2CAPConnection;
+import javax.bluetooth.LocalDevice;
+import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
@@ -40,6 +42,8 @@ import org.bluecove.tester.util.IOUtils;
 import org.bluecove.tester.util.RuntimeDetect;
 import org.bluecove.tester.util.StringUtils;
 import org.bluecove.tester.util.TimeUtils;
+
+import com.intel.bluetooth.RemoteDeviceHelper;
 
 import net.sf.bluecove.ConnectionHolder;
 import net.sf.bluecove.ConnectionHolderL2CAP;
@@ -60,6 +64,8 @@ public class ClientConnectionThread extends Thread {
 
 	private ConnectionHolder c;
 
+	private RemoteDevice remoteDevice;
+	
 	private boolean stoped = false;
 
 	boolean isRunning = false;
@@ -96,6 +102,8 @@ public class ClientConnectionThread extends Thread {
 
 	private FileOutputStream fileOut;
 
+	private boolean rssiEnabled;
+	
 	ClientConnectionThread(String serverURL) {
 		super("ClientConnectionThread" + (++connectionCount));
 		this.serverURL = serverURL;
@@ -122,6 +130,7 @@ public class ClientConnectionThread extends Thread {
 				isConnecting = true;
 				Logger.debug(logPrefix + "Connecting:" + serverURL + " ...");
 				conn = Connector.open(serverURL);
+				remoteDevice = RemoteDevice.getRemoteDevice(conn);
 			} catch (IOException e) {
 				Logger.error(logPrefix + "Connection error", e);
 				return;
@@ -129,6 +138,7 @@ public class ClientConnectionThread extends Thread {
 				isConnecting = false;
 			}
 			Logger.info(logPrefix + "Connected");
+			rssiEnabled = "true".equals(LocalDevice.getProperty("bluecove.feature.rssi"));
 			if (rfcomm) {
 				ConnectionHolderStream cs = new ConnectionHolderStream((StreamConnection) conn);
 				c = cs;
@@ -224,7 +234,14 @@ public class ClientConnectionThread extends Thread {
 			if (now - reported > 5 * 1000) {
 				int size = (int) (receivedCount - reportedSize);
 				reportedSize = receivedCount;
-				Logger.debug(logPrefix + "Received " + receivedCount + " bytes " + TimeUtils.bps(size, reported));
+				String rssiInfo = "";
+				if (rssiEnabled) {
+				    try {
+				        rssiInfo =  " RSSI:" + RemoteDeviceHelper.readRSSI(remoteDevice);
+		            } catch (IOException ignore) {
+		            }
+				}
+				Logger.debug(logPrefix + "Received " + receivedCount + " bytes " + TimeUtils.bps(size, reported) + rssiInfo);
 				reported = now;
 			}
 			break;
