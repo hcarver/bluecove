@@ -727,6 +727,10 @@ RUNNABLE(GetRemoteDeviceRSSIRelease, "GetRemoteDeviceRSSIRelease") {
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_readRemoteDeviceRSSIImpl
   (JNIEnv *env, jobject, jlong address) {
 #ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
+    if (localDeviceSupportedSoftwareVersion < BLUETOOTH_VERSION_2_0) {
+        // Run on Tiger
+        throwIOException(env, "Not Supported on OS X Bluetooth API before 2.0");
+    }
     GetRemoteDeviceRSSI runnable;
     runnable.jlData = address;
     synchronousBTOperation(&runnable);
