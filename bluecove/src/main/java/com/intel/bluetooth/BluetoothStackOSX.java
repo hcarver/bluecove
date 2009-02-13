@@ -103,7 +103,7 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
      */
     public int getFeatureSet() {
         if (localDeviceSupportedSoftwareVersion >= BLUETOOTH_SOFTWARE_VERSION_2_0_0) {
-            return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES | FEATURE_RSSI;
+            return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES | (isLocalDeviceFeatureRSSI()?FEATURE_RSSI:0);
         } else {
             return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES;
         }
@@ -213,6 +213,8 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
 
     private native boolean isLocalDeviceFeatureParkMode();
 
+    private native boolean isLocalDeviceFeatureRSSI();
+    
     private native int getLocalDeviceL2CAPMTUMaximum();
 
     private native int getLocalDeviceSupportedSoftwareVersion();
