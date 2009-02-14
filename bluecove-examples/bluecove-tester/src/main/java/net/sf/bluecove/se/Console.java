@@ -100,8 +100,9 @@ public class Console {
 				    Switcher.startTCKAgent();
 				    break;
 				}
-			} catch (IOException e) {
-				return;
+			} catch (Throwable e) {
+			    System.out.println("Exception " + e.getMessage());
+			    e.printStackTrace(System.out);
 			}
 		}
 	}
