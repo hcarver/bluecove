@@ -47,7 +47,6 @@ JNIEXPORT jintArray JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_getLoca
         close(s);
         return NULL;
     }
-    int dev_id = -1;
     int flag = HCI_UP;
     int i;
     int count = 0;

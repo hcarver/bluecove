@@ -28,17 +28,18 @@
 #include <fcntl.h>
 
 int dynamic_bind_rc(int sock, struct sockaddr_rc *sockaddr, uint8_t *port) {
-	int err;
-	for(*port=1;*port<=31;*port++) {
-		sockaddr->rc_channel=*port;
-		err=bind(sock,(struct sockaddr *)sockaddr,sizeof(sockaddr));
-		if(!err)
-			break;
-	}
-	if(*port==31) {
-		err=-1;
-	}
-	return err;
+    int err;
+    for ((*port) = 1; (*port) <= 31; (*port)++) {
+        sockaddr->rc_channel = *port;
+        err = bind(sock,(struct sockaddr *)sockaddr,sizeof(sockaddr));
+        if (!err) {
+            break;
+        }
+    }
+    if ((*port) == 31) {
+        err = -1;
+    }
+    return err;
 }
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerOpenImpl
@@ -59,40 +60,40 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerOpe
     longToDeviceAddr(localDeviceBTAddress, &localAddr.rc_bdaddr);
 
     if (bind(handle, (struct sockaddr *)&localAddr, sizeof(localAddr)) < 0) {
-		throwIOException(env, "Failed to  bind socket. [%d] %s", errno, strerror(errno));
-		close(handle);
-		return 0;
-	}
+        throwIOException(env, "Failed to  bind socket. [%d] %s", errno, strerror(errno));
+        close(handle);
+        return 0;
+    }
 
     // TODO verify how this works, I think device needs to paird before this can be setup.
     // Set link security options
     if (encrypt || authenticate || authorize || master) {
-		int socket_opt = 0;
-		socklen_t len = sizeof(socket_opt);
+        int socket_opt = 0;
+        socklen_t len = sizeof(socket_opt);
         if (getsockopt(handle, SOL_RFCOMM, RFCOMM_LM, &socket_opt, &len) < 0) {
             throwIOException(env, "Failed to read RFCOMM server mode. [%d] %s", errno, strerror(errno));
             close(handle);
             return 0;
         }
-		if (master) {
-			socket_opt |= RFCOMM_LM_MASTER;
-		}
-		if (authenticate) {
-			socket_opt |= RFCOMM_LM_AUTH;
-			debug("RFCOMM set authenticate");
-		}
-		if (encrypt) {
-			socket_opt |= RFCOMM_LM_ENCRYPT;
-		}
-		if (authorize) {
-			socket_opt |= RFCOMM_LM_SECURE;
-		}
+        if (master) {
+            socket_opt |= RFCOMM_LM_MASTER;
+        }
+        if (authenticate) {
+            socket_opt |= RFCOMM_LM_AUTH;
+            debug("RFCOMM set authenticate");
+        }
+        if (encrypt) {
+            socket_opt |= RFCOMM_LM_ENCRYPT;
+        }
+        if (authorize) {
+            socket_opt |= RFCOMM_LM_SECURE;
+        }
 
-		if ((socket_opt != 0) && setsockopt(handle, SOL_RFCOMM, RFCOMM_LM, &socket_opt, sizeof(socket_opt)) < 0) {
-			throwIOException(env, "Failed to set RFCOMM server mode. [%d] %s", errno, strerror(errno));
+        if ((socket_opt != 0) && setsockopt(handle, SOL_RFCOMM, RFCOMM_LM, &socket_opt, sizeof(socket_opt)) < 0) {
+            throwIOException(env, "Failed to set RFCOMM server mode. [%d] %s", errno, strerror(errno));
             close(handle);
             return 0;
-		}
+        }
     }
 
     // use non-blocking mode
@@ -124,9 +125,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerGetC
     socklen_t len = sizeof(localAddr);
     if (getsockname(handle, (struct sockaddr*)&localAddr, &len) < 0) {
         throwIOException(env, "Failed to get rc_channel. [%d] %s", errno, strerror(errno));
-		return -1;
-	}
-	return localAddr.rc_channel;
+        return -1;
+    }
+    return localAddr.rc_channel;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerCloseImpl
@@ -148,25 +149,25 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerClos
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerAcceptAndOpenRfServerConnection
   (JNIEnv* env, jobject peer, jlong handle) {
     struct sockaddr_rc remoteAddr;
-	socklen_t  remoteAddrLen = sizeof(remoteAddr);
-	int client_socket = SOCKET_ERROR;
-	do {
-	    client_socket = accept(handle, (struct sockaddr*)&remoteAddr, &remoteAddrLen);
-	    if (SOCKET_ERROR == client_socket) {
-	        if (errno == EWOULDBLOCK) {
-	            if (isCurrentThreadInterrupted(env, peer)) {
-	                return 0;
-	            }
-	            if (!threadSleep(env, 100)) {
-	                return 0;
-	            }
-	            continue;
-	        } else {
-	            throwIOException(env, "Failed to accept RFCOMM client connection. [%d] %s", errno, strerror(errno));
-	            return 0;
-	        }
-	    }
+    socklen_t  remoteAddrLen = sizeof(remoteAddr);
+    int client_socket = SOCKET_ERROR;
+    do {
+        client_socket = accept(handle, (struct sockaddr*)&remoteAddr, &remoteAddrLen);
+        if (SOCKET_ERROR == client_socket) {
+            if (errno == EWOULDBLOCK) {
+                if (isCurrentThreadInterrupted(env, peer)) {
+                    return 0;
+                }
+                if (!threadSleep(env, 100)) {
+                    return 0;
+                }
+                continue;
+            } else {
+                throwIOException(env, "Failed to accept RFCOMM client connection. [%d] %s", errno, strerror(errno));
+                return 0;
+            }
+        }
     } while (SOCKET_ERROR == client_socket);
-	debug("RFCOMM client accepted, handle %li", client_socket);
-	return client_socket;
+    debug("RFCOMM client accepted, handle %li", client_socket);
+    return client_socket;
 }

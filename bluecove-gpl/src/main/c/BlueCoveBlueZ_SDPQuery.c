@@ -524,17 +524,20 @@ void debugDataElement(JNIEnv *env, sdp_data_t *data, int ident) {
             debug("%sSDP_INT64 %i", t, data->val.int64);
             break;
         case SDP_UINT64: {
-            uint64_t value = data->val.uint64;
+            // TODO Print 64 bit value
+            //uint64_t value = data->val.uint64;
             debug("%sSDP_UINT64 ...", t);
             break;
         }
         case SDP_UINT128: {
-            uint128_t value = data->val.uint128;
+            // TODO Print 128 bit value
+            //uint128_t value = data->val.uint128;
             debug("%sSDP_UINT128 ...", t);
             break;
         }
         case SDP_INT128: {
-            uint128_t value = data->val.int128;
+            // TODO Print 128 bit value
+            //uint128_t value = data->val.int128;
             debug("%sSDP_INT128 ...", t);
             break;
         }
