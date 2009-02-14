@@ -88,17 +88,15 @@ sdp_record_t* bluecove_sdp_extract_pdu(JNIEnv* env, const uint8_t *pdata, int bu
     }
     debug("BlueZ major verion %d detected", bluezVersionMajor);
 
-    void *function_pointer = &sdp_extract_pdu;
-
     // call function with appropriate parameters according to bluez version
     switch(bluezVersionMajor) {
         case BLUEZ_VERSION_MAJOR_3:
-            bluecove_sdp_extract_pdu_bluez_v3 = function_pointer;
+            bluecove_sdp_extract_pdu_bluez_v3 = (typeof(bluecove_sdp_extract_pdu_bluez_v3))&sdp_extract_pdu;
             rec = (*bluecove_sdp_extract_pdu_bluez_v3)(pdata, scanned);
             debug("function %s of bluez major version %d is called", functionName, bluezVersionMajor);
             break;
         case BLUEZ_VERSION_MAJOR_4:
-            bluecove_sdp_extract_pdu_bluez_v4 = function_pointer;
+            bluecove_sdp_extract_pdu_bluez_v4 = (typeof(bluecove_sdp_extract_pdu_bluez_v4))&sdp_extract_pdu;
             rec = (*bluecove_sdp_extract_pdu_bluez_v4)(pdata, bufsize, scanned);
             debug("function %s of bluez major version %d is called", functionName, bluezVersionMajor);
             break;
