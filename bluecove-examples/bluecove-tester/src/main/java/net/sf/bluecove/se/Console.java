@@ -30,6 +30,7 @@ import org.bluecove.tester.log.Logger;
 
 import net.sf.bluecove.Configuration;
 import net.sf.bluecove.Switcher;
+import net.sf.bluecove.TestResponderCommon;
 
 /**
  * 
@@ -84,6 +85,9 @@ public class Console {
 				case '6':
 					Switcher.serverShutdown();
 					break;
+				case 'P':
+					TestResponderCommon.printLocalDeviceInfo();
+					break;
 				case 'D':
 					boolean dbg = BlueCoveSpecific.changeDebug();
 					if (dbg) {
@@ -120,6 +124,7 @@ public class Console {
 		System.out.println("\t7 - Services Search");
 		System.out.println("\td - toggle BlueCove Debug");
 		System.out.println("\tT - Start TCK Agent");
+		System.out.println("\tP - Print LocalDevice Info");
 		System.out.println("\tq - Quit");
 		System.out.flush();
 	}
