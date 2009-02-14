@@ -9,7 +9,6 @@
 BLUECOVE_VERSION=2.1.1-SNAPSHOT
 
 BLUECOVE_JAR=../bluecove/target/bluecove-${BLUECOVE_VERSION}.jar
-#JAVA_HOME=/usr
 JAVAH=$(JAVA_HOME)/bin/javah
 JAVAC=$(JAVA_HOME)/bin/javac
 CC=gcc
@@ -30,22 +29,25 @@ CLASSPATH=$(BLUECOVE_JAR)
 all: classes jni-headers native-lib
 
 classes:
-	mkdir -p $(CLASSES_DIR)
-	$(JAVAC) -d $(CLASSES_DIR) -classpath $(CLASSPATH) \
+	-@mkdir -p $(CLASSES_DIR)
+	-@$(JAVAC) -d $(CLASSES_DIR) -classpath $(CLASSPATH) \
 	$(SRC_JAVA_DIR)/com/intel/bluetooth/*.java
 
 jni-headers:
-	$(JAVAH) -d $(SRC_C_DIR) \
+	-@$(JAVAH) -d $(SRC_C_DIR) \
 	-classpath $(CLASSPATH):$(CLASSES_DIR) \
 	$(JAVACLASSES)
 
 native-lib:
-	mkdir -p $(OBJ_DIR)
-	cd $(OBJ_DIR) && \
-	$(CC) $(CFLAGS) -c ../../$(SRC_C_DIR)/*.c ../../${SRC_C_DIR}/*.h
-	$(CC) $(CLIBFLAGS) -o $(TARGET_LIB) $(OBJ_DIR)/*.o
-	strip $(TARGET_LIB)
-	cp $(TARGET_LIB) $(CLASSES_DIR)/libbluecove$(LIBPOSTFIX).so
+	-@mkdir -p $(OBJ_DIR)
+	-@cd $(OBJ_DIR) && \
+	$(CC) $(CFLAGS) -c ../../$(SRC_C_DIR)/*.c -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux
+	-@$(CC) $(CLIBFLAGS) -o $(TARGET_LIB) $(OBJ_DIR)/*.o
+	-@strip $(TARGET_LIB)
+	-@cp $(TARGET_LIB) $(CLASSES_DIR)/libbluecove$(LIBPOSTFIX).so
+	-@echo "Native library $(TARGET_LIB) created"
+	-@echo "Shared library dependencies:"
+	-@ldd -v $(TARGET_LIB)
 
 clean:
 	rm -rf target

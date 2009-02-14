@@ -41,7 +41,7 @@ fi
 echo "=== Compile the C files ==="
 mkdir -p ${OBJ_DIR}
 cd ${OBJ_DIR}
-gcc -fPIC -c ${SRC_C_DIR}/*.c ${SRC_C_DIR}/*.h
+gcc -fPIC -c ${SRC_C_DIR}/*.c -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux
 if [[ ! "$?" = "0" ]]; then
     echo Error in C compilation
     cd ${BUILD_DIR}
