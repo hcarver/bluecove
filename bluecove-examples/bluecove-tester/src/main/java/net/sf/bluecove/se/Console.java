@@ -130,11 +130,17 @@ public class Console {
 	}
 
 	private static String readCommand() throws IOException {
-		int b = System.in.read();
-		if (b == -1) {
-			return null;
-		}
-		return new String("" + (char) b);
+	    StringBuffer buf = new StringBuffer();
+	    int b;
+	    do {
+	        b = System.in.read();
+	        if (b == '\n') {
+	            return buf.toString();
+	        }
+	        buf.append(b);
+	    } while (b != -1);
+		return null;
+
 	}
 
 	private static void help() {
