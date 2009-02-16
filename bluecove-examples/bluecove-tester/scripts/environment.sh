@@ -11,7 +11,7 @@ SCRIPTS_DIR=`pwd`
 cd "${SAVE_DIR}"
 # echo SCRIPTS_DIR=${SCRIPTS_DIR}
 . "${SCRIPTS_DIR}/version.sh"
-if [[ ! "$?" = "0" ]]; then
+if [ ! "$?" = "0" ]; then
     echo Error calling version.sh
     exit 1
 fi
@@ -42,7 +42,7 @@ BLUECOVE_TESTER_CP=${BLUECOVE_TESTER_CP}:${BLUECOVE_GPL_PROJECT_HOME}/target/cla
 BLUECOVE_TESTER_CP=${BLUECOVE_TESTER_CP}:${BLUECOVE_TESTER_BASE_PROJECT_HOME}/target/classes
 BLUECOVE_TESTER_CP=${BLUECOVE_TESTER_CP}:${BLUECOVE_TESTER_HOME}/target/cldcunit.jar
 
-if [[ ! -f ${BLUECOVE_JAR} ]] ; then
+if [ ! -f ${BLUECOVE_JAR} ] ; then
   echo "BlueCove not found ${BLUECOVE_JAR}"
   exit 1
 fi
