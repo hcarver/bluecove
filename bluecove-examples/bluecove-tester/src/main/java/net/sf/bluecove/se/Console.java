@@ -114,7 +114,7 @@ public class Console {
 				        //L2CAP Write test
 				        UIHelper.configurationForSpeedTest(Consts.TRAFFIC_GENERATOR_READ, true);  
 				    } else {
-				        System.out.println("Unknown speed test command " + cmd);
+				        System.out.println("Unknown speed test command '" + cmd + "'");
 				        break;
 				    }
 				    Switcher.startClient();
@@ -134,10 +134,10 @@ public class Console {
 	    int b;
 	    do {
 	        b = System.in.read();
-	        if (b == '\n') {
+	        if ((b == '\n') || (b == '\r')) {
 	            return buf.toString();
 	        }
-	        buf.append(b);
+	        buf.append((char)b);
 	    } while (b != -1);
 		return null;
 
