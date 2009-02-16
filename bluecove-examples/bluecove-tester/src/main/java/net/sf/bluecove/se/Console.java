@@ -29,6 +29,7 @@ import java.io.IOException;
 import org.bluecove.tester.log.Logger;
 
 import net.sf.bluecove.Configuration;
+import net.sf.bluecove.Consts;
 import net.sf.bluecove.Switcher;
 import net.sf.bluecove.TestResponderCommon;
 
@@ -99,6 +100,27 @@ public class Console {
 				case 'T':
 				    Switcher.startTCKAgent();
 				    break;
+				case 'S':
+				    if (cmd.equals("SRR")) {
+				        //RFCOMM Read test
+				        UIHelper.configurationForSpeedTest(Consts.TRAFFIC_GENERATOR_WRITE, false);
+				    } else if (cmd.equals("SRW")) {
+				        //RFCOMM Write test
+				        UIHelper.configurationForSpeedTest(Consts.TRAFFIC_GENERATOR_READ, false);
+				    } else if (cmd.equals("SLR")) {
+				        //L2CAP Read test
+				        UIHelper.configurationForSpeedTest(Consts.TRAFFIC_GENERATOR_WRITE, true);
+				    } else if (cmd.equals("SLW")) {
+				        //L2CAP Write test
+				        UIHelper.configurationForSpeedTest(Consts.TRAFFIC_GENERATOR_READ, true);  
+				    } else {
+				        System.out.println("Unknown speed test command " + cmd);
+				        break;
+				    }
+				    Switcher.startClient();
+				    break;
+				default :
+				    System.out.println("Unknown command " + cmd);
 				}
 			} catch (Throwable e) {
 			    System.out.println("Exception " + e.getMessage());
@@ -126,6 +148,7 @@ public class Console {
 		System.out.println("\td - toggle BlueCove Debug");
 		System.out.println("\tT - Start TCK Agent");
 		System.out.println("\tP - Print LocalDevice Info");
+		System.out.println("\tSRR|SRW|SLR|SLW  - Speed tests RFCOMM|L2CAP Read|Write");
 		System.out.println("\tq - Quit");
 		System.out.flush();
 	}
