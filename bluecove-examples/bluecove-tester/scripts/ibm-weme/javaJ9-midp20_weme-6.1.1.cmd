@@ -24,6 +24,11 @@ rem set JVM_ARGS=%JVM_ARGS% -Dbluecove.debug=1
 
 call "%~dp0..\set-stack.cmd"
 
+@if exist "%JAVA_HOME%\lib\jclMidp20\ext" goto :ext_exists
+@echo Create directory "%JAVA_HOME%\lib\jclMidp20\ext"
+mkdir "%JAVA_HOME%\lib\jclMidp20\ext"
+:ext_exists
+
 copy "%BLUECOVE_JAR%" "%JAVA_HOME%\lib\jclMidp20\ext\bluecove.jar"
 copy "%BLUECOVE_PROJECT_HOME%\src\main\resources\*.dll" "%JAVA_HOME%\bin"
 

@@ -59,6 +59,16 @@ BlueCove Bluetooth speed test results
 *--------------------------------+--------------------------------+-
 | BlueZ,    Tiny EDR             | Mac OS X, Apple Integrated     |   230,000 - 1,300,000 bit/s {{{#*}*}}  {{{#***}***}} (faster when OS X is server/bug?)
 *--------------------------------+--------------------------------+-
+| Winsock,  MS BT v3             | Winsock,  MS BT v3             |   840,000 bit/s
+*--------------------------------+--------------------------------+-
+| Winsock,  MS BT v3             | Mac OS X, Apple Integrated     | 1,060,000 bit/s {{{#*}*}}
+*--------------------------------+--------------------------------+-
+| Mac OS X, Apple Integrated     | Winsock,  MS BT v3             |   325,000 bit/s {{{#*}*}}
+*--------------------------------+--------------------------------+-
+| Winsock,  MS BT v3             | BlueZ,    BT-2400P             |   770,000 bit/s
+*--------------------------------+--------------------------------+-
+| BlueZ,    BT-2400P             | Winsock,  MS BT v3             | 1,000,000 bit/s  
+*--------------------------------+--------------------------------+-
 | WIDCOMM,  TRUST BT-2210Tp      | SE K790                        |   230,000 bit/s
 *--------------------------------+--------------------------------+-
 | Winsock,  D-Link DBT-120       | SE K790                        |   510,000 bit/s {{{#*}*}}
@@ -122,6 +132,8 @@ The reciving speed was measured since sent L2CAP pakets may be lost.
         * JSR-082 Phones: Sony Ericsson K790, Nokia 5310 XpressMusic
 
         * BlueCove with Microsoft Bluetooth stack, Microsoft Wireless Transceiver for Bluetooth 2.0 (MS BT v2)
+        
+        * BlueCove with Microsoft Bluetooth stack, Microsoft Transceiver v3.0 for Bluetooth (MS BT v3)
 
         * BlueCove with Microsoft Bluetooth stack, D-Link DBT-120 USB Bluetooth Adapter
 
@@ -135,3 +147,13 @@ The reciving speed was measured since sent L2CAP pakets may be lost.
 
         * BlueCove with Mac OS X 10.5.6 i386, 2.8GHz Quad-Core Intel Xeon, Apple Integrated Cambridge Silicon Radio; see {{{#*}*}}
 
+
+Test one device is under VMWare Workstation on Windows
+
+*--------------------------------+--------------------------------+------------------------+------------------------+
+| <<Client Device>>              | <<Server Device>>              |  Sending RFCOMM speed  |  Reciving RFCOMM speed  
+*--------------------------------+--------------------------------+------------------------+------------------------+
+| VM, Winsock,  MS BT v3         | Winsock,  MS BT v3             |   680,000 bit/s        |   740,000 bit/s
+*--------------------------------+--------------------------------+------------------------+------------------------+
+| Winsock,  MS BT v3             | VM, Winsock,  MS BT v3         |   580,000 bit/s        |   610,000 bit/s
+*--------------------------------+--------------------------------+------------------------+------------------------+

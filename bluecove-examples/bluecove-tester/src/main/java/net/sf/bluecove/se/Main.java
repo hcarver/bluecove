@@ -69,7 +69,7 @@ public class Main {
 			runConsole(args);
 			return;
 		}
-		if (GraphicsEnvironment.isHeadless()) {
+		if (isHeadlessEnvironment()) {
 			runConsole(args);
 			return;
 		}
@@ -85,6 +85,14 @@ public class Main {
 			return;
 		}
 		runAWT(args);
+	}
+	
+	private static boolean isHeadlessEnvironment() {  
+	    try {
+            return GraphicsEnvironment.isHeadless();
+        } catch (Throwable b4java14) {
+            return false;
+        }   
 	}
 
 	static void runConsole(String[] args) {
