@@ -62,7 +62,7 @@
 
     <ciManagement>
         <system>Cruisecontrol</system>
-        <url>https://pyx4j.com/cruisecontrol/</url>
+        <url>http://pyx4j.com/cruisecontrol-public/</url>
     </ciManagement>
 
     <distributionManagement>
