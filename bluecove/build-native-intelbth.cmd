@@ -121,6 +121,7 @@ copy src\main\resources\bluecove_ce.dll target\classes\
 :errormark
 	@echo Error in build
     @if "%CALLED_FROM_MAVEN%" == "1" (
+        echo PATH=[%PATH%]
         @ENDLOCAL
         exit 1
     )
