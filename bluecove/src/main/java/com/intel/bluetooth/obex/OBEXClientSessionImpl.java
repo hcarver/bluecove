@@ -243,11 +243,15 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 	}
 
 	public void close() throws IOException {
-		if (this.operation != null) {
-			this.operation.close();
-			this.operation = null;
-		}
-		super.close();
-	}
+        try {
+            if (this.operation != null) {
+                this.operation.close();
+                this.operation = null;
+            }
+        } finally {
+            // Close connection even if operation can't be closed.
+            super.close();
+        }
+    }
 
 }
