@@ -58,7 +58,7 @@ abstract class OBEXUtils {
 					available = is.available();
 					if (available == 0) {
 						if (System.currentTimeMillis() > endOfDellay) {
-							throw new InterruptedIOException("OBEX read timeout");
+							throw new InterruptedIOException("OBEX read timeout; received " + got + " form " +  len + " expected");
 						}
 						try {
 							Thread.sleep(100);
@@ -70,7 +70,7 @@ abstract class OBEXUtils {
 			}
 			int rc = is.read(b, off + got, len - got);
 			if (rc < 0) {
-				throw new EOFException("EOF while reading OBEX packet");
+				throw new EOFException("EOF while reading OBEX packet; received " + got + " form " +  len + " expected");
 			}
 			got += rc;
 		}
