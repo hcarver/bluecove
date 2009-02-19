@@ -272,26 +272,51 @@
         </profile>
 
         <!-- cruisecontrol -->
-        
+
         <profile>
             <!-- build master is now Linux x86-64; Idealy would be nice to split project to platform dependant modules -->
             <id>build-master</id>
+
+            <repositories>
+                <repository>
+                    <id>pyx4j.com-cruisecontrol-shared-http</id>
+                    <url>http://snapshot.bluecove.org/build/${version}</url>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                </repository>
+            </repositories>
+
+            <dependencies>
+                <dependency>
+                    <groupId>${groupId}.native.linux</groupId>
+                    <artifactId>libbluecove</artifactId>
+                    <type>so</type>
+                    <version>${label}</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+
             <build>
                 <plugins>
-
                     <plugin>
-                        <artifactId>maven-antrun-plugin</artifactId>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
                         <executions>
                             <execution>
                                 <id>get-multi-platform-binary</id>
                                 <phase>process-classes</phase>
                                 <goals>
-                                    <goal>run</goal>
+                                    <goal>copy-dependencies</goal>
                                 </goals>
                                 <configuration>
-                                    <tasks>
-                                        <get src="http://snapshot.bluecove.org/build/${version}/${label}/linux/bluecove.so" dest="${project.build.directory}/classes/bluecove.so"/>
-                                    </tasks>
+                                    <stripVersion>true</stripVersion>
+                                    <includeScope>provided</includeScope>
+                                    <excludeTypes>jar</excludeTypes>
+                                    <outputDirectory>${project.build.directory}/classes</outputDirectory>
                                 </configuration>
                             </execution>
                         </executions>
@@ -333,7 +358,7 @@
                 </plugins>
             </build>
         </profile>
-        
+
     </profiles>
 
 </project>
