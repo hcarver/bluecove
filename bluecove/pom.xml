@@ -571,10 +571,112 @@
         </profile>
         
         <profile>
+             <id>build-leo</id>
+             <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                            <!-- Can't run deploy for this profile -->
+                            <configuration>
+                                <repositoryId>pyx4j.com-cruisecontrol-shared</repositoryId>
+                                <url>${scp-apache-base}/bluecove/build/${version}</url>
+                                <groupId>${groupId}.native.mac</groupId>
+                                <packaging>jnilib</packaging>
+                                <version>${label}</version>
+                                <uniqueVersion>false</uniqueVersion>
+                                <generatePom>true</generatePom>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>deploy-multi-platform-build-binary-libbluecove</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>deploy-file</goal>
+                                    </goals>
+                                    <configuration>
+                                        <file>${project.build.directory}/classes/libbluecove.jnilib</file>
+                                        <artifactId>libbluecove</artifactId>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>build-xp</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                            <!-- Can't run deploy for this profile -->
+                            <configuration>
+                                <repositoryId>pyx4j.com-cruisecontrol-shared</repositoryId>
+                                <url>${scp-apache-base}/bluecove/build/${version}</url>
+                                <groupId>${groupId}.native.win</groupId>
+                                <packaging>dll</packaging>
+                                <version>${label}</version>
+                                <uniqueVersion>false</uniqueVersion>
+                                <generatePom>true</generatePom>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>deploy-multi-platform-build-binary-intelbth</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>deploy-file</goal>
+                                    </goals>
+                                    <configuration>
+                                        <file>${project.build.directory}/classes/intelbth.dll</file>
+                                        <artifactId>intelbth</artifactId>
+                                    </configuration>
+                                </execution>
+                                <execution>
+                                    <id>deploy-multi-platform-build-binary-bluecove</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>deploy-file</goal>
+                                    </goals>
+                                    <configuration>
+                                        <file>${project.build.directory}/classes/bluecove.dll</file>
+                                        <artifactId>bluecove</artifactId>
+                                    </configuration>
+                                </execution>
+                                <execution>
+                                    <id>deploy-multi-platform-build-binary-intelbth_ce</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>deploy-file</goal>
+                                    </goals>
+                                    <configuration>
+                                        <file>${project.build.directory}/classes/intelbth_ce.dll</file>
+                                        <artifactId>intelbth_ce</artifactId>
+                                    </configuration>
+                                </execution>
+                                <execution>
+                                    <id>deploy-multi-platform-build-binary-bluecove_ce</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>deploy-file</goal>
+                                    </goals>
+                                    <configuration>
+                                        <file>${project.build.directory}/classes/bluecove_ce.dll</file>
+                                        <artifactId>bluecove_ce</artifactId>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
             <id>build</id>
             <build>
                 <plugins>
-                    <!-- jar sources during snapshot build -->
+                    <!-- jar sources during snapshot build; TODO remove-->
+                    <!--
                     <plugin>
                         <inherited>true</inherited>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -591,28 +693,7 @@
                             </execution>
                         </executions>
                     </plugin>
-                    
-                    <plugin>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-multi-platform-binary</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <tasks>
-                                        <mkdir dir="${user.home}/build-shared/bluecove-build/${version}/${label}/win"/>
-                                        <copy file="${project.build.directory}/classes/*.dll" todir="${user.home}/build-shared/bluecove-build/${version}/${label}/win" overwrite="true"/>
-                                        <mkdir dir="${user.home}/build-shared/bluecove-build/${version}/${label}/mac"/>
-                                        <copy file="${project.build.directory}/classes/*.jnilib" todir="${user.home}/build-shared/bluecove-build/${version}/${label}/mac" overwrite="true"/>
-                                    </tasks>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    
+                    -->
                 </plugins>
             </build>
         </profile>

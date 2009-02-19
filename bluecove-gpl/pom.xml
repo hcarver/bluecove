@@ -301,31 +301,39 @@
         </profile>
 
         <profile>
-            <id>build</id>
-            <build>
+             <id>build-linux32</id>
+             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-multi-platform-binary</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <tasks>
-                                        <mkdir dir="${user.home}/build-shared/bluecove-build/${version}/${label}/linux"/>
-                                        <copy file="${project.build.directory}/classes/*.so" todir="${user.home}/build-shared/bluecove-build/${version}/${label}/linux" overwrite="true"/>
-                                    </tasks>
-                                </configuration>
-                            </execution>
-                        </executions>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                            <!-- Can't run deploy for this profile -->
+                            <configuration>
+                                <repositoryId>pyx4j.com-cruisecontrol-shared</repositoryId>
+                                <url>${scp-apache-base}/bluecove/build/${version}</url>
+                                <groupId>${groupId}.native.linux</groupId>
+                                <packaging>so</packaging>
+                                <version>${label}</version>
+                                <uniqueVersion>false</uniqueVersion>
+                                <generatePom>true</generatePom>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>deploy-multi-platform-build-binary-linux-bluecove</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>deploy-file</goal>
+                                    </goals>
+                                    <configuration>
+                                        <file>${project.build.directory}/classes/libbluecove.so</file>
+                                        <artifactId>libbluecove</artifactId>
+                                    </configuration>
+                                </execution>
+                            </executions>
                     </plugin>
-                    
                 </plugins>
             </build>
         </profile>
+        
     </profiles>
 
 </project>

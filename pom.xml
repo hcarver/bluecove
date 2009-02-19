@@ -482,28 +482,7 @@
             </activation>
             <properties>
                 <buildLabel>${label}</buildLabel>
-                <buildEnv>cruisecontrol</buildEnv>
             </properties>
-        </profile>
-
-        <profile>
-            <id>release</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <distributionManagement>
-                <site>
-                    <id>bluecove-release-site</id>
-                    <url>file:///home/apache/bluecove/release-site</url>
-                </site>
-                <repository>
-                    <id>pyx4j.com-file-release</id>
-                    <url>file:///home/apache/pyx4j/maven2-release</url>
-                </repository>
-            </distributionManagement>
         </profile>
         
         <profile>
@@ -531,6 +510,45 @@
             </properties>
         </profile>
 
+        <!-- cruisecontrol -->
+
+        <profile>
+            <id>build</id>
+            <properties>
+                <buildEnv>cruisecontrol</buildEnv>
+            </properties>
+        </profile>
+        
+        <profile>
+            <id>build_on_linux</id>
+            <activation>
+                <os>
+                    <name>linux</name>
+                    <family>unix</family>
+                </os>
+            </activation>
+        </profile>
+
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <distributionManagement>
+                <site>
+                    <id>bluecove-release-site</id>
+                    <url>file:///home/apache/bluecove/release-site</url>
+                </site>
+                <repository>
+                    <id>pyx4j.com-file-release</id>
+                    <url>file:///home/apache/pyx4j/maven2-release</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+        
     </profiles>
 
 </project>
