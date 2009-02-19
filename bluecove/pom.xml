@@ -72,7 +72,7 @@
             <name>Sam Halliday</name>
             <email>sam.halliday@gmail.com</email>
             <roles>
-                <role>OSX-distribution-build</role>
+                <role>First OS X binary compilation and tests</role>
             </roles>
         </contributor>
 
@@ -264,7 +264,7 @@
                             <tasks>
                                 <copy file="${basedir}/assembly.manifest" todir="${project.build.directory}" overwrite="true"/>
                                 <tstamp><format property="TODAY" pattern="yyyy-MM-dd hh:mm:ss" /></tstamp>
-                                <echo>pom.xml: timestamp ${TODAY}</echo>
+                                <echo>pom.xml: timestamp=${TODAY} buildLabel=${buildLabel}</echo>
                                 <!-- Set build number -->
                                 <replace dir="${project.build.directory}">
                                     <include name="assembly.manifest"/>
@@ -537,8 +537,11 @@
             </build>
         </profile>
 
+        <!-- cruisecontrol -->
+
         <profile>
-            <id>build</id>
+            <!-- build master is now Linux x86-64; Idealy would be nice to split project to platform dependant modules -->
+            <id>build-master</id>
             <build>
                 <plugins>
 
@@ -546,24 +549,31 @@
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>get-compileed-on-windows-dll</id>
+                                <id>get-multi-platform-binary</id>
                                 <phase>process-classes</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/intelbth.dll" dest="${project.build.directory}/classes/intelbth.dll"/>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/bluecove.dll" dest="${project.build.directory}/classes/bluecove.dll"/>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/intelbth_ce.dll" dest="${project.build.directory}/classes/intelbth_ce.dll"/>
-                                        <get src="http://bluecove.googlecode.com/svn/build/win-dlls/bluecove_ce.dll" dest="${project.build.directory}/classes/bluecove_ce.dll"/>
-                                        <get src="http://bluecove.googlecode.com/svn/build/osx-jnilib/libbluecove.jnilib" dest="${project.build.directory}/classes/libbluecove.jnilib"/>
+                                        <get src="http://snapshot.bluecove.org/build/${version}/${label}/win/intelbth.dll" dest="${project.build.directory}/classes/intelbth.dll"/>
+                                        <get src="http://snapshot.bluecove.org/build/${version}/${label}/win/bluecove.dll" dest="${project.build.directory}/classes/bluecove.dll"/>
+                                        <get src="http://snapshot.bluecove.org/build/${version}/${label}/win/intelbth_ce.dll" dest="${project.build.directory}/classes/intelbth_ce.dll"/>
+                                        <get src="http://snapshot.bluecove.org/build/${version}/${label}/win/bluecove_ce.dll" dest="${project.build.directory}/classes/bluecove_ce.dll"/>
+                                        <get src="http://snapshot.bluecove.org/build/${version}/${label}/mac/libbluecove.jnilib" dest="${project.build.directory}/classes/libbluecove.jnilib"/>
                                     </tasks>
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
-
+                </plugins>
+            </build>
+        </profile>
+        
+        <profile>
+            <id>build</id>
+            <build>
+                <plugins>
                     <!-- jar sources during snapshot build -->
                     <plugin>
                         <inherited>true</inherited>
@@ -581,6 +591,28 @@
                             </execution>
                         </executions>
                     </plugin>
+                    
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-multi-platform-binary</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <mkdir dir="${user.home}/build-shared/bluecove-build/${version}/${label}/win"/>
+                                        <copy file="${project.build.directory}/classes/*.dll" todir="${user.home}/build-shared/bluecove-build/${version}/${label}/win" overwrite="true"/>
+                                        <mkdir dir="${user.home}/build-shared/bluecove-build/${version}/${label}/mac"/>
+                                        <copy file="${project.build.directory}/classes/*.jnilib" todir="${user.home}/build-shared/bluecove-build/${version}/${label}/mac" overwrite="true"/>
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    
                 </plugins>
             </build>
         </profile>

@@ -271,7 +271,61 @@
             </build>
         </profile>
 
+        <!-- cruisecontrol -->
+        
+        <profile>
+            <!-- build master is now Linux x86-64; Idealy would be nice to split project to platform dependant modules -->
+            <id>build-master</id>
+            <build>
+                <plugins>
 
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>get-multi-platform-binary</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <get src="http://snapshot.bluecove.org/build/${version}/${label}/linux/bluecove.so" dest="${project.build.directory}/classes/bluecove.so"/>
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>build</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-multi-platform-binary</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <mkdir dir="${user.home}/build-shared/bluecove-build/${version}/${label}/linux"/>
+                                        <copy file="${project.build.directory}/classes/*.so" todir="${user.home}/build-shared/bluecove-build/${version}/${label}/linux" overwrite="true"/>
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
 </project>

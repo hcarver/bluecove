@@ -168,7 +168,7 @@
             <name>Sam Halliday</name>
             <email>sam.halliday@gmail.com</email>
             <roles>
-                <role>OSX-distribution-build</role>
+                <role>First OS X binary compilation and tests</role>
             </roles>
         </contributor>
 
