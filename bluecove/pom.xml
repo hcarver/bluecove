@@ -620,7 +620,7 @@
         </profile>
 
         <profile>
-             <id>build-leo</id>
+             <id>build-mac</id>
              <build>
                 <plugins>
                     <plugin>
