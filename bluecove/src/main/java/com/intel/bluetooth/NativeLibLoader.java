@@ -336,6 +336,7 @@ public abstract class NativeLibLoader {
 		File fd = makeTempName(libFileName);
 		try {
 			if (!copy2File(is, fd)) {
+				loadErrors.append("\ncan't create temporary file");
 				return false;
 			}
 		} finally {
