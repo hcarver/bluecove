@@ -378,7 +378,8 @@ public class BlueCoveImpl {
                 c = stack.getClass();
             }
             if (!NativeLibLoader.isAvailable(libs[i].libraryName, c)) {
-                throw new BluetoothStateException("BlueCove library " + libs[i].libraryName + " not available");
+                throw new BluetoothStateException("BlueCove library " + libs[i].libraryName + " not available;"
+                        + NativeLibLoader.getLoadErrors(libs[i].libraryName));
             }
         }
     }
