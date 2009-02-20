@@ -127,7 +127,7 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>clean-remove-generated-hreaders</id>
+                        <id>clean-remove-created-files</id>
                         <phase>clean</phase>
                         <goals>
                             <goal>run</goal>
@@ -136,6 +136,9 @@
                             <tasks>
                                 <delete>
                                     <fileset dir="${native.source.dir}" includes="com_intel_*.h"/>
+                                </delete>
+                                <delete>
+                                    <fileset dir="${basedir}/src/main/resources" includes="*.so"/>
                                 </delete>
                             </tasks>
                         </configuration>

@@ -239,7 +239,7 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>clean-remove-generated-hreaders</id>
+                        <id>clean-remove-created-files</id>
                         <phase>clean</phase>
                         <goals>
                             <goal>run</goal>
@@ -251,6 +251,10 @@
                                 </delete>
                                 <delete dir="${native.source.dir}/Pocket PC 2003 (ARMV4)"/>
                                 <delete dir="${native.source.dir}/Win32"/>
+                                <delete>
+                                    <fileset dir="${basedir}/src/main/resources" includes="*.dll"/>
+                                    <fileset dir="${basedir}/src/main/resources" includes="*.jnilib"/>
+                                </delete>
                             </tasks>
                         </configuration>
                     </execution>
