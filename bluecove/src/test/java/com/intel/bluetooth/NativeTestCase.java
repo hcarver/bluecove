@@ -28,9 +28,9 @@ import junit.framework.TestCase;
 
 /**
  * Base class for test cases that are calling native function.
- *
+ * 
  * Native Debug automatically enabled when running tests in Eclipse
- *
+ * 
  */
 public abstract class NativeTestCase extends TestCase {
 
@@ -61,15 +61,15 @@ public abstract class NativeTestCase extends TestCase {
 
 		if (NativeLibLoader.getOS() == NativeLibLoader.OS_MAC_OS_X) {
 			if (!NativeLibLoader.isAvailable(BlueCoveImpl.NATIVE_LIB_OSX)) {
-				throw new Error("Can't load DLL");
+				throw new Error("Can't load DLL " + NativeLibLoader.getLoadErrors(BlueCoveImpl.NATIVE_LIB_OSX));
 			}
 		} else if (needDllWIDCOMM()) {
 			if (!NativeTestInterfaces.loadDllWIDCOMM()) {
-				throw new Error("Can't load DLL");
+				throw new Error("Can't load DLL " + NativeLibLoader.getLoadErrors(BlueCoveImpl.NATIVE_LIB_WIDCOMM));
 			}
 		} else {
 			if (!NativeTestInterfaces.loadDllMS()) {
-				throw new Error("Can't load DLL");
+				throw new Error("Can't load DLL " + NativeLibLoader.getLoadErrors(BlueCoveImpl.NATIVE_LIB_MS));
 			}
 		}
 	}
