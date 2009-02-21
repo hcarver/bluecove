@@ -141,6 +141,51 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>build-jni-headers-bluez-dbus</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>javah</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${native.source.dir}</outputDirectory>
+                            <classNames>
+                                <className>com.intel.bluetooth.BluetoothStackBlueZDBus</className>
+                                <className>com.intel.bluetooth.BluetoothStackBlueZDBusConsts</className>
+                                <className>com.intel.bluetooth.BluetoothStackBlueZDBusNativeTests</className>
+                            </classNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>clean-remove-created-files-bluez-dbus</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <delete>
+                                    <fileset dir="${native.source.dir}" includes="com_intel_*.h"/>
+                                </delete>
+                                <delete>
+                                    <fileset dir="${basedir}/src/main/resources" includes="*.so"/>
+                                </delete>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
             <!-- jar sources during build -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -223,7 +268,7 @@
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>compile-native-lib-gpl</id>
+                                <id>compile-native-lib-bluez-dbus</id>
                                 <phase>process-classes</phase>
                                 <goals>
                                     <goal>run</goal>
