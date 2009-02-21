@@ -10,5 +10,4 @@ This is the custom build native libraries for released and SNAPSHOT versions.
 
 If required the standard native libraries for released versions should extracted from distribution bluecove-$VERSION$.jar
 
-Ideally the libraries in this directory should be produced by bluecove build process running on Windows XP in VMware-player on the main pyx4j.com Linux build server.
-The only problem is that Mac OS X Leo does not run under VMware for me But this may change soon.
+Ideally the libraries in this directory should be produced by bluecove build process running on Windows XP/Mac OS X Leo/Linux Fedora in VMware Server on the main pyx4j.com Linux build server.

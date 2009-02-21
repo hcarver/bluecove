@@ -21,7 +21,7 @@
 
 * Building Release
 
-    Release procesure is nearly fully automated on build server. But still manual work is require.
+    Release procesure is fully automated on build server.
 
     * Test locally
 
@@ -29,19 +29,19 @@
 
     * Remove all -SNAPSHOT and verify version from pom.xml, BlueCoveImpl.java, build.version, common.h, bluecove.rc, intelbth.rc
       
-      Update versionBuild for native code to the last build # +2 we had in snapshot.
+      Update versionBuild for native code to the last build # +2 (max 99) we had in snapshot.
 
     * Comment out sections marked <!--4release--> and <!--4snapshot--> in src/site/site.xml
 
     * SVN commit
 
-    * run java and c/c++ build again.  (Win, OSX and Linux 64 Bit needs to done manually)
+    * run java and c/c++ build again.  (Win 32, Win CE, Mac OSX and Linux 32 and 64 bit done on build server)
 
-    * On build server (CruiseControl) https://pyx4j.com/cruisecontrol/ start "bluecove-nightly"
+    * On build server (CruiseControl) run bluecove-nightly-linux32, bluecove-nightly-mac, bluecove-nightly-xp, then start bluecove-nightly.
     
       Verify that the site is OK and there are no errors when runnning results on OS X/Windows/Linux.
 
-    * On build server (CruiseControl) https://pyx4j.com/cruisecontrol/ start "bluecove-release"
+    * On build server (CruiseControl) run bluecove-nightly-* and then start "bluecove-release"
       It will execute:
         mvn clean --fail-never -P build,release
         mvn scm:update -P build,release
@@ -65,20 +65,23 @@
 
     * Update src/site/site.xml reverse changes for <!--4release--> and <!--4snapshot-->
 
-* cruisecontrol
+* cruisecontrol nightly build  
+    
+    http://snapshot.bluecove.org/cruisecontrol/ reporting application allows users to browse the builds logs and see modifications for each build
 
     File ./m2/settings.xml  has:
     
-        <activeProfile>cruisecontrol</activeProfile>
+        <activeProfile>cruisecontrol-env</activeProfile>
     
-    This enables additional errors handling for official builds.
+    This enables additional errors handling for official nightly builds.
 
+    "bluecove-nightly-*" 3AM EST on Linux/Intel 32-bit, Windows XP/Intel 32-bit and Mac Leo/Intel 32-bit
+        clean --fail-never -P build|scm:update -P build|install -P build,build-linux32
+        clean --fail-never -P build|scm:update -P build|install -P build,build-xp
+        clean --fail-never -P build|scm:update -P build|install -P build,build-mac
+        
+    master cruisecontrol runs only on Fedora 10 (Linux 64 bit)
     "bluecove-nightly" 4AM EST
-        mvn clean --fail-never -P build;mvn scm:update -P build;mvn clean deploy -P build,build-snapshot;mvn site-deploy -P build,build-snapshot
+        mvn clean --fail-never -P build|scm:update -P build|deploy site-deploy -P build,build-master
+        Linux 32but, Windows and OS X dll are taken from http://snapshot.bluecove.org/build/
 
-    cruisecontrol runs only on Unix (Linux 32but) now
-      Windows and OS X dll are taken from SVN http://bluecove.googlecode.com/svn/build/win-dlls/
-
-      If you made modification to C/C++ code place compiled library in SVN
-
-        https://bluecove.googlecode.com/svn/build/win-dlls/
