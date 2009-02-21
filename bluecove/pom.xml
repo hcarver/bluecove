@@ -565,35 +565,35 @@
                     <groupId>${groupId}.native.win</groupId>
                     <artifactId>intelbth</artifactId>
                     <type>dll</type>
-                    <version>${label}</version>
+                    <version>${buildLabel}</version>
                     <scope>provided</scope>
                 </dependency>
                 <dependency>
                     <groupId>${groupId}.native.win</groupId>
                     <artifactId>intelbth_ce</artifactId>
                     <type>dll</type>
-                    <version>${label}</version>
+                    <version>${buildLabel}</version>
                     <scope>provided</scope>
                 </dependency>
                 <dependency>
                     <groupId>${groupId}.native.win</groupId>
                     <artifactId>bluecove</artifactId>
                     <type>dll</type>
-                    <version>${label}</version>
+                    <version>${buildLabel}</version>
                     <scope>provided</scope>
                 </dependency>
                 <dependency>
                     <groupId>${groupId}.native.win</groupId>
                     <artifactId>bluecove_ce</artifactId>
                     <type>dll</type>
-                    <version>${label}</version>
+                    <version>${buildLabel}</version>
                     <scope>provided</scope>
                 </dependency>
                 <dependency>
                     <groupId>${groupId}.native.mac</groupId>
                     <artifactId>libbluecove</artifactId>
                     <type>jnilib</type>
-                    <version>${label}</version>
+                    <version>${buildLabel}</version>
                     <scope>provided</scope>
                 </dependency>
             </dependencies>
@@ -635,7 +635,7 @@
                                 <url>${scp-apache-base}/bluecove/build/${version}</url>
                                 <groupId>${groupId}.native.mac</groupId>
                                 <packaging>jnilib</packaging>
-                                <version>${label}</version>
+                                <version>${buildLabel}</version>
                                 <uniqueVersion>false</uniqueVersion>
                                 <generatePom>true</generatePom>
                             </configuration>
@@ -669,7 +669,7 @@
                                 <url>${scp-apache-base}/bluecove/build/${version}</url>
                                 <groupId>${groupId}.native.win</groupId>
                                 <packaging>dll</packaging>
-                                <version>${label}</version>
+                                <version>${buildLabel}</version>
                                 <uniqueVersion>false</uniqueVersion>
                                 <generatePom>true</generatePom>
                             </configuration>
@@ -720,33 +720,6 @@
                                 </execution>
                             </executions>
                     </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>build</id>
-            <build>
-                <plugins>
-                    <!-- jar sources during snapshot build; TODO remove-->
-                    <!--
-                    <plugin>
-                        <inherited>true</inherited>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                                <configuration>
-                                    <excludeResources>true</excludeResources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    -->
                 </plugins>
             </build>
         </profile>

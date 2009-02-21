@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0">
+    <!-- @version $Revision$ ($Author$) $Date$ -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.sf.bluecove</groupId>
+        <artifactId>bluecove-parent</artifactId>
+        <version>2.1.1-SNAPSHOT</version><!--bluecove-version-->
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <groupId>net.sf.bluecove</groupId>
+    <artifactId>distribution</artifactId>
+    <name>distribution</name>
+    <packaging>pom</packaging>
+
+    <description>BlueCove distribution</description>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <distributionManagement>
+        <!-- no-deployment -->
+        <repository>
+            <id>no-deployment</id>
+            <url>file:///${basedir}/target/tmp</url>
+        </repository>
+    </distributionManagement>
+
+    <profiles>
+        <profile>
+            <id>build-master</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <inherited>false</inherited>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-all-download</id>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <mkdir dir="${project.build.directory}/site/download/${version}/${buildLabel}"/>
+                                        <copy overwrite="true"
+                                            todir="${project.build.directory}/site/download/${version}/${buildLabel}">
+                                            <fileset dir="${basedir}/../bluecove">
+                                                <include name="*.SNAPSHOT.jar"/>
+                                                <include name="*.tar.gz"/>
+                                            </fileset>
+                                            <fileset dir="${basedir}/../bluecove-gpl">
+                                                <include name="*.SNAPSHOT.jar"/>
+                                                <include name="*.tar.gz"/>
+                                            </fileset>
+                                            <fileset dir="${basedir}/../bluecove-bluez">
+                                                <include name="*.SNAPSHOT.jar"/>
+                                                <include name="*.tar.gz"/>
+                                            </fileset>
+                                            <fileset dir="${basedir}/../bluecove-emu">
+                                                <include name="*.SNAPSHOT.jar"/>
+                                                <include name="*.tar.gz"/>
+                                            </fileset>
+                                        </copy>
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

@@ -66,8 +66,8 @@
 
     <repositories>
         <repository>
-            <id>pyx4me-web-repo</id>
-            <url>http://www.pyx4me.com/maven2-snapshot</url>
+            <id>pyx4j-web-snapshot</id>
+            <url>http://repository.pyx4j.com/maven2-snapshot</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -125,7 +125,7 @@
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -185,21 +185,25 @@
                     </execution>
                 </executions>
             </plugin>
-            
-            <!-- jar sources during build -->
+
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                    <id>attach-sources</id>
-                    <goals>
-                        <goal>jar</goal>
-                    </goals>
+                        <id>all-sources-gz</id>
+                        <phase>install</phase>
+                        <goals><goal>single</goal></goals>
+                        <configuration>
+                            <attach>false</attach>
+                            <tarLongFileMode>gnu</tarLongFileMode>
+                            <descriptors>
+                                <descriptor>assembly-distr-sources.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -235,7 +239,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
         </plugins>
 
     </build>
@@ -365,7 +369,7 @@
                     <groupId>${groupId}.native.linux</groupId>
                     <artifactId>libbluecovez</artifactId>
                     <type>so</type>
-                    <version>${label}</version>
+                    <version>${buildLabel}</version>
                     <scope>provided</scope>
                 </dependency>
             </dependencies>
@@ -407,7 +411,7 @@
                                 <url>${scp-apache-base}/bluecove/build/${version}</url>
                                 <groupId>${groupId}.native.linux</groupId>
                                 <packaging>so</packaging>
-                                <version>${label}</version>
+                                <version>${buildLabel}</version>
                                 <uniqueVersion>false</uniqueVersion>
                                 <generatePom>true</generatePom>
                             </configuration>
@@ -428,7 +432,7 @@
                 </plugins>
             </build>
         </profile>
-        
+
     </profiles>
 
 </project>

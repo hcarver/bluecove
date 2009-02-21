@@ -63,7 +63,7 @@
                             <addClasspath>true</addClasspath>
                         </manifest>
                         <manifestEntries>
-                            <Version>${label}</Version>
+                            <Version>${buildLabel}</Version>
                             <Build-Time>${cctimestamp}</Build-Time>
                            <Build-Time>${cctimestamp}</Build-Time>
                             <Implementation-Version2>${pom.version}</Implementation-Version2>
@@ -93,7 +93,7 @@
                                 </manifest>
                                 <!-- this does not work, bug http://jira.codehaus.org/browse/MASSEMBLY-188 -->
                                 <manifestEntries>
-                                    <Version>${label}</Version>
+                                    <Version>${buildLabel}</Version>
                                     <Build-Time>${cctimestamp}</Build-Time>
                                     <Build-Time>${cctimestamp}</Build-Time>
                                     <Implementation-Version2>${pom.version}</Implementation-Version2>

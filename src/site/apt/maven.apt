@@ -46,13 +46,13 @@ Building project using maven
 
 * Releases
 
-    Releases can be found in maven Central Repository {{{http://repo1.maven.org/maven2/net/sf/bluecove/bluecove/}maven.org}} and {{{http://mirrors.ibiblio.org/pub/mirrors/maven2/net/sf/bluecove/bluecove/}ibiblio.org}}.
+    Releases can be found in maven Central Repository {{{http://repo1.maven.org/maven2/net/sf/bluecove/}maven.org}} and {{{http://mirrors.ibiblio.org/pub/mirrors/maven2/net/sf/bluecove/}ibiblio.org}}.
 
-    Also the releases available from the {{{http://www.pyx4me.com/maven2-release/net/sf/bluecove/bluecove/}http://www.pyx4me.com/maven2-release}} maven 2 repository.
+    Also the releases available from the {{{http://repository.pyx4j.com/maven2-release/net/sf/bluecove/}http://repository.pyx4j.com/maven2-release}} maven 2 repository.
 
 * Development snapshot
 
-    The latest snapshot builds can be downloaded directly from the {{{http://www.pyx4me.com/maven2-snapshot/net/sf/bluecove/bluecove/}http://www.pyx4me.com/maven2-snapshot}} pyx4me.com maven 2 snapshot repository.
+    The latest snapshot builds can be downloaded directly from the {{{http://repository.pyx4j.com/maven2-snapshot/net/sf/bluecove/}http://repository.pyx4j.com/maven2-snapshot}} pyx4j.com maven 2 snapshot repository.
 
     You need to add this repository to your pom.xml or $home/.m2/settings.xml
 
@@ -60,8 +60,8 @@ Building project using maven
         <repositories>
             ...
             <repository>
-                <id>pyx4me-web-snapshot</id>
-                <url>http://www.pyx4me.com/maven2-snapshot</url>
+                <id>pyx4j-web-snapshot</id>
+                <url>http://repository.pyx4j.com/maven2-snapshot</url>
                 <snapshots>
                     <enabled>true</enabled>
                 </snapshots>
@@ -70,19 +70,4 @@ Building project using maven
                 </releases>
             </repository>
 
-and for maven-plugins
-
-        <pluginRepositories>
-            ...
-            <pluginRepository>
-                <id>pyx4me-web-snapshot</id>
-                <url>http://www.pyx4me.com/maven2-snapshot</url>
-                <snapshots>
-                    <enabled>true</enabled>
-                </snapshots>
-                <releases>
-                    <enabled>false</enabled>
-                </releases>
-            </pluginRepository>
-        </pluginRepositories>
 ---

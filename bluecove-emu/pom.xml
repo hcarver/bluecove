@@ -26,7 +26,7 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
-    
+
     <developers>
         <developer>
             <name>Vlad Skarzhevskyy</name>
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>com.pyx4j</groupId>
             <artifactId>pyx4j-rpc-over-http</artifactId>
- 			<version>1.0.2-SNAPSHOT</version>
+            <version>1.0.2-SNAPSHOT</version>
         </dependency>
         -->
 
@@ -108,16 +108,20 @@
                 </configuration>
             </plugin>
 
-            <!-- jar sources during build -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                    <id>attach-sources</id>
-                    <goals>
-                        <goal>jar</goal>
-                    </goals>
+                        <id>all-sources-gz</id>
+                        <phase>install</phase>
+                        <goals><goal>single</goal></goals>
+                        <configuration>
+                            <attach>false</attach>
+                            <tarLongFileMode>gnu</tarLongFileMode>
+                            <descriptors>
+                                <descriptor>assembly-distr-sources.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

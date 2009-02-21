@@ -77,7 +77,7 @@
         </repository>
         <snapshotRepository>
             <id>pyx4j.com-file-development</id>
-            <url>file:///home/apache/pyx4j/maven2</url>
+            <url>file:///home/apache/pyx4j-repository/maven2-snapshot</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -189,8 +189,8 @@
     <!--
     <repositories>
         <repository>
-            <id>pyx4me-web-repo</id>
-            <url>http://www.pyx4me.com/maven2-snapshot</url>
+            <id>pyx4j-web-repo</id>
+            <url>http://repository.pyx4j.com/maven2-snapshot</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -206,8 +206,8 @@
     <pluginRepositories>
 
         <pluginRepository>
-            <id>pyx4me-web-plugin-repo</id>
-            <url>http://www.pyx4me.com/maven2-snapshot</url>
+            <id>pyx4j-web-snapshot</id>
+            <url>http://repository.pyx4j.com/maven2-snapshot</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -293,6 +293,7 @@
         <module>bluecove-gpl</module>
         <module>bluecove-bluez</module>
         <module>bluecove-examples</module>
+        <module>distribution</module>
     </modules>
 
     <build>
@@ -321,6 +322,23 @@
                 <configuration>
                     <outputEncoding>UTF-8</outputEncoding>
                 </configuration>
+            </plugin>
+
+            <!-- jar sources during build -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <excludeResources>true</excludeResources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -484,7 +502,7 @@
                 <buildLabel>${label}</buildLabel>
             </properties>
         </profile>
-        
+
         <profile>
             <id>buildByMicroEmulatorTeam</id>
             <activation>
@@ -496,7 +514,7 @@
                 <buildByMicroEmulatorTeam>true</buildByMicroEmulatorTeam>
             </properties>
         </profile>
-        
+
         <profile>
             <id>osx</id>
             <activation>
@@ -518,16 +536,6 @@
                 <buildEnv>cruisecontrol</buildEnv>
             </properties>
         </profile>
-        
-        <profile>
-            <id>build_on_linux</id>
-            <activation>
-                <os>
-                    <name>linux</name>
-                    <family>unix</family>
-                </os>
-            </activation>
-        </profile>
 
         <profile>
             <id>release</id>
@@ -544,11 +552,11 @@
                 </site>
                 <repository>
                     <id>pyx4j.com-file-release</id>
-                    <url>file:///home/apache/pyx4j/maven2-release</url>
+                    <url>file:///home/apache/pyx4j-repository/maven2-release</url>
                 </repository>
             </distributionManagement>
         </profile>
-        
+
     </profiles>
 
 </project>

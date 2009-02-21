@@ -164,22 +164,6 @@
                 </executions>
             </plugin>
 
-            <!-- jar sources during build -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <excludeResources>true</excludeResources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
 
     </build>
@@ -298,7 +282,7 @@
                     <groupId>${groupId}.native.linux</groupId>
                     <artifactId>libbluecove</artifactId>
                     <type>so</type>
-                    <version>${label}</version>
+                    <version>${buildLabel}</version>
                     <scope>provided</scope>
                 </dependency>
             </dependencies>
@@ -340,7 +324,7 @@
                                 <url>${scp-apache-base}/bluecove/build/${version}</url>
                                 <groupId>${groupId}.native.linux</groupId>
                                 <packaging>so</packaging>
-                                <version>${label}</version>
+                                <version>${buildLabel}</version>
                                 <uniqueVersion>false</uniqueVersion>
                                 <generatePom>true</generatePom>
                             </configuration>
