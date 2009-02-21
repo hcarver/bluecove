@@ -34,7 +34,7 @@ import javax.bluetooth.ServiceRecord;
  * Export constants to native code
  *
  */
-abstract class BluetoothStackBlueZConsts {
+abstract class BluetoothStackBlueZDBusConsts {
 
     public static final int NOT_DISCOVERABLE = DiscoveryAgent.NOT_DISCOVERABLE;
 

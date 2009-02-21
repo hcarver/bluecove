@@ -45,7 +45,7 @@ public class RunDBusManager {
 
 	public static void main(String[] args) {
 		try {
-			BluetoothStack anyStack = new BluetoothStackBlueZ();
+			BluetoothStack anyStack = new BluetoothStackBlueZDBus();
 			BlueCoveImpl.loadNativeLibraries(anyStack);
 		} catch (BluetoothStateException e) {
 			throw new Error(e);

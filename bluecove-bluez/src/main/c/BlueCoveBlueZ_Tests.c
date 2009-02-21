@@ -24,11 +24,11 @@
 #define CPP__FILE "BlueCoveBlueZ_Tests.c"
 
 #include "BlueCoveBlueZ.h"
-#include "com_intel_bluetooth_BluetoothStackBlueZNativeTests.h"
+#include "com_intel_bluetooth_BluetoothStackBlueZDBusNativeTests.h"
 
 #include <bluetooth/sdp_lib.h>
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZNativeTests_testThrowException
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBusNativeTests_testThrowException
 (JNIEnv *env, jclass peer, jint extype) {
 	switch (extype) {
 		case 0: throwException(env, "java/lang/Exception", "0"); break;
@@ -49,7 +49,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZNativeTests_t
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZNativeTests_testDebug
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBusNativeTests_testDebug
 (JNIEnv *env, jclass peer, jint argc, jstring message) {
 	if ((argc == 0) || (message == NULL)) {
 	    debug("message");

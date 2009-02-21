@@ -83,6 +83,11 @@ public interface BlueCoveConfigProperties {
     public static final String PROPERTY_NATIVE_PATH = "bluecove.native.path";
 
     /**
+     * Linux implementation class. Initialization property.
+     */
+    public static final String PROPERTY_BLUEZ_CLASS = "bluecove.bluez.class";
+    
+    /**
      * If Stack support multiple bluetooth adapters select one by its system ID.
      * (Linux BlueZ and Emulator) Initialization property.
      */
@@ -94,6 +99,11 @@ public interface BlueCoveConfigProperties {
      */
     public static final String PROPERTY_LOCAL_DEVICE_ADDRESS = "bluecove.deviceAddress";
 
+    /**
+     * JSR-82 simulator class. Initialization property.
+     */
+    public static final String PROPERTY_EMULATOR_CLASS = "bluecove.emulator.class";
+    
     /**
      * JSR-82 air simulator server can be on remote computer, default
      * 'localhost'. Initialization property.
@@ -119,7 +129,7 @@ public interface BlueCoveConfigProperties {
      * initialized.
      */
     public static final String[] INITIALIZATION_PROPERTIES = new String[] { PROPERTY_STACK, PROPERTY_STACK_FIRST, PROPERTY_NATIVE_RESOURCE,
-            PROPERTY_NATIVE_RESOURCE, PROPERTY_LOCAL_DEVICE_ID, PROPERTY_LOCAL_DEVICE_ADDRESS, PROPERTY_EMULATOR_HOST, PROPERTY_EMULATOR_PORT };
+            PROPERTY_NATIVE_RESOURCE, PROPERTY_BLUEZ_CLASS, PROPERTY_LOCAL_DEVICE_ID, PROPERTY_LOCAL_DEVICE_ADDRESS, PROPERTY_EMULATOR_CLASS, PROPERTY_EMULATOR_HOST, PROPERTY_EMULATOR_PORT };
 
     /**
      * The amount of time in milliseconds for which the implementation will

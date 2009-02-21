@@ -137,7 +137,7 @@
                 <artifactId>native-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>build-jni-headers</id>
+                        <id>build-jni-headers-main</id>
                         <phase>process-classes</phase>
                         <goals>
                             <goal>javah</goal>
@@ -239,7 +239,7 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>clean-remove-created-files</id>
+                        <id>clean-remove-created-files-main</id>
                         <phase>clean</phase>
                         <goals>
                             <goal>run</goal>
@@ -605,7 +605,7 @@
                         <artifactId>maven-dependency-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>get-multi-platform-binary</id>
+                                <id>get-multi-platform-binary-win-leo</id>
                                 <phase>process-classes</phase>
                                 <goals>
                                     <goal>copy-dependencies</goal>

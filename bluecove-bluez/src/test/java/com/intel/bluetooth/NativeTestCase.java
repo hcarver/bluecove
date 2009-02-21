@@ -59,7 +59,7 @@ public abstract class NativeTestCase extends TestCase {
 			BlueCoveImpl.instance().enableNativeDebug(true);
 		}
 
-		BluetoothStack anyStack = new BluetoothStackBlueZ();
+		BluetoothStack anyStack = new BluetoothStackBlueZDBus();
 		BlueCoveImpl.loadNativeLibraries(anyStack);
 	}
 

@@ -35,8 +35,8 @@
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 
-#include "com_intel_bluetooth_BluetoothStackBlueZ.h"
-#include "com_intel_bluetooth_BluetoothStackBlueZConsts.h"
+#include "com_intel_bluetooth_BluetoothStackBlueZDBus.h"
+#include "com_intel_bluetooth_BluetoothStackBlueZDBusConsts.h"
 #include "common.h"
 
 #define LOCALDEVICE_ACCESS_TIMEOUT 5000

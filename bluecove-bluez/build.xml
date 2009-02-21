@@ -1,0 +1,208 @@
+<project name="BlueCove GPL" default="default" basedir=".">
+    <description>
+        Open source implementation of JSR-82 Java Bluetooth API. Additional GPL licensed module to support BlueCove runtime on Linux BlueZ
+    </description>
+
+    <!--
+        You may use to build the project
+        ant -Dbuild.compiler=jikes
+        
+        You may skip adding shared library to jar file
+        ant -Dbluecove.native.resources.skip=true  jar
+        
+        You may change linker options if you need to
+        ant -Dbluecove.native.linker.options= 
+     -->
+
+    <property name="product_version" value="2.1.1-SNAPSHOT"/>
+
+    <property name="bluecove_main_dist_dir" location="../bluecove/target"/>
+    <property name="bluecove_main_jar" location="${bluecove_main_dist_dir}/bluecove-${product_version}.jar"/>
+
+    <property name="basedir" value="."/>
+
+    <!-- set global properties for this build -->
+    <property name="src" location="src/main/java"/>
+    <property name="src_c" location="src/main/c"/>
+    <property name="resources" location="src/main/resources"/>
+    <property name="target" location="target"/>
+    <property name="build_classes" location="${target}/classes"/>
+    <property name="build_native" location="${target}/native"/>
+    <property name="dist" location="${target}"/>
+
+    <property name="CC" value="gcc"/>
+    <property name="CC_compiler_options" value="-fPIC -fno-stack-protector"/>
+    <property name="bluecove.native.linker.options" value="-nodefaultlibs"/>
+
+    <target name="default" depends="compile, jni-headers, native-lib"/>
+
+    <target name="init-native">
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build_classes}"/>
+        <mkdir dir="${build_native}"/>
+        <echo message="java.home ${java.home}"/>
+        <available property="java-home.exists" file="${java.home}" type="dir"/>
+        <antcall target="verify-java-home"/>
+    </target>
+
+    <target name="init" depends="init-native">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build_classes}"/>
+        <mkdir dir="${build_native}"/>
+        <available property="bluecove-main.exists" file="${bluecove_main_jar}" type="file"/>
+        <antcall target="verify-bluecove-main-exists"/>
+    </target>
+
+    <target name="verify-bluecove-main-exists" unless="bluecove-main.exists">
+        <fail>
+             The path "${bluecove_main_jar}" does not exist.
+             Download or build main BlueCove jar.
+        </fail>
+    </target>
+
+    <target name="verify-java-home" unless="java-home.exists">
+        <fail>
+             The path "${java.home}" does not exist.
+        </fail>
+    </target>
+
+    <target name="compile" depends="init"
+        description="Compile the source">
+
+        <echo message="compiling on java ${java.version}, OS ${os.name} ${os.version} ${os.arch}"/>
+        <javac source="1.3" target="1.1" debug="true"
+               srcdir="${src}" destdir="${build_classes}">
+            <classpath>
+                <pathelement path="${bluecove_main_jar}"/>
+            </classpath>
+        </javac>
+
+    </target>
+
+    <target name="jni-headers" depends="init" unless="jni_headers_skip"
+        description="Create JNI headers">
+
+        <echo message="create JNI headers using java.home ${java.home}"/>
+        <javah destdir="src/main/c" classpath="${build}">
+            <classpath>
+                <pathelement path="${build_classes}"/>
+                <pathelement path="${bluecove_main_jar}"/>
+            </classpath>
+            <class name="com.intel.bluetooth.BluetoothStackBlueZDBus"/>
+            <class name="com.intel.bluetooth.BluetoothStackBlueZDBusConsts"/>
+            <class name="com.intel.bluetooth.BluetoothStackBlueZDBusNativeTests"/>
+        </javah>
+
+    </target>
+
+    <target name="native-lib" depends="jni-headers, compile-native-lib"
+        description="Create Native shared library">
+    </target>
+
+    <target name="compile-native-lib"  depends="init-native"
+        description="Create Native shared library">
+        <echo message="compiling  .c -> .o  (${CC_compiler_options})"/>
+
+        <apply executable="${CC}" dest="${build_native}" parallel="false" failonerror="true">
+             <arg line="${CC_compiler_options}"/>
+             <arg value="-I${java.home}/../include" />
+             <arg value="-I${java.home}/../include/linux" />
+             <arg value="-c"/>
+             <srcfile/>
+             <arg value="-o"/>
+             <targetfile/>
+             <fileset dir="${src_c}"/>
+             <mapper type='glob' from='*.c' to='*.o'/>
+        </apply>
+
+        <!-- i386 version does not have any sufix, See NativeLibLoader.java -->
+        <condition property="library_sufix" value="">
+            <os arch="i386"/>
+        </condition>
+        <condition property="library_sufix" value="">
+            <os arch="x86"/>
+        </condition>
+        <condition property="library_sufix" value="_x64">
+            <os arch="amd64"/>
+        </condition>
+        <condition property="library_sufix" value="_x64">
+            <os arch="x86_64"/>
+        </condition>
+        <condition property="library_sufix" value="_${os.arch}">
+            <not>
+                <isset property="library_sufix" />
+            </not>
+        </condition>
+
+        <property name="library_name" value="libbluecovez${library_sufix}.so"/>
+
+        <echo message="linking    .o -> ${library_name}  (${bluecove.native.linker.options})"/>
+
+        <apply executable="${CC}" parallel="true" failonerror="true">
+             <arg value="-shared"/>
+             <arg line="${bluecove.native.linker.options}"/>
+             <arg value="-Wl,-soname,libbluecovez${library_sufix}-${product_version}"/>
+             <arg value="-o"/>
+             <arg value="${target}/${library_name}"/>
+             <fileset dir='${build_native}' includes="*.o"/>
+             <srcfile/>
+        </apply>
+
+        <echo message="ldd ${library_name}"/>
+        <exec executable="ldd" failonerror="true">
+            <arg value="-v"/>
+            <arg value="${target}/${library_name}"/>
+        </exec>
+
+        <antcall target="native-lib-resources"/>
+
+    </target>
+
+    <target name="native-lib-resources" unless="bluecove.native.resources.skip">
+        <copy file="${target}/${library_name}" todir="${resources}"/>
+        <copy file="${target}/${library_name}" todir="${build_classes}"/>
+    </target>
+
+    <target name="jar" depends="compile, native-lib"
+            description="Create the distribution jar">
+
+        <!-- Create the distribution directory -->
+        <mkdir dir="${dist}"/>
+
+        <tstamp>
+            <format property="today" pattern="yyyy-MM-dd hh:mm:ss" />
+        </tstamp>
+
+        <!-- Put everything in ${build} into the BlueCove-${DSTAMP}.jar file -->
+        <jar jarfile="${dist}/bluecove-bluez-${product_version}.jar">
+            <manifest>
+                <attribute name="Description" value="BlueCove JSR-82 implementation, runtime module for Linux BlueZ DBus"/>
+                <attribute name="License" value="The Apache Software License, Version 2.0"/>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Implementation-Version" value="${product_version}"/>
+                <attribute name="Build-Date" value="${today}"/>
+                <attribute name="Built-Env"   value="${os.name} ${os.version} ${os.arch}, Java ${java.version}"/>
+            </manifest>
+            <fileset dir="${build_classes}">
+                <include name="**/*.class"/>
+                <exclude name="**/*.log"/>
+                <exclude name="**/.*"/>
+                <exclude name="**/Thumbs.db"/>
+            </fileset>
+            <fileset dir="${resources}">
+                <include name="*.so"/>
+            </fileset>
+        </jar>
+    </target>
+
+    <target name="clean"
+            description="clean up" >
+        <!-- Delete the ${build} and ${dist} directory trees -->
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+
+    <target name="all" depends="clean, jar"/>
+</project>

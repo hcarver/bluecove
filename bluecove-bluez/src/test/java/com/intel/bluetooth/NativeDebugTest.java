@@ -44,27 +44,27 @@ public class NativeDebugTest extends NativeTestCase implements LoggerAppender {
 	private String lastMessage;
 
 	public void testDebug() throws BluetoothStateException {
-		BluetoothStack anyStack = new BluetoothStackBlueZ();
+		BluetoothStack anyStack = new BluetoothStackBlueZDBus();
 		BlueCoveImpl.loadNativeLibraries(anyStack);
 
 		anyStack.enableNativeDebug(DebugLog.class, true);
 		DebugLog.setDebugEnabled(true);
 
-		BluetoothStackBlueZNativeTests.testDebug(0, null);
+		BluetoothStackBlueZDBusNativeTests.testDebug(0, null);
 		assertNotNull("Debug recived", lastMessage);
 		assertTrue("Debug {" + lastMessage + "}", lastMessage.startsWith("message"));
 
-		BluetoothStackBlueZNativeTests.testDebug(1, "test-message");
+		BluetoothStackBlueZDBusNativeTests.testDebug(1, "test-message");
 		assertNotNull("Debug recived", lastMessage);
 		assertTrue("Debug {" + lastMessage + "}", lastMessage.startsWith("message[test-message]"));
 		lastMessage = null;
 
-		BluetoothStackBlueZNativeTests.testDebug(2, "test-message");
+		BluetoothStackBlueZDBusNativeTests.testDebug(2, "test-message");
 		assertNotNull("Debug recived", lastMessage);
 		assertTrue("Debug {" + lastMessage + "}", lastMessage.startsWith("message[test-message],[test-message]"));
 		lastMessage = null;
 
-		BluetoothStackBlueZNativeTests.testDebug(3, "test-message");
+		BluetoothStackBlueZDBusNativeTests.testDebug(3, "test-message");
 		assertNotNull("Debug recived", lastMessage);
 		assertTrue("Debug {" + lastMessage + "}", lastMessage.startsWith("message[test-message],[test-message],[3]"));
 	}

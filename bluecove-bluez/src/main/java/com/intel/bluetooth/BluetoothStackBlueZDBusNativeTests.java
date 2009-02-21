@@ -29,7 +29,7 @@ package com.intel.bluetooth;
  *
  *
  */
-public class BluetoothStackBlueZNativeTests {
+public class BluetoothStackBlueZDBusNativeTests {
 
 	static native void testThrowException(int type) throws Exception;
 

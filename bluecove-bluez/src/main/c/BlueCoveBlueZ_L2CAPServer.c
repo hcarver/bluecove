@@ -26,7 +26,7 @@
 #include "BlueCoveBlueZ.h"
 #include <bluetooth/l2cap.h>
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2ServerOpenImpl
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2ServerOpenImpl
   (JNIEnv* env, jobject peer, jlong localDeviceBTAddress, jboolean authorize, jboolean authenticate, jboolean encrypt, jboolean master, jboolean timeouts, jint backlog, jint receiveMTU, jint transmitMTU) {
 
     // allocate socket
@@ -104,7 +104,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2ServerOpe
     return handle;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2ServerGetPSMImpl
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2ServerGetPSMImpl
   (JNIEnv* env, jobject peer, jlong handle) {
     struct sockaddr_l2 localAddr;
     socklen_t len = sizeof(localAddr);
@@ -116,7 +116,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2ServerGetP
 }
 
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2ServerCloseImpl
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2ServerCloseImpl
   (JNIEnv* env, jobject peer, jlong handle, jboolean quietly) {
     debug("RFCOMM close server handle %li", handle);
     // Closing channel, further sends and receives will be disallowed.
@@ -132,7 +132,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2ServerClos
     }
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2ServerAcceptAndOpenServerConnection
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2ServerAcceptAndOpenServerConnection
   (JNIEnv* env, jobject peer, jlong handle) {
     struct sockaddr_l2 remoteAddr;
 	socklen_t  remoteAddrLen = sizeof(remoteAddr);

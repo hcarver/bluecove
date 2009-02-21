@@ -27,18 +27,17 @@
 
 #include <bluetooth/sdp_lib.h>
 
-JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_isNativeCodeLoaded
+JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_isNativeCodeLoaded
   (JNIEnv *env, jobject peer) {
     return JNI_TRUE;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_getLibraryVersionNative
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_getLibraryVersionNative
   (JNIEnv *env, jobject peer) {
-  	return com_intel_bluetooth_BluetoothStackBlueZ_BLUECOVE_DBUS_VERSION;
-    //return com_intel_bluetooth_BluetoothStackBlueZ_NATIVE_LIBRARY_VERSION;
+  	return com_intel_bluetooth_BluetoothStackBlueZDBus_BLUECOVE_DBUS_VERSION;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_enableNativeDebug
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_enableNativeDebug
   (JNIEnv *env, jobject peer, jclass loggerClass, jboolean on) {
     enableNativeDebug(env, loggerClass, on);
 }
@@ -86,15 +85,4 @@ void reverseArray(jbyte* array, int length) {
     }
 }
 
-void convertUUIDByteArrayToUUID(JNIEnv *env, jbyteArray byteArray, uuid_t* uuid) {
-    jbyte *bytes = (*env)->GetByteArrayElements(env, byteArray, 0);
-    convertUUIDBytesToUUID(bytes, uuid);
-    // unpin array
-    (*env)->ReleaseByteArrayElements(env, byteArray, bytes, 0);
-}
-
-void convertUUIDBytesToUUID(jbyte *bytes, uuid_t* uuid) {
-    uuid->type = SDP_UUID128;
-    memcpy(&uuid->value, bytes, 128/8);
-}
 

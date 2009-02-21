@@ -43,7 +43,7 @@ int dynamic_bind_rc(int sock, struct sockaddr_rc *sockaddr, uint8_t *port) {
 	return err;
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerOpenImpl
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_rfServerOpenImpl
   (JNIEnv* env, jobject peer, jlong localDeviceBTAddress, jboolean authorize, jboolean authenticate, jboolean encrypt, jboolean master, jboolean timeouts, jint backlog) {
     // allocate socket
     int handle = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
@@ -107,7 +107,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerOpe
     return handle;
 }
 
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerGetChannelIDImpl
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_rfServerGetChannelIDImpl
   (JNIEnv* env, jobject peer, jlong handle) {
     struct sockaddr_rc localAddr;
     socklen_t len = sizeof(localAddr);
@@ -118,7 +118,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerGetC
 	return localAddr.rc_channel;
 }
 
-JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerCloseImpl
+JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_rfServerCloseImpl
   (JNIEnv* env, jobject peer, jlong handle, jboolean quietly) {
     debug("RFCOMM close server handle %li", handle);
     // Closing channel, further sends and receives will be disallowed.
@@ -134,7 +134,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerClos
     }
 }
 
-JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfServerAcceptAndOpenRfServerConnection
+JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_rfServerAcceptAndOpenRfServerConnection
   (JNIEnv* env, jobject peer, jlong handle) {
     struct sockaddr_rc remoteAddr;
 	socklen_t  remoteAddrLen = sizeof(remoteAddr);

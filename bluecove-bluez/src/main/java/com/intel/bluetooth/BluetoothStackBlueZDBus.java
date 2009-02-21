@@ -73,9 +73,11 @@ import cx.ath.matthew.unix.UnixSocket;
  * A: The idea was that I copied all the method descriptors from bluez-d-bus documentation. Some I tested and this is
  * uncommented . Some I'm not sure are implemented as described so I commented out.
  */
-class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
+class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
 
-	public static final String NATIVE_BLUECOVE_LIB_BLUEZ = "bluecove";
+    // This native lib contains the rfcomm and l2cap linux-specific
+    // implementation for this bluez d-bus implementation.
+	public static final String NATIVE_BLUECOVE_LIB_BLUEZ = "bluecovez";
 
 	// Our reusable DBUS connection.
 	DBusConnection dbusConn = null;
@@ -112,10 +114,6 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 
 	public static String CONST_ADAPTER_PREFIX = "/org/bluez/hci";
 
-	// This native lib contains the rfcomm and l2cap linux-specific
-	// implementation for this bluez d-bus implementation.
-	public static String NATIVE_BLUEZ_LINUX_LIB = "bluecovebluez";
-
 	private class DiscoveryData {
 		public DeviceClass deviceClass;
 
@@ -127,12 +125,12 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 	// and then create the RemoteDevice objects.
 	private Map<Long, DiscoveryData> address2DiscoveryData;
 
-	BluetoothStackBlueZ() {
+	BluetoothStackBlueZDBus() {
 	}
 
 	public String getStackID() {
 		DebugLog.debug("getStackID()");
-		return BlueCoveImpl.STACK_BLUEZ;
+		return BlueCoveImpl.STACK_BLUEZ_DBUS;
 	}
 
 	// --- Library initialization
@@ -596,7 +594,7 @@ class BluetoothStackBlueZ implements BluetoothStack, DeviceInquiryRunnable, Sear
 							DebugLog.debug("Ignoring springer.");
 							continue;
 						}
-						RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(BluetoothStackBlueZ.this,
+						RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(BluetoothStackBlueZDBus.this,
 								address, discoveryData.name, paired);
 						listener.deviceDiscovered(remoteDevice, discoveryData.deviceClass);
 					}

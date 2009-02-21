@@ -38,7 +38,7 @@ public class NativeExceptionTest extends NativeTestCase {
 
 	private void verify(int ntype, Throwable e) {
 		try {
-			BluetoothStackBlueZNativeTests.testThrowException(ntype);
+			BluetoothStackBlueZDBusNativeTests.testThrowException(ntype);
 			fail("Should raise an Exception " + e);
 		} catch (Throwable t) {
 			if (t instanceof AssertionFailedError) {

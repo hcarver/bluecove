@@ -220,88 +220,21 @@
                 <plugins>
 
                     <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <extensions>false</extensions>
-                        <executions>
-                            <execution>
-                                <id>build-jni-headers</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>javah</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${native.source.dir}</outputDirectory>
-                                    <classNames>
-                                        <className>com.intel.bluetooth.BluetoothStackBlueZ</className>
-                                        <className>com.intel.bluetooth.BluetoothStackBlueZConsts</className>
-                                        <className>com.intel.bluetooth.BluetoothStackBlueZNativeTests</className>
-                                    </classNames>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>build-native</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>compile</goal>
-                                    <goal>link</goal>
-                                </goals>
-                                <configuration>
-                                    <javahOS>linux</javahOS>
-                                    <sources>
-                                        <source>
-                                            <directory>${native.source.dir}</directory>
-                                            <fileNames>
-                                                <fileName>BlueCoveBlueZ.c</fileName>
-                                                <fileName>common.c</fileName>
-                                                <fileName>BlueCoveBlueZ_RFCOMM.c</fileName>
-                                                <fileName>BlueCoveBlueZ_RFCOMMServer.c</fileName>
-                                                <fileName>BlueCoveBlueZ_L2CAP.c</fileName>
-                                                <fileName>BlueCoveBlueZ_L2CAPServer.c</fileName>
-                                                <fileName>BlueCoveBlueZ_Tests.c</fileName>
-                                                <!--
-                                                <fileName>BlueCoveBlueZ_LocalDevice.c</fileName>
-                                                <fileName>BlueCoveBlueZ_Discovery.c</fileName>
-                                                <fileName>BlueCoveBlueZ_SDPServer.c</fileName>
-                                                <fileName>BlueCoveBlueZ_SDPQuery.c</fileName>
-                                                -->
-                                            </fileNames>
-                                        </source>
-                                        <source>
-                                            <directory>${native.source.dir}</directory>
-                                        </source>
-                                    </sources>
-                                    <compilerStartOptions>
-                                        <!-- This flag creates position independent code on 64 bit platform/ IA32 has this flag applied by default with GCC -->
-                                        <compilerStartOption>-fPIC</compilerStartOption>
-                                    </compilerStartOptions>
-                                    <linkerStartOptions>
-                                        <linkerStartOption>-shared</linkerStartOption>
-                                        <linkerStartOption>-nodefaultlibs</linkerStartOption>
-                                        <linkerStartOption>-lstdc++</linkerStartOption>
-                                        <linkerStartOption>-nodefaultlibs</linkerStartOption>
-                                    </linkerStartOptions>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>link-move-so</id>
+                                <id>compile-native-lib-gpl</id>
                                 <phase>process-classes</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <condition property="library_sufix" value="_x64" else="">
-                                             <os name="Linux" arch="amd64"/>
-                                        </condition>
-                                        <move file="${project.build.directory}/${project.build.finalName}.jar" tofile="${project.build.directory}/classes/libbluecove${library_sufix}.so" overwrite="true"/>
-                                        <copy file="${project.build.directory}/classes/libbluecove${library_sufix}.so" todir="${basedir}/src/main/resources" overwrite="true"/>
+                                        <ant antfile="${basedir}/build.xml" target="compile-native-lib">
+                                            <property name="basedir" value="${basedir}"/>
+                                            <property name="buildEnv" value="${buildEnv}"/>
+                                            <property name="java.home" value="${java.home}"/>
+                                        </ant>
                                     </tasks>
                                 </configuration>
                             </execution>
@@ -363,6 +296,94 @@
             </build>
         </profile>
 
+        <!-- cruisecontrol -->
+
+        <profile>
+            <!-- build master is now Linux x86-64; Idealy would be nice to split project to platform dependant modules -->
+            <id>build-master</id>
+
+            <repositories>
+                <repository>
+                    <id>pyx4j.com-cruisecontrol-shared-http</id>
+                    <url>http://snapshot.bluecove.org/build/${version}</url>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                </repository>
+            </repositories>
+
+            <dependencies>
+                <dependency>
+                    <groupId>${groupId}.native.linux</groupId>
+                    <artifactId>libbluecovez</artifactId>
+                    <type>so</type>
+                    <version>${label}</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>get-multi-platform-binary-bluez-dbus</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <stripVersion>true</stripVersion>
+                                    <includeScope>provided</includeScope>
+                                    <excludeTypes>jar</excludeTypes>
+                                    <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+             <id>build-linux32</id>
+             <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                            <!-- Can't run deploy for this profile -->
+                            <configuration>
+                                <repositoryId>pyx4j.com-cruisecontrol-shared</repositoryId>
+                                <url>${scp-apache-base}/bluecove/build/${version}</url>
+                                <groupId>${groupId}.native.linux</groupId>
+                                <packaging>so</packaging>
+                                <version>${label}</version>
+                                <uniqueVersion>false</uniqueVersion>
+                                <generatePom>true</generatePom>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>deploy-multi-platform-build-binary-linux-bluecove-bluez-dbus</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>deploy-file</goal>
+                                    </goals>
+                                    <configuration>
+                                        <file>${project.build.directory}/classes/libbluecovez.so</file>
+                                        <artifactId>libbluecovez</artifactId>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
     </profiles>
 
 </project>
