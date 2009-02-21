@@ -24,8 +24,11 @@ fi
 
 mkdir -p ${CLASSES_DIR}
 
+DBUS_JAVA_LIBS_DIR=target
+DBUS_JAVA_CLASSPATH=${DBUS_JAVA_LIBS_DIR}/dbus.jar:${DBUS_JAVA_LIBS_DIR}/unixsockets.jar
+
 echo "=== Compile the bluez stack java files ==="
-javac -d ${CLASSES_DIR} -cp ${BLUECOVE_JAR} ${SRC_JAVA_DIR}/com/intel/bluetooth/BluetoothStackBlueZ*.java
+javac -d ${CLASSES_DIR} -cp ${BLUECOVE_JAR}:${DBUS_JAVA_CLASSPATH} ${SRC_JAVA_DIR}/com/intel/bluetooth/BluetoothStackBlueZ*.java
 if [[ ! "$?" = "0" ]]; then
     echo Error in Java compilation
     exit 1

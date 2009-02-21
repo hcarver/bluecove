@@ -23,7 +23,9 @@ LIBPOSTFIX=`uname -p | grep 64 | sed 's/.*64.*/_x64/g'`
 
 TARGET_LIB=target/libbluecovez$(LIBPOSTFIX).so
 
-CLASSPATH=$(BLUECOVE_JAR)
+DBUS_JAVA_LIBS_DIR=target
+DBUS_JAVA_CLASSPATH=$(DBUS_JAVA_LIBS_DIR)/dbus.jar:$(DBUS_JAVA_LIBS_DIR)/unixsockets.jar
+CLASSPATH=$(BLUECOVE_JAR):$(DBUS_JAVA_CLASSPATH)
 
 all: classes jni-headers native-lib
 
