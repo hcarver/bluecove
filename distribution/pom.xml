@@ -45,7 +45,6 @@
             <build>
                 <plugins>
                     <plugin>
-                        <inherited>false</inherited>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
@@ -59,20 +58,20 @@
                                         <mkdir dir="${project.build.directory}/site/download/${version}/${buildLabel}"/>
                                         <copy overwrite="true"
                                             todir="${project.build.directory}/site/download/${version}/${buildLabel}">
-                                            <fileset dir="${basedir}/../bluecove">
-                                                <include name="*.SNAPSHOT.jar"/>
+                                            <fileset dir="${basedir}/../bluecove/target">
+                                                <include name="bluecove*-SNAPSHOT.jar"/>
                                                 <include name="*.tar.gz"/>
                                             </fileset>
-                                            <fileset dir="${basedir}/../bluecove-gpl">
-                                                <include name="*.SNAPSHOT.jar"/>
+                                            <fileset dir="${basedir}/../bluecove-gpl/target">
+                                                <include name="bluecove*-SNAPSHOT.jar"/>
                                                 <include name="*.tar.gz"/>
                                             </fileset>
-                                            <fileset dir="${basedir}/../bluecove-bluez">
-                                                <include name="*.SNAPSHOT.jar"/>
+                                            <fileset dir="${basedir}/../bluecove-bluez/target">
+                                                <include name="bluecove*-SNAPSHOT.jar"/>
                                                 <include name="*.tar.gz"/>
                                             </fileset>
-                                            <fileset dir="${basedir}/../bluecove-emu">
-                                                <include name="*.SNAPSHOT.jar"/>
+                                            <fileset dir="${basedir}/../bluecove-emu/target">
+                                                <include name="bluecove*-SNAPSHOT.jar"/>
                                                 <include name="*.tar.gz"/>
                                             </fileset>
                                         </copy>
