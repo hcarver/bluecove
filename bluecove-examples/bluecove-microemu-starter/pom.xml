@@ -18,6 +18,18 @@
 
     <description>Project used to start MIDlet application in eclipse</description>
 
+    <distributionManagement>
+        <!-- no-deployment -->
+        <repository>
+            <id>no-deployment</id>
+            <url>file:///${basedir}/target/tmp</url>
+        </repository>
+        <snapshotRepository>
+            <id>no-deployment</id>
+            <url>file:///${basedir}/target/tmp</url>
+        </snapshotRepository>
+    </distributionManagement>
+    
     <dependencies>
 
         <dependency>

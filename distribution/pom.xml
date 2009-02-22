@@ -33,6 +33,10 @@
             <id>no-deployment</id>
             <url>file:///${basedir}/target/tmp</url>
         </repository>
+        <snapshotRepository>
+            <id>no-deployment</id>
+            <url>file:///${basedir}/target/tmp</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <profiles>
