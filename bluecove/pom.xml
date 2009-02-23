@@ -277,6 +277,7 @@
                                     <replacefilter token="#user.name#" value="${user.name}"/>
                                     <replacefilter token="#today#" value="${TODAY}"/>
                                 </replace>
+                                <echo file="${project.build.directory}/build.version" append="false">${buildLabel}</echo>
                             </tasks>
                         </configuration>
                     </execution>

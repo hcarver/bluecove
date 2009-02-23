@@ -24,7 +24,7 @@
     </fileSets>
     <files>
         <file>
-            <source>${basedir}/../build.version</source>
+            <source>${basedir}/target/build.version</source>
             <destName>${artifactId}-${buildLabel}.version</destName>
         </file>
    </files>
