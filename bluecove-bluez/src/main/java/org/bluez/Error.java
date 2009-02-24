@@ -35,8 +35,7 @@ import org.freedesktop.dbus.exceptions.DBusExecutionException;
 public interface Error extends DBusInterface {
 
 	/**
-	 * An unknown error occured. The error messages is taken from the
-	 * strerror(errno) function.
+	 * An unknown error occured. The error messages is taken from the strerror(errno) function.
 	 * 
 	 */
 	@SuppressWarnings("serial")
@@ -45,10 +44,9 @@ public interface Error extends DBusInterface {
 			super(message);
 		}
 	}
-	
+
 	/**
-	 * Error returned when the argument list is invalid or out of specification
-	 * for the method.
+	 * Error returned when the argument list is invalid or out of specification for the method.
 	 * 
 	 */
 	@SuppressWarnings("serial")
@@ -59,9 +57,8 @@ public interface Error extends DBusInterface {
 	}
 
 	/**
-	 * Error returned when the caller of a method is not authorized. This might
-	 * happen if a caller tries to terminate a connection that it hasn't
-	 * created.
+	 * Error returned when the caller of a method is not authorized. This might happen if a caller tries to terminate a
+	 * connection that it hasn't created.
 	 */
 	@SuppressWarnings("serial")
 	public class NotAuthorized extends DBusExecutionException {
@@ -71,8 +68,7 @@ public interface Error extends DBusInterface {
 	}
 
 	/**
-	 * Error returned when a memory allocation via malloc() fails. This error is
-	 * similar to ENOMEM.
+	 * Error returned when a memory allocation via malloc() fails. This error is similar to ENOMEM.
 	 */
 	@SuppressWarnings("serial")
 	public class OutOfMemory extends DBusExecutionException {
@@ -82,8 +78,7 @@ public interface Error extends DBusInterface {
 	}
 
 	/**
-	 * Error returned when the requested adapter doesn't exists. This error is
-	 * similar to ENODEV.
+	 * Error returned when the requested adapter doesn't exists. This error is similar to ENODEV.
 	 */
 	@SuppressWarnings("serial")
 	public class NoSuchAdapter extends DBusExecutionException {
@@ -130,9 +125,8 @@ public interface Error extends DBusInterface {
 	}
 
 	/**
-	 * Error returned if a record for a specific procedure already exists and it
-	 * has been tried create a new one. The error message however should
-	 * indicate the procedure that fails. For example "Bonding already exists"
+	 * Error returned if a record for a specific procedure already exists and it has been tried create a new one. The
+	 * error message however should indicate the procedure that fails. For example "Bonding already exists"
 	 */
 	@SuppressWarnings("serial")
 	public class AlreadyExists extends DBusExecutionException {
@@ -142,9 +136,8 @@ public interface Error extends DBusInterface {
 	}
 
 	/**
-	 * Error returned if a record for a specifc procedure doesn't exist. The
-	 * error message however should indicate the procedure that fails. For
-	 * example "Bonding does not exist".
+	 * Error returned if a record for a specifc procedure doesn't exist. The error message however should indicate the
+	 * procedure that fails. For example "Bonding does not exist".
 	 */
 	@SuppressWarnings("serial")
 	public class DoesNotExist extends DBusExecutionException {
@@ -154,9 +147,8 @@ public interface Error extends DBusInterface {
 	}
 
 	/**
-	 * Error returned if an operation is in progress. Since this is a generic
-	 * error that can be used in various situations, the error message should be
-	 * more clear about what is in progress. For example "Bonding in progress".
+	 * Error returned if an operation is in progress. Since this is a generic error that can be used in various
+	 * situations, the error message should be more clear about what is in progress. For example "Bonding in progress".
 	 */
 	@SuppressWarnings("serial")
 	public class InProgress extends DBusExecutionException {
@@ -209,10 +201,17 @@ public interface Error extends DBusInterface {
 			super(message);
 		}
 	}
-	
+
 	@SuppressWarnings("serial")
 	public class NoSuchService extends DBusExecutionException {
 		public NoSuchService(String message) {
+			super(message);
+		}
+	}
+
+	@SuppressWarnings("serial")
+	public class RequestDeferred extends DBusExecutionException {
+		public RequestDeferred(String message) {
 			super(message);
 		}
 	}
