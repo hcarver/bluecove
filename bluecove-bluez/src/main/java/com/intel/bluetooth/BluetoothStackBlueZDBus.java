@@ -792,9 +792,6 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 					ServiceRecord[] servRecordArray = (ServiceRecord[]) Utils.vector2toArray(records,
 							new ServiceRecord[records.size()]);
 					listener.servicesDiscovered(sst.getTransID(), servRecordArray);
-				} else
-					listener.servicesDiscovered(sst.getTransID(), new ServiceRecord[0]);
-				if (records.size() != 0) {
 					return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
 				} else {
 					return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
