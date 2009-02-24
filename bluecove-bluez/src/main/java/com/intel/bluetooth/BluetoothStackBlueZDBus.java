@@ -26,7 +26,6 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -720,9 +719,9 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	 * @return
 	 * @throws SearchServicesException
 	 */
-	private int runSearchServicesImpl(SearchServicesThread sst, long localDeviceBTAddress, byte[][] uuidValues,
-			long remoteDeviceAddress) throws SearchServicesException {
-		DebugLog.debug("runSearchServicesImpl()");
+	private int getRemoteServices(SearchServicesThread sst, UUID[] uuidSet, long remoteDeviceAddress)
+			throws SearchServicesException {
+		DebugLog.debug("getRemoteServices");
 		// TODO: services discovery
 
 		// 1. uuidValues need to be converted somehow to a match String.
@@ -731,19 +730,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 		// So, instead we match everything and do our own matching further
 		// down.
 		String match = "";
-		for (int j = 0; j < uuidValues.length; ++j) {
-			// I expect something like this:
-			// 000000020000100080000002ee000002
-			BigInteger bi = new BigInteger(uuidValues[j]);
-			String hex = bi.abs().toString(16);
-			// if (hex.length() == 33)
-			// hex = hex.substring(1); // minus sign
-			// DebugLog.debug("service uuid:" + hex);
-			UUID protocolUUID = new UUID(hex, false);
-		}
-
 		// 2. I assume the current adapter is to be used atm.
-
 		// MUST use ':' format. F.E. 00:00:00:00:00:00
 		String hexAddress = toHexString(remoteDeviceAddress);
 		DebugLog.debug("runSearchServicesImpl() hexAddress:" + hexAddress);
@@ -755,9 +742,8 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 			throw new SearchServicesException("GetRemoteServiceHandles() failed:" + t.getMessage());
 		}
 		DebugLog.debug("GetRemoteServiceHandles() done.");
-
-		if (serviceHandles == null && serviceHandles.length == 0)
-			return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
+		if ((serviceHandles == null) || (serviceHandles.length == 0))
+			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
 
 		DebugLog.debug("Found serviceHandles:" + serviceHandles.length);
 		RemoteDevice remoteDevice = RemoteDeviceHelper.getCashedDevice(this, remoteDeviceAddress);
@@ -767,18 +753,14 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 				byte[] serviceRecordBytes = adapter.GetRemoteServiceRecord(hexAddress, handle);
 				ServiceRecordImpl serviceRecordImpl = new ServiceRecordImpl(this, remoteDevice, handle.intValue());
 				serviceRecordImpl.loadByteArray(serviceRecordBytes);
-				for (int j = 0; j < uuidValues.length; ++j) {
-					// I expect something like this:
-					// 000000020000100080000002ee000002
-					BigInteger bi = new BigInteger(uuidValues[j]);
-					String hex = bi.abs().toString(16);
-					UUID protocolUUID = new UUID(hex, false);
-					if (!serviceRecordImpl.hasServiceClassUUID(protocolUUID)) {
-						DebugLog.debug("ignoring service uuid:" + hex);
-						continue;
+				for (int j = 0; j < uuidSet.length; j++) {
+					if (serviceRecordImpl.hasServiceClassUUID(uuidSet[j])) {
+						DebugLog.debug("found service", i);
+						sst.addServicesRecords(serviceRecordImpl);
+						break;
+					} else {
+						DebugLog.debug("ignoring service", i);
 					}
-					DebugLog.debug("found service uuid:" + hex);
-					sst.addServicesRecords(serviceRecordImpl);
 				}
 				/*
 				 * int[] attributeIDs = serviceRecordImpl.getAttributeIDs(); for (int j=0; j < attributeIDs.length; ++j)
@@ -792,7 +774,6 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 				// failed to parse the service record.");
 			}
 		}
-
 		return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
 	}
 
@@ -801,12 +782,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 		DebugLog.debug("runSearchServices()");
 		sst.searchServicesStartedCallback();
 		try {
-			byte[][] uuidValues = new byte[uuidSet.length][];
-			for (int i = 0; i < uuidSet.length; i++) {
-				uuidValues[i] = Utils.UUIDToByteArray(uuidSet[i]);
-			}
-			long btAddress = Long.parseLong(adapter.GetAddress().replaceAll(":", ""), 16);
-			int respCode = runSearchServicesImpl(sst, btAddress, uuidValues, RemoteDeviceHelper.getAddress(device));
+			int respCode = getRemoteServices(sst, uuidSet, RemoteDeviceHelper.getAddress(device));
 			if ((respCode != DiscoveryListener.SERVICE_SEARCH_ERROR) && (sst.isTerminated())) {
 				return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
 			} else if (respCode == DiscoveryListener.SERVICE_SEARCH_COMPLETED) {
@@ -833,19 +809,6 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 		} catch (SearchServicesException e) {
 			return DiscoveryListener.SERVICE_SEARCH_ERROR;
 		}
-	}
-
-	public boolean serviceDiscoveredCallback(SearchServicesThread sst, long sdpSession, long handle) {
-		DebugLog.debug("serviceDiscoveredCallback()");
-		if (sst.isTerminated()) {
-			return true;
-		}
-		ServiceRecordImpl servRecord = new ServiceRecordImpl(this, sst.getDevice(), handle);
-		int[] attrIDs = sst.getAttrSet();
-		long remoteDeviceAddress = RemoteDeviceHelper.getAddress(sst.getDevice());
-		populateServiceRecordAttributeValuesImpl(remoteDeviceAddress, sdpSession, handle, attrIDs, servRecord);
-		sst.addServicesRecords(servRecord);
-		return false;
 	}
 
 	public boolean cancelServiceSearch(int transID) {
