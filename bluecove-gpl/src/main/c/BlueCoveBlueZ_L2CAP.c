@@ -153,6 +153,11 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2Ready
     if (poll(&fds, 1, timeout) > 0) {
         if (fds.revents & (POLLHUP | POLLERR /*| POLLRDHUP*/)) {
             throwIOException(env, "Peer closed connection");
+            return JNI_FALSE;
+        } else if (fds.revents & POLLNVAL) {
+            // this connection has been closed by invoking the close() method.
+            throwIOException(env, "Connection closed");
+            return JNI_FALSE;
         } else if (fds.revents & POLLIN) {
             return JNI_TRUE;
         }
@@ -179,6 +184,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2Receive
         if (poll(&fds, 1, timeout) > 0) {
             if (fds.revents & (POLLHUP | POLLERR /*| POLLRDHUP*/)) {
                 throwIOException(env, "Peer closed connection");
+                return 0;
+            } else if (fds.revents & POLLNVAL) {
+                // this connection has been closed by invoking the close() method.
+                throwIOException(env, "Connection closed");
                 return 0;
             } else if (fds.revents & POLLIN) {
                 dataReady = true;
