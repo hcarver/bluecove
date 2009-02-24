@@ -1,0 +1,14 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/guides/mini/guide-apt-format.html
+
+                                    ------------------
+                                    BlueCove snapshot distribution
+                                    ------------------
+
+BlueCove Nightly build distribution
+
+     BlueCove nightly build is fully automated on Linux 32 and 64bit, Windows and Mac OS X Leo using {{{integration.html}CruiseControl}}.
+
+     Please folow 'Download'  'Snapshot' link in left side menu to download latest build binaries or sources.
+
+     Use project {{{http://groups.google.com/group/bluecove-users}User/Developer support google group}} to inform us about problems (if any).
