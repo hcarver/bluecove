@@ -1,7 +1,7 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2006-2007 Vlad Skarzhevskyy
- * 
+ *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
  *  distributed with this work for additional information
@@ -52,7 +52,7 @@ import net.sf.bluecove.util.BluetoothTypesInfo;
 
 /**
  *
- * 
+ *
  */
 public class ClientConnectionThread extends Thread {
 
@@ -65,7 +65,7 @@ public class ClientConnectionThread extends Thread {
 	private ConnectionHolder c;
 
 	private RemoteDevice remoteDevice;
-	
+
 	private boolean stoped = false;
 
 	boolean isRunning = false;
@@ -103,7 +103,7 @@ public class ClientConnectionThread extends Thread {
 	private FileOutputStream fileOut;
 
 	private boolean rssiEnabled;
-	
+
 	ClientConnectionThread(String serverURL) {
 		super("ClientConnectionThread" + (++connectionCount));
 		this.serverURL = serverURL;
@@ -180,7 +180,8 @@ public class ClientConnectionThread extends Thread {
 					if (interpretData == interpretIgnore) {
 						Thread.sleep(777);
 					} else {
-						if ((interpretData != interpretDataCharArray) || (interpretData != interpretDataStatsArray)) {
+					    // Tests if receive() will block
+						if ((interpretData != interpretDataCharArray) && (interpretData != interpretDataStatsArray)) {
 							while ((!lc.channel.ready()) && (!stoped)) {
 								Thread.sleep(100);
 							}

@@ -39,6 +39,10 @@
 #include "com_intel_bluetooth_BluetoothStackBlueZDBusConsts.h"
 #include "common.h"
 
+#ifndef SOCKET_ERROR
+#define SOCKET_ERROR   (-1)
+#endif
+
 #define LOCALDEVICE_ACCESS_TIMEOUT 5000
 #define READ_REMOTE_NAME_TIMEOUT 5000
 #define DEVICE_NAME_MAX_SIZE 248

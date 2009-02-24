@@ -25,6 +25,7 @@
 
 #include "BlueCoveBlueZ.h"
 #include <bluetooth/l2cap.h>
+#include <fcntl.h>
 
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2ServerOpenImpl
   (JNIEnv* env, jobject peer, jlong localDeviceBTAddress, jboolean authorize, jboolean authenticate, jboolean encrypt, jboolean master, jboolean timeouts, jint backlog, jint receiveMTU, jint transmitMTU, jint assignPsm) {
