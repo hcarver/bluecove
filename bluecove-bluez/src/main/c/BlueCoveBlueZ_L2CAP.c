@@ -19,7 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
- * @version $Id: BlueCoveBlueZ_L2CAP.c 1721 2008-01-31 01:12:08Z skarzhevskyy $
+ * @version $Id$
  */
 #define CPP__FILE "BlueCoveBlueZ_L2CAP.c"
 
@@ -153,10 +153,10 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Re
     fds.events = POLLIN | POLLHUP | POLLERR;// | POLLRDHUP;
     fds.revents = 0;
     if (poll(&fds, 1, timeout) > 0) {
-        if (fds.revents & POLLIN) {
-            return JNI_TRUE;
-        } else if (fds.revents & (POLLHUP | POLLERR /*| POLLRDHUP*/)) {
+        if (fds.revents & (POLLHUP | POLLERR /*| POLLRDHUP*/)) {
             throwIOException(env, "Peer closed connection");
+        } else if (fds.revents & POLLIN) {
+            return JNI_TRUE;
         }
     }
     return JNI_FALSE;
@@ -170,6 +170,25 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Receiv
        return 0;
     }
 #endif //BLUECOVE_L2CAP_MTU_TRUNCATE
+    bool dataReady = false;
+    while(!dataReady) {
+        struct pollfd fds;
+        int timeout = 10; // milliseconds
+        fds.fd = handle;
+        fds.events = POLLIN | POLLHUP | POLLERR;// | POLLRDHUP;
+        fds.revents = 0;
+        if (poll(&fds, 1, timeout) > 0) {
+            if (fds.revents & (POLLHUP | POLLERR /*| POLLRDHUP*/)) {
+                throwIOException(env, "Peer closed connection");
+                return 0;
+            } else if (fds.revents & POLLIN) {
+                dataReady = true;
+            }
+        }
+        if(isCurrentThreadInterrupted(env, peer)) {
+            return 0;
+        }
+    }
 
     jbyte *bytes = (*env)->GetByteArrayElements(env, inBuf, 0);
     size_t inBufLen = (size_t)(*env)->GetArrayLength(env, inBuf);
@@ -256,7 +275,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Remot
     struct sockaddr_l2 remoteAddr;
     socklen_t len = sizeof(remoteAddr);
     if (getpeername(handle, (struct sockaddr*)&remoteAddr, &len) < 0) {
-        throwIOException(env, "Failed to get peer name. [%d] %s", errno, strerror(errno));
+        throwIOException(env, "Failed to get L2CAP (%i) peer name. [%d] %s", (int)handle, errno, strerror(errno));
         return -1;
     }
     return deviceAddrToLong(&remoteAddr.l2_bdaddr);
@@ -267,7 +286,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2GetSec
     int socket_opt = 0;
     socklen_t len = sizeof(socket_opt);
     if (getsockopt(handle, SOL_L2CAP, L2CAP_LM, &socket_opt, &len) < 0) {
-        throwIOException(env, "Failed to get L2CAP link mode. [%d] %s", errno, strerror(errno));
+        throwIOException(env, "Failed to get L2CAP (%i) link mode. [%d] %s", (int)handle, errno, strerror(errno));
         return 0;
     }
     bool encrypted = socket_opt &  (L2CAP_LM_ENCRYPT | L2CAP_LM_SECURE);

@@ -19,7 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
- * @version $Id: BlueCoveBlueZ_RFCOMM.c 1719 2008-01-30 23:04:48Z skarzhevskyy $
+ * @version $Id$
  */
 #define CPP__FILE "BlueCoveBlueZ_RFCOMM.c"
 
@@ -177,10 +177,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_connecti
                 //Edebug("poll: wait");
                 int poll_rc = poll(&fds, 1, timeout);
                 if (poll_rc > 0) {
-                    if (fds.revents & POLLIN) {
-                        //Edebug("poll: data to read available");
-                        available = true;
-                    } else if (fds.revents & (POLLHUP | POLLERR /* | POLLRDHUP */)) {
+                    if (fds.revents & (POLLHUP | POLLERR /* | POLLRDHUP */)) {
                         debug("Stream socket peer closed connection");
                         done = -1;
                         goto rfReadEnd;
@@ -188,6 +185,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_connecti
                         // socket closed...
                          done = -1;
                          goto rfReadEnd;
+                    } else if (fds.revents & POLLIN) {
+                        //Edebug("poll: data to read available");
+                        available = true;
                     } else {
                         Edebug("poll: revents %i", fds.revents);
                     }
@@ -220,10 +220,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_connecti
     fds.revents = 0;
     int poll_rc = poll(&fds, 1, timeout);
     if (poll_rc > 0) {
-        if (fds.revents & POLLIN) {
-            return 1;
-        } else if (fds.revents & (POLLHUP | POLLERR/* | POLLRDHUP */)) {
+        if (fds.revents & (POLLHUP | POLLERR/* | POLLRDHUP */)) {
             throwIOException(env, "Stream socket peer closed connection");
+        } else if (fds.revents & POLLIN) {
+            return 1;
         }
         // POLLNVAL - this method may choose to throw an IOException if this input stream has been closed by invoking the close() method.
         // We do not

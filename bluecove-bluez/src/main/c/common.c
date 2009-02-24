@@ -19,7 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
- * @version $Id: BlueCoveBlueZ_Tests.c 1721 2008-01-31 01:12:08Z skarzhevskyy $
+ * @version $Id$
  */
 #define CPP__FILE "common.c"
 

@@ -19,7 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
- * @version $Id: BlueCoveBlueZ.h 1745 2008-02-03 00:36:44Z skarzhevskyy $
+ * @version $Id$
  */
 
 #ifndef _BLUECOVEBLUEZ_H

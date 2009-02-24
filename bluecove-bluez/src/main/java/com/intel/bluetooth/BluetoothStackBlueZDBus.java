@@ -75,8 +75,8 @@ import cx.ath.matthew.unix.UnixSocket;
  */
 class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, SearchServicesRunnable {
 
-    // This native lib contains the rfcomm and l2cap linux-specific
-    // implementation for this bluez d-bus implementation.
+	// This native lib contains the rfcomm and l2cap linux-specific
+	// implementation for this bluez d-bus implementation.
 	public static final String NATIVE_BLUECOVE_LIB_BLUEZ = "bluecovez";
 
 	// Our reusable DBUS connection.
@@ -158,7 +158,8 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	public int getLibraryVersion() throws BluetoothStateException {
 		int version = getLibraryVersionNative();
 		if (version != BLUECOVE_DBUS_VERSION) {
-			DebugLog.fatal("BlueCove native library version mismatch " + version + " expected " + BLUECOVE_DBUS_VERSION);
+			DebugLog
+					.fatal("BlueCove native library version mismatch " + version + " expected " + BLUECOVE_DBUS_VERSION);
 			throw new BluetoothStateException("BlueCove native library version mismatch");
 		}
 		return version;
@@ -1079,8 +1080,8 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	public native void l2CloseClientConnection(long handle) throws IOException;
 
 	private native long l2ServerOpenImpl(long localDeviceBTAddress, boolean authorize, boolean authenticate,
-			boolean encrypt, boolean master, boolean timeouts, int backlog, int receiveMTU, int transmitMTU)
-			throws IOException;
+			boolean encrypt, boolean master, boolean timeouts, int backlog, int receiveMTU, int transmitMTU,
+			int assignPsm) throws IOException;
 
 	public native int l2ServerGetPSMImpl(long handle) throws IOException;
 
@@ -1094,7 +1095,8 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 			ServiceRecordImpl serviceRecord) throws IOException {
 		final int listen_backlog = 1;
 		long socket = l2ServerOpenImpl(this.localDeviceBTAddress, params.authorize, params.authenticate,
-				params.encrypt, params.master, params.timeouts, listen_backlog, receiveMTU, transmitMTU);
+				params.encrypt, params.master, params.timeouts, listen_backlog, receiveMTU, transmitMTU,
+				params.bluecove_ext_psm);
 		boolean success = false;
 		try {
 			int channel = l2ServerGetPSMImpl(socket);
@@ -1149,7 +1151,6 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 		} finally {
 			l2ServerCloseImpl(handle, false);
 		}
-
 	}
 
 	/*
@@ -1164,12 +1165,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2receive(long, byte[])
 	 */
-	// public native int l2Receive(long handle, byte[] inBuf) throws
-	// IOException;
-	public int l2Receive(long handle, byte[] inBuf) throws IOException {
-
-		throw new IOException("l2Receive() Not supported yet.");
-	}
+	public native int l2Receive(long handle, byte[] inBuf) throws IOException;
 
 	/*
 	 * (non-Javadoc)

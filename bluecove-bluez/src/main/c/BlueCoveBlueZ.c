@@ -19,7 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
- * @version $Id: BlueCoveBlueZ.c 1724 2008-01-31 16:59:24Z skarzhevskyy $
+ * @version $Id$
  */
 #define CPP__FILE "BlueCoveBlueZ.c"
 
@@ -34,7 +34,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_isNa
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_getLibraryVersionNative
   (JNIEnv *env, jobject peer) {
-  	return com_intel_bluetooth_BluetoothStackBlueZDBus_BLUECOVE_DBUS_VERSION;
+    return com_intel_bluetooth_BluetoothStackBlueZDBus_BLUECOVE_DBUS_VERSION;
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_enableNativeDebug
