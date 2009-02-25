@@ -152,9 +152,11 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Re
     fds.fd = handle;
     fds.events = POLLIN | POLLHUP | POLLERR;// | POLLRDHUP;
     fds.revents = 0;
-    if (poll(&fds, 1, timeout) > 0) {
+    int poll_rc = poll(&fds, 1, timeout);
+    if (poll_rc > 0) {
         if (fds.revents & (POLLHUP | POLLERR /*| POLLRDHUP*/)) {
             throwIOException(env, "Peer closed connection");
+            return JNI_FALSE;
         } else if (fds.revents & POLLNVAL) {
             // this connection has been closed by invoking the close() method.
             throwIOException(env, "Connection closed");
@@ -162,6 +164,11 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Re
         } else if (fds.revents & POLLIN) {
             return JNI_TRUE;
         }
+    } else if (poll_rc == -1) {
+        throwIOException(env, "Failed to read. [%d] %s", errno, strerror(errno));
+        return JNI_FALSE;
+    } else {
+        //Edebug("poll: call timed out");
     }
     return JNI_FALSE;
 }
@@ -181,7 +188,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Receiv
         fds.fd = handle;
         fds.events = POLLIN | POLLHUP | POLLERR;// | POLLRDHUP;
         fds.revents = 0;
-        if (poll(&fds, 1, timeout) > 0) {
+        int poll_rc = poll(&fds, 1, timeout);
+        if (poll_rc > 0) {
             if (fds.revents & (POLLHUP | POLLERR /*| POLLRDHUP*/)) {
                 throwIOException(env, "Peer closed connection");
                 return 0;
@@ -192,6 +200,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Receiv
             } else if (fds.revents & POLLIN) {
                 dataReady = true;
             }
+        } else if (poll_rc == -1) {
+            throwIOException(env, "Failed to read. [%d] %s", errno, strerror(errno));
+            return 0;
+        } else {
+            //Edebug("poll: call timed out");
         }
         if(isCurrentThreadInterrupted(env, peer)) {
             return 0;
