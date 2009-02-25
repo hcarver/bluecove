@@ -132,6 +132,19 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_detectBlue
     return detectBluetoothStack(env);
 }
 
+JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_nativeBuildFeatures
+(JNIEnv *, jobject) {
+#ifdef _WIN32_WCE
+    #ifndef WIDCOMM_CE_MINUMUM
+        return 0;
+    #else
+        return 1;
+    #endif // WIDCOMM_CE_MINUMUM
+#else
+    return 2;
+#endif // _WIN32_WCE
+}
+
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_enableNativeDebug
   (JNIEnv *env, jobject, jclass loggerClass, jboolean on) {
     enableNativeDebug(env, loggerClass, on);

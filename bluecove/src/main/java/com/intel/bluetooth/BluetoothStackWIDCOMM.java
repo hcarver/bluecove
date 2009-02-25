@@ -87,13 +87,16 @@ class BluetoothStackWIDCOMM implements BluetoothStack, BluetoothStackExtension {
 		return getStackID();
 	}
 
+	private native int nativeBuildFeatures();
+	
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
 	 */
 	public int getFeatureSet() {
-		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP | FEATURE_RSSI;
+	    int nativeBuildFeaturs = nativeBuildFeatures();
+		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP | ((nativeBuildFeaturs>0)?FEATURE_RSSI:0);
 	}
 
 	// ---------------------- Library initialization
