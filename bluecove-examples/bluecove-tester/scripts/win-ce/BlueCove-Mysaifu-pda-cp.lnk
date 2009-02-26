@@ -1,0 +1,1 @@
+112#"\Storage Card\Mysaifu JVM\jre\bin\jvm.exe" -Xhidevmwindow -cp "\Storage Card\bluecove\bluecove-tester.jar;\Storage Card\bluecove\bluecove.jar" net.sf.bluecove.se.Main
