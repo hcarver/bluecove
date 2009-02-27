@@ -381,28 +381,6 @@
                 </configuration>
             </plugin>
             -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>changelog-maven-plugin</artifactId>
-                <!--artifactId>maven-changelog-plugin</artifactId-->
-                <configuration>
-                    <basedir>${basedir}</basedir>
-                </configuration>
-                <reportSets>
-                    <reportSet>
-                        <id>dual-report</id>
-                        <configuration>
-                            <type>range</type>
-                            <range>90</range>
-                        </configuration>
-                        <reports>
-                            <report>changelog</report>
-                            <report>file-activity</report>
-                            <report>dev-activity</report>
-                        </reports>
-                  </reportSet>
-                </reportSets>
-            </plugin>
        </plugins>
     </reporting>
 
