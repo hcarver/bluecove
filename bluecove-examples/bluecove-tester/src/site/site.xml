@@ -10,24 +10,14 @@
         <artifactId>bluecove-site-skin</artifactId>
         <version>2.0.0</version>
     </skin>
-    
+
+    <bannerLeft>
+        <name>BlueCove</name>
+        <src>#remove#/logo.png</src>
+        <href>http://bluecove.org/</href>
+    </bannerLeft>
+
     <body>
-
-        <menu name="Ver #version#">
-            <item name="BlueCove" href="../../" />
-            <item name="Project site" href="http://bluecove.googlecode.com/" />
-            <item name="Introduction" href="index.html" />
-            <item name="Download" href="#">
-                <item name="Releases" href="http://sourceforge.net/project/showfiles.php?group_id=114020"/>
-                <!--4snapshot-->
-                <!--
-                <item name="Snapshot" href="http://www.pyx4me.com/maven2-snapshot/net/sf/bluecove/bluecove/#version#/"/>
-                -->
-                <item name="SVN Access" href="source-repository.html"/>
-                <item name="Browse SVN" href="http://code.google.com/p/bluecove/source/browse/bluecove-examples/bluecove-tester"/>
-            </item>
-
-        </menu>
 
         <menu name="Tests">
             <item name="Results" href="results.html" />
