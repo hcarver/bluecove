@@ -190,8 +190,13 @@ void throwBluetoothConnectionException(JNIEnv *env, int error, const char *fmt, 
 
 bool isCurrentThreadInterrupted(JNIEnv *env, jobject peer) {
     jclass peerClass = (*env)->GetObjectClass(env, peer);
+    if (peerClass == NULL) {
+        throwRuntimeException(env, "Fail to get Object Class");
+        return true;
+    }
     jmethodID aMethod = getGetMethodID(env, peerClass, "isCurrentThreadInterruptedCallback", "()Z");
     if (aMethod == NULL) {
+        throwRuntimeException(env, "Fail to get MethodID isCurrentThreadInterruptedCallback");
         return true;
     }
     if ((*env)->CallBooleanMethod(env, peer, aMethod)) {

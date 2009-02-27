@@ -15,6 +15,7 @@ SRC_JAVA_DIR=${BUILD_DIR}/src/main/java
 SRC_C_DIR=${BUILD_DIR}/src/main/c
 CLASSES_DIR=${BUILD_DIR}/target/classes
 OBJ_DIR=${BUILD_DIR}/target/native
+JAVAC_OPTIONS="-g -source 1.5 -target 1.5"
 
 BLUECOVE_JAR="${BUILD_DIR}/../bluecove/target/bluecove-${BLUECOVE_VERSION}.jar"
 if [[ ! -f ${BLUECOVE_JAR} ]] ; then
@@ -28,7 +29,7 @@ DBUS_JAVA_LIBS_DIR=target
 DBUS_JAVA_CLASSPATH=${DBUS_JAVA_LIBS_DIR}/dbus.jar:${DBUS_JAVA_LIBS_DIR}/unixsockets.jar
 
 echo "=== Compile the bluez stack java files ==="
-javac -d ${CLASSES_DIR} -cp ${BLUECOVE_JAR}:${DBUS_JAVA_CLASSPATH} ${SRC_JAVA_DIR}/com/intel/bluetooth/BluetoothStackBlueZ*.java
+javac -d ${CLASSES_DIR} ${JAVAC_OPTIONS} -cp ${BLUECOVE_JAR}:${DBUS_JAVA_CLASSPATH} ${SRC_JAVA_DIR}/org/bluez/*.java  ${SRC_JAVA_DIR}/com/intel/bluetooth/BluetoothStackBlueZ*.java
 if [[ ! "$?" = "0" ]]; then
     echo Error in Java compilation
     exit 1

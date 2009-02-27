@@ -11,9 +11,11 @@ BLUECOVE_VERSION=2.1.1-SNAPSHOT
 BLUECOVE_JAR=../bluecove/target/bluecove-${BLUECOVE_VERSION}.jar
 JAVAH=$(JAVA_HOME)/bin/javah
 JAVAC=$(JAVA_HOME)/bin/javac
+JAVAC_OPTIONS=-g -source 1.5 -target 1.5
 CC=gcc
-CFLAGS=-Wall -fPIC # -Werror
-CLIBFLAGS=$(CFLAGS) -shared -Wl,-soname,libbluecovez-$(BLUECOVE_VERSION)
+CFLAGS=-Wall -fPIC -fno-stack-protector # -Werror
+# -nodefaultlibs ->  statically linked
+CLIBFLAGS=$(CFLAGS) -nodefaultlibs -shared -Wl,-soname,libbluecovez-$(BLUECOVE_VERSION)
 SRC_C_DIR=src/main/c
 SRC_JAVA_DIR=src/main/java
 CLASSES_DIR=target/classes
@@ -31,8 +33,8 @@ all: classes jni-headers native-lib
 
 classes:
 	-@mkdir -p $(CLASSES_DIR)
-	-@$(JAVAC) -d $(CLASSES_DIR) -classpath $(CLASSPATH) \
-	$(SRC_JAVA_DIR)/com/intel/bluetooth/*.java
+	-@$(JAVAC) -d $(CLASSES_DIR) $(JAVAC_OPTIONS) -classpath $(CLASSPATH) \
+	$(SRC_JAVA_DIR)/org/bluez/*.java $(SRC_JAVA_DIR)/com/intel/bluetooth/*.java
 
 jni-headers:
 	-@$(JAVAH) -d $(SRC_C_DIR) \

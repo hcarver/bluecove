@@ -209,6 +209,24 @@ bool isCurrentThreadInterrupted(JNIEnv *env, jobject peer) {
     return (*env)->ExceptionCheck(env);
 }
 
+bool threadSleep(JNIEnv *env, jlong millis) {
+    jclass clazz = (*env)->FindClass(env, "java/lang/Thread");
+    if (clazz == NULL) {
+        throwRuntimeException(env, "Fail to get Thread class");
+        return false;
+    }
+    jmethodID methodID = (*env)->GetStaticMethodID(env, clazz, "sleep", "(J)V");
+    if (methodID == NULL) {
+        throwRuntimeException(env, "Fail to get MethodID Thread.sleep");
+        return false;
+    }
+    (*env)->CallStaticVoidMethod(env, clazz, methodID, millis);
+    if ((*env)->ExceptionCheck(env)) {
+        return false;
+    }
+    return true;
+}
+
 jmethodID getGetMethodID(JNIEnv * env, jclass clazz, const char *name, const char *sig) {
     if (clazz == NULL) {
         throwRuntimeException(env, "Fail to get MethodID %s for NULL class", name);
@@ -222,69 +240,4 @@ jmethodID getGetMethodID(JNIEnv * env, jclass clazz, const char *name, const cha
     return methodID;
 }
 
-void DeviceInquiryCallback_Init(struct DeviceInquiryCallback* callback) {
-    callback->peer = NULL;
-    callback->deviceDiscoveredCallbackMethod = NULL;
-    callback->startedNotify = NULL;
-    callback->startedNotifyNotifyMethod = NULL;
-}
-
-bool DeviceInquiryCallback_builDeviceInquiryCallbacks(JNIEnv * env, struct DeviceInquiryCallback* callback, jobject peer, jobject startedNotify) {
-    jclass peerClass = (*env)->GetObjectClass(env, peer);
-
-    if (peerClass == NULL) {
-        throwRuntimeException(env, "Fail to get Object Class");
-        return false;
-    }
-
-    jmethodID deviceDiscoveredCallbackMethod = (*env)->GetMethodID(env, peerClass, "deviceDiscoveredCallback", "(Ljavax/bluetooth/DiscoveryListener;JILjava/lang/String;Z)V");
-    if (deviceDiscoveredCallbackMethod == NULL) {
-        throwRuntimeException(env, "Fail to get MethodID deviceDiscoveredCallback");
-        return false;
-    }
-
-    jclass notifyClass = (*env)->GetObjectClass(env, startedNotify);
-    if (notifyClass == NULL) {
-        throwRuntimeException(env, "Fail to get Object Class");
-        return false;
-    }
-    jmethodID notifyMethod = (*env)->GetMethodID(env, notifyClass, "deviceInquiryStartedCallback", "()V");
-    if (notifyMethod == NULL) {
-        throwRuntimeException(env, "Fail to get MethodID deviceInquiryStartedCallback");
-        return false;
-    }
-
-    callback->peer = peer;
-    callback->deviceDiscoveredCallbackMethod = deviceDiscoveredCallbackMethod;
-    callback->startedNotify = startedNotify;
-    callback->startedNotifyNotifyMethod = notifyMethod;
-
-    return true;
-}
-
-bool DeviceInquiryCallback_callDeviceInquiryStartedCallback(JNIEnv * env, struct DeviceInquiryCallback* callback) {
-    if ((callback->startedNotify == NULL) || (callback->startedNotifyNotifyMethod == NULL)) {
-        throwRuntimeException(env, "DeviceInquiryCallback not initialized");
-        return false;
-    }
-    (*env)->CallVoidMethod(env, callback->startedNotify, callback->startedNotifyNotifyMethod);
-    if ((*env)->ExceptionCheck(env)) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-bool DeviceInquiryCallback_callDeviceDiscovered(JNIEnv * env, struct DeviceInquiryCallback* callback, jobject listener, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired) {
-    if ((callback->peer == NULL) || (callback->deviceDiscoveredCallbackMethod == NULL)) {
-        throwRuntimeException(env, "DeviceInquiryCallback not initialized");
-        return false;
-    }
-    (*env)->CallVoidMethod(env, callback->peer, callback->deviceDiscoveredCallbackMethod, listener, deviceAddr, deviceClass, name, paired);
-    if ((*env)->ExceptionCheck(env)) {
-        return false;
-    } else {
-        return true;
-    }
-}
 

@@ -72,20 +72,7 @@ void throwBluetoothConnectionException(JNIEnv *env, int error, const char *fmt, 
 jmethodID getGetMethodID(JNIEnv * env, jclass clazz, const char *name, const char *sig);
 
 bool isCurrentThreadInterrupted(JNIEnv *env, jobject peer);
-
-struct DeviceInquiryCallback {
-    jobject peer;
-    jmethodID deviceDiscoveredCallbackMethod;
-
-    jobject startedNotify;
-    jmethodID startedNotifyNotifyMethod;
-};
-
-void DeviceInquiryCallback_Init(struct DeviceInquiryCallback* callback);
-bool DeviceInquiryCallback_builDeviceInquiryCallbacks(JNIEnv * env, struct DeviceInquiryCallback* callback, jobject peer, jobject startedNotify);
-bool DeviceInquiryCallback_callDeviceInquiryStartedCallback(JNIEnv * env, struct DeviceInquiryCallback* callback);
-bool DeviceInquiryCallback_callDeviceDiscovered(JNIEnv * env, struct DeviceInquiryCallback* callback, jobject listener, jlong deviceAddr, jint deviceClass, jstring name, jboolean paired);
-
+bool threadSleep(JNIEnv *env, jlong millis);
 
 #endif  /* _BLUECOVE_COMMON_H */
 
