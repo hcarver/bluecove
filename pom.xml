@@ -402,6 +402,8 @@
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
+                    <!-- For Linux 64-bit -->
+                    <maxmemory>256m</maxmemory>
                     <quiet>true</quiet>
                     <excludePackageNames>com.ibm.*:com.intel.bluetooth.btgoep:com.intel.bluetooth.btspp:com.intel.bluetooth.btl2cap:com.intel.bluetooth.tcpobex:com.intel.bluetooth.gcf.socket:com.sun.cdc.*</excludePackageNames>
                     <groups>
