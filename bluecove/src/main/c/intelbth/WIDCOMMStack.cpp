@@ -135,7 +135,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_detectBlue
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_nativeBuildFeatures
 (JNIEnv *, jobject) {
 #ifdef _WIN32_WCE
-    #ifndef WIDCOMM_CE_MINUMUM
+    #ifdef WIDCOMM_CE_MINUMUM
         return 0;
     #else
         return 1;
