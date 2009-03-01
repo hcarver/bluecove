@@ -27,9 +27,9 @@
 
 #ifndef _WIN32_WCE
 #define RECEIVE_BUFFER_MAX 0x40000
-#endif //_WIN32_WCE
+#else //_WIN32_WCE
 #define RECEIVE_BUFFER_MAX 0x8000
-#else  //_WIN32_WCE
+#endif  //_WIN32_WCE
 
 // This is extra precaution, may be unnecessary
 #define RECEIVE_BUFFER_SAFE TRUE
