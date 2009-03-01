@@ -403,7 +403,11 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Receive
 
 	int count = comm->receiveBuffer.available();
 	if (count < paketLengthSize) {
-		throwIOException(env, "Receive buffer corrupted (1)");
+	    if (comm->isClosed) {
+	        throwIOException(env, cCONNECTION_CLOSED);
+	    } else {
+		    throwIOException(env, "Receive buffer corrupted (1)");
+		}
 		return 0;
 	}
 	int paketLength = 0;
