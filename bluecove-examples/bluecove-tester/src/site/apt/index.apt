@@ -201,6 +201,8 @@ java -cp avetanaBluetooth.jar:bluecove-tester.jar net.sf.bluecove.se.Main
 
         * <<<{{{./awt-bctest-2.0.3.jnlp}\u00bbStart with BlueCove v 2.0.3}}>>>
 
+        * <<<{{{./awt-bctest-2.1.0.jnlp}\u00bbStart with BlueCove v 2.1.0}}>>>
+
 * Servers in this application can be used as traffic generator
 
    To initialize the server send special initialization 4 bytes sequence to it.  "7, 100, 45, 90, 1",  45 is sleep in microseconds between each array sent; and 90 is size of the array to send (min 16, max 255); 1 duration in minutes .
