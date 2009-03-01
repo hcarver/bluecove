@@ -384,7 +384,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Receive
 
 	int paketLengthSize = comm->receiveBuffer.sizeof_len();
 
-	while ((stack != NULL) && comm->isConnected  && (comm->receiveBuffer.available() <= paketLengthSize)) {
+	while ((stack != NULL) && comm->isConnected  && (!comm->isClosed) && (comm->receiveBuffer.available() <= paketLengthSize)) {
 		Edebug(("receive[] waits for data"));
 		MPEventFlags flags;
         OSStatus err = MPWaitForEvent(comm->notificationEvent, &flags, kDurationMillisecond * 500);
