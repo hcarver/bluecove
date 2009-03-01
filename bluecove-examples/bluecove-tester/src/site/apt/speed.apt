@@ -59,6 +59,8 @@ BlueCove Bluetooth speed test results
 *--------------------------------+--------------------------------+-
 | BlueZ,    Tiny EDR             | Mac OS X, Apple Integrated     |   230,000 - 1,300,000 bit/s {{{#*}*}}  {{{#***}***}} (faster when OS X is server/bug?)
 *--------------------------------+--------------------------------+-
+| Mac OS X, Apple Integrated     | WIDCOMM 6.5, Lenovo W500       |     3,000 (Mac sends), 200,000 bit/s (Mac read)
+*--------------------------------+--------------------------------+-
 | Winsock,  MS BT v3             | Winsock,  MS BT v3             |   840,000 bit/s
 *--------------------------------+--------------------------------+-
 | Winsock,  MS BT v3             | Mac OS X, Apple Integrated     | 1,060,000 bit/s {{{#*}*}}
@@ -67,7 +69,7 @@ BlueCove Bluetooth speed test results
 *--------------------------------+--------------------------------+-
 | Winsock,  MS BT v3             | BlueZ,    BT-2400P             |   770,000 bit/s
 *--------------------------------+--------------------------------+-
-| BlueZ,    BT-2400P             | Winsock,  MS BT v3             | 1,000,000 bit/s  
+| BlueZ,    BT-2400P             | Winsock,  MS BT v3             | 1,000,000 bit/s
 *--------------------------------+--------------------------------+-
 | WIDCOMM,  TRUST BT-2210Tp      | SE K790                        |   230,000 bit/s
 *--------------------------------+--------------------------------+-
@@ -93,7 +95,7 @@ BlueCove Bluetooth speed test results
 *--------------------------------+--------------------------------+-
 
     <<{*}>>  The transfer speed significantly depends on direction.
-    
+
     <<{**}>>  The transfer speed depeneds on the System hardware, Linux, and BlueZ version as well depends on wich side initiate connection.
 
     <<{***}>>  The transfer speed depeneds on wich side initiate connection.
@@ -114,9 +116,9 @@ The reciving speed was measured since sent L2CAP pakets may be lost.
 *--------------------------------+--------------------------------+-
 | BlueZ,    Tiny EDR             | Mac OS X, Apple Integrated     |    80,000 - 760,000 bit/s {{{#***}***}}
 *--------------------------------+--------------------------------+-
-| Mac OS X, Apple Integrated     | BlueZ,    Tiny EDR             |   220,000 bit/s 
+| Mac OS X, Apple Integrated     | BlueZ,    Tiny EDR             |   220,000 bit/s
 *--------------------------------+--------------------------------+-
-| BlueZ,    TRUST BT-2210Tp      | Mac OS X, Apple Integrated     |   980,000 bit/s 
+| BlueZ,    TRUST BT-2210Tp      | Mac OS X, Apple Integrated     |   980,000 bit/s
 *--------------------------------+--------------------------------+-
 | WIDCOMM,  TRUST BT-2210Tp      | SE K790                        |   370,000 bit/s {{{#*}*}}
 *--------------------------------+--------------------------------+-
@@ -132,7 +134,7 @@ The reciving speed was measured since sent L2CAP pakets may be lost.
         * JSR-082 Phones: Sony Ericsson K790, Nokia 5310 XpressMusic
 
         * BlueCove with Microsoft Bluetooth stack, Microsoft Wireless Transceiver for Bluetooth 2.0 (MS BT v2)
-        
+
         * BlueCove with Microsoft Bluetooth stack, Microsoft Transceiver v3.0 for Bluetooth (MS BT v3)
 
         * BlueCove with Microsoft Bluetooth stack, D-Link DBT-120 USB Bluetooth Adapter
@@ -148,12 +150,24 @@ The reciving speed was measured since sent L2CAP pakets may be lost.
         * BlueCove with Mac OS X 10.5.6 i386, 2.8GHz Quad-Core Intel Xeon, Apple Integrated Cambridge Silicon Radio; see {{{#*}*}}
 
 
-Test one device is under VMWare Workstation on Windows
+Test with one device under VMWare or VirtualBox
 
-*--------------------------------+--------------------------------+------------------------+------------------------+
-| <<Client Device>>              | <<Server Device>>              |  Sending RFCOMM speed  |  Reciving RFCOMM speed  
-*--------------------------------+--------------------------------+------------------------+------------------------+
-| VM, Winsock,  MS BT v3         | Winsock,  MS BT v3             |   680,000 bit/s        |   740,000 bit/s
-*--------------------------------+--------------------------------+------------------------+------------------------+
-| Winsock,  MS BT v3             | VM, Winsock,  MS BT v3         |   580,000 bit/s        |   610,000 bit/s
-*--------------------------------+--------------------------------+------------------------+------------------------+
+  I used VMWare Workstation on Windows XP or VMware Fusion on OS X Leo and VirtualBox on XP and Leo
+
+*----------------------------------------+----------------------------------------+------------------------+------------------------+
+| <<Client Device>>                      | <<Server Device>>                      |  Sending RFCOMM speed  |  Reciving RFCOMM speed
+*----------------------------------------+----------------------------------------+------------------------+------------------------+
+| VMW XP, Winsock,  MS BT v3             | Winsock,  MS BT v3                     |   680,000 bit/s        |   740,000 bit/s
+*----------------------------------------+----------------------------------------+------------------------+------------------------+
+| Winsock,  MS BT v3                     | VMW XP, Winsock,  MS BT v3             |   580,000 bit/s        |   610,000 bit/s
+*----------------------------------------+----------------------------------------+------------------------+------------------------+
+| WIDCOMM 6.5, Lenovo W500               | VMW OS X, WIDCOMM 5.1, TRUST BT-2210Tp |   200,000 bit/s        |   170,000 bit/s
+*----------------------------------------+----------------------------------------+------------------------+------------------------+
+| VMW OS X, WIDCOMM 5.1, TRUST BT-2210Tp | WIDCOMM 6.5, Lenovo W500               |   176,000 bit/s        |   200,000 bit/s
+*----------------------------------------+----------------------------------------+------------------------+------------------------+
+| any                                    | VMW OS X, BlueZ, TRUST BT-2210Tp       |  DEVICE_NOT_REACHABLE  |  DEVICE_NOT_REACHABLE
+*----------------------------------------+----------------------------------------+------------------------+------------------------+
+| VMW OS X, BlueZ, TRUST BT-2210Tp       | WIDCOMM 6.5, Lenovo W500               |    20,000 bit/s        |     4,000 bit/s
+*----------------------------------------+----------------------------------------+------------------------+------------------------+
+| Winsock, MS BT v3                      | VMW OS X, BlueZ, D-Link DBT-120        |    15,000 bit/s        |     7,000 bit/s
+*----------------------------------------+----------------------------------------+------------------------+------------------------+
