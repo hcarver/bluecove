@@ -131,6 +131,7 @@ public class ClientConnectionDialog extends Dialog {
 			if (thread == null) {
 				if (wasConnected || wasStarted) {
 					status.setText("Idle");
+					setCursorDefault();
 					btnDisconnect.setEnabled(false);
 					btnConnect.setEnabled(true);
 					btnSend.setEnabled(false);
