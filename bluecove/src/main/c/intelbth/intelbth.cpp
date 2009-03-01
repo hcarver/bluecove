@@ -950,7 +950,7 @@ connectRety:
 		//10051 - A socket operation was attempted to an unreachable network. / Error other than time-out at L2CAP or Bluetooth radio level.
 		if (last_error == WSAENETUNREACH) {
 			if ((retyCount < retryUnreachable) && (retryUnreachable > 0)) {
-			    if (isCurrentThreadInterrupted(env, peer)) {
+			    if (isCurrentThreadInterrupted(env, peer, "connect")) {
                     return;
                 }
 				debug(("connectRety %i", retyCount));
@@ -1045,7 +1045,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J(
 	        return -1;
 	    } else if (ready_count > 0) {
             break;
-        } else if (isCurrentThreadInterrupted(env, peer)) {
+        } else if (isCurrentThreadInterrupted(env, peer, "read")) {
             return -1;
         }
     }
@@ -1082,7 +1082,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J_
 	        return -1;
 	    } else if (ready_count > 0) {
             break;
-        } else if (isCurrentThreadInterrupted(env, peer)) {
+        } else if (isCurrentThreadInterrupted(env, peer, "read")) {
             return -1;
         }
     }
@@ -1107,7 +1107,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_recv__J_
 		}
 		done += count;
 		if (done != 0) {
-		    if (isCurrentThreadInterrupted(env, peer)) {
+		    if (isCurrentThreadInterrupted(env, peer, "read")) {
 			    done = -1;
 			    break;
 		    }
@@ -1143,7 +1143,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackMicrosoft_send__J_
 			break;
 		}
 		done += count;
-		if ((done < len) && (isCurrentThreadInterrupted(env, peer))) {
+		if ((done < len) && (isCurrentThreadInterrupted(env, peer, "write"))) {
             break;
         }
 	}

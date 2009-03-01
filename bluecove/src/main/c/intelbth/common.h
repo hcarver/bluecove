@@ -292,7 +292,7 @@ char* waitResultsString(DWORD rc);
 
 BOOL ExceptionCheckCompatible(JNIEnv *env);
 
-BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer);
+BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer, const char* message);
 
 #ifdef WIN32
 void convertUUIDBytesToGUID(jbyte *bytes, GUID *uuid);

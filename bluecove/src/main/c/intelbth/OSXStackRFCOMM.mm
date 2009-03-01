@@ -384,8 +384,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 			throwRuntimeException(env, "MPWaitForEvent");
 			return 0;
 		}
-		if (isCurrentThreadInterrupted(env, peer)) {
-			debug(("Interrupted while reading"));
+		if (isCurrentThreadInterrupted(env, peer, "read")) {
 			return 0;
 		}
 	}
@@ -421,8 +420,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 			    throwRuntimeException(env, "MPWaitForEvent");
 			    return 0;
 		    }
-			if (isCurrentThreadInterrupted(env, peer)) {
-				debug(("Interrupted while reading"));
+			if (isCurrentThreadInterrupted(env, peer, "read")) {
 				return 0;
 			}
 		}
@@ -550,7 +548,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
 			    error = true;
 			    break;
 		    }
-            if (isCurrentThreadInterrupted(env, peer)) {
+            if (isCurrentThreadInterrupted(env, peer, "write")) {
 			    error = true;
 			    break;
 		    }

@@ -320,7 +320,7 @@ BOOL ExceptionCheckCompatible(JNIEnv *env) {
     }
 }
 
-BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer) {
+BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer, const char* message) {
     jclass peerClass = env->GetObjectClass(peer);
     if (peerClass == NULL) {
         throwRuntimeException(env, "Fail to get Object Class");
@@ -332,7 +332,7 @@ BOOL isCurrentThreadInterrupted(JNIEnv *env, jobject peer) {
         return TRUE;
     }
     if (env->CallBooleanMethod(peer, aMethod)) {
-        throwInterruptedIOException(env, "thread interrupted");
+        throwInterruptedIOException(env, "thread interrupted %s", message);
         return TRUE;
     }
     return ExceptionCheckCompatible(env);

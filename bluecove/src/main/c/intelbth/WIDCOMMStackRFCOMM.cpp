@@ -230,8 +230,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connectio
 				throwRuntimeException(env, "WaitForSingleObject");
 				open_client_return 0;
 			}
-			if (isCurrentThreadInterrupted(env, peer)) {
-			    debug(("Interrupted while writing"));
+			if (isCurrentThreadInterrupted(env, peer, "connect")) {
 			    open_client_return 0;
 		    }
 			if ((timeout > 0) && ((GetTickCount() - waitStart)  > (DWORD)timeout)) {
@@ -341,7 +340,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			throwRuntimeException(env, "WaitForMultipleObjects");
 			return 0;
 		}
-		if (isCurrentThreadInterrupted(env, peer)) {
+		if (isCurrentThreadInterrupted(env, peer, "read")) {
 			return 0;
 		}
 		/*
@@ -399,8 +398,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			if (rc != WAIT_TIMEOUT) {
 				debug(("read waits returns %s", waitResultsString(rc)));
 			}
-			if (isCurrentThreadInterrupted(env, peer)) {
-				debug(("Interrupted while reading"));
+			if (isCurrentThreadInterrupted(env, peer, "read")) {
 				return 0;
 			}
 		}
@@ -487,10 +485,10 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 		if (signal & PORT_CTSRTS_ON) {
 			break;
 		}
-		Sleep(200);
-		if (isCurrentThreadInterrupted(env, peer)) {
+		if (isCurrentThreadInterrupted(env, peer, "write")) {
 		    return;
 		}
+        Sleep(200);
 	}
     HANDLE hEvents[2];
 	hEvents[0] = rf->hConnectionEvent;
@@ -520,7 +518,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_connection
 			break;
 		}
 		done += written;
-		if (isCurrentThreadInterrupted(env, peer)) {
+		if (isCurrentThreadInterrupted(env, peer, "write")) {
 			break;
 		}
 		waitForTransmit = true;
@@ -743,7 +741,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_rfServerA
 			throwRuntimeException(env, "WaitForMultipleObjects");
 			accept_rf_server_return 0;
 		}
-		if (isCurrentThreadInterrupted(env, peer)) {
+		if (isCurrentThreadInterrupted(env, peer, "accept")) {
 			accept_rf_server_return 0;
 		}
 	}

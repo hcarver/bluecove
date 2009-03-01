@@ -392,8 +392,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Receive
 			throwRuntimeException(env, "MPWaitForEvent");
 			return 0;
 		}
-		if (isCurrentThreadInterrupted(env, peer)) {
-			debug(("Interrupted while reading"));
+		if (isCurrentThreadInterrupted(env, peer, "receive")) {
 			return 0;
 		}
 	}
@@ -502,8 +501,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Send
 			    throwRuntimeException(env, "MPWaitForEvent");
 			    break;
 		    }
-            if (isCurrentThreadInterrupted(env, peer)) {
-			    debug(("Interrupted while writing"));
+            if (isCurrentThreadInterrupted(env, peer, "send")) {
 			    break;
 		    }
 		    break;

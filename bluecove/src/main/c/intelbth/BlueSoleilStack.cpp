@@ -984,8 +984,7 @@ int waitBytesAvailable(JNIEnv *env, jobject peer, BlueSoleilCOMPort* rf) {
         }
         rf->clearCommError();
         printCOMSTAT(env, &(rf->comStat));
-        if (isCurrentThreadInterrupted(env, peer)) {
-            debug(("Interrupted while reading"));
+        if (isCurrentThreadInterrupted(env, peer, "wait available")) {
             return -1;
         }
     }
@@ -1051,8 +1050,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
                     rf->tDec();
                     return -1;
                 }
-                if (isCurrentThreadInterrupted(env, peer)) {
-                    debug(("Interrupted while reading"));
+                if (isCurrentThreadInterrupted(env, peer, "read")) {
                     return -1;
                 }
                 rf->clearCommError();
@@ -1130,8 +1128,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
                     return -1;
                 }
                 rf->clearCommError();
-                if (isCurrentThreadInterrupted(env, peer)) {
-                    debug(("Interrupted while reading"));
+                if (isCurrentThreadInterrupted(env, peer, "read")) {
                     return -1;
                 }
             }
@@ -1295,8 +1292,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
                 Edebug(("write(byte) GetOverlappedResult returns SUCCESS"));
                 break;
             }
-            if (isCurrentThreadInterrupted(env, peer)) {
-                debug(("Interrupted while writing"));
+            if (isCurrentThreadInterrupted(env, peer, "write")) {
                 return;
             }
             wait = (rc != WAIT_TIMEOUT);
@@ -1376,8 +1372,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_connect
                     Edebug(("write(byte[]) GetOverlappedResult returns SUCCESS"));
                     break;
                 }
-                if (isCurrentThreadInterrupted(env, peer)) {
-                    debug(("Interrupted while writing"));
+                if (isCurrentThreadInterrupted(env, peer, "write")) {
                     return;
                 }
                 wait = (rc != WAIT_TIMEOUT);
@@ -1582,8 +1577,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
             throwInterruptedIOException(env, cCONNECTION_CLOSED);
             return 0;
         }
-        if (isCurrentThreadInterrupted(env, peer)) {
-            debug(("Interrupted while waiting for connections"));
+        if (isCurrentThreadInterrupted(env, peer, "close")) {
             return 0;
         }
     }
@@ -1613,8 +1607,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueSoleil_rfServ
             throwInterruptedIOException(env, cCONNECTION_CLOSED);
             return 0;
         }
-        if (isCurrentThreadInterrupted(env, peer)) {
-            debug(("Interrupted while waiting for connections"));
+        if (isCurrentThreadInterrupted(env, peer, "accept")) {
             return 0;
         }
     }

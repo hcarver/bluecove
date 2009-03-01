@@ -363,8 +363,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
 			throwRuntimeException(env, "MPWaitForEvent");
 			return 0;
 		}
-		if (isCurrentThreadInterrupted(env, peer)) {
-			debug(("Interrupted while waiting for connections"));
+		if (isCurrentThreadInterrupted(env, peer, "close")) {
 			return 0;
 		}
 }
@@ -406,8 +405,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
 			error = true;
 			break;
 		}
-		if (isCurrentThreadInterrupted(env, peer)) {
-			debug(("Interrupted while waiting for connections"));
+		if (isCurrentThreadInterrupted(env, peer, "accept")) {
 			error = true;
 			break;
 		}

@@ -218,8 +218,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2OpenCli
                 throwRuntimeException(env, "WaitForSingleObject");
                 open_l2client_return 0;
             }
-            if (isCurrentThreadInterrupted(env, peer)) {
-                debug(("Interrupted while writing"));
+            if (isCurrentThreadInterrupted(env, peer, "connect")) {
                 open_l2client_return 0;
             }
             if ((timeout > 0) && ((GetTickCount() - waitStart)  > (DWORD)timeout)) {
@@ -416,8 +415,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2ServerA
             debug(("L2CAP server incomingConnectionCount %i", incomingL2CAPConnectionCount));
             incomingConnectionCountWas = incomingL2CAPConnectionCount;
         }
-        if (isCurrentThreadInterrupted(env, peer)) {
-            debug(("Interrupted while waiting for connections"));
+        if (isCurrentThreadInterrupted(env, peer, "accept")) {
             accept_l2_server_return 0;
         }
     }
@@ -573,14 +571,13 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 
     while ((stack != NULL) && l2c->isConnected  && (l2c->receiveBuffer.available() <= paketLengthSize)) {
         debug(("receive[] waits for data"));
-        DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+        DWORD  rc = WaitForMultipleObjects(2, hEvents, FALSE, 500);
         if (rc == WAIT_FAILED) {
             throwRuntimeException(env, "WaitForMultipleObjects");
             return 0;
         }
         debug(("receive[] waits returns %s", waitResultsString(rc)));
-        if (isCurrentThreadInterrupted(env, peer)) {
-            debug(("Interrupted while receiving"));
+        if (isCurrentThreadInterrupted(env, peer, "receive")) {
             return 0;
         }
     }
