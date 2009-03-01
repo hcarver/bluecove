@@ -38,11 +38,10 @@ public class ObexPutClient {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        String serverURL = null; // = "btgoep://0019639C4007:6";
+        String serverURL;
         if ((args != null) && (args.length > 0)) {
             serverURL = args[0];
-        }
-        if (serverURL == null) {
+        } else {
             String[] searchArgs = null;
             // Connect to OBEXPutServer from examples
             // searchArgs = new String[] { "11111111111111111111111111111123" };
