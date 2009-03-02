@@ -21,7 +21,7 @@ JSR-82 Emulator added in BlueCove version 2.0.3 as additional module `bluecove-e
 
 == Library API ===
 
-BlueCove provides an implementation of the JSR 82. Applications should use API defined in JSR-82. See [http://www.bluecove.org/apidocs/index.html BlueCove JSR-82 API]
+BlueCove provides an implementation of the JSR 82. Applications should use API defined in JSR-82. See [http://www.bluecove.org/bluecove/apidocs/ BlueCove JSR-82 API]
 
 == Runtime Requirements ==
 
