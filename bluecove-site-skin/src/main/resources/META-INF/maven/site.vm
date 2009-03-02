@@ -284,8 +284,8 @@
     <title>$title</title>
     <META NAME="subject" CONTENT="Java library for Bluetooth JSR-82"/>
     <META NAME="Description" CONTENT="BlueCove is a Java library for Bluetooth (JSR-82 implementation)"/>
-    <META NAME="Classification" CONTENT="java, j2se, bluetooth api, jsr-82, OBEX API, cross-platform"/>
-    <META NAME="Keywords" CONTENT="java, bluetooth api, jsr-82, j2se, OBEX, Linux BlueZ, Mac OS X"/>
+    <META NAME="Classification" CONTENT="java, j2se, bluetooth, bluetooth api, jsr-82, OBEX API, cross-platform"/>
+    <META NAME="Keywords" CONTENT="java, bluetooth, bluetooth api, jsr-82, j2se, OBEX, Linux, BlueZ, Mac OS X"/>
     <META NAME="Language" CONTENT="English"/>
     <META NAME="author" CONTENT="Vlad Skarzhevskyy"/>
     <style type="text/css" media="all">
