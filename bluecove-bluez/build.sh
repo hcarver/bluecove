@@ -29,14 +29,14 @@ DBUS_JAVA_LIBS_DIR=target
 DBUS_JAVA_CLASSPATH=${DBUS_JAVA_LIBS_DIR}/dbus.jar:${DBUS_JAVA_LIBS_DIR}/unixsockets.jar
 
 echo "=== Compile the bluez stack java files ==="
-javac -d ${CLASSES_DIR} ${JAVAC_OPTIONS} -cp ${BLUECOVE_JAR}:${DBUS_JAVA_CLASSPATH} ${SRC_JAVA_DIR}/org/bluez/*.java  ${SRC_JAVA_DIR}/com/intel/bluetooth/BluetoothStackBlueZ*.java
+javac -d ${CLASSES_DIR} ${JAVAC_OPTIONS} -cp ${BLUECOVE_JAR}:${DBUS_JAVA_CLASSPATH} ${SRC_JAVA_DIR}/org/bluez/*.java  ${SRC_JAVA_DIR}/com/intel/bluetooth/BluetoothStackBlueZ*.java ${SRC_JAVA_DIR}/org/bluecove/socket/*.java
 if [[ ! "$?" = "0" ]]; then
     echo Error in Java compilation
     exit 1
 fi
 
 echo "=== Generate the JNI C header files from these java files ==="
-javah -d ${SRC_C_DIR} -classpath ${CLASSES_DIR} com.intel.bluetooth.BluetoothStackBlueZDBus com.intel.bluetooth.BluetoothStackBlueZDBusConsts com.intel.bluetooth.BluetoothStackBlueZDBusNativeTests
+javah -d ${SRC_C_DIR} -classpath ${CLASSES_DIR} com.intel.bluetooth.BluetoothStackBlueZDBus com.intel.bluetooth.BluetoothStackBlueZDBusConsts com.intel.bluetooth.BluetoothStackBlueZDBusNativeTests org.bluecove.socket.LocalSocketImpl
 if [[ ! "$?" = "0" ]]; then
     echo Error in JNI haders creation
     exit 1

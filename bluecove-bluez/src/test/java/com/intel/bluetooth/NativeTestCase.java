@@ -39,6 +39,7 @@ public abstract class NativeTestCase extends TestCase {
 
 	protected boolean debugOnInEclipse = true;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 

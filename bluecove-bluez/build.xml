@@ -6,12 +6,12 @@
     <!--
         You may use to build the project
         ant -Dbuild.compiler=jikes
-        
+
         You may skip adding shared library to jar file
         ant -Dbluecove.native.resources.skip=true  jar
-        
+
         You may change linker options if you need to
-        ant -Dbluecove.native.linker.options= 
+        ant -Dbluecove.native.linker.options=
      -->
 
     <property name="product_version" value="2.1.1-SNAPSHOT"/>
@@ -97,6 +97,7 @@
             <class name="com.intel.bluetooth.BluetoothStackBlueZDBus"/>
             <class name="com.intel.bluetooth.BluetoothStackBlueZDBusConsts"/>
             <class name="com.intel.bluetooth.BluetoothStackBlueZDBusNativeTests"/>
+            <class name="org.bluecove.socket.LocalSocketImpl"/>
         </javah>
 
     </target>

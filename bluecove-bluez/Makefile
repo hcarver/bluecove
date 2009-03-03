@@ -20,7 +20,7 @@ SRC_C_DIR=src/main/c
 SRC_JAVA_DIR=src/main/java
 CLASSES_DIR=target/classes
 OBJ_DIR=target/native
-JAVACLASSES=com.intel.bluetooth.BluetoothStackBlueZDBus com.intel.bluetooth.BluetoothStackBlueZDBusConsts com.intel.bluetooth.BluetoothStackBlueZDBusNativeTests
+JAVACLASSES=com.intel.bluetooth.BluetoothStackBlueZDBus com.intel.bluetooth.BluetoothStackBlueZDBusConsts com.intel.bluetooth.BluetoothStackBlueZDBusNativeTests org.bluecove.socket.LocalSocketImpl
 LIBPOSTFIX=`uname -p | grep 64 | sed 's/.*64.*/_x64/g'`
 
 TARGET_LIB=target/libbluecovez$(LIBPOSTFIX).so
@@ -34,7 +34,7 @@ all: classes jni-headers native-lib
 classes:
 	-@mkdir -p $(CLASSES_DIR)
 	-@$(JAVAC) -d $(CLASSES_DIR) $(JAVAC_OPTIONS) -classpath $(CLASSPATH) \
-	$(SRC_JAVA_DIR)/org/bluez/*.java $(SRC_JAVA_DIR)/com/intel/bluetooth/*.java
+	$(SRC_JAVA_DIR)/org/bluez/*.java $(SRC_JAVA_DIR)/com/intel/bluetooth/*.java $(SRC_JAVA_DIR)/org/bluecove/socket/*.java
 
 jni-headers:
 	-@$(JAVAH) -d $(SRC_C_DIR) \
