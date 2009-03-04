@@ -25,15 +25,23 @@
 package org.bluecove.socket;
 
 import java.io.IOException;
-import java.net.SocketException;
+import java.net.SocketAddress;
+import java.net.SocketImpl;
 
 /**
  *  Unix domain client socket.
  */
 public class LocalSocket extends java.net.Socket {
 
-    LocalSocket() throws SocketException {
-        super(new LocalSocketImpl());
+    /**
+     * The implementation of this Socket.
+     */
+    private LocalSocketImpl impl;
+    
+    LocalSocket() throws IOException {
+        super((SocketImpl)null);
+        impl = new LocalSocketImpl();
+        impl.create(true);
     }
     
     public LocalSocket(LocalSocketAddress address) throws IOException {
@@ -43,5 +51,11 @@ public class LocalSocket extends java.net.Socket {
     
     LocalSocket(LocalSocketImpl impl) throws IOException {
         super(impl);
+        this.impl = impl;
+    }
+    
+    @Override
+    public void connect(SocketAddress endpoint, int timeout) throws IOException {
+    	impl.connect(endpoint, timeout);
     }
 }

@@ -31,14 +31,22 @@ import java.net.Socket;
 
 public class NativeSocketSimpleTest extends NativeSocketTestCase {
 
+	private final boolean socketAbstractNamespace = false;
+	
     private final String socketName = "test-sock_name";
+    
     
     protected TestRunnable createTestServer() {
         
         return new TestRunnable() {
             public void run() throws Exception {
-                LocalServerSocket serverSocket = new LocalServerSocket(new LocalSocketAddress(socketName, true));
+                LocalServerSocket serverSocket = new LocalServerSocket(new LocalSocketAddress(socketName, socketAbstractNamespace));
                 try {
+                	System.out.println("Server starts");
+                	synchronized (serverAcceptEvent) {
+                		serverAccepts = true;
+                		serverAcceptEvent.notifyAll();
+                    }
                     Socket socket = serverSocket.accept();
                     InputStream in = socket.getInputStream();
                     OutputStream out = socket.getOutputStream();
@@ -53,13 +61,20 @@ public class NativeSocketSimpleTest extends NativeSocketTestCase {
                     socket.close();
                 } finally {
                     serverSocket.close();
+                    System.out.println("Server ends");
                 }
             }
         };
     }
     
     public void testOneByte() throws Exception  {
-        Socket socket = new LocalSocket(new LocalSocketAddress(socketName, true));
+    	while (!serverAccepts) {
+    		synchronized (serverAcceptEvent) {
+    			serverAcceptEvent.wait();
+    		}
+        }
+    	Thread.sleep(200);
+        Socket socket = new LocalSocket(new LocalSocketAddress(socketName, socketAbstractNamespace));
         OutputStream out = socket.getOutputStream();
         out.write(1);
         out.write(2);
@@ -70,6 +85,7 @@ public class NativeSocketSimpleTest extends NativeSocketTestCase {
         in.close();
         out.close();
         socket.close();
+        assertServerErrors();
     }
     
 }

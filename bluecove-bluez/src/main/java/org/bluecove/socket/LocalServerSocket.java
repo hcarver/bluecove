@@ -34,10 +34,6 @@ import java.net.SocketAddress;
  * Inheritance from java.net.ServerSocket is mainly for documentation consistency. 
  */
 public class LocalServerSocket extends java.net.ServerSocket {
-
-    private boolean bound = false;
-    
-    private boolean closed = false;
     
     /**
      * The implementation of this Socket.
@@ -47,6 +43,7 @@ public class LocalServerSocket extends java.net.ServerSocket {
     public LocalServerSocket() throws IOException {
         super();
         impl = new LocalSocketImpl();
+        impl.create(true);
     }
     
     public LocalServerSocket(SocketAddress endpoint) throws IOException {
@@ -62,7 +59,6 @@ public class LocalServerSocket extends java.net.ServerSocket {
     @Override
     public void bind(SocketAddress endpoint, int backlog) throws IOException {
         impl.bind(endpoint, backlog);
-        this.bound = true;
     }
     
     @Override

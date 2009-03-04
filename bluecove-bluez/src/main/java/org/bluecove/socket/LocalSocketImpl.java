@@ -43,6 +43,10 @@ class LocalSocketImpl extends java.net.SocketImpl {
      */
     private int socket;
 
+    private boolean closed;
+    
+    private boolean bound;
+    
     private InputStream in;
 
     private OutputStream out;
@@ -71,9 +75,11 @@ class LocalSocketImpl extends java.net.SocketImpl {
 
     protected void bind(SocketAddress endpoint, int backlog) throws IOException {
         if (!(endpoint instanceof LocalSocketAddress)) {
-            throw new UnknownServiceException();
+        	throw new IllegalArgumentException("Unsupported address type");
         }
-        nativeBind(socket, ((LocalSocketAddress) endpoint).getName(), ((LocalSocketAddress) endpoint).isAbstractNamespace(), backlog);
+        nativeBind(socket, ((LocalSocketAddress) endpoint).getName(), ((LocalSocketAddress) endpoint).isAbstractNamespace());
+        nativeListen(socket, backlog);
+        this.bound = true;
     }
     
     @Override
@@ -94,15 +100,14 @@ class LocalSocketImpl extends java.net.SocketImpl {
     @Override
     protected void connect(SocketAddress address, int timeout) throws IOException {
         if (!(address instanceof LocalSocketAddress)) {
-            throw new UnknownServiceException();
+        	throw new IllegalArgumentException("Unsupported address type");
         }
-        socket = nativeConnect(((LocalSocketAddress) address).getName(), ((LocalSocketAddress) address).isAbstractNamespace(), timeout);
+        nativeConnect(socket, ((LocalSocketAddress) address).getName(), ((LocalSocketAddress) address).isAbstractNamespace(), timeout);
     }
 
     @Override
     protected void create(boolean stream) throws IOException {
-        // TODO Auto-generated method stub
-
+    	socket = nativeCreate(stream);
     }
 
     @Override
@@ -151,9 +156,13 @@ class LocalSocketImpl extends java.net.SocketImpl {
         }
     }
 
-    private native int nativeConnect(String name, boolean abstractNamespace, int timeout);
+    private native int nativeCreate(boolean stream) throws IOException;
     
-    private native void nativeBind(int socket, String name, boolean abstractNamespace, int backlog);
+    private native void nativeConnect(int socket, String name, boolean abstractNamespace, int timeout);
+    
+    private native void nativeBind(int socket, String name, boolean abstractNamespace);
+    
+    private native void nativeListen(int socket, int backlog);
     
     private native int nativeAccept(int socket) throws IOException;
     

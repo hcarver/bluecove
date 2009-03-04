@@ -28,12 +28,17 @@ import com.intel.bluetooth.NativeTestCase;
 
 public class NativeSocketTestCase extends NativeTestCase {
 
+    protected Object serverAcceptEvent = new Object();
+    
+    protected boolean serverAccepts = false;
+    
     private Throwable serverThreadError;
 
     private Thread serverThread;
 
     private static int threadNumber;
 
+    
     private static synchronized int nextThreadNum() {
         return threadNumber++;
     }
@@ -41,6 +46,7 @@ public class NativeSocketTestCase extends NativeTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        serverAccepts = false;
         serverThreadError = null;
         serverThread = runNewServerThread(createTestServer());
     }
@@ -86,7 +92,6 @@ public class NativeSocketTestCase extends NativeTestCase {
         }
 
         public void run() {
-            started = true;
             synchronized (startedEvent) {
                 started = true;
                 startedEvent.notifyAll();
@@ -95,6 +100,8 @@ public class NativeSocketTestCase extends NativeTestCase {
             try {
                 runnable.run();
             } catch (Throwable t) {
+            	System.out.println("Server error: " + t.getMessage());
+            	t.printStackTrace(System.out);
                 serverThreadError = t;
             }
         }
