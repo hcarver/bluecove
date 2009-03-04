@@ -67,5 +67,18 @@ public class LocalServerSocket extends java.net.ServerSocket {
         impl.accept(clientImpl);
         return new LocalSocket(clientImpl);
     }
+	
+    public void close() throws IOException {
+		impl.close();
+	}
+	
+    @Override
+    public boolean isBound() {
+    	return impl.isBound();
+    }
     
+    @Override
+    public boolean isClosed() {
+    	return impl.isClosed();
+    }
 }

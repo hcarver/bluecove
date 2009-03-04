@@ -31,10 +31,15 @@ import java.net.Socket;
 
 public class NativeSocketSimpleTest extends NativeSocketTestCase {
 
-	private final boolean socketAbstractNamespace = false;
+	private final boolean socketAbstractNamespace = true;
 	
-    private final String socketName = "test-sock_name";
+    private final String socketName = "target/test-sock_name";
     
+    @Override
+    protected void setUp() throws Exception {
+    	//debug = true;
+    	super.setUp();
+    }
     
     protected TestRunnable createTestServer() {
         
@@ -42,7 +47,7 @@ public class NativeSocketSimpleTest extends NativeSocketTestCase {
             public void run() throws Exception {
                 LocalServerSocket serverSocket = new LocalServerSocket(new LocalSocketAddress(socketName, socketAbstractNamespace));
                 try {
-                	System.out.println("Server starts");
+                	System.out.println("server starts");
                 	synchronized (serverAcceptEvent) {
                 		serverAccepts = true;
                 		serverAcceptEvent.notifyAll();
@@ -61,7 +66,7 @@ public class NativeSocketSimpleTest extends NativeSocketTestCase {
                     socket.close();
                 } finally {
                     serverSocket.close();
-                    System.out.println("Server ends");
+                    System.out.println("server ends");
                 }
             }
         };
@@ -70,11 +75,13 @@ public class NativeSocketSimpleTest extends NativeSocketTestCase {
     public void testOneByte() throws Exception  {
     	while (!serverAccepts) {
     		synchronized (serverAcceptEvent) {
-    			serverAcceptEvent.wait();
+    			serverAcceptEvent.wait(500);
     		}
+    		assertServerErrors();
         }
     	Thread.sleep(200);
         Socket socket = new LocalSocket(new LocalSocketAddress(socketName, socketAbstractNamespace));
+        System.out.println("client connected");
         OutputStream out = socket.getOutputStream();
         out.write(1);
         out.write(2);

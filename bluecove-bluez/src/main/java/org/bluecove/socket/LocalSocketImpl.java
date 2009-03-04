@@ -41,18 +41,20 @@ class LocalSocketImpl extends java.net.SocketImpl {
     /**
      * socket file descriptor
      */
-    private int socket;
+    private int socket = -1;
 
+    private boolean bound;
+    
+    private boolean connected;
+    
     private boolean closed;
     
-    private boolean bound;
     
     private InputStream in;
 
     private OutputStream out;
 
     LocalSocketImpl() {
-
     }
 
     @Override
@@ -61,6 +63,7 @@ class LocalSocketImpl extends java.net.SocketImpl {
             throw new UnknownServiceException();
         }
         ((LocalSocketImpl)s).socket = nativeAccept(this.socket);
+        ((LocalSocketImpl)s).connected = true;
     }
 
     @Override
@@ -84,7 +87,10 @@ class LocalSocketImpl extends java.net.SocketImpl {
     
     @Override
     protected void close() throws IOException {
-        nativeClose(socket);
+    	if (!this.closed) {
+    		this.closed = true;
+        	nativeClose(socket);
+    	}
     }
 
     @Override
@@ -103,6 +109,8 @@ class LocalSocketImpl extends java.net.SocketImpl {
         	throw new IllegalArgumentException("Unsupported address type");
         }
         nativeConnect(socket, ((LocalSocketAddress) address).getName(), ((LocalSocketAddress) address).isAbstractNamespace(), timeout);
+        this.connected = true;
+        this.bound = true;
     }
 
     @Override
@@ -155,7 +163,23 @@ class LocalSocketImpl extends java.net.SocketImpl {
             close();
         }
     }
+    
+    public boolean isCurrentThreadInterruptedCallback() {
+		return Thread.interrupted();
+	}
 
+    boolean isClosed() {
+    	return closed;
+    }
+
+    boolean isConnected() {
+    	return connected;
+    }
+    
+    boolean isBound() {
+    	return bound;
+    }
+    
     private native int nativeCreate(boolean stream) throws IOException;
     
     private native void nativeConnect(int socket, String name, boolean abstractNamespace, int timeout);

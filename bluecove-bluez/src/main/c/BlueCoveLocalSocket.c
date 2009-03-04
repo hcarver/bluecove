@@ -36,36 +36,62 @@ JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeCreate
     return rc;
 }
 
-bool populateSocketAddress(JNIEnv *env, struct sockaddr_un* saddr, jstring name, jboolean abstractNamespace) {
+bool validateSocket(JNIEnv *env, jint handle) {
+    if (handle < 0) {
+        throwIOException(env, "invalid socket [%d]", handle);
+        return false;
+    } else {
+        return true;
+    }
+}
+
+struct sockaddr_un* populateSocketAddress(JNIEnv *env, int* paddress_len, jstring name, jboolean abstractNamespace) {
     const char* path;
+    int name_len;
+    struct sockaddr_un* paddr;
+
     path = (*env)->GetStringUTFChars(env, name, NULL);
     if (path == NULL) {
-        throwRuntimeException(env, "Internal JNI error");
-        return false;
+        throwRuntimeException(env, "JNI error");
+        return NULL;
     }
 
-    if (abstractNamespace) {
-        strncpy(saddr->sun_path + 1, path, sizeof(saddr->sun_path) - 1);
-        saddr->sun_path[0] = '\0';
-    } else {
-        strncpy(saddr->sun_path, path, sizeof(saddr->sun_path));
+    name_len = (*env)->GetStringUTFLength(env, name);
+    paddr = (struct sockaddr_un*)malloc(sizeof(sa_family_t) + name_len + 1);
+    if (paddr == NULL) {
+        throwRuntimeException(env, "no memory available");
+        return NULL;
     }
-    saddr->sun_path[sizeof(saddr->sun_path) - 1] = '\0';
-    saddr->sun_family = AF_UNIX;
+    if (abstractNamespace) {
+        strncpy(paddr->sun_path + 1, path, name_len);
+        paddr->sun_path[0] = '\0';
+    } else {
+        strncpy(paddr->sun_path, path, name_len + 1);
+    }
+    paddr->sun_family = AF_UNIX;
 
     (*env)->ReleaseStringUTFChars(env, name, path);
-    return true;
+
+    (*paddress_len) = offsetof(struct sockaddr_un, sun_path) + name_len + 1;
+
+    return paddr;
 }
 
 JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeConnect
   (JNIEnv *env, jobject peer, jint handle, jstring name, jboolean abstractNamespace, jint timeout) {
-    struct sockaddr_un saddr;
+    struct sockaddr_un* paddr;
+    int address_len;
     int rc;
 
-    if (!populateSocketAddress(env, &saddr, name, abstractNamespace)) {
+    if (!validateSocket(env, handle)) {
         return;
     }
-    rc = connect(handle, (struct sockaddr *) &saddr, SUN_LEN(&saddr));
+    paddr = populateSocketAddress(env, &address_len, name, abstractNamespace);
+    if (paddr == NULL) {
+        return;
+    }
+    rc = connect((int)handle, (struct sockaddr *) paddr, address_len);
+    free(paddr);
     if (rc < 0) {
         throwIOException(env, "Failed to connect socket. [%d] %s", errno, strerror(errno));
         return;
@@ -75,13 +101,19 @@ JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeConnect
 
 JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeBind
   (JNIEnv *env, jobject peer, jint handle, jstring name, jboolean abstractNamespace) {
-    struct sockaddr_un saddr;
+    struct sockaddr_un* paddr;
+    int address_len;
     int rc;
 
-    if (!populateSocketAddress(env, &saddr, name, abstractNamespace)) {
+    if (!validateSocket(env, handle)) {
         return;
     }
-    rc = bind(handle, (struct sockaddr *) &saddr, SUN_LEN(&saddr));
+    paddr = populateSocketAddress(env, &address_len, name, abstractNamespace);
+    if (paddr == NULL) {
+        return;
+    }
+    rc = bind((int)handle, (struct sockaddr *) paddr, address_len);
+    free(paddr);
     if (rc < 0) {
         throwIOException(env, "Failed to bind socket. [%d] %s", errno, strerror(errno));
         return;
@@ -93,6 +125,9 @@ JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeListen
     int rc;
     int flags;
 
+    if (!validateSocket(env, handle)) {
+        return;
+    }
     // use non-blocking mode
     flags = fcntl(handle, F_GETFL, 0);
     if (SOCKET_ERROR == flags) {
@@ -113,6 +148,10 @@ JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeListen
 
 JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeAccept
   (JNIEnv *env, jobject peer, jint handle) {
+    if (!validateSocket(env, handle)) {
+        return -1;
+    }
+
     int client_socket = SOCKET_ERROR;
     do {
         client_socket = accept(handle, NULL, NULL);
@@ -127,7 +166,7 @@ JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeAccept
                 continue;
             } else {
                 throwIOException(env, "Failed to accept client connection. [%d] %s", errno, strerror(errno));
-                return 0;
+                return -1;
             }
         }
     } while (SOCKET_ERROR == client_socket);
@@ -149,6 +188,11 @@ JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeAvailable
   (JNIEnv *env, jobject peer, jint handle) {
     struct pollfd fds;
     int timeout = 10; // milliseconds
+
+    if (!validateSocket(env, handle)) {
+        return -1;
+    }
+
     fds.fd = handle;
     fds.events = POLLIN | POLLHUP | POLLERR; // | POLLRDHUP;
     fds.revents = 0;
@@ -169,15 +213,22 @@ JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeAvailable
 
 JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeRead
   (JNIEnv *env, jobject peer, jint handle, jbyteArray b, jint off, jint len) {
-    jbyte *bytes = (*env)->GetByteArrayElements(env, b, 0);
-    int done = 0;
+    jbyte *bytes;
+    int done;
+
+    if (!validateSocket(env, handle)) {
+        return -1;
+    }
+
+    bytes = (*env)->GetByteArrayElements(env, b, 0);
+    done = 0;
     while (done == 0) {
         int flags = MSG_DONTWAIT;
         int count = recv(handle, (char *)(bytes + off + done), len - done, flags);
         if (count < 0) {
             if (errno == EAGAIN) { // Try again for non-blocking operation
                 count = 0;
-                 Edebug("no data available for read");
+                debug("no data available for read");
             } else if (errno == ECONNRESET) { //104 Connection reset by peer
                 debug("Connection closed, Connection reset by peer");
                 // See InputStream.read();
@@ -208,12 +259,12 @@ JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeRead
                 struct pollfd fds;
                 int timeout = 500; // milliseconds
                 fds.fd = handle;
-                fds.events = POLLIN | POLLHUP | POLLERR;// | POLLRDHUP;
+                fds.events = POLLIN;
                 fds.revents = 0;
-                //Edebug("poll: wait");
+                //debug("poll: wait");
                 int poll_rc = poll(&fds, 1, timeout);
                 if (poll_rc > 0) {
-                    if (fds.revents & (POLLHUP | POLLERR /* | POLLRDHUP */)) {
+                    if (fds.revents & (POLLHUP | POLLERR)) {
                         debug("Stream socket peer closed connection");
                         done = -1;
                         goto rfReadEnd;
@@ -222,10 +273,10 @@ JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeRead
                          done = -1;
                          goto rfReadEnd;
                     } else if (fds.revents & POLLIN) {
-                        //Edebug("poll: data to read available");
+                        debug("poll: data to read available");
                         available = true;
                     } else {
-                        Edebug("poll: revents %i", fds.revents);
+                        debug("poll: revents %i", fds.revents);
                     }
                 } else if (poll_rc == -1) {
                     //Edebug("poll: call error %i", errno);
@@ -233,7 +284,7 @@ JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeRead
                     done = 0;
                     goto rfReadEnd;
                 } else {
-                    //Edebug("poll: call timed out");
+                    //debug("poll: call timed out");
                 }
                 if (isCurrentThreadInterrupted(env, peer)) {
                     done = -1;
@@ -249,8 +300,15 @@ rfReadEnd:
 
 JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeWrite
   (JNIEnv *env, jobject peer, jint handle, jbyteArray b, jint off, jint len) {
-    jbyte *bytes = (*env)->GetByteArrayElements(env, b, 0);
-    int done = 0;
+    jbyte *bytes;
+    int done;
+
+    if (!validateSocket(env, handle)) {
+        return;
+    }
+
+    bytes = (*env)->GetByteArrayElements(env, b, 0);
+    done = 0;
     while(done < len) {
         int count = send(handle, (char *)(bytes + off + done), len - done, 0);
         if (count < 0) {

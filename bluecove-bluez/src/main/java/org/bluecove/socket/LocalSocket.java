@@ -25,37 +25,93 @@
 package org.bluecove.socket;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.net.SocketImpl;
 
 /**
- *  Unix domain client socket.
+ * Unix domain client socket.
  */
 public class LocalSocket extends java.net.Socket {
 
-    /**
-     * The implementation of this Socket.
-     */
-    private LocalSocketImpl impl;
-    
-    LocalSocket() throws IOException {
-        super((SocketImpl)null);
-        impl = new LocalSocketImpl();
-        impl.create(true);
-    }
-    
-    public LocalSocket(LocalSocketAddress address) throws IOException {
-        this();
-        connect(address);
-    }
-    
-    LocalSocket(LocalSocketImpl impl) throws IOException {
-        super(impl);
-        this.impl = impl;
-    }
-    
-    @Override
-    public void connect(SocketAddress endpoint, int timeout) throws IOException {
-    	impl.connect(endpoint, timeout);
-    }
+	/**
+	 * The implementation of this Socket.
+	 */
+	private LocalSocketImpl impl;
+
+	LocalSocket() throws IOException {
+		super((SocketImpl) null);
+		impl = new LocalSocketImpl();
+		impl.create(true);
+	}
+
+	public LocalSocket(LocalSocketAddress address) throws IOException {
+		this();
+		connect(address);
+	}
+
+	LocalSocket(LocalSocketImpl impl) throws IOException {
+		super((SocketImpl) null);
+		this.impl = impl;
+	}
+
+	@Override
+	public void connect(SocketAddress endpoint, int timeout) throws IOException {
+		if (isClosed()) {
+			throw new SocketException("Socket is already closed");
+		}
+		if (isConnected()) {
+			throw new SocketException("Socket is already connected");
+		}
+		impl.connect(endpoint, timeout);
+	}
+
+	public void close() throws IOException {
+		impl.close();
+	}
+
+	@Override
+	public boolean isConnected() {
+		return impl.isConnected();
+	}
+
+	@Override
+	public boolean isBound() {
+		return impl.isBound();
+	}
+
+	@Override
+	public boolean isClosed() {
+		return impl.isClosed();
+	}
+
+	@Override
+	public OutputStream getOutputStream() throws IOException {
+		if (isClosed()) {
+			throw new SocketException("Socket is already closed");
+		}
+		if (!isConnected()) {
+			throw new SocketException("Socket is not connected");
+		}
+		if (isOutputShutdown()) {
+			throw new SocketException("Socket output is shutdown");
+		}
+		return impl.getOutputStream();
+	}
+
+	@Override
+	public InputStream getInputStream() throws IOException {
+		if (isClosed()) {
+			throw new SocketException("Socket is already closed");
+		}
+		if (!isConnected()) {
+			throw new SocketException("Socket is not connected");
+		}
+		if (isInputShutdown()) {
+			throw new SocketException("Socket input is shutdown");
+		}
+		return impl.getInputStream();
+	}
 }

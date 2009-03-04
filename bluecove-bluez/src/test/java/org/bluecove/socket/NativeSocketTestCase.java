@@ -30,9 +30,9 @@ public class NativeSocketTestCase extends NativeTestCase {
 
     protected Object serverAcceptEvent = new Object();
     
-    protected boolean serverAccepts = false;
+    protected volatile boolean serverAccepts = false;
     
-    private Throwable serverThreadError;
+    private volatile Throwable serverThreadError;
 
     private Thread serverThread;
 
@@ -45,7 +45,7 @@ public class NativeSocketTestCase extends NativeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        super.setUp();
+    	super.setUp();
         serverAccepts = false;
         serverThreadError = null;
         serverThread = runNewServerThread(createTestServer());
@@ -55,6 +55,7 @@ public class NativeSocketTestCase extends NativeTestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         if ((serverThread != null) && (serverThread.isAlive())) {
+        	System.out.println("tearDown; interrupt server thread");
             serverThread.interrupt();
             serverThread.join();
         }
@@ -76,8 +77,14 @@ public class NativeSocketTestCase extends NativeTestCase {
     }
 
     protected void assertServerErrors() {
-        assertNull("Server Errors", serverThreadError);
-    }
+		if (serverThreadError != null) {
+			try {
+				throw new Error("Server Error", serverThreadError);
+			} finally {
+				serverThreadError = null;
+			}
+		}
+	}
 
     private class SafeTestRunnable implements Runnable {
 
@@ -85,7 +92,7 @@ public class NativeSocketTestCase extends NativeTestCase {
 
         private Object startedEvent = new Object();
 
-        private boolean started = false;
+        private volatile boolean started = false;
 
         SafeTestRunnable(TestRunnable runnable) {
             this.runnable = runnable;
@@ -100,7 +107,7 @@ public class NativeSocketTestCase extends NativeTestCase {
             try {
                 runnable.run();
             } catch (Throwable t) {
-            	System.out.println("Server error: " + t.getMessage());
+            	System.out.println("server error: " + t.getMessage());
             	t.printStackTrace(System.out);
                 serverThreadError = t;
             }
