@@ -392,13 +392,13 @@ public class Main extends Frame implements LoggerAppender {
 		menuMore.add(menuLocalDevice);
 
 		Menu menuRemoteDevice = new Menu("RemoteDevice");
-		addMenu(menuRemoteDevice, "Retrieve CACHED", new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		addMenu(menuRemoteDevice, "Retrieve CACHED", new ActionListenerRunnable() {
+			public void run() {
 				RemoteDeviceManager.retrieveDevices(DiscoveryAgent.CACHED);
 			}
 		});
-		addMenu(menuRemoteDevice, "Retrieve PREKNOWN", new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		addMenu(menuRemoteDevice, "Retrieve PREKNOWN", new ActionListenerRunnable() {
+			public void run() {
 				RemoteDeviceManager.retrieveDevices(DiscoveryAgent.PREKNOWN);
 			}
 		});

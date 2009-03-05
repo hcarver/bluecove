@@ -24,9 +24,13 @@
  */
 package net.sf.bluecove.awt;
 
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import net.sf.bluecove.Configuration;
+
+import org.bluecove.tester.log.Logger;
+import org.bluecove.tester.util.RuntimeDetect;
 
 /**
  *
@@ -35,6 +39,17 @@ import java.awt.event.ActionListener;
 public abstract class ActionListenerRunnable implements ActionListener, Runnable {
 
 	public void actionPerformed(ActionEvent e) {
-		EventQueue.invokeLater(this);
+	    Thread t = new Thread("Thread" + e.getActionCommand()) {
+	        public void run() {
+	            try {
+                    RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(Configuration.threadLocalBluetoothStack);
+                    ActionListenerRunnable.this.run();
+                } catch (Throwable e) {
+                    Logger.warn("action error: " + e.toString());
+                }
+	        }
+	    };
+	    t.setDaemon(true);
+	    t.start();
 	}
 }

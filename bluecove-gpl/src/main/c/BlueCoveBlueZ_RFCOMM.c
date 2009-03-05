@@ -131,7 +131,15 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_rfGetSecurit
 
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_connectionRfRead
   (JNIEnv* env, jobject peer, jlong handle, jbyteArray b, jint off, jint len ) {
+    if (b == NULL) {
+        throwRuntimeException(env, "Invalid argument");
+        return;
+    }
     jbyte *bytes = (*env)->GetByteArrayElements(env, b, 0);
+    if (bytes == NULL) {
+        throwRuntimeException(env, "Invalid argument");
+        return;
+    }
     int done = 0;
     while (done == 0) {
         int flags = MSG_DONTWAIT;
@@ -241,8 +249,15 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_connectionRf
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_connectionRfWrite__J_3BII
   (JNIEnv* env, jobject peer, jlong handle, jbyteArray b, jint off, jint len) {
-
+    if (b == NULL) {
+        throwRuntimeException(env, "Invalid argument");
+        return;
+    }
     jbyte *bytes = (*env)->GetByteArrayElements(env, b, 0);
+    if (bytes == NULL) {
+        throwRuntimeException(env, "Invalid argument");
+        return;
+    }
     int done = 0;
     while(done < len) {
         int count = send(handle, (char *)(bytes + off + done), len - done, 0);

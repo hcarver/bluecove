@@ -599,6 +599,7 @@ public class ClientConnectionDialog extends Dialog {
 			public void run() {
 				try {
 					setCursorWait();
+					RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
 					boolean rc = RemoteDeviceHelper.authenticate(device, pin);
 					Logger.info("authenticate returns: " + rc);
 				} catch (IOException e) {
@@ -628,6 +629,7 @@ public class ClientConnectionDialog extends Dialog {
 			public void run() {
 				try {
 					setCursorWait();
+					RuntimeDetect.cldcStub.setThreadLocalBluetoothStack(threadLocalBluetoothStack);
 					RemoteDeviceHelper.removeAuthentication(device);
 					Logger.info("removed authentication");
 				} catch (IOException e) {
