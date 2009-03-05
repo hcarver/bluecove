@@ -19,6 +19,8 @@ BlueCove test Results
 
         * {BlueCove-WC2} - BlueCove with WIDCOMM (Broadcom Bluetooth stack) v4.0.1.2900, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}};
 
+        * {BlueCove-WC3} - BlueCove with WIDCOMM (Broadcom Bluetooth stack) v5.5.0.4300, Integrated Radio on Lenovo W500
+
         * MPx220 - BlueCove with Microsoft Bluetooth stack, Windows Mobile 2003 Phone Edition, Motorola MPx220;
 
         * {BlueCove-BS} - BlueCove with BlueSoleil stack 1.6 on BlueSoleil BS001 Dongle (Class I 100 Metres);
@@ -82,6 +84,10 @@ BlueCove test Results
 | {{{#BlueCove-WC}BlueCove-WC}}  | SE-K790                        |  more than 3,000 Connections made and running
 *--------------------------------+--------------------------------+-
 | {{{#BlueCove-WC2}BlueCove-WC2}}| {{{#BlueCove-BS}BlueCove-BS}}  |  more than 1,000 Connections made and running
+*--------------------------------+--------------------------------+-
+| Mac Pro OS X Integrated        | {{{#BlueCove-WC3}BlueCove-WC3}}|  more than 5,000 Connections made and running
+*--------------------------------+--------------------------------+-
+| {{{#BlueCove-WC3}BlueCove-WC3}}| Mac Pro OS X Integrated        |  more than 2,000 Connections made and running
 *--------------------------------+--------------------------------+-
 
   Just connection tests

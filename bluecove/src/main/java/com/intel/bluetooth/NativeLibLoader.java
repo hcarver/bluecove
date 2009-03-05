@@ -62,7 +62,7 @@ public abstract class NativeLibLoader {
 
 	private static Hashtable libsState = new Hashtable();
 
-	private static String bluecoveDllDir = null;
+	private static Object bluecoveDllDir = null;
 
 	private static class LibState {
 
@@ -336,7 +336,7 @@ public abstract class NativeLibLoader {
 		File fd = makeTempName(libFileName);
 		try {
 			if (!copy2File(is, fd)) {
-				loadErrors.append("\ncan't create temporary file");
+				loadErrors.append("\ncan't create temp file");
 				return false;
 			}
 		} finally {
@@ -378,8 +378,8 @@ public abstract class NativeLibLoader {
 			}
 			return true;
 		} catch (Throwable e) {
-			DebugLog.debug("Can't create temporary file ", e);
-			System.err.println("Can't create temporary file " + fd.getAbsolutePath());
+			DebugLog.debug("Can't create temp file ", e);
+			System.err.println("Can't create temp file " + fd.getAbsolutePath());
 			return false;
 		} finally {
 			if (fos != null) {
@@ -394,9 +394,15 @@ public abstract class NativeLibLoader {
 
 	private static File makeTempName(String libFileName) {
 		if (bluecoveDllDir != null) {
-			return new File(bluecoveDllDir, libFileName);
+			File f = new File((File)bluecoveDllDir, libFileName);
+			DebugLog.debug("tmp file", f.getAbsolutePath());
+			return f;
 		}
 		String tmpDir = System.getProperty("java.io.tmpdir");
+		if ((tmpDir == null) || (tmpDir.length() == 0)) {
+		    // CrEme 3.29
+		    tmpDir = "temp";
+		}
 		String uname = System.getProperty("user.name");
 		int count = 0;
 		File fd = null;
@@ -447,7 +453,8 @@ public abstract class NativeLibLoader {
 			} catch (Throwable e) {
 				// Java 1.1 or J9
 			}
-			bluecoveDllDir = dir.getAbsolutePath();
+			bluecoveDllDir = dir;
+			DebugLog.debug("set dll dir", dir.getAbsolutePath());
 			break;
 		}
 		return fd;

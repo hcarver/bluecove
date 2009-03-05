@@ -33,7 +33,7 @@ BlueCove test application
     This is communication test code {{{http://bluecove.googlecode.com/svn/trunk/bluecove-examples/bluecove-tester/src/main/java/net/sf/bluecove/CommunicationTester.java}CommunicationTester.java}}.
     The same functions are called from server and from client. E.g. sendString() and readString(). In first test Client sendString over established connection and server readString. In second the direction is reversed.
 
-    For tests you need two devices. Once device should run as server another as client. You can switch roles in the application.
+    For tests you need two devices. One device should run as server another as client. You can switch roles in the application.
 
     There is no fancy GUI! Just communication log windows.  While client is running you will see the log like this:
 
@@ -188,6 +188,20 @@ java -cp avetanaBluetooth.jar:bluecove-tester.jar net.sf.bluecove.se.Main
     We tried IBM's J9 VM  and NSICOM's CrEme JVM and BlueCove works there.
 
     If you run test application Mysaifu on Windows Mobile Phone Edition application Menu will not appear in AWT application! Use {{{#keys}hot keys}}. # key two times will exit the application.
+
+    On Windows Mobile you may create link file to start application.
+
+    IBM J9 Personal Profile:
+
+---
+126#"\Program Files\J9\PPRO10\bin\j9.exe" "-jcl:ppro10" -cp "\Storage Card\bluecove\bluecove-tester-mobile.jar" net.sf.bluecove.awt.Main
+---
+
+    IBM J9 MIDP 2.0 Profile: (Follow BlueCove {{{http://code.google.com/p/bluecove/wiki/Documentation}installation instruction}})
+
+---
+255#"\Program Files\J9\MIDP20\bin\emulator.exe" "-Xdescriptor:\Storage Card\bluecove\bctest.jad"  "-Xjam:force"
+---
 
 * Web Start with {previous} releases of BlueCove
 

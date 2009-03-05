@@ -30,15 +30,19 @@ BlueCove
 
     * SUN Sun Java Toolkit for CDC 1.0 on Windows XP/X86 (Need {{{http://snapshot.bluecove.org/special-build/}custom made}} dlls with __cdecl exports)
 
-    * WebSphere Everyplace Micro Environment 5.7.2, CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows XP/X86
+    * WebSphere Everyplace Micro Environment 5.7.2 (IBM J9), CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows XP/X86
 
-    * WebSphere Everyplace Micro Environment 6.1.1, CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows XP and Linux/X86
+    * WebSphere Everyplace Micro Environment 6.1.1 (IBM J9), CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows XP and Linux/X86
 
-    * WebSphere Everyplace Micro Environment 5.7.2, CLDC 1.1, MIDP 2.0 on Windows XP/X86
+    * WebSphere Everyplace Micro Environment 5.7.2 (IBM J9), CLDC 1.1, MIDP 2.0 on Windows XP/X86
 
-    * WebSphere Everyplace Micro Environment 6.1.1, CLDC 1.1, MIDP 2.0 on Linux/X86
+    * WebSphere Everyplace Micro Environment 6.1.1 (IBM J9), CLDC 1.1, MIDP 2.0 on Linux/X86
 
     * {{{http://www2s.biglobe.ne.jp/~dat/java/project/jvm/index_en.html}Mysaifu JVM}} - An open-source (GPL v.2 license) Java VM on Windows Mobile 2003 Second Edition.
+
+    * WebSphere Everyplace Micro Environment 5.7.2 (IBM J9), CDC 1.0/Foundation 1.0/Personal Profile 1.0 on Windows Mobile 2003 Second Edition.
+
+    * WebSphere Everyplace Micro Environment 5.7.2 (IBM J9), CLDC 1.1, MIDP 2.0 on Windows Mobile 2003 Second Edition.
 
     * Java for Mac OS X 10.4 and 10.5, Release 5 on PowerPC and Intel processors
 
@@ -70,7 +74,7 @@ BlueCove
 
     API-Documentation for BlueCove {{{bluecove/apidocs/index.html}Java docs}}. For application it is not recommended to use any classes or API other than defined in JSR-82.
 
-    For more limitations on different stacks see {{{http://code.google.com/p/bluecove/wiki/stacks}BlueCove supported stacks}}. 
+    For more limitations on different stacks see {{{http://code.google.com/p/bluecove/wiki/stacks}BlueCove supported stacks}}.
 
     Main project website {{{http://bluecove.googlecode.com}http://bluecove.googlecode.com}}
 
