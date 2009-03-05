@@ -786,37 +786,25 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
             return DiscoveryListener.SERVICE_SEARCH_ERROR;
         }
         DebugLog.debug("GetRemoteServiceHandles() done.");
-        if ((serviceHandles == null) || (serviceHandles.length == 0))
+        if ((serviceHandles == null) || (serviceHandles.length == 0)) {
             return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
-
+        }
         DebugLog.debug("Found serviceHandles:" + serviceHandles.length);
         RemoteDevice remoteDevice = RemoteDeviceHelper.getCashedDevice(this, remoteDeviceAddress);
-        for (int i = 0; i < serviceHandles.length; ++i) {
+        nextRecord: for (int i = 0; i < serviceHandles.length; ++i) {
             UInt32 handle = serviceHandles[i];
             try {
                 byte[] serviceRecordBytes = adapter.GetRemoteServiceRecord(hexAddress, handle);
                 ServiceRecordImpl sr = new ServiceRecordImpl(this, remoteDevice, handle.intValue());
                 sr.loadByteArray(serviceRecordBytes);
-                boolean accepted = false;
                 for (int u = 0; u < uuidSet.length; u++) {
-                    if ((sr.hasServiceClassUUID(uuidSet[u])) || (sr.hasProtocolClassUUID(uuidSet[u]))) {
-                        DebugLog.debug("found service", i);
-                        sst.addServicesRecords(sr);
-                        accepted = true;
-                        break;
+                    if (!((sr.hasServiceClassUUID(uuidSet[u])) || (sr.hasProtocolClassUUID(uuidSet[u])))) {
+                        DebugLog.debug("ignoring service", sr);
+                        continue nextRecord; 
                     }
                 }
-                if (!accepted) {
-                    DebugLog.debug("ignoring service", sr);
-                }
-                /*
-                 * int[] attributeIDs = serviceRecordImpl.getAttributeIDs(); for
-                 * (int j=0; j < attributeIDs.length; ++j) { DataElement
-                 * dataElement =
-                 * serviceRecordImpl.getAttributeValue(attributeIDs[j]);
-                 * DebugLog.debug("dataElement:" +
-                 * ((Object)dataElement).toString()); }
-                 */
+                DebugLog.debug("found service", i);
+                sst.addServicesRecords(sr);
             } catch (IOException e) {
                 DebugLog.debug("Failed to load serviceRecordBytes", e);
                 // TODO: Is there any logical reason to parse other records?
