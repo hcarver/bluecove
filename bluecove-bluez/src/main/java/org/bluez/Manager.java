@@ -41,38 +41,7 @@ import org.freedesktop.dbus.exceptions.DBusException;
  *
  */
 public interface Manager extends DBusInterface {
-
-	/**
-	 * @deprecated in BlueZ 4
-	 * @return the current interface version. At the moment only version 0 is
-	 *         supported.
-	 */
-	@Deprecated
-	public UInt32 InterfaceVersion() throws Error.InvalidArguments;
-
-	/**
-	 * Returns object path for the default adapter.
-	 *
-	 * @return returns Object in BlueZ 4
-	 */
-	String DefaultAdapter() throws Error.InvalidArguments, Error.NoSuchAdapter;
-
-	/**
-	 * Returns object path for the specified adapter.
-	 *
-	 * @param pattern
-	 *            "hci0" or "00:11:22:33:44:55"
-	 * @return returns Object in BlueZ 4
-	 */
-	String FindAdapter(String pattern) throws Error.InvalidArguments, Error.NoSuchAdapter;
-
-	/**
-	 * Returns list of adapter object paths under /org/bluez
-	 *
-	 * @return returns Object[] in BlueZ 4
-	 */
-	String[] ListAdapters() throws Error.InvalidArguments, Error.Failed, Error.OutOfMemory;
-
+	
 	/**
 	 * @deprecated in BlueZ 4
 	 *

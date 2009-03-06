@@ -48,11 +48,6 @@ public interface Adapter extends DBusInterface {
     //
 
     /**
-     * Returns the device address for a given path. Example: "00:11:22:33:44:55"
-     */
-    String GetAddress();
-
-    /**
      * Returns the version of the Bluetooth chip. This version is compiled from
      * the LMP version. In case of EDR the features attribute must be checked.
      *
@@ -242,10 +237,6 @@ public interface Adapter extends DBusInterface {
      */
     String[] GetServiceClasses() throws Error.NotReady, Error.NoSuchAdapter, Error.Failed;
 
-    /**
-     * Returns the local adapter name (friendly name) in UTF-8.
-     */
-    String GetName() throws Error.NotReady, Error.Failed;
 
     // void SetName(String name)
     //

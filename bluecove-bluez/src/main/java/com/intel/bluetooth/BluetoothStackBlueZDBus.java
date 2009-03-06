@@ -47,10 +47,18 @@ import org.bluez.Manager;
 import org.bluez.Error.Failed;
 import org.bluez.Error.NoSuchAdapter;
 import org.bluez.Error.NotReady;
+import org.bluez.v3.AdapterV3;
+import org.bluez.v3.ManagerV3;
+import org.bluez.v4.AdapterV4;
+import org.bluez.v4.ManagerV4;
+import org.freedesktop.DBus;
 import org.freedesktop.dbus.DBusConnection;
 import org.freedesktop.dbus.DBusSigHandler;
+import org.freedesktop.dbus.Path;
 import org.freedesktop.dbus.UInt32;
 import org.freedesktop.dbus.exceptions.DBusException;
+
+import com.intel.bluetooth.dbus.DBusProperty;
 
 import cx.ath.matthew.unix.UnixSocket;
 
@@ -199,57 +207,100 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
                 throw new BluetoothStateException(e.getMessage());
             }
             try {
-                dbusManager = (Manager) dbusConn.getRemoteObject("org.bluez", "/org/bluez", Manager.class);
+            	dbusManager = dbusConn.getRemoteObject("org.bluez", "/org/bluez", ManagerV3.class);
             } catch (DBusException e) {
                 DebugLog.error("Failed to get bluez dbus manager", e);
                 throw new BluetoothStateException(e.getMessage());
             }
-            String adapterName = null;
-
+            try {
+				((ManagerV3)dbusManager).InterfaceVersion();
+			} catch (DBus.Error.UnknownMethod ok) {
+				DebugLog.debug("Switch to bluez D-Bus for version 4");
+	            try {
+	            	dbusManager = dbusConn.getRemoteObject("org.bluez", "/", ManagerV4.class);
+	            } catch (DBusException e) {
+	                DebugLog.error("Failed to get bluez dbus manager", e);
+	                throw new BluetoothStateException(e.getMessage());
+	            }
+			}
+            
+            Path adapterPath;
             // If the user specifies a specific deviceID then we try to find it.
             String findID = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_LOCAL_DEVICE_ID);
             String deviceAddressStr = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_LOCAL_DEVICE_ADDRESS);
             if (findID != null) {
                 if (findID.startsWith(BLUEZ_DEVICEID_PREFIX)) {
-                    adapterName = dbusManager.FindAdapter(findID);
-                    if (adapterName == null) {
+                	if (dbusManager instanceof ManagerV3) {
+                		adapterPath = new Path(((ManagerV3)dbusManager).FindAdapter(findID));
+                	} else {
+                		adapterPath = ((ManagerV4)dbusManager).FindAdapter(findID);
+                	}
+                    if ((adapterPath == null) || (adapterPath.getPath() == null)) {
                         throw new BluetoothStateException("Can't find '" + findID + "' adapter");
                     }
                 } else {
                     int findNumber = Integer.parseInt(findID);
-                    Object[] adapters = dbusManager.ListAdapters();
+                    Object[] adapters;
+                    if (dbusManager instanceof ManagerV3) {
+                    	adapters = ((ManagerV3)dbusManager).ListAdapters();
+                    } else {
+                    	adapters = ((ManagerV4)dbusManager).ListAdapters();
+                    }
                     if (adapters == null) {
                         throw new BluetoothStateException("Can't find BlueZ adapters");
                     }
                     if ((findNumber < 0) || (findNumber >= adapters.length)) {
                         throw new BluetoothStateException("Can't find adapter #" + findID);
                     }
-                    adapterName = String.valueOf(adapters[findNumber]);
+                    if (dbusManager instanceof ManagerV3) {
+                    	adapterPath = new Path(String.valueOf(adapters[findNumber]));
+                    } else {
+                    	adapterPath = (Path)adapters[findNumber];
+                    }
                 }
             } else if (deviceAddressStr != null) {
-                adapterName = dbusManager.FindAdapter(toHexString(Long.parseLong(deviceAddressStr, 0x10)));
-                if (adapterName == null) {
+            	String pattern = toHexString(Long.parseLong(deviceAddressStr, 0x10));
+            	if (dbusManager instanceof ManagerV3) {
+            		adapterPath = new Path(((ManagerV3)dbusManager).FindAdapter(pattern));
+            	} else {
+            		adapterPath = ((ManagerV4)dbusManager).FindAdapter(pattern);
+            	}
+            	if ((adapterPath == null) || (adapterPath.getPath() == null)) {
                     throw new BluetoothStateException("Can't find adapter with address '" + deviceAddressStr + "'");
                 }
             } else {
-                adapterName = dbusManager.DefaultAdapter();
-                if (adapterName == null) {
+                if (dbusManager instanceof ManagerV3) {
+                	adapterPath = new Path(((ManagerV3)dbusManager).DefaultAdapter());
+            	} else {
+            		adapterPath = ((ManagerV4)dbusManager).DefaultAdapter();
+            	}
+                if ((adapterPath == null) || (adapterPath.getPath() == null)) {
                     throw new BluetoothStateException("Can't find default adapter");
                 }
             }
             try {
-                adapter = dbusConn.getRemoteObject("org.bluez", adapterName, Adapter.class);
+            	if (dbusManager instanceof ManagerV3) {
+            		adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), AdapterV3.class);
+            	} else {
+            		adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), AdapterV4.class);
+            	}
             } catch (DBusException e) {
-                throw new BluetoothStateException(e.getMessage());
+                throw new BluetoothStateException(adapterPath + " " + e.getMessage());
             }
             if (adapter == null) {
-                throw new BluetoothStateException("Can't connect to '" + adapterName + "' adapter");
+                throw new BluetoothStateException("Can't connect to '" + adapterPath + "' adapter");
             }
-            localDeviceBTAddress = convertBTAddress(adapter.GetAddress());
+            if (adapter instanceof AdapterV3) {
+            	localDeviceBTAddress = convertBTAddress(((AdapterV3)adapter).GetAddress());
+            } else {
+            	localDeviceBTAddress = convertBTAddress(DBusProperty.getValue(((AdapterV4)adapter), AdapterV4.Properties.Address));
+            }
             propertiesMap = new TreeMap<String, String>();
             // TODO
             propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX, "1");
-            propertiesMap.put(BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_DEVICE_ID, adapterName.substring(adapterName.indexOf(BLUEZ_DEVICEID_PREFIX)));
+            
+            //propertiesMap.put(BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_DEVICE_ID, adapterName.substring(adapterName.indexOf(BLUEZ_DEVICEID_PREFIX)));
+            
             intialized = true;
         } finally {
             if (!intialized) {
@@ -304,7 +355,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
     // --- LocalDevice
 
     public String getLocalDeviceBluetoothAddress() throws BluetoothStateException {
-        return RemoteDeviceHelper.getBluetoothAddress(convertBTAddress(adapter.GetAddress()));
+        return RemoteDeviceHelper.getBluetoothAddress(localDeviceBTAddress);
     }
 
     public DeviceClass getLocalDeviceClass() {
@@ -377,7 +428,11 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
      */
     public String getLocalDeviceName() {
         try {
-            return adapter.GetName();
+        	if (adapter instanceof AdapterV3) {
+        		return ((AdapterV3)adapter).GetName();
+        	} else {
+        		return DBusProperty.getValue(((AdapterV4)adapter), AdapterV4.Properties.Name);
+        	}
         } catch (NotReady e) {
             return null;
         } catch (Failed e) {
@@ -391,7 +446,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 
     public String getLocalDeviceProperty(String property) {
         if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_DEVICES_LIST.equals(property)) {
-            Object[] adapters = dbusManager.ListAdapters();
+            Object[] adapters = null;//dbusManager.ListAdapters();
             StringBuffer b = new StringBuffer();
             if (adapters != null) {
                 for (int i = 0; i < adapters.length; i++) {
@@ -484,7 +539,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
                 adapter.CreateBonding(toHexString(address));
                 return true;
             } catch (Throwable e) {
-                throw new IOException(e);
+                throw (IOException)UtilsJavaSE.initCause(new IOException(e.getMessage()), e);
             }   
         } else {
             return false;
@@ -502,7 +557,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
         try {
             adapter.RemoveBonding(toHexString(address));
         } catch (Throwable e) {
-            throw new IOException(e);
+        	throw (IOException)UtilsJavaSE.initCause(new IOException(e.getMessage()), e);
         }
     }
 
