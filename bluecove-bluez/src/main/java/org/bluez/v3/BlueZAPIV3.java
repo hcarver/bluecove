@@ -51,7 +51,8 @@ public class BlueZAPIV3 implements BlueZAPI {
 	private Path adapterPath;
 
 	public BlueZAPIV3(DBusConnection dbusConn, ManagerV3 dbusManager) {
-
+		this.dbusConn = dbusConn;
+		this.dbusManager = dbusManager;
 	}
 
 	/*
