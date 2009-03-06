@@ -22,22 +22,29 @@
  *  @author vlads
  *  @version $Id$
  */
-package org.bluez.v3;
+package org.bluez;
 
-import org.bluez.Adapter;
-import org.bluez.Error;
-import org.freedesktop.dbus.DBusInterfaceName;
+import java.util.List;
 
-@DBusInterfaceName("org.bluez.Adapter")
-public interface AdapterV3 extends Adapter {
+import org.freedesktop.dbus.Path;
+import org.freedesktop.dbus.exceptions.DBusException;
 
-	/**
-	 * Returns the device address for a given path. Example: "00:11:22:33:44:55"
-	 */
-	String GetAddress();
+/**
+ * Abstraction interface to access BlueZ over D-Bus
+ */
+public interface BlueZAPI {
 
-	/**
-	 * Returns the local adapter name (friendly name) in UTF-8.
-	 */
-	String GetName() throws Error.NotReady, Error.Failed;
+	public List<String> listAdapters();
+
+	public Path getAdapter(int number);
+
+	public Path findAdapter(String pattern) throws Error.InvalidArguments;
+
+	public Path defaultAdapter() throws Error.InvalidArguments;
+
+	public Adapter selectAdapter(Path adapterPath) throws DBusException;
+
+	public String getAdapterID();
+
+	public String getAdapterAddress();
 }
