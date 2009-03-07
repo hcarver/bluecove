@@ -266,8 +266,30 @@ public interface AdapterV4 extends org.bluez.Adapter, DBusProperties.PropertiesA
      * addition there can be values for the RSSI and the TX power level.
      */
     public class DeviceFound extends DBusSignal {
-        public DeviceFound(String path, String address, Map values) throws DBusException {
-            super(path, address, values);
+        
+        private final String address;
+        
+        private final Map<String, Variant<?>> devicePoperties;
+        
+        public DeviceFound(String path, String address, Map<String, Variant<?>> devicePoperties) throws DBusException {
+            super(path, address, devicePoperties);
+            this.address = address;
+            this.devicePoperties = devicePoperties;
+        }
+        
+        /**
+         * @return the address
+         */
+        public String getDeviceAddress() {
+            return address;
+        }
+
+        /**
+         * @see org.bluez.v4.Device.Properties
+         * @return the devicePoperties
+         */
+        public Map<String, Variant<?>> getDevicePoperties() {
+            return devicePoperties;
         }
     }
 

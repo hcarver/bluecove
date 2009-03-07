@@ -35,38 +35,180 @@ package org.bluez.v3;
 import org.bluez.Error;
 import org.bluez.Manager;
 import org.freedesktop.dbus.DBusInterfaceName;
+import org.freedesktop.dbus.DBusSignal;
 import org.freedesktop.dbus.UInt32;
+import org.freedesktop.dbus.exceptions.DBusException;
 
+/**
+ * This interface provides methods to list the available adapters, retrieve the
+ * default local adapter path and list/activate services. There is just one
+ * Manager object instance provided in the path "/org/bluez".
+ * 
+ * Service org.bluez; Interface org.bluez.Manager; Object path /org/bluez
+ * 
+ * Created base on D-Bus API description for BlueZ
+ * bluez-utils-3.17/hcid/dbus-api.txt
+ * 
+ */
 @DBusInterfaceName("org.bluez.Manager")
 public interface ManagerV3 extends Manager {
 
-	/**
-	 * Deprecated in BlueZ 4
-	 * 
-	 * @return the current interface version. At the moment only version 0 is supported.
-	 */
-	public UInt32 InterfaceVersion() throws Error.InvalidArguments;
+    /**
+     * Deprecated in BlueZ 4
+     * 
+     * @return the current interface version. At the moment only version 0 is
+     *         supported.
+     */
+    public UInt32 InterfaceVersion() throws Error.InvalidArguments;
 
-	/**
-	 * Returns object path for the default adapter.
-	 * 
-	 * @return returns Object in BlueZ 4
-	 */
-	String DefaultAdapter() throws Error.InvalidArguments, Error.NoSuchAdapter;
+    /**
+     * Returns object path for the default adapter.
+     * 
+     * @return returns Object in BlueZ 4
+     */
+    String DefaultAdapter() throws Error.InvalidArguments, Error.NoSuchAdapter;
 
-	/**
-	 * Returns object path for the specified adapter.
-	 * 
-	 * @param pattern
-	 *            "hci0" or "00:11:22:33:44:55"
-	 * @return returns Object in BlueZ 4
-	 */
-	String FindAdapter(String pattern) throws Error.InvalidArguments, Error.NoSuchAdapter;
+    /**
+     * Returns object path for the specified adapter.
+     * 
+     * @param pattern
+     *            "hci0" or "00:11:22:33:44:55"
+     * @return returns Object in BlueZ 4
+     */
+    String FindAdapter(String pattern) throws Error.InvalidArguments, Error.NoSuchAdapter;
 
-	/**
-	 * Returns list of adapter object paths under /org/bluez
-	 * 
-	 * @return returns path list
-	 */
-	String[] ListAdapters() throws Error.InvalidArguments, Error.Failed, Error.OutOfMemory;
+    /**
+     * Returns list of adapter object paths under /org/bluez
+     * 
+     * @return returns path list
+     */
+    String[] ListAdapters() throws Error.InvalidArguments, Error.Failed, Error.OutOfMemory;
+
+    /**
+     * 
+     * Returns object path for the specified service. Valid patterns are the
+     * unqiue identifier or a bus name.
+     * 
+     * @param pattern
+     * @return
+     */
+    String FindService(String pattern) throws Error.InvalidArguments, Error.NoSuchService;
+
+    /**
+     * Returns list of object paths of current services.
+     * 
+     * @return
+     * @throws Error.InvalidArguments
+     */
+    String[] ListServices() throws Error.InvalidArguments;
+
+    /**
+     * Returns the unqiue bus id of the specified service. Valid patterns are
+     * the same as for FindService(). If the service is not running it will be
+     * started.
+     * 
+     * @param pattern
+     * @return
+     */
+    String ActivateService(String pattern);
+
+    /**
+     * Parameter is object path of added adapter.
+     */
+    public class AdapterAdded extends DBusSignal {
+        
+        private final String adapterPath;
+        
+        public AdapterAdded(String path, String adapterPath) throws DBusException {
+            super(path, adapterPath);
+            this.adapterPath = adapterPath;
+        }
+
+        /**
+         * @return the adapterPath
+         */
+        public String getAdapterPath() {
+            return adapterPath;
+        }
+    }
+
+    /**
+     * Parameter is object path of removed adapter. 
+     */
+    public class AdapterRemoved extends DBusSignal {
+        
+        private final String adapterPath;
+        
+        public AdapterRemoved(String path, String adapterPath) throws DBusException {
+            super(path, adapterPath);
+            this.adapterPath = adapterPath;
+        }
+
+        /**
+         * @return the adapterPath
+         */
+        public String getAdapterPath() {
+            return adapterPath;
+        }
+    }
+
+    /**
+     * Parameter is object path of the new default adapter.
+     */
+    public class DefaultAdapterChanged extends DBusSignal {
+        
+        private final String adapterPath;
+        
+        public DefaultAdapterChanged(String path, String adapterPath) throws DBusException {
+            super(path, adapterPath);
+            this.adapterPath = adapterPath;
+        }
+
+        /**
+         * @return the adapterPath
+         */
+        public String getAdapterPath() {
+            return adapterPath;
+        }
+    }
+
+    /**
+     * Parameter is object path of registered service agent.
+     */
+    public class ServiceAdded extends DBusSignal {
+        
+        private final String serviceAgentPath;
+        
+        public ServiceAdded(String path, String serviceAgentPath) throws DBusException {
+            super(path, serviceAgentPath);
+            this.serviceAgentPath = serviceAgentPath;
+        }
+
+        /**
+         * @return the serviceAgentPath
+         */
+        public String getServiceAgentPath() {
+            return serviceAgentPath;
+        }
+    }
+    
+    /**
+     * Parameter is object path of unregistered service agent.
+     */
+    public class ServiceRemoved extends DBusSignal {
+        
+        private final String serviceAgentPath;
+        
+        public ServiceRemoved(String path, String serviceAgentPath) throws DBusException {
+            super(path, serviceAgentPath);
+            this.serviceAgentPath = serviceAgentPath;
+        }
+
+        /**
+         * @return the serviceAgentPath
+         */
+        public String getServiceAgentPath() {
+            return serviceAgentPath;
+        }
+    }
 }

@@ -28,6 +28,7 @@ package com.intel.bluetooth;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -45,12 +46,7 @@ import javax.bluetooth.UUID;
 import org.bluez.Adapter;
 import org.bluez.BlueZAPI;
 import org.bluez.BlueZAPIFactory;
-import org.bluez.Error.Failed;
-import org.bluez.Error.NoSuchAdapter;
-import org.bluez.Error.NotReady;
-import org.bluez.dbus.DBusProperties;
 import org.bluez.v3.AdapterV3;
-import org.bluez.v4.AdapterV4;
 import org.freedesktop.dbus.DBusConnection;
 import org.freedesktop.dbus.DBusSigHandler;
 import org.freedesktop.dbus.Path;
@@ -111,9 +107,11 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 
 	private class DiscoveryData {
 
-		public DeviceClass deviceClass;
+		public int deviceClass;
 
 		public String name;
+		
+		boolean paired;
 	}
 
 	BluetoothStackBlueZDBus() {
@@ -187,8 +185,13 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 				hex.append(":");
 			}
 		}
-		return hex.toString();
+		return hex.toString().toUpperCase(Locale.ENGLISH);
 	}
+	
+    private long convertBTAddress(String anAddress) {
+        long btAddress = Long.parseLong(anAddress.replaceAll(":", ""), 16);
+        return btAddress;
+    }
 
 	public void initialize() throws BluetoothStateException {
 		boolean intialized = false;
@@ -305,65 +308,10 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	}
 
 	public DeviceClass getLocalDeviceClass() {
-		int record = 0;
-		String major = adapter.GetMajorClass();
-
-		if ("computer".equals(major)) {
-			record |= BluetoothConsts.DeviceClassConsts.MAJOR_COMPUTER;
-		} else {
-			DebugLog.debug("Unknown MajorClass", major);
-		}
-
-		String minor = adapter.GetMinorClass();
-		if (minor.equals("uncategorized")) {
-			record |= BluetoothConsts.DeviceClassConsts.COMPUTER_MINOR_UNCLASSIFIED;
-		} else if (minor.equals("desktop")) {
-			record |= BluetoothConsts.DeviceClassConsts.COMPUTER_MINOR_DESKTOP;
-		} else if (minor.equals("server")) {
-			record |= BluetoothConsts.DeviceClassConsts.COMPUTER_MINOR_SERVER;
-		} else if (minor.equals("laptop")) {
-			record |= BluetoothConsts.DeviceClassConsts.COMPUTER_MINOR_LAPTOP;
-		} else if (minor.equals("handheld")) {
-			record |= BluetoothConsts.DeviceClassConsts.COMPUTER_MINOR_HANDHELD;
-		} else if (minor.equals("palm")) {
-			record |= BluetoothConsts.DeviceClassConsts.COMPUTER_MINOR_PALM;
-		} else if (minor.equals("wearable")) {
-			record |= BluetoothConsts.DeviceClassConsts.COMPUTER_MINOR_WEARABLE;
-		} else {
-			DebugLog.debug("Unknown MinorClass", minor);
-			record |= BluetoothConsts.DeviceClassConsts.COMPUTER_MINOR_UNCLASSIFIED;
-		}
-
-		if (DiscoveryAgent.LIAC == getLocalDeviceDiscoverable()) {
-			record |= BluetoothConsts.DeviceClassConsts.LIMITED_DISCOVERY_SERVICE;
-		}
-
-		String[] srvc = adapter.GetServiceClasses();
-		if (srvc != null) {
-			for (int s = 0; s < srvc.length; s++) {
-				String serviceClass = srvc[s];
-				if (serviceClass.equals("positioning")) {
-					record |= BluetoothConsts.DeviceClassConsts.POSITIONING_SERVICE;
-				} else if (serviceClass.equals("networking")) {
-					record |= BluetoothConsts.DeviceClassConsts.NETWORKING_SERVICE;
-				} else if (serviceClass.equals("rendering")) {
-					record |= BluetoothConsts.DeviceClassConsts.RENDERING_SERVICE;
-				} else if (serviceClass.equals("capturing")) {
-					record |= BluetoothConsts.DeviceClassConsts.CAPTURING_SERVICE;
-				} else if (serviceClass.equals("object transfer")) {
-					record |= BluetoothConsts.DeviceClassConsts.OBJECT_TRANSFER_SERVICE;
-				} else if (serviceClass.equals("audio")) {
-					record |= BluetoothConsts.DeviceClassConsts.AUDIO_SERVICE;
-				} else if (serviceClass.equals("telephony")) {
-					record |= BluetoothConsts.DeviceClassConsts.TELEPHONY_SERVICE;
-				} else if (serviceClass.equals("information")) {
-					record |= BluetoothConsts.DeviceClassConsts.INFORMATION_SERVICE;
-				} else {
-					DebugLog.debug("Unknown ServiceClasses", serviceClass);
-				}
-			}
-		}
-
+	    int record = blueZ.getAdapterDeviceClass();
+        if (DiscoveryAgent.LIAC == getLocalDeviceDiscoverable()) {
+            record |= BluetoothConsts.DeviceClassConsts.LIMITED_DISCOVERY_SERVICE;
+        }
 		return new DeviceClass(record);
 	}
 
@@ -373,21 +321,11 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	 * @see javax.bluetooth.LocalDevice#getFriendlyName()
 	 */
 	public String getLocalDeviceName() {
-		try {
-			if (adapter instanceof AdapterV3) {
-				return ((AdapterV3) adapter).GetName();
-			} else {
-				return DBusProperties.getStringValue(((AdapterV4) adapter), AdapterV4.Properties.Name);
-			}
-		} catch (NotReady e) {
-			return null;
-		} catch (Failed e) {
-			return null;
-		}
-	}
+        return blueZ.getAdapterName();
+    }
 
 	public boolean isLocalDevicePowerOn() {
-		return !"off".equals(adapter.GetMode());
+		return blueZ.isAdapterPowerOn();
 	}
 
 	public String getLocalDeviceProperty(String property) {
@@ -401,18 +339,18 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 			}
 			return b.toString();
 		} else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_RADIO_VERSION.equals(property)) {
-			return adapter.GetVersion() + "; HCI " + adapter.GetRevision();
+			return blueZ.getAdapterVersion() + "; HCI " + blueZ.getAdapterRevision();
 		} else if (BlueCoveLocalDeviceProperties.LOCAL_DEVICE_RADIO_MANUFACTURER.equals(property)) {
-			return adapter.GetManufacturer();
+			return blueZ.getAdapterManufacturer();
 		} else {
 			return propertiesMap.get(property);
 		}
 	}
 
 	public int getLocalDeviceDiscoverable() {
-		if (adapter.IsDiscoverable()) {
-			UInt32 timeout = adapter.GetDiscoverableTimeout();
-			if ((timeout == null) || (timeout.intValue() == 0)) {
+		if (blueZ.isAdapterDiscoverable()) {
+			int timeout = blueZ.getAdapterDiscoverableTimeout();
+			if (timeout == 0) {
 				return DiscoveryAgent.GIAC;
 			} else {
 				return DiscoveryAgent.LIAC;
@@ -426,27 +364,10 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 		if (getLocalDeviceDiscoverable() == mode) {
 			return true;
 		}
-		String modeStr;
-		switch (mode) {
-		case DiscoveryAgent.NOT_DISCOVERABLE:
-			modeStr = "connectable";
-			break;
-		case DiscoveryAgent.GIAC:
-			modeStr = "discoverable";
-			break;
-		case DiscoveryAgent.LIAC:
-			modeStr = "limited";
-			break;
-		default:
-			throw new IllegalArgumentException("Invalid discoverable mode");
-		}
 		try {
-			adapter.SetMode(modeStr);
-			return true;
-		} catch (Failed e) {
-			throw new BluetoothStateException(e.getMessage());
-		} catch (NoSuchAdapter e) {
-			throw new BluetoothStateException(e.getMessage());
+		    return blueZ.setAdapterDiscoverable(mode);
+		} catch (DBusException e) {
+			throw (BluetoothStateException) UtilsJavaSE.initCause(new BluetoothStateException(e.getMessage()), e);
 		}
 	}
 
@@ -462,7 +383,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 
 	public boolean authenticateRemoteDevice(long address) throws IOException {
 		try {
-			adapter.CreateBonding(toHexString(address));
+		    ((AdapterV3)adapter).CreateBonding(toHexString(address));
 			return true;
 		} catch (Throwable e) {
 			DebugLog.error("Error creating bonding", e);
@@ -473,7 +394,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException {
 		if (passkey == null) {
 			try {
-				adapter.CreateBonding(toHexString(address));
+				((AdapterV3)adapter).CreateBonding(toHexString(address));
 				return true;
 			} catch (Throwable e) {
 				throw (IOException) UtilsJavaSE.initCause(new IOException(e.getMessage()), e);
@@ -490,7 +411,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	 */
 	public void removeAuthenticationWithRemoteDevice(long address) throws IOException {
 		try {
-			adapter.RemoveBonding(toHexString(address));
+		    ((AdapterV3)adapter).RemoveBonding(toHexString(address));
 		} catch (Throwable e) {
 			throw (IOException) UtilsJavaSE.initCause(new IOException(e.getMessage()), e);
 		}
@@ -508,120 +429,60 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 		return DeviceInquiryThread.startInquiry(this, this, accessCode, listener);
 	}
 
-	private int runDeviceInquiryImpl(DeviceInquiryThread startedNotify, int accessCode, int inquiryLength,
-			int maxResponses, final DiscoveryListener listener) throws BluetoothStateException {
-
-		try {
-			final Object discoveryCompletedEvent = new Object();
-
-			DBusSigHandler<Adapter.DiscoveryCompleted> discoveryCompleted = new DBusSigHandler<Adapter.DiscoveryCompleted>() {
-				public void handle(Adapter.DiscoveryCompleted s) {
-					DebugLog.debug("discoveryCompleted.handle()");
-					synchronized (discoveryCompletedEvent) {
-						discoveryCompletedEvent.notifyAll();
-					}
-				}
-			};
-			dbusConn.addSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
-
-			DBusSigHandler<Adapter.DiscoveryStarted> discoveryStarted = new DBusSigHandler<Adapter.DiscoveryStarted>() {
-				public void handle(Adapter.DiscoveryStarted s) {
-					DebugLog.debug("device discovery procedure has been started.");
-				}
-			};
-			dbusConn.addSigHandler(Adapter.DiscoveryStarted.class, discoveryStarted);
-
-			// Different signal handlers get different device attributes
-			// so we cache the data until device discovery is finished
-			// and then create the RemoteDevice objects.
-			final Map<Long, DiscoveryData> address2DiscoveryData = new HashMap<Long, DiscoveryData>();
-
-			final Map<String, Adapter.RemoteDeviceFound> devicesDiscovered = new HashMap<String, Adapter.RemoteDeviceFound>();
-			DBusSigHandler<Adapter.RemoteDeviceFound> remoteDeviceFound = new DBusSigHandler<Adapter.RemoteDeviceFound>() {
-				public void handle(Adapter.RemoteDeviceFound s) {
-					if (devicesDiscovered.containsKey(s.address)) {
-						return;
-					}
-					// dbus doesn't give us the remote device name so we
-					// can't create the RemoteDevice here as we can never set
-					// the device name later during remoteNameUpdated.
-					DebugLog.debug("device found " + s.address + " , name:" + s.getName() + ", destination:"
-							+ s.getDestination() + ", interface:" + s.getInterface() + ", path:" + s.getPath()
-							+ ", sig:" + s.getSig() + ", source:" + s.getSource() + ", device class:"
-							+ s.deviceClass.intValue());
-					devicesDiscovered.put(s.address, s);
-					DeviceClass deviceClass = new DeviceClass(s.deviceClass.intValue());
-					long longAddress = convertBTAddress(s.address);
-					DiscoveryData discoveryData = address2DiscoveryData.get(longAddress);
-					if (discoveryData == null) {
-						discoveryData = new DiscoveryData();
-						address2DiscoveryData.put(longAddress, discoveryData);
-					}
-					discoveryData.deviceClass = deviceClass;
-				}
-			};
-			dbusConn.addSigHandler(Adapter.RemoteDeviceFound.class, remoteDeviceFound);
-
-			DBusSigHandler<Adapter.RemoteNameUpdated> remoteNameUpdated = new DBusSigHandler<Adapter.RemoteNameUpdated>() {
-				public void handle(Adapter.RemoteNameUpdated s) {
-					DebugLog.debug("deviceNameUpdated() " + s.address + " " + s.name);
-					long longAddress = convertBTAddress(s.address);
-					DiscoveryData discoveryData = address2DiscoveryData.get(longAddress);
-					if (discoveryData == null) {
-						discoveryData = new DiscoveryData();
-						address2DiscoveryData.put(longAddress, discoveryData);
-					}
-					discoveryData.name = s.name;
-				}
-			};
-			dbusConn.addSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
-
-			synchronized (discoveryCompletedEvent) {
-				adapter.DiscoverDevices();
-				startedNotify.deviceInquiryStartedCallback();
-				DebugLog.debug("wait for device inquiry to complete...");
-				try {
-					discoveryCompletedEvent.wait();
-					DebugLog.debug(devicesDiscovered.size() + " device(s) found");
-					if (deviceInquiryCanceled) {
-						return DiscoveryListener.INQUIRY_TERMINATED;
-					}
-
-					for (Long address : address2DiscoveryData.keySet()) {
-						DiscoveryData discoveryData = address2DiscoveryData.get(address);
-						boolean paired = adapter.HasBonding(toHexString(address.longValue()));
-						RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(BluetoothStackBlueZDBus.this,
-								address, discoveryData.name, paired);
-						listener.deviceDiscovered(remoteDevice, discoveryData.deviceClass);
-					}
-					return DiscoveryListener.INQUIRY_COMPLETED;
-				} catch (InterruptedException e) {
-					DebugLog.error("Discovery interrupted.");
-					return DiscoveryListener.INQUIRY_TERMINATED;
-				} catch (Exception e) {
-					DebugLog.error("Discovery process failed", e);
-					throw new BluetoothStateException("Device Inquiry failed:" + e.getMessage());
-				} finally {
-					dbusConn.removeSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
-					dbusConn.removeSigHandler(Adapter.RemoteDeviceFound.class, remoteDeviceFound);
-					dbusConn.removeSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
-				}
-			}
-		} catch (DBusException e) {
-			DebugLog.error("Discovery dbus problem", e);
-			throw new BluetoothStateException("Device Inquiry failed:" + e.getMessage());
-		}
-	}
-
-	public int runDeviceInquiry(DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
+	public int runDeviceInquiry(final DeviceInquiryThread startedNotify, int accessCode, DiscoveryListener listener)
 			throws BluetoothStateException {
 		DebugLog.debug("runDeviceInquiry()");
 		try {
-			int discType = runDeviceInquiryImpl(startedNotify, accessCode, 8, 20, listener);
-			if (deviceInquiryCanceled) {
-				return DiscoveryListener.INQUIRY_TERMINATED;
-			}
-			return discType;
+		    
+	        // Different signal handlers get different device attributes
+            // so we cache the data until device discovery is finished
+            // and then create the RemoteDevice objects.
+            final Map<Long, DiscoveryData> address2DiscoveryData = new HashMap<Long, DiscoveryData>();
+            
+		    BlueZAPI.DeviceInquiryListener bluezDiscoveryListener = new BlueZAPI.DeviceInquiryListener() {
+
+                public void deviceInquiryStarted() {
+                    startedNotify.deviceInquiryStartedCallback();
+                    
+                }
+                
+                public void deviceDiscovered(String deviceAddr, String deviceName, int deviceClass, boolean paired) {
+                    long longAddress = convertBTAddress(deviceAddr);
+                    DiscoveryData discoveryData = address2DiscoveryData.get(longAddress);
+                    if (discoveryData == null) {
+                        discoveryData = new DiscoveryData();
+                        address2DiscoveryData.put(longAddress, discoveryData);
+                    }
+                    if (deviceName != null) {
+                        discoveryData.name = deviceName;
+                    }
+                    if (deviceClass >= 0) {
+                        discoveryData.deviceClass = deviceClass;
+                    }
+                }
+		    };
+		    
+		    try {
+                blueZ.deviceInquiry(bluezDiscoveryListener);
+            } catch (Throwable e) {
+                throw (BluetoothStateException) UtilsJavaSE.initCause(new BluetoothStateException(e.getMessage()), e);
+            }
+		    
+		    for (Long address : address2DiscoveryData.keySet()) {
+                DiscoveryData discoveryData = address2DiscoveryData.get(address);
+                RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(BluetoothStackBlueZDBus.this, address, discoveryData.name,
+                        discoveryData.paired);
+                listener.deviceDiscovered(remoteDevice, new DeviceClass(discoveryData.deviceClass));
+                if (deviceInquiryCanceled) {
+                    break;
+                }
+            }
+		    
+		    if (deviceInquiryCanceled) {
+                return DiscoveryListener.INQUIRY_TERMINATED;
+            } else {
+                return DiscoveryListener.INQUIRY_COMPLETED;
+            }
 		} finally {
 			discoveryListener = null;
 		}
@@ -633,90 +494,47 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	}
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
-		DebugLog.debug("cancelInquiry()");
-		if (discoveryListener != null && discoveryListener == listener) {
-			deviceInquiryCanceled = true;
-			adapter.CancelDiscovery();
-			return true; // TODO: how could the be true or false?
-		} else {
-			return false;
-		}
-	}
+        DebugLog.debug("cancelInquiry()");
+        if (discoveryListener != null && discoveryListener == listener) {
+            deviceInquiryCanceled = true;
+            try {
+                blueZ.deviceInquiryCancel();
+                return true;
+            } catch (DBusException e) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 
 	/**
 	 * Contact the remote device
 	 */
-	public String getRemoteDeviceFriendlyName(final long anAddress) throws IOException {
+	public String getRemoteDeviceFriendlyName(final long deviceAddress) throws IOException {
 		// return adapter.GetRemoteName(toHexString(anAddress));
 		// For JSR-82 GetRemoteName can't be since it use cash.
 
-		DebugLog.debug("getRemoteDeviceFriendlyName()");
-		try {
-			final Object discoveryCompletedEvent = new Object();
-			final Vector<String> namesFound = new Vector<String>();
-
-			DBusSigHandler<Adapter.DiscoveryCompleted> discoveryCompleted = new DBusSigHandler<Adapter.DiscoveryCompleted>() {
-				public void handle(Adapter.DiscoveryCompleted s) {
-					DebugLog.debug("discoveryCompleted.handle()");
-					synchronized (discoveryCompletedEvent) {
-						discoveryCompletedEvent.notifyAll();
-					}
-				}
-			};
-			dbusConn.addSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
-
-			DBusSigHandler<Adapter.RemoteNameUpdated> remoteNameUpdated = new DBusSigHandler<Adapter.RemoteNameUpdated>() {
-				public void handle(Adapter.RemoteNameUpdated s) {
-					if (convertBTAddress(s.address) == anAddress) {
-						if (s.name != null) {
-							namesFound.add(s.name);
-							synchronized (discoveryCompletedEvent) {
-								discoveryCompletedEvent.notifyAll();
-							}
-						} else {
-							DebugLog.debug("device name is null");
-						}
-					} else {
-						DebugLog.debug("ignore device name " + s.address + " " + s.name);
-					}
-				}
-			};
-			dbusConn.addSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
-
-			synchronized (discoveryCompletedEvent) {
-				adapter.DiscoverDevices();
-				DebugLog.debug("wait for device inquiry to complete...");
-				try {
-					discoveryCompletedEvent.wait();
-					DebugLog.debug(namesFound.size() + " device name(s) found");
-					if (namesFound.size() == 0) {
-						throw new IOException("Can't retrive device name");
-					}
-					// return the last name found
-					return namesFound.get(namesFound.size() - 1);
-				} catch (InterruptedException e) {
-					throw new InterruptedIOException();
-				} finally {
-					dbusConn.removeSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
-					dbusConn.removeSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
-				}
-			}
-		} catch (DBusException e) {
-			DebugLog.error("Discovery dbus problem", e);
-			throw new IOException("Device Inquiry failed:" + e.getMessage());
-		}
+	    if (discoveryListener != null) {
+	        throw new IOException("DeviceInquiry alredy running");
+	    }
+	    try {
+            return blueZ.getRemoteDeviceFriendlyName(toHexString(deviceAddress));
+        } catch (DBusException e) {
+            throw (BluetoothStateException) UtilsJavaSE.initCause(new BluetoothStateException(e.getMessage()), e);
+        }
 	}
 
 	public RemoteDevice[] retrieveDevices(int option) {
 		if (DiscoveryAgent.PREKNOWN == option) {
 			final Vector<RemoteDevice> devices = new Vector<RemoteDevice>();
-			String[] bonded = adapter.ListBondings();
+			String[] bonded = ((AdapterV3)adapter).ListBondings();
 			if (bonded != null) {
 				for (int i = 0; i < bonded.length; i++) {
 					devices.add(RemoteDeviceHelper.createRemoteDevice(this, convertBTAddress(bonded[i]), null, true));
 				}
 			}
-			String[] trusted = adapter.ListTrusts();
+			String[] trusted = ((AdapterV3)adapter).ListTrusts();
 			if (trusted != null) {
 				for (int i = 0; i < trusted.length; i++) {
 					devices.add(RemoteDeviceHelper.createRemoteDevice(this, convertBTAddress(trusted[i]), null, false));
@@ -729,11 +547,16 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	}
 
 	public Boolean isRemoteDeviceTrusted(long address) {
-		return Boolean.valueOf(adapter.HasBonding(toHexString(address)));
+		try {
+            return blueZ.isRemoteDeviceTrusted(toHexString(address));
+        } catch (DBusException e) {
+            DebugLog.error("isRemoteDeviceTrusted", e);
+            return Boolean.FALSE;
+        }
 	}
 
 	public Boolean isRemoteDeviceAuthenticated(long address) {
-		return Boolean.valueOf(adapter.IsConnected(toHexString(address)) && adapter.HasBonding(toHexString(address)));
+		return Boolean.valueOf(((AdapterV3)adapter).IsConnected(toHexString(address)) && ((AdapterV3)adapter).HasBonding(toHexString(address)));
 	}
 
 	// --- Service search
@@ -776,7 +599,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 		UInt32[] serviceHandles = null;
 		String hexAddress = toHexString(remoteDeviceAddress);
 		try {
-			serviceHandles = adapter.GetRemoteServiceHandles(hexAddress, match);
+			serviceHandles = ((AdapterV3)adapter).GetRemoteServiceHandles(hexAddress, match);
 		} catch (Throwable t) {
 			DebugLog.debug("GetRemoteServiceHandles() failed:", t);
 			return DiscoveryListener.SERVICE_SEARCH_ERROR;
@@ -790,7 +613,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 		nextRecord: for (int i = 0; i < serviceHandles.length; ++i) {
 			UInt32 handle = serviceHandles[i];
 			try {
-				byte[] serviceRecordBytes = adapter.GetRemoteServiceRecord(hexAddress, handle);
+				byte[] serviceRecordBytes = ((AdapterV3)adapter).GetRemoteServiceRecord(hexAddress, handle);
 				ServiceRecordImpl sr = new ServiceRecordImpl(this, remoteDevice, handle.intValue());
 				sr.loadByteArray(serviceRecordBytes);
 				for (int u = 0; u < uuidSet.length; u++) {
@@ -859,11 +682,6 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	private boolean populateServiceRecordAttributeValuesImpl(long remoteDeviceAddress, long sdpSession, long handle,
 			int[] attrIDs, ServiceRecordImpl serviceRecord) {
 		throw new UnsupportedOperationException("populateServiceRecordAttributeValuesImpl() Not supported yet.");
-	}
-
-	private long convertBTAddress(String anAddress) {
-		long btAddress = Long.parseLong(anAddress.replaceAll(":", ""), 16);
-		return btAddress;
 	}
 
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs)

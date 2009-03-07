@@ -94,6 +94,7 @@ public interface ManagerV4 extends org.bluez.Manager, DBusProperties.PropertiesA
     /**
      * This signal indicates a changed value of the given property.
      */
+    @DBusInterfaceName("org.bluez.Manager.AdapterAdded")
     public class PropertyChanged extends DBusSignal {
         public PropertyChanged(String path, String name, Variant<Object> value) throws DBusException {
             super(path);
@@ -103,6 +104,7 @@ public interface ManagerV4 extends org.bluez.Manager, DBusProperties.PropertiesA
     /**
      * Parameter is object path of added adapter.
      */
+    @DBusInterfaceName("org.bluez.Manager.AdapterAdded")
     public class AdapterAdded extends DBusSignal {
         public AdapterAdded(String path, Path adapter) throws DBusException {
             super(path, adapter);
@@ -112,6 +114,7 @@ public interface ManagerV4 extends org.bluez.Manager, DBusProperties.PropertiesA
     /**
      * Parameter is object path of removed adapter.
      */
+    @DBusInterfaceName("org.bluez.Manager.AdapterAdded")
     public class AdapterRemoved extends DBusSignal {
         public AdapterRemoved(String path, Path adapter) throws DBusException {
             super(path, adapter);
@@ -125,6 +128,7 @@ public interface ManagerV4 extends org.bluez.Manager, DBusProperties.PropertiesA
      * AdapterRemoved signal has to be used to detect that no default adapter is
      * selected or available anymore.
      */
+    @DBusInterfaceName("org.bluez.Manager.AdapterAdded")
     public class DefaultAdapterChanged extends DBusSignal {
         public DefaultAdapterChanged(String path, Path adapter) throws DBusException {
             super(path, adapter);

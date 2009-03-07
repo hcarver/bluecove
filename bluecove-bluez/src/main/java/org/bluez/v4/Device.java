@@ -202,6 +202,7 @@ public interface Device extends DBusInterface, DBusProperties.PropertiesAccess {
     /**
      * This signal indicates a changed value of the given property.
      */
+    @DBusInterfaceName("org.bluez.Device.PropertyChanged")
     public class PropertyChanged extends DBusSignal {
         public PropertyChanged(String path, String name, Variant<Object> value) throws DBusException {
             super(path);

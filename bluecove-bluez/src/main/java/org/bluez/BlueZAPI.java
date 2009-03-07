@@ -24,6 +24,7 @@
  */
 package org.bluez;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.freedesktop.dbus.Path;
@@ -34,6 +35,14 @@ import org.freedesktop.dbus.exceptions.DBusException;
  */
 public interface BlueZAPI {
 
+    public interface DeviceInquiryListener {
+
+        public void deviceInquiryStarted();
+        
+        public void deviceDiscovered(String deviceAddr, String deviceName, int deviceClass, boolean paired);
+        
+    }
+    
 	public List<String> listAdapters();
 
 	public Path getAdapter(int number);
@@ -47,4 +56,30 @@ public interface BlueZAPI {
 	public String getAdapterID();
 
 	public String getAdapterAddress();
+	
+	public int getAdapterDeviceClass();
+	
+	public String getAdapterName();
+	
+	public boolean isAdapterDiscoverable();
+	
+	public int getAdapterDiscoverableTimeout();
+	
+	public String getAdapterVersion();
+	 
+	public String getAdapterRevision();
+	 
+	public String getAdapterManufacturer();
+	
+	public boolean isAdapterPowerOn();
+	
+	public boolean setAdapterDiscoverable(int mode) throws DBusException;
+	
+	public void deviceInquiry(final DeviceInquiryListener listener) throws DBusException, InterruptedException;
+	
+	public void deviceInquiryCancel() throws DBusException;
+	
+	public String getRemoteDeviceFriendlyName(String deviceAddress) throws DBusException, IOException;
+	
+	public Boolean isRemoteDeviceTrusted(String deviceAddress) throws DBusException;
 }

@@ -31,6 +31,7 @@ import java.lang.annotation.Target;
 import java.util.Map;
 
 import org.freedesktop.dbus.DBusInterface;
+import org.freedesktop.dbus.UInt32;
 import org.freedesktop.dbus.Variant;
 
 public abstract class DBusProperties {
@@ -70,7 +71,7 @@ public abstract class DBusProperties {
 		 * 
 		 * @return
 		 */
-		public Map<String, Variant<Object>> GetProperties() throws org.bluez.Error.DoesNotExist, org.bluez.Error.InvalidArguments;
+		public Map<String, Variant<?>> GetProperties() throws org.bluez.Error.DoesNotExist, org.bluez.Error.InvalidArguments;
 
 		/**
 		 * Changes the value of the specified property. Only properties that are listed a read-write are changeable.
@@ -78,14 +79,51 @@ public abstract class DBusProperties {
 		 * @param name
 		 * @param value
 		 */
-		public void SetProperty(String name, Variant<Object> value) throws org.bluez.Error.DoesNotExist, org.bluez.Error.InvalidArguments;
+		public void SetProperty(String name, Variant<?> value) throws org.bluez.Error.DoesNotExist, org.bluez.Error.InvalidArguments;
 	}
 
 	public static String getStringValue(PropertiesAccess dBusInterface, PropertyEnum propertyEnum) {
-		return (String) dBusInterface.GetProperties().get(getPropertyName(propertyEnum)).getValue();
+	    //TODO use type annotation
+	    return getStringValue(dBusInterface.GetProperties(), propertyEnum);
 	}
+	
+	public static String getStringValue(Map<String, Variant<?>> properties, PropertyEnum propertyEnum) {
+        return (String) properties.get(getPropertyName(propertyEnum)).getValue();
+    }
 
-	private static String getPropertyName(PropertyEnum propertyEnum) {
+    public static boolean getBooleanValue(PropertiesAccess dBusInterface, PropertyEnum propertyEnum) {
+        //TODO use type annotation
+        return getBooleanValue(dBusInterface.GetProperties(), propertyEnum);
+    }
+	
+    public static boolean getBooleanValue(Map<String, Variant<?>> properties, PropertyEnum propertyEnum) {
+        //TODO use type annotation
+        return (Boolean) properties.get(getPropertyName(propertyEnum)).getValue();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean getBooleanValue(Map<String, Variant<?>> properties, PropertyEnum propertyEnum, boolean defaultValue) {
+        //TODO use type annotation
+        Variant<Boolean> value = (Variant<Boolean>)properties.get(getPropertyName(propertyEnum));
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return value.getValue();
+        }
+    }
+    
+    public static int getIntValue(PropertiesAccess dBusInterface, PropertyEnum propertyEnum) {
+        //TODO use type annotation
+        return getIntValue(dBusInterface.GetProperties(), propertyEnum);
+    }
+    
+    public static int getIntValue(Map<String, Variant<?>> properties, PropertyEnum propertyEnum) {
+        //TODO use type annotation
+        return ((UInt32) properties.get(getPropertyName(propertyEnum)).getValue()).intValue();
+    }
+    
+    public static String getPropertyName(PropertyEnum propertyEnum) {
+	    //TODO use name annotation
 		return propertyEnum.toString();
 	}
 }

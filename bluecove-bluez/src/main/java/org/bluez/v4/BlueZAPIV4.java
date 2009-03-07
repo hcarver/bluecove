@@ -24,16 +24,27 @@
  */
 package org.bluez.v4;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 
+import javax.bluetooth.DiscoveryAgent;
+
+import org.bluez.Adapter;
 import org.bluez.BlueZAPI;
+import org.bluez.BlueZAPI.DeviceInquiryListener;
 import org.bluez.Error.InvalidArguments;
 import org.bluez.Error.NoSuchAdapter;
 import org.bluez.dbus.DBusProperties;
 import org.freedesktop.dbus.DBusConnection;
+import org.freedesktop.dbus.DBusSigHandler;
 import org.freedesktop.dbus.Path;
+import org.freedesktop.dbus.UInt32;
+import org.freedesktop.dbus.Variant;
 import org.freedesktop.dbus.exceptions.DBusException;
+
+import com.intel.bluetooth.BluetoothConsts;
+import com.intel.bluetooth.DebugLog;
 
 /**
  * Access BlueZ v4 over D-Bus
@@ -149,5 +160,157 @@ public class BlueZAPIV4 implements BlueZAPI {
 			return adapterPath.getPath();
 		}
 	}
+	
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#getAdapterDeviceClass()
+     */
+    public int getAdapterDeviceClass() {
+        // TODO How do I get this in BlueZ 4?
+        return BluetoothConsts.DeviceClassConsts.MAJOR_COMPUTER;
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#getAdapterName()
+     */
+    public String getAdapterName() {
+        return DBusProperties.getStringValue(adapter, AdapterV4.Properties.Name);
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#isAdapterDiscoverable()
+     */
+    public boolean isAdapterDiscoverable() {
+        return DBusProperties.getBooleanValue(adapter, AdapterV4.Properties.Discoverable);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#getAdapterDiscoverableTimeout()
+     */
+    public int getAdapterDiscoverableTimeout() {
+        return DBusProperties.getIntValue(adapter, AdapterV4.Properties.DiscoverableTimeout);
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#setAdapterDiscoverable(int)
+     */
+    public boolean setAdapterDiscoverable(int mode) throws DBusException {
+        switch (mode) {
+        case DiscoveryAgent.NOT_DISCOVERABLE:
+            adapter.SetProperty(DBusProperties.getPropertyName(AdapterV4.Properties.Discoverable), new Variant<Boolean>(Boolean.FALSE));
+            break;
+        case DiscoveryAgent.GIAC:
+            adapter.SetProperty(DBusProperties.getPropertyName(AdapterV4.Properties.DiscoverableTimeout), new Variant<UInt32>(new UInt32(0)));
+            adapter.SetProperty(DBusProperties.getPropertyName(AdapterV4.Properties.Discoverable), new Variant<Boolean>(Boolean.TRUE));
+            break;
+        case DiscoveryAgent.LIAC:
+            adapter.SetProperty(DBusProperties.getPropertyName(AdapterV4.Properties.DiscoverableTimeout), new Variant<UInt32>(new UInt32(180)));
+            adapter.SetProperty(DBusProperties.getPropertyName(AdapterV4.Properties.Discoverable), new Variant<Boolean>(Boolean.TRUE));
+            break;
+        default:
+            throw new IllegalArgumentException("Invalid discoverable mode");
+        }
+        return true;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#getAdapterManufacturer()
+     */
+    public String getAdapterManufacturer() {
+     // TODO How do I get this in BlueZ 4?
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#getAdapterRevision()
+     */
+    public String getAdapterRevision() {
+     // TODO How do I get this in BlueZ 4?
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#getAdapterVersion()
+     */
+    public String getAdapterVersion() {
+     // TODO How do I get this in BlueZ 4?
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#isAdapterPowerOn()
+     */
+    public boolean isAdapterPowerOn() {
+        return DBusProperties.getBooleanValue(adapter, AdapterV4.Properties.Powered);
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#deviceInquiry(org.bluez.BlueZAPI.DeviceInquiryListener)
+     */
+    public void deviceInquiry(final DeviceInquiryListener listener) throws DBusException, InterruptedException {
+        DBusSigHandler<AdapterV4.DeviceFound> remoteDeviceFound = new DBusSigHandler<AdapterV4.DeviceFound>() {
+            public void handle(AdapterV4.DeviceFound s) {
+                String deviceName = DBusProperties.getStringValue(s.getDevicePoperties(), Device.Properties.Name);
+                int deviceClass = DBusProperties.getIntValue(s.getDevicePoperties(), Device.Properties.Class);
+                //TODO verify that this ever present
+                boolean paired = DBusProperties.getBooleanValue(s.getDevicePoperties(), Device.Properties.Paired, false);
+                listener.deviceDiscovered(s.getDeviceAddress(), deviceName, deviceClass, paired);
+            }
+        };
+        try {
+            dbusConn.addSigHandler(AdapterV4.DeviceFound.class, remoteDeviceFound);
+
+            adapter.StartDiscovery();
+            
+            listener.deviceInquiryStarted();
+            
+            while (DBusProperties.getBooleanValue(adapter, AdapterV4.Properties.Discovering)) {
+                Thread.sleep(200);
+            }
+
+            adapter.StopDiscovery();
+
+        } finally {
+            dbusConn.removeSigHandler(AdapterV4.DeviceFound.class, remoteDeviceFound);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#deviceInquiryCancel()
+     */
+    public void deviceInquiryCancel() throws DBusException {
+        adapter.StopDiscovery();
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#getRemoteDeviceFriendlyName(java.lang.String)
+     */
+    public String getRemoteDeviceFriendlyName(String deviceAddress) throws DBusException, IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    private Device findDevice(String deviceAddress) throws DBusException {
+        Path devicePath = adapter.FindDevice(deviceAddress);
+        return dbusConn.getRemoteObject("org.bluez", devicePath.getPath(), Device.class);
+    }
+    
+    private Device getDevice(String deviceAddress) throws DBusException {
+        Variant<Path[]> devices = (Variant<Path[]>)adapter.GetProperties().get(DBusProperties.getPropertyName(AdapterV4.Properties.Devices));
+        if (devices == null) {
+            return null;
+        }
+        Path devicePath = adapter.FindDevice(deviceAddress);
+        return dbusConn.getRemoteObject("org.bluez", devicePath.getPath(), Device.class);
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#isRemoteDeviceTrusted(java.lang.String)
+     */
+    public Boolean isRemoteDeviceTrusted(String deviceAddress) throws DBusException {
+        return null;
+        //TODO
+        //return DBusProperties.getBooleanValue(findDevice(deviceAddress), Device.Properties.Paired);
+    }
+    
 
 }
