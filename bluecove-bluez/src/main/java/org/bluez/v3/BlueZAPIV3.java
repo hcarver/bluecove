@@ -46,9 +46,9 @@ import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.DebugLog;
 
 /**
- * 
+ *
  * Access BlueZ v3 over D-Bus
- * 
+ *
  */
 public class BlueZAPIV3 implements BlueZAPI {
 
@@ -67,7 +67,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#findAdapter(java.lang.String)
      */
     public Path findAdapter(String pattern) throws InvalidArguments {
@@ -86,7 +86,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#defaultAdapter()
      */
     public Path defaultAdapter() throws InvalidArguments {
@@ -105,7 +105,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#getAdapter(int)
      */
     public Path getAdapter(int number) {
@@ -121,7 +121,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#listAdapters()
      */
     public List<String> listAdapters() {
@@ -142,7 +142,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#selectAdapter(org.freedesktop.dbus.Path)
      */
     public Adapter selectAdapter(Path adapterPath) throws DBusException {
@@ -153,7 +153,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#getAdapterAddress()
      */
     public String getAdapterAddress() {
@@ -162,7 +162,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#getAdapterID()
      */
     public String getAdapterID() {
@@ -176,7 +176,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#getAdapterDeviceClass()
      */
     public int getAdapterDeviceClass() {
@@ -240,7 +240,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#getAdapterName()
      */
     public String getAdapterName() {
@@ -255,7 +255,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#isAdapterDiscoverable()
      */
     public boolean isAdapterDiscoverable() {
@@ -264,7 +264,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#getAdapterDiscoverableTimeout()
      */
     public int getAdapterDiscoverableTimeout() {
@@ -273,7 +273,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#setAdapterDiscoverable(int)
      */
     public boolean setAdapterDiscoverable(int mode) throws DBusException {
@@ -297,7 +297,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#getAdapterManufacturer()
      */
     public String getAdapterManufacturer() {
@@ -306,7 +306,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#getAdapterRevision()
      */
     public String getAdapterRevision() {
@@ -315,7 +315,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#getAdapterVersion()
      */
     public String getAdapterVersion() {
@@ -324,7 +324,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#isAdapterPowerOn()
      */
     public boolean isAdapterPowerOn() {
@@ -333,7 +333,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.bluez.BlueZAPI#deviceInquiry(org.bluez.BlueZAPI.DeviceInquiryListener
      * )
@@ -381,7 +381,7 @@ public class BlueZAPIV3 implements BlueZAPI {
                 listener.deviceInquiryStarted();
                 DebugLog.debug("wait for device inquiry to complete...");
                 discoveryCompletedEvent.wait();
-                adapter.CancelDiscovery();
+                //adapter.CancelDiscovery();
             }
 
         } finally {
@@ -394,7 +394,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#deviceInquiryCancel()
      */
     public void deviceInquiryCancel() throws DBusException {
@@ -403,7 +403,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.bluez.BlueZAPI#getRemoteDeviceFriendlyName(java.lang.String)
      */
     public String getRemoteDeviceFriendlyName(final String deviceAddress) throws DBusException, IOException {
