@@ -19,6 +19,14 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
+ *  =======================================================================================
+ *
+ *  BlueZ Java docs licensed under GNU Free Documentation License, Version 1.1 http://www.fsf.org
+ *  Copyright (C) 2004-2008  Marcel Holtmann <marcel@holtmann.org>
+ *  Copyright (C) 2005-2006  Johan Hedberg <johan.hedberg@nokia.com>
+ *  Copyright (C) 2005-2006  Claudio Takahasi <claudio.takahasi@indt.org.br>
+ *  Copyright (C) 2006-2007  Luiz von Dentz <luiz.dentz@indt.org.br> 
+ *
  *  @author vlads
  *  @version $Id$
  */
@@ -156,6 +164,36 @@ public interface Error extends DBusInterface {
 			super(message);
 		}
 	}
+
+	/**
+	 * @since BlueZ v4
+	 */
+	@SuppressWarnings("serial")
+    public class NotInProgress extends DBusExecutionException {
+        public NotInProgress(String message) {
+            super(message);
+        }
+	}
+	
+	/**
+     * @since BlueZ v4
+     */
+    @SuppressWarnings("serial")
+    public class Rejected extends DBusExecutionException {
+        public Rejected(String message) {
+            super(message);
+        }
+    }
+
+    /**
+     * @since BlueZ v4
+     */
+    @SuppressWarnings("serial")
+    public class Canceled extends DBusExecutionException {
+        public Canceled(String message) {
+            super(message);
+        }
+    }
 
 	/**
 	 * The feature is not supported by the remote device

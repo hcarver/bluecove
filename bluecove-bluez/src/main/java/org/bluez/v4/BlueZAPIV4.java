@@ -27,7 +27,6 @@ package org.bluez.v4;
 import java.util.List;
 import java.util.Vector;
 
-import org.bluez.Adapter;
 import org.bluez.BlueZAPI;
 import org.bluez.Error.InvalidArguments;
 import org.bluez.Error.NoSuchAdapter;
@@ -122,7 +121,7 @@ public class BlueZAPIV4 implements BlueZAPI {
 	 * 
 	 * @see org.bluez.BlueZAPI#selectAdapter(org.freedesktop.dbus.Path)
 	 */
-	public Adapter selectAdapter(Path adapterPath) throws DBusException {
+	public org.bluez.Adapter selectAdapter(Path adapterPath) throws DBusException {
 		adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), AdapterV4.class);
 		this.adapterPath = adapterPath;
 		return adapter;

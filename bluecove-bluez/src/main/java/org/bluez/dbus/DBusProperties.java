@@ -24,6 +24,10 @@
  */
 package org.bluez.dbus;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Map;
 
 import org.freedesktop.dbus.DBusInterface;
@@ -31,10 +35,34 @@ import org.freedesktop.dbus.Variant;
 
 public abstract class DBusProperties {
 
-	public interface Property {
+	public interface PropertyEnum {
 
 	}
+	
+	public enum DBusPropertyAccessType {
+	    
+	    READWRITE,
+	    
+	    READONLY;
+	}
 
+	@Target({ElementType.FIELD}) @Retention(RetentionPolicy.RUNTIME)
+	public @interface DBusProperty {
+	    
+	    /**
+	     * The name of the Property. Defaults to the property or Enum name
+	     */
+	    String name() default "";
+	 
+	    /**
+	     * The property type class.
+	     */
+	    Class<?> type() default void.class;
+	    
+	    DBusPropertyAccessType access() default DBusPropertyAccessType.READWRITE;
+	    
+    }
+	
 	public interface PropertiesAccess extends DBusInterface {
 
 		/**
@@ -42,7 +70,7 @@ public abstract class DBusProperties {
 		 * 
 		 * @return
 		 */
-		public Map<String, Variant<Object>> GetProperties();
+		public Map<String, Variant<Object>> GetProperties() throws org.bluez.Error.DoesNotExist, org.bluez.Error.InvalidArguments;
 
 		/**
 		 * Changes the value of the specified property. Only properties that are listed a read-write are changeable.
@@ -50,14 +78,14 @@ public abstract class DBusProperties {
 		 * @param name
 		 * @param value
 		 */
-		public void SetProperty(String name, Variant<Object> value);
+		public void SetProperty(String name, Variant<Object> value) throws org.bluez.Error.DoesNotExist, org.bluez.Error.InvalidArguments;
 	}
 
-	public static String getStringValue(PropertiesAccess dBusInterface, Property propertyEnum) {
+	public static String getStringValue(PropertiesAccess dBusInterface, PropertyEnum propertyEnum) {
 		return (String) dBusInterface.GetProperties().get(getPropertyName(propertyEnum)).getValue();
 	}
 
-	private static String getPropertyName(Property propertyEnum) {
+	private static String getPropertyName(PropertyEnum propertyEnum) {
 		return propertyEnum.toString();
 	}
 }
