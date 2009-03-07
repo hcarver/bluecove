@@ -150,7 +150,7 @@ public abstract class BluetoothConsts {
 		return DeviceClassConsts.toString(dc);
 	}
 
-	static class DeviceClassConsts {
+	public static class DeviceClassConsts {
 
 		public static final int SERVICE_MASK = 0xffe000;
 
