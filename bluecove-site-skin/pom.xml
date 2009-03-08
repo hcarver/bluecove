@@ -19,7 +19,7 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
-    
+
     <distributionManagement>
         <site>
             <id>no-deployment</id>
@@ -35,5 +35,9 @@
             <url>file:///${basedir}/target/tmp</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
+    </properties>
 
 </project>
