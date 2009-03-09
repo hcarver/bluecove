@@ -87,8 +87,17 @@ public abstract class DBusProperties {
 	    return getStringValue(dBusInterface.GetProperties(), propertyEnum);
 	}
 	
-	public static String getStringValue(Map<String, Variant<?>> properties, PropertyEnum propertyEnum) {
-        return (String) properties.get(getPropertyName(propertyEnum)).getValue();
+	@SuppressWarnings("unchecked")
+    public static String getStringValue(Map<String, Variant<?>> properties, PropertyEnum propertyEnum) {
+	    if (properties == null) {
+            return null;
+        }
+        //TODO use type annotation
+        Variant<String> value = (Variant<String>)properties.get(getPropertyName(propertyEnum));
+        if (value == null) {
+            return null;
+        }
+        return value.getValue();
     }
 
     public static boolean getBooleanValue(PropertiesAccess dBusInterface, PropertyEnum propertyEnum) {
@@ -112,14 +121,22 @@ public abstract class DBusProperties {
         }
     }
     
-    public static int getIntValue(PropertiesAccess dBusInterface, PropertyEnum propertyEnum) {
+    public static Integer getIntValue(PropertiesAccess dBusInterface, PropertyEnum propertyEnum) {
         //TODO use type annotation
         return getIntValue(dBusInterface.GetProperties(), propertyEnum);
     }
     
-    public static int getIntValue(Map<String, Variant<?>> properties, PropertyEnum propertyEnum) {
+    @SuppressWarnings("unchecked")
+    public static Integer getIntValue(Map<String, Variant<?>> properties, PropertyEnum propertyEnum) {
+        if (properties == null) {
+            return null;
+        }
         //TODO use type annotation
-        return ((UInt32) properties.get(getPropertyName(propertyEnum)).getValue()).intValue();
+        Variant<UInt32> value = (Variant<UInt32>)properties.get(getPropertyName(propertyEnum));
+        if (value == null) {
+            return null;
+        }
+        return value.getValue().intValue();
     }
     
     public static String getPropertyName(PropertyEnum propertyEnum) {
