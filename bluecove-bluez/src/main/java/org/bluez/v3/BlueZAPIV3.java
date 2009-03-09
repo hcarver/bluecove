@@ -35,10 +35,13 @@ import javax.bluetooth.DiscoveryAgent;
 
 import org.bluez.Adapter;
 import org.bluez.BlueZAPI;
+import org.bluez.Error.ConnectionAttemptFailed;
 import org.bluez.Error.Failed;
+import org.bluez.Error.InProgress;
 import org.bluez.Error.InvalidArguments;
 import org.bluez.Error.NoSuchAdapter;
 import org.bluez.Error.NotReady;
+import org.freedesktop.DBus;
 import org.freedesktop.dbus.DBusConnection;
 import org.freedesktop.dbus.DBusSigHandler;
 import org.freedesktop.dbus.Path;
@@ -476,9 +479,14 @@ public class BlueZAPIV3 implements BlueZAPI {
      */
     public Map<Integer, String> getRemoteDeviceServices(String deviceAddress) throws DBusException {
         String match = "";
-        UInt32[] serviceHandles =  adapter.GetRemoteServiceHandles(deviceAddress, match);
-        if ((serviceHandles == null) || (serviceHandles.length == 0)) {
+        UInt32[] serviceHandles;
+        try {
+            serviceHandles = adapter.GetRemoteServiceHandles(deviceAddress, match);
+        } catch (DBus.Error.NoReply e) {
             return null;
+        }
+        if (serviceHandles == null) {
+            throw new DBusException("Recived no records");
         }
         Map<Integer, String> xmlRecords = new HashMap<Integer, String>();
         for (int i = 0; i < serviceHandles.length; ++i) {
