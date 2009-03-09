@@ -26,7 +26,6 @@
 package com.intel.bluetooth;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -48,9 +47,7 @@ import org.bluez.BlueZAPI;
 import org.bluez.BlueZAPIFactory;
 import org.bluez.v3.AdapterV3;
 import org.freedesktop.dbus.DBusConnection;
-import org.freedesktop.dbus.DBusSigHandler;
 import org.freedesktop.dbus.Path;
-import org.freedesktop.dbus.UInt32;
 import org.freedesktop.dbus.exceptions.DBusException;
 
 import cx.ath.matthew.unix.UnixSocket;
@@ -569,7 +566,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
 			throws BluetoothStateException {
 		try {
-			DebugLog.debug("searchServices() device:" + device.getFriendlyName(false));
+			DebugLog.debug("searchServices() device", device.getBluetoothAddress());
 			return SearchServicesThread.startSearchServices(this, this, attrSet, uuidSet, device, listener);
 		} catch (Exception ex) {
 			DebugLog.debug("searchServices() failed", ex);
@@ -577,93 +574,67 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 		}
 	}
 
-	/**
-	 * Finds services. Implements interface: SearchServicesRunnable
-	 * 
-	 * @param sst
-	 * @param localDeviceBTAddress
-	 * @param uuidValues
-	 * @param remoteDeviceAddress
-	 * @return
-	 * @throws SearchServicesException
-	 */
-	private int getRemoteServices(SearchServicesThread sst, UUID[] uuidSet, long remoteDeviceAddress)
-			throws SearchServicesException {
-		DebugLog.debug0x("getRemoteServices", remoteDeviceAddress);
-		// 1. uuidValues need to be converted somehow to a match String.
-		// http://wiki.bluez.org/wiki/HOWTO/DiscoveringServices states:
-		// "Currently, the BlueZ D-Bus API supports only a single pattern."
-		// So, instead we match everything and do our own matching further
-		// down.
-		String match = "";
-		UInt32[] serviceHandles = null;
-		String hexAddress = toHexString(remoteDeviceAddress);
-		try {
-			serviceHandles = ((AdapterV3)adapter).GetRemoteServiceHandles(hexAddress, match);
-		} catch (Throwable t) {
-			DebugLog.debug("GetRemoteServiceHandles() failed:", t);
-			return DiscoveryListener.SERVICE_SEARCH_ERROR;
-		}
-		DebugLog.debug("GetRemoteServiceHandles() done.");
-		if ((serviceHandles == null) || (serviceHandles.length == 0)) {
-			return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
-		}
-		DebugLog.debug("Found serviceHandles:" + serviceHandles.length);
-		RemoteDevice remoteDevice = RemoteDeviceHelper.getCashedDevice(this, remoteDeviceAddress);
-		nextRecord: for (int i = 0; i < serviceHandles.length; ++i) {
-			UInt32 handle = serviceHandles[i];
-			try {
-				byte[] serviceRecordBytes = ((AdapterV3)adapter).GetRemoteServiceRecord(hexAddress, handle);
-				ServiceRecordImpl sr = new ServiceRecordImpl(this, remoteDevice, handle.intValue());
-				sr.loadByteArray(serviceRecordBytes);
-				for (int u = 0; u < uuidSet.length; u++) {
-					if (!((sr.hasServiceClassUUID(uuidSet[u])) || (sr.hasProtocolClassUUID(uuidSet[u])))) {
-						DebugLog.debug("ignoring service", sr);
-						continue nextRecord;
-					}
-				}
-				DebugLog.debug("found service", i);
-				sst.addServicesRecords(sr);
-			} catch (IOException e) {
-				DebugLog.debug("Failed to load serviceRecordBytes", e);
-				// TODO: Is there any logical reason to parse other records?
-				// throw new SearchServicesException("runSearchServicesImpl()
-				// failed to parse the service record.");
-			}
-		}
-		return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
-	}
+	private int getRemoteServices(SearchServicesThread sst, UUID[] uuidSet, long remoteDeviceAddress) {
+        Map<Integer, String> xmlRecords;
+        try {
+            xmlRecords = blueZ.getRemoteDeviceServices(toHexString(remoteDeviceAddress));
+        } catch (DBusException e) {
+            DebugLog.error("get Service records failed", e);
+            return DiscoveryListener.SERVICE_SEARCH_ERROR;
+        }
+        if (xmlRecords == null) {
+            return DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
+        }
+        RemoteDevice remoteDevice = RemoteDeviceHelper.getCashedDevice(this, remoteDeviceAddress);
+        nextRecord: for (Map.Entry<Integer, String> record : xmlRecords.entrySet()) {
+            DebugLog.debug("pars service record", record.getValue());
+            ServiceRecordImpl sr = new ServiceRecordImpl(this, remoteDevice, record.getKey().intValue());
+            Map<Integer, DataElement> elements;
+            try {
+                elements = BlueZServiceRecordXML.parsXMLRecord(record.getValue());
+            } catch (IOException e) {
+                DebugLog.error("Error parsing service record", e);
+                continue nextRecord;
+            }
+            for (Map.Entry<Integer, DataElement> element : elements.entrySet()) {
+                sr.populateAttributeValue(element.getKey().intValue(), element.getValue());
+            }
+            for (int u = 0; u < uuidSet.length; u++) {
+                if (!((sr.hasServiceClassUUID(uuidSet[u])) || (sr.hasProtocolClassUUID(uuidSet[u])))) {
+                    DebugLog.debug("ignoring service", sr);
+                    continue nextRecord;
+                }
+            }
+            DebugLog.debug("found service");
+            sst.addServicesRecords(sr);
+        }
+        return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
+    }
 
-	public int runSearchServices(SearchServicesThread sst, int[] attrSet, UUID[] uuidSet, RemoteDevice device,
-			DiscoveryListener listener) throws BluetoothStateException {
-		DebugLog.debug("runSearchServices()");
-		sst.searchServicesStartedCallback();
-		try {
-			int respCode = getRemoteServices(sst, uuidSet, RemoteDeviceHelper.getAddress(device));
-			if ((respCode != DiscoveryListener.SERVICE_SEARCH_ERROR) && (sst.isTerminated())) {
-				return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
-			} else if (respCode == DiscoveryListener.SERVICE_SEARCH_COMPLETED) {
-				Vector<ServiceRecord> records = sst.getServicesRecords();
-				if (records.size() != 0) {
-					DebugLog.debug("SearchServices finished", sst.getTransID());
-					ServiceRecord[] servRecordArray = (ServiceRecord[]) Utils.vector2toArray(records,
-							new ServiceRecord[records.size()]);
-					listener.servicesDiscovered(sst.getTransID(), servRecordArray);
-					return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
-				} else {
-					return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
-				}
-			} else {
-				return respCode;
-			}
-		} catch (SearchServicesDeviceNotReachableException e) {
-			return DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
-		} catch (SearchServicesTerminatedException e) {
-			return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
-		} catch (SearchServicesException e) {
-			return DiscoveryListener.SERVICE_SEARCH_ERROR;
-		}
-	}
+    public int runSearchServices(SearchServicesThread sst, int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener)
+            throws BluetoothStateException {
+        DebugLog.debug("runSearchServices()");
+        sst.searchServicesStartedCallback();
+
+        int respCode = getRemoteServices(sst, uuidSet, RemoteDeviceHelper.getAddress(device));
+        DebugLog.debug("SearchServices finished", sst.getTransID());
+        Vector<ServiceRecord> records = sst.getServicesRecords();
+        if (records.size() != 0) {
+            ServiceRecord[] servRecordArray = (ServiceRecord[]) Utils.vector2toArray(records, new ServiceRecord[records.size()]);
+            listener.servicesDiscovered(sst.getTransID(), servRecordArray);
+        }
+        if ((respCode != DiscoveryListener.SERVICE_SEARCH_ERROR) && (sst.isTerminated())) {
+            return DiscoveryListener.SERVICE_SEARCH_TERMINATED;
+        } else if (respCode == DiscoveryListener.SERVICE_SEARCH_COMPLETED) {
+            if (records.size() != 0) {
+                return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
+            } else {
+                return DiscoveryListener.SERVICE_SEARCH_NO_RECORDS;
+            }
+        } else {
+            return respCode;
+        }
+    }
 
 	public boolean cancelServiceSearch(int transID) {
 		DebugLog.debug("cancelServiceSearch()");

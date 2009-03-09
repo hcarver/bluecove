@@ -26,6 +26,7 @@ package org.bluez;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.freedesktop.dbus.Path;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -82,4 +83,9 @@ public interface BlueZAPI {
 	public String getRemoteDeviceFriendlyName(String deviceAddress) throws DBusException, IOException;
 	
 	public Boolean isRemoteDeviceTrusted(String deviceAddress) throws DBusException;
+	
+	/**
+	 * If device could not be reached returns {@code null}
+	 */
+	public Map<Integer, String> getRemoteDeviceServices(String deviceAddress) throws DBusException;
 }

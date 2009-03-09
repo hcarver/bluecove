@@ -25,14 +25,15 @@
 package org.bluez.v4;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.bluetooth.DiscoveryAgent;
 
-import org.bluez.Adapter;
 import org.bluez.BlueZAPI;
-import org.bluez.BlueZAPI.DeviceInquiryListener;
+import org.bluez.Error.DoesNotExist;
 import org.bluez.Error.InvalidArguments;
 import org.bluez.Error.NoSuchAdapter;
 import org.bluez.dbus.DBusProperties;
@@ -44,7 +45,6 @@ import org.freedesktop.dbus.Variant;
 import org.freedesktop.dbus.exceptions.DBusException;
 
 import com.intel.bluetooth.BluetoothConsts;
-import com.intel.bluetooth.DebugLog;
 
 /**
  * Access BlueZ v4 over D-Bus
@@ -310,6 +310,27 @@ public class BlueZAPIV4 implements BlueZAPI {
         return null;
         //TODO
         //return DBusProperties.getBooleanValue(findDevice(deviceAddress), Device.Properties.Paired);
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#getRemoteDeviceServices(java.lang.String)
+     */
+    public Map<Integer, String> getRemoteDeviceServices(String deviceAddress) throws DBusException {
+        Path devicePath;
+        try {
+            devicePath = adapter.FindDevice(deviceAddress);
+        } catch (DoesNotExist e) {
+            devicePath = adapter.CreateDevice(deviceAddress);
+        }
+        Device device = dbusConn.getRemoteObject("org.bluez", devicePath.getPath(), Device.class);
+        
+        Map<UInt32, String> xmlMap =  device.DiscoverServices("");
+        Map<Integer, String> xmlRecords = new HashMap<Integer, String>();
+        for (Map.Entry<UInt32, String> record : xmlMap.entrySet()) {
+            xmlRecords.put(record.getKey().intValue(), record.getValue());
+        }
+        return xmlRecords;
+
     }
     
 

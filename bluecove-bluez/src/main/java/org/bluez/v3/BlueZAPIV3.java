@@ -26,7 +26,9 @@ package org.bluez.v3;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.bluetooth.DiscoveryAgent;
@@ -40,6 +42,7 @@ import org.bluez.Error.NotReady;
 import org.freedesktop.dbus.DBusConnection;
 import org.freedesktop.dbus.DBusSigHandler;
 import org.freedesktop.dbus.Path;
+import org.freedesktop.dbus.UInt32;
 import org.freedesktop.dbus.exceptions.DBusException;
 
 import com.intel.bluetooth.BluetoothConsts;
@@ -466,5 +469,21 @@ public class BlueZAPIV3 implements BlueZAPI {
      */
     public Boolean isRemoteDeviceTrusted(String deviceAddress) throws DBusException {
         return Boolean.valueOf(adapter.HasBonding(deviceAddress));
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#getRemoteDeviceServices(java.lang.String)
+     */
+    public Map<Integer, String> getRemoteDeviceServices(String deviceAddress) throws DBusException {
+        String match = "";
+        UInt32[] serviceHandles =  adapter.GetRemoteServiceHandles(deviceAddress, match);
+        if ((serviceHandles == null) || (serviceHandles.length == 0)) {
+            return null;
+        }
+        Map<Integer, String> xmlRecords = new HashMap<Integer, String>();
+        for (int i = 0; i < serviceHandles.length; ++i) {
+            xmlRecords.put(serviceHandles[i].intValue(), adapter.GetRemoteServiceRecordAsXML(deviceAddress, serviceHandles[i]));
+        }
+        return xmlRecords;
     }
 }

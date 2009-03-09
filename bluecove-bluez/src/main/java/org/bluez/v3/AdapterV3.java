@@ -680,15 +680,12 @@ public interface AdapterV3 extends Adapter {
      */
     public byte[] GetRemoteServiceRecord(String address, UInt32 handle) throws Error.InvalidArguments, Error.InProgress, Error.Failed;
 
-    // String GetRemoteServiceRecordAsXML(String address, UInt32 handle)
-    //
-    // This method will request the SDP database of a remote
-    // device for a service record and return its data in XML
-    // format.
-    //
-    // throws Error.InvalidArguments
-    // Error.InProgress
-    // Error.Failed
+    /**
+     * This method will request the SDP database of a remote device for a
+     * service record and return its data in XML format.
+     */
+    public String GetRemoteServiceRecordAsXML(String address, UInt32 handle) throws Error.InvalidArguments, Error.InProgress, Error.Failed;
+    
     //
     // array{String} GetRemoteServiceIdentifiers(String address)
     //
