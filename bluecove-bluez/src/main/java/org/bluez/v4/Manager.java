@@ -57,7 +57,7 @@ import org.freedesktop.dbus.exceptions.DBusException;
  * Created base on D-Bus API description for BlueZ. bluez-4.32/doc/manager-api.txt
  */
 @DBusInterfaceName("org.bluez.Manager")
-public interface ManagerV4 extends org.bluez.Manager, DBusProperties.PropertiesAccess {
+public interface Manager extends org.bluez.Manager, DBusProperties.PropertiesAccess {
 
     public static enum Properties implements DBusProperties.PropertyEnum {
 

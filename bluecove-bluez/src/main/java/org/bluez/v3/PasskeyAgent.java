@@ -1,6 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2007-2008 Vlad Skarzhevskyy
+ *  Copyright (C) 2007-2009 Vlad Skarzhevskyy
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -30,46 +30,41 @@
  *  @author vlads
  *  @version $Id$
  */
-package org.bluez;
+package org.bluez.v3;
+
+import org.freedesktop.dbus.DBusInterface;
+import org.freedesktop.dbus.DBusInterfaceName;
 
 /**
- * Service unique name; Interface org.bluez.AuthorizationAgent; Object path
- * freely definable
+ * Service unique name;
+ * <p>
+ * Interface org.bluez.PasskeyAgent;
+ * <p>
+ * Object path freely definable
  * 
+ * Created base on D-Bus API description for BlueZ bluez-utils-3.36/hcid/dbus-api.txt
  */
-public interface AuthorizationAgent {
-/*
-	void Authorize(String adapter_path, String address,
-			String service_path, String uuid)
+@DBusInterfaceName("org.bluez.PasskeyAgent")
+public interface PasskeyAgent extends DBusInterface {
 
-	This method gets called when the service daemon wants
-	to get an authorization for accessing a service. This
-	method should return if the remote user is granted
-	access or an error otherwise.
+	/**
+	 * This method gets called when the service daemon needs to get the passkey for an authentication. The return value
+	 * is actual passkey. It is a 1 to 16 byte PIN code in UTF-8 format.
+	 * 
+	 * The first argument contains the path of the local adapter and the second one the remote address.
+	 */
+	public String Request(String path, String address) throws org.bluez.Error.Rejected, org.bluez.Error.Canceled;
 
-	The adapter_path parameter is the object path of the
-	local adapter. The address, service_path and action
-	parameters correspond to the remote device address,
-	the object path of the service and the uuid of the
-	profile.
+	/**
+	 * This method gets called to indicate that the authentication request failed before a reply was returned by the
+	 * Request method.
+	 */
+	public void Cancel(String path, String address);
 
-	throws Error.Rejected
-	                 Error.Canceled
-
-void Cancel(String adapter_path, String address,
-			String service_path, String uuid)
-
-	This method cancels a previous authorization request.
-	The adapter_path, address, service_path and uuid
-	parameters must match the same values that have been
-	used when the Authorize() method was called.
-
-void Release()
-
-	This method gets called when the service daemon
-	unregisters an authorization agent. An agent can
-	use it to do cleanup tasks. There is no need to
-	unregister the agent, because when this method
-	gets called it has already been unregistered.
-*/	
+	/**
+	 * This method gets called when the service daemon unregisters a passkey agent. An agent can use it to do cleanup
+	 * tasks. There is no need to unregister the agent, because when this method gets called it has already been
+	 * unregistered.
+	 */
+	public void Release();
 }

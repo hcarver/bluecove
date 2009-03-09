@@ -50,7 +50,7 @@ import org.freedesktop.dbus.UInt32;
  * Created base on D-Bus API description for BlueZ. bluez-4.32/doc/service-api.txt
  */
 @DBusInterfaceName("org.bluez.Service")
-public interface Service extends org.bluez.Service {
+public interface Service extends org.bluez.v3.Service {
 
     /**
      * Adds a new service record from the XML description and returns the

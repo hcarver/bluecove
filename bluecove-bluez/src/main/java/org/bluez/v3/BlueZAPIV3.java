@@ -57,13 +57,13 @@ public class BlueZAPIV3 implements BlueZAPI {
 
     private DBusConnection dbusConn;
 
-    private ManagerV3 dbusManager;
+    private Manager dbusManager;
 
-    private AdapterV3 adapter;
+    private Adapter adapter;
 
     private Path adapterPath;
 
-    public BlueZAPIV3(DBusConnection dbusConn, ManagerV3 dbusManager) {
+    public BlueZAPIV3(DBusConnection dbusConn, Manager dbusManager) {
         this.dbusConn = dbusConn;
         this.dbusManager = dbusManager;
     }
@@ -149,7 +149,7 @@ public class BlueZAPIV3 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#selectAdapter(org.freedesktop.dbus.Path)
      */
     public void selectAdapter(Path adapterPath) throws DBusException {
-        adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), AdapterV3.class);
+        adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), Adapter.class);
         this.adapterPath = adapterPath;
     }
 
@@ -342,8 +342,8 @@ public class BlueZAPIV3 implements BlueZAPI {
 
         final Object discoveryCompletedEvent = new Object();
 
-        DBusSigHandler<AdapterV3.DiscoveryCompleted> discoveryCompleted = new DBusSigHandler<AdapterV3.DiscoveryCompleted>() {
-            public void handle(AdapterV3.DiscoveryCompleted s) {
+        DBusSigHandler<Adapter.DiscoveryCompleted> discoveryCompleted = new DBusSigHandler<Adapter.DiscoveryCompleted>() {
+            public void handle(Adapter.DiscoveryCompleted s) {
                 DebugLog.debug("discoveryCompleted.handle()");
                 synchronized (discoveryCompletedEvent) {
                     discoveryCompletedEvent.notifyAll();
@@ -351,30 +351,30 @@ public class BlueZAPIV3 implements BlueZAPI {
             }
         };
 
-        DBusSigHandler<AdapterV3.DiscoveryStarted> discoveryStarted = new DBusSigHandler<AdapterV3.DiscoveryStarted>() {
-            public void handle(AdapterV3.DiscoveryStarted s) {
+        DBusSigHandler<Adapter.DiscoveryStarted> discoveryStarted = new DBusSigHandler<Adapter.DiscoveryStarted>() {
+            public void handle(Adapter.DiscoveryStarted s) {
                 DebugLog.debug("device discovery procedure has been started.");
                 //TODO
             }
         };
 
-        DBusSigHandler<AdapterV3.RemoteDeviceFound> remoteDeviceFound = new DBusSigHandler<AdapterV3.RemoteDeviceFound>() {
-            public void handle(AdapterV3.RemoteDeviceFound s) {
+        DBusSigHandler<Adapter.RemoteDeviceFound> remoteDeviceFound = new DBusSigHandler<Adapter.RemoteDeviceFound>() {
+            public void handle(Adapter.RemoteDeviceFound s) {
                 listener.deviceDiscovered(s.getDeviceAddress(), null, s.getDeviceClass().intValue(), adapter.HasBonding(s.getDeviceAddress()));
             }
         };
 
-        DBusSigHandler<AdapterV3.RemoteNameUpdated> remoteNameUpdated = new DBusSigHandler<AdapterV3.RemoteNameUpdated>() {
-            public void handle(AdapterV3.RemoteNameUpdated s) {
+        DBusSigHandler<Adapter.RemoteNameUpdated> remoteNameUpdated = new DBusSigHandler<Adapter.RemoteNameUpdated>() {
+            public void handle(Adapter.RemoteNameUpdated s) {
                 listener.deviceDiscovered(s.getDeviceAddress(), s.getDeviceName(), -1, false);
             }
         };
 
         try {
-            dbusConn.addSigHandler(AdapterV3.DiscoveryCompleted.class, discoveryCompleted);
-            dbusConn.addSigHandler(AdapterV3.DiscoveryStarted.class, discoveryStarted);
-            dbusConn.addSigHandler(AdapterV3.RemoteDeviceFound.class, remoteDeviceFound);
-            dbusConn.addSigHandler(AdapterV3.RemoteNameUpdated.class, remoteNameUpdated);
+            dbusConn.addSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
+            dbusConn.addSigHandler(Adapter.DiscoveryStarted.class, discoveryStarted);
+            dbusConn.addSigHandler(Adapter.RemoteDeviceFound.class, remoteDeviceFound);
+            dbusConn.addSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
 
             synchronized (discoveryCompletedEvent) {
                 adapter.DiscoverDevices();
@@ -385,10 +385,10 @@ public class BlueZAPIV3 implements BlueZAPI {
             }
 
         } finally {
-            dbusConn.removeSigHandler(AdapterV3.RemoteNameUpdated.class, remoteNameUpdated);
-            dbusConn.removeSigHandler(AdapterV3.RemoteDeviceFound.class, remoteDeviceFound);
-            dbusConn.removeSigHandler(AdapterV3.DiscoveryStarted.class, discoveryStarted);
-            dbusConn.removeSigHandler(AdapterV3.DiscoveryCompleted.class, discoveryCompleted);
+            dbusConn.removeSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
+            dbusConn.removeSigHandler(Adapter.RemoteDeviceFound.class, remoteDeviceFound);
+            dbusConn.removeSigHandler(Adapter.DiscoveryStarted.class, discoveryStarted);
+            dbusConn.removeSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
         }
     }
 
@@ -410,8 +410,8 @@ public class BlueZAPIV3 implements BlueZAPI {
         final Object discoveryCompletedEvent = new Object();
         final Vector<String> namesFound = new Vector<String>();
 
-        DBusSigHandler<AdapterV3.DiscoveryCompleted> discoveryCompleted = new DBusSigHandler<AdapterV3.DiscoveryCompleted>() {
-            public void handle(AdapterV3.DiscoveryCompleted s) {
+        DBusSigHandler<Adapter.DiscoveryCompleted> discoveryCompleted = new DBusSigHandler<Adapter.DiscoveryCompleted>() {
+            public void handle(Adapter.DiscoveryCompleted s) {
                 DebugLog.debug("discoveryCompleted.handle()");
                 synchronized (discoveryCompletedEvent) {
                     discoveryCompletedEvent.notifyAll();
@@ -419,8 +419,8 @@ public class BlueZAPIV3 implements BlueZAPI {
             }
         };
 
-        DBusSigHandler<AdapterV3.RemoteNameUpdated> remoteNameUpdated = new DBusSigHandler<AdapterV3.RemoteNameUpdated>() {
-            public void handle(AdapterV3.RemoteNameUpdated s) {
+        DBusSigHandler<Adapter.RemoteNameUpdated> remoteNameUpdated = new DBusSigHandler<Adapter.RemoteNameUpdated>() {
+            public void handle(Adapter.RemoteNameUpdated s) {
                 if (deviceAddress.equals(s.getDeviceAddress())) {
                     if (s.getDeviceName() != null) {
                         namesFound.add(s.getDeviceName());
@@ -437,8 +437,8 @@ public class BlueZAPIV3 implements BlueZAPI {
         };
 
         try {
-            dbusConn.addSigHandler(AdapterV3.DiscoveryCompleted.class, discoveryCompleted);
-            dbusConn.addSigHandler(AdapterV3.RemoteNameUpdated.class, remoteNameUpdated);
+            dbusConn.addSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
+            dbusConn.addSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
 
             synchronized (discoveryCompletedEvent) {
                 adapter.DiscoverDevices();
@@ -456,8 +456,8 @@ public class BlueZAPIV3 implements BlueZAPI {
                 }
             }
         } finally {
-            dbusConn.removeSigHandler(AdapterV3.RemoteNameUpdated.class, remoteNameUpdated);
-            dbusConn.removeSigHandler(AdapterV3.DiscoveryCompleted.class, discoveryCompleted);
+            dbusConn.removeSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
+            dbusConn.removeSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
         }
     }
 

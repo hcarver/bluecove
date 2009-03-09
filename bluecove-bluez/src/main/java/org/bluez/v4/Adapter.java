@@ -59,7 +59,7 @@ import org.freedesktop.dbus.exceptions.DBusException;
  * Created base on D-Bus API description for BlueZ. bluez-4.32/doc/adapter-api.txt
  */
 @DBusInterfaceName("org.bluez.Adapter")
-public interface AdapterV4 extends org.bluez.Adapter, DBusProperties.PropertiesAccess {
+public interface Adapter extends org.bluez.Adapter, DBusProperties.PropertiesAccess {
 
     public static enum Properties implements DBusProperties.PropertyEnum {
 

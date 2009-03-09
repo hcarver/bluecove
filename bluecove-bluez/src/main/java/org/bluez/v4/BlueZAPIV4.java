@@ -54,13 +54,13 @@ public class BlueZAPIV4 implements BlueZAPI {
 
     private DBusConnection dbusConn;
 
-    private ManagerV4 dbusManager;
+    private Manager dbusManager;
 
-    private AdapterV4 adapter;
+    private Adapter adapter;
 
     private Path adapterPath;
 
-    public BlueZAPIV4(DBusConnection dbusConn, ManagerV4 dbusManager) {
+    public BlueZAPIV4(DBusConnection dbusConn, Manager dbusManager) {
         this.dbusConn = dbusConn;
         this.dbusManager = dbusManager;
     }
@@ -134,7 +134,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#selectAdapter(org.freedesktop.dbus.Path)
      */
     public void selectAdapter(Path adapterPath) throws DBusException {
-        adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), AdapterV4.class);
+        adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), Adapter.class);
         this.adapterPath = adapterPath;
     }
 
@@ -144,7 +144,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#getAdapterAddress()
      */
     public String getAdapterAddress() {
-        return DBusProperties.getStringValue(adapter, AdapterV4.Properties.Address);
+        return DBusProperties.getStringValue(adapter, Adapter.Properties.Address);
     }
 
     /*
@@ -177,7 +177,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#getAdapterName()
      */
     public String getAdapterName() {
-        return DBusProperties.getStringValue(adapter, AdapterV4.Properties.Name);
+        return DBusProperties.getStringValue(adapter, Adapter.Properties.Name);
     }
 
     /*
@@ -186,7 +186,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#isAdapterDiscoverable()
      */
     public boolean isAdapterDiscoverable() {
-        return DBusProperties.getBooleanValue(adapter, AdapterV4.Properties.Discoverable);
+        return DBusProperties.getBooleanValue(adapter, Adapter.Properties.Discoverable);
     }
 
     /*
@@ -195,7 +195,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#getAdapterDiscoverableTimeout()
      */
     public int getAdapterDiscoverableTimeout() {
-        return DBusProperties.getIntValue(adapter, AdapterV4.Properties.DiscoverableTimeout);
+        return DBusProperties.getIntValue(adapter, Adapter.Properties.DiscoverableTimeout);
     }
 
     /*
@@ -206,15 +206,15 @@ public class BlueZAPIV4 implements BlueZAPI {
     public boolean setAdapterDiscoverable(int mode) throws DBusException {
         switch (mode) {
         case DiscoveryAgent.NOT_DISCOVERABLE:
-            adapter.SetProperty(DBusProperties.getPropertyName(AdapterV4.Properties.Discoverable), new Variant<Boolean>(Boolean.FALSE));
+            adapter.SetProperty(DBusProperties.getPropertyName(Adapter.Properties.Discoverable), new Variant<Boolean>(Boolean.FALSE));
             break;
         case DiscoveryAgent.GIAC:
-            adapter.SetProperty(DBusProperties.getPropertyName(AdapterV4.Properties.DiscoverableTimeout), new Variant<UInt32>(new UInt32(0)));
-            adapter.SetProperty(DBusProperties.getPropertyName(AdapterV4.Properties.Discoverable), new Variant<Boolean>(Boolean.TRUE));
+            adapter.SetProperty(DBusProperties.getPropertyName(Adapter.Properties.DiscoverableTimeout), new Variant<UInt32>(new UInt32(0)));
+            adapter.SetProperty(DBusProperties.getPropertyName(Adapter.Properties.Discoverable), new Variant<Boolean>(Boolean.TRUE));
             break;
         case DiscoveryAgent.LIAC:
-            adapter.SetProperty(DBusProperties.getPropertyName(AdapterV4.Properties.DiscoverableTimeout), new Variant<UInt32>(new UInt32(180)));
-            adapter.SetProperty(DBusProperties.getPropertyName(AdapterV4.Properties.Discoverable), new Variant<Boolean>(Boolean.TRUE));
+            adapter.SetProperty(DBusProperties.getPropertyName(Adapter.Properties.DiscoverableTimeout), new Variant<UInt32>(new UInt32(180)));
+            adapter.SetProperty(DBusProperties.getPropertyName(Adapter.Properties.Discoverable), new Variant<Boolean>(Boolean.TRUE));
             break;
         default:
             throw new IllegalArgumentException("Invalid discoverable mode");
@@ -258,7 +258,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#isAdapterPowerOn()
      */
     public boolean isAdapterPowerOn() {
-        return DBusProperties.getBooleanValue(adapter, AdapterV4.Properties.Powered);
+        return DBusProperties.getBooleanValue(adapter, Adapter.Properties.Powered);
     }
 
     /*
@@ -267,8 +267,8 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#deviceInquiry(org.bluez.BlueZAPI.DeviceInquiryListener)
      */
     public void deviceInquiry(final DeviceInquiryListener listener) throws DBusException, InterruptedException {
-        DBusSigHandler<AdapterV4.DeviceFound> remoteDeviceFound = new DBusSigHandler<AdapterV4.DeviceFound>() {
-            public void handle(AdapterV4.DeviceFound s) {
+        DBusSigHandler<Adapter.DeviceFound> remoteDeviceFound = new DBusSigHandler<Adapter.DeviceFound>() {
+            public void handle(Adapter.DeviceFound s) {
                 String deviceName = null;
                 int deviceClass = -1;
                 boolean paired = false;
@@ -283,20 +283,20 @@ public class BlueZAPIV4 implements BlueZAPI {
             }
         };
         try {
-            dbusConn.addSigHandler(AdapterV4.DeviceFound.class, remoteDeviceFound);
+            dbusConn.addSigHandler(Adapter.DeviceFound.class, remoteDeviceFound);
 
             adapter.StartDiscovery();
 
             listener.deviceInquiryStarted();
 
-            while (DBusProperties.getBooleanValue(adapter, AdapterV4.Properties.Discovering)) {
+            while (DBusProperties.getBooleanValue(adapter, Adapter.Properties.Discovering)) {
                 Thread.sleep(200);
             }
 
             adapter.StopDiscovery();
 
         } finally {
-            dbusConn.removeSigHandler(AdapterV4.DeviceFound.class, remoteDeviceFound);
+            dbusConn.removeSigHandler(Adapter.DeviceFound.class, remoteDeviceFound);
         }
     }
 

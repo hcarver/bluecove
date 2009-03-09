@@ -1,6 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2007-2008 Vlad Skarzhevskyy
+ *  Copyright (C) 2007-2009 Vlad Skarzhevskyy
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -30,34 +30,32 @@
  *  @author vlads
  *  @version $Id$
  */
-package org.bluez;
+package org.bluez.v3;
 
-import org.freedesktop.dbus.DBusInterface;
 import org.bluez.Error;
+import org.freedesktop.dbus.DBusInterface;
+import org.freedesktop.dbus.DBusInterfaceName;
 import org.freedesktop.dbus.UInt32;
+
 /**
- * SDP queries involves transactions between an SDP server and an SDP client.
- * The server maintains a list of service records that describe the
- * characteristics of services associated with the server.
+ * SDP queries involves transactions between an SDP server and an SDP client. The server maintains a list of service
+ * records that describe the characteristics of services associated with the server.
  * <p>
- * The database interface provides methods to manage local service records(SDP
- * Server). All of the information about a service that is maintained by an SDP
- * server is contained within a single service record. A service record is
- * basically a list of service attributes. Each service attribute describes a
- * single characteristic of a service such as the service type, name,
- * description, ...
+ * The database interface provides methods to manage local service records(SDP Server). All of the information about a
+ * service that is maintained by an SDP server is contained within a single service record. A service record is
+ * basically a list of service attributes. Each service attribute describes a single characteristic of a service such as
+ * the service type, name, description, ...
  * <p>
- * Client methods are available at Adapter interface. See
- * GetRemoteService?{handles, record} methods for more information how retrieve
- * remote service handles/records.
+ * Client methods are available at Adapter interface. See GetRemoteService?{handles, record} methods for more
+ * information how retrieve remote service handles/records.
  * 
  */
+@DBusInterfaceName("org.bluez.Database")
 public interface Database extends DBusInterface {
-	
+
 	/**
-	 * This method registers a new service specified by its unique identifier.
-	 * This is only needed for services that are not started through the
-	 * Bluetooth daemon.
+	 * This method registers a new service specified by its unique identifier. This is only needed for services that are
+	 * not started through the Bluetooth daemon.
 	 */
 
 	void RegisterService(String identifier, String name, String description);
@@ -95,8 +93,7 @@ public interface Database extends DBusInterface {
 	/**
 	 * Remove a service record identified by its handle.
 	 * <p>
-	 * It is only possible to remove service records that where added by the
-	 * current connection.
+	 * It is only possible to remove service records that where added by the current connection.
 	 * 
 	 * @param handle
 	 */
@@ -104,21 +101,18 @@ public interface Database extends DBusInterface {
 			Error.Failed;
 
 	/**
-	 * This method gets called when a service wants to check if a remote device
-	 * is authorized to perform some action. The authorization request is
-	 * forwarded to an authorization agent.
+	 * This method gets called when a service wants to check if a remote device is authorized to perform some action.
+	 * The authorization request is forwarded to an authorization agent.
 	 * <p>
-	 * The address parameter is the Bluetooth address of the remote device and
-	 * the uuid is the identifier of the profile requesting the authorization.
-	 * This parameter can also be left blank.
+	 * The address parameter is the Bluetooth address of the remote device and the uuid is the identifier of the profile
+	 * requesting the authorization. This parameter can also be left blank.
 	 */
 	void RequestAuthorization(String address, String uuid);
 
 	/**
-	 * This method cancels an authorization process requested by a previous call
-	 * to RequestAuthorization(). The address and uuid parameters must match.
+	 * This method cancels an authorization process requested by a previous call to RequestAuthorization(). The address
+	 * and uuid parameters must match.
 	 */
 	void CancelAuthorizationRequest(String address, String uuid);
-
 
 }

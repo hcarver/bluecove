@@ -1,6 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2007-2008 Vlad Skarzhevskyy
+ *  Copyright (C) 2007-2009 Vlad Skarzhevskyy
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -169,31 +169,31 @@ public interface Error extends DBusInterface {
 	 * @since BlueZ v4
 	 */
 	@SuppressWarnings("serial")
-    public class NotInProgress extends DBusExecutionException {
-        public NotInProgress(String message) {
-            super(message);
-        }
+	public class NotInProgress extends DBusExecutionException {
+		public NotInProgress(String message) {
+			super(message);
+		}
 	}
-	
-	/**
-     * @since BlueZ v4
-     */
-    @SuppressWarnings("serial")
-    public class Rejected extends DBusExecutionException {
-        public Rejected(String message) {
-            super(message);
-        }
-    }
 
-    /**
-     * @since BlueZ v4
-     */
-    @SuppressWarnings("serial")
-    public class Canceled extends DBusExecutionException {
-        public Canceled(String message) {
-            super(message);
-        }
-    }
+	/**
+	 * @since BlueZ v4
+	 */
+	@SuppressWarnings("serial")
+	public class Rejected extends DBusExecutionException {
+		public Rejected(String message) {
+			super(message);
+		}
+	}
+
+	/**
+	 * @since BlueZ v4
+	 */
+	@SuppressWarnings("serial")
+	public class Canceled extends DBusExecutionException {
+		public Canceled(String message) {
+			super(message);
+		}
+	}
 
 	/**
 	 * The feature is not supported by the remote device

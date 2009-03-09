@@ -1,6 +1,6 @@
 /**
  *  BlueCove - Java library for Bluetooth
- *  Copyright (C) 2007-2008 Vlad Skarzhevskyy
+ *  Copyright (C) 2007-2009 Vlad Skarzhevskyy
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -37,7 +37,7 @@ import org.freedesktop.dbus.DBusInterface;
 /**
  * 
  * The "Adapter" interface provides methods to access the local adapter(s).
- *
+ * 
  */
 public interface Adapter extends DBusInterface {
 }
