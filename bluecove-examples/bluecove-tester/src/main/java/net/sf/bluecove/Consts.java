@@ -69,7 +69,8 @@ public interface Consts {
 
 	public static final int TEST_SERVICE_ATTRIBUTE_URL_ID = 0x0A2;
 
-	public static final String TEST_SERVICE_ATTRIBUTE_URL_VALUE = "http:/www.bluecove.org:80/someUrl?q=10&bluecove=123&ServiceDiscovery=Test";
+	// The query params in URL are not working on BlueZ xml format ?q=10&bluecove=123&ServiceDiscovery=Test
+	public static final String TEST_SERVICE_ATTRIBUTE_URL_VALUE = "http:/www.bluecove.org:80/someUrl";
 
 	public static final int TEST_SERVICE_ATTRIBUTE_LONG_ID = 0x0A3;
 
