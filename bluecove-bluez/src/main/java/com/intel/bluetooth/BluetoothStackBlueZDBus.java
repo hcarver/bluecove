@@ -385,8 +385,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 
     public boolean authenticateRemoteDevice(long address, String passkey) throws IOException {
         try {
-            blueZ.authenticateRemoteDevice(toHexString(address), passkey);
-            return true;
+            return blueZ.authenticateRemoteDevice(toHexString(address), passkey);
         } catch (Throwable e) {
             throw (IOException) UtilsJavaSE.initCause(new IOException(e.getMessage()), e);
         }

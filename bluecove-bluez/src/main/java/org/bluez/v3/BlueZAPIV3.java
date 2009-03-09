@@ -520,8 +520,9 @@ public class BlueZAPIV3 implements BlueZAPI {
      * java.lang.String)
      */
     public boolean authenticateRemoteDevice(String deviceAddress, String passkey) throws DBusException {
-        if (passkey == null) {
-            return false;
+        if (passkey != null) {
+            //return false;
+            throw new DBusException("TODO: implement this using AuthorizationAgent");
         } else {
             adapter.CreateBonding(deviceAddress);
             return true;

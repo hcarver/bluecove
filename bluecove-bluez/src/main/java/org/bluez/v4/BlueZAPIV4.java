@@ -382,6 +382,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      */
     public void authenticateRemoteDevice(String deviceAddress) throws DBusException {
         // TODO Auto-generated method stub
+        throw new DBusException("TODO: implement this using Agent");
     }
 
     /*
@@ -392,7 +393,8 @@ public class BlueZAPIV4 implements BlueZAPI {
      */
     public boolean authenticateRemoteDevice(String deviceAddress, String passkey) throws DBusException {
         // TODO Auto-generated method stub
-        return false;
+        //return false;
+        throw new DBusException("TODO: implement this using Agent");
     }
 
     /*
