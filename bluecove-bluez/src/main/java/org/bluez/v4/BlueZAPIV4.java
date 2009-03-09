@@ -51,117 +51,119 @@ import com.intel.bluetooth.BluetoothConsts;
  */
 public class BlueZAPIV4 implements BlueZAPI {
 
-	private DBusConnection dbusConn;
+    private DBusConnection dbusConn;
 
-	private ManagerV4 dbusManager;
+    private ManagerV4 dbusManager;
 
-	private AdapterV4 adapter;
+    private AdapterV4 adapter;
 
-	private Path adapterPath;
+    private Path adapterPath;
 
-	public BlueZAPIV4(DBusConnection dbusConn, ManagerV4 dbusManager) {
-		this.dbusConn = dbusConn;
-		this.dbusManager = dbusManager;
-	}
+    public BlueZAPIV4(DBusConnection dbusConn, ManagerV4 dbusManager) {
+        this.dbusConn = dbusConn;
+        this.dbusManager = dbusManager;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.bluez.BlueZAPI#findAdapter(java.lang.String)
-	 */
-	public Path findAdapter(String pattern) throws InvalidArguments {
-		try {
-			return dbusManager.FindAdapter(pattern);
-		} catch (NoSuchAdapter e) {
-			return null;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#findAdapter(java.lang.String)
+     */
+    public Path findAdapter(String pattern) throws InvalidArguments {
+        try {
+            return dbusManager.FindAdapter(pattern);
+        } catch (NoSuchAdapter e) {
+            return null;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.bluez.BlueZAPI#defaultAdapter()
-	 */
-	public Path defaultAdapter() throws InvalidArguments {
-		try {
-			return dbusManager.DefaultAdapter();
-		} catch (NoSuchAdapter e) {
-			return null;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#defaultAdapter()
+     */
+    public Path defaultAdapter() throws InvalidArguments {
+        try {
+            return dbusManager.DefaultAdapter();
+        } catch (NoSuchAdapter e) {
+            return null;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.bluez.BlueZAPI#getAdapter(int)
-	 */
-	public Path getAdapter(int number) {
-		Path[] adapters = dbusManager.ListAdapters();
-		if (adapters == null) {
-			throw null;
-		}
-		if ((number < 0) || (number >= adapters.length)) {
-			throw null;
-		}
-		return adapters[number];
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#getAdapter(int)
+     */
+    public Path getAdapter(int number) {
+        Path[] adapters = dbusManager.ListAdapters();
+        if (adapters == null) {
+            throw null;
+        }
+        if ((number < 0) || (number >= adapters.length)) {
+            throw null;
+        }
+        return adapters[number];
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.bluez.BlueZAPI#listAdapters()
-	 */
-	public List<String> listAdapters() {
-		List<String> v = new Vector<String>();
-		Path[] adapters = dbusManager.ListAdapters();
-		if (adapters != null) {
-			for (int i = 0; i < adapters.length; i++) {
-				String adapterId = String.valueOf(adapters[i]);
-				final String bluezPath = "/org/bluez/";
-				if (adapterId.startsWith(bluezPath)) {
-					adapterId = adapterId.substring(bluezPath.length());
-				}
-				v.add(adapterId);
-			}
-		}
-		return v;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#listAdapters()
+     */
+    public List<String> listAdapters() {
+        List<String> v = new Vector<String>();
+        Path[] adapters = dbusManager.ListAdapters();
+        if (adapters != null) {
+            for (int i = 0; i < adapters.length; i++) {
+                String adapterId = String.valueOf(adapters[i]);
+                final String bluezPath = "/org/bluez/";
+                if (adapterId.startsWith(bluezPath)) {
+                    adapterId = adapterId.substring(bluezPath.length());
+                }
+                v.add(adapterId);
+            }
+        }
+        return v;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.bluez.BlueZAPI#selectAdapter(org.freedesktop.dbus.Path)
-	 */
-	public org.bluez.Adapter selectAdapter(Path adapterPath) throws DBusException {
-		adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), AdapterV4.class);
-		this.adapterPath = adapterPath;
-		return adapter;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#selectAdapter(org.freedesktop.dbus.Path)
+     */
+    public org.bluez.Adapter selectAdapter(Path adapterPath) throws DBusException {
+        adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), AdapterV4.class);
+        this.adapterPath = adapterPath;
+        return adapter;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.bluez.BlueZAPI#getAdapterAddress()
-	 */
-	public String getAdapterAddress() {
-		return DBusProperties.getStringValue(adapter, AdapterV4.Properties.Address);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#getAdapterAddress()
+     */
+    public String getAdapterAddress() {
+        return DBusProperties.getStringValue(adapter, AdapterV4.Properties.Address);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.bluez.BlueZAPI#getAdapterID()
-	 */
-	public String getAdapterID() {
-		final String bluezPath = "/org/bluez/";
-		if (adapterPath.getPath().startsWith(bluezPath)) {
-			return adapterPath.getPath().substring(bluezPath.length());
-		} else {
-			return adapterPath.getPath();
-		}
-	}
-	
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#getAdapterID()
+     */
+    public String getAdapterID() {
+        final String bluezPath = "/org/bluez/";
+        if (adapterPath.getPath().startsWith(bluezPath)) {
+            return adapterPath.getPath().substring(bluezPath.length());
+        } else {
+            return adapterPath.getPath();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#getAdapterDeviceClass()
      */
     public int getAdapterDeviceClass() {
@@ -169,28 +171,36 @@ public class BlueZAPIV4 implements BlueZAPI {
         return BluetoothConsts.DeviceClassConsts.MAJOR_COMPUTER;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#getAdapterName()
      */
     public String getAdapterName() {
         return DBusProperties.getStringValue(adapter, AdapterV4.Properties.Name);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#isAdapterDiscoverable()
      */
     public boolean isAdapterDiscoverable() {
         return DBusProperties.getBooleanValue(adapter, AdapterV4.Properties.Discoverable);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#getAdapterDiscoverableTimeout()
      */
     public int getAdapterDiscoverableTimeout() {
         return DBusProperties.getIntValue(adapter, AdapterV4.Properties.DiscoverableTimeout);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#setAdapterDiscoverable(int)
      */
     public boolean setAdapterDiscoverable(int mode) throws DBusException {
@@ -211,48 +221,64 @@ public class BlueZAPIV4 implements BlueZAPI {
         }
         return true;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#getAdapterManufacturer()
      */
     public String getAdapterManufacturer() {
-     // TODO How do I get this in BlueZ 4?
+        // TODO How do I get this in BlueZ 4?
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#getAdapterRevision()
      */
     public String getAdapterRevision() {
-     // TODO How do I get this in BlueZ 4?
+        // TODO How do I get this in BlueZ 4?
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#getAdapterVersion()
      */
     public String getAdapterVersion() {
-     // TODO How do I get this in BlueZ 4?
+        // TODO How do I get this in BlueZ 4?
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#isAdapterPowerOn()
      */
     public boolean isAdapterPowerOn() {
         return DBusProperties.getBooleanValue(adapter, AdapterV4.Properties.Powered);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#deviceInquiry(org.bluez.BlueZAPI.DeviceInquiryListener)
      */
     public void deviceInquiry(final DeviceInquiryListener listener) throws DBusException, InterruptedException {
         DBusSigHandler<AdapterV4.DeviceFound> remoteDeviceFound = new DBusSigHandler<AdapterV4.DeviceFound>() {
             public void handle(AdapterV4.DeviceFound s) {
-                String deviceName = DBusProperties.getStringValue(s.getDevicePoperties(), Device.Properties.Name);
-                int deviceClass = DBusProperties.getIntValue(s.getDevicePoperties(), Device.Properties.Class);
-                //TODO verify that this ever present
-                boolean paired = DBusProperties.getBooleanValue(s.getDevicePoperties(), Device.Properties.Paired, false);
+                String deviceName = null;
+                int deviceClass = -1;
+                boolean paired = false;
+                Map<String, Variant<?>> properties = s.getDevicePoperties();
+                if (properties != null) {
+                    deviceName = DBusProperties.getStringValue(properties, Device.Properties.Name);
+                    deviceClass = DBusProperties.getIntValue(properties, Device.Properties.Class);
+                    //TODO verify that this ever present
+                    paired = DBusProperties.getBooleanValue(properties, Device.Properties.Paired, false);
+                }
                 listener.deviceDiscovered(s.getDeviceAddress(), deviceName, deviceClass, paired);
             }
         };
@@ -260,9 +286,9 @@ public class BlueZAPIV4 implements BlueZAPI {
             dbusConn.addSigHandler(AdapterV4.DeviceFound.class, remoteDeviceFound);
 
             adapter.StartDiscovery();
-            
+
             listener.deviceInquiryStarted();
-            
+
             while (DBusProperties.getBooleanValue(adapter, AdapterV4.Properties.Discovering)) {
                 Thread.sleep(200);
             }
@@ -274,28 +300,32 @@ public class BlueZAPIV4 implements BlueZAPI {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#deviceInquiryCancel()
      */
     public void deviceInquiryCancel() throws DBusException {
         adapter.StopDiscovery();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#getRemoteDeviceFriendlyName(java.lang.String)
      */
     public String getRemoteDeviceFriendlyName(String deviceAddress) throws DBusException, IOException {
         // TODO Auto-generated method stub
         return null;
     }
-    
+
     private Device findDevice(String deviceAddress) throws DBusException {
         Path devicePath = adapter.FindDevice(deviceAddress);
         return dbusConn.getRemoteObject("org.bluez", devicePath.getPath(), Device.class);
     }
-    
+
     private Device getDevice(String deviceAddress) throws DBusException {
-        Variant<Path[]> devices = (Variant<Path[]>)adapter.GetProperties().get(DBusProperties.getPropertyName(AdapterV4.Properties.Devices));
+        Variant<Path[]> devices = (Variant<Path[]>) adapter.GetProperties().get(DBusProperties.getPropertyName(AdapterV4.Properties.Devices));
         if (devices == null) {
             return null;
         }
@@ -303,7 +333,9 @@ public class BlueZAPIV4 implements BlueZAPI {
         return dbusConn.getRemoteObject("org.bluez", devicePath.getPath(), Device.class);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#isRemoteDeviceTrusted(java.lang.String)
      */
     public Boolean isRemoteDeviceTrusted(String deviceAddress) throws DBusException {
@@ -312,7 +344,9 @@ public class BlueZAPIV4 implements BlueZAPI {
         //return DBusProperties.getBooleanValue(findDevice(deviceAddress), Device.Properties.Paired);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#getRemoteDeviceServices(java.lang.String)
      */
     public Map<Integer, String> getRemoteDeviceServices(String deviceAddress) throws DBusException {
@@ -323,15 +357,13 @@ public class BlueZAPIV4 implements BlueZAPI {
             devicePath = adapter.CreateDevice(deviceAddress);
         }
         Device device = dbusConn.getRemoteObject("org.bluez", devicePath.getPath(), Device.class);
-        
-        Map<UInt32, String> xmlMap =  device.DiscoverServices("");
+
+        Map<UInt32, String> xmlMap = device.DiscoverServices("");
         Map<Integer, String> xmlRecords = new HashMap<Integer, String>();
         for (Map.Entry<UInt32, String> record : xmlMap.entrySet()) {
             xmlRecords.put(record.getKey().intValue(), record.getValue());
         }
         return xmlRecords;
-
     }
-    
 
 }
