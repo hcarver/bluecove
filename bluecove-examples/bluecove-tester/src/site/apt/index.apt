@@ -130,6 +130,8 @@ java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:bluecove-tester.jar n
 java -cp avetanaBluetooth.jar:bluecove-tester.jar net.sf.bluecove.se.Main
 ---
 
+    N.B. On Windows replace : with ; for path separator
+
     bluecove-tester-app.jar is the same application as bluecove-tester.jar only BlueCove classes are included.
 
 
