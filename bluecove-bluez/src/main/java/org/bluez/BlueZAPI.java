@@ -52,7 +52,7 @@ public interface BlueZAPI {
 
 	public Path defaultAdapter() throws Error.InvalidArguments;
 
-	public Adapter selectAdapter(Path adapterPath) throws DBusException;
+	public void selectAdapter(Path adapterPath) throws DBusException;
 
 	public String getAdapterID();
 
@@ -81,11 +81,21 @@ public interface BlueZAPI {
 	public void deviceInquiryCancel() throws DBusException;
 	
 	public String getRemoteDeviceFriendlyName(String deviceAddress) throws DBusException, IOException;
-	
+
+	public List<String> retrieveDevices(boolean preKnown);
+    
+    public boolean isRemoteDeviceConnected(String deviceAddress) throws DBusException;
+    
 	public Boolean isRemoteDeviceTrusted(String deviceAddress) throws DBusException;
 	
 	/**
 	 * If device could not be reached returns {@code null}
 	 */
 	public Map<Integer, String> getRemoteDeviceServices(String deviceAddress) throws DBusException;
+	
+	public void authenticateRemoteDevice(String deviceAddress) throws DBusException;
+	
+	public boolean authenticateRemoteDevice(String deviceAddress, String passkey) throws DBusException;
+	
+	public void removeAuthenticationWithRemoteDevice(String deviceAddress) throws DBusException;
 }

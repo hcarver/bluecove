@@ -45,6 +45,7 @@ import org.freedesktop.dbus.Variant;
 import org.freedesktop.dbus.exceptions.DBusException;
 
 import com.intel.bluetooth.BluetoothConsts;
+import com.intel.bluetooth.DebugLog;
 
 /**
  * Access BlueZ v4 over D-Bus
@@ -132,10 +133,9 @@ public class BlueZAPIV4 implements BlueZAPI {
      * 
      * @see org.bluez.BlueZAPI#selectAdapter(org.freedesktop.dbus.Path)
      */
-    public org.bluez.Adapter selectAdapter(Path adapterPath) throws DBusException {
+    public void selectAdapter(Path adapterPath) throws DBusException {
         adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), AdapterV4.class);
         this.adapterPath = adapterPath;
-        return adapter;
     }
 
     /*
@@ -309,28 +309,61 @@ public class BlueZAPIV4 implements BlueZAPI {
         adapter.StopDiscovery();
     }
 
+    private Device getDevice(String deviceAddress) throws DBusException {
+        Path devicePath;
+        try {
+            devicePath = adapter.FindDevice(deviceAddress);
+        } catch (DoesNotExist e) {
+            devicePath = adapter.CreateDevice(deviceAddress);
+        }
+        return dbusConn.getRemoteObject("org.bluez", devicePath.getPath(), Device.class);
+    }
+
     /*
      * (non-Javadoc)
      * 
      * @see org.bluez.BlueZAPI#getRemoteDeviceFriendlyName(java.lang.String)
      */
     public String getRemoteDeviceFriendlyName(String deviceAddress) throws DBusException, IOException {
-        // TODO Auto-generated method stub
-        return null;
+        return DBusProperties.getStringValue(getDevice(deviceAddress), Device.Properties.Name);
     }
 
-    private Device findDevice(String deviceAddress) throws DBusException {
-        Path devicePath = adapter.FindDevice(deviceAddress);
-        return dbusConn.getRemoteObject("org.bluez", devicePath.getPath(), Device.class);
-    }
-
-    private Device getDevice(String deviceAddress) throws DBusException {
-        Variant<Path[]> devices = (Variant<Path[]>) adapter.GetProperties().get(DBusProperties.getPropertyName(AdapterV4.Properties.Devices));
-        if (devices == null) {
-            return null;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#retrieveDevices(boolean)
+     */
+    public List<String> retrieveDevices(boolean preKnown) {
+        Path[] devices = adapter.ListDevices();
+        List<String> addresses = new Vector<String>();
+        if (devices != null) {
+            for (Path devicePath : devices) {
+                try {
+                    Device device = dbusConn.getRemoteObject("org.bluez", devicePath.getPath(), Device.class);
+                    Map<String, Variant<?>> properties = device.GetProperties();
+                    if (properties != null) {
+                        String address = DBusProperties.getStringValue(properties, Device.Properties.Address);
+                        boolean paired = DBusProperties.getBooleanValue(properties, Device.Properties.Paired, false);
+                        boolean trusted = DBusProperties.getBooleanValue(properties, Device.Properties.Trusted, false);
+                        if ((!preKnown) || paired || trusted) {
+                            addresses.add(address);
+                        }
+                    }
+                } catch (DBusException e) {
+                    DebugLog.debug("can't get device " + devicePath, e);
+                }
+            }
         }
-        Path devicePath = adapter.FindDevice(deviceAddress);
-        return dbusConn.getRemoteObject("org.bluez", devicePath.getPath(), Device.class);
+        return addresses;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#isRemoteDeviceConnected(java.lang.String)
+     */
+    public boolean isRemoteDeviceConnected(String deviceAddress) throws DBusException {
+        return DBusProperties.getBooleanValue(getDevice(deviceAddress), Device.Properties.Connected);
     }
 
     /*
@@ -339,9 +372,36 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#isRemoteDeviceTrusted(java.lang.String)
      */
     public Boolean isRemoteDeviceTrusted(String deviceAddress) throws DBusException {
-        return null;
-        //TODO
-        //return DBusProperties.getBooleanValue(findDevice(deviceAddress), Device.Properties.Paired);
+        return DBusProperties.getBooleanValue(getDevice(deviceAddress), Device.Properties.Paired);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#authenticateRemoteDevice(java.lang.String)
+     */
+    public void authenticateRemoteDevice(String deviceAddress) throws DBusException {
+        // TODO Auto-generated method stub
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#authenticateRemoteDevice(java.lang.String,
+     * java.lang.String)
+     */
+    public boolean authenticateRemoteDevice(String deviceAddress, String passkey) throws DBusException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.bluez.BlueZAPI#removeAuthenticationWithRemoteDevice(java.lang.String)
+     */
+    public void removeAuthenticationWithRemoteDevice(String deviceAddress) throws DBusException {
+        // TODO Auto-generated method stub
     }
 
     /*
