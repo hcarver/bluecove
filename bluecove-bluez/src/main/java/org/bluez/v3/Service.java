@@ -176,7 +176,7 @@ public interface Service extends DBusInterface {
             this.address = address;
         }
 
-        public String getAddress() {
+        public String getDeviceAddress() {
             return address;
         }
     }
@@ -193,7 +193,7 @@ public interface Service extends DBusInterface {
             this.address = address;
         }
 
-        public String getAddress() {
+        public String getDeviceAddress() {
             return address;
         }
     }

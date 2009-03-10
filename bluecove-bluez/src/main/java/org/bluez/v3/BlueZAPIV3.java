@@ -41,6 +41,7 @@ import org.bluez.Error.NotReady;
 import org.freedesktop.DBus;
 import org.freedesktop.dbus.DBusConnection;
 import org.freedesktop.dbus.DBusSigHandler;
+import org.freedesktop.dbus.DBusSignal;
 import org.freedesktop.dbus.Path;
 import org.freedesktop.dbus.UInt32;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -333,6 +334,13 @@ public class BlueZAPIV3 implements BlueZAPI {
         return !"off".equals(adapter.GetMode());
     }
 
+    private <T extends DBusSignal> void quietRemoveSigHandler(Class<T> type, DBusSigHandler<T> handler) {
+        try {
+            dbusConn.removeSigHandler(type, handler);
+        } catch (DBusException ignore) {
+        }
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -370,11 +378,18 @@ public class BlueZAPIV3 implements BlueZAPI {
             }
         };
 
+        DBusSigHandler<Adapter.RemoteClassUpdated> remoteClassUpdated = new DBusSigHandler<Adapter.RemoteClassUpdated>() {
+            public void handle(Adapter.RemoteClassUpdated s) {
+                listener.deviceDiscovered(s.getDeviceAddress(), null, s.getDeviceClass().intValue(), adapter.HasBonding(s.getDeviceAddress()));
+            }
+        };
+
         try {
             dbusConn.addSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
             dbusConn.addSigHandler(Adapter.DiscoveryStarted.class, discoveryStarted);
             dbusConn.addSigHandler(Adapter.RemoteDeviceFound.class, remoteDeviceFound);
             dbusConn.addSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
+            dbusConn.addSigHandler(Adapter.RemoteClassUpdated.class, remoteClassUpdated);
 
             synchronized (discoveryCompletedEvent) {
                 adapter.DiscoverDevices();
@@ -385,10 +400,11 @@ public class BlueZAPIV3 implements BlueZAPI {
             }
 
         } finally {
-            dbusConn.removeSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
-            dbusConn.removeSigHandler(Adapter.RemoteDeviceFound.class, remoteDeviceFound);
-            dbusConn.removeSigHandler(Adapter.DiscoveryStarted.class, discoveryStarted);
-            dbusConn.removeSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
+            quietRemoveSigHandler(Adapter.RemoteClassUpdated.class, remoteClassUpdated);
+            quietRemoveSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
+            quietRemoveSigHandler(Adapter.RemoteDeviceFound.class, remoteDeviceFound);
+            quietRemoveSigHandler(Adapter.DiscoveryStarted.class, discoveryStarted);
+            quietRemoveSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
         }
     }
 
@@ -456,8 +472,8 @@ public class BlueZAPIV3 implements BlueZAPI {
                 }
             }
         } finally {
-            dbusConn.removeSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
-            dbusConn.removeSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
+            quietRemoveSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
+            quietRemoveSigHandler(Adapter.DiscoveryCompleted.class, discoveryCompleted);
         }
     }
 
@@ -561,21 +577,27 @@ public class BlueZAPIV3 implements BlueZAPI {
         return xmlRecords;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#registerSDPRecord(java.lang.String)
      */
     public long registerSDPRecord(String sdpXML) throws DBusException {
         throw new DBusException("TODO: implement this using org.bluez.Database");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#updateSDPRecord(long, java.lang.String)
      */
     public void updateSDPRecord(long handle, String sdpXML) throws DBusException {
         // TODO Auto-generated method stub
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#unregisterSDPRecord(long)
      */
     public void unregisterSDPRecord(long handle) throws DBusException {

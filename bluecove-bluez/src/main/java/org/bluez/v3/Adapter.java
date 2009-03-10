@@ -509,52 +509,34 @@ public interface Adapter extends org.bluez.Adapter {
      */
     void CancelDiscovery() throws Error.NotReady, Error.Failed, Error.NotAuthorized, Error.NoSuchAdapter;
 
-    // void StartPeriodicDiscovery()
-    //
-    // This method starts a periodic discovery.
-    //
-    // throws Error.NotReady
-    // Error.Failed
-    // Error.InProgress
-    // Error.NoSuchAdapter
-    //
-    // void StopPeriodicDiscovery()
-    //
-    // This method stops a periodic discovery. If the
-    // adapter is not in the periodic inquiry mode an
-    // error(not authorized) is returned. Everyone can
-    // request exit from this mode, it is not restricted
-    // to start requestor.
-    //
-    // throws Error.NotReady
-    // Error.Failed
-    // Error.NotAuthorized
-    // Error.NoSuchAdapter
-    //
-    // boolean IsPeriodicDiscovery()
-    //
-    // Returns true if the periodic inquiry is active and
-    // false if it is switched off.
-    //
-    // throws none
-    //
-    // void SetPeriodicDiscoveryNameResolving(boolean resolve_names)
-    //
-    // Enable or disable automatic remote name resolving for
-    // periodic discovery.
-    //
-    // throws Error.InvalidArguments
-    //
-    // boolean GetPeriodicDiscoveryNameResolving()
-    //
-    // Check if automatic remote name resolving is enabled or not
-    // for periodic discovery.
-    //
-    // Possible error: Error.InvalidArguments
-    //
-    //
+    /**
+     * This method starts a periodic discovery.
+     */
+    void StartPeriodicDiscovery() throws Error.NotReady, Error.Failed, Error.InProgress, Error.NoSuchAdapter;
 
-    // array{UInt32} GetRemoteServiceHandles(String address, String match)
+    /**
+     * This method stops a periodic discovery. If the adapter is not in the periodic
+     * inquiry mode an error(not authorized) is returned. Everyone can request exit from
+     * this mode, it is not restricted to start requestor.
+     */
+    void StopPeriodicDiscovery() throws Error.NotReady, Error.Failed, Error.NotAuthorized, Error.NoSuchAdapter;
+
+    /**
+     * Returns true if the periodic inquiry is active and false if it is switched off.
+     */
+    boolean IsPeriodicDiscovery();
+
+    /**
+     * Enable or disable automatic remote name resolving for periodic discovery.
+     * 
+     * @param resolve_names
+     */
+    void SetPeriodicDiscoveryNameResolving(boolean resolve_names) throws Error.InvalidArguments;
+
+    /**
+     * Check if automatic remote name resolving is enabled or not for periodic discovery.
+     */
+    boolean GetPeriodicDiscoveryNameResolving() throws Error.InvalidArguments;
 
     /**
      * 
@@ -577,70 +559,116 @@ public interface Adapter extends org.bluez.Adapter {
      */
     public String GetRemoteServiceRecordAsXML(String address, UInt32 handle) throws Error.InvalidArguments, Error.InProgress, Error.Failed;
 
-    //
-    // array{String} GetRemoteServiceIdentifiers(String address)
-    //
-    // This method will request the SDP database of a remote
-    // device for all supported services. The identifiers are
-    // returned in UUID 128 String format.
-    //
-    // throws Error.InProgress
-    // Error.Failed
-    //
-    // void FinishRemoteServiceTransaction(String address)
-    //
-    // This method will finish all SDP transaction for that
-    // given address. In general this call is not needed,
-    // but in cases of resources restricted devices it
-    // is useful to call this to finish the SDP transaction
-    // before proceeded with profile specific connections.
-    //
-    // array{String} ListRemoteDevices()
-    //
-    // List addresses of all known remote devices (bonded,
-    // trusted and used).
-    //
-    // throws none
-    //
-    // array{String} ListRecentRemoteDevices(String date)
-    //
-    // List addresses of all bonded, trusted, seen or used remote
-    // devices since date. Bonded and trusted devices are always
-    // included(the date informed is not applied).
-    //
-    // date format is "YYYY-MM-DD HH:MM:SS GMT"
-    //
-    // throws none
-    //
-    
+    /**
+     * This method will request the SDP database of a remote device for all supported
+     * services. The identifiers are returned in UUID 128 String format.
+     * 
+     * @param address
+     * @return
+     */
+    String[] GetRemoteServiceIdentifiers(String address) throws Error.InProgress, Error.Failed;
+
+    /**
+     * This method will finish all SDP transaction for that given address. In general this
+     * call is not needed, but in cases of resources restricted devices it is useful to
+     * call this to finish the SDP transaction before proceeded with profile specific
+     * connections.
+     */
+    void FinishRemoteServiceTransaction(String address);
+
+    /**
+     * List addresses of all known remote devices (bonded, trusted and used).
+     */
+    String[] ListRemoteDevices();
+
+    /**
+     * List addresses of all bonded, trusted, seen or used remote devices since date.
+     * Bonded and trusted devices are always included(the date informed is not applied).
+     * 
+     * date format is "YYYY-MM-DD HH:MM:SS GMT"
+     * 
+     * @param date
+     * @return
+     */
+    String[] ListRecentRemoteDevices(String date);
+
     //===================== Signals =====================
-    
-    // void ModeChanged(String mode)
-    //
-    // If the current mode is changed with SetMode this signal
-    // will inform about the new mode.
-    //
-    // This signal can also be triggered by low-level HCI
-    // commands.
-    //
-    // void DiscoverableTimeoutChanged(UInt32 timeout)
-    //
-    // After changing the discoverable timeout this signal
-    // provide the new timeout value.
-    //
-    // void MinorClassChanged(String minor)
-    //
-    // After changing the minor class with SetMinorClass this
-    // signal will provide the new class value.
-    //
-    // void NameChanged(String name)
-    //
-    // After changing the local adapter name with SetName this
-    // signal will provide the new name.
-    //
-    // This signal can also be triggered by low-level HCI
-    // commands.
-    //
+
+    /**
+     * If the current mode is changed with SetMode this signal will inform about the new
+     * mode.
+     * 
+     * This signal can also be triggered by low-level HCI commands.
+     */
+    public class ModeChanged extends DBusSignal {
+
+        private final String mode;
+
+        public ModeChanged(String path, String mode) throws DBusException {
+            super(path, mode);
+            this.mode = mode;
+        }
+
+        public String getMode() {
+            return mode;
+        }
+    }
+
+    /**
+     * After changing the discoverable timeout this signal provide the new timeout value.
+     */
+    public class DiscoverableTimeoutChanged extends DBusSignal {
+
+        private final UInt32 timeout;
+
+        public DiscoverableTimeoutChanged(String path, UInt32 timeout) throws DBusException {
+            super(path, timeout);
+            this.timeout = timeout;
+        }
+
+        public UInt32 getTimeout() {
+            return timeout;
+        }
+    }
+
+    /**
+     * After changing the minor class with SetMinorClass this signal will provide the new
+     * class value.
+     */
+    public class MinorClassChanged extends DBusSignal {
+
+        private final String minorClass;
+
+        public MinorClassChanged(String path, String minorClass) throws DBusException {
+            super(path, minorClass);
+            this.minorClass = minorClass;
+        }
+
+        public String getMinorClass() {
+            return minorClass;
+        }
+    }
+
+    /**
+     * After changing the local adapter name with SetName this signal will provide the new
+     * name.
+     * 
+     * This signal can also be triggered by low-level HCI commands.
+     */
+    public class NameChanged extends DBusSignal {
+
+        private final String name;
+
+        public NameChanged(String path, String name) throws DBusException {
+            super(path, name);
+            this.name = name;
+        }
+
+        public String getMinorClass() {
+            return name;
+        }
+    }
+
     /**
      * This signal indicates that a device discovery procedure has been started.
      */
@@ -650,7 +678,7 @@ public interface Adapter extends org.bluez.Adapter {
         }
     }
 
-    /*
+    /**
      * This signal indicates that a device discovery procedure has been completed.
      */
     public class DiscoveryCompleted extends DBusSignal {
@@ -659,15 +687,23 @@ public interface Adapter extends org.bluez.Adapter {
         }
     }
 
-    // void PeriodicDiscoveryStarted()
-    //
-    // This signal indicates that a periodic discovery
-    // procedure has been started.
-    //
-    // void PeriodicDiscoveryStopped()
-    //
-    // This signal indicates that a periodic discovery
-    // procedure has been completed.
+    /**
+     * This signal indicates that a periodic discovery procedure has been started.
+     */
+    public class PeriodicDiscoveryStarted extends DBusSignal {
+        public PeriodicDiscoveryStarted(String path) throws DBusException {
+            super(path);
+        }
+    }
+
+    /**
+     * This signal indicates that a periodic discovery procedure has been completed.
+     */
+    public class PeriodicDiscoveryStopped extends DBusSignal {
+        public PeriodicDiscoveryStopped(String path) throws DBusException {
+            super(path);
+        }
+    }
 
     /**
      * This signal will be send every time an inquiry result has been found by the service
@@ -710,19 +746,58 @@ public interface Adapter extends org.bluez.Adapter {
         }
     }
 
-    // void RemoteDeviceDisappeared(String address)
-    //
-    // This signal will be send when an inquiry session for
-    // a periodic discovery finishes and previously found
-    // devices are no longer in range or visible.
-    //
-    // void RemoteClassUpdated(String address, UInt32 class)
-    //
-    // This signal will be send every time the remote class
-    // of device has been changed. This happens for example
-    // after a remote connection attempt. This signal will
-    // not be send if the class of device hasn't changed
-    // compared to cached one.
+    /**
+     * This signal will be send when an inquiry session for a periodic discovery finishes
+     * and previously found devices are no longer in range or visible.
+     */
+    public class RemoteDeviceDisappeared extends DBusSignal {
+
+        private final String address;
+
+        public RemoteDeviceDisappeared(String path, String address) throws DBusException {
+            super(path, address);
+            this.address = address;
+        }
+
+        /**
+         * @return the address
+         */
+        public String getDeviceAddress() {
+            return address;
+        }
+    }
+
+    /**
+     * This signal will be send every time the remote class of device has been changed.
+     * This happens for example after a remote connection attempt. This signal will not be
+     * send if the class of device hasn't changed compared to cached one.
+     */
+    public class RemoteClassUpdated extends DBusSignal {
+
+        private final String address;
+
+        private final UInt32 deviceClass;
+
+        public RemoteClassUpdated(String path, String address, UInt32 deviceClass) throws DBusException {
+            super(path, address, deviceClass);
+            this.address = address;
+            this.deviceClass = deviceClass;
+        }
+
+        /**
+         * @return the address
+         */
+        public String getDeviceAddress() {
+            return address;
+        }
+
+        /**
+         * @return the deviceClass
+         */
+        public UInt32 getDeviceClass() {
+            return deviceClass;
+        }
+    }
 
     /**
      * This signal will be send every time the service daemon detect a new name for a
@@ -755,35 +830,128 @@ public interface Adapter extends org.bluez.Adapter {
         }
     }
 
-    //
-    // void RemoteIdentifiersUpdated(String address, array{String identifiers})
-    //
-    // This signal is sent to indicate the provided services of a given
-    // remote device. It will be sent after GetRemoteServiceIdentifiers
-    // calls. This signal has at least one identifier and it does not
-    // contain repeated entries.
-    //
-    // void RemoteNameFailed(String address)
-    //
-    // This signal will be sent every time the service daemon
-    // tries to resolve a remote and this fails.
-    //
-    // void RemoteNameRequested(String address)
-    //
-    // This signal will be sent every time the service daemon
-    // tries to resolve a remote name during discovery.
-    //
-    // void RemoteAliasChanged(String address, String alias)
-    //
-    // After changing an alias with SetRemoteAlias this
-    // signal will indicate the new alias.
-    //
-    // void RemoteAliasCleared(String address)
-    //
-    // After removing an alias with ClearRemoteAlias this
-    // signal will indicate that the alias is no longer
-    // valid.
-    //
+    /**
+     * This signal is sent to indicate the provided services of a given remote device. It
+     * will be sent after GetRemoteServiceIdentifiers calls. This signal has at least one
+     * identifier and it does not contain repeated entries.
+     * 
+     */
+    public class RemoteIdentifiersUpdated extends DBusSignal {
+
+        private final String address;
+
+        private final String[] identifiers;
+
+        public RemoteIdentifiersUpdated(String path, String address, String[] identifiers) throws DBusException {
+            super(path, address);
+            this.address = address;
+            this.identifiers = identifiers;
+        }
+
+        /**
+         * @return the address
+         */
+        public String getDeviceAddress() {
+            return address;
+        }
+
+        public String[] getIdentifiers() {
+            return this.identifiers;
+        }
+
+    }
+
+    /**
+     * This signal will be sent every time the service daemon tries to resolve a remote
+     * and this fails.
+     */
+    public class RemoteNameFailed extends DBusSignal {
+
+        private final String address;
+
+        public RemoteNameFailed(String path, String address) throws DBusException {
+            super(path, address);
+            this.address = address;
+        }
+
+        /**
+         * @return the address
+         */
+        public String getDeviceAddress() {
+            return address;
+        }
+    }
+
+    /**
+     * This signal will be sent every time the service daemon tries to resolve a remote
+     * name during discovery.
+     */
+    public class RemoteNameRequested extends DBusSignal {
+
+        private final String address;
+
+        public RemoteNameRequested(String path, String address) throws DBusException {
+            super(path, address);
+            this.address = address;
+        }
+
+        /**
+         * @return the address
+         */
+        public String getDeviceAddress() {
+            return address;
+        }
+    }
+
+    /**
+     * After changing an alias with SetRemoteAlias this signal will indicate the new
+     * alias.
+     */
+    public class RemoteAliasChanged extends DBusSignal {
+
+        private final String address;
+
+        private final String alias;
+
+        public RemoteAliasChanged(String path, String address, String alias) throws DBusException {
+            super(path, address);
+            this.address = address;
+            this.alias = alias;
+        }
+
+        /**
+         * @return the address
+         */
+        public String getDeviceAddress() {
+            return address;
+        }
+
+        public String getAlias() {
+            return this.alias;
+        }
+
+    }
+
+    /**
+     * After removing an alias with ClearRemoteAlias this signal will indicate that the
+     * alias is no longer valid.
+     */
+    public class RemoteAliasCleared extends DBusSignal {
+
+        private final String address;
+
+        public RemoteAliasCleared(String path, String address) throws DBusException {
+            super(path, address);
+            this.address = address;
+        }
+
+        /**
+         * @return the address
+         */
+        public String getDeviceAddress() {
+            return address;
+        }
+    }
 
     /**
      * This signal will be send if a low level connection between two devices has been
@@ -798,7 +966,7 @@ public interface Adapter extends org.bluez.Adapter {
             this.address = address;
         }
 
-        public String getAddress() {
+        public String getDeviceAddress() {
             return address;
         }
     }
@@ -816,7 +984,7 @@ public interface Adapter extends org.bluez.Adapter {
             this.address = address;
         }
 
-        public String getAddress() {
+        public String getDeviceAddress() {
             return address;
         }
     }
@@ -834,7 +1002,7 @@ public interface Adapter extends org.bluez.Adapter {
             this.address = address;
         }
 
-        public String getAddress() {
+        public String getDeviceAddress() {
             return address;
         }
     }
@@ -851,7 +1019,7 @@ public interface Adapter extends org.bluez.Adapter {
             this.address = address;
         }
 
-        public String getAddress() {
+        public String getDeviceAddress() {
             return address;
         }
     }
@@ -868,7 +1036,7 @@ public interface Adapter extends org.bluez.Adapter {
             this.address = address;
         }
 
-        public String getAddress() {
+        public String getDeviceAddress() {
             return address;
         }
     }
@@ -885,7 +1053,7 @@ public interface Adapter extends org.bluez.Adapter {
             this.address = address;
         }
 
-        public String getAddress() {
+        public String getDeviceAddress() {
             return address;
         }
     }
@@ -902,7 +1070,7 @@ public interface Adapter extends org.bluez.Adapter {
             this.address = address;
         }
 
-        public String getAddress() {
+        public String getDeviceAddress() {
             return address;
         }
     }

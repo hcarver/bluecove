@@ -39,6 +39,7 @@ import org.bluez.Error.NoSuchAdapter;
 import org.bluez.dbus.DBusProperties;
 import org.freedesktop.dbus.DBusConnection;
 import org.freedesktop.dbus.DBusSigHandler;
+import org.freedesktop.dbus.DBusSignal;
 import org.freedesktop.dbus.Path;
 import org.freedesktop.dbus.UInt32;
 import org.freedesktop.dbus.Variant;
@@ -261,6 +262,13 @@ public class BlueZAPIV4 implements BlueZAPI {
         return DBusProperties.getBooleanValue(adapter, Adapter.Properties.Powered);
     }
 
+    private <T extends DBusSignal> void quietRemoveSigHandler(Class<T> type, DBusSigHandler<T> handler) {
+        try {
+            dbusConn.removeSigHandler(type, handler);
+        } catch (DBusException ignore) {
+        }
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -296,7 +304,7 @@ public class BlueZAPIV4 implements BlueZAPI {
             adapter.StopDiscovery();
 
         } finally {
-            dbusConn.removeSigHandler(Adapter.DeviceFound.class, remoteDeviceFound);
+            quietRemoveSigHandler(Adapter.DeviceFound.class, remoteDeviceFound);
         }
     }
 
@@ -428,35 +436,40 @@ public class BlueZAPIV4 implements BlueZAPI {
         }
         return xmlRecords;
     }
-    
+
     private Service getSDPService() throws DBusException {
         return dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), Service.class);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#registerSDPRecord(java.lang.String)
      */
     public long registerSDPRecord(String sdpXML) throws DBusException {
-        DebugLog.debug("AddRecord", sdpXML );
+        DebugLog.debug("AddRecord", sdpXML);
         UInt32 handle = getSDPService().AddRecord(sdpXML);
         return handle.longValue();
     }
 
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#updateSDPRecord(long, java.lang.String)
      */
     public void updateSDPRecord(long handle, String sdpXML) throws DBusException {
         getSDPService().UpdateRecord(new UInt32(handle), sdpXML);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.bluez.BlueZAPI#unregisterSDPRecord(long)
      */
     public void unregisterSDPRecord(long handle) throws DBusException {
-        DebugLog.debug("RemoveRecord", handle );
+        DebugLog.debug("RemoveRecord", handle);
         getSDPService().RemoveRecord(new UInt32(handle));
-        
+
     }
 
 }
