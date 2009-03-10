@@ -841,6 +841,10 @@ public class DataElement {
 			return "U_INT_2";
 		case DataElement.U_INT_4:
 			return "U_INT_4";
+		case DataElement.U_INT_8:
+            return "U_INT_8";
+		case DataElement.U_INT_16:
+            return "U_INT_16";
 		case DataElement.INT_1:
 			return "INT_1";
 		case DataElement.INT_2:
