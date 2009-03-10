@@ -34,10 +34,12 @@ import java.util.Vector;
 import javax.bluetooth.DiscoveryAgent;
 
 import org.bluez.BlueZAPI;
+import org.bluez.Error.Canceled;
 import org.bluez.Error.Failed;
 import org.bluez.Error.InvalidArguments;
 import org.bluez.Error.NoSuchAdapter;
 import org.bluez.Error.NotReady;
+import org.bluez.Error.Rejected;
 import org.freedesktop.DBus;
 import org.freedesktop.dbus.DBusConnection;
 import org.freedesktop.dbus.DBusSigHandler;
@@ -45,7 +47,9 @@ import org.freedesktop.dbus.DBusSignal;
 import org.freedesktop.dbus.Path;
 import org.freedesktop.dbus.UInt32;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.exceptions.DBusExecutionException;
 
+import com.intel.bluetooth.BlueCoveImpl;
 import com.intel.bluetooth.BluetoothConsts;
 import com.intel.bluetooth.DebugLog;
 
@@ -535,13 +539,74 @@ public class BlueZAPIV3 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#authenticateRemoteDevice(java.lang.String,
      * java.lang.String)
      */
-    public boolean authenticateRemoteDevice(String deviceAddress, String passkey) throws DBusException {
-        if (passkey != null) {
-            //return false;
-            throw new DBusException("TODO: implement this using AuthorizationAgent");
-        } else {
-            adapter.CreateBonding(deviceAddress);
+    public boolean authenticateRemoteDevice(final String deviceAddress, final String passkey) throws DBusException {
+        if (passkey == null) {
+            authenticateRemoteDevice(deviceAddress);
             return true;
+        } else {
+            
+            PasskeyAgent passkeyAgent = new PasskeyAgent() {
+
+                public String Request(String path, String address) throws Rejected, Canceled {
+                    if (deviceAddress.equals(address)) {
+                        DebugLog.debug("PasskeyAgent.Request");
+                        return passkey;
+                    } else {
+                        return "";
+                    }
+                }
+
+                public boolean isRemote() {
+                    return false;
+                }
+                
+                public void Cancel(String path, String address) {
+                }
+
+                public void Release() {
+                }
+            };
+
+//            final Object completedEvent = new Object();
+//            DBusSigHandler<Adapter.BondingCreated> bondingCreated = new DBusSigHandler<Adapter.BondingCreated>() {
+//                public void handle(Adapter.BondingCreated s) {
+//                    DebugLog.debug("BondingCreated.handle");
+//                    synchronized (completedEvent) {
+//                        completedEvent.notifyAll();
+//                    }
+//                }
+//            };
+            
+            DebugLog.debug("get security on path", adapterPath.getPath());
+            Security security = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), Security.class);
+            
+            String passkeyAgentPath = "/org/bluecove/authenticate/" + getAdapterID() + "/" + deviceAddress.replace(':', '_');
+            
+            DebugLog.debug("export passkeyAgent", passkeyAgentPath);
+            dbusConn.exportObject(passkeyAgentPath, passkeyAgent);
+            
+            // see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=501222
+            final boolean useDefaultPasskeyAgentBug = BlueCoveImpl.getConfigProperty("bluecove.bluez.registerDefaultPasskeyAgent", false); 
+            try {
+                if (useDefaultPasskeyAgentBug) {
+                    security.RegisterDefaultPasskeyAgent(passkeyAgentPath);
+                } else {
+                    security.RegisterPasskeyAgent(passkeyAgentPath, deviceAddress);
+                }
+                adapter.CreateBonding(deviceAddress);
+                return true;
+            } finally {
+                //quietRemoveSigHandler(Adapter.BondingCreated.class, bondingCreated);
+                try {
+                    if (useDefaultPasskeyAgentBug) {
+                        security.UnregisterDefaultPasskeyAgent(passkeyAgentPath);
+                    } else {
+                        security.UnregisterPasskeyAgent(passkeyAgentPath, deviceAddress);
+                    }
+                } catch (DBusExecutionException ignore) {
+                }
+                dbusConn.unExportObject(passkeyAgentPath);
+            }
         }
     }
 

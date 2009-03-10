@@ -780,7 +780,7 @@ public class BlueCoveImpl {
         }
     }
 
-    static String getConfigProperty(String key) {
+    public static String getConfigProperty(String key) {
         if (key == null) {
             throw new NullPointerException("key is null");
         }
@@ -815,7 +815,7 @@ public class BlueCoveImpl {
         return value;
     }
 
-    static boolean getConfigProperty(String key, boolean defaultValue) {
+    public static boolean getConfigProperty(String key, boolean defaultValue) {
         String value = getConfigProperty(key);
         if (value != null) {
             return TRUE.equals(value) || "1".equals(value);
