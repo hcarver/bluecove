@@ -19,7 +19,7 @@
 
     <bannerRight>
         <name>Sourceforge</name>
-        <src>http://sourceforge.net/sflogo.php?group_id=114020&amp;amp;type=2</src>
+        <src>http://sflogo.sourceforge.net/sflogo.php?group_id=114020&amp;amp;type=2</src>
         <href>http://sourceforge.net/projects/bluecove/</href>
     </bannerRight>
 
@@ -33,11 +33,11 @@
         <!--
         <menu name="Ver #version#">
         -->
-        
+
         <!--4snapshot-->
         <menu name="Ver #build#" inherit="top">
             <item name="Release 2.1.0" href="#remove#http://www.bluecove.org/"/>
-        
+
             <item name="Project site" href="#remove#http://bluecove.googlecode.com" />
             <item name="sf.net" href="http://sourceforge.net/projects/bluecove/" />
             <item name="Introduction" href="#remove#/index.html" />
