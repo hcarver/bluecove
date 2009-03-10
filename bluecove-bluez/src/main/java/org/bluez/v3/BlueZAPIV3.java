@@ -561,4 +561,24 @@ public class BlueZAPIV3 implements BlueZAPI {
         return xmlRecords;
     }
 
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#registerSDPRecord(java.lang.String)
+     */
+    public long registerSDPRecord(String sdpXML) throws DBusException {
+        throw new DBusException("TODO: implement this using org.bluez.Database");
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#updateSDPRecord(long, java.lang.String)
+     */
+    public void updateSDPRecord(long handle, String sdpXML) throws DBusException {
+        // TODO Auto-generated method stub
+    }
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#unregisterSDPRecord(long)
+     */
+    public void unregisterSDPRecord(long handle) throws DBusException {
+        // TODO Auto-generated method stub
+    }
 }

@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.freedesktop.dbus.Path;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.exceptions.DBusExecutionException;
 
 /**
  * Abstraction interface to access BlueZ over D-Bus.
@@ -100,4 +101,10 @@ public interface BlueZAPI {
 	public boolean authenticateRemoteDevice(String deviceAddress, String passkey) throws DBusException;
 
 	public void removeAuthenticationWithRemoteDevice(String deviceAddress) throws DBusException;
+	
+	public long registerSDPRecord(String sdpXML) throws DBusExecutionException, DBusException;
+	
+	public void updateSDPRecord(long handle, String sdpXML) throws DBusExecutionException, DBusException;
+	
+	public void unregisterSDPRecord(long handle) throws DBusExecutionException, DBusException;
 }

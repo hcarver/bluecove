@@ -404,6 +404,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      */
     public void removeAuthenticationWithRemoteDevice(String deviceAddress) throws DBusException {
         // TODO Auto-generated method stub
+        throw new DBusException("TODO: implement this using Agent");
     }
 
     /*
@@ -426,6 +427,36 @@ public class BlueZAPIV4 implements BlueZAPI {
             xmlRecords.put(record.getKey().intValue(), record.getValue());
         }
         return xmlRecords;
+    }
+    
+    private Service getSDPService() throws DBusException {
+        return dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), Service.class);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#registerSDPRecord(java.lang.String)
+     */
+    public long registerSDPRecord(String sdpXML) throws DBusException {
+        DebugLog.debug("AddRecord", sdpXML );
+        UInt32 handle = getSDPService().AddRecord(sdpXML);
+        return handle.longValue();
+    }
+
+
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#updateSDPRecord(long, java.lang.String)
+     */
+    public void updateSDPRecord(long handle, String sdpXML) throws DBusException {
+        getSDPService().UpdateRecord(new UInt32(handle), sdpXML);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.bluez.BlueZAPI#unregisterSDPRecord(long)
+     */
+    public void unregisterSDPRecord(long handle) throws DBusException {
+        DebugLog.debug("RemoveRecord", handle );
+        getSDPService().RemoveRecord(new UInt32(handle));
+        
     }
 
 }

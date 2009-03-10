@@ -26,10 +26,14 @@ package com.intel.bluetooth;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.bluetooth.DataElement;
+import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -48,19 +52,139 @@ import org.xml.sax.SAXException;
  */
 class BlueZServiceRecordXML {
 
-    private static final Map<String, Integer> integetXMLtypes = new HashMap<String, Integer>();
+    private static final Map<String, Integer> integerXMLtypes = new HashMap<String, Integer>();
 
+    private static final Map<Integer, String> allXMLtypes = new HashMap<Integer, String>();
+    
     static {
-        integetXMLtypes.put("uint8", DataElement.U_INT_1);
-        integetXMLtypes.put("uint16", DataElement.U_INT_2);
-        integetXMLtypes.put("uint32", DataElement.U_INT_4);
+        integerXMLtypes.put("uint8", DataElement.U_INT_1);
+        integerXMLtypes.put("uint16", DataElement.U_INT_2);
+        integerXMLtypes.put("uint32", DataElement.U_INT_4);
 
-        integetXMLtypes.put("int8", DataElement.INT_1);
-        integetXMLtypes.put("int16", DataElement.INT_2);
-        integetXMLtypes.put("int32", DataElement.INT_4);
-        integetXMLtypes.put("int64", DataElement.INT_8);
+        integerXMLtypes.put("int8", DataElement.INT_1);
+        integerXMLtypes.put("int16", DataElement.INT_2);
+        integerXMLtypes.put("int32", DataElement.INT_4);
+        integerXMLtypes.put("int64", DataElement.INT_8);
+        
+        allXMLtypes.put(DataElement.U_INT_1, "uint8");
+        allXMLtypes.put(DataElement.U_INT_2, "uint16");
+        allXMLtypes.put(DataElement.U_INT_4, "uint32");
+        allXMLtypes.put(DataElement.U_INT_8, "uint64");
+        allXMLtypes.put(DataElement.U_INT_16, "uint128");
+        allXMLtypes.put(DataElement.INT_1, "int8");
+        allXMLtypes.put(DataElement.INT_2, "int16");
+        allXMLtypes.put(DataElement.INT_4, "int32");
+        allXMLtypes.put(DataElement.INT_8, "int64");
+        allXMLtypes.put(DataElement.INT_16, "int128");
+        allXMLtypes.put(DataElement.BOOL, "boolean");
+        allXMLtypes.put(DataElement.UUID, "uuid");
+        allXMLtypes.put(DataElement.STRING, "text");
+        allXMLtypes.put(DataElement.URL, "url");
+        allXMLtypes.put(DataElement.NULL, "nil");
+        allXMLtypes.put(DataElement.DATALT, "sequence");
+        allXMLtypes.put(DataElement.DATSEQ, "sequence");
     }
 
+    private static String toHexStringSigned(long l) {
+        if (l >= 0) {
+            return "0x" + Long.toHexString(l);
+        } else {
+            return "-0x" + Long.toHexString(-l);
+        }
+    }
+    
+    private static void appendUUID(StringBuffer buf, UUID uuid) {
+        String str = uuid.toString().toUpperCase();
+        int shortIdx = str.indexOf(BluetoothConsts.SHORT_UUID_BASE);
+        if ((shortIdx != -1) && (shortIdx + BluetoothConsts.SHORT_UUID_BASE.length() == str.length())) {
+            // This is short 16-bit or 32-bit UUID
+            buf.append("0x").append(str.substring(0, shortIdx));
+        } else {
+            //12345678-1234-1234-1234-123456789012 ?
+            buf.append(str);
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    static void appendDataElement(StringBuffer buf, DataElement d) {
+        int valueType = d.getDataType();
+        String type = allXMLtypes.get(valueType);
+        buf.append("<").append(type);
+        
+        switch (valueType) {
+        case DataElement.U_INT_1:
+        case DataElement.U_INT_2:
+        case DataElement.U_INT_4:
+            buf.append(" value=\"0x").append(Long.toHexString(d.getLong())).append("\">");
+            break;
+        case DataElement.INT_1:
+        case DataElement.INT_2:
+        case DataElement.INT_4:
+        case DataElement.INT_8:
+            buf.append(" value=\"").append(toHexStringSigned(d.getLong())).append("\">");
+            break;
+        case DataElement.BOOL:
+            buf.append(" value=\"").append(d.getBoolean()?"true":"false").append("\">");
+            break;
+        case DataElement.URL:
+        case DataElement.STRING:
+            //TODO add encoding
+            buf.append(" value=\"").append(d.getValue()).append("\">");
+            break;
+        case DataElement.UUID:
+            buf.append(" value=\"");
+            appendUUID(buf, ((UUID) d.getValue()));
+            buf.append("\">");
+            break;
+        case DataElement.U_INT_8:
+        case DataElement.U_INT_16:
+        case DataElement.INT_16:
+            byte[] b = (byte[]) d.getValue();
+            buf.append(" value=\"");
+            for (int i = 0; i < b.length; i++) {
+                buf.append(Integer.toHexString(b[i] >> 4 & 0xf));
+                buf.append(Integer.toHexString(b[i] & 0xf));
+            }
+            buf.append("\">");
+            break;
+        case DataElement.DATALT:
+        case DataElement.DATSEQ:
+            buf.append(">\n");
+            for (Enumeration en = (Enumeration) (d.getValue()); en.hasMoreElements();) {
+                appendDataElement(buf, (DataElement)en.nextElement());
+            }
+            break;
+        case DataElement.NULL:
+            buf.append(">\n");
+            break;
+        default:
+            throw new IllegalArgumentException("DataElement type " + valueType );
+        }
+        buf.append("</").append(type).append(">\n");
+    }
+    
+    public static String exportXMLRecord(ServiceRecord serviceRecord) {
+        StringBuffer b = new StringBuffer();
+        b.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+        b.append("<record>\n");
+        int[] ids = serviceRecord.getAttributeIDs();
+        Vector<Integer> sorted = new Vector<Integer>();
+        for (int i = 0; i < ids.length; i++) {
+            sorted.addElement(new Integer(ids[i]));
+        }
+        Collections.sort(sorted);
+        for(Integer id : sorted) {
+            if (id == BluetoothConsts.ServiceRecordHandle) {
+                continue;
+            }
+            b.append("<attribute id=\"0x").append(Long.toHexString(id)).append("\" >\n");
+            appendDataElement(b, serviceRecord.getAttributeValue(id));
+            b.append("</attribute>\n");
+        }
+        b.append("</record>");
+        return b.toString();
+    }
+    
     public static Map<Integer, DataElement> parsXMLRecord(String xml) throws IOException {
         try {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -106,6 +230,8 @@ class BlueZServiceRecordXML {
     private static long parsLong(String value) {
         if (value.startsWith("0x")) {
             return Long.valueOf(value.substring(2), 16).longValue();
+        } else if (value.startsWith("-0x")) {
+            return - Long.valueOf(value.substring(3), 16).longValue();
         } else {
             return Long.valueOf(value).longValue();
         }
@@ -190,7 +316,7 @@ class BlueZServiceRecordXML {
 
     private static DataElement parsDataElement(Node node) throws IOException {
         String name = node.getNodeName();
-        Integer intValueType = integetXMLtypes.get(name);
+        Integer intValueType = integerXMLtypes.get(name);
         if (intValueType != null) {
             return new DataElement(intValueType.intValue(), getLongValue(node));
         } else if ("sequence".equals(name)) {

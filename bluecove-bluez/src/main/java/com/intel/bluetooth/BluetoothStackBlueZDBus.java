@@ -100,10 +100,6 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
      */
     private long localDeviceBTAddress = -1;
 
-    private long sdpSesion;
-
-    private int registeredServicesCount = 0;
-
     private Map<String, String> propertiesMap;
 
     private DiscoveryListener discoveryListener;
@@ -293,14 +289,6 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
         if (deviceID != null) {
             devicesUsed.removeElement(deviceID);
             deviceID = null;
-        }
-        if (sdpSesion != 0) {
-            try {
-                long s = sdpSesion;
-                sdpSesion = 0;
-                closeSDPSessionImpl(s, true);
-            } catch (ServiceRegistrationException ignore) {
-            }
         }
         if (dbusConn != null) {
             dbusConn.disconnect();
@@ -677,101 +665,38 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
         }
     }
 
-    // private native boolean populateServiceRecordAttributeValuesImpl(long
-    // localDeviceBTAddress,
-    // long remoteDeviceAddress, long sdpSession, long handle, int[] attrIDs,
-    // ServiceRecordImpl serviceRecord);
-    private boolean populateServiceRecordAttributeValuesImpl(long remoteDeviceAddress, long sdpSession, long handle, int[] attrIDs,
-            ServiceRecordImpl serviceRecord) {
-        throw new UnsupportedOperationException("populateServiceRecordAttributeValuesImpl() Not supported yet.");
-    }
-
     public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
         DebugLog.debug("populateServicesRecordAttributeValues()");
         long remoteDeviceAddress = RemoteDeviceHelper.getAddress(serviceRecord.getHostDevice());
-        return populateServiceRecordAttributeValuesImpl(remoteDeviceAddress, 0, serviceRecord.getHandle(), attrIDs, serviceRecord);
+        throw new UnsupportedOperationException("populateServicesRecordAttributeValues Not supported yet.");
     }
 
     // --- SDP Server
 
-    // private native long openSDPSessionImpl() throws
-    // ServiceRegistrationException;
-    private long openSDPSessionImpl() throws ServiceRegistrationException {
-        throw new ServiceRegistrationException("openSDPSessionImpl() Not supported yet.");
-    }
-
-    private synchronized long getSDPSession() throws ServiceRegistrationException {
-        if (this.sdpSesion == 0) {
-            sdpSesion = openSDPSessionImpl();
-            DebugLog.debug("created SDPSession", sdpSesion);
-        }
-        return sdpSesion;
-    }
-
-    // private native void closeSDPSessionImpl(long sdpSesion, boolean quietly)
-    // throws ServiceRegistrationException;
-    private void closeSDPSessionImpl(long sdpSesion, boolean quietly) throws ServiceRegistrationException {
-
-        throw new ServiceRegistrationException("closeSDPSessionImpl() Not supported yet.");
-    }
-
-    // private native long registerSDPServiceImpl(long sdpSesion, long
-    // localDeviceBTAddress, byte[] record)
-    // throws ServiceRegistrationException;
-    private long registerSDPServiceImpl(long sdpSesion, byte[] record) throws ServiceRegistrationException {
-
-        throw new ServiceRegistrationException("registerSDPServiceImpl() Not supported yet.");
-    }
-
-    // private native void updateSDPServiceImpl(long sdpSesion, long
-    // localDeviceBTAddress, long handle, byte[] record)
-    // throws ServiceRegistrationException;
-    private void updateSDPServiceImpl(long sdpSesion, long handle, byte[] record) throws ServiceRegistrationException {
-
-        throw new ServiceRegistrationException("updateSDPServiceImpl() Not supported yet.");
-    }
-
-    // private native void unregisterSDPServiceImpl(long sdpSesion, long
-    // localDeviceBTAddress, long handle, byte[] record)
-    // throws ServiceRegistrationException;
-    private void unregisterSDPServiceImpl(long sdpSesion, long handle, byte[] record) throws ServiceRegistrationException {
-
-        throw new ServiceRegistrationException("unregisterSDPServiceImpl() Not supported yet.");
-    }
-
-    private byte[] getSDPBinary(ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
-        byte[] blob;
-        try {
-            blob = serviceRecord.toByteArray();
-        } catch (IOException e) {
-            throw new ServiceRegistrationException(e.toString());
-        }
-        return blob;
-    }
-
     private synchronized void registerSDPRecord(ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
-        long handle = registerSDPServiceImpl(getSDPSession(), getSDPBinary(serviceRecord));
+        long handle;
+        try {
+            handle = blueZ.registerSDPRecord(BlueZServiceRecordXML.exportXMLRecord(serviceRecord));
+        } catch (Throwable e) {
+            throw (ServiceRegistrationException) UtilsJavaSE.initCause(new ServiceRegistrationException(e.getMessage()), e);
+        }
         serviceRecord.setHandle(handle);
         serviceRecord.populateAttributeValue(BluetoothConsts.ServiceRecordHandle, new DataElement(DataElement.U_INT_4, handle));
-        registeredServicesCount++;
     }
 
-    private void updateSDPRecord(ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
-        updateSDPServiceImpl(getSDPSession(), serviceRecord.getHandle(), getSDPBinary(serviceRecord));
+    private synchronized void updateSDPRecord(ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
+        try {
+            blueZ.updateSDPRecord(serviceRecord.getHandle(), BlueZServiceRecordXML.exportXMLRecord(serviceRecord));
+        } catch (Throwable e) {
+            throw (ServiceRegistrationException) UtilsJavaSE.initCause(new ServiceRegistrationException(e.getMessage()), e);
+        }
     }
 
     private synchronized void unregisterSDPRecord(ServiceRecordImpl serviceRecord) throws ServiceRegistrationException {
         try {
-            unregisterSDPServiceImpl(getSDPSession(), serviceRecord.getHandle(), getSDPBinary(serviceRecord));
-        } finally {
-            registeredServicesCount--;
-            if (registeredServicesCount <= 0) {
-                registeredServicesCount = 0;
-                DebugLog.debug("closeSDPSession", sdpSesion);
-                long s = sdpSesion;
-                sdpSesion = 0;
-                closeSDPSessionImpl(s, false);
-            }
+            blueZ.unregisterSDPRecord(serviceRecord.getHandle());
+        } catch (Throwable e) {
+            throw (ServiceRegistrationException) UtilsJavaSE.initCause(new ServiceRegistrationException(e.getMessage()), e);
         }
     }
 
