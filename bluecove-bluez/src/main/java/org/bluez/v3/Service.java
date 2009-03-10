@@ -32,108 +32,169 @@
  */
 package org.bluez.v3;
 
+import java.util.Map;
+
 import org.freedesktop.dbus.DBusInterface;
 import org.freedesktop.dbus.DBusInterfaceName;
+import org.freedesktop.dbus.DBusSignal;
+import org.freedesktop.dbus.exceptions.DBusException;
 
 /**
- * The service interfaces aim provide an easy way to develop Bluetooth services. For remote service
- * search(handles/records) check the Adapter interface. This section is restricted to local interactions only. There are
- * two interfaces related to Bluetooth services:
+ * The service interfaces aim provide an easy way to develop Bluetooth services. For
+ * remote service search(handles/records) check the Adapter interface. This section is
+ * restricted to local interactions only. There are two interfaces related to Bluetooth
+ * services:
  * <p>
  * <ul>
- * <li>Service interface: retrieve information about the registered service. eg: name, description, status, Bus id, ...</li>
+ * <li>Service interface: retrieve information about the registered service. eg: name,
+ * description, status, Bus id, ...</li>
  * <li>Database interface: manage SDP records and service connection authorizations</li>
  * <ul>
  * 
- * BlueZ services can be classified as external and internal. Internal are services registered automatically when the
- * system starts. External are services running in the standalone mode where the user start the service and ask for
- * registration. Once the service is registered, an object instance will be available, the methods provided are
+ * BlueZ services can be classified as external and internal. Internal are services
+ * registered automatically when the system starts. External are services running in the
+ * standalone mode where the user start the service and ask for registration. Once the
+ * service is registered, an object instance will be available, the methods provided are
  * described below.
  * 
- * Service org.bluez; Interface org.bluez.Service; Object path path from org.bluez.Manager.ListServices()
  * 
+ * Service org.bluez;
+ * <p>
+ * Interface org.bluez.Service;
+ * <p>
+ * Object path path from org.bluez.Manager.ListServices()
  * 
+ * Created base on D-Bus API description for BlueZ bluez-utils-3.36/hcid/dbus-api.txt
  */
 @DBusInterfaceName("org.bluez.Service")
 public interface Service extends DBusInterface {
-	/*
-	 * 
-	 * dict GetInfo()
-	 * 
-	 * Returns the service properties.
-	 * 
-	 * String GetIdentifier()
-	 * 
-	 * This method returns the service identifier.
-	 * 
-	 * String GetName()
-	 * 
-	 * This method returns the service name.
-	 * 
-	 * String GetDescription()
-	 * 
-	 * This method returns the service description.
-	 * 
-	 * String GetBusName() [experimental]
-	 * 
-	 * Returns the unique bus name of the service if it has been started.
-	 * 
-	 * throws Error.NotAvailable
-	 * 
-	 * void Start()
-	 * 
-	 * This method tells the system to start the service.
-	 * 
-	 * void Stop()
-	 * 
-	 * This method tells the system to stop the service.
-	 * 
-	 * boolean IsRunning()
-	 * 
-	 * Returns true if the service has been started and is currently active. Otherwise, it returns false.
-	 * 
-	 * boolean IsExternal()
-	 * 
-	 * Returns true if the service was registered using the Database.RegisterService method instead of a .service file.
-	 * The Start and Stop methods are not applicable to external services and will return an error.
-	 * 
-	 * array{String} ListTrusts() [experimental]
-	 * 
-	 * Returns a list of remote devices that are trusted for the service.
-	 * 
-	 * void SetTrusted(String address) [experimental]
-	 * 
-	 * Marks the user as trusted.
-	 * 
-	 * throws Error.InvalidArguments Error.AlreadyExists
-	 * 
-	 * boolean IsTrusted(String address) [experimental]
-	 * 
-	 * Returns true if the user is trusted or false otherwise. The address parameter must match one of the current users
-	 * of the service.
-	 * 
-	 * throws Error.InvalidArguments
-	 * 
-	 * void RemoveTrust(String address) [experimental]
-	 * 
-	 * Marks the user as not trusted.
-	 * 
-	 * throws Error.InvalidArguments Error.DoesNotExist
-	 * 
-	 * Signals void Started()
-	 * 
-	 * The object path of this signal contains which service was started.
-	 * 
-	 * void Stopped()
-	 * 
-	 * The object path of this signal contains which service was stopped.
-	 * 
-	 * void TrustAdded(String address)
-	 * 
-	 * Sent when SetTrusted() is called.
-	 * 
-	 * void TrustRemoved(String address)
-	 * 
-	 * Sent when RemoveTrust() is called.
-	 */
+
+    /**
+     * Returns the service properties.
+     */
+    Map GetInfo();
+
+    /**
+     * This method returns the service identifier.
+     */
+    String GetIdentifier();
+
+    /**
+     * This method returns the service name.
+     */
+    String GetName();
+
+    /**
+     * This method returns the service description.
+     */
+    String GetDescription();
+
+    /**
+     * Returns the unique bus name of the service if it has been started. [experimental]
+     */
+    String GetBusName() throws org.bluez.Error.NotAvailable;
+
+    /**
+     * This method tells the system to start the service.
+     */
+    void Start();
+
+    /**
+     * This method tells the system to stop the service.
+     */
+    void Stop();
+
+    /**
+     * Returns true if the service has been started and is currently active. Otherwise, it
+     * returns false.
+     */
+    boolean IsRunning();
+
+    /**
+     * Returns true if the service was registered using the Database.RegisterService
+     * method instead of a .service file. The Start and Stop methods are not applicable to
+     * external services and will return an error.
+     */
+    boolean IsExternal();
+
+    /**
+     * Returns a list of remote devices that are trusted for the service. [experimental]
+     */
+    String[] ListTrusts();
+
+    /**
+     * Marks the user as trusted. [experimental]
+     */
+    void SetTrusted(String address) throws org.bluez.Error.InvalidArguments, org.bluez.Error.AlreadyExists;
+
+    /**
+     * Returns true if the user is trusted or false otherwise. The address parameter must
+     * match one of the current users of the service.
+     * 
+     * [experimental]
+     */
+    boolean IsTrusted(String address) throws org.bluez.Error.InvalidArguments;
+
+    /**
+     * Marks the user as not trusted.
+     * 
+     * [experimental]
+     */
+    void RemoveTrust(String address) throws org.bluez.Error.InvalidArguments, org.bluez.Error.DoesNotExist;
+
+    //===================== Signals =====================
+
+    /**
+     * The object path of this signal contains which service was started.
+     */
+    public class Started extends DBusSignal {
+
+        public Started(String path) throws DBusException {
+            super(path);
+        }
+    }
+
+    /**
+     * The object path of this signal contains which service was stopped.
+     */
+    public class Stopped extends DBusSignal {
+
+        public Stopped(String path) throws DBusException {
+            super(path);
+        }
+    }
+
+    /**
+     * Sent when SetTrusted() is called.
+     */
+    public class TrustAdded extends DBusSignal {
+
+        private final String address;
+
+        public TrustAdded(String path, String address) throws DBusException {
+            super(path, address);
+            this.address = address;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+    }
+
+    /**
+     * Sent when RemoveTrust() is called.
+     */
+    public class TrustRemoved extends DBusSignal {
+
+        private final String address;
+
+        public TrustRemoved(String path, String address) throws DBusException {
+            super(path, address);
+            this.address = address;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+    }
 }
