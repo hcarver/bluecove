@@ -78,8 +78,18 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 
     private final static String BLUEZ_DEVICEID_PREFIX = "hci";
 
+    private final static int LISTEN_BACKLOG_RFCOMM = 4;
+
+    private final static int LISTEN_BACKLOG_L2CAP = 4;
+
+    private final int l2cap_receiveMTU_max = 65535;
+
+    private final static Vector<String> devicesUsed = new Vector<String>();
+
     // Our reusable DBUS connection.
     private DBusConnection dbusConn = null;
+
+    private String deviceID;
 
     private BlueZAPI blueZ;
 
@@ -114,6 +124,14 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 
     public String getStackID() {
         return BlueCoveImpl.STACK_BLUEZ_DBUS;
+    }
+
+    public String toString() {
+        if (deviceID != null) {
+            return getStackID() + ":" + deviceID;
+        } else {
+            return getStackID();
+        }
     }
 
     // --- Library initialization
@@ -239,10 +257,25 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
                 throw new BluetoothStateException(adapterPath + " " + e.getMessage());
             }
             localDeviceBTAddress = convertBTAddress(blueZ.getAdapterAddress());
+            deviceID = blueZ.getAdapterID();
+            if (devicesUsed.contains(deviceID)) {
+                throw new BluetoothStateException("LocalDevice " + deviceID + " alredy in use");
+            }
             propertiesMap = new TreeMap<String, String>();
             // TODO
-            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX, "1");
-            propertiesMap.put(BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_DEVICE_ID, blueZ.getAdapterID());
+            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX, "7");
+            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX, "1"); // 7 ?
+            propertiesMap.put(BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_DEVICE_ID, deviceID);
+
+            final String TRUE = "true";
+            final String FALSE = "false";
+            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY_SCAN, TRUE);
+            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE_SCAN, TRUE);
+            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY, TRUE);
+            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE, TRUE);
+            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX, String.valueOf(256));
+            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_MASTER_SWITCH, FALSE);
+            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX, String.valueOf(l2cap_receiveMTU_max));
 
             intialized = true;
         } finally {
@@ -257,6 +290,10 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 
     public void destroy() {
         DebugLog.debug("destroy()");
+        if (deviceID != null) {
+            devicesUsed.removeElement(deviceID);
+            deviceID = null;
+        }
         if (sdpSesion != 0) {
             try {
                 long s = sdpSesion;
@@ -744,7 +781,6 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
             int timeout) throws IOException;
 
     public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
-        DebugLog.debug("connectionRfOpenClientConnection()");
         return connectionRfOpenClientConnectionImpl(this.localDeviceBTAddress, params.address, params.channel, params.authenticate, params.encrypt,
                 params.timeout);
     }
@@ -757,6 +793,11 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
         return rfGetSecurityOptImpl(handle);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
+     */
     public boolean rfEncrypt(long address, long handle, boolean on) throws IOException {
         // TODO
         return false;
@@ -768,9 +809,8 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
     private native int rfServerGetChannelIDImpl(long handle) throws IOException;
 
     public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException {
-        final int listen_backlog = 1;
         long socket = rfServerOpenImpl(this.localDeviceBTAddress, params.authorize, params.authenticate, params.encrypt, params.master, params.timeouts,
-                listen_backlog);
+                LISTEN_BACKLOG_RFCOMM);
         boolean success = false;
         try {
             int channel = rfServerGetChannelIDImpl(socket);
@@ -799,11 +839,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
         updateSDPRecord(serviceRecord);
     }
 
-    // public native long rfServerAcceptAndOpenRfServerConnection(long handle)
-    // throws IOException;
-    public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException {
-        throw new IOException("rfServerAcceptAndOpenRfServerConnection() Not supported yet.");
-    }
+    public native long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException;
 
     public void connectionRfCloseServerConnection(long clientHandle) throws IOException {
         connectionRfCloseClientConnection(clientHandle);
@@ -834,6 +870,12 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 
     // --- Client and Server L2CAP connections
 
+    private void validateMTU(int receiveMTU, int transmitMTU) {
+        if (receiveMTU > l2cap_receiveMTU_max) {
+            throw new IllegalArgumentException("invalid ReceiveMTU value " + receiveMTU);
+        }
+    }
+
     private native long l2OpenClientConnectionImpl(long localDeviceBTAddress, long address, int channel, boolean authenticate, boolean encrypt, int receiveMTU,
             int transmitMTU, int timeout) throws IOException;
 
@@ -844,9 +886,9 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
      * .BluetoothConnectionParams, int, int)
      */
     public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
-
-        return l2OpenClientConnectionImpl(localDeviceBTAddress, params.address, params.channel, params.authenticate, params.encrypt, receiveMTU, transmitMTU,
-                params.timeout);
+        validateMTU(receiveMTU, transmitMTU);
+        return l2OpenClientConnectionImpl(this.localDeviceBTAddress, params.address, params.channel, params.authenticate, params.encrypt, receiveMTU,
+                transmitMTU, params.timeout);
     }
 
     /*
@@ -868,9 +910,9 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
      * BluetoothConnectionNotifierParams, int, int, com.intel.bluetooth.ServiceRecordImpl)
      */
     public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
-        final int listen_backlog = 1;
+        validateMTU(receiveMTU, transmitMTU);
         long socket = l2ServerOpenImpl(this.localDeviceBTAddress, params.authorize, params.authenticate, params.encrypt, params.master, params.timeouts,
-                listen_backlog, receiveMTU, transmitMTU, params.bluecove_ext_psm);
+                LISTEN_BACKLOG_L2CAP, receiveMTU, transmitMTU, params.bluecove_ext_psm);
         boolean success = false;
         try {
             int channel = l2ServerGetPSMImpl(socket);
@@ -977,6 +1019,11 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
      */
     public native int l2GetSecurityOpt(long handle, int expected) throws IOException;
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.intel.bluetooth.BluetoothStack#l2Encrypt(long,long,boolean)
+     */
     public boolean l2Encrypt(long address, long handle, boolean on) throws IOException {
         // TODO
         return false;
