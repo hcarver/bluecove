@@ -456,6 +456,16 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
 
             for (Long address : address2DiscoveryData.keySet()) {
                 DiscoveryData discoveryData = address2DiscoveryData.get(address);
+                if (discoveryData.name == null) {
+                    try {
+                        discoveryData.name = blueZ.getRemoteDeviceFriendlyName(toHexString(address));
+                    } catch (Throwable e) {
+                        DebugLog.error("can't get device name", e);
+                    }
+                    if (discoveryData.name == null) {
+                        discoveryData.name = "";
+                    }
+                }
                 RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(BluetoothStackBlueZDBus.this, address, discoveryData.name,
                         discoveryData.paired);
                 listener.deviceDiscovered(remoteDevice, new DeviceClass(discoveryData.deviceClass));
