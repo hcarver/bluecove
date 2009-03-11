@@ -36,6 +36,7 @@ import org.freedesktop.dbus.DBusInterface;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 
 /**
+ * Errors thrown by hcid or any bluetooth service.
  * 
  * Created base on D-Bus API description for BlueZ bluez-utils-3.36/hcid/dbus-api.txt and
  * bluez-4.32/doc/*.txt

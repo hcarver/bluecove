@@ -29,10 +29,10 @@ package com.intel.bluetooth;
  *
  *
  */
-public class BluetoothStackBlueZDBusNativeTests {
+class BluetoothStackBlueZDBusNativeTests {
 
-	static native void testThrowException(int type) throws Exception;
+    static native void testThrowException(int type) throws Exception;
 
-	static native void testDebug(int argc, String message);
+    static native void testDebug(int argc, String message);
 
 }
