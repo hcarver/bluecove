@@ -585,6 +585,8 @@ public abstract class RemoteDeviceHelper {
      * <p>
      * <b>PUBLIC JSR-82 extension</b>
      * 
+     * On BlueZ will throw exception when authentication already exists.
+     * 
      * @param device
      *            Remote Device
      * @param passkey
