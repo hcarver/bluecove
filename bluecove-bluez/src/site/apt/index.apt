@@ -37,8 +37,6 @@ java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus.jar:unixsocket
 
     * Require additional library {{{http://dbus.freedesktop.org/doc/dbus-java/}Java D-Bus}} and its dependencies.
 
-    * Service registration is not implemented yet
-
 * Configuration options
 
     System properties:

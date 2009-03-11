@@ -154,6 +154,7 @@ public class BlueZAPIV3 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#selectAdapter(org.freedesktop.dbus.Path)
      */
     public void selectAdapter(Path adapterPath) throws DBusException {
+        DebugLog.debug("selectAdapter", adapterPath.getPath());
         adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), Adapter.class);
         this.adapterPath = adapterPath;
     }
@@ -642,13 +643,20 @@ public class BlueZAPIV3 implements BlueZAPI {
         return xmlRecords;
     }
 
+    private Database getSDPService() throws DBusException {
+        //return dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), Database.class);
+        return dbusConn.getRemoteObject("org.bluez", "/org/bluez", Database.class);
+    }
+    
     /*
      * (non-Javadoc)
      * 
      * @see org.bluez.BlueZAPI#registerSDPRecord(java.lang.String)
      */
     public long registerSDPRecord(String sdpXML) throws DBusException {
-        throw new DBusException("TODO: implement this using org.bluez.Database");
+        DebugLog.debug("AddServiceRecordFromXML", sdpXML);
+        UInt32 handle = getSDPService().AddServiceRecordFromXML(sdpXML);
+        return handle.longValue();
     }
 
     /*
@@ -657,7 +665,8 @@ public class BlueZAPIV3 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#updateSDPRecord(long, java.lang.String)
      */
     public void updateSDPRecord(long handle, String sdpXML) throws DBusException {
-        // TODO Auto-generated method stub
+        DebugLog.debug("UpdateServiceRecordFromXML", sdpXML);
+        getSDPService().UpdateServiceRecordFromXML(new UInt32(handle), sdpXML);
     }
 
     /*
@@ -666,6 +675,7 @@ public class BlueZAPIV3 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#unregisterSDPRecord(long)
      */
     public void unregisterSDPRecord(long handle) throws DBusException {
-        // TODO Auto-generated method stub
+        DebugLog.debug("RemoveServiceRecord", handle);
+        getSDPService().RemoveServiceRecord(new UInt32(handle));
     }
 }

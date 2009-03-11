@@ -135,6 +135,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#selectAdapter(org.freedesktop.dbus.Path)
      */
     public void selectAdapter(Path adapterPath) throws DBusException {
+        DebugLog.debug("selectAdapter", adapterPath.getPath());
         adapter = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), Adapter.class);
         this.adapterPath = adapterPath;
     }
@@ -458,6 +459,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#updateSDPRecord(long, java.lang.String)
      */
     public void updateSDPRecord(long handle, String sdpXML) throws DBusException {
+        DebugLog.debug("UpdateRecord", sdpXML);
         getSDPService().UpdateRecord(new UInt32(handle), sdpXML);
     }
 
