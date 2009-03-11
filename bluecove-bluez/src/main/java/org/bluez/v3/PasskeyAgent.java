@@ -52,6 +52,8 @@ public interface PasskeyAgent extends DBusInterface {
 	 * is actual passkey. It is a 1 to 16 byte PIN code in UTF-8 format.
 	 * 
 	 * The first argument contains the path of the local adapter and the second one the remote address.
+	 * 
+	 * NOTE BlueZ 3.8 - 3.32 used to have extra argument (boolean numeric).
 	 */
 	public String Request(String path, String address) throws org.bluez.Error.Rejected, org.bluez.Error.Canceled;
 

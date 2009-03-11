@@ -62,6 +62,8 @@ public interface Adapter extends org.bluez.Adapter {
 
     /**
      * Returns the properties of the local adapter.
+     * 
+     * @since BlueZ 3.10
      */
     Map GetInfo() throws Error.NotReady;
 
@@ -244,6 +246,8 @@ public interface Adapter extends org.bluez.Adapter {
 
     /**
      * Returns the properties for a remote device.
+     * 
+     * @since BlueZ 3.10
      */
     Map GetRemoteInfo(String address);
 
@@ -312,6 +316,8 @@ public interface Adapter extends org.bluez.Adapter {
 
     /**
      * Get the remote features encoded as bit mask.
+     * 
+     * @since BlueZ 3.8
      */
     byte[] GetRemoteFeatures(String address) throws Error.InvalidArguments, Error.NotAvailable;
 
@@ -456,6 +462,7 @@ public interface Adapter extends org.bluez.Adapter {
      * succeed.
      * 
      * @param address
+     * @since BlueZ 3.10
      */
     void SetTrusted(String address) throws Error.InvalidArguments, Error.AlreadyExists;
 
@@ -465,11 +472,13 @@ public interface Adapter extends org.bluez.Adapter {
      * 
      * @param address
      * @return
+     * @since BlueZ 3.10
      */
     boolean IsTrusted(String address) throws Error.InvalidArguments;
 
     /**
      * Marks the remote device as not trusted.
+     * @since BlueZ 3.10
      */
     void RemoveTrust(String address) throws Error.InvalidArguments, Error.DoesNotExist;
 
@@ -530,11 +539,13 @@ public interface Adapter extends org.bluez.Adapter {
      * Enable or disable automatic remote name resolving for periodic discovery.
      * 
      * @param resolve_names
+     * @since BlueZ 3.8
      */
     void SetPeriodicDiscoveryNameResolving(boolean resolve_names) throws Error.InvalidArguments;
 
     /**
      * Check if automatic remote name resolving is enabled or not for periodic discovery.
+     * @since BlueZ 3.8
      */
     boolean GetPeriodicDiscoveryNameResolving() throws Error.InvalidArguments;
 
@@ -556,6 +567,8 @@ public interface Adapter extends org.bluez.Adapter {
     /**
      * This method will request the SDP database of a remote device for a service record
      * and return its data in XML format.
+     * 
+     * @since BlueZ 3.8
      */
     public String GetRemoteServiceRecordAsXML(String address, UInt32 handle) throws Error.InvalidArguments, Error.InProgress, Error.Failed;
 
@@ -573,11 +586,15 @@ public interface Adapter extends org.bluez.Adapter {
      * call is not needed, but in cases of resources restricted devices it is useful to
      * call this to finish the SDP transaction before proceeded with profile specific
      * connections.
+     * 
+     * @since BlueZ 3.10
      */
     void FinishRemoteServiceTransaction(String address);
 
     /**
      * List addresses of all known remote devices (bonded, trusted and used).
+     * 
+     * @since BlueZ 3.8
      */
     String[] ListRemoteDevices();
 
@@ -589,6 +606,7 @@ public interface Adapter extends org.bluez.Adapter {
      * 
      * @param date
      * @return
+     * @since BlueZ 3.8
      */
     String[] ListRecentRemoteDevices(String date);
 
@@ -616,6 +634,8 @@ public interface Adapter extends org.bluez.Adapter {
 
     /**
      * After changing the discoverable timeout this signal provide the new timeout value.
+     * 
+     * @since BlueZ 3.8
      */
     public class DiscoverableTimeoutChanged extends DBusSignal {
 
@@ -885,6 +905,8 @@ public interface Adapter extends org.bluez.Adapter {
     /**
      * This signal will be sent every time the service daemon tries to resolve a remote
      * name during discovery.
+     * 
+     * @since BlueZ 3.10
      */
     public class RemoteNameRequested extends DBusSignal {
 

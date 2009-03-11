@@ -116,12 +116,16 @@ public interface Security extends DBusInterface {
      * 
      * The path parameter defines the object path of the authorization agent that will be
      * called when an authorization request needs to be answered.
+     * 
+     * @since BlueZ 3.8
      */
     void RegisterDefaultAuthorizationAgent(String path);
 
     /**
      * This unregisters a default authorization agent that has been previously registered.
      * The path parameter must match the same value that has been used on registration.
+     * 
+     * @since BlueZ 3.8
      */
     void UnregisterDefaultAuthorizationAgent(String path);
 

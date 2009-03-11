@@ -88,6 +88,7 @@ public interface Manager extends org.bluez.Manager {
 	 * 
 	 * Returns object path for the specified service. Valid patterns are the unqiue identifier or a bus name.
 	 * 
+	 * @since BlueZ 3.10
 	 * @param pattern
 	 * @return
 	 */
@@ -96,6 +97,7 @@ public interface Manager extends org.bluez.Manager {
 	/**
 	 * Returns list of object paths of current services.
 	 * 
+	 * @since BlueZ 3.10
 	 * @return
 	 * @throws Error.InvalidArguments
 	 */
@@ -105,6 +107,7 @@ public interface Manager extends org.bluez.Manager {
 	 * Returns the unqiue bus id of the specified service. Valid patterns are the same as for FindService(). If the
 	 * service is not running it will be started.
 	 * 
+	 * @since BlueZ 3.10
 	 * @param pattern
 	 * @return
 	 */
@@ -152,6 +155,8 @@ public interface Manager extends org.bluez.Manager {
 
 	/**
 	 * Parameter is object path of the new default adapter.
+	 * 
+	 * @since BlueZ 3.10
 	 */
 	public class DefaultAdapterChanged extends DBusSignal {
 
@@ -172,6 +177,8 @@ public interface Manager extends org.bluez.Manager {
 
 	/**
 	 * Parameter is object path of registered service agent.
+	 * 
+	 * @since BlueZ 3.10
 	 */
 	public class ServiceAdded extends DBusSignal {
 
@@ -192,6 +199,8 @@ public interface Manager extends org.bluez.Manager {
 
 	/**
 	 * Parameter is object path of unregistered service agent.
+	 * 
+	 * @since BlueZ 3.10
 	 */
 	public class ServiceRemoved extends DBusSignal {
 

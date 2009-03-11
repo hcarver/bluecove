@@ -65,12 +65,15 @@ import org.freedesktop.dbus.exceptions.DBusException;
  * Object path path from org.bluez.Manager.ListServices()
  * 
  * Created base on D-Bus API description for BlueZ bluez-utils-3.36/hcid/dbus-api.txt
+ * 
+ * @since BlueZ 3.8
  */
 @DBusInterfaceName("org.bluez.Service")
 public interface Service extends DBusInterface {
 
     /**
      * Returns the service properties.
+     * @since BlueZ 3.10
      */
     Map GetInfo();
 
@@ -91,6 +94,7 @@ public interface Service extends DBusInterface {
 
     /**
      * Returns the unique bus name of the service if it has been started. [experimental]
+     * @since BlueZ 3.10
      */
     String GetBusName() throws org.bluez.Error.NotAvailable;
 
@@ -166,6 +170,8 @@ public interface Service extends DBusInterface {
 
     /**
      * Sent when SetTrusted() is called.
+     * 
+     * @since BlueZ 3.10
      */
     public class TrustAdded extends DBusSignal {
 
@@ -183,6 +189,8 @@ public interface Service extends DBusInterface {
 
     /**
      * Sent when RemoveTrust() is called.
+     * 
+     * @since BlueZ 3.10
      */
     public class TrustRemoved extends DBusSignal {
 

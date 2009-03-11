@@ -65,6 +65,7 @@ import org.freedesktop.dbus.UInt32;
  * <p>
  * Object path /org/bluez   (NOT On /org/bluez/{hci0,hci1,...})
  * <p>
+ * @since BlueZ 3.9
  */
 @DBusInterfaceName("org.bluez.Database")
 public interface Database extends DBusInterface {
@@ -93,6 +94,8 @@ public interface Database extends DBusInterface {
 
     /**
      * Updates a given service record.
+     * 
+     * @since BlueZ 3.10
      */
     void UpdateServiceRecord(UInt32 handle, byte[] sdprecord) throws Error.InvalidArguments, Error.NotAvailable, Error.Failed;
 
