@@ -39,12 +39,13 @@ java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus.jar:unixsocket
 
     * Require additional library {{{http://dbus.freedesktop.org/doc/dbus-java/}Java D-Bus}} and its dependencies.
 
-=== JSR-82 Limitations ===
+** JSR-82 Limitations
 
     * `ServiceRecord.setDeviceServiceClasses(..)` not supported.
+
     * `LocalDevice.getDeviceClass()` not supported on BlueZ v4.
 
-=== BlueCove API Limitations ===
+** BlueCove API Limitations
 
     * In BlueZ 3.x Service registration with multiple adapters installed would be visible on all Adapters (This is because BlueZ interface org.bluez.Database is not bound to adapter)
 
@@ -66,6 +67,6 @@ java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus.jar:unixsocket
 
     BlueCove {{{http://code.google.com/p/bluecove/wiki/Documentation}Installation and configuration instructions here}}.
 
-    BlueZ D-Bus API available in pakages `org.bluez.v3` and `org.bluez.v3` and can be used separately. API-Documentation {{{apidocs/index.html}Java docs}}.
+    BlueZ D-Bus API available in package `org.bluez.v3` and `org.bluez.v3` and can be used separately. API-Documentation {{{apidocs/index.html}Java docs}}.
 
-    Unix domain socket API available in pakage `org.bluecove.socket` and can be used independatly from Bluetooth APIs.
+    Unix domain socket API available in package `org.bluecove.socket` and can be used independently from Bluetooth APIs.
