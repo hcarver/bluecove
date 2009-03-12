@@ -11,11 +11,18 @@ fi
 BLUECOVE_BLUEZ_CP="${BLUECOVE_JAR}"
 #BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${BLUECOVE_BLUEZ_JAR}"
 BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/classes"
+JAVA_ARGS=
 
 DBUS_JAVA_JAR=/usr/share/java/dbus-java/dbus.jar
 
-if [ -f "${DBUS_JAVA_JAR}" ] ; then
+#BLUECOVE_USE_RPM=false; export BLUECOVE_USE_RPMS
+
+if [ -f "${DBUS_JAVA_JAR}" -a "${BLUECOVE_USE_RPM}" != "false" ] ; then
+
     echo "dbus-java installation found ${DBUS_JAVA_JAR}"
+    echo "Use: BLUECOVE_USE_RPM=false; export BLUECOVE_USE_RPM; to use library from maven repository"
+    echo ""
+
     BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${DBUS_JAVA_JAR}"
     if [ "$HOSTTYPE" = "x86_64" ]; then
         LIBMATTHEW_JAVA_DIR=/usr/lib64/libmatthew-java
@@ -25,6 +32,7 @@ if [ -f "${DBUS_JAVA_JAR}" ] ; then
     BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${LIBMATTHEW_JAVA_DIR}/unix.jar"
     BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${LIBMATTHEW_JAVA_DIR}/debug-disable.jar"
     BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${LIBMATTHEW_JAVA_DIR}/hexdump.jar"
+    #JAVA_ARGS=-Djava.library.path=${LIBMATTHEW_JAVA_DIR}
 else
     BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/dbus.jar"
     BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/debug-disable.jar"
@@ -34,7 +42,7 @@ fi
 
 BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${BLUECOVE_TESTER_JAR}"
 
-java -cp "${BLUECOVE_BLUEZ_CP}" ${BLUECOVE_MAIN} $*
+java ${JAVA_ARGS} -cp "${BLUECOVE_BLUEZ_CP}" ${BLUECOVE_MAIN} $*
 rc=$?
 if [ ! "${rc}" = "0" ]; then
     echo Error calling java
