@@ -145,7 +145,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
      * @see com.intel.bluetooth.BluetoothStack#requireNativeLibraries()
      */
     public LibraryInformation[] requireNativeLibraries() {
-        LibraryInformation unixSocketLib = new LibraryInformation("unix-java");
+        LibraryInformation unixSocketLib = new LibraryInformation("unix-java", false);
         unixSocketLib.stackClass = UnixSocket.class;
         return new LibraryInformation[] { new LibraryInformation(NATIVE_BLUECOVE_LIB_BLUEZ), unixSocketLib };
     }

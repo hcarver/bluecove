@@ -41,23 +41,27 @@ import com.intel.bluetooth.BluetoothStack.LibraryInformation;
  *
  * Singleton class used as holder for BluetoothStack.
  *
- * Under security manager all you need to do is initialize BlueCoveImpl inside Privileged context.
+ * Under security manager all you need to do is initialize BlueCoveImpl inside Privileged
+ * context.
  * <p>
- * If automatic Bluetooth Stack detection is not enough Java System property "bluecove.stack" can be used to force
- * desired Stack Initialization. Values "widcomm", "bluesoleil" or "winsock". By default winsock is selected if
- * available.
+ * If automatic Bluetooth Stack detection is not enough Java System property
+ * "bluecove.stack" can be used to force desired Stack Initialization. Values "widcomm",
+ * "bluesoleil" or "winsock". By default winsock is selected if available.
  * <p>
- * Another property "bluecove.stack.first" is used optimize stack detection. If -Dbluecove.stack.first=widcomm then
- * widcomm (bluecove.dll) stack is loaded first and if not available then BlueCove will switch to winsock. By default
- * intelbth.dll is loaded first.
+ * Another property "bluecove.stack.first" is used optimize stack detection. If
+ * -Dbluecove.stack.first=widcomm then widcomm (bluecove.dll) stack is loaded first and if
+ * not available then BlueCove will switch to winsock. By default intelbth.dll is loaded
+ * first.
  * <p>
- * If multiple stacks are detected they are selected in following order: "winsock", "widcomm", "bluesoleil". Since
- * BlueCove v2.0.1 "bluecove.stack.first" will alter the order of stack selection.
+ * If multiple stacks are detected they are selected in following order: "winsock",
+ * "widcomm", "bluesoleil". Since BlueCove v2.0.1 "bluecove.stack.first" will alter the
+ * order of stack selection.
  * <p>
  * To use jsr-82 emulator set "bluecove.stack" value to "emulator".
  * <p>
- * If System property is not an option (e.g. when running in Webstart) create text file "bluecove.stack" or
- * "bluecove.stack.first" containing stack name and add this file to BlueCove or Application jar. (Since v2.0.1)
+ * If System property is not an option (e.g. when running in Webstart) create text file
+ * "bluecove.stack" or "bluecove.stack.first" containing stack name and add this file to
+ * BlueCove or Application jar. (Since v2.0.1)
  * <p>
  * Use `LocalDevice.getProperty("bluecove.stack")` to find out which stack is used.
  *
@@ -78,11 +82,10 @@ public class BlueCoveImpl {
 
     public static final String versionSufix = "-SNAPSHOT"; // SNAPSHOT
 
-    public static final String version = String.valueOf(versionMajor1) + "." + String.valueOf(versionMajor2) + "."
-            + String.valueOf(versionMinor) + versionSufix;
+    public static final String version = String.valueOf(versionMajor1) + "." + String.valueOf(versionMajor2) + "." + String.valueOf(versionMinor)
+            + versionSufix;
 
-    public static final int nativeLibraryVersionExpected = versionMajor1 * 1000000 + versionMajor2 * 10000
-            + versionMinor * 100 + versionBuild;
+    public static final int nativeLibraryVersionExpected = versionMajor1 * 1000000 + versionMajor2 * 10000 + versionMinor * 100 + versionBuild;
 
     public static final String STACK_WINSOCK = "winsock";
 
@@ -95,7 +98,7 @@ public class BlueCoveImpl {
     public static final String STACK_BLUEZ = "bluez";
 
     public static final String STACK_BLUEZ_DBUS = "bluez-dbus";
-    
+
     public static final String STACK_OSX = "mac";
 
     public static final String STACK_EMULATOR = "emulator";
@@ -117,7 +120,8 @@ public class BlueCoveImpl {
     public static final String NATIVE_LIB_OSX = "bluecove";
 
     /**
-     * To work on BlueSoleil version 2.3 we need to compile C++ code /MT the same as winsock.
+     * To work on BlueSoleil version 2.3 we need to compile C++ code /MT the same as
+     * winsock.
      */
     public static final String NATIVE_LIB_BLUESOLEIL = NATIVE_LIB_MS;
 
@@ -136,7 +140,7 @@ public class BlueCoveImpl {
     public static final int BLUECOVE_STACK_DETECT_EMULATOR = 1 << 6;
 
     public static final int BLUECOVE_STACK_DETECT_BLUEZ_DBUS = 1 << 7;
-    
+
     static final String TRUE = "true";
 
     static final String FALSE = "false";
@@ -276,8 +280,8 @@ public class BlueCoveImpl {
     }
 
     /**
-     * Applications should not used this function. Allow default initialization. In Secure environment instance() should
-     * be called initially from secure context.
+     * Applications should not used this function. Allow default initialization. In Secure
+     * environment instance() should be called initially from secure context.
      *
      * @return Instance of the class, getBluetoothStack() can be called.
      */
@@ -388,8 +392,12 @@ public class BlueCoveImpl {
                 c = stack.getClass();
             }
             if (!NativeLibLoader.isAvailable(libs[i].libraryName, c)) {
-                throw new BluetoothStateException("BlueCove library " + libs[i].libraryName + " not available;"
-                        + NativeLibLoader.getLoadErrors(libs[i].libraryName));
+                if (libs[i].required) {
+                    throw new BluetoothStateException("BlueCove library " + libs[i].libraryName + " not available;"
+                            + NativeLibLoader.getLoadErrors(libs[i].libraryName));
+                } else {
+                    DebugLog.debug("library " + libs[i].libraryName + " not available");
+                }
             }
         }
     }
@@ -435,7 +443,8 @@ public class BlueCoveImpl {
         } else {
             switch (NativeLibLoader.getOS()) {
             case NativeLibLoader.OS_LINUX:
-                Class stackClass = loadStackClass(BlueCoveConfigProperties.PROPERTY_BLUEZ_CLASS, "com.intel.bluetooth.BluetoothStackBlueZ|com.intel.bluetooth.BluetoothStackBlueZDBus");
+                Class stackClass = loadStackClass(BlueCoveConfigProperties.PROPERTY_BLUEZ_CLASS,
+                        "com.intel.bluetooth.BluetoothStackBlueZ|com.intel.bluetooth.BluetoothStackBlueZDBus");
                 detectorStack = newStackInstance(stackClass);
                 loadNativeLibraries(detectorStack);
                 stackSelected = detectorStack.getStackID();
@@ -460,8 +469,7 @@ public class BlueCoveImpl {
 
         int libraryVersion = detectorStack.getLibraryVersion();
         if (nativeLibraryVersionExpected != libraryVersion) {
-            DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected "
-                    + nativeLibraryVersionExpected);
+            DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected " + nativeLibraryVersionExpected);
             throw new BluetoothStateException("BlueCove native library version mismatch");
         }
 
@@ -500,10 +508,11 @@ public class BlueCoveImpl {
     }
 
     /**
-     * List the local adapters that can be initialized using configuration property "bluecove.deviceID". (Linux BlueZ
-     * and Emulator)
+     * List the local adapters that can be initialized using configuration property
+     * "bluecove.deviceID". (Linux BlueZ and Emulator)
      *
-     * The first stack/adapter would be initialized if not initialized already, you can exclude it from the list.
+     * The first stack/adapter would be initialized if not initialized already, you can
+     * exclude it from the list.
      *
      * The function return empty list on non BlueZ environment.
      *
@@ -515,8 +524,7 @@ public class BlueCoveImpl {
      */
     public static Vector getLocalDevicesID() throws BluetoothStateException {
         Vector v = new Vector();
-        String ids = BluetoothStackHolder.getBluetoothStack().getLocalDeviceProperty(
-                BlueCoveLocalDeviceProperties.LOCAL_DEVICE_DEVICES_LIST);
+        String ids = BluetoothStackHolder.getBluetoothStack().getLocalDeviceProperty(BlueCoveLocalDeviceProperties.LOCAL_DEVICE_DEVICES_LIST);
         if (ids != null) {
             UtilsStringTokenizer tok = new UtilsStringTokenizer(ids, ",");
             while (tok.hasMoreTokens()) {
@@ -527,8 +535,9 @@ public class BlueCoveImpl {
     }
 
     /**
-     * API that enables the use of Multiple Adapters and Bluetooth Stacks in parallel in the same JVM. Each thread
-     * should call setThreadBluetoothStackID() before using JSR-82 API.
+     * API that enables the use of Multiple Adapters and Bluetooth Stacks in parallel in
+     * the same JVM. Each thread should call setThreadBluetoothStackID() before using
+     * JSR-82 API.
      *
      * Affects the following JSR-82 API methods:
      *
@@ -609,11 +618,11 @@ public class BlueCoveImpl {
     }
 
     /**
-     * Initialize BluetoothStack if not already done and returns the ID to be used in other threads accessing the same
-     * stack.
+     * Initialize BluetoothStack if not already done and returns the ID to be used in
+     * other threads accessing the same stack.
      *
-     * @return an object that represents Adapter/BluetoothStack, stackID to be used in call to
-     *         <code>setThreadBluetoothStackID</code>
+     * @return an object that represents Adapter/BluetoothStack, stackID to be used in
+     *         call to <code>setThreadBluetoothStackID</code>
      * @throws BluetoothStateException
      *             if the Bluetooth system could not be initialized
      */
@@ -626,8 +635,9 @@ public class BlueCoveImpl {
     /**
      * Returns the ID to be used in other threads accessing the same stack.
      *
-     * @return an object that represents Adapter/BluetoothStack, stackID to be used in call to
-     *         <code>setThreadBluetoothStackID</code> or <code>null<code> if ThreadLocalBluetoothStack not used.
+     * @return an object that represents Adapter/BluetoothStack, stackID to be used in
+     *         call to <code>setThreadBluetoothStackID</code> or
+     *         <code>null<code> if ThreadLocalBluetoothStack not used.
      */
     public static synchronized Object getCurrentThreadBluetoothStackID() {
         if (threadStack == null) {
@@ -637,9 +647,10 @@ public class BlueCoveImpl {
     }
 
     /**
-     * Updates the current Thread BluetoothStack. Updating is possible only if <code>stackID</code> was obtained using
-     * the <code>getThreadBluetoothStackID()</code> method. Should be called before connection is made or LocalDevice
-     * received from LocalDevice.getLocalDevice().
+     * Updates the current Thread BluetoothStack. Updating is possible only if
+     * <code>stackID</code> was obtained using the
+     * <code>getThreadBluetoothStackID()</code> method. Should be called before connection
+     * is made or LocalDevice received from LocalDevice.getLocalDevice().
      *
      * @param stackID
      *            stackID to use or <code>null</code> to detach the current Thread
@@ -655,8 +666,8 @@ public class BlueCoveImpl {
     }
 
     /**
-     * Detach BluetoothStack from ThreadLocal. Used for removing itself from container threads. Also can be use to
-     * initialize different stack in the same thread.
+     * Detach BluetoothStack from ThreadLocal. Used for removing itself from container
+     * threads. Also can be use to initialize different stack in the same thread.
      */
     public static synchronized void releaseThreadBluetoothStack() {
         if (threadStack == null) {
@@ -666,9 +677,10 @@ public class BlueCoveImpl {
     }
 
     /**
-     * Set default Thread BluetoothStack for Threads that do not call <code>setThreadBluetoothStackID(stackID)</code>.
-     * Updating is possible only if <code>stackID</code> was obtained using the <code>getThreadBluetoothStackID()</code>
-     * method.
+     * Set default Thread BluetoothStack for Threads that do not call
+     * <code>setThreadBluetoothStackID(stackID)</code>. Updating is possible only if
+     * <code>stackID</code> was obtained using the
+     * <code>getThreadBluetoothStackID()</code> method.
      *
      * @param stackID
      *            stackID to use or <code>null</code> to remove default
@@ -700,7 +712,8 @@ public class BlueCoveImpl {
     }
 
     /**
-     * Shutdown BluetoothStack assigned for current Thread and clear configuration properties for this thread
+     * Shutdown BluetoothStack assigned for current Thread and clear configuration
+     * properties for this thread
      */
     public static synchronized void shutdownThreadBluetoothStack() {
         // ThreadLocal configuration is not initialized
@@ -751,9 +764,10 @@ public class BlueCoveImpl {
     }
 
     /**
-     * API that can be used to configure BlueCove properties instead of System properties. Initialization properties
-     * should be changed before stack initialized. If <code>null</code> is passed as the <code>value</code> then the
-     * property will be removed.
+     * API that can be used to configure BlueCove properties instead of System properties.
+     * Initialization properties should be changed before stack initialized. If
+     * <code>null</code> is passed as the <code>value</code> then the property will be
+     * removed.
      *
      * @param name
      *            property name
@@ -834,14 +848,11 @@ public class BlueCoveImpl {
     }
 
     static String[] getSystemPropertiesList() {
-        String[] p = { BluetoothConsts.PROPERTY_BLUETOOTH_MASTER_SWITCH,
-                BluetoothConsts.PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX,
-                BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX,
-                BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX,
-                BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX,
-                BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY_SCAN,
-                BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE_SCAN,
-                BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY, BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE };
+        String[] p = { BluetoothConsts.PROPERTY_BLUETOOTH_MASTER_SWITCH, BluetoothConsts.PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX,
+                BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX, BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX,
+                BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX, BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY_SCAN,
+                BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE_SCAN, BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY,
+                BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE };
         return p;
     }
 
@@ -855,8 +866,7 @@ public class BlueCoveImpl {
     }
 
     void copySystemProperties(BluetoothStack bluetoothStack) {
-        UtilsJavaSE.setSystemProperty(BluetoothConsts.PROPERTY_BLUETOOTH_API_VERSION,
-                BlueCoveImpl.BLUETOOTH_API_VERSION);
+        UtilsJavaSE.setSystemProperty(BluetoothConsts.PROPERTY_BLUETOOTH_API_VERSION, BlueCoveImpl.BLUETOOTH_API_VERSION);
         UtilsJavaSE.setSystemProperty(BluetoothConsts.PROPERTY_OBEX_API_VERSION, BlueCoveImpl.OBEX_API_VERSION);
         if (bluetoothStack != null) {
             String[] property = getSystemPropertiesList();
@@ -922,8 +932,7 @@ public class BlueCoveImpl {
         return setBluetoothStack(stack, null).getStackID();
     }
 
-    private synchronized BluetoothStack setBluetoothStack(String stack, BluetoothStack detectorStack)
-            throws BluetoothStateException {
+    private synchronized BluetoothStack setBluetoothStack(String stack, BluetoothStack detectorStack) throws BluetoothStateException {
         if (singleStack != null) {
             if (singleStack.bluetoothStack != null) {
                 singleStack.bluetoothStack.destroy();
@@ -953,8 +962,7 @@ public class BlueCoveImpl {
         loadNativeLibraries(newStack);
         int libraryVersion = newStack.getLibraryVersion();
         if (nativeLibraryVersionExpected != libraryVersion) {
-            DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected "
-                    + nativeLibraryVersionExpected);
+            DebugLog.fatal("BlueCove native library version mismatch " + libraryVersion + " expected " + nativeLibraryVersionExpected);
             throw new BluetoothStateException("BlueCove native library version mismatch");
         }
 
@@ -1005,8 +1013,8 @@ public class BlueCoveImpl {
      *
      * @return current BluetoothStack implementation
      * @throws BluetoothStateException
-     *             when BluetoothStack not detected. If one connected the hardware later, BlueCove would be able to
-     *             recover and start correctly
+     *             when BluetoothStack not detected. If one connected the hardware later,
+     *             BlueCove would be able to recover and start correctly
      * @exception Error
      *                if called from outside of BlueCove internal code.
      */
