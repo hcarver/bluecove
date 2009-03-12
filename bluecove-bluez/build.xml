@@ -12,6 +12,19 @@
 
         You may change linker options if you need to
         ant -Dbluecove.native.linker.options=
+
+        When building on fedora you may install RPMs libmatthew-java and dbus-java.
+        Then run ant with this arguments
+            -Ddbus_java_jar=/usr/share/java/dbus-java/dbus.jar
+            -Dlibmatthew_java_debug_jar=/usr/lib/libmatthew-java/unix.jar
+            -Dlibmatthew_java_unix_jar=/usr/lib/libmatthew-java/debug-disable.jar
+        libmatthew is platform dependant on 64 bit use this
+            -Dlibmatthew_java_debug_jar=/usr/lib64/libmatthew-java/unix.jar
+            -Dlibmatthew_java_unix_jar=/usr/lib64/libmatthew-java/debug-disable.jar
+
+        Alternative is to use locations only:
+            -Ddbus_java_libs_dir=/usr/share/java/dbus-java
+            -Dlibmatthew_java_libs_dir=/usr/lib/libmatthew-java
      -->
 
     <property name="product_version" value="2.1.1-SNAPSHOT"/>
@@ -19,7 +32,13 @@
     <property name="bluecove_main_dist_dir" location="../bluecove/target"/>
     <property name="bluecove_main_jar" location="${bluecove_main_dist_dir}/bluecove-${product_version}.jar"/>
 
-    <property name="dbus-java-libs-dir" location="target"/>
+    <property name="dbus_java_libs_dir" location="target"/>
+    <property name="libmatthew_java_libs_dir" location="target"/>
+
+    <!-- this is loaded by maven from snapshot repository -->
+    <property name="dbus_java_jar" location="${dbus_java_libs_dir}/dbus.jar"/>
+    <property name="libmatthew_java_debug_jar" location="${libmatthew_java_libs_dir}/debug-disable.jar"/>
+    <property name="libmatthew_java_unix_jar" location="${libmatthew_java_libs_dir}/unix.jar"/>
 
     <property name="basedir" value="."/>
 
@@ -78,8 +97,9 @@
                srcdir="${src}" destdir="${build_classes}">
             <classpath>
                 <pathelement path="${bluecove_main_jar}"/>
-                <pathelement path="${dbus-java-libs-dir}/dbus.jar"/>
-                <pathelement path="${dbus-java-libs-dir}/unixsockets.jar"/>
+                <pathelement path="${dbus_java_jar}"/>
+                <pathelement path="${libmatthew_java_unix_jar}"/>
+                <pathelement path="${libmatthew_java_debug_jar}"/>
             </classpath>
         </javac>
 
