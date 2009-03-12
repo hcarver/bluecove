@@ -1,8 +1,8 @@
 /**
  *  BlueCove - Java library for Bluetooth
- * 
+ *
  *  Java docs licensed under the Apache License, Version 2.0
- *  http://www.apache.org/licenses/LICENSE-2.0 
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *   (c) Copyright 2001, 2002 Motorola, Inc.  ALL RIGHTS RESERVED.
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
@@ -34,10 +34,10 @@ import com.intel.bluetooth.Utils;
 /**
  * The <code>DataElement</code> class defines the various data types that a
  * Bluetooth service attribute value may have.
- * 
+ *
  * The following table describes the data types and valid values that a
  * <code>DataElement</code> object can store.
- * 
+ *
  * <TABLE BORDER>
  * <TR>
  * <TH>Data Type</TH>
@@ -113,8 +113,8 @@ import com.intel.bluetooth.Utils;
  * <TD><code>java.util.Enumeration</code></TD>
  * </TR>
  * </TABLE>
- * 
- * 
+ *
+ *
  */
 
 public class DataElement {
@@ -126,13 +126,13 @@ public class DataElement {
 
 	/**
 	 * Defines data of type NULL.
-	 * 
+	 *
 	 * The value for data type <code>DataElement.NULL</code> is implicit,
 	 * i.e., there is no representation of it. Accordingly there is no method to
 	 * retrieve it, and attempts to retrieve the value will throw an exception.
 	 * <P>
 	 * The value of <code>NULL</code> is 0x00 (0).
-	 * 
+	 *
 	 */
 	public static final int NULL = 0x0000;
 
@@ -262,15 +262,15 @@ public class DataElement {
 	/**
 	 * Creates a <code>DataElement</code> of type <code>NULL</code>,
 	 * <code>DATALT</code>, or <code>DATSEQ</code>.
-	 * 
+	 *
 	 * @see #NULL
 	 * @see #DATALT
 	 * @see #DATSEQ
-	 * 
+	 *
 	 * @param valueType
 	 *            the type of DataElement to create: <code>NULL</code>,
 	 *            <code>DATALT</code>, or <code>DATSEQ</code>
-	 * 
+	 *
 	 * @exception IllegalArgumentException
 	 *                if <code>valueType</code> is not <code>NULL</code>,
 	 *                <code>DATALT</code>, or <code>DATSEQ</code>
@@ -296,9 +296,9 @@ public class DataElement {
 	/**
 	 * Creates a <code>DataElement</code> whose data type is <code>BOOL</code>
 	 * and whose value is equal to <code>bool</code>
-	 * 
+	 *
 	 * @see #BOOL
-	 * 
+	 *
 	 * @param bool
 	 *            the value of the <code>DataElement</code> of type BOOL.
 	 */
@@ -349,7 +349,7 @@ public class DataElement {
 	 * </TR>
 	 * </TABLE> All other pairings are illegal and will cause an
 	 * <code>IllegalArgumentException</code> to be thrown.
-	 * 
+	 *
 	 * @see #U_INT_1
 	 * @see #U_INT_2
 	 * @see #U_INT_4
@@ -357,23 +357,23 @@ public class DataElement {
 	 * @see #INT_2
 	 * @see #INT_4
 	 * @see #INT_8
-	 * 
+	 *
 	 * @param valueType
 	 *            the data type of the object that is being created; must be one
 	 *            of the following: <code>U_INT_1</code>,
 	 *            <code>U_INT_2</code>, <code>U_INT_4</code>,
 	 *            <code>INT_1</code>, <code>INT_2</code>,
 	 *            <code>INT_4</code>, or <code>INT_8</code>
-	 * 
+	 *
 	 * @param value
 	 *            the value of the object being created; must be in the range
 	 *            specified for the given <code>valueType</code>
-	 * 
+	 *
 	 * @exception IllegalArgumentException
 	 *                if the <code>valueType</code> is not valid or the
 	 *                <code>value</code> for the given legal
 	 *                <code>valueType</code> is outside the valid range
-	 * 
+	 *
 	 */
 
 	public DataElement(int valueType, long value) {
@@ -455,29 +455,29 @@ public class DataElement {
 	 * </TR>
 	 * </TABLE> All other pairings are illegal and would cause an
 	 * <code>IllegalArgumentException</code> exception.
-	 * 
+	 *
 	 * @see #URL
 	 * @see #UUID
 	 * @see #STRING
 	 * @see #U_INT_8
 	 * @see #INT_16
 	 * @see #U_INT_16
-	 * 
+	 *
 	 * @param valueType
 	 *            the data type of the object that is being created; must be one
 	 *            of the following: <code>URL</code>, <code>UUID</code>,
 	 *            <code>STRING</code>, <code>INT_16</code>,
 	 *            <code>U_INT_8</code>, or <code>U_INT_16</code>
-	 * 
+	 *
 	 * @param value
 	 *            the value for the <code>DataElement</code> being created of
 	 *            type <code>valueType</code>
-	 * 
+	 *
 	 * @exception IllegalArgumentException
 	 *                if the <code>value</code> is not of the
 	 *                <code>valueType</code> type or is not in the range
 	 *                specified or is <code>null</code>
-	 * 
+	 *
 	 */
 
 	public DataElement(int valueType, Object value) {
@@ -524,18 +524,18 @@ public class DataElement {
 	 * <code>DATALT</code>, and the various signed and unsigned integer
 	 * types. The same object may be added twice. If the object is successfully
 	 * added the size of the <code>DataElement</code> is increased by one.
-	 * 
+	 *
 	 * @param elem
 	 *            the <code>DataElement</code> object to add
-	 * 
+	 *
 	 * @exception ClassCastException
 	 *                if the method is invoked on a <code>DataElement</code>
 	 *                whose type is not <code>DATALT</code> or
 	 *                <code>DATSEQ</code>
-	 * 
+	 *
 	 * @exception NullPointerException
 	 *                if <code>elem</code> is <code>null</code>
-	 * 
+	 *
 	 */
 
 	public void addElement(DataElement elem) {
@@ -568,25 +568,25 @@ public class DataElement {
 	 * The <code>index</code> must be greater than or equal to 0 and less than
 	 * or equal to the current size. Therefore, <code>DATALT</code> and
 	 * <code>DATSEQ</code> are zero-based objects.
-	 * 
+	 *
 	 * @param elem
 	 *            the <code>DataElement</code> object to add
-	 * 
+	 *
 	 * @param index
 	 *            the location at which to add the <code>DataElement</code>
-	 * 
+	 *
 	 * @throws ClassCastException
 	 *             if the method is invoked on an instance of
 	 *             <code>DataElement</code> whose type is not
 	 *             <code>DATALT</code> or <code>DATSEQ</code>
-	 * 
+	 *
 	 * @throws IndexOutOfBoundsException
 	 *             if <code>index</code> is negative or greater than the size
 	 *             of the <code>DATALT</code> or <code>DATSEQ</code>
-	 * 
+	 *
 	 * @throws NullPointerException
 	 *             if <code>elem</code> is <code>null</code>
-	 * 
+	 *
 	 */
 
 	public void insertElementAt(DataElement elem, int index) {
@@ -607,10 +607,10 @@ public class DataElement {
 	 * Returns the number of <code>DataElements</code> that are present in
 	 * this <code>DATALT</code> or <code>DATSEQ</code> object. It is
 	 * possible that the number of elements is equal to zero.
-	 * 
+	 *
 	 * @return the number of elements in this <code>DATALT</code> or
 	 *         <code>DATSEQ</code>
-	 * 
+	 *
 	 * @throws ClassCastException
 	 *             if this object is not of type <code>DATALT</code> or
 	 *             <code>DATSEQ</code>
@@ -642,17 +642,17 @@ public class DataElement {
 	 * <code>DATSEQ</code> with an index greater than the index of
 	 * <code>elem</code> is shifted downward to have an index one smaller than
 	 * the value it had previously.
-	 * 
+	 *
 	 * @param elem
 	 *            the <code>DataElement</code> to be removed
-	 * 
+	 *
 	 * @return <code>true</code> if the input value was found and removed;
 	 *         else <code>false</code>
-	 * 
+	 *
 	 * @throws ClassCastException
 	 *             if this object is not of type <code>DATALT</code> or
 	 *             <code>DATSEQ</code>
-	 * 
+	 *
 	 * @throws NullPointerException
 	 *             if <code>elem</code> is <code>null</code>
 	 */
@@ -673,7 +673,7 @@ public class DataElement {
 	/**
 	 * Returns the data type of the object this <code>DataElement</code>
 	 * represents.
-	 * 
+	 *
 	 * @return the data type of this <code>DataElement<code> object; the legal
 	 * return values are:
 	 *        <code>URL</code>,
@@ -706,11 +706,11 @@ public class DataElement {
 	 * be <code>U_INT_1</code>, <code>U_INT_2</code>, <code>U_INT_4</code>,
 	 * <code>INT_1</code>, <code>INT_2</code>, <code>INT_4</code>, or
 	 * <code>INT_8</code>.
-	 * 
-	 * 
+	 *
+	 *
 	 * @return the value of the <code>DataElement</code> as a
 	 *         <code>long</code>
-	 * 
+	 *
 	 * @throws ClassCastException
 	 *             if the data type of the object is not <code>U_INT_1</code>,
 	 *             <code>U_INT_2</code>, <code>U_INT_4</code>,
@@ -736,11 +736,11 @@ public class DataElement {
 	/**
 	 * Returns the value of the <code>DataElement</code> if it is represented
 	 * as a <code>boolean</code>.
-	 * 
-	 * 
+	 *
+	 *
 	 * @return the <code>boolean</code> value of this <code>DataElement</code>
 	 *         object
-	 * 
+	 *
 	 * @throws ClassCastException
 	 *             if the data type of this object is not of type
 	 *             <code>BOOL</code>
@@ -762,7 +762,7 @@ public class DataElement {
 	 * <code>U_INT_8</code>, <code>U_INT_16</code>, and
 	 * <code>INT_16</code>. Modifying the returned <code>Object</code> will
 	 * not change this <code>DataElement</code>.
-	 * 
+	 *
 	 * The following are the legal pairs of data type and Java object type being
 	 * returned. <TABLE>
 	 * <TR>
@@ -802,14 +802,14 @@ public class DataElement {
 	 * <TD>byte[] of length 16</TD>
 	 * </TR>
 	 * </TABLE>
-	 * 
+	 *
 	 * @return the value of this object
-	 * 
+	 *
 	 * @throws ClassCastException
 	 *             if the object is not a <code>URL</code>, <code>UUID</code>,
 	 *             <code>STRING</code>, <code>DATSEQ</code>, <code>DATALT</code>,
 	 *             <code>U_INT_8</code>, <code>U_INT_16</code>, or <code>INT_16</code>
-	 * 
+	 *
 	 */
 
 	public Object getValue() {
@@ -874,7 +874,7 @@ public class DataElement {
 
 	/**
 	 * Non JSR-82 function.
-	 * 
+	 *
 	 * @deprecated Use ((Object)dataElement).toString() if you want your
 	 *             application to run in MDIP profile
 	 */

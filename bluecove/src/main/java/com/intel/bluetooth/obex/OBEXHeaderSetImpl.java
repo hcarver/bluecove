@@ -227,7 +227,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.obex.HeaderSet#getHeaderList()
 	 */
 	public int[] getHeaderList() throws IOException {
