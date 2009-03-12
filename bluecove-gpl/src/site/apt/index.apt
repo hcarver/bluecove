@@ -12,7 +12,7 @@ This module distributed as different jar because of the License differences.
 
   Compiled for i386 and x86-64 versions of the native code (jni shared library) is included in jar distribution. Native shared library have been tested and should work on Ubuntu, OpenSUSE and Fedora. For other Linux distributions you may need to compile it yourself.
 
-  N.B. This is stable module. Another experimental module {{{../bluecove-bluez}bluecove-bluez}} (Apache Software License) that is using D-Bus is in developement. {{{http://groups.google.com/group/bluecove-developers}Help us make it}}.
+  N.B. Another module {{{../bluecove-bluez}bluecove-bluez}} (Apache Software License) that is based on BlueZ D-Bus interface available. {{{http://groups.google.com/group/bluecove-developers}Help us make it}}.
 
 * Usage
 
@@ -25,16 +25,16 @@ java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:yourApp.jar org.your.
     * BlueCove library of the same mojor version
 
     * Package bluez-libs 3.7 or later should be installed on your system
-    
+
     * We linked JNI library with <libbluetooth.so> (Not libbluetooth.so.3 or libbluetooth.so.2) to be able to use same build with Bluez Version 3 and Version 4
-      
+
         * You need package/rpm that creates a link libbluetooth.so to already installed libbluetooth.so.3 or libbluetooth.so.2
-        
+
         * <libbluetooth-dev> on Ubuntu
-        
+
         * <bluez-libs-devel> on Fedora
-        
-        * <bluez-devel> on openSUSE 
+
+        * <bluez-devel> on openSUSE
 
     * To change Discoverable mode of the device you should be root
 
@@ -64,6 +64,8 @@ java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:yourApp.jar org.your.
 
         * `bluecove.deviceID=1` bluecove supports multiple local devices, this will force it to select second one.
 
+        * `bluecove.deviceID=hci1` this will force BlueCove to select second adapter.
+
         * `bluecove.deviceAddress=btaddr` select local devices by Bluetooth address
 
 * Documentation
@@ -80,6 +82,4 @@ java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:yourApp.jar org.your.
 * Legal
 
   BlueCove-gpl is licensed under {{{http://www.gnu.org/licenses/gpl.html}GNU General Public License}}.
-
-  If you know how we can legaly make a library for BlueZ licensed differently please let us know.
 

@@ -9,22 +9,24 @@ BlueCove Linux D-Bus module
 
    BlueCove-bluez is additional module for BlueCove to support JSR-82 on Linux using D-Bus interfaces.
 
-   Compiled for i386 and x86-64 of the native BlueCove code (shared library) is included in SNAPSHOT jar distribution. Native shared library have been tested and should work on Ubuntu, OpenSUSE and Fedora. For other Linux distributions you may need to compile it yourself.
+   Compiled for i386 and x86-64 of the native BlueCove code (shared library) is included in jar distribution. Native shared library have been tested and should work on Ubuntu, OpenSUSE and Fedora. For other Linux distributions you may need to compile it yourself.
 
    This module works with BlueZ version 3 and BlueZ version 4 using D-Bus interfaces.
 
    This module require additional library {{{http://dbus.freedesktop.org/doc/dbus-java/}Java D-Bus}} and its dependencies.
 
+   This module require Java 5 Standard Edition or later
+
    JNI library for this modile is not linked with libbluetooth.so
 
-   N.B. This is experimental module. Another stable module {{{../bluecove-gpl}bluecove-gpl}} available.
+   N.B. Another BlueZ interfacing module {{{../bluecove-gpl}bluecove-gpl}} available.
 
    {{{http://groups.google.com/group/bluecove-developers}Help us make it}}.
 
 * Usage
 
 ---
-java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus.jar:unixsockets.jar:debug-disable.jar:yourApp.jar org.your.app.Main
+java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus.jar:unixsockets.jar:debug-disable.jar:hexdump.jar:yourApp.jar org.your.app.Main
 ---
 
 * Requirements
@@ -33,17 +35,21 @@ java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus.jar:unixsocket
 
     * bluez-utils BlueZ version 3.x (3.10 or later) or version 4.x installed on your system
 
+    * Java 5 Standard Edition or later ({{{http://openjdk.java.net/}OpenJDK}}, Sun Java SE or {{{http://harmony.apache.org/}Apache Harmony}})
+
     * On 64-bit Linux platform 64-bit java should be used
+
+    * dbus-java and libmatthew-java packages. (TODO define minimum required version. Tested with 2.5)
 
 * Limitations
 
-    * Require additional library {{{http://dbus.freedesktop.org/doc/dbus-java/}Java D-Bus}} and its dependencies.
+    * Require additional library {{{http://dbus.freedesktop.org/doc/dbus-java/}Java D-Bus}} and its dependencies. Available as RPM on most Linux distributions.
 
 ** JSR-82 Limitations
 
     * `ServiceRecord.setDeviceServiceClasses(..)` not supported.
 
-    * `LocalDevice.getDeviceClass()` not supported on BlueZ v4.
+    * `LocalDevice.getDeviceClass()` not proprly supported on BlueZ v4, will return 'computer' (There are no Class property in new org.bluez.Adapter).
 
 ** BlueCove API Limitations
 
@@ -64,6 +70,8 @@ java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus.jar:unixsocket
     API-Documentation for BlueCove {{{../bluecove/apidocs/index.html}Java docs}}. For application it is not recommended to use any classes or API other than defined in JSR-82.
 
     API that enables the use of Multiple Adapters and Bluetooth Stacks in parallel in the same JVM is BlueCove specific, documentation can be found {{{../bluecove/apidocs/com/intel/bluetooth/BlueCoveImpl.html#useThreadLocalBluetoothStack()}here}}.
+
+    JSR-82 extension <<<bluecovepsm>>> enables the use of specific PSM channel in L2CAP service. <<<btl2cap://localhost;name=...;bluecovepsm=1007>>>
 
     BlueCove {{{http://code.google.com/p/bluecove/wiki/Documentation}Installation and configuration instructions here}}.
 

@@ -42,7 +42,7 @@ BLUECOVE_TESTER_CP=${BLUECOVE_TESTER_CP}:${BLUECOVE_GPL_PROJECT_HOME}/target/cla
 BLUECOVE_TESTER_CP=${BLUECOVE_TESTER_CP}:${BLUECOVE_TESTER_BASE_PROJECT_HOME}/target/classes
 BLUECOVE_TESTER_CP=${BLUECOVE_TESTER_CP}:${BLUECOVE_TESTER_HOME}/target/cldcunit.jar
 
-if [ ! -f ${BLUECOVE_JAR} ] ; then
+if [ ! -f "${BLUECOVE_JAR}" ] ; then
   echo "BlueCove not found ${BLUECOVE_JAR}"
   exit 1
 fi
