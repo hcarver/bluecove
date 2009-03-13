@@ -1,7 +1,7 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2004 Intel Corporation
- *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
+ *  Copyright (C) 2006-2009 Vlad Skarzhevskyy
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
