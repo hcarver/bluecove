@@ -25,6 +25,10 @@
         Alternative is to use locations only:
             -Ddbus_java_libs_dir=/usr/share/java/dbus-java
             -Dlibmatthew_java_libs_dir=/usr/lib/libmatthew-java
+
+        On redhat consider adding this during RPM build
+            -Dusr_share_java_dbus.jar=/usr/share/java/dbus-java/dbus.jar
+        It will add Class-Path to META-INF/MANIFEST.MF
      -->
 
     <property name="product_version" value="2.1.1-SNAPSHOT"/>
@@ -39,6 +43,8 @@
     <property name="dbus_java_jar" location="${dbus_java_libs_dir}/dbus.jar"/>
     <property name="libmatthew_java_debug_jar" location="${libmatthew_java_libs_dir}/debug-disable.jar"/>
     <property name="libmatthew_java_unix_jar" location="${libmatthew_java_libs_dir}/unix.jar"/>
+
+    <property name="usr_share_java_dbus.jar" value="/usr/share/java/dbus.jar"/>
 
     <property name="basedir" value="."/>
 
@@ -204,12 +210,13 @@
         <!-- Put everything in ${build} into the BlueCove-${DSTAMP}.jar file -->
         <jar jarfile="${dist}/bluecove-bluez-${product_version}.jar">
             <manifest>
-                <attribute name="Description" value="BlueCove JSR-82 implementation, runtime module for Linux BlueZ DBus"/>
+                <attribute name="Description" value="BlueCove JSR-82 implementation, runtime module for Linux BlueZ D-Bus"/>
                 <attribute name="License" value="The Apache Software License, Version 2.0"/>
                 <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Implementation-Version" value="${product_version}"/>
                 <attribute name="Build-Date" value="${today}"/>
-                <attribute name="Built-Env"   value="${os.name} ${os.version} ${os.arch}, Java ${java.version}"/>
+                <attribute name="Built-Env"  value="${os.name} ${os.version} ${os.arch}, Java ${java.version}"/>
+                <attribute name="Class-Path" value="${usr_share_java_dbus.jar}"/>
             </manifest>
             <fileset dir="${build_classes}">
                 <include name="**/*.class"/>
