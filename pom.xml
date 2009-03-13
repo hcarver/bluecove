@@ -426,7 +426,7 @@
                         <link>http://java.sun.com/j2se/1.4.2/docs/api</link>
                     </links>
                     <overview>${basedir}/src/main/javadoc/overview.html</overview>
-                    <bottom><![CDATA[JSR-82 Javadocs <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0<a> Copyright &#169; 2001-2008 Motorola, Inc.  ALL RIGHTS RESERVED.<br>BlueCove Javadocs <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0<a> Copyright &#169; 2004-2008 <a href="http://bluecove.sourceforge.net/">BlueCove Team.<a>]]></bottom>
+                    <bottom><![CDATA[JSR-82 Javadocs <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0<a> Copyright &#169; 2001-2009 Motorola, Inc.  ALL RIGHTS RESERVED.<br>BlueCove Javadocs <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0<a> Copyright &#169; 2004-2009 <a href="http://bluecove.org/" target="_top">BlueCove Team.<a>]]></bottom>
                     <!--Generic Connection framework Javadocs <a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GNU General Public License version 2<a> Copyright &#169; 1990-2007 Sun Microsystems, Inc.  ALL RIGHTS RESERVED.-->
                 </configuration>
             </plugin>

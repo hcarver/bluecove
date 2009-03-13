@@ -2,9 +2,11 @@ License: The Apache Software License, Version 2.0
 Description: BlueCove JSR-82 implementation
 Implementation-URL: http://www.bluecove.org/
 Specification-Title: JSR-82
-Specification-Version: 1.1
+Specification-Version: 1.1.1
 Specification-Vendor: JCP
 Implementation-Version: #version#
 Implementation-Build: #build#
 Built-By: #user.name#
+Build-Jdk: #java.version#
 Build-Date: #today#
+Build-Platform: #build.platform#

@@ -293,6 +293,8 @@
                                     <replacefilter token="#version#" value="${version}"/>
                                     <replacefilter token="#user.name#" value="${user.name}"/>
                                     <replacefilter token="#today#" value="${TODAY}"/>
+                                    <replacefilter token="#java.version#" value="${java.runtime.version}"/>
+                                    <replacefilter token="#build.platform#" value="${os.arch} ${os.name} ${os.version}"/>
                                 </replace>
                                 <echo file="${project.build.directory}/build.version" append="false">${buildLabel}</echo>
                             </tasks>
