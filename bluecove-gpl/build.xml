@@ -6,12 +6,12 @@
     <!--
         You may use to build the project
         ant -Dbuild.compiler=jikes
-        
+
         You may skip adding shared library to jar file
         ant -Dbluecove.native.resources.skip=true  jar
-        
+
         You may change linker options if you need to
-        ant -Dbluecove.native.linker.options= 
+        ant -Dbluecove.native.linker.options=
      -->
 
     <property name="product_version" value="2.1.1-SNAPSHOT"/>
@@ -54,6 +54,7 @@
         <!-- Create the build directory structure used by compile -->
         <mkdir dir="${build_classes}"/>
         <mkdir dir="${build_native}"/>
+        <mkdir dir="${resources}"/>
         <available property="bluecove-main.exists" file="${bluecove_main_jar}" type="file"/>
         <antcall target="verify-bluecove-main-exists"/>
     </target>
