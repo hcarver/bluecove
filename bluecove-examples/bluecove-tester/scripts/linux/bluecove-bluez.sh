@@ -24,7 +24,7 @@ esac
 
 #BLUECOVE_USE_RPM=true; export BLUECOVE_USE_RPMS
 
-if [ -f "${DBUS_JAVA_JAR}" -a "${BLUECOVE_USE_RPM}" == "true" ] ; then
+if [ -f "${DBUS_JAVA_JAR}" -a "${BLUECOVE_USE_RPM}" = "true" ] ; then
 
     echo "dbus-java installation found ${DBUS_JAVA_JAR}"
     echo "Use: BLUECOVE_USE_RPM=false; export BLUECOVE_USE_RPM; to use library from maven repository"

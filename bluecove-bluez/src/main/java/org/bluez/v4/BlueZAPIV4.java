@@ -33,9 +33,11 @@ import java.util.Vector;
 import javax.bluetooth.DiscoveryAgent;
 
 import org.bluez.BlueZAPI;
+import org.bluez.Error.Canceled;
 import org.bluez.Error.DoesNotExist;
 import org.bluez.Error.InvalidArguments;
 import org.bluez.Error.NoSuchAdapter;
+import org.bluez.Error.Rejected;
 import org.bluez.dbus.DBusProperties;
 import org.freedesktop.dbus.DBusConnection;
 import org.freedesktop.dbus.DBusSigHandler;
@@ -390,8 +392,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#authenticateRemoteDevice(java.lang.String)
      */
     public void authenticateRemoteDevice(String deviceAddress) throws DBusException {
-        // TODO Auto-generated method stub
-        throw new DBusException("TODO: implement this using Agent");
+        throw new DBusException("TODO: How to implement this using Agent?");
     }
 
     /*
@@ -400,10 +401,57 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#authenticateRemoteDevice(java.lang.String,
      * java.lang.String)
      */
-    public boolean authenticateRemoteDevice(String deviceAddress, String passkey) throws DBusException {
-        // TODO Auto-generated method stub
-        //return false;
-        throw new DBusException("TODO: implement this using Agent");
+    public boolean authenticateRemoteDevice(String deviceAddress, final String passkey) throws DBusException {
+        if (passkey == null) {
+            authenticateRemoteDevice(deviceAddress);
+            return true;
+        } 
+        Agent agent = new Agent() {
+
+            public void Authorize(Path device, String uuid) throws Rejected, Canceled {
+            }
+
+            public void ConfirmModeChange(String mode) throws Rejected, Canceled {
+            }
+
+            public void DisplayPasskey(Path device, UInt32 passkey, byte entered) {
+            }
+
+            public void RequestConfirmation(Path device, UInt32 passkey) throws Rejected, Canceled {
+            }
+
+            public UInt32 RequestPasskey(Path device) throws Rejected, Canceled {
+                return null;
+            }
+
+            public String RequestPinCode(Path device) throws Rejected, Canceled {
+                return passkey;
+            }
+
+            public void Cancel() {
+            }
+
+
+            public void Release() {
+            }
+            
+            public boolean isRemote() {
+                return false;
+            }
+            
+        };
+        
+        String agentPath = "/org/bluecove/authenticate/" + getAdapterID() + "/" + deviceAddress.replace(':', '_');
+        
+        DebugLog.debug("export Agent", agentPath);
+        dbusConn.exportObject(agentPath, agent);
+        
+        try {
+            adapter.CreatePairedDevice(deviceAddress, new Path(agentPath), "");
+            return true;
+        } finally {
+            dbusConn.unExportObject(agentPath);
+        }
     }
 
     /*
@@ -412,8 +460,8 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#removeAuthenticationWithRemoteDevice(java.lang.String)
      */
     public void removeAuthenticationWithRemoteDevice(String deviceAddress) throws DBusException {
-        // TODO Auto-generated method stub
-        throw new DBusException("TODO: implement this using Agent");
+        Path devicePath = adapter.FindDevice(deviceAddress);
+        adapter.RemoveDevice(devicePath);
     }
 
     /*
