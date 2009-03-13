@@ -1,7 +1,7 @@
 /**
  *  MicroEmulator and BlueCove
- *  Copyright (C) 2006-2008 Bartek Teodorczyk <barteo@barteo.net>
- *  Copyright (C) 2006-2008 Vlad Skarzhevskyy
+ *  Copyright (C) 2006-2009 Bartek Teodorczyk <barteo@barteo.net>
+ *  Copyright (C) 2006-2009 Vlad Skarzhevskyy
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
