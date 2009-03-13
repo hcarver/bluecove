@@ -13,22 +13,43 @@ BLUECOVE_BLUEZ_CP="${BLUECOVE_JAR}"
 BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/classes"
 JAVA_ARGS=
 
-DBUS_JAVA_JAR=/usr/share/java/dbus-java/dbus.jar
+case "$MACHTYPE" in
+    *-suse-*)
+        DBUS_JAVA_JAR=/usr/share/java/dbus.jar
+        ;;
+    *-redhat-*)
+        DBUS_JAVA_JAR=/usr/share/java/dbus-java/dbus.jar
+        ;;
+esac
 
-#BLUECOVE_USE_RPM=false; export BLUECOVE_USE_RPMS
+#BLUECOVE_USE_RPM=true; export BLUECOVE_USE_RPMS
 
-if [ -f "${DBUS_JAVA_JAR}" -a "${BLUECOVE_USE_RPM}" != "false" ] ; then
+if [ -f "${DBUS_JAVA_JAR}" -a "${BLUECOVE_USE_RPM}" == "true" ] ; then
 
     echo "dbus-java installation found ${DBUS_JAVA_JAR}"
     echo "Use: BLUECOVE_USE_RPM=false; export BLUECOVE_USE_RPM; to use library from maven repository"
     echo ""
 
     BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${DBUS_JAVA_JAR}"
-    if [ "$HOSTTYPE" = "x86_64" ]; then
-        LIBMATTHEW_JAVA_DIR=/usr/lib64/libmatthew-java
-    else
-        LIBMATTHEW_JAVA_DIR=/usr/lib/libmatthew-java
-    fi
+
+    case "$MACHTYPE" in
+    *-suse-*)
+        LIBMATTHEW_JAVA_DIR=/usr/share/java
+        if [ "$HOSTTYPE" = "x86_64" ]; then
+            JAVA_ARGS=-Djava.library.path=/usr/lib64
+        else
+            JAVA_ARGS=-Djava.library.path=/usr/lib
+        fi
+        ;;
+    *-redhat-*)
+        if [ "$HOSTTYPE" = "x86_64" ]; then
+            LIBMATTHEW_JAVA_DIR=/usr/lib64/libmatthew-java
+        else
+            LIBMATTHEW_JAVA_DIR=/usr/lib/libmatthew-java
+        fi
+        ;;
+    esac
+
     BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${LIBMATTHEW_JAVA_DIR}/unix.jar"
     BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${LIBMATTHEW_JAVA_DIR}/debug-disable.jar"
     BLUECOVE_BLUEZ_CP="${BLUECOVE_BLUEZ_CP}:${LIBMATTHEW_JAVA_DIR}/hexdump.jar"
