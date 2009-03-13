@@ -43,7 +43,7 @@ java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus.jar:unixsocket
 
 * Limitations
 
-    * Require additional library {{{http://dbus.freedesktop.org/doc/dbus-java/}Java D-Bus}} and its dependencies. Available as RPM on most Linux distributions.
+    * Require additional library {{{http://dbus.freedesktop.org/doc/dbus-java/}Java D-Bus}} and its dependencies. Only version 2.5 available as RPM on most Linux distributions and it has bug that breaks BlueCove device discovery!
 
 ** JSR-82 Limitations
 
