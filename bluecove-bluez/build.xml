@@ -26,7 +26,8 @@
             -Ddbus_java_libs_dir=/usr/share/java/dbus-java
             -Dlibmatthew_java_libs_dir=/usr/lib/libmatthew-java
 
-        On redhat consider adding this during RPM build
+        TODO Make it optional. e.g. when not specified the 'Class-Path'  entry not created
+         Consider adding this during RPM build
             -Dusr_share_java_dbus.jar=/usr/share/java/dbus-java/dbus.jar
         It will add Class-Path to META-INF/MANIFEST.MF
      -->
@@ -44,7 +45,7 @@
     <property name="libmatthew_java_debug_jar" location="${libmatthew_java_libs_dir}/debug-disable.jar"/>
     <property name="libmatthew_java_unix_jar" location="${libmatthew_java_libs_dir}/unix.jar"/>
 
-    <property name="usr_share_java_dbus.jar" value="/usr/share/java/dbus.jar"/>
+    <!--property name="usr_share_java_dbus.jar" value="/usr/share/java/dbus.jar"/-->
 
     <property name="basedir" value="."/>
 
@@ -215,8 +216,10 @@
                 <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Implementation-Version" value="${product_version}"/>
                 <attribute name="Build-Date" value="${today}"/>
-                <attribute name="Built-Env"  value="${os.name} ${os.version} ${os.arch}, Java ${java.version}"/>
-                <attribute name="Class-Path" value="${usr_share_java_dbus.jar}"/>
+                <attribute name="Build-Jdk"  value="${java.runtime.version}"/>
+                <attribute name="Build-Platform" value="${os.arch} ${os.name} ${os.version}"/>
+                <!-- TODO how to make it optional? -->
+                <!--attribute name="Class-Path" value="${usr_share_java_dbus.jar}"/-->
             </manifest>
             <fileset dir="${build_classes}">
                 <include name="**/*.class"/>

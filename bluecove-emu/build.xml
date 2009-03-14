@@ -64,7 +64,8 @@
                 <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Implementation-Version" value="${product_version}"/>
                 <attribute name="Build-Date" value="${today}"/>
-                <attribute name="Built-Env"   value="${os.name} ${os.version} ${os.arch}, Java ${java.version}"/>
+                <attribute name="Build-Jdk"  value="${java.runtime.version}"/>
+                <attribute name="Build-Platform" value="${os.arch} ${os.name} ${os.version}"/>
             </manifest>
             <fileset dir="${build_classes}">
                 <include name="**/*.class"/>
