@@ -364,7 +364,7 @@ class OBEXHeaderSetImpl implements HeaderSet {
 		// null terminated Unicode text, length prefixed with 2 byte unsigned
 		// integer
 		// the length field includes the 2 bytes of the null
-		// terminator (0x00, 0x00). Therefore the length of the string ”Jumar”
+		// terminator (0x00, 0x00). Therefore the length of the string `Jumar`
 		// would be 12 bytes; 5 visible
 		// characters plus the null terminator, each two bytes in length.
 		if (value.length() == 0) {

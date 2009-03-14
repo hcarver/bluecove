@@ -633,7 +633,7 @@ public class DataElement {
 	 * <code>STRING</code>, <code>DATSEQ</code>, <code>DATALT</code>,
 	 * or the variously sized signed and unsigned integers. Only the first
 	 * object in the list that is equal to <code>elem</code> will be removed.
-	 * Other objects, if present, are not removed. Since this class doesn’t
+	 * Other objects, if present, are not removed. Since this class doesn't
 	 * override the <code>equals()</code> method of the <code>Object</code>
 	 * class, the remove method compares only the references of objects. If
 	 * <code>elem</code> is successfully removed the size of this
