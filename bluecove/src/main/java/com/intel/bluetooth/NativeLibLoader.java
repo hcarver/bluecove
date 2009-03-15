@@ -119,6 +119,10 @@ public abstract class NativeLibLoader {
 	}
 
 	static boolean isAvailable(String name, Class stackClass) {
+	    return isAvailable(name, stackClass, true);
+	}
+	
+	static boolean isAvailable(String name, Class stackClass, boolean requiredLibrary) {
 		LibState state = (LibState) libsState.get(name);
 		if (state == null) {
 			state = new LibState();
@@ -224,7 +228,9 @@ public abstract class NativeLibLoader {
 		}
 
 		if (!state.libraryAvailable) {
-			System.err.println("Native Library " + libName + " not available");
+		    if (requiredLibrary) {
+		        System.err.println("Native Library " + libName + " not available");
+		    }
 			DebugLog.debug("java.library.path", System.getProperty("java.library.path"));
 		}
 		state.triedToLoadAlredy = true;

@@ -391,7 +391,7 @@ public class BlueCoveImpl {
             if (c == null) {
                 c = stack.getClass();
             }
-            if (!NativeLibLoader.isAvailable(libs[i].libraryName, c)) {
+            if (!NativeLibLoader.isAvailable(libs[i].libraryName, c, libs[i].required)) {
                 if (libs[i].required) {
                     throw new BluetoothStateException("BlueCove library " + libs[i].libraryName + " not available;"
                             + NativeLibLoader.getLoadErrors(libs[i].libraryName));
