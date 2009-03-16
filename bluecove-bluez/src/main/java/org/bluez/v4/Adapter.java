@@ -70,38 +70,46 @@ public interface Adapter extends org.bluez.Adapter, DBusProperties.PropertiesAcc
         Address,
 
         /**
-         * The Bluetooth friendly name. This value can be changed and a
-         * PropertyChanged signal will be emitted.
+         * The Bluetooth friendly name. This value can be changed and a PropertyChanged
+         * signal will be emitted.
          */
         @DBusProperty(type = String.class)
         Name,
 
         /**
-         * Switch an adapter on or off. This will also set the appropriate
-         * connectable state.
+         * The Bluetooth class of device.
+         * 
+         * @since BlueZ 4.34
+         */
+        @DBusProperty(type = UInt32.class, access = DBusPropertyAccessType.READONLY)
+        Class,
+
+        /**
+         * Switch an adapter on or off. This will also set the appropriate connectable
+         * state.
          */
         @DBusProperty(type = boolean.class)
         Powered,
 
         /**
-         * Switch an adapter to discoverable or non-discoverable to either make
-         * it visible or hide it. This is a global setting and should only be
-         * used by the settings application.
+         * Switch an adapter to discoverable or non-discoverable to either make it visible
+         * or hide it. This is a global setting and should only be used by the settings
+         * application.
          * 
-         * If the DiscoverableTimeout is set to a non-zero value then the system
-         * will set this value back to false after the timer expired.
+         * If the DiscoverableTimeout is set to a non-zero value then the system will set
+         * this value back to false after the timer expired.
          * 
          * In case the adapter is switched off, setting this value will fail.
          * 
-         * When changing the Powered property the new state of this property
-         * will be updated via a PropertyChanged signal.
+         * When changing the Powered property the new state of this property will be
+         * updated via a PropertyChanged signal.
          */
         @DBusProperty(type = boolean.class)
         Discoverable,
 
         /**
-         * Switch an adapter to pairable or non-pairable. This is a global
-         * setting and should only be used by the settings application.
+         * Switch an adapter to pairable or non-pairable. This is a global setting and
+         * should only be used by the settings application.
          * 
          * Note that this property only affects incoming pairing requests.
          */
@@ -109,19 +117,18 @@ public interface Adapter extends org.bluez.Adapter, DBusProperties.PropertiesAcc
         Pairable,
 
         /**
-         * The pairable timeout in seconds. A value of zero means that the
-         * timeout is disabled and it will stay in pairable mode forever.
+         * The pairable timeout in seconds. A value of zero means that the timeout is
+         * disabled and it will stay in pairable mode forever.
          */
         @DBusProperty(type = UInt32.class)
         PaireableTimeout,
 
         /**
-         * The discoverable timeout in seconds. A value of zero means that the
-         * timeout is disabled and it will stay in discoverable/limited mode
-         * forever.
+         * The discoverable timeout in seconds. A value of zero means that the timeout is
+         * disabled and it will stay in discoverable/limited mode forever.
          * 
-         * The default value for the discoverable timeout should be 180 seconds
-         * (3 minutes).
+         * The default value for the discoverable timeout should be 180 seconds (3
+         * minutes).
          */
         @DBusProperty(type = UInt32.class)
         DiscoverableTimeout,
@@ -140,9 +147,8 @@ public interface Adapter extends org.bluez.Adapter, DBusProperties.PropertiesAcc
     }
 
     /**
-     * This method will request a client session that provides operational
-     * Bluetooth. A possible mode change must be confirmed by the user via the
-     * agent.
+     * This method will request a client session that provides operational Bluetooth. A
+     * possible mode change must be confirmed by the user via the agent.
      */
     void RequestSession() throws org.bluez.Error.Rejected;
 
@@ -153,28 +159,27 @@ public interface Adapter extends org.bluez.Adapter, DBusProperties.PropertiesAcc
     void ReleaseSession() throws org.bluez.Error.DoesNotExist;
 
     /**
-     * This method starts the device discovery session. This includes an inquiry
-     * procedure and remote device name resolving. Use StopDiscovery to release
-     * the sessions acquired.
+     * This method starts the device discovery session. This includes an inquiry procedure
+     * and remote device name resolving. Use StopDiscovery to release the sessions
+     * acquired.
      * 
-     * This process will start emitting DeviceFound and PropertyChanged
-     * "Discovering" signals.
+     * This process will start emitting DeviceFound and PropertyChanged "Discovering"
+     * signals.
      */
     void StartDiscovery() throws org.bluez.Error.NotReady, org.bluez.Error.Failed;
 
     /**
      * This method will cancel any previous StartDiscovery transaction.
      * 
-     * Note that a discovery procedure is shared between all discovery sessions
-     * thus calling StopDiscovery will only release a single session.
+     * Note that a discovery procedure is shared between all discovery sessions thus
+     * calling StopDiscovery will only release a single session.
      */
     void StopDiscovery() throws org.bluez.Error.NotReady, org.bluez.Error.Failed, org.bluez.Error.NotAuthorized;
 
     /**
      * Returns the object path of device for given address.
      * 
-     * The device object needs to be first created via CreateDevice or
-     * CreatePairedDevice.
+     * The device object needs to be first created via CreateDevice or CreatePairedDevice.
      */
     Path FindDevice(String address) throws org.bluez.Error.DoesNotExist, org.bluez.Error.InvalidArguments;
 
@@ -184,30 +189,27 @@ public interface Adapter extends org.bluez.Adapter, DBusProperties.PropertiesAcc
     Path[] ListDevices() throws org.bluez.Error.InvalidArguments, org.bluez.Error.Failed, org.bluez.Error.OutOfMemory;
 
     /**
-     * Creates a new object path for a remote device. This method will connect
-     * to the remote device and retrieve all SDP records.
+     * Creates a new object path for a remote device. This method will connect to the
+     * remote device and retrieve all SDP records.
      * 
      * If the object for the remote device already exists this method will fail.
      */
     Path CreateDevice(String address) throws org.bluez.Error.InvalidArguments, org.bluez.Error.Failed;
 
     /**
-     * Creates a new object path for a remote device. This method will connect
-     * to the remote device and retrieve all SDP records and then initiate the
-     * pairing.
+     * Creates a new object path for a remote device. This method will connect to the
+     * remote device and retrieve all SDP records and then initiate the pairing.
      * 
-     * If previously CreateDevice was used successfully, this method will only
-     * initiate the pairing.
+     * If previously CreateDevice was used successfully, this method will only initiate
+     * the pairing.
      * 
-     * Compared to CreateDevice this method will fail if the pairing already
-     * exists, but not if the object path already has been created. This allows
-     * applications to use CreateDevice first and the if needed use
-     * CreatePairedDevice to initiate pairing.
+     * Compared to CreateDevice this method will fail if the pairing already exists, but
+     * not if the object path already has been created. This allows applications to use
+     * CreateDevice first and the if needed use CreatePairedDevice to initiate pairing.
      * 
-     * The agent object path is assumed to reside within the process (D-Bus
-     * connection instance) that calls this method. No separate registration
-     * procedure is needed for it and it gets automatically released once the
-     * pairing operation is complete.
+     * The agent object path is assumed to reside within the process (D-Bus connection
+     * instance) that calls this method. No separate registration procedure is needed for
+     * it and it gets automatically released once the pairing operation is complete.
      * 
      * The capability parameter is the same as for the RegisterAgent method.
      */
@@ -219,31 +221,30 @@ public interface Adapter extends org.bluez.Adapter, DBusProperties.PropertiesAcc
     void CancelDeviceCreation(String address) throws org.bluez.Error.InvalidArguments, org.bluez.Error.NotInProgress;
 
     /**
-     * This removes the remote device object at the given path. It will remove
-     * also the pairing information.
+     * This removes the remote device object at the given path. It will remove also the
+     * pairing information.
      */
     void RemoveDevice(Path device) throws org.bluez.Error.InvalidArguments, org.bluez.Error.Failed;
 
     /**
      * This registers the adapter wide agent.
      * 
-     * The object path defines the path the of the agent that will be called
-     * when user input is needed.
+     * The object path defines the path the of the agent that will be called when user
+     * input is needed.
      * 
-     * If an application disconnects from the bus all of its registered agents
-     * will be removed.
+     * If an application disconnects from the bus all of its registered agents will be
+     * removed.
      * 
-     * The capability parameter can have the values "DisplayOnly",
-     * "DisplayYesNo", "KeyboardOnly" and "NoInputNoOutput" which reflects the
-     * input and output capabilities of the agent. If an empty string is used it
-     * will fallback to "DisplayYesNo".
+     * The capability parameter can have the values "DisplayOnly", "DisplayYesNo",
+     * "KeyboardOnly" and "NoInputNoOutput" which reflects the input and output
+     * capabilities of the agent. If an empty string is used it will fallback to
+     * "DisplayYesNo".
      */
     void RegisterAgent(Path agent, String capability) throws org.bluez.Error.InvalidArguments, org.bluez.Error.AlreadyExists;
 
     /**
-     * This unregisters the agent that has been previously registered. The
-     * object path parameter must match the same value that has been used on
-     * registration.
+     * This unregisters the agent that has been previously registered. The object path
+     * parameter must match the same value that has been used on registration.
      */
     void UnregisterAgent(Path agent) throws org.bluez.Error.DoesNotExist;
 
@@ -257,26 +258,25 @@ public interface Adapter extends org.bluez.Adapter, DBusProperties.PropertiesAcc
     }
 
     /**
-     * This signal will be send every time an inquiry result has been found by
-     * the service daemon. In general they only appear during a device
-     * discovery.
+     * This signal will be send every time an inquiry result has been found by the service
+     * daemon. In general they only appear during a device discovery.
      * 
-     * The dictionary can contain basically the same values that we be returned
-     * by the GetProperties method from the org.bluez.Device interface. In
-     * addition there can be values for the RSSI and the TX power level.
+     * The dictionary can contain basically the same values that we be returned by the
+     * GetProperties method from the org.bluez.Device interface. In addition there can be
+     * values for the RSSI and the TX power level.
      */
     public class DeviceFound extends DBusSignal {
-        
+
         private final String address;
-        
+
         private final Map<String, Variant<?>> devicePoperties;
-        
+
         public DeviceFound(String path, String address, Map<String, Variant<?>> devicePoperties) throws DBusException {
             super(path, address, devicePoperties);
             this.address = address;
             this.devicePoperties = devicePoperties;
         }
-        
+
         /**
          * @return the address
          */
@@ -294,8 +294,8 @@ public interface Adapter extends org.bluez.Adapter, DBusProperties.PropertiesAcc
     }
 
     /**
-     * This signal will be send when an inquiry session for a periodic discovery
-     * finishes and previously found devices are no longer in range or visible.
+     * This signal will be send when an inquiry session for a periodic discovery finishes
+     * and previously found devices are no longer in range or visible.
      */
     public class DeviceDisappeared extends DBusSignal {
         public DeviceDisappeared(String path, String address) throws DBusException {

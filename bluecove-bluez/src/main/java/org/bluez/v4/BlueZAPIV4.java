@@ -171,8 +171,13 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#getAdapterDeviceClass()
      */
     public int getAdapterDeviceClass() {
-        // TODO How do I get this in BlueZ 4?
-        return BluetoothConsts.DeviceClassConsts.MAJOR_COMPUTER;
+        // Since BlueZ 4.34
+        Integer deviceClass = DBusProperties.getIntValue(adapter, Adapter.Properties.Class);
+        if (deviceClass == null) {
+            return BluetoothConsts.DeviceClassConsts.MAJOR_COMPUTER;
+        } else {
+            return deviceClass.intValue();
+        }
     }
 
     /*
@@ -405,7 +410,7 @@ public class BlueZAPIV4 implements BlueZAPI {
         if (passkey == null) {
             authenticateRemoteDevice(deviceAddress);
             return true;
-        } 
+        }
         Agent agent = new Agent() {
 
             public void Authorize(Path device, String uuid) throws Rejected, Canceled {
@@ -431,21 +436,20 @@ public class BlueZAPIV4 implements BlueZAPI {
             public void Cancel() {
             }
 
-
             public void Release() {
             }
-            
+
             public boolean isRemote() {
                 return false;
             }
-            
+
         };
-        
+
         String agentPath = "/org/bluecove/authenticate/" + getAdapterID() + "/" + deviceAddress.replace(':', '_');
-        
+
         DebugLog.debug("export Agent", agentPath);
         dbusConn.exportObject(agentPath, agent);
-        
+
         try {
             adapter.CreatePairedDevice(deviceAddress, new Path(agentPath), "");
             return true;

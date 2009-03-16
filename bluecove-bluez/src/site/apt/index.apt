@@ -49,7 +49,7 @@ java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus.jar:unixsocket
 
     * `ServiceRecord.setDeviceServiceClasses(..)` not supported.
 
-    * `LocalDevice.getDeviceClass()` not properly supported on BlueZ v4, will return 'computer' (There are no Class property in new org.bluez.Adapter).
+    * `LocalDevice.getDeviceClass()` properly supported since BlueZ 4.34, on early versions will return 'computer' (There are no Class property in new org.bluez.Adapter).
 
     * `RemoteDevice.authenticate()` not supported on BlueZ v4
 
