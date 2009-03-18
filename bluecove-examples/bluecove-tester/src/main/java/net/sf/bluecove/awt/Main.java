@@ -526,13 +526,13 @@ public class Main extends Frame implements LoggerAppender {
 		});
 
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		if (screenSize.height < 400) {
+		if ((screenSize.height < 480) || (screenSize.width < 480))  {
 			Configuration.screenSizeSmall = true;
 		}
 		Font logFont = new Font("Monospaced", Font.PLAIN, Configuration.screenSizeSmall ? 9 : 12);
 		output.setFont(logFont);
 
-		if (screenSize.width > 600) {
+		if (screenSize.width > 640) {
 			screenSize.setSize(600, 420);
 		}
 		if (this.isResizable()) {
