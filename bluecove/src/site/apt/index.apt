@@ -7,6 +7,6 @@
 
 BlueCove Core module
 
-   This is main BlueCove module. Native libraies to support for Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth are inclused in its build.
-   
+   This is main BlueCove module. Native libraies to support for Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth are included in this module build.
+
    For more information see  {{{../}Main project page}}

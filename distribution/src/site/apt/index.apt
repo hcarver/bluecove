@@ -9,6 +9,8 @@ BlueCove Nightly build distribution
 
      BlueCove nightly build is fully automated on Linux 32 and 64bit, Windows and Mac OS X Leo using {{{integration.html}CruiseControl}}.
 
-     Please folow 'Download'  'Snapshot' link in left side menu to download latest build binaries or sources.
+     Please folow 'Download' 'Snapshot' link in left side menu to download latest nightly build (snapshot) binaries and sources.
+
+     To use snapshot builds in your maven project see {{{../maven.html}this link}}.
 
      Use project {{{http://groups.google.com/group/bluecove-users}User/Developer support google group}} to inform us about problems (if any).

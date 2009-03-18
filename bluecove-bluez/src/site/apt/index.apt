@@ -33,7 +33,7 @@ java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus.jar:unixsocket
 
     * BlueCove library of the same mojor version
 
-    * bluez-utils BlueZ version 3.x (3.10 or later) or version 4.x installed on your system
+    * bluez-utils BlueZ version 3.x (3.10 or later) or BlueZ version 4.x installed on your system
 
     * Java 5 Standard Edition or later ({{{http://openjdk.java.net/}OpenJDK}}, Sun Java SE or {{{http://harmony.apache.org/}Apache Harmony}})
 

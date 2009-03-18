@@ -38,11 +38,10 @@
         <menu name="Ver #build#" inherit="top">
             <item name="Release 2.1.0" href="#remove#http://www.bluecove.org/"/>
 
-            <item name="Project site" href="#remove#http://bluecove.googlecode.com" />
-            <item name="sf.net" href="http://sourceforge.net/projects/bluecove/" />
             <item name="Introduction" href="#remove#/index.html" />
             <item name="JSR 82 TCK"  href="#remove#/tck/index.html" />
 
+            <item name="Linux BlueZ D-Bus" href="#remove#/bluecove-bluez/index.html"/>
             <item name="Linux BlueZ" href="#remove#/bluecove-gpl/index.html"/>
             <item name="JSR 82 Emulator" href="#remove#/bluecove-emu/index.html"/>
 
@@ -54,6 +53,10 @@
                 <item name="SVN Access" href="source-repository.html"/>
                 <item name="Browse SVN" href="http://code.google.com/p/bluecove/source/browse/trunk"/>
             </item>
+
+            <item name="Project site" href="#remove#http://bluecove.googlecode.com" />
+
+            <item name="sf.net" href="http://sourceforge.net/projects/bluecove/" />
 
             <item name="Maven" href="http://www.bluecove.org/maven.html"/>
 
