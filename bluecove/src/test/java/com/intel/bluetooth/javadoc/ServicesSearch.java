@@ -38,6 +38,8 @@ public class ServicesSearch {
 
     static final UUID OBEX_OBJECT_PUSH = new UUID(0x1105);
 
+    static final UUID OBEX_FILE_TRANSFER = new UUID(0x1106);
+    
     public static final Vector/*<String>*/ serviceFound = new Vector();
 
     public static void main(String[] args) throws IOException, InterruptedException {
