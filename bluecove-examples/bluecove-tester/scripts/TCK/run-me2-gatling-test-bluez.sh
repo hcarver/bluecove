@@ -17,17 +17,18 @@ if [ ! -f "${MICROEMULATOR_HOME}/microemulator.jar" ] ; then
   exit 1
 fi
 
-if [ ! -f "${BLUECOVE_GPL_JAR}" ] ; then
-  echo "BlueCove-GPL not found ${BLUECOVE_GPL_JAR}"
+if [ ! -f "${BLUECOVE_BLUEZ_JAR}" ] ; then
+  echo "BlueCove-BLUEZ not found ${BLUECOVE_BLUEZ_JAR}"
   exit 1
 fi
 
 BLUECOVE_TCK_CP="${MICROEMULATOR_HOME}/microemulator.jar"
-BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_JAR}:${BLUECOVE_GPL_JAR}"
+BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_JAR}:${BLUECOVE_BLUEZ_JAR}"
+BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/dbus.jar"
+BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/debug-disable.jar"
+BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/unix.jar"
 
-JVM_ARGS="-Dbluecove.deviceID=1"
-
-java ${JVM_ARGS} -cp "${BLUECOVE_TCK_CP}"  ${MICROEMULATOR_MAIN} ${MICROEMULATOR_ARGS} -Xautotest:http://${BLUECOVE_TCK_HOST}:${BLUECOVE_TCK_PORT}/getNextApp.jad
+java -cp "${BLUECOVE_TCK_CP}" ${MICROEMULATOR_MAIN} ${MICROEMULATOR_ARGS} -Xautotest:http://${BLUECOVE_TCK_HOST}:${BLUECOVE_TCK_PORT}/getNextApp.jad
 rc=$?
 if [ ! "${rc}" = "0" ]; then
     echo Error calling java
