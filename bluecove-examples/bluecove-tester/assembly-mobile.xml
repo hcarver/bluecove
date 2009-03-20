@@ -33,6 +33,8 @@
                     <exclude>com/intel/bluetooth/BluetoothStackOSX*.*</exclude>
                     <exclude>com/intel/bluetooth/BluetoothStackToshiba*.*</exclude>
                     <exclude>com/intel/bluetooth/BluetoothStackBlueSoleil*.*</exclude>
+                    <exclude>junit/framework/Test**</exclude>
+                    <exclude>cldcunit/**</exclude>
                 </excludes>
             </unpackOptions>
             <outputDirectory></outputDirectory>

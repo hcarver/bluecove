@@ -29,10 +29,11 @@
                     <exclude>intelbth.dll</exclude>
                     <exclude>libbluecove.jnilib</exclude>
                     <exclude>META-INF/**</exclude>
-                    <exclude>cldcunit/**</exclude>
                     <exclude>com/intel/bluetooth/BluetoothStackOSX*.*</exclude>
                     <exclude>com/intel/bluetooth/BluetoothStackToshiba*.*</exclude>
                     <exclude>com/intel/bluetooth/BluetoothStackBlueSoleil*.*</exclude>
+                    <exclude>junit/framework/Test**</exclude>
+                    <exclude>cldcunit/**</exclude>
                 </excludes>
             </unpackOptions>
             <outputDirectory></outputDirectory>

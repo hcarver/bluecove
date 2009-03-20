@@ -26,6 +26,8 @@
             <unpackOptions>
                 <excludes>
                     <exclude>META-INF/**</exclude>
+                    <exclude>junit/framework/Test**</exclude>
+                    <exclude>cldcunit/**</exclude>
                 </excludes>
             </unpackOptions>
             <outputDirectory></outputDirectory>

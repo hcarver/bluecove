@@ -28,6 +28,7 @@ import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Checkbox;
 import java.awt.Choice;
+import java.awt.ComponentOrientation;
 import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Font;
@@ -174,6 +175,9 @@ public class ClientConnectionDialog extends Dialog {
 
 		TestResponderCommon.initLocalDevice();
 
+		Font font = new Font("Monospaced", Font.PLAIN, Configuration.screenSizeSmall ? 9 : 12);
+        this.setFont(font);
+	      
 		GridBagLayout gridbag = new GridBagLayout();
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
@@ -182,8 +186,10 @@ public class ClientConnectionDialog extends Dialog {
 		this.add(panelItems, BorderLayout.NORTH);
 
 		Label lURL = new Label("URL:");
+		lURL.setFont(font);
 		panelItems.add(lURL);
 		panelItems.add(tfURL = new TextField("", 25));
+		tfURL.setFont(font);
 		c.gridwidth = 1;
 		gridbag.setConstraints(lURL, c);
 		c.gridwidth = GridBagConstraints.REMAINDER;
@@ -198,6 +204,7 @@ public class ClientConnectionDialog extends Dialog {
 		}
 
 		Label lDiscovered = new Label("Discovered:");
+		lDiscovered.setFont(font);
 		panelItems.add(lDiscovered);
 		choiceAllURLs = new Choice();
 		c.gridwidth = 1;
@@ -206,8 +213,7 @@ public class ClientConnectionDialog extends Dialog {
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		gridbag.setConstraints(choiceAllURLs, c);
 
-		Font logFont = new Font("Monospaced", Font.PLAIN, Configuration.screenSizeSmall ? 9 : 12);
-		choiceAllURLs.setFont(logFont);
+		choiceAllURLs.setFont(font);
 
 		ServiceRecords.populateChoice(choiceAllURLs, false);
 		populateRecentConnections(choiceAllURLs);
@@ -218,8 +224,10 @@ public class ClientConnectionDialog extends Dialog {
 		});
 
 		Label lData = new Label("Data:");
+		lData.setFont(font);
 		panelItems.add(lData);
 		panelItems.add(tfData = new TextField());
+		tfData.setFont(font);
 		c.gridwidth = 1;
 		gridbag.setConstraints(lData, c);
 		c.gridwidth = GridBagConstraints.REMAINDER;
@@ -238,6 +246,7 @@ public class ClientConnectionDialog extends Dialog {
 		gridbag.setConstraints(l3, c);
 
 		panelItems.add(btnSend = new Button("Send"));
+		btnSend.setFont(font);
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				send();
@@ -248,6 +257,7 @@ public class ClientConnectionDialog extends Dialog {
 		gridbag.setConstraints(btnSend, c);
 
 		choiceDataSendType = new Choice();
+		choiceDataSendType.setFont(font);
 		choiceDataSendType.add("as String.getBytes()+CR");
 		choiceDataSendType.add("as String.getBytes()");
 		choiceDataSendType.add("as parseByte(text)");
@@ -259,11 +269,13 @@ public class ClientConnectionDialog extends Dialog {
 		gridbag.setConstraints(choiceDataSendType, c);
 
 		Label lReceive = new Label("  Receive:");
+		lReceive.setFont(font);
 		panelItems.add(lReceive);
 		c.gridwidth = 1;
 		gridbag.setConstraints(lReceive, c);
 
 		choiceDataReceiveType = new Choice();
+		choiceDataReceiveType.setFont(font);
 		choiceDataReceiveType.add("as char");
 		choiceDataReceiveType.add("as charArray");
 		choiceDataReceiveType.add("stats only char");
@@ -287,6 +299,7 @@ public class ClientConnectionDialog extends Dialog {
 		gridbag.setConstraints(lRemainder, c);
 
 		Label lSaveToFile = new Label("Save to file:");
+		lSaveToFile.setFont(font);
 		panelItems.add(lSaveToFile);
 		panelItems.add(cbSaveToFile = new Checkbox());
 		c.gridwidth = 1;
@@ -300,19 +313,22 @@ public class ClientConnectionDialog extends Dialog {
 		});
 
 		Label lStatus = new Label("Status:");
+		lStatus.setFont(font);
 		panelItems.add(lStatus);
 		c.gridwidth = 1;
 		gridbag.setConstraints(lStatus, c);
 
 		status = new Label("Idle");
+		status.setFont(font);
 		panelItems.add(status);
-		c.gridwidth = 2;
+		c.gridwidth = GridBagConstraints.REMAINDER;
 		gridbag.setConstraints(status, c);
 
 		Panel panelBtns = new Panel();
 		this.add(panelBtns, BorderLayout.SOUTH);
 
 		panelBtns.add(btnConnect = new Button("Connect"));
+		btnConnect.setFont(font);
 		btnConnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				connect();
@@ -320,6 +336,7 @@ public class ClientConnectionDialog extends Dialog {
 		});
 
 		panelBtns.add(btnDisconnect = new Button("Disconnect"));
+		btnDisconnect.setFont(font);
 		btnDisconnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				shutdown();
@@ -328,6 +345,7 @@ public class ClientConnectionDialog extends Dialog {
 		btnDisconnect.setEnabled(false);
 
 		panelBtns.add(btnInterrupt = new Button("Interrupt"));
+		btnInterrupt.setFont(font);
 		btnInterrupt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				interrupt();
@@ -336,8 +354,17 @@ public class ClientConnectionDialog extends Dialog {
 		btnInterrupt.setEnabled(false);
 
 		if (RuntimeDetect.isBlueCove) {
+		    Panel panelExtraBtns = panelBtns;
+		    if (Configuration.screenSizeSmall) {
+		        panelExtraBtns = new Panel();
+		        panelItems.add(panelExtraBtns);
+		        c.anchor = GridBagConstraints.EAST;
+		        c.gridwidth = GridBagConstraints.REMAINDER;;
+		        gridbag.setConstraints(panelExtraBtns, c);
+		    }
 			Button btnBond = new Button("Bond");
-			panelBtns.add(btnBond);
+			btnBond.setFont(font);
+			panelExtraBtns.add(btnBond);
 			btnBond.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					onBond();
@@ -345,7 +372,8 @@ public class ClientConnectionDialog extends Dialog {
 			});
 
 			Button btnUnBond = new Button("UnBond");
-			panelBtns.add(btnUnBond);
+			btnUnBond.setFont(font);
+			panelExtraBtns.add(btnUnBond);
 			btnUnBond.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					onUnBond();
@@ -353,7 +381,8 @@ public class ClientConnectionDialog extends Dialog {
 			});
 
 			Button btnInfo = new Button("Info");
-			panelBtns.add(btnInfo);
+			btnInfo.setFont(font);
+			panelExtraBtns.add(btnInfo);
 			btnInfo.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					onInfo();
@@ -362,6 +391,7 @@ public class ClientConnectionDialog extends Dialog {
 		}
 
 		panelBtns.add(btnCancel = new Button("Cancel"));
+		btnCancel.setFont(font);
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				onClose();
@@ -373,6 +403,7 @@ public class ClientConnectionDialog extends Dialog {
 				onClose();
 			}
 		});
+		
 		this.pack();
 
 		synchronized (openConnectionDialogs) {

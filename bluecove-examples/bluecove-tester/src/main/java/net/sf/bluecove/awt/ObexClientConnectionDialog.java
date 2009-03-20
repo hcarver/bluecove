@@ -93,12 +93,16 @@ public class ObexClientConnectionDialog extends Dialog {
 
 	public ObexClientConnectionDialog(Frame owner) {
 		super(owner, "OBEX Client", false);
-
+		
+		Font font = new Font("Monospaced", Font.PLAIN, Configuration.screenSizeSmall ? 9 : 12);
+        this.setFont(font);
+        
 		GridBagLayout gridbag = new GridBagLayout();
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
 
 		Panel panelItems = new BorderPanel(gridbag);
+		panelItems.setFont(font);
 		this.add(panelItems, BorderLayout.NORTH);
 
 		Label l = new Label("URL:");
@@ -167,6 +171,7 @@ public class ObexClientConnectionDialog extends Dialog {
 		gridbag.setConstraints(status, c);
 
 		Panel panelBtns = new Panel();
+		panelBtns.setFont(font);
 		this.add(panelBtns, BorderLayout.SOUTH);
 
 		panelBtns.add(btnPut = new Button("Put"));

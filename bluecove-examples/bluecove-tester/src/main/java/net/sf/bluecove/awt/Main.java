@@ -105,7 +105,12 @@ public class Main extends Frame implements LoggerAppender {
 		Logger.debug("Stated app");
 		Logger.debug("OS:" + System.getProperty("os.name") + "|" + System.getProperty("os.version") + "|"
 				+ System.getProperty("os.arch"));
-		Logger.debug("Java:" + System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
+		Logger.debug("Java:" + System.getProperty("java.vendor") + " " + System.getProperty("java.version") + "; " +System.getProperty("java.vm.version"));
+
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        if (Configuration.windowsCE || Configuration.screenSizeSmall) {
+            Logger.debug("Screen:" + screenSize.width + "x" + screenSize.height + (Configuration.screenSizeSmall?" small":""));
+        }
 
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equalsIgnoreCase("--stack")) {
@@ -288,6 +293,12 @@ public class Main extends Frame implements LoggerAppender {
 				logSaveToFile();
 			}
 		});
+		
+		addMenu(menuLogs, "System.getProperties", new ActionListenerRunnable() {
+            public void run() {
+                JavaSECommon.logSystemProperties();
+            }
+        });
 
 		menuBar.add(menuLogs);
 
@@ -525,28 +536,29 @@ public class Main extends Frame implements LoggerAppender {
 			}
 		});
 
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		if ((screenSize.height < 480) || (screenSize.width < 480))  {
-			Configuration.screenSizeSmall = true;
-		}
-		Font logFont = new Font("Monospaced", Font.PLAIN, Configuration.screenSizeSmall ? 9 : 12);
-		output.setFont(logFont);
+		 Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+         
+         if ((screenSize.height < 500) || (screenSize.width < 500))  {
+             Configuration.screenSizeSmall = true;
+         }
+         
+         output.setFont( new Font("Monospaced", Font.PLAIN, Configuration.screenSizeSmall ? 9 : 12));
 
-		if (screenSize.width > 640) {
-			screenSize.setSize(600, 420);
-		}
-		if (this.isResizable()) {
-			Rectangle b = this.getBounds();
-			b.x = Integer.valueOf(Configuration.getStorageData("main.x", "0")).intValue();
-			b.y = Integer.valueOf(Configuration.getStorageData("main.y", "0")).intValue();
-			b.height = Integer.valueOf(Configuration.getStorageData("main.height", String.valueOf(screenSize.height)))
-					.intValue();
-			b.width = Integer.valueOf(Configuration.getStorageData("main.width", String.valueOf(screenSize.width)))
-					.intValue();
-			this.setBounds(b);
-		}
+         if (screenSize.width > 640) {
+             screenSize.setSize(600, 420);
+         }
+         if (isResizable()) {
+             Rectangle b = getBounds();
+             b.x = Integer.valueOf(Configuration.getStorageData("main.x", "0")).intValue();
+             b.y = Integer.valueOf(Configuration.getStorageData("main.y", "0")).intValue();
+             b.height = Integer.valueOf(Configuration.getStorageData("main.height", String.valueOf(screenSize.height)))
+                     .intValue();
+             b.width = Integer.valueOf(Configuration.getStorageData("main.width", String.valueOf(screenSize.width)))
+                     .intValue();
+             setBounds(b);
+         }
 	}
-
+	
 	boolean isMainFrameActive() {
 		try {
 			return isActive();

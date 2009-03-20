@@ -673,19 +673,4 @@ public class TestResponderServer implements CanShutdown, Runnable {
 		setAttributeValue(record, ATTR_BROWSE_GRP_LIST, browseClassIDList);
 	}
 
-	public static void main(String[] args) {
-		JavaSECommon.initOnce();
-		try {
-			(new TestResponderServer()).run();
-			if (TestResponderServer.failure.countFailure > 0) {
-				System.exit(1);
-			} else {
-				System.exit(0);
-			}
-		} catch (Throwable e) {
-			Logger.error("start error ", e);
-			System.exit(1);
-		}
-	}
-
 }

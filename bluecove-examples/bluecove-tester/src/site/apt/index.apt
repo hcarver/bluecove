@@ -90,11 +90,11 @@ Server failure 0
 
     On Linux BlueZ bluecove supports multiple local devices so you can start more then one applications and see how they communicate.
 
-        * <<<{{{./awt-bctest-device-0.jnlp}\u00bbStart with Local Bluetooth device 0}}>>>
+        * <<<{{{./awt-bctest-device-0.jnlp}\u00bbStart bluecove-gpl with Local Bluetooth device 0}}>>>
 
-        * <<<{{{./awt-bctest-device-1.jnlp}\u00bbStart with Local Bluetooth device 1}}>>>
+        * <<<{{{./awt-bctest-device-1.jnlp}\u00bbStart bluecove-gpl with Local Bluetooth device 1}}>>>
 
-        * <<<{{{./awt-bctest-device-2.jnlp}\u00bbStart with Local Bluetooth device 2}}>>>
+        * <<<{{{./awt-bctest-device-2.jnlp}\u00bbStart bluecove-gpl with Local Bluetooth device 2}}>>>
 
     Generic web start (Mac OS X/Windows/Linux)
 
@@ -122,8 +122,12 @@ java -cp avetanaBluetooth.jar;bluecove-tester-app.jar net.sf.bluecove.se.Main
 
     You can download the {{{./bluecove-tester.jar}bluecove-tester.jar}} application jar and run it with or without BlueCove JSR-82 in calsspath.
 
+    On Linux
+
 ---
 java -cp bluecove-#version#.jar:bluecove-gpl-#version#.jar:bluecove-tester.jar net.sf.bluecove.se.Main
+ or using D-Bus
+java -cp bluecove-#version#.jar:bluecove-bluez-#version#.jar:dbus-java-2.5.1.jar:unix.jar:bluecove-tester.jar net.sf.bluecove.se.Main
 ---
 
 ---
@@ -196,14 +200,18 @@ java -cp avetanaBluetooth.jar:bluecove-tester.jar net.sf.bluecove.se.Main
     IBM J9 Personal Profile:
 
 ---
-126#"\Program Files\J9\PPRO10\bin\j9.exe" "-jcl:ppro10" -cp "\Storage Card\bluecove\bluecove-tester-mobile.jar" net.sf.bluecove.awt.Main
+132#"\Program Files\J9\PPRO10\bin\j9.exe" "-jcl:ppro10" -cp "\Storage Card\bluecove\bluecove-tester-mobile.jar" net.sf.bluecove.awt.Main
 ---
+
+    132# means that the command line contains 132 characters,
 
     IBM J9 MIDP 2.0 Profile: (Follow BlueCove {{{http://code.google.com/p/bluecove/wiki/Documentation}installation instruction}})
 
 ---
-255#"\Program Files\J9\MIDP20\bin\emulator.exe" "-Xdescriptor:\Storage Card\bluecove\bctest.jad"  "-Xjam:force"
+107#"\Program Files\J9\MIDP20\bin\emulator.exe" "-Xdescriptor:\Storage Card\bluecove\bctest.jad"  "-Xjam:force"
 ---
+
+    FYI: on diferent version of Windows Mobile path <<<\Storage Card>>> should be replaced with <<<\SD Card>>>
 
 * Web Start with {previous} releases of BlueCove
 

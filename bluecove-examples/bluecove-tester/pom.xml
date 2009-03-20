@@ -160,7 +160,7 @@
                             <option>-defaultpackage 'bc1'</option>
                         </options>
                     </proguardOptions>
-                    <inFilter>!net/sf/bluecove/se/**,!net/sf/bluecove/swing/**,!net/sf/bluecove/awt/**</inFilter>
+                    <inFilter>!net/sf/bluecove/se/**,!net/sf/bluecove/swing/**,!net/sf/bluecove/awt/**,junit/framework/Assert.class,junit/framework/ComparisonFailure.class,junit/framework/AssertionFailedError.class,!junit/**,!cldcunit/**</inFilter>
                     <jadAttributes>
                         <!--FlipInsensitive>true</FlipInsensitive-->
                         <MIDlet-Permissions>javax.microedition.io.Connector.bluetooth.client,javax.microedition.io.Connector.bluetooth.server</MIDlet-Permissions>

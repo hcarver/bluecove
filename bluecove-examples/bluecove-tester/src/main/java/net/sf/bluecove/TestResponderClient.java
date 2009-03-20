@@ -543,14 +543,4 @@ public class TestResponderClient extends TestResponderCommon implements Runnable
 		}
 	}
 
-	public static void main(String[] args) {
-		JavaSECommon.initOnce();
-		try {
-			(new TestResponderClient()).run();
-			// System.exit(0);
-		} catch (Throwable e) {
-			Logger.error("start error ", e);
-		}
-	}
-
 }

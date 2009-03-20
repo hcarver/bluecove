@@ -1,1 +1,1 @@
-126#"\Storage Card\J9\PPRO10\bin\j9.exe" -Dmicroedition.connection.pkgs=com.intel.bluetooth "-jcl:ppro10" -cp "\Storage Card\bluecove\bluecove-tester-2.1.1-SNAPSHOT-mobile.jar" net.sf.bluecove.awt.Main
+197#"\Storage Card\J9\PPRO10\bin\j9.exe" -Dmicroedition.connection.pkgs=com.intel.bluetooth "-jcl:ppro10" -cp "\Storage Card\bluecove\bluecove-tester-2.1.1-SNAPSHOT-mobile.jar" net.sf.bluecove.awt.Main
