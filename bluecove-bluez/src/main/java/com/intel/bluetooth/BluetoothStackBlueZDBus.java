@@ -479,7 +479,11 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
             try {
                 blueZ.deviceInquiry(bluezDiscoveryListener);
             } catch (Throwable e) {
-                throw (BluetoothStateException) UtilsJavaSE.initCause(new BluetoothStateException(e.getMessage()), e);
+                if (deviceInquiryCanceled) {
+                    return DiscoveryListener.INQUIRY_TERMINATED;
+                } else {
+                    throw (BluetoothStateException) UtilsJavaSE.initCause(new BluetoothStateException(e.getMessage()), e);
+                }
             }
 
             for (Long address : address2DiscoveryData.keySet()) {
