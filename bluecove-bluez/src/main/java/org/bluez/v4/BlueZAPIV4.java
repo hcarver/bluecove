@@ -330,6 +330,7 @@ public class BlueZAPIV4 implements BlueZAPI {
         try {
             devicePath = adapter.FindDevice(deviceAddress);
         } catch (DoesNotExist e) {
+            DebugLog.debug("can't get device", e);
             devicePath = adapter.CreateDevice(deviceAddress);
         }
         return dbusConn.getRemoteObject("org.bluez", devicePath.getPath(), Device.class);
