@@ -47,7 +47,7 @@ import com.intel.bluetooth.Utils;
  */
 public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSession {
 
-	private OBEXClientOperation operation;
+    protected OBEXClientOperation operation;
 
 	private static final String FQCN = OBEXClientSessionImpl.class.getName();
 
@@ -161,7 +161,7 @@ public class OBEXClientSessionImpl extends OBEXSessionBase implements ClientSess
 		return this.connectionID;
 	}
 
-	private void canStartOperation() throws IOException {
+	protected void canStartOperation() throws IOException {
 		if (!isConnected) {
 			throw new IOException("Session not connected");
 		}
