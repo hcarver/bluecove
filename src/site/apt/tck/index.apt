@@ -12,7 +12,7 @@ JSR 82 Technology Compatibility Kit
     JSR-82 project website {{{https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.jsr82}https://opensource.motorola.com/sf/sfmain/do/viewProject/projects.jsr82}}
 
 
-* BlueCove TCK Tests on Windows, Linux and Mac OS X
+* BlueCove TCK Tests on Linux, Windows and Mac OS X
 
     Latest test reports for Bluetooth_1-1-1_002_TCK can be found {{{Bluetooth_1-1-1_002_TCK/}here}}. See Description of {{{#failures}failures}}.
 
@@ -28,7 +28,7 @@ JSR 82 Technology Compatibility Kit
 
     * {{{http://www.microemu.org/}MicroEmulator}} v2.0.3 as MIDP container.
 
-    * BlueCove BlueZ (D-Bus) on Ubuntu 8.10 32-bit (BlueZ 4.12, Generic Bluetooth USB driver ver 0.3) as Main TCK agent
+    * BlueCove-BlueZ (D-Bus) on Ubuntu 8.10 32-bit (BlueZ 4.12, Generic Bluetooth USB driver ver 0.3) as Main TCK agent
 
     ~~ * BlueCove on WIDCOMM stack as TCK agent for Microsoft stack and Mac OS X tests
 
@@ -60,6 +60,8 @@ JSR 82 Technology Compatibility Kit
 
     ~~ * System 4 TCK Client, Fedora 9 32-bit, BlueZ v3.36, {{{http://www.trust.com/14693}TRUST Bluetooth 2.0 EDR USB Adapter BT-2210Tp}}
 
+
+    Before starting tests Bluetooth devices had been paired.
 
 
     []
