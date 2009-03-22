@@ -29,7 +29,7 @@ BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/debug-
 BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/unix.jar"
 
 JVM_ARGS=
-JVM_ARGS="${JVM_ARGS} -Dbluecove.debug=1"
+#JVM_ARGS="${JVM_ARGS} -Dbluecove.debug=1"
 
 java -cp "${BLUECOVE_TCK_CP}" ${JVM_ARGS} ${MICROEMULATOR_MAIN} ${MICROEMULATOR_ARGS} -Xautotest:http://${BLUECOVE_TCK_HOST}:${BLUECOVE_TCK_PORT}/getNextApp.jad  | tee tck_test-dbus.log
 rc=$?
