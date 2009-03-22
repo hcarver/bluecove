@@ -781,7 +781,7 @@ class BluetoothStackToshiba implements BluetoothStack, DeviceInquiryRunnable, Se
 	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
-	public void l2Send(long handle, byte[] data) throws IOException {
+	public void l2Send(long handle, byte[] data, int transmitMTU) throws IOException {
 		// TODO Auto-generated method stub
 	}
 

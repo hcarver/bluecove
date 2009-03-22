@@ -40,6 +40,8 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 
 	protected volatile long handle;
 
+	protected int transmitMTU;
+	
 	protected int securityOpt;
 
 	private RemoteDevice remoteDevice;
@@ -127,7 +129,7 @@ abstract class BluetoothL2CAPConnection implements L2CAPConnection, BluetoothCon
 		if (data == null) {
 			throw new NullPointerException("data is null");
 		}
-		bluetoothStack.l2Send(handle, data);
+		bluetoothStack.l2Send(handle, data, transmitMTU);
 	}
 
 	abstract void closeConnectionHandle(long handle) throws IOException;

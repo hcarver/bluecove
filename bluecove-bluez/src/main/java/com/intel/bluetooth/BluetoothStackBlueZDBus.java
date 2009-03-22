@@ -921,7 +921,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
      *
      * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
      */
-    public native void l2Send(long handle, byte[] data) throws IOException;
+    public native void l2Send(long handle, byte[] data, int transmitMTU) throws IOException;
 
     /*
      * (non-Javadoc)

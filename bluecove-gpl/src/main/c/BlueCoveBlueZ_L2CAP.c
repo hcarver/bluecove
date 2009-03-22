@@ -254,7 +254,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2Receive
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2Send
-  (JNIEnv* env, jobject peer, jlong handle, jbyteArray data) {
+  (JNIEnv* env, jobject peer, jlong handle, jbyteArray data, jint transmitMTU) {
 #ifdef BLUECOVE_L2CAP_MTU_TRUNCATE
     struct l2cap_options opt;
     if (!l2Get_options(env, handle, &opt)) {
@@ -272,6 +272,9 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2Send
         return;
     }
     int len = (int)(*env)->GetArrayLength(env, data);
+    if (len > transmitMTU) {
+		len = transmitMTU;
+	}
 
 #ifdef BLUECOVE_L2CAP_MTU_TRUNCATE
     if (len > opt.omtu) {

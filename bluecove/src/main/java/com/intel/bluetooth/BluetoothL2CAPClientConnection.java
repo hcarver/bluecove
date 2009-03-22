@@ -31,34 +31,37 @@ import java.io.IOException;
  */
 class BluetoothL2CAPClientConnection extends BluetoothL2CAPConnection {
 
-	public BluetoothL2CAPClientConnection(BluetoothStack bluetoothStack, BluetoothConnectionParams params,
-			int receiveMTU, int transmitMTU) throws IOException {
-		super(bluetoothStack, bluetoothStack.l2OpenClientConnection(params, receiveMTU, transmitMTU));
-		boolean initOK = false;
-		try {
-			this.securityOpt = bluetoothStack.l2GetSecurityOpt(this.handle, Utils.securityOpt(params.authenticate,
-					params.encrypt));
-			RemoteDeviceHelper.connected(this);
-			initOK = true;
-		} finally {
-			if (!initOK) {
-				try {
-					bluetoothStack.l2CloseClientConnection(this.handle);
-				} catch (IOException e) {
-					DebugLog.error("close error", e);
-				}
-			}
-		}
-	}
+    public BluetoothL2CAPClientConnection(BluetoothStack bluetoothStack, BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
+        super(bluetoothStack, bluetoothStack.l2OpenClientConnection(params, receiveMTU, transmitMTU));
+        boolean initOK = false;
+        try {
+            this.securityOpt = bluetoothStack.l2GetSecurityOpt(this.handle, Utils.securityOpt(params.authenticate, params.encrypt));
+            this.transmitMTU = this.getTransmitMTU();
+            // JAR-82 If the byte array is larger than the TransmitMTU of the local device, send method will only send a byte array whose size is equal to the TransmitMTU of the local device.
+            if ((transmitMTU > 0) && (transmitMTU < this.transmitMTU)) {
+                this.transmitMTU = transmitMTU;
+            }
+            RemoteDeviceHelper.connected(this);
+            initOK = true;
+        } finally {
+            if (!initOK) {
+                try {
+                    bluetoothStack.l2CloseClientConnection(this.handle);
+                } catch (IOException e) {
+                    DebugLog.error("close error", e);
+                }
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.intel.bluetooth.BluetoothL2CAPConnection#closeConnectionHandle(long)
-	 */
-	void closeConnectionHandle(long handle) throws IOException {
-		RemoteDeviceHelper.disconnected(this);
-		bluetoothStack.l2CloseClientConnection(handle);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.intel.bluetooth.BluetoothL2CAPConnection#closeConnectionHandle(long)
+     */
+    void closeConnectionHandle(long handle) throws IOException {
+        RemoteDeviceHelper.disconnected(this);
+        bluetoothStack.l2CloseClientConnection(handle);
+    }
 
 }

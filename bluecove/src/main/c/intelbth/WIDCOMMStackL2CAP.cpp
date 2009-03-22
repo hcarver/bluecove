@@ -630,7 +630,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Receive
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Send
-(JNIEnv *env, jobject, jlong handle, jbyteArray data) {
+(JNIEnv *env, jobject, jlong handle, jbyteArray data, jint transmitMTU) {
     WIDCOMMStackL2CapConn* l2c = validL2CapConnHandle(env, handle);
     if (l2c == NULL) {
         return;
@@ -646,6 +646,9 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackWIDCOMM_l2Send
     if (len > l2c->connectionTransmitMTU) {
         len = l2c->connectionTransmitMTU;
     }
+    if (len > transmitMTU) {
+		len = transmitMTU;
+	}
 
     UINT16 written = 0;
     BOOL rc = l2c->Write((void*)bytes, (UINT16)len, &written);

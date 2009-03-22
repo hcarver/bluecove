@@ -485,7 +485,7 @@ public interface BluetoothStack {
     /**
      * @see javax.bluetooth.L2CAPConnection#send(byte[])
      */
-    public void l2Send(long handle, byte[] data) throws IOException;
+    public void l2Send(long handle, byte[] data, int transmitMTU) throws IOException;
 
     /**
      * @see javax.bluetooth.RemoteDevice#getRemoteDevice(javax.microedition.io.Connection)

@@ -545,7 +545,7 @@ class BluetoothEmulator implements BluetoothStack {
 		return ((EmulatorL2CAPClient) activeLocalDevice().getConnection(handle)).receive(inBuf);
 	}
 
-	public void l2Send(long handle, byte[] data) throws IOException {
+	public void l2Send(long handle, byte[] data, int transmitMTU) throws IOException {
 		((EmulatorL2CAPClient) activeLocalDevice().getConnection(handle)).send(data);
 	}
 

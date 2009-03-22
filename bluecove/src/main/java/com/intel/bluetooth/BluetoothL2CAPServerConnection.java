@@ -36,12 +36,17 @@ class BluetoothL2CAPServerConnection extends BluetoothL2CAPConnection implements
 	 * @param handle
 	 * @throws IOException
 	 */
-	protected BluetoothL2CAPServerConnection(BluetoothStack bluetoothStack, long handle, int securityOpt)
+	protected BluetoothL2CAPServerConnection(BluetoothStack bluetoothStack, long handle,  int transmitMTU, int securityOpt)
 			throws IOException {
 		super(bluetoothStack, handle);
 		boolean initOK = false;
 		try {
 			this.securityOpt = securityOpt;
+			this.transmitMTU = this.getTransmitMTU();
+            // JAR-82 If the byte array is larger than the TransmitMTU of the local device, send method will only send a byte array whose size is equal to the TransmitMTU of the local device.
+		    if ((transmitMTU > 0) && (transmitMTU < this.transmitMTU)) {
+                this.transmitMTU = transmitMTU;
+            }
 			RemoteDeviceHelper.connected(this);
 			initOK = true;
 		} finally {

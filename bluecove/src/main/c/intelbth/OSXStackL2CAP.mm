@@ -471,7 +471,7 @@ void L2CAPConnectionWrite::run() {
 }
 
 JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Send
-  (JNIEnv *env, jobject peer, jlong handle, jbyteArray data) {
+  (JNIEnv *env, jobject peer, jlong handle, jbyteArray data, jint transmitMTU) {
     L2CAPChannelController* comm = validOpenL2CAPChannelHandle(env, handle);
 	if (comm == NULL) {
 		return;
@@ -480,6 +480,9 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Send
 	int len = (int)env->GetArrayLength(data);
     if (len > comm->transmitMTU) {
 		len = comm->transmitMTU;
+	}
+	if (len > transmitMTU) {
+		len = transmitMTU;
 	}
 
 	L2CAPConnectionWrite runnable;

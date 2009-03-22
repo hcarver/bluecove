@@ -536,7 +536,7 @@ class BluetoothStackBlueSoleil implements BluetoothStack, DeviceInquiryRunnable,
 	 * 
 	 * @see com.intel.bluetooth.BluetoothStack#l2send(long, byte[])
 	 */
-	public void l2Send(long handle, byte[] data) throws IOException {
+	public void l2Send(long handle, byte[] data, int transmitMTU) throws IOException {
 		throw new NotSupportedIOException(getStackID());
 	}
 
