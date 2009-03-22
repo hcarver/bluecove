@@ -13,10 +13,10 @@ goto :errormark
 :3p_found
 
 set MICROEMULATOR_HOME=%BLUECOVE_3RDPARTY_HOME%\microemulator
-set MICROEMULATOR_HOME=%D:\corp\me2\microemulator\microemulator\target
+rem set MICROEMULATOR_HOME=%D:\corp\me2\microemulator\microemulator\target
 
 set MICROEMULATOR_JAR=%MICROEMULATOR_HOME%\microemulator.jar
-set MICROEMULATOR_JAR=%MICROEMULATOR_HOME%\microemulator-2.0.3-SNAPSHOT.jar
+rem set MICROEMULATOR_JAR=%MICROEMULATOR_HOME%\microemulator-2.0.4-SNAPSHOT.jar
 
 set MICROEMULATOR_MAIN=org.microemu.app.Main
 rem set MICROEMULATOR_MAIN=org.microemu.app.Headless
