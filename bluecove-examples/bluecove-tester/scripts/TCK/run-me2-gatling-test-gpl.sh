@@ -25,7 +25,10 @@ fi
 BLUECOVE_TCK_CP="${MICROEMULATOR_HOME}/microemulator.jar"
 BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_JAR}:${BLUECOVE_GPL_JAR}"
 
-java -cp "${BLUECOVE_TCK_CP}" ${MICROEMULATOR_MAIN} ${MICROEMULATOR_ARGS} -Xautotest:http://${BLUECOVE_TCK_HOST}:${BLUECOVE_TCK_PORT}/getNextApp.jad
+JVM_ARGS=
+JVM_ARGS="${JVM_ARGS} -Dbluecove.debug=1"
+
+java -cp "${BLUECOVE_TCK_CP}" ${JVM_ARGS} ${MICROEMULATOR_MAIN} ${MICROEMULATOR_ARGS} -Xautotest:http://${BLUECOVE_TCK_HOST}:${BLUECOVE_TCK_PORT}/getNextApp.jad | tee tck_test-gpl.log
 rc=$?
 if [ ! "${rc}" = "0" ]; then
     echo Error calling java

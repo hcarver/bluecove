@@ -28,7 +28,10 @@ BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/dbus.j
 BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/debug-disable.jar"
 BLUECOVE_TCK_CP="${BLUECOVE_TCK_CP}:${BLUECOVE_BLUEZ_PROJECT_HOME}/target/unix.jar"
 
-java -cp "${BLUECOVE_TCK_CP}" ${MICROEMULATOR_MAIN} ${MICROEMULATOR_ARGS} -Xautotest:http://${BLUECOVE_TCK_HOST}:${BLUECOVE_TCK_PORT}/getNextApp.jad
+JVM_ARGS=
+JVM_ARGS="${JVM_ARGS} -Dbluecove.debug=1"
+
+java -cp "${BLUECOVE_TCK_CP}" ${JVM_ARGS} ${MICROEMULATOR_MAIN} ${MICROEMULATOR_ARGS} -Xautotest:http://${BLUECOVE_TCK_HOST}:${BLUECOVE_TCK_PORT}/getNextApp.jad  | tee tck_test-dbus.log
 rc=$?
 if [ ! "${rc}" = "0" ]; then
     echo Error calling java
