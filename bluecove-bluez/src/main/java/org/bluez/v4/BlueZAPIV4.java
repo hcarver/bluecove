@@ -110,6 +110,22 @@ public class BlueZAPIV4 implements BlueZAPI {
         return adapters[number];
     }
 
+    private String hciID(String adapterPath) {
+        final String bluezPath = "/org/bluez/";
+        String path;
+        if (adapterPath.startsWith(bluezPath)) {
+            path = adapterPath.substring(bluezPath.length());
+        } else {
+            path = adapterPath;
+        }
+        int lastpart = path.lastIndexOf('/');
+        if ((lastpart != -1) && (lastpart != path.length() -1)) {
+            return path.substring(lastpart + 1);
+        } else {
+            return path;
+        }
+    }
+    
     /*
      * (non-Javadoc)
      * 
@@ -120,12 +136,7 @@ public class BlueZAPIV4 implements BlueZAPI {
         Path[] adapters = dbusManager.ListAdapters();
         if (adapters != null) {
             for (int i = 0; i < adapters.length; i++) {
-                String adapterId = String.valueOf(adapters[i]);
-                final String bluezPath = "/org/bluez/";
-                if (adapterId.startsWith(bluezPath)) {
-                    adapterId = adapterId.substring(bluezPath.length());
-                }
-                v.add(adapterId);
+                v.add(hciID(adapters[i].getPath()));
             }
         }
         return v;
@@ -157,12 +168,7 @@ public class BlueZAPIV4 implements BlueZAPI {
      * @see org.bluez.BlueZAPI#getAdapterID()
      */
     public String getAdapterID() {
-        final String bluezPath = "/org/bluez/";
-        if (adapterPath.getPath().startsWith(bluezPath)) {
-            return adapterPath.getPath().substring(bluezPath.length());
-        } else {
-            return adapterPath.getPath();
-        }
+        return hciID(adapterPath.getPath());
     }
 
     /*
