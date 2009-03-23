@@ -297,6 +297,10 @@ public class BlueZAPIV3 implements BlueZAPI {
             modeStr = "limited";
             break;
         default:
+            if ((0x9E8B00 <= mode) && (mode <= 0x9E8B3F)) {
+                // system does not support the access mode specified
+                return false;
+            }
             throw new IllegalArgumentException("Invalid discoverable mode");
         }
         adapter.SetMode(modeStr);

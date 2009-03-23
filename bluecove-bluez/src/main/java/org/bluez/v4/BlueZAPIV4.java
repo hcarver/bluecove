@@ -232,6 +232,10 @@ public class BlueZAPIV4 implements BlueZAPI {
             adapter.SetProperty(DBusProperties.getPropertyName(Adapter.Properties.Discoverable), new Variant<Boolean>(Boolean.TRUE));
             break;
         default:
+            if ((0x9E8B00 <= mode) && (mode <= 0x9E8B3F)) {
+                // system does not support the access mode specified
+                return false;
+            }
             throw new IllegalArgumentException("Invalid discoverable mode");
         }
         return true;
