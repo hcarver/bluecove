@@ -41,6 +41,7 @@ public class NativeSocketSimpleTest extends NativeSocketTestCase {
     	super.setUp();
     }
     
+    @Override
     protected TestRunnable createTestServer() {
         
         return new TestRunnable() {
@@ -48,10 +49,7 @@ public class NativeSocketSimpleTest extends NativeSocketTestCase {
                 LocalServerSocket serverSocket = new LocalServerSocket(new LocalSocketAddress(socketName, socketAbstractNamespace));
                 try {
                 	System.out.println("server starts");
-                	synchronized (serverAcceptEvent) {
-                		serverAccepts = true;
-                		serverAcceptEvent.notifyAll();
-                    }
+                	serverAcceptsNotifyAll();
                     Socket socket = serverSocket.accept();
                     InputStream in = socket.getInputStream();
                     OutputStream out = socket.getOutputStream();
@@ -73,13 +71,7 @@ public class NativeSocketSimpleTest extends NativeSocketTestCase {
     }
     
     public void testOneByte() throws Exception  {
-    	while (!serverAccepts) {
-    		synchronized (serverAcceptEvent) {
-    			serverAcceptEvent.wait(500);
-    		}
-    		assertServerErrors();
-        }
-    	Thread.sleep(200);
+        serverAcceptsWait();
         Socket socket = new LocalSocket(new LocalSocketAddress(socketName, socketAbstractNamespace));
         System.out.println("client connected");
         OutputStream out = socket.getOutputStream();

@@ -32,6 +32,7 @@ const char* cInterruptedIOException = "java/io/InterruptedIOException";
 const char* cBluetoothStateException = "javax/bluetooth/BluetoothStateException";
 const char* cBluetoothConnectionException = "javax/bluetooth/BluetoothConnectionException";
 const char* cServiceRegistrationException = "javax/bluetooth/ServiceRegistrationException";
+const char* cSocketException = "java/io/SocketException";
 
 // --- Debug
 
@@ -126,6 +127,13 @@ void throwIOException(JNIEnv *env, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     vthrowException(env, cIOException, fmt, ap);
+    va_end(ap);
+}
+
+void throwSocketException(JNIEnv *env, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vthrowException(env, cSocketException, fmt, ap);
     va_end(ap);
 }
 

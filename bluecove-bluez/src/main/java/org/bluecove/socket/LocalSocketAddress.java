@@ -25,7 +25,7 @@
 package org.bluecove.socket;
 
 /**
- * This class represents an address local interprocess communication on Unix.
+ * This class represents an address local interprocess communication on Linux Unix.
  * 
  * PF_UNIX, AF_UNIX, PF_LOCAL, AF_LOCAL
  */

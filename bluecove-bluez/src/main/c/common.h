@@ -66,6 +66,7 @@ void throwInterruptedIOException(JNIEnv *env, const char *fmt, ...);
 void throwServiceRegistrationException(JNIEnv *env, const char *fmt, ...);
 void throwBluetoothStateException(JNIEnv *env, const char *fmt, ...);
 void throwBluetoothConnectionException(JNIEnv *env, int error, const char *fmt, ...);
+void throwSocketException(JNIEnv *env, const char *fmt, ...);
 
 // --- Interaction with java classes
 

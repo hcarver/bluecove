@@ -38,6 +38,7 @@
 #include "common.h"
 
 #include "org_bluecove_socket_LocalSocketImpl.h"
+#include "org_bluecove_socket_LocalSocketImpl_LocalSocketOptions.h"
 
 #ifndef SOCKET_ERROR
 #define SOCKET_ERROR   (-1)

@@ -60,6 +60,23 @@ public class NativeSocketTestCase extends NativeTestCase {
             serverThread.join();
         }
     }
+    
+    protected void serverAcceptsNotifyAll() {
+        synchronized (serverAcceptEvent) {
+            serverAccepts = true;
+            serverAcceptEvent.notifyAll();
+        }
+    }
+    
+    public void serverAcceptsWait() throws Exception  {
+        while (!serverAccepts) {
+            synchronized (serverAcceptEvent) {
+                serverAcceptEvent.wait(500);
+            }
+            assertServerErrors();
+        }
+        Thread.sleep(200);
+    }
 
     public interface TestRunnable {
         

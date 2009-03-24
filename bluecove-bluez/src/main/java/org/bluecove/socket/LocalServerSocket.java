@@ -27,9 +27,12 @@ package org.bluecove.socket;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketException;
+
+import org.bluecove.socket.LocalSocketImpl.LocalSocketOptions;
 
 /**
- * Unix domain server socket.
+ * Unix domain server socket on Linux.
  * 
  * Inheritance from java.net.ServerSocket is mainly for documentation consistency. 
  */
@@ -80,5 +83,30 @@ public class LocalServerSocket extends java.net.ServerSocket {
     @Override
     public boolean isClosed() {
     	return impl.isClosed();
+    }
+    
+    /**
+     * Enable/disable the SO_PASSCRED socket option.
+     * 
+     * @param on
+     * @throws SocketException 
+     */
+    public void setReceiveCredentials(boolean on) throws SocketException  {
+        if (isClosed()) {
+            throw new SocketException("Socket is already closed");
+        }
+        impl.setOption(LocalSocketOptions.SO_PASSCRED, Integer.valueOf((on?1:0)));
+    }
+    
+    public boolean getReceiveCredentials() throws SocketException {
+        if (isClosed()) {
+            throw new SocketException("Socket is already closed");
+        }
+        Object value = impl.getOption(LocalSocketOptions.SO_PASSCRED);
+        if (value instanceof Integer) {
+            return (((Integer) value).intValue() > 0);
+        } else {
+            return false;
+        }
     }
 }

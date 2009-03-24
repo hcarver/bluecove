@@ -34,10 +34,26 @@ import java.net.SocketImpl;
 import java.net.UnknownServiceException;
 
 /**
- * Socket implementation used for Unix domain sockets
+ * Socket implementation used for Unix domain sockets on Linux 
  */
 class LocalSocketImpl extends java.net.SocketImpl {
 
+    public interface LocalSocketOptions {
+        
+        public final static int SO_LINGER = 1; 
+        
+        public final static int SO_PASSCRED = 2;
+        
+        public final static int SO_SNDBUF = 3;
+        
+        public final static int SO_RCVBUF = 4;
+        
+        public final static int SO_RCVTIMEO = 5;
+
+        public final static int SO_SNDTIMEO  = 6;
+        
+    }
+    
     /**
      * socket file descriptor
      */
@@ -143,16 +159,23 @@ class LocalSocketImpl extends java.net.SocketImpl {
     @Override
     protected void sendUrgentData(int data) throws IOException {
         // TODO Auto-generated method stub
-
     }
 
     public Object getOption(int optID) throws SocketException {
-        // TODO Auto-generated method stub
-        return null;
+        int rc = nativeGetOption(socket, optID);
+        return Integer.valueOf(rc);
     }
 
     public void setOption(int optID, Object value) throws SocketException {
-        // TODO Auto-generated method stub
+        int nativeValue;
+        if (value instanceof Boolean) {
+            nativeValue = ((Boolean) value) ? 1 : -1;
+        } else if (value instanceof Integer) {
+            nativeValue = ((Integer) value).intValue();
+        } else {
+            throw new IllegalArgumentException();
+        }
+        nativeSetOption(socket, optID, nativeValue);
     }
 
     /**
@@ -180,6 +203,18 @@ class LocalSocketImpl extends java.net.SocketImpl {
     	return bound;
     }
     
+    Credentials readPeerCredentials() throws IOException {
+        int[] ucred = new int[3];
+        nativeReadCredentials(socket, ucred);
+        return new Credentials(ucred[0],ucred[2],ucred[2]);
+    }
+    
+    static Credentials readProcessCredentials() {
+        int[] ucred = new int[3];
+        nativeReadProcessCredentials(ucred);
+        return new Credentials(ucred[0],ucred[2],ucred[2]);
+    }
+    
     private native int nativeCreate(boolean stream) throws IOException;
     
     private native void nativeConnect(int socket, String name, boolean abstractNamespace, int timeout);
@@ -198,6 +233,14 @@ class LocalSocketImpl extends java.net.SocketImpl {
 
     private native void nativeWrite(int socket, byte[] buf, int off, int len) throws IOException;
 
+    private native void nativeReadCredentials(int socket, int[] buf) throws IOException;
+    
+    private static native void nativeReadProcessCredentials(int[] buf);
+    
+    private native void nativeSetOption(int socket, int optID, int value) throws SocketException;
+    
+    private native int nativeGetOption(int socket, int optID) throws SocketException;
+    
     private class LocalSocketInputStream extends InputStream {
 
         @Override

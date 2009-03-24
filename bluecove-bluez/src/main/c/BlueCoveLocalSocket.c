@@ -23,6 +23,7 @@
  */
 #define CPP__FILE "BlueCoveLocalSocket.c"
 
+#define _GNU_SOURCE
 #include "BlueCoveLocalSocket.h"
 
 JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeCreate
@@ -221,6 +222,10 @@ JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeRead
     }
 
     bytes = (*env)->GetByteArrayElements(env, b, 0);
+    if (bytes == NULL) {
+        throwRuntimeException(env, "Invalid argument");
+        return -1;
+    }
     done = 0;
     while (done == 0) {
         int flags = MSG_DONTWAIT;
@@ -308,6 +313,10 @@ JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeWrite
     }
 
     bytes = (*env)->GetByteArrayElements(env, b, 0);
+    if (bytes == NULL) {
+        throwRuntimeException(env, "Invalid argument");
+        return;
+    }
     done = 0;
     while(done < len) {
         int count = send(handle, (char *)(bytes + off + done), len - done, 0);
@@ -321,4 +330,159 @@ JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeWrite
         done += count;
     }
     (*env)->ReleaseByteArrayElements(env, b, bytes, 0);
+}
+
+JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeReadCredentials
+  (JNIEnv *env, jobject peer, jint handle, jintArray b) {
+    jint *rc;
+    struct ucred cr;
+    int cr_len;
+
+    if (!validateSocket(env, handle)) {
+        return;
+    }
+
+    cr_len = sizeof(cr);
+    memset(&cr, 0, sizeof(cr));
+
+    if ((getsockopt(handle, SOL_SOCKET, SO_PEERCRED, &cr, &cr_len) < 0) || (cr_len != sizeof (cr)))  {
+        throwIOException(env, "Failed to read getsockopt. [%d] %s", errno, strerror(errno));
+        return;
+    }
+
+    rc = (*env)->GetIntArrayElements(env, b, 0);
+    if (rc == NULL) {
+        throwRuntimeException(env, "Invalid argument");
+        return;
+    }
+    rc[0] = cr.pid;
+    rc[1] = cr.uid;
+    rc[2] = cr.gid;
+
+    (*env)->ReleaseIntArrayElements(env, b, rc, 0);
+}
+
+JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeReadProcessCredentials
+  (JNIEnv *env, jclass peerclass, jintArray b) {
+    jint *rc;
+
+    rc = (*env)->GetIntArrayElements(env, b, 0);
+    if (rc == NULL) {
+        throwRuntimeException(env, "Invalid argument");
+        return;
+    }
+
+    rc[0] = getpid();
+    rc[1] = getuid();
+    rc[2] = getgid();
+
+    (*env)->ReleaseIntArrayElements(env, b, rc, 0);
+}
+
+bool localSocketOptions2unix(int optID, int* optname) {
+    switch (optID) {
+        case org_bluecove_socket_LocalSocketImpl_LocalSocketOptions_SO_LINGER:
+            *optname = SO_LINGER;
+            break;
+        case org_bluecove_socket_LocalSocketImpl_LocalSocketOptions_SO_RCVTIMEO:
+            *optname = SO_RCVTIMEO;
+            break;
+        case org_bluecove_socket_LocalSocketImpl_LocalSocketOptions_SO_SNDTIMEO:
+            *optname = SO_SNDTIMEO;
+            break;
+        case org_bluecove_socket_LocalSocketImpl_LocalSocketOptions_SO_SNDBUF:
+            *optname = SO_SNDBUF;
+            break;
+        case org_bluecove_socket_LocalSocketImpl_LocalSocketOptions_SO_RCVBUF:
+            *optname = SO_RCVBUF;
+            break;
+        case org_bluecove_socket_LocalSocketImpl_LocalSocketOptions_SO_PASSCRED:
+            *optname = SO_PASSCRED;
+            break;
+        default:
+            return false;
+    }
+    return true;
+}
+
+JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeSetOption
+  (JNIEnv *env, jobject peer, jint handle, jint optID, jint value) {
+    int optname;
+    struct linger lingr;
+    struct timeval timeout;
+    int rc, v;
+
+    if (!localSocketOptions2unix(optID, &optname)) {
+        throwRuntimeException(env, "Invalid argument");
+        return;
+    }
+
+    switch (optname) {
+        case SO_LINGER:
+            lingr.l_onoff = (value > 0) ? 1 : 0;
+            lingr.l_linger = value;
+            rc = setsockopt(handle, SOL_SOCKET, optname, &lingr, sizeof(lingr));
+            break;
+        case SO_SNDTIMEO:
+        case SO_RCVTIMEO:
+            timeout.tv_sec = value / 1000;
+            timeout.tv_usec = (value % 1000) * 1000;
+            rc = setsockopt(handle, SOL_SOCKET, optname, (void *)&timeout, sizeof(timeout));
+            break;
+        default:
+            v = value;
+            rc = setsockopt(handle, SOL_SOCKET, optname, &v, sizeof(int));
+            break;
+    }
+    if (rc != 0) {
+        throwSocketException(env, "Failed to read getsockopt. [%d] %s", errno, strerror(errno));
+        return -1;
+    }
+}
+
+
+JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeGetOption
+  (JNIEnv *env, jobject peer, jint handle, jint optID) {
+    int optname;
+    struct linger lingr;
+    struct timeval timeout;
+    socklen_t size, expected_size;
+    int rc, value;
+
+    if (!localSocketOptions2unix(optID, &optname)) {
+        throwRuntimeException(env, "Invalid argument");
+        return -1;
+    }
+
+    switch (optname) {
+        case SO_LINGER:
+            size = sizeof(lingr);
+            expected_size = size;
+            rc = getsockopt(handle, SOL_SOCKET, optname, &lingr, &size);
+            if (!lingr.l_onoff) {
+                value = -1;
+            } else {
+                value = lingr.l_linger;
+            }
+            break;
+        case SO_SNDTIMEO:
+        case SO_RCVTIMEO:
+            size = sizeof(timeout);
+            expected_size = size;
+            rc = getsockopt(handle, SOL_SOCKET, optname, (void *)&timeout, &size);
+            value = (timeout.tv_sec * 1000) + timeout.tv_usec;
+            break;
+        default:
+            size = sizeof(int);
+            expected_size = size;
+            rc = getsockopt(handle, SOL_SOCKET, optname, &value, &size);
+            break;
+    }
+
+    if ((rc != 0) || (expected_size != size)) {
+        throwSocketException(env, "Failed to read getsockopt. [%d] %s", errno, strerror(errno));
+        return -1;
+    } else {
+        return value;
+    }
 }
