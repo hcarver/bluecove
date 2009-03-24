@@ -27,9 +27,12 @@ package org.bluecove.socket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketImpl;
+import java.net.UnknownServiceException;
+import java.nio.channels.SocketChannel;
 
 import org.bluecove.socket.LocalSocketImpl.LocalSocketOptions;
 
@@ -42,6 +45,10 @@ public class LocalSocket extends java.net.Socket {
      * The implementation of this Socket.
      */
     private LocalSocketImpl impl;
+    
+    private boolean shutdownIn = false;
+    
+    private boolean shutdownOut = false;
 
     public LocalSocket() throws IOException {
         super((SocketImpl) null);
@@ -69,7 +76,66 @@ public class LocalSocket extends java.net.Socket {
         }
         impl.connect(endpoint, timeout);
     }
-
+    
+    @Override
+    public String toString() {
+        if (isConnected()) {
+            return "LocalSocket[" + getLocalSocketAddress() + "]";
+        } else {
+            return "LocalSocket[unconnected]";
+        }
+    }
+    
+    @Override
+    public SocketAddress getRemoteSocketAddress() {
+        if (!isConnected()) {
+            return null;
+        }
+        return impl.getSocketAddress();
+    }
+    
+    @Override
+    public SocketAddress getLocalSocketAddress() {
+        return impl.getSocketAddress();
+    }
+    
+    @Override
+    public void bind(SocketAddress bindpoint) throws IOException {
+        throw new UnknownServiceException();
+    }
+    
+    @Override
+    public SocketChannel getChannel()  {
+        return null;
+    }
+    
+    @Override
+    public InetAddress getInetAddress() {
+        if (!isConnected()) {
+            return null;
+        }
+        throw new IllegalArgumentException("Unsupported address type");
+    }
+    
+    @Override
+    public InetAddress getLocalAddress() {
+        if (!isConnected()) {
+            return null;
+        }
+        throw new IllegalArgumentException("Unsupported address type");
+    }
+    
+    @Override
+    public int getPort() {
+        throw new IllegalArgumentException("Unsupported address type");
+    }
+    
+    @Override
+    public int getLocalPort() {
+        throw new IllegalArgumentException("Unsupported address type");
+    }
+    
+    @Override
     public void close() throws IOException {
         impl.close();
     }
@@ -124,6 +190,47 @@ public class LocalSocket extends java.net.Socket {
         }
         return impl.getInputStream();
     }
+    
+    @Override
+    public boolean isInputShutdown() {
+        return shutdownIn;
+    }
+
+    @Override
+    public boolean isOutputShutdown() {
+        return shutdownOut;
+    }
+    
+    @Override
+    public void shutdownInput() throws IOException {
+        if (isClosed()) {
+            throw new SocketException("Socket is already closed");
+        }
+        if (!isConnected()) {
+            throw new SocketException("Socket is not connected");
+        }
+        if (isInputShutdown()) {
+            throw new SocketException("Socket input is already shutdown");
+        }
+        impl.shutdownInput();
+        shutdownIn = true;
+    }
+ 
+    @Override
+    public void shutdownOutput() throws IOException {
+        if (isClosed()) {
+            throw new SocketException("Socket is already closed");
+        }
+        if (!isConnected()) {
+            throw new SocketException("Socket is not connected");
+        }
+        if (isOutputShutdown()) {
+            throw new SocketException("Socket output is already shutdown");
+        }
+        impl.shutdownOutput();
+        shutdownOut = true;
+    }
+
 
     /**
      * Enable/disable the SO_LINGER socket option.

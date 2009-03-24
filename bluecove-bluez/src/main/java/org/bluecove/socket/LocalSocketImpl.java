@@ -65,6 +65,7 @@ class LocalSocketImpl extends java.net.SocketImpl {
     
     private boolean closed;
     
+    private SocketAddress endpoint;
     
     private InputStream in;
 
@@ -80,6 +81,7 @@ class LocalSocketImpl extends java.net.SocketImpl {
         }
         ((LocalSocketImpl)s).socket = nativeAccept(this.socket);
         ((LocalSocketImpl)s).connected = true;
+        ((LocalSocketImpl)s).endpoint = endpoint;
     }
 
     @Override
@@ -92,13 +94,18 @@ class LocalSocketImpl extends java.net.SocketImpl {
         throw new UnknownServiceException();
     }
 
-    protected void bind(SocketAddress endpoint, int backlog) throws IOException {
+    protected void bind(SocketAddress endpoint) throws IOException {
         if (!(endpoint instanceof LocalSocketAddress)) {
         	throw new IllegalArgumentException("Unsupported address type");
         }
         nativeBind(socket, ((LocalSocketAddress) endpoint).getName(), ((LocalSocketAddress) endpoint).isAbstractNamespace());
-        nativeListen(socket, backlog);
         this.bound = true;
+        this.endpoint = endpoint;
+    }
+    
+    @Override
+    protected void listen(int backlog) throws IOException {
+        nativeListen(socket, backlog);
     }
     
     @Override
@@ -107,6 +114,12 @@ class LocalSocketImpl extends java.net.SocketImpl {
     		this.closed = true;
         	nativeClose(socket);
     	}
+    	this.bound = false;
+    	this.endpoint = null;
+    }
+    
+    void unlink(String path) {
+        nativeUnlink(path);
     }
 
     @Override
@@ -129,6 +142,10 @@ class LocalSocketImpl extends java.net.SocketImpl {
         this.bound = true;
     }
 
+    public SocketAddress getSocketAddress() {
+        return endpoint;
+    }
+    
     @Override
     protected void create(boolean stream) throws IOException {
     	socket = nativeCreate(stream);
@@ -151,10 +168,14 @@ class LocalSocketImpl extends java.net.SocketImpl {
     }
 
     @Override
-    protected void listen(int backlog) throws IOException {
-        // TODO Auto-generated method stub
-
+    protected void shutdownInput() throws IOException {
+        nativeShutdown(socket, true);
     }
+
+    @Override
+    protected void shutdownOutput() throws IOException {
+        nativeShutdown(socket, false);
+    }  
 
     @Override
     protected void sendUrgentData(int data) throws IOException {
@@ -227,6 +248,10 @@ class LocalSocketImpl extends java.net.SocketImpl {
     
     private native void nativeClose(int socket) throws IOException;
 
+    private native void nativeShutdown(int socket, boolean read) throws IOException;
+    
+    private native void nativeUnlink(String path);
+    
     private native int nativeAvailable(int socket) throws IOException;
 
     private native int nativeRead(int socket, byte[] buf, int off, int len) throws IOException;

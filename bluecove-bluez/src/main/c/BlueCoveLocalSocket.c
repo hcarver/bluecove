@@ -185,6 +185,26 @@ JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeClose
     }
 }
 
+JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeShutdown
+  (JNIEnv *env, jobject peer, jint handle, jboolean read) {
+    int how = read?SHUT_RD:SHUT_WR;
+    if (shutdown(handle, SHUT_RDWR) < 0) {
+        throwIOException(env, "shutdown failed. [%d] %s", errno, strerror(errno));
+    }
+}
+
+JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeUnlink
+  (JNIEnv *env, jobject peer, jstring path) {
+    const char* cpath;
+    cpath = (*env)->GetStringUTFChars(env, path, NULL);
+    if (cpath == NULL) {
+        throwRuntimeException(env, "JNI error");
+        return;
+    }
+    unlink(cpath);
+    (*env)->ReleaseStringUTFChars(env, path, cpath);
+}
+
 JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeAvailable
   (JNIEnv *env, jobject peer, jint handle) {
     struct pollfd fds;
@@ -436,7 +456,7 @@ JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeSetOption
     }
     if (rc != 0) {
         throwSocketException(env, "Failed to read getsockopt. [%d] %s", errno, strerror(errno));
-        return -1;
+        return;
     }
 }
 

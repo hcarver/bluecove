@@ -61,7 +61,8 @@ public class LocalServerSocket extends java.net.ServerSocket {
     
     @Override
     public void bind(SocketAddress endpoint, int backlog) throws IOException {
-        impl.bind(endpoint, backlog);
+        impl.bind(endpoint);
+        impl.listen(backlog);
     }
     
     @Override
@@ -70,9 +71,18 @@ public class LocalServerSocket extends java.net.ServerSocket {
         impl.accept(clientImpl);
         return new LocalSocket(clientImpl);
     }
+    
+    @Override
+    public SocketAddress getLocalSocketAddress() {
+        return impl.getSocketAddress();
+    }
 	
     public void close() throws IOException {
+        SocketAddress endpoint = getLocalSocketAddress();
 		impl.close();
+		if ((endpoint != null) && !((LocalSocketAddress)endpoint).isAbstractNamespace()) {
+		    impl.unlink(((LocalSocketAddress)endpoint).getName());
+		}
 	}
 	
     @Override
@@ -84,6 +94,16 @@ public class LocalServerSocket extends java.net.ServerSocket {
     public boolean isClosed() {
     	return impl.isClosed();
     }
+    
+    @Override
+    public String toString() {
+        if (isBound()) {
+            return "LocalServerSocket[" + getLocalSocketAddress() + "]";
+        } else {
+            return "LocalServerSocket[unbound]";
+        }
+    }
+
     
     /**
      * Enable/disable the SO_PASSCRED socket option.

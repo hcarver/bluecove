@@ -32,15 +32,9 @@ import java.io.OutputStream;
  */
 public class NativeSocketCredentialsTest extends NativeSocketTestCase {
 
-        private final boolean socketAbstractNamespace = true;
+        private final boolean socketAbstractNamespace = false;
         
         private final String socketName = "target/test-sock_name";
-        
-        @Override
-        protected void setUp() throws Exception {
-            //debug = true;
-            super.setUp();
-        }
         
         @Override
         protected TestRunnable createTestServer() {
@@ -48,14 +42,13 @@ public class NativeSocketCredentialsTest extends NativeSocketTestCase {
             return new TestRunnable() {
                 public void run() throws Exception {
                     LocalServerSocket serverSocket = new LocalServerSocket(new LocalSocketAddress(socketName, socketAbstractNamespace));
-                    serverSocket.setReceiveCredentials(false);
+                    serverSocket.setReceiveCredentials(true);
                     try {
-                        System.out.println("server starts");
                         serverAcceptsNotifyAll();
                         LocalSocket socket = (LocalSocket)serverSocket.accept();
-                        socket.setReceiveCredentials(false);
+
                         Credentials thisProcessCredentials = LocalSocket.getProcessCredentials();
-                        assertEquals("Credentials", thisProcessCredentials, socket.getPeerCredentials());
+                        assertEquals("Server Credentials", thisProcessCredentials, socket.getPeerCredentials());
                         
                         InputStream in = socket.getInputStream();
                         OutputStream out = socket.getOutputStream();
@@ -67,18 +60,20 @@ public class NativeSocketCredentialsTest extends NativeSocketTestCase {
                         socket.close();
                     } finally {
                         serverSocket.close();
-                        System.out.println("server ends");
                     }
                 }
             };
         }
         
-        public void testOneByte() throws Exception  {
+        public void testCredentials() throws Exception  {
             serverAcceptsWait();
             LocalSocket socket = new LocalSocket(new LocalSocketAddress(socketName, socketAbstractNamespace));
-            System.out.println("client connected");
             OutputStream out = socket.getOutputStream();
             out.write(1);
+            
+            Credentials thisProcessCredentials = LocalSocket.getProcessCredentials();
+            assertEquals("Client Credentials", thisProcessCredentials, socket.getPeerCredentials());
+            
             InputStream in = socket.getInputStream();
             assertEquals(1, in.read());
             assertEquals(-1, in.read());
