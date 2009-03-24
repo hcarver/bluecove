@@ -58,9 +58,14 @@ sdp_record_t* createNativeSDPrecord(JNIEnv* env, jbyteArray record) {
         return NULL;
     }
     jbyte *bytes = (*env)->GetByteArrayElements(env, record, 0);
+    if (bytes == NULL) {
+        throwRuntimeException(env, "Memory allocation error.");
+        return;
+    }
     int length_scanned = length;
     sdp_record_t *rec = bluecove_sdp_extract_pdu(env, (uint8_t*) bytes, length, &length_scanned);
-    if(!rec) {
+    if (!rec) {
+        (*env)->ReleaseByteArrayElements(env, record, bytes, 0);
         return NULL;
     }
 
