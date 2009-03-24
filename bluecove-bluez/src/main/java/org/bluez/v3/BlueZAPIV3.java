@@ -67,6 +67,8 @@ public class BlueZAPIV3 implements BlueZAPI {
     private Adapter adapter;
 
     private Path adapterPath;
+    
+    private long lastDeviceDiscoveryTime = 0;
 
     public BlueZAPIV3(DBusConnection dbusConn, Manager dbusManager) {
         this.dbusConn = dbusConn;
@@ -400,6 +402,14 @@ public class BlueZAPIV3 implements BlueZAPI {
             dbusConn.addSigHandler(Adapter.RemoteNameUpdated.class, remoteNameUpdated);
             dbusConn.addSigHandler(Adapter.RemoteClassUpdated.class, remoteClassUpdated);
 
+            // Inquiries are throttled if they are called too quickly in succession.
+            // e.g. JSR-82 TCK
+            long sinceDiscoveryLast = System.currentTimeMillis() - lastDeviceDiscoveryTime;
+            long acceptableInterval = 5 * 1000;
+            if (sinceDiscoveryLast < acceptableInterval) {
+                Thread.sleep(acceptableInterval - sinceDiscoveryLast);
+            }
+            
             synchronized (discoveryCompletedEvent) {
                 adapter.DiscoverDevices();
                 listener.deviceInquiryStarted();

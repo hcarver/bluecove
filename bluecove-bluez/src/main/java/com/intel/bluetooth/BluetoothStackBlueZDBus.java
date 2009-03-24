@@ -482,6 +482,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
                 if (deviceInquiryCanceled) {
                     return DiscoveryListener.INQUIRY_TERMINATED;
                 } else {
+                    DebugLog.error("deviceInquiry error", e);
                     throw (BluetoothStateException) UtilsJavaSE.initCause(new BluetoothStateException(e.getMessage()), e);
                 }
             }
@@ -527,7 +528,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
             try {
                 blueZ.deviceInquiryCancel();
                 return true;
-            } catch (DBusException e) {
+            } catch (Throwable e) {
                 return false;
             }
         } else {
