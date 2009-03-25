@@ -6,6 +6,8 @@ if [ ! -f "${GENERATED_VERSION}" ]; then
     echo "${GENERATED_VERSION} Not Found, run maven first"
     exit 1;
 fi
-chmod +x "${GENERATED_VERSION}"
+if [ ! -x "${GENERATED_VERSION}" ]; then
+    chmod +x "${GENERATED_VERSION}"
+fi
 . "${GENERATED_VERSION}"
 # echo BLUECOVE_VERSION=${BLUECOVE_VERSION}
