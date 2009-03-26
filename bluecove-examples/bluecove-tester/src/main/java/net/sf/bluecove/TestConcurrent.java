@@ -29,108 +29,114 @@ import java.util.Vector;
 
 import org.bluecove.tester.log.Logger;
 import org.bluecove.tester.util.RuntimeDetect;
+import org.bluecove.tester.util.TimeUtils;
 
 /**
  * 
  */
 public class TestConcurrent {
 
-	private static class ServicesSearchClientsThread implements CanShutdown, Runnable {
+    private static class ServicesSearchClientsThread implements CanShutdown, Runnable {
 
-		Thread thread;
+        Thread thread;
 
-		private boolean stoped = false;
+        private boolean stoped = false;
 
-		private long active;
+        private long active;
 
-		public void run() {
-			if (RemoteDeviceInfo.devices.size() < 2) {
-				Logger.info("Need more Devices, have " + RemoteDeviceInfo.devices.size());
-				return;
-			}
-			try {
-				Switcher.clientStarted(this);
-				while (!stoped) {
-					Vector clients = new Vector();
-					int ccount = 1;
-					Logger.info("Starting Concurrent ServicesSearch " + RemoteDeviceInfo.devices.size());
-					for (Enumeration iter = RemoteDeviceInfo.devices.elements(); iter.hasMoreElements() && (!stoped);) {
-						RemoteDeviceInfo dev = (RemoteDeviceInfo) iter.nextElement();
+        public void run() {
+            if (RemoteDeviceInfo.devices.size() < 2) {
+                Logger.info("Need more Devices, have " + RemoteDeviceInfo.devices.size());
+                return;
+            }
+            try {
+                Switcher.clientStarted(this);
+                while (!stoped) {
+                    Vector clients = new Vector();
+                    int ccount = 1;
+                    Logger.info("Starting Concurrent ServicesSearch " + RemoteDeviceInfo.devices.size());
+                    long startTime = System.currentTimeMillis();
+                    for (Enumeration iter = RemoteDeviceInfo.devices.elements(); iter.hasMoreElements() && (!stoped);) {
+                        RemoteDeviceInfo dev = (RemoteDeviceInfo) iter.nextElement();
 
-						TestResponderClient client = Switcher.createClient(true);
+                        TestResponderClient client = Switcher.createClient(true);
 
-						client.config.searchServiceRetry = false;
-						client.config.discoveryOnce = true;
-						client.config.useDiscoveredDevices = false;
-						client.config.connectDevice = dev.remoteDevice.getBluetoothAddress();
-						client.config.searchOnlyBluecoveUuid = Configuration.discoverySearchOnlyBluecoveUuid;
-						client.config.logID = "CSS-" + ccount + " ";
-						ccount++;
+                        client.config.searchServiceRetry = false;
+                        client.config.discoveryOnce = true;
+                        client.config.useDiscoveredDevices = false;
+                        client.config.connectDevice = dev.remoteDevice.getBluetoothAddress();
+                        client.config.searchOnlyBluecoveUuid = Configuration.discoverySearchOnlyBluecoveUuid;
+                        client.config.logID = "CSS-" + ccount + " ";
+                        ccount++;
 
-						client.configured();
+                        client.configured();
 
-						clients.addElement(client);
+                        clients.addElement(client);
 
-						active = System.currentTimeMillis();
-					}
+                        active = System.currentTimeMillis();
+                    }
 
-					for (Enumeration en = clients.elements(); en.hasMoreElements() && (!stoped);) {
-						TestResponderClient c = (TestResponderClient) en.nextElement();
-						try {
-							c.thread.join();
-						} catch (InterruptedException e) {
-							break;
-						}
-					}
+                    for (Enumeration en = clients.elements(); en.hasMoreElements() && (!stoped);) {
+                        TestResponderClient c = (TestResponderClient) en.nextElement();
+                        try {
+                            c.thread.join();
+                        } catch (InterruptedException e) {
+                            break;
+                        }
+                        active = System.currentTimeMillis();
+                    }
 
-					int cerviceFound = 0;
-					for (Enumeration en = clients.elements(); en.hasMoreElements() && (!stoped);) {
-						TestResponderClient c = (TestResponderClient) en.nextElement();
-						if (c.isAnyServiceFound()) {
-							cerviceFound++;
-						} else {
-							Logger.debug("No srvc on " + TestResponderClient.niceDeviceName(c.config.connectDevice));
-						}
-					}
+                    int cerviceFound = 0;
+                    for (Enumeration en = clients.elements(); en.hasMoreElements() && (!stoped);) {
+                        TestResponderClient c = (TestResponderClient) en.nextElement();
+                        RemoteDeviceInfo info = RemoteDeviceInfo.getDevice(c.config.connectDevice);
+                        if (c.isAnyServiceFound()) {
+                            Logger.debug("srvSearch on " + TestResponderClient.niceDeviceName(c.config.connectDevice) + " took "
+                                    + info.serviceSearch.durationLast + " millis");
+                            cerviceFound++;
+                        } else {
+                            Logger.debug("No srvc on " + TestResponderClient.niceDeviceName(c.config.connectDevice));
+                        }
+                    }
 
-					Logger.info("Services found on " + cerviceFound + " from " + clients.size());
+                    Logger.info("Services found on " + cerviceFound + " from " + clients.size() + " took " + TimeUtils.since(startTime) + " millis");
 
-					if (!Configuration.clientContinuousServicesSearch) {
-						break;
-					}
+                    if (!Configuration.clientContinuousServicesSearch) {
+                        break;
+                    }
 
-				}
-			} finally {
-				Switcher.clientEnds(this);
-			}
-		}
+                }
+            } finally {
+                Switcher.clientEnds(this);
+            }
+        }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.sf.bluecove.CanShutdown#lastActivityTime()
-		 */
-		public long lastActivityTime() {
-			return active;
-		}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see net.sf.bluecove.CanShutdown#lastActivityTime()
+         */
+        public long lastActivityTime() {
+            return active;
+        }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.sf.bluecove.CanShutdown#shutdown()
-		 */
-		public void shutdown() {
-			stoped = true;
-			if (RuntimeDetect.cldcStub != null) {
-				RuntimeDetect.cldcStub.interruptThread(thread);
-			}
-		}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see net.sf.bluecove.CanShutdown#shutdown()
+         */
+        public void shutdown() {
+            stoped = true;
+            if (RuntimeDetect.cldcStub != null) {
+                RuntimeDetect.cldcStub.interruptThread(thread);
+            }
+        }
 
-	}
+    }
 
-	public static void startConcurrentServicesSearchClients() {
-		ServicesSearchClientsThread cclient = new ServicesSearchClientsThread();
-		cclient.thread = RuntimeDetect.cldcStub.createNamedThread(cclient, "ConcurrentSS");
-		cclient.thread.start();
-	}
+    public static void startConcurrentServicesSearchClients() {
+        ServicesSearchClientsThread cclient = new ServicesSearchClientsThread();
+        cclient.thread = RuntimeDetect.cldcStub.createNamedThread(cclient, "ConcurrentSS");
+        cclient.thread.start();
+    }
 }

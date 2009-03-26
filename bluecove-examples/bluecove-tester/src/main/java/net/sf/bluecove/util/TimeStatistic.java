@@ -21,7 +21,7 @@
  *
  *  @author vlads
  *  @version $Id$
- */ 
+ */
 package net.sf.bluecove.util;
 
 /**
@@ -29,41 +29,44 @@ package net.sf.bluecove.util;
  */
 public class TimeStatistic {
 
-	public long count;
-	
-	public long durationMax;
-	
-	public long durationTotal;
+    public long count;
 
-	public void clear() {
-		count = 0;
-		durationMax = 0;
-		durationTotal = 0;
-	}
-	
-	public void add(long duration) {
-		count ++;
-		durationTotal += duration;
-		if (duration > durationMax) {
-			durationMax = duration;
-		}
-	}
-	
-	public long avgSec() {
-		if (count == 0) {
-			return 0;
-		}
-		return (durationTotal/(1000 * count));
-	}
+    public long durationMax;
 
-	public long avg() {
-		if (count == 0) {
-			return 0;
-		}
-		return (durationTotal/(count));
-	}
-	
-	public long durationMaxSec() {
-		return durationMax/1000;
-	}
+    public long durationTotal;
+
+    public long durationLast;
+
+    public void clear() {
+        count = 0;
+        durationMax = 0;
+        durationTotal = 0;
+    }
+
+    public void add(long duration) {
+        count++;
+        durationLast = duration;
+        durationTotal += duration;
+        if (duration > durationMax) {
+            durationMax = duration;
+        }
+    }
+
+    public long avgSec() {
+        if (count == 0) {
+            return 0;
+        }
+        return (durationTotal / (1000 * count));
+    }
+
+    public long avg() {
+        if (count == 0) {
+            return 0;
+        }
+        return (durationTotal / (count));
+    }
+
+    public long durationMaxSec() {
+        return durationMax / 1000;
+    }
 }
