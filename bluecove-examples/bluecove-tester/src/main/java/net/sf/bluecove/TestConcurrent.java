@@ -92,14 +92,14 @@ public class TestConcurrent {
                         RemoteDeviceInfo info = RemoteDeviceInfo.getDevice(c.config.connectDevice);
                         if (c.isAnyServiceFound()) {
                             Logger.debug("srvSearch on " + TestResponderClient.niceDeviceName(c.config.connectDevice) + " took "
-                                    + info.serviceSearch.durationLast + " millis");
+                                    + info.serviceSearch.durationLast + " ms");
                             cerviceFound++;
                         } else {
                             Logger.debug("No srvc on " + TestResponderClient.niceDeviceName(c.config.connectDevice));
                         }
                     }
 
-                    Logger.info("Services found on " + cerviceFound + " from " + clients.size() + " took " + TimeUtils.since(startTime) + " millis");
+                    Logger.info("Services found on " + cerviceFound + " from " + clients.size() + " took " + TimeUtils.since(startTime) + " ms");
 
                     if (!Configuration.clientContinuousServicesSearch) {
                         break;
