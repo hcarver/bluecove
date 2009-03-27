@@ -261,9 +261,8 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
                 throw new BluetoothStateException("LocalDevice " + deviceID + " alredy in use");
             }
             propertiesMap = new TreeMap<String, String>();
-            // TODO
             propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX, "7");
-            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX, "1"); // 7 ?
+            propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX, "7");
             propertiesMap.put(BlueCoveLocalDeviceProperties.LOCAL_DEVICE_PROPERTY_DEVICE_ID, deviceID);
 
             final String TRUE = "true";
