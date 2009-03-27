@@ -399,6 +399,12 @@ public class Main extends Frame implements LoggerAppender {
 				LocalDeviceManager.setDiscoverableLIAC();
 			}
 		});
+		
+		addMenu(menuLocalDevice, "Update ServiceRecord", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Switcher.updateServiceRecord();
+            }
+        });
 
 		menuMore.add(menuLocalDevice);
 

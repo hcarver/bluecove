@@ -27,6 +27,8 @@ package net.sf.bluecove;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -97,6 +99,8 @@ public class TestResponderServer implements CanShutdown, Runnable {
 
 	public static TimeStatistic connectionDuration = new TimeStatistic();
 
+	public static int updateVariableCount = 0;
+	
 	private class ServerConnectionRunnable implements Runnable {
 
 		long connectionStartTime;
@@ -589,15 +593,18 @@ public class TestResponderServer implements CanShutdown, Runnable {
 	}
 
 	static void updateVariableServiceRecord(ServiceRecord record) {
-		// long data;
-		//		
-		// Calendar calendar = Calendar.getInstance();
-		// calendar.setTime(new Date());
-		// data = 1 + calendar.get(Calendar.MINUTE);
-		//        
-		// record.setAttributeValue(Consts.VARIABLE_SERVICE_ATTRIBUTE_BYTES_ID,
-		// new DataElement(DataElement.U_INT_4, data));
-	}
+        int data;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        data = 1 + calendar.get(Calendar.MINUTE);
+        data = (updateVariableCount << 8) + Integer.parseInt(String.valueOf(data), 16);
+        Logger.debug("Var info: " + Integer.toHexString(data));
+        record.setAttributeValue(Consts.VARIABLE_SERVICE_ATTRIBUTE_BYTES_ID, new DataElement(DataElement.U_INT_4, data));
+        updateVariableCount ++;
+        if (updateVariableCount > 0xFF) {
+            updateVariableCount = 0;
+        }
+    }
 
 	static void buildServiceRecord(ServiceRecord record) throws ServiceRegistrationException {
 		String id = "";

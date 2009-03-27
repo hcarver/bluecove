@@ -478,6 +478,14 @@ public class Switcher implements Runnable {
 			Logger.error("start error ", e);
 		}
 	}
+	
+	public static void updateServiceRecord() {
+	    if (server != null) {
+	        server.updateServiceRecord();
+	    } else {
+	        Logger.error("Service not started");
+	    }
+	}
 
 	public static void serverShutdown() {
 		if (Configuration.canCloseServer) {

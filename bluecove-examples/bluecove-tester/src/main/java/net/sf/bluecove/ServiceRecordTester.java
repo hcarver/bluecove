@@ -325,8 +325,8 @@ public class ServiceRecordTester {
 						} catch (Throwable e) {
 							Logger.warn("attr " + id + " " + e.getMessage());
 							hadError = true;
-							break;
 						}
+						break;
 					case Consts.SERVICE_ATTRIBUTE_BYTES_SERVER_INFO:
 						Logger.debug("Server info:" + attrDataElement.getValue());
 						try {
