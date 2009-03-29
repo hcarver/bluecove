@@ -15,6 +15,10 @@ BlueCove JSR-82 Emulator module
 
    N.B. This is experimental module and have no monitoring GUI. Another module bluecove-emu-gui is in developement. {{{http://groups.google.com/group/bluecove-developers}Help us make it}}.
 
+   The diagram below shows the architecture used by this module
+
+[images/diagram-emulator.png] JSR-82 emulator diagram
+
 * Usage
 
  Start local bluetooth air simulator server
