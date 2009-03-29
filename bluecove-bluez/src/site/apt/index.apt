@@ -21,7 +21,12 @@ BlueCove Linux D-Bus module
 
    N.B. Another BlueZ interfacing module {{{../bluecove-gpl}bluecove-gpl}} available.
 
-   {{{http://groups.google.com/group/bluecove-developers}Help us make it}}.
+   {{{http://groups.google.com/group/bluecove-developers}Help us make it better}}.
+
+
+   The diagram below shows the architecture used by this module
+
+[images/diagram-bluez.png] JSR-82 and Bluetooth stack diagram on BlueZ
 
 * Usage
 
