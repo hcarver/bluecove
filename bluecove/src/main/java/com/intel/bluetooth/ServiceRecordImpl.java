@@ -68,8 +68,7 @@ class ServiceRecordImpl implements ServiceRecord {
 	}
 
 	byte[] toByteArray() throws IOException {
-	    ByteArrayOutputStream out = new ByteArrayOutputStream();
-        SDPOutputStream sdpOut = new SDPOutputStream(out);
+	    DataElement rootSeq = new DataElement(DataElement.DATSEQ);
 		final boolean sort = true;
 		if (sort) {
 			int[] sortIDs = new int[attributes.size()];
@@ -92,16 +91,20 @@ class ServiceRecordImpl implements ServiceRecord {
 			}
 			// DebugLog.debug("sorted", sortIDs);
 			for (int i = 0; i < sortIDs.length; i++) {
-			    sdpOut.writeElement(new DataElement(DataElement.U_INT_2, sortIDs[i]));
-				sdpOut.writeElement(getAttributeValue(sortIDs[i]),  sortIDs[i]);
+			    int attrID  = sortIDs[i];
+			    rootSeq.addElement(new DataElement(DataElement.U_INT_2, attrID));
+			    rootSeq.addElement(getAttributeValue(attrID));
 			}
 		} else {
 			for (Enumeration e = attributes.keys(); e.hasMoreElements();) {
 				Integer key = (Integer) e.nextElement();
-				sdpOut.writeElement(new DataElement(DataElement.U_INT_2, key.intValue()));
-				sdpOut.writeElement((DataElement) attributes.get(key), key.intValue());
+				rootSeq.addElement(new DataElement(DataElement.U_INT_2, key.intValue()));
+				rootSeq.addElement((DataElement) attributes.get(key));
 			}
 		}
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        SDPOutputStream sdpOut = new SDPOutputStream(out);
+        sdpOut.writeElement(rootSeq);
 		return out.toByteArray();
 	}
 
