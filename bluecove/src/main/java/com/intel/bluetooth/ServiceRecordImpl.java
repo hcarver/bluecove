@@ -68,8 +68,8 @@ class ServiceRecordImpl implements ServiceRecord {
 	}
 
 	byte[] toByteArray() throws IOException {
-		DataElement element = new DataElement(DataElement.DATSEQ);
-
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+        SDPOutputStream sdpOut = new SDPOutputStream(out);
 		final boolean sort = true;
 		if (sort) {
 			int[] sortIDs = new int[attributes.size()];
@@ -91,24 +91,17 @@ class ServiceRecordImpl implements ServiceRecord {
 				}
 			}
 			// DebugLog.debug("sorted", sortIDs);
-
 			for (int i = 0; i < sortIDs.length; i++) {
-				element.addElement(new DataElement(DataElement.U_INT_2, sortIDs[i]));
-				element.addElement(getAttributeValue(sortIDs[i]));
+			    sdpOut.writeElement(new DataElement(DataElement.U_INT_2, sortIDs[i]));
+				sdpOut.writeElement(getAttributeValue(sortIDs[i]),  sortIDs[i]);
 			}
 		} else {
 			for (Enumeration e = attributes.keys(); e.hasMoreElements();) {
 				Integer key = (Integer) e.nextElement();
-
-				element.addElement(new DataElement(DataElement.U_INT_2, key.intValue()));
-				element.addElement((DataElement) attributes.get(key));
+				sdpOut.writeElement(new DataElement(DataElement.U_INT_2, key.intValue()));
+				sdpOut.writeElement((DataElement) attributes.get(key), key.intValue());
 			}
 		}
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-		(new SDPOutputStream(out)).writeElement(element);
-
 		return out.toByteArray();
 	}
 

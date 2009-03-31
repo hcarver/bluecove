@@ -139,7 +139,7 @@ public class Configuration {
 	 * discovery by Motorola. INT_16 are truncated in discovery by WIDCOMM Service attributes are not supported on
 	 * BlueSoleil
 	 */
-	public static BooleanVar testIgnoreNotWorkingServiceAttributes = new BooleanVar(true);
+	public static BooleanVar testIgnoreNotWorkingServiceAttributes = new BooleanVar(false);
 
 	public static BooleanVar testServerForceDiscoverable = new BooleanVar(false);
 

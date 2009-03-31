@@ -33,7 +33,7 @@ class SDPInputStream extends InputStream {
 
 	private InputStream source;
 
-	private long pos;
+	private int pos;
 
 	public SDPInputStream(InputStream in) {
 		this.source = in;
@@ -46,36 +46,37 @@ class SDPInputStream extends InputStream {
 
 	private long readLong(int size) throws IOException {
 		long result = 0;
-
 		for (int i = 0; i < size; i++) {
 			result = result << 8 | read();
 		}
-
 		pos += size;
-
 		return result;
 	}
 
+	private int readInteger(int size) throws IOException {
+        int result = 0;
+        for (int i = 0; i < size; i++) {
+            result = result << 8 | read();
+        }
+        pos += size;
+        return result;
+    }
+	
 	private String hexString(byte[] b) throws IOException {
 		StringBuffer buf = new StringBuffer();
-
 		for (int i = 0; i < b.length; i++) {
 			buf.append(Integer.toHexString(b[i] >> 4 & 0xf));
 			buf.append(Integer.toHexString(b[i] & 0xf));
 		}
-
 		return buf.toString();
 	}
 
 	private byte[] readBytes(int size) throws IOException {
 		byte[] result = new byte[size];
-
 		for (int i = 0; i < size; i++) {
 			result[i] = (byte) read();
 		}
-
 		pos += size;
-
 		return result;
 	}
 
@@ -145,35 +146,36 @@ class SDPInputStream extends InputStream {
 
 			switch (sizeDescriptor) {
 			case 5:
-				length = (int) readLong(1);
+				length = readInteger(1);
 				break;
 			case 6:
-				length = (int) readLong(2);
+				length = readInteger(2);
 				break;
 			case 7:
-				length = (int) readLong(4);
+				length = readInteger(4);
 				break;
 			default:
 				throw new IOException();
 			}
-
-			return new DataElement(DataElement.STRING, Utils.newStringUTF8(readBytes(length)));
+			String strValue = Utils.newStringUTF8(readBytes(length));
+			DebugLog.debug("DataElement.STRING", strValue, Integer.toString(length - strValue.length()));
+			return new DataElement(DataElement.STRING, strValue);
 		}
 		case 5: // BOOL
 			return new DataElement(readLong(1) != 0);
 		case 6: // DATSEQ
 		{
-			long length;
+			int length;
 
 			switch (sizeDescriptor) {
 			case 5:
-				length = readLong(1);
+				length = readInteger(1);
 				break;
 			case 6:
-				length = readLong(2);
+				length = readInteger(2);
 				break;
 			case 7:
-				length = readLong(4);
+				length = readInteger(4);
 				break;
 			default:
 				throw new IOException();
@@ -181,9 +183,9 @@ class SDPInputStream extends InputStream {
 
 			DataElement element = new DataElement(DataElement.DATSEQ);
 
-			long started = pos;
+			int started = pos;
 
-			for (long end = pos + length; pos < end;) {
+			for (int end = pos + length; pos < end;) {
 				element.addElement(readElement());
 			}
 			if (started + length != pos) {
@@ -193,17 +195,17 @@ class SDPInputStream extends InputStream {
 		}
 		case 7: // DATALT
 		{
-			long length;
+			int length;
 
 			switch (sizeDescriptor) {
 			case 5:
-				length = readLong(1);
+				length = readInteger(1);
 				break;
 			case 6:
-				length = readLong(2);
+				length = readInteger(2);
 				break;
 			case 7:
-				length = readLong(4);
+				length = readInteger(4);
 				break;
 			default:
 				throw new IOException();
@@ -211,7 +213,7 @@ class SDPInputStream extends InputStream {
 
 			DataElement element = new DataElement(DataElement.DATALT);
 
-			long started = pos;
+			int started = pos;
 
 			for (long end = pos + length; pos < end;) {
 				element.addElement(readElement());
@@ -227,13 +229,13 @@ class SDPInputStream extends InputStream {
 
 			switch (sizeDescriptor) {
 			case 5:
-				length = (int) readLong(1);
+				length = readInteger(1);
 				break;
 			case 6:
-				length = (int) readLong(2);
+				length = readInteger(2);
 				break;
 			case 7:
-				length = (int) readLong(4);
+				length = readInteger(4);
 				break;
 			default:
 				throw new IOException();

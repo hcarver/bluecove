@@ -91,8 +91,12 @@ class SDPOutputStream extends OutputStream {
 				return 1 + 4;
 			}
 		case DataElement.STRING: {
-			byte[] b = Utils.getUTF8Bytes((String) d.getValue());
-
+			byte[] b;
+			if (BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_SDP_STRING_ENCODING_ASCII, false)) { 
+                b = Utils.getASCIIBytes((String) d.getValue());
+            } else {
+                b = Utils.getUTF8Bytes((String) d.getValue());
+            }
 			if (b.length < 0x100)
 				return b.length + 2;
 			else if (b.length < 0x10000)
@@ -135,6 +139,10 @@ class SDPOutputStream extends OutputStream {
 	}
 
 	public void writeElement(DataElement d) throws IOException {
+	    writeElement(d, -1);
+	}
+	
+	void writeElement(DataElement d, int attrID) throws IOException {
 		switch (d.getDataType()) {
 		case DataElement.NULL:
 			write(0 | 0);
@@ -197,7 +205,13 @@ class SDPOutputStream extends OutputStream {
 			break;
 
 		case DataElement.STRING: {
-			byte[] b = Utils.getUTF8Bytes((String) d.getValue());
+			byte[] b;
+			//if (attrID == BluetoothConsts.AttributeIDServiceName) {
+			if (BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_SDP_STRING_ENCODING_ASCII, false)) { 
+			    b = Utils.getASCIIBytes((String) d.getValue());
+			} else {
+			    b = Utils.getUTF8Bytes((String) d.getValue());
+			}
 
 			if (b.length < 0x100) {
 				write(32 | 5);

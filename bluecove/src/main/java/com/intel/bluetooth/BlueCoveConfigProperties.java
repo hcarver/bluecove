@@ -182,4 +182,15 @@ public interface BlueCoveConfigProperties {
      * >JSR-82 1.2</A>
      */
     public static final String PROPERTY_JSR_82_PSM_MINIMUM_OFF = "bluecove.jsr82.psm_minimum_off";
+    
+    /**
+     * In some cases BlueCove has a control how String are encoded in SDP records. 
+     * This one will force it to be encoded as ASCII (charsetName "US-ASCII").
+     * May be useful for connections with some OEM devices.
+     * 
+     * Used on MS stack and BlueZ GPL module for now. TODO other stacks.
+     * 
+     * Defaults to false.
+     */
+    public static final String PROPERTY_SDP_STRING_ENCODING_ASCII = "bluecove.sdp.string_encoding_ascii";
 }
