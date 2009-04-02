@@ -126,6 +126,7 @@
             <class name="com.intel.bluetooth.BluetoothStackBlueZDBusConsts"/>
             <class name="com.intel.bluetooth.BluetoothStackBlueZDBusNativeTests"/>
             <class name="org.bluecove.socket.LocalSocketImpl"/>
+            <class name="org.bluecove.socket.LocalSocketImpl$LocalSocketOptions"/>
         </javah>
 
     </target>
