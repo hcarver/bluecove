@@ -16,6 +16,7 @@
                 <exclude>build/**</exclude>
                 <exclude>src/main/resources/**</exclude>
                 <exclude>src/main/c/com_*.h</exclude>
+                <exclude>src/main/c/org_*.h</exclude>
                 <exclude>.settings/**</exclude>
                 <exclude>**/Thumbs.db</exclude>
                 <exclude>**/*.log</exclude>
