@@ -622,6 +622,9 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
         } catch (DBusException e) {
             DebugLog.error("get Service records failed", e);
             return DiscoveryListener.SERVICE_SEARCH_ERROR;
+        } catch (DBusExecutionException e) {
+            DebugLog.error("get Service records failed", e);
+            return DiscoveryListener.SERVICE_SEARCH_ERROR;
         }
         if (xmlRecords == null) {
             return DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
