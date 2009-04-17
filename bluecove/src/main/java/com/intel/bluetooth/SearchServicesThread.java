@@ -85,7 +85,7 @@ class SearchServicesThread extends Thread {
 		this.attrSet = attrSet;
 		this.listener = listener;
 		this.uuidSet = uuidSet;
-		this.device = RemoteDeviceHelper.createRemoteDevice(stack, device);
+		this.device = RemoteDeviceHelper.getStackBoundDevice(stack, device);
 	}
 
 	/**
