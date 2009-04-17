@@ -615,10 +615,10 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
         }
     }
 
-    private int getRemoteServices(SearchServicesThread sst, UUID[] uuidSet, long remoteDeviceAddress) {
+    private int getRemoteServices(SearchServicesThread sst, UUID[] uuidSet, RemoteDevice remoteDevice) {
         Map<Integer, String> xmlRecords;
         try {
-            xmlRecords = blueZ.getRemoteDeviceServices(toHexString(remoteDeviceAddress));
+            xmlRecords = blueZ.getRemoteDeviceServices(toHexString(RemoteDeviceHelper.getAddress(remoteDevice)));
         } catch (DBusException e) {
             DebugLog.error("get Service records failed", e);
             return DiscoveryListener.SERVICE_SEARCH_ERROR;
@@ -629,7 +629,6 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
         if (xmlRecords == null) {
             return DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE;
         }
-        RemoteDevice remoteDevice = RemoteDeviceHelper.getCashedDevice(this, remoteDeviceAddress);
         nextRecord: for (Map.Entry<Integer, String> record : xmlRecords.entrySet()) {
             DebugLog.debug("pars service record", record.getValue());
             ServiceRecordImpl sr = new ServiceRecordImpl(this, remoteDevice, record.getKey().intValue());
@@ -661,7 +660,7 @@ class BluetoothStackBlueZDBus implements BluetoothStack, DeviceInquiryRunnable, 
         DebugLog.debug("runSearchServices()");
         sst.searchServicesStartedCallback();
 
-        int respCode = getRemoteServices(sst, uuidSet, RemoteDeviceHelper.getAddress(device));
+        int respCode = getRemoteServices(sst, uuidSet, device);
         DebugLog.debug("SearchServices finished", sst.getTransID());
         Vector<ServiceRecord> records = sst.getServicesRecords();
         if (records.size() != 0) {

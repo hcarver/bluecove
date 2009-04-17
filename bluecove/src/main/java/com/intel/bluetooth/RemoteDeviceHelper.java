@@ -342,6 +342,13 @@ public abstract class RemoteDeviceHelper {
         return getCashedDeviceWithExtendedInfo(bluetoothStack, address);
     }
 
+    static RemoteDevice getStackBoundDevice(BluetoothStack bluetoothStack, RemoteDevice device) {
+        if ((device instanceof RemoteDeviceWithExtendedInfo) && (((RemoteDeviceWithExtendedInfo)device).bluetoothStack == bluetoothStack)) {
+            return device;
+        }
+        return createRemoteDevice(bluetoothStack, getAddress(device), null, false);
+    }
+    
     static RemoteDevice createRemoteDevice(BluetoothStack bluetoothStack, long address, String name, boolean paired) {
         RemoteDeviceWithExtendedInfo dev = getCashedDeviceWithExtendedInfo(bluetoothStack, address);
         if (dev == null) {
