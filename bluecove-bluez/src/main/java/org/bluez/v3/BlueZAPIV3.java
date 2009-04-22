@@ -67,7 +67,7 @@ public class BlueZAPIV3 implements BlueZAPI {
     private Adapter adapter;
 
     private Path adapterPath;
-    
+
     private long lastDeviceDiscoveryTime = 0;
 
     public BlueZAPIV3(DBusConnection dbusConn, Manager dbusManager) {
@@ -352,6 +352,14 @@ public class BlueZAPIV3 implements BlueZAPI {
         }
     }
 
+    private boolean hasBonding(String deviceAddress) {
+        try {
+            return adapter.HasBonding(deviceAddress);
+        } catch (Throwable e) {
+            return false;
+        }
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -379,7 +387,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
         DBusSigHandler<Adapter.RemoteDeviceFound> remoteDeviceFound = new DBusSigHandler<Adapter.RemoteDeviceFound>() {
             public void handle(Adapter.RemoteDeviceFound s) {
-                listener.deviceDiscovered(s.getDeviceAddress(), null, s.getDeviceClass().intValue(), adapter.HasBonding(s.getDeviceAddress()));
+                listener.deviceDiscovered(s.getDeviceAddress(), null, s.getDeviceClass().intValue(), hasBonding(s.getDeviceAddress()));
             }
         };
 
@@ -391,7 +399,7 @@ public class BlueZAPIV3 implements BlueZAPI {
 
         DBusSigHandler<Adapter.RemoteClassUpdated> remoteClassUpdated = new DBusSigHandler<Adapter.RemoteClassUpdated>() {
             public void handle(Adapter.RemoteClassUpdated s) {
-                listener.deviceDiscovered(s.getDeviceAddress(), null, s.getDeviceClass().intValue(), adapter.HasBonding(s.getDeviceAddress()));
+                listener.deviceDiscovered(s.getDeviceAddress(), null, s.getDeviceClass().intValue(), hasBonding(s.getDeviceAddress()));
             }
         };
 
@@ -409,7 +417,7 @@ public class BlueZAPIV3 implements BlueZAPI {
             if (sinceDiscoveryLast < acceptableInterval) {
                 Thread.sleep(acceptableInterval - sinceDiscoveryLast);
             }
-            
+
             synchronized (discoveryCompletedEvent) {
                 adapter.DiscoverDevices();
                 listener.deviceInquiryStarted();
@@ -559,7 +567,7 @@ public class BlueZAPIV3 implements BlueZAPI {
             authenticateRemoteDevice(deviceAddress);
             return true;
         } else {
-            
+
             PasskeyAgent passkeyAgent = new PasskeyAgent() {
 
                 public String Request(String path, String address) throws Rejected, Canceled {
@@ -574,7 +582,7 @@ public class BlueZAPIV3 implements BlueZAPI {
                 public boolean isRemote() {
                     return false;
                 }
-                
+
                 public void Cancel(String path, String address) {
                 }
 
@@ -582,26 +590,26 @@ public class BlueZAPIV3 implements BlueZAPI {
                 }
             };
 
-//            final Object completedEvent = new Object();
-//            DBusSigHandler<Adapter.BondingCreated> bondingCreated = new DBusSigHandler<Adapter.BondingCreated>() {
-//                public void handle(Adapter.BondingCreated s) {
-//                    DebugLog.debug("BondingCreated.handle");
-//                    synchronized (completedEvent) {
-//                        completedEvent.notifyAll();
-//                    }
-//                }
-//            };
-            
+            //            final Object completedEvent = new Object();
+            //            DBusSigHandler<Adapter.BondingCreated> bondingCreated = new DBusSigHandler<Adapter.BondingCreated>() {
+            //                public void handle(Adapter.BondingCreated s) {
+            //                    DebugLog.debug("BondingCreated.handle");
+            //                    synchronized (completedEvent) {
+            //                        completedEvent.notifyAll();
+            //                    }
+            //                }
+            //            };
+
             DebugLog.debug("get security on path", adapterPath.getPath());
             Security security = dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), Security.class);
-            
+
             String passkeyAgentPath = "/org/bluecove/authenticate/" + getAdapterID() + "/" + deviceAddress.replace(':', '_');
-            
+
             DebugLog.debug("export passkeyAgent", passkeyAgentPath);
             dbusConn.exportObject(passkeyAgentPath, passkeyAgent);
-            
+
             // see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=501222
-            final boolean useDefaultPasskeyAgentBug = BlueCoveImpl.getConfigProperty("bluecove.bluez.registerDefaultPasskeyAgent", false); 
+            final boolean useDefaultPasskeyAgentBug = BlueCoveImpl.getConfigProperty("bluecove.bluez.registerDefaultPasskeyAgent", false);
             try {
                 if (useDefaultPasskeyAgentBug) {
                     security.RegisterDefaultPasskeyAgent(passkeyAgentPath);
@@ -661,7 +669,7 @@ public class BlueZAPIV3 implements BlueZAPI {
         //return dbusConn.getRemoteObject("org.bluez", adapterPath.getPath(), Database.class);
         return dbusConn.getRemoteObject("org.bluez", "/org/bluez", Database.class);
     }
-    
+
     /*
      * (non-Javadoc)
      * 
