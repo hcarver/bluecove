@@ -158,6 +158,7 @@
                                 <className>com.intel.bluetooth.BluetoothStackBlueZDBusConsts</className>
                                 <className>com.intel.bluetooth.BluetoothStackBlueZDBusNativeTests</className>
                                 <className>org.bluecove.socket.LocalSocketImpl</className>
+                                <className>org.bluecove.socket.LocalSocketImpl$LocalSocketOptions</className>
                             </classNames>
                         </configuration>
                     </execution>
