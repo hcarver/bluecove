@@ -270,7 +270,10 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_nativeGetLoc
 
     error = hci_read_current_iac_lap(deviceDescriptor, &num_iac, lap, LOCALDEVICE_ACCESS_TIMEOUT);
     //M.S.  I don't know why to check for num_iac to be less than or equal to one but avetana to this.
-    if ((error < 0) || (num_iac > 1)) {
+    //---------------------------
+    // We don't know a good reason for checking num_iac to be <= 1 and it seems it takes values
+    // greater than 1 with BlueZ 4.x and it works without this check.
+    if ((error < 0) /*|| (num_iac > 1)*/) {
         throwRuntimeException(env, "Unable to retrieve the local discovery mode.");
         return 0;
     }
