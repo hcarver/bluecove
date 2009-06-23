@@ -23,7 +23,7 @@
 #include "BlueCoveBlueZ.h"
 
 #include <sys/socket.h>
-#include <sys/unistd.h>
+#include <unistd.h>
 #include <bluetooth/rfcomm.h>
 #include <fcntl.h>
 

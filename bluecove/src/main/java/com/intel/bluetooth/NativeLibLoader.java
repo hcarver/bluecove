@@ -30,8 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 
-import com.ibm.oti.vm.VM;
-
 /**
  * Load native library from resources.
  * 
@@ -57,6 +55,8 @@ public abstract class NativeLibLoader {
 	static final int OS_WINDOWS_CE = 3;
 
 	static final int OS_MAC_OS_X = 4;
+	
+	static final int OS_ANDROID = 5;
 
 	private static int os = 0;
 
@@ -96,7 +96,12 @@ public abstract class NativeLibLoader {
 			} else if (sysName.indexOf("mac os x") != -1) {
 				os = OS_MAC_OS_X;
 			} else if (sysName.indexOf("linux") != -1) {
-				os = OS_LINUX;
+				String javaRuntimeName = System.getProperty("java.runtime.name");
+				if ((javaRuntimeName != null) && (javaRuntimeName.toLowerCase().indexOf("android runtime") != -1)) {
+					os = OS_ANDROID;
+				} else {
+					os = OS_LINUX;
+				}
 			} else {
 				DebugLog.fatal("Native Library not available on platform " + sysName);
 				os = OS_UNSUPPORTED;
@@ -186,6 +191,9 @@ public abstract class NativeLibLoader {
 			libFileName = libName;
 			libFileName = "lib" + libFileName + ".so";
 			break;
+		case OS_ANDROID:
+			libFileName = "lib" + libFileName + ".so";
+			break;
 		default:
 			state.loadErrors.append("Native Library " + name + " not available on [" + sysName + "] platform");
 			DebugLog.fatal("Native Library " + name + " not available on platform " + sysName);
@@ -206,7 +214,7 @@ public abstract class NativeLibLoader {
 		}
 		boolean useResource = true;
 		String d = System.getProperty(BlueCoveConfigProperties.PROPERTY_NATIVE_RESOURCE);
-		if ((d != null) && (d.equalsIgnoreCase("false"))) {
+		if (((d != null) && (d.equalsIgnoreCase("false"))) || (getOS() == OS_ANDROID)) {
 			useResource = false;
 		}
 
@@ -259,7 +267,7 @@ public abstract class NativeLibLoader {
 
 	private static boolean tryloadIBMj9MIDP(String name) {
 		try {
-			VM.loadLibrary(name);
+			IBMJ9Helper.loadLibrary(name);
 			DebugLog.debug("Library loaded", name);
 		} catch (Throwable e) {
 			DebugLog.error("Library " + name + " not loaded ", e);
@@ -301,7 +309,7 @@ public abstract class NativeLibLoader {
 
 	private static boolean tryloadPathIBMj9MIDP(String path, String name) {
 		try {
-			VM.loadLibrary(path + "\\" + name);
+			IBMJ9Helper.loadLibrary(path + "\\" + name);
 			DebugLog.debug("Library loaded", path + "\\" + name);
 		} catch (Throwable e) {
 			DebugLog.error("Can't load library from path " + path + "\\" + name, e);

@@ -443,6 +443,7 @@ public class BlueCoveImpl {
         } else {
             switch (NativeLibLoader.getOS()) {
             case NativeLibLoader.OS_LINUX:
+			case NativeLibLoader.OS_ANDROID:
                 Class stackClass = loadStackClass(BlueCoveConfigProperties.PROPERTY_BLUEZ_CLASS,
                         "com.intel.bluetooth.BluetoothStackBlueZ|com.intel.bluetooth.BluetoothStackBlueZDBus");
                 detectorStack = newStackInstance(stackClass);
