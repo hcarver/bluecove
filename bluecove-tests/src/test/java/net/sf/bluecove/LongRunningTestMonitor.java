@@ -29,65 +29,91 @@ package net.sf.bluecove;
  */
 public class LongRunningTestMonitor extends Thread {
 
-	private boolean testFinished = false;
+    private boolean testFinished = false;
 
-	private Thread testThread;
+    private Thread testThread;
 
-	private int gracePeriod = 0;
+    private ThreadGroup secondaryTestThreadGroup;
 
-	private String testName;
+    private int gracePeriod = 0;
 
-	LongRunningTestMonitor(int gracePeriod, String testName) {
-		super("TestMonitor");
-		this.gracePeriod = gracePeriod;
-		this.testName = testName;
-		testThread = Thread.currentThread();
-	}
+    private String testName;
 
-	public void run() {
-		try {
-			sleep(gracePeriod);
-		} catch (InterruptedException e) {
-			return;
-		}
+    LongRunningTestMonitor(int gracePeriod, String testName) {
+        super("TestMonitor");
+        this.gracePeriod = gracePeriod;
+        this.testName = testName;
+        testThread = Thread.currentThread();
+    }
 
-		int count = 0;
-		while (!testFinished) {
+    public void setSecondaryTestThreadGroup(ThreadGroup secondaryTestThreadGroup) {
+        this.secondaryTestThreadGroup = secondaryTestThreadGroup;
+    }
 
-			try {
-				sleep(4 * 1000);
-			} catch (InterruptedException e) {
-				return;
-			}
+    public void run() {
+        try {
+            sleep(gracePeriod);
+        } catch (InterruptedException e) {
+            return;
+        }
 
-			if (!testFinished) {
-				System.out.println("Long running test " + testName + " detected in thread:" + testThread.getName());
-				StackTraceElement[] ste = testThread.getStackTrace();
-				StringBuffer buf = new StringBuffer();
-				buf.append("stack trace:\n");
-				for (int i = 0; i < ste.length; i++) {
-					buf.append("\t").append(ste[i].toString()).append('\n');
-					if (ste[i].getClassName().startsWith("junit.framework")) {
-						break;
-					}
-				}
-				System.out.println(buf.toString());
-				count++;
-				if (count > 4) {
-					System.out.println("Sending ThreadDeath");
-					testThread.stop();
-					break;
-				} else {
-					System.out.println("Sending InterruptedException");
-					testThread.interrupt();
-				}
-			}
-		}
-	}
+        int count = 0;
+        while (!testFinished) {
 
-	public void finish() {
-		testFinished = true;
-		interrupt();
-	}
+            try {
+                sleep(4 * 1000);
+            } catch (InterruptedException e) {
+                return;
+            }
+
+            if (!testFinished) {
+                System.out.println("Long running test " + testName + " detected in thread:" + testThread.getName());
+                StackTraceElement[] ste = testThread.getStackTrace();
+                StringBuffer buf = new StringBuffer();
+                buf.append("stack trace:\n");
+                for (int i = 0; i < ste.length; i++) {
+                    buf.append("\t").append(ste[i].toString()).append('\n');
+                    if (ste[i].getClassName().startsWith("junit.framework")) {
+                        break;
+                    }
+                }
+                if (secondaryTestThreadGroup != null) {
+                    int secondaryTestThreadCount = secondaryTestThreadGroup.activeCount();
+                    if (secondaryTestThreadCount > 0) {
+                        buf.append("---------------\n");
+                        buf.append("stack trace for secondary " + secondaryTestThreadCount + " threads:\n");
+                        Thread[] activeThreads = new Thread[secondaryTestThreadCount];
+                        secondaryTestThreadCount = secondaryTestThreadGroup.enumerate(activeThreads);
+                        for (int i = 0; i < secondaryTestThreadCount; i++) {
+                            StackTraceElement[] sste = activeThreads[i].getStackTrace();
+                            for (int k = 0; k < sste.length; k++) {
+                                buf.append("\t").append(sste[k].toString()).append('\n');
+                                if (sste[k].getClassName().startsWith("junit.framework")) {
+                                    break;
+                                }
+                            }
+                            buf.append("---------------\n");
+                        }
+                    }
+                }
+
+                System.out.println(buf.toString());
+                count++;
+                if (count > 4) {
+                    System.out.println("Sending ThreadDeath");
+                    testThread.stop();
+                    break;
+                } else {
+                    System.out.println("Sending InterruptedException");
+                    testThread.interrupt();
+                }
+            }
+        }
+    }
+
+    public void finish() {
+        testFinished = true;
+        interrupt();
+    }
 
 }
