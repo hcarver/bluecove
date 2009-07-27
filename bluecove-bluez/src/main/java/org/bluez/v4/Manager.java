@@ -21,7 +21,7 @@
  *
  *  =======================================================================================
  *
- *  BlueZ Java docs licensed under GNU Free Documentation License, Version 1.1 http://www.fsf.org
+ *  BlueZ docs licensed under GNU Free Documentation License, Version 1.1 http://www.fsf.org
  *  Copyright (C) 2004-2008  Marcel Holtmann <marcel@holtmann.org>
  *  Copyright (C) 2005-2006  Johan Hedberg <johan.hedberg@nokia.com>
  *  Copyright (C) 2005-2006  Claudio Takahasi <claudio.takahasi@indt.org.br>
