@@ -21,7 +21,7 @@
  *
  *  =======================================================================================
  *
- *  BlueZ Java docs licensed under GNU Free Documentation License, Version 1.1 http://www.fsf.org
+ *  BlueZ docs licensed under GNU Free Documentation License, Version 1.1 http://www.fsf.org
  *  Copyright (C) 2004-2008  Marcel Holtmann <marcel@holtmann.org>
  *  Copyright (C) 2005-2006  Johan Hedberg <johan.hedberg@nokia.com>
  *  Copyright (C) 2005-2006  Claudio Takahasi <claudio.takahasi@indt.org.br>
@@ -58,7 +58,7 @@ import org.freedesktop.dbus.exceptions.DBusException;
  * <p>
  * 
  * Created base on D-Bus API description for BlueZ.
- * bluez-4.32/doc/device-api.txt
+ * bluez-4.32/doc/device-api.txt, Updated to v 4.46
  */
 @DBusInterfaceName("org.bluez.Device")
 public interface Device extends DBusInterface, DBusProperties.PropertiesAccess {
@@ -143,10 +143,10 @@ public interface Device extends DBusInterface, DBusProperties.PropertiesAccess {
         /**
          * Set to true if the device only supports the pre-2.1 pairing
          * mechanism. This property is useful in the Adapter.DeviceFound signal
-         * to anticipate whether legacy or secure simple pairing will occur.
+         * to anticipate whether legacy or simple pairing will occur.
          * 
          * Note that this property can exhibit false-positives in the case of
-         * Bluetooth 2.1 (or newer) devices that have disabled Extend Inquiry
+         * Bluetooth 2.1 (or newer) devices that have disabled Extended Inquiry
          * Response support.
          */
         @DBusProperty(type = boolean.class, access = DBusPropertyAccessType.READONLY)
@@ -156,7 +156,8 @@ public interface Device extends DBusInterface, DBusProperties.PropertiesAccess {
 
     /**
      * This method starts the service discovery to retrieve remote service
-     * records. The pattern parameter can be used to specific specific UUIDs.
+     * records. The pattern parameter can be used to specify specific UUIDs. And
+     * empty string will look for the public browse group.
      * 
      * The return value is a dictionary with the record handles as keys and the
      * service record in XML format as values. The key is uint32 and the value a
@@ -169,7 +170,7 @@ public interface Device extends DBusInterface, DBusProperties.PropertiesAccess {
      */
     void CancelDiscovery() throws org.bluez.Error.NotReady, org.bluez.Error.Failed, org.bluez.Error.NotAuthorized;
 
-    /*
+    /**
      * This method disconnects a specific remote device by terminating the
      * low-level ACL connection. The use of this method should be restricted to
      * administrator use.
