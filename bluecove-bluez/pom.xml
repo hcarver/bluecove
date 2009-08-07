@@ -373,7 +373,7 @@
             <repositories>
                 <repository>
                     <id>pyx4j.com-cruisecontrol-shared-http</id>
-                    <url>http://snapshot.bluecove.org/build/${version}</url>
+                    <url>http://snapshot.bluecove.org/build/${project.version}</url>
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>
@@ -427,7 +427,7 @@
                             <!-- Can't run deploy for this profile -->
                             <configuration>
                                 <repositoryId>pyx4j.com-cruisecontrol-shared</repositoryId>
-                                <url>${scp-apache-base}/bluecove/build/${version}</url>
+                                <url>${scp-apache-base}/bluecove/build/${project.version}</url>
                                 <groupId>${groupId}.native.linux</groupId>
                                 <packaging>so</packaging>
                                 <version>${buildLabel}</version>

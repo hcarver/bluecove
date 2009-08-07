@@ -220,7 +220,7 @@
     -->
 
     <properties>
-        <buildLabel>${version}</buildLabel>
+        <buildLabel>${project.version}</buildLabel>
         <buildEnv>developer</buildEnv>
         <native.build.skip>false</native.build.skip>
         <me2Version>2.0.3</me2Version>
@@ -365,7 +365,7 @@
                                     <include name="tck/*.html"></include>
                                     <replacefilter token="#remove#" value=""/>
                                     <replacefilter token="#build#" value="${buildLabel}"/>
-                                    <replacefilter token="#version#" value="${version}"/>
+                                    <replacefilter token="#version#" value="${project.version}"/>
                                 </replace>
                             </tasks>
                         </configuration>

@@ -290,7 +290,7 @@
                                 <replace dir="${project.build.directory}">
                                     <include name="assembly.manifest"/>
                                     <replacefilter token="#build#" value="${buildLabel}"/>
-                                    <replacefilter token="#version#" value="${version}"/>
+                                    <replacefilter token="#version#" value="${project.version}"/>
                                     <replacefilter token="#user.name#" value="${user.name}"/>
                                     <replacefilter token="#today#" value="${TODAY}"/>
                                     <replacefilter token="#java.version#" value="${java.runtime.version}"/>
@@ -548,7 +548,7 @@
             <repositories>
                 <repository>
                     <id>pyx4j.com-cruisecontrol-shared-http</id>
-                    <url>http://snapshot.bluecove.org/build/${version}</url>
+                    <url>http://snapshot.bluecove.org/build/${project.version}</url>
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>
@@ -630,7 +630,7 @@
                             <!-- Can't run deploy for this profile -->
                             <configuration>
                                 <repositoryId>pyx4j.com-cruisecontrol-shared</repositoryId>
-                                <url>${scp-apache-base}/bluecove/build/${version}</url>
+                                <url>${scp-apache-base}/bluecove/build/${project.version}</url>
                                 <groupId>${groupId}.native.mac</groupId>
                                 <packaging>jnilib</packaging>
                                 <version>${buildLabel}</version>
@@ -664,7 +664,7 @@
                             <!-- Can't run deploy for this profile -->
                             <configuration>
                                 <repositoryId>pyx4j.com-cruisecontrol-shared</repositoryId>
-                                <url>${scp-apache-base}/bluecove/build/${version}</url>
+                                <url>${scp-apache-base}/bluecove/build/${project.version}</url>
                                 <groupId>${groupId}.native.win</groupId>
                                 <packaging>dll</packaging>
                                 <version>${buildLabel}</version>

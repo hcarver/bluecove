@@ -23,9 +23,9 @@
         <dependency>
             <groupId>net.sf.bluecove</groupId>
             <artifactId>bluecove</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>net.sf.bluecove</groupId>
             <artifactId>bluecove-gpl</artifactId>
@@ -38,7 +38,7 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        
+
     </dependencies>
 
     <build>

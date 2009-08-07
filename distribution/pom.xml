@@ -67,9 +67,9 @@
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <mkdir dir="${project.build.directory}/site/download/${version}/${buildLabel}"/>
+                                        <mkdir dir="${project.build.directory}/site/download/${project.version}/${buildLabel}"/>
                                         <copy overwrite="true"
-                                            todir="${project.build.directory}/site/download/${version}/${buildLabel}">
+                                            todir="${project.build.directory}/site/download/${project.version}/${buildLabel}">
                                             <fileset dir="${basedir}/../bluecove/target">
                                                 <include name="bluecove*-SNAPSHOT.jar"/>
                                                 <include name="*.tar.gz"/>
@@ -87,7 +87,7 @@
                                                 <include name="*.tar.gz"/>
                                             </fileset>
                                         </copy>
-                                        <echo file="${project.build.directory}/site/download/${version}/.htaccess" append="false">
+                                        <echo file="${project.build.directory}/site/download/${project.version}/.htaccess" append="false">
 AddDescription "&amp;#060;== The latest build." ${buildLabel}
 AddIcon /distribution/images/last-build-folder.png ${buildLabel}
 </echo>
