@@ -66,7 +66,7 @@ abstract class OBEXSessionBase implements Connection, BluetoothConnectionAccess 
 
 	protected Authenticator authenticator;
 
-	protected OBEXConnectionParams obexConnectionParams;
+	protected final OBEXConnectionParams obexConnectionParams;
 
 	protected int packetsCountWrite;
 
