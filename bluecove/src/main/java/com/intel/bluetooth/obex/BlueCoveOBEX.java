@@ -30,16 +30,16 @@ import java.io.IOException;
 import javax.microedition.io.Connection;
 
 /**
- * Allow access to BlueCove OBEX internals.  Non JSR-82.
+ * Allow access to BlueCove OBEX internals. Non JSR-82.
  * <p>
  * <b>PUBLIC JSR-82 extension</b>
  */
 public abstract class BlueCoveOBEX {
 
     private BlueCoveOBEX() {
-        
+
     }
-    
+
     /**
      * Once OBEX connection is made this will return negotiated MTU value.
      * 
@@ -48,32 +48,36 @@ public abstract class BlueCoveOBEX {
     public static int getPacketSize(Connection c) {
         if (c instanceof OBEXSessionBase) {
             return ((OBEXSessionBase) c).getPacketSize();
+        } else {
+            throw new IllegalArgumentException("Not a BlueCove OBEX Session " + c.getClass().getName());
         }
-        throw new IllegalArgumentException("Not a BlueCove OBEX Session " + c.getClass().getName());
     }
-    
+
     /**
-     * Allows to change the MTU before calling clientSession.connect(headers).
-     * Alternative is to use java system property "bluecove.obex.mtu" to define the global value.
-     *  
-     * @param c the OBEX connection
+     * Allows to change the MTU before calling clientSession.connect(headers). Alternative
+     * is to use java system property "bluecove.obex.mtu" to define the global value.
+     * 
+     * @param c
+     *            the OBEX connection
      * @param mtu
      * @throws IOException
      */
     public static void setPacketSize(Connection c, int mtu) throws IOException {
         if (c instanceof OBEXSessionBase) {
             ((OBEXSessionBase) c).setPacketSize(mtu);
+        } else {
+            throw new IllegalArgumentException("Not a BlueCove OBEX Session " + c.getClass().getName());
         }
-        throw new IllegalArgumentException("Not a BlueCove OBEX Session " + c.getClass().getName());
     }
-    
+
     /**
-     * ConvertOBEX SUCCESS response code to human readable string, useful for debugging applications.
+     * ConvertOBEX SUCCESS response code to human readable string, useful for debugging
+     * applications.
      * 
      * @param responseCode
      * @return String representation of javax.obex.ResponseCodes
      */
     public static String obexResponseCodes(int responseCode) {
-       return OBEXUtils.toStringObexResponseCodes(responseCode);
+        return OBEXUtils.toStringObexResponseCodes(responseCode);
     }
 }
