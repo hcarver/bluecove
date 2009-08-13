@@ -32,47 +32,50 @@ import javax.microedition.io.Connection;
  */
 public abstract class BlueCoveInternals {
 
-	public static boolean isShortRequestPhase() {
-		return OBEXClientOperation.isShortRequestPhase();
-	}
+    public static boolean isShortRequestPhase() {
+        return OBEXClientOperation.isShortRequestPhase();
+    }
 
-	public static int readServerErrorCount() {
-		synchronized (OBEXServerSessionImpl.class) {
-			int count = OBEXServerSessionImpl.errorCount;
-			OBEXServerSessionImpl.errorCount = 0;
-			return count;
-		}
+    public static int readServerErrorCount() {
+        synchronized (OBEXServerSessionImpl.class) {
+            int count = OBEXServerSessionImpl.errorCount;
+            OBEXServerSessionImpl.errorCount = 0;
+            return count;
+        }
 
-	}
+    }
 
-	/**
-	 * @return the packetsCountWrite
-	 */
-	public static int getPacketsCountWrite(Connection c) {
-		if (c instanceof OBEXSessionBase) {
-			return ((OBEXSessionBase) c).getPacketsCountWrite();
-		}
-		throw new IllegalArgumentException("Not a BlueCove OBEX Session " + c.getClass().getName());
-	}
+    /**
+     * @return the packetsCountWrite
+     */
+    public static int getPacketsCountWrite(Connection c) {
+        if (c instanceof OBEXSessionBase) {
+            return ((OBEXSessionBase) c).getPacketsCountWrite();
+        } else {
+            throw new IllegalArgumentException("Not a BlueCove OBEX Session " + c.getClass().getName());
+        }
+    }
 
-	/**
-	 * @return the packetsCountRead
-	 */
-	public static int getPacketsCountRead(Connection c) {
-		if (c instanceof OBEXSessionBase) {
-			return ((OBEXSessionBase) c).getPacketsCountRead();
-		}
-		throw new IllegalArgumentException("Not a BlueCove OBEX Session " + c.getClass().getName());
-	}
+    /**
+     * @return the packetsCountRead
+     */
+    public static int getPacketsCountRead(Connection c) {
+        if (c instanceof OBEXSessionBase) {
+            return ((OBEXSessionBase) c).getPacketsCountRead();
+        } else {
+            throw new IllegalArgumentException("Not a BlueCove OBEX Session " + c.getClass().getName());
+        }
+    }
 
-	/**
-	 * 
-	 * @return the mtu
-	 */
-	public static int getPacketSize(Connection c) {
-		if (c instanceof OBEXSessionBase) {
-			return ((OBEXSessionBase) c).getPacketSize();
-		}
-		throw new IllegalArgumentException("Not a BlueCove OBEX Session " + c.getClass().getName());
-	}
+    /**
+     * 
+     * @return the mtu
+     */
+    public static int getPacketSize(Connection c) {
+        if (c instanceof OBEXSessionBase) {
+            return ((OBEXSessionBase) c).getPacketSize();
+        } else {
+            throw new IllegalArgumentException("Not a BlueCove OBEX Session " + c.getClass().getName());
+        }
+    }
 }
