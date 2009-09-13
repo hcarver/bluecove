@@ -367,7 +367,7 @@
         <!-- cruisecontrol -->
 
         <profile>
-            <!-- build master is now Linux x86-64; Idealy would be nice to split project to platform dependant modules -->
+            <!-- build master takes Linux 32 and x86-64 builds from repository; Idealy would be nice to split project to platform dependant modules -->
             <id>build-master</id>
 
             <repositories>
@@ -393,6 +393,16 @@
                 </dependency>
             </dependencies>
 
+            <dependencies>
+                <dependency>
+                    <groupId>${groupId}.native.linux</groupId>
+                    <artifactId>libbluecovez_x64</artifactId>
+                    <type>so</type>
+                    <version>${buildLabel}</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            
             <build>
                 <plugins>
                     <plugin>
@@ -436,7 +446,7 @@
                             </configuration>
                             <executions>
                                 <execution>
-                                    <id>deploy-multi-platform-build-binary-linux-bluecove-bluez-dbus</id>
+                                    <id>deploy-multi-platform-build-binary-linux_32-bluecove-bluez-dbus</id>
                                     <phase>install</phase>
                                     <goals>
                                         <goal>deploy-file</goal>
@@ -452,6 +462,40 @@
             </build>
         </profile>
 
+        <profile>
+             <id>build-linux64</id>
+             <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                            <!-- Can't run deploy for this profile -->
+                            <configuration>
+                                <repositoryId>pyx4j.com-cruisecontrol-shared</repositoryId>
+                                <url>${scp-apache-base}/bluecove/build/${project.version}</url>
+                                <groupId>${groupId}.native.linux</groupId>
+                                <packaging>so</packaging>
+                                <version>${buildLabel}</version>
+                                <uniqueVersion>false</uniqueVersion>
+                                <generatePom>true</generatePom>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>deploy-multi-platform-build-binary-linux_x64-bluecove-bluez-dbus</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>deploy-file</goal>
+                                    </goals>
+                                    <configuration>
+                                        <file>${project.build.directory}/classes/libbluecovez_x64.so</file>
+                                        <artifactId>libbluecovez_x64</artifactId>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
     </profiles>
 
 </project>
