@@ -391,9 +391,7 @@
                     <version>${buildLabel}</version>
                     <scope>provided</scope>
                 </dependency>
-            </dependencies>
 
-            <dependencies>
                 <dependency>
                     <groupId>${groupId}.native.linux</groupId>
                     <artifactId>libbluecovez_x64</artifactId>

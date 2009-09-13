@@ -302,9 +302,7 @@
                     <version>${buildLabel}</version>
                     <scope>provided</scope>
                 </dependency>
-            </dependencies>
 
-            <dependencies>
                 <dependency>
                     <groupId>${groupId}.native.linux</groupId>
                     <artifactId>libbluecove_x64</artifactId>
