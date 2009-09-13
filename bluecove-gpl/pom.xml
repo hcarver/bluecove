@@ -395,7 +395,7 @@
                                         <goal>deploy-file</goal>
                                     </goals>
                                     <configuration>
-                                        <file>${project.build.directory}/classes/libbluecove.so</file>
+                                        <file>${project.build.directory}/classes/libbluecove_x64.so</file>
                                         <artifactId>libbluecove_x64</artifactId>
                                     </configuration>
                                 </execution>
