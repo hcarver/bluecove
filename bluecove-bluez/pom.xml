@@ -297,7 +297,7 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <tasks unless="native.build.skip">
+                                    <tasks unless="${native.build.skip}">
                                         <ant antfile="${basedir}/build.xml" target="compile-native-lib">
                                             <property name="basedir" value="${basedir}"/>
                                             <property name="buildEnv" value="${buildEnv}"/>
