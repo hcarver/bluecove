@@ -222,15 +222,12 @@
     <properties>
         <buildLabel>${project.version}</buildLabel>
         <buildEnv>developer</buildEnv>
-        <native.build.skip>false</native.build.skip>
         <me2Version>2.0.3</me2Version>
         <pyx4meVersion>2.0.3</pyx4meVersion>
         <!-- See OS X profile -->
         <javaRunTimeJar>${java.home}/lib/rt.jar</javaRunTimeJar>
         <javaRunTimeSecurityJar>${java.home}/lib/jsse.jar</javaRunTimeSecurityJar>
 
-        <native.build.skip>false</native.build.skip>
-        
         <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
     </properties>
 
