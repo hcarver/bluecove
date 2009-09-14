@@ -115,7 +115,6 @@
     </dependencies>
 
     <properties>
-        <native.build.skip>false</native.build.skip>
         <native.source.dir>${basedir}/src/main/c/intelbth</native.source.dir>
     </properties>
 
@@ -542,9 +541,13 @@
         <!-- cruisecontrol -->
 
         <profile>
-            <!-- build master is now Linux x86-64; Idealy would be nice to split project to platform dependant modules -->
+            <!-- build master is now Linux; Idealy would be nice to split project to platform dependant modules -->
             <id>build-master</id>
 
+            <properties>
+                <native.build.skip>true</native.build.skip>
+            </properties>
+            
             <repositories>
                 <repository>
                     <id>pyx4j.com-cruisecontrol-shared-http</id>

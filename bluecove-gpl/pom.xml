@@ -208,7 +208,7 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <tasks>
+                                    <tasks unless="native.build.skip">
                                         <ant antfile="${basedir}/build.xml" target="compile-native-lib">
                                             <property name="basedir" value="${basedir}"/>
                                             <property name="buildEnv" value="${buildEnv}"/>
@@ -281,6 +281,10 @@
             <!--  build master takes Linux 32 and x86-64 builds from repository;  Idealy would be nice to split project to platform dependant modules -->
             <id>build-master</id>
 
+            <properties>
+                <native.build.skip>true</native.build.skip>
+            </properties>
+            
             <repositories>
                 <repository>
                     <id>pyx4j.com-cruisecontrol-shared-http</id>
