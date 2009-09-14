@@ -45,133 +45,144 @@ import com.intel.bluetooth.EmulatorTestsHelper;
  * 
  */
 public class RFCOMMConnectTest extends TestCase {
-	private static final UUID uuid = new UUID(0x2108);
 
-	private Thread serverThread;
+    private static final UUID uuid = new UUID(0x2108);
 
-	private EchoServerRunnable srv;
+    private Thread serverThread;
 
-	private static final String echoGreeting = "I echo";
+    private EchoServerRunnable srv;
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		EmulatorTestsHelper.startInProcessServer();
-		EmulatorTestsHelper.useThreadLocalEmulator();
-		serverThread = EmulatorTestsHelper.runNewEmulatorStack(srv = new EchoServerRunnable());
-	}
+    private static final String echoGreeting = "I echo";
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		if (srv != null) {
-			srv.stop = true;
-		}
-		if ((serverThread != null) && (serverThread.isAlive())) {
-			serverThread.interrupt();
-			serverThread.join();
-		}
-		EmulatorTestsHelper.stopInProcessServer();
-	}
+    protected void setUp() throws Exception {
+        super.setUp();
+        EmulatorTestsHelper.startInProcessServer();
+        EmulatorTestsHelper.useThreadLocalEmulator();
+        serverThread = EmulatorTestsHelper.runNewEmulatorStack(srv = new EchoServerRunnable());
+    }
 
-	private class EchoServerConnectionThread extends Thread {
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        if (srv != null) {
+            srv.stop = true;
+        }
+        if ((serverThread != null) && (serverThread.isAlive())) {
+            serverThread.interrupt();
+            serverThread.join();
+        }
+        EmulatorTestsHelper.stopInProcessServer();
+    }
 
-		private StreamConnection conn;
+    private class EchoServerConnectionThread extends Thread {
 
-		private EchoServerConnectionThread(StreamConnection conn) {
-			super("EchoServerConnectionThread");
-			this.conn = conn;
-		}
+        private StreamConnection conn;
 
-		public void run() {
-			try {
-				DataOutputStream dos = conn.openDataOutputStream();
-				DataInputStream dis = conn.openDataInputStream();
+        private EchoServerConnectionThread(StreamConnection conn) {
+            super("EchoServerConnectionThread");
+            this.conn = conn;
+        }
 
-				dos.writeUTF(echoGreeting);
-				dos.flush();
+        public void run() {
+            try {
+                DataOutputStream dos = conn.openDataOutputStream();
+                DataInputStream dis = conn.openDataInputStream();
 
-				String received = dis.readUTF();
-				System.out.println("Server received:" + received);
+                dos.writeUTF(echoGreeting);
+                dos.flush();
 
-				dos.writeUTF(received);
-				dos.flush();
+                String received = dis.readUTF();
+                System.out.println("Server received:" + received);
 
-				dos.close();
-				dis.close();
+                dos.writeUTF(received);
+                dos.flush();
 
-				conn.close();
-			} catch (Throwable e) {
-				// System.err.print(e.toString());
-				// e.printStackTrace();
-			} finally {
-				if (conn != null) {
-					try {
-						conn.close();
-					} catch (IOException ignore) {
-					}
-				}
-			}
-		}
+                dos.close();
+                dis.close();
 
-	}
+                conn.close();
+            } catch (Throwable e) {
+                // System.err.print(e.toString());
+                // e.printStackTrace();
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (IOException ignore) {
+                    }
+                }
+            }
+        }
 
-	private class EchoServerRunnable implements Runnable {
+    }
 
-		boolean stop = false;
+    private class EchoServerRunnable implements Runnable {
 
-		public void run() {
+        boolean stop = false;
 
-			StreamConnectionNotifier service = null;
+        public void run() {
 
-			try {
-				String url = "btspp://localhost:" + uuid.toString() + ";name=TServer";
-				service = (StreamConnectionNotifier) Connector.open(url);
+            StreamConnectionNotifier service = null;
 
-				while (!stop) {
-					StreamConnection conn = (StreamConnection) service.acceptAndOpen();
-					System.out.println("Server received connection");
-					EchoServerConnectionThread t = new EchoServerConnectionThread(conn);
-					t.setDaemon(true);
-					t.start();
-				}
+            try {
+                String url = "btspp://localhost:" + uuid.toString() + ";name=TServer";
+                service = (StreamConnectionNotifier) Connector.open(url);
 
-			} catch (Throwable e) {
-				if (!stop) {
-					System.err.print(e.toString());
-					e.printStackTrace();
-				}
-			} finally {
-				if (service != null) {
-					try {
-						service.close();
-					} catch (IOException ignore) {
-					}
-				}
-			}
-		}
-	}
+                while (!stop) {
+                    StreamConnection conn = (StreamConnection) service.acceptAndOpen();
+                    System.out.println("Server received connection");
+                    EchoServerConnectionThread t = new EchoServerConnectionThread(conn);
+                    t.setDaemon(true);
+                    t.start();
+                }
 
-	public void testTwoConnections() throws Exception {
-		DiscoveryAgent discoveryAgent = LocalDevice.getLocalDevice().getDiscoveryAgent();
-		// Find service
-		String serverURL = discoveryAgent.selectService(uuid, ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
-		Assert.assertNotNull("service not found", serverURL);
+            } catch (Throwable e) {
+                if (!stop) {
+                    System.err.print(e.toString());
+                    e.printStackTrace();
+                }
+            } finally {
+                if (service != null) {
+                    try {
+                        service.close();
+                    } catch (IOException ignore) {
+                    }
+                }
+            }
+        }
+    }
 
-		StreamConnection conn = (StreamConnection) Connector.open(serverURL);
+    public void testTwoConnections() throws Exception {
+        DiscoveryAgent discoveryAgent = LocalDevice.getLocalDevice().getDiscoveryAgent();
+        // Find service
+        String serverURL = null;
+        // Let the server start in a separate thread.
+        int tryCount = 0;
+        while ((serverURL == null) && (tryCount <= 3)) {
+            if (tryCount > 0) {
+                Thread.sleep(300);
+            }
+            tryCount++;
+            serverURL = discoveryAgent.selectService(uuid, ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
 
-		StreamConnection conn2 = null;
-		try {
-			conn2 = (StreamConnection) Connector.open(serverURL);
-			Assert.fail("Should not accpet the second connection to the same port");
-		} catch (IOException e) {
+        }
+        Assert.assertNotNull("service not found", serverURL);
 
-		} finally {
-			if (conn2 != null) {
-				try {
-					conn2.close();
-				} catch (IOException ignore) {
-				}
-			}
-		}
-		conn.close();
-	}
+        StreamConnection conn = (StreamConnection) Connector.open(serverURL);
+
+        StreamConnection conn2 = null;
+        try {
+            conn2 = (StreamConnection) Connector.open(serverURL);
+            Assert.fail("Should not accpet the second connection to the same port");
+        } catch (IOException e) {
+
+        } finally {
+            if (conn2 != null) {
+                try {
+                    conn2.close();
+                } catch (IOException ignore) {
+                }
+            }
+        }
+        conn.close();
+    }
 }
