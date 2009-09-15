@@ -159,7 +159,7 @@ public class RFCOMMConnectTest extends TestCase {
         int tryCount = 0;
         while ((serverURL == null) && (tryCount <= 3)) {
             if (tryCount > 0) {
-                Thread.sleep(300);
+                Thread.sleep(700);
             }
             tryCount++;
             serverURL = discoveryAgent.selectService(uuid, ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
