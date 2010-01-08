@@ -343,7 +343,7 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
         case kBluetoothSDPDataElementTypeNil:
             write(0 | 0);
             break;
-        case kBluetoothSDPDataElementTypeBoolean:
+        case kBluetoothSDPDataElementTypeBoolean: {
             write(40 | 0);
 			CFNumberRef	bNumber = IOBluetoothSDPDataElementGetNumberValue(dataElement);
 			if (bNumber == NULL) {
@@ -353,6 +353,7 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
 			CFNumberGetValue(bNumber, kCFNumberCharType, &aBool);
 			write(aBool);
             break;
+        }
         case kBluetoothSDPDataElementTypeUnsignedInt:
             isUnsigned = true;
         case kBluetoothSDPDataElementTypeSignedInt: {
