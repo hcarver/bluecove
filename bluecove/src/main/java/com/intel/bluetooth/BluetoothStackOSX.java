@@ -50,9 +50,9 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
     // TODO what is the real number for Attributes retrivable ?
     private final static int ATTR_RETRIEVABLE_MAX = 256;
 
-    private Vector deviceDiscoveryListeners = new Vector/* <DiscoveryListener> */();
+    private final Vector deviceDiscoveryListeners = new Vector/* <DiscoveryListener> */();
 
-    private Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
+    private final Hashtable deviceDiscoveryListenerReportedDevices = new Hashtable();
 
     private int receive_mtu_max = -1;
 
@@ -103,7 +103,7 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
      */
     public int getFeatureSet() {
         if (localDeviceSupportedSoftwareVersion >= BLUETOOTH_SOFTWARE_VERSION_2_0_0) {
-            return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES | (isLocalDeviceFeatureRSSI()?FEATURE_RSSI:0);
+            return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES | FEATURE_SET_DEVICE_SERVICE_CLASSES | (isLocalDeviceFeatureRSSI() ? FEATURE_RSSI : 0);
         } else {
             return FEATURE_L2CAP | FEATURE_SERVICE_ATTRIBUTES;
         }
@@ -119,6 +119,15 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
         if (singleInstance != null) {
             throw new BluetoothStateException("Only one instance of " + getStackID() + " stack supported");
         }
+
+        String sysVersion = System.getProperty("os.version");
+        String jreDataModel = System.getProperty("sun.arch.data.model");
+        boolean osIsLeopard = (sysVersion != null) && sysVersion.startsWith("10.5");
+        boolean jreIs64Bit = "64".equals(jreDataModel);
+        if (osIsLeopard && jreIs64Bit) {
+            throw new BluetoothStateException("Mac OS X 10.5 not supported with a 64 bit JRE");
+        }
+
         localDeviceSupportedSoftwareVersion = getLocalDeviceSupportedSoftwareVersion();
         DebugLog.debug("localDeviceSupportedSoftwareVersion", localDeviceSupportedSoftwareVersion);
         if (!initializeImpl()) {
@@ -139,8 +148,7 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
+     * @see com.intel.bluetooth.BluetoothStack#isCurrentThreadInterruptedCallback()
      */
     public boolean isCurrentThreadInterruptedCallback() {
         return UtilsJavaSE.isCurrentThreadInterrupted();
@@ -214,7 +222,7 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
     private native boolean isLocalDeviceFeatureParkMode();
 
     private native boolean isLocalDeviceFeatureRSSI();
-    
+
     private native int getLocalDeviceL2CAPMTUMaximum();
 
     private native int getLocalDeviceSupportedSoftwareVersion();
@@ -335,7 +343,7 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
     }
 
     private native int readRemoteDeviceRSSIImpl(long address) throws IOException;
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -344,7 +352,7 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
     public int readRemoteDeviceRSSI(long address) throws IOException {
         return readRemoteDeviceRSSIImpl(address);
     }
-    
+
     // ---------------------- Remote Device authentication
 
     private native boolean authenticateRemoteDeviceImpl(long address) throws IOException;
@@ -366,9 +374,7 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.intel.bluetooth.BluetoothStack#removeAuthenticationWithRemoteDevice
-     * (long)
+     * @see com.intel.bluetooth.BluetoothStack#removeAuthenticationWithRemoteDevice (long)
      */
     public void removeAuthenticationWithRemoteDevice(long address) throws IOException {
         throw new NotSupportedIOException(getStackID());
@@ -744,8 +750,7 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth
+     * @see com.intel.bluetooth.BluetoothStack#l2OpenClientConnection(com.intel.bluetooth
      * .BluetoothConnectionParams, int, int)
      */
     public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
@@ -775,8 +780,7 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
      * (non-Javadoc)
      * 
      * @seecom.intel.bluetooth.BluetoothStack#l2ServerOpen(com.intel.bluetooth.
-     * BluetoothConnectionNotifierParams, int, int,
-     * com.intel.bluetooth.ServiceRecordImpl)
+     * BluetoothConnectionNotifierParams, int, int, com.intel.bluetooth.ServiceRecordImpl)
      */
     public long l2ServerOpen(BluetoothConnectionNotifierParams params, int receiveMTU, int transmitMTU, ServiceRecordImpl serviceRecord) throws IOException {
         verifyDeviceReady();
@@ -809,8 +813,7 @@ class BluetoothStackOSX implements BluetoothStack, BluetoothStackExtension {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection
+     * @see com.intel.bluetooth.BluetoothStack#l2ServerAcceptAndOpenServerConnection
      * (long)
      */
     public native long l2ServerAcceptAndOpenServerConnection(long handle) throws IOException;
