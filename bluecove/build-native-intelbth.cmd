@@ -32,6 +32,8 @@
 @echo WARN: JAVA_HOME Not Found
 :java_found
 
+@set p=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin
+@if exist "%p%\VCVARS32.BAT" goto vs_found
 @set p=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin
 @if exist "%p%\VCVARS32.BAT" goto vs_found
 
@@ -47,11 +49,13 @@
 @echo [%p%\VCVARS32.BAT]
 call "%p%\VCVARS32.BAT"
 
-@set sdk=%ProgramFiles%\Microsoft SDKs\Windows\v6.0
+@set sdk=%ProgramFiles%\Microsoft SDKs\Windows\v7.0
+@if exist "%sdk%\Include" goto sdk_found
+@set sdk=%ProgramFiles%\Microsoft Platform SDK for Windows Server 2003 R2
 @if exist "%sdk%\Include" goto sdk_found
 @set sdk=%ProgramFiles%\Microsoft SDKs\Windows\v6.1
 @if exist "%sdk%\Include" goto sdk_found
-@set sdk=%ProgramFiles%\Microsoft Platform SDK for Windows Server 2003 R2
+@set sdk=%ProgramFiles%\Microsoft SDKs\Windows\v6.0
 @if exist "%sdk%\Include" goto sdk_found
 @echo Microsoft SDKs Not Found
 @goto :errormark
