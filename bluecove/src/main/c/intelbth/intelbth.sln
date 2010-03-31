@@ -10,6 +10,7 @@ Global
 		BlueSoleil|Win32 = BlueSoleil|Win32
 		Release|Pocket PC 2003 (ARMV4) = Release|Pocket PC 2003 (ARMV4)
 		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
 		Toshiba|Pocket PC 2003 (ARMV4) = Toshiba|Pocket PC 2003 (ARMV4)
 		Toshiba|Win32 = Toshiba|Win32
 		WIDCOMM|Pocket PC 2003 (ARMV4) = WIDCOMM|Pocket PC 2003 (ARMV4)
@@ -29,6 +30,8 @@ Global
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|Pocket PC 2003 (ARMV4).Build.0 = Release|Pocket PC 2003 (ARMV4)
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|Win32.ActiveCfg = Release|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|Win32.Build.0 = Release|Win32
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|x64.ActiveCfg = Release|x64
+		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Release|x64.Build.0 = Release|x64
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Toshiba|Pocket PC 2003 (ARMV4).ActiveCfg = Toshiba|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Toshiba|Win32.ActiveCfg = Toshiba|Win32
 		{DE2D9A0D-E17B-4DB0-B280-7DF45D3B6E2B}.Toshiba|Win32.Build.0 = Toshiba|Win32

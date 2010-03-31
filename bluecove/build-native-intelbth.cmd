@@ -32,12 +32,14 @@
 @echo WARN: JAVA_HOME Not Found
 :java_found
 
+set p=%ProgramFiles(x86)%\Microsoft Visual Studio 9.0\VC\bin
+@if exist "%p%\VCVARS32.BAT" goto vs_found
 @set p=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin
 @if exist "%p%\VCVARS32.BAT" goto vs_found
 @set p=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin
 @if exist "%p%\VCVARS32.BAT" goto vs_found
 
-@echo Visual Studio 2005 Not Found
+@echo Visual Studio Not Found
 @goto :errormark
 
 :vs_found
@@ -98,6 +100,40 @@ vcbuild /u /rebuild src\main\c\intelbth\intelbth.sln "%CONFIGURATION%|Win32"
 copy src\main\resources\intelbth.dll target\classes\
 @if errorlevel 1 goto errormark
 
+echo [========= Build x64 start ===========]
+
+set p=%ProgramFiles(x86)%\Microsoft Visual Studio 9.0\VC\bin\x86_amd64
+set ms_env=vcvarsx86_amd64.bat
+if exist "%p%\%ms_env%" goto vs64_found
+set p=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin\x86_amd64
+set ms_env=vcvarsx86_amd64.bat
+if exist "%p%\%ms_env%" goto vs64_found
+@rem Visual C++ Express Edition 2008
+set p=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin
+set ms_env=vcvarsx86_amd64.bat
+if exist "%p%\%ms_env%" goto vs64_found
+
+echo ERROR: Visual Studio (x64 cross-compiler) Not Found
+@if "%CRUISECONTROL_BUILD%" == "1" (
+    @echo ERROR: Windows x64 cross-compiler required for build.
+    @goto :errormark
+)
+@goto :endmark64
+
+:vs64_found
+@echo Found Visual Studio x64 %p%
+@echo [%p%\%ms_env%]
+call "%p%\%ms_env%"
+
+vcbuild /u /rebuild src\main\c\intelbth\intelbth.sln "Release|x64"
+@if errorlevel 1 goto errormark
+@echo [Build x64 OK]
+copy src\main\resources\intelbth_x64.dll target\classes\
+@if errorlevel 1 goto errormark
+
+:endmark64
+echo [========= Build x64 end ===========]
+
 @if exist "%VCINSTALLDIR%\ce" goto ce_sdk_found
 
 @echo Microsoft Windows CE SDKs Not Found
@@ -127,7 +163,7 @@ copy src\main\resources\bluecove_ce.dll target\classes\
 :errormark
 	@echo Error in build
     @if "%CALLED_FROM_MAVEN%" == "1" (
-        echo PATH=[%PATH%]
+        @rem echo PATH=[%PATH%]
         @ENDLOCAL
         exit 1
     )
