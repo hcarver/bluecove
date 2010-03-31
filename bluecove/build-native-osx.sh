@@ -16,6 +16,6 @@ if [[ ${BUILD_ERROR_CODE} != 0  ]] ; then
 fi
 
 echo ---- Created library ----
-otool -fv ${BUILD_ROOT}/target/classes/libbluecove.jnilib
+otool -fv ${BUILD_ROOT}/src/main/resources/libbluecove.jnilib
 echo Copy Library to ${BUILD_ROOT}/target/classes/
 cp ${BUILD_ROOT}/src/main/resources/libbluecove.jnilib ${BUILD_ROOT}/target/classes/

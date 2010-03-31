@@ -258,8 +258,7 @@
 				ARCHS = (
 					i386,
 					ppc,
-					ppc64,
-					x84_64,
+					x86_64,
 				);
 				EXECUTABLE_PREFIX = lib;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -275,8 +274,7 @@
 				ARCHS = (
 					i386,
 					ppc,
-					ppc64,
-					x84_64,
+					x86_64,
 				);
 				EXECUTABLE_EXTENSION = jnilib;
 				EXECUTABLE_PREFIX = lib;
@@ -298,13 +296,11 @@
 				ARCHS = (
 					i386,
 					ppc,
-					ppc64,
-					x84_64,
+					x86_64,
 				);
 				EXECUTABLE_EXTENSION = jnilib;
 				EXECUTABLE_PREFIX = lib;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_MODEL_PPC64 = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -313,7 +309,7 @@
 				);
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				VALID_ARCHS = "ppc64 ppc7400 ppc970 i386 x86_64 ppc";
+				VALID_ARCHS = "ppc7400 ppc970 i386 x86_64 ppc";
 			};
 			name = Release;
 		};
