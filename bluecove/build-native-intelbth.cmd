@@ -32,24 +32,24 @@
 @echo WARN: JAVA_HOME Not Found
 :java_found
 
-@set p=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin
-@if exist "%p%\VCVARS32.BAT" goto vs_found
-set p=%ProgramFiles(x86)%\Microsoft Visual Studio 9.0\VC\bin
-@if exist "%p%\VCVARS32.BAT" goto vs_found
-@set p=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin
-@if exist "%p%\VCVARS32.BAT" goto vs_found
+@set p32=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin
+@if exist "%p32%\VCVARS32.BAT" goto vs_found
+set p32=%ProgramFiles(x86)%\Microsoft Visual Studio 9.0\VC\bin
+@if exist "%p32%\VCVARS32.BAT" goto vs_found
+@set p32=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin
+@if exist "%p32%\VCVARS32.BAT" goto vs_found
 
 @echo Visual Studio Not Found
 @goto :errormark
 
 :vs_found
-@echo Found Visual Studio %p%
-@set PATH=%p%;%PATH%
+@echo Found Visual Studio %p32%
+@set PATH=%p32%;%PATH%
 
 @rem PATH=%DEFAULT_BUILD_HOME%\bin;%PATH%
 
-@echo [%p%\VCVARS32.BAT]
-call "%p%\VCVARS32.BAT"
+@echo [%p32%\VCVARS32.BAT]
+call "%p32%\VCVARS32.BAT"
 
 @set sdk=%ProgramFiles%\Microsoft SDKs\Windows\v7.0
 @if exist "%sdk%\Include" goto sdk_found
@@ -103,21 +103,21 @@ copy src\main\resources\intelbth.dll target\classes\
 echo [========= Build x64 start ===========]
 
 @rem ------- Visual C++ 2008 on Win 64  -------
-set p=%ProgramFiles(x86)%\Microsoft Visual Studio 9.0\VC\bin\x86_amd64
+set p64=%ProgramFiles(x86)%\Microsoft Visual Studio 9.0\VC\bin\x86_amd64
 set ms_env=vcvarsx86_amd64.bat
-if exist "%p%\%ms_env%" goto vs64_found
+if exist "%p64%\%ms_env%" goto vs64_found
 @rem ------- Visual C++ 2008 on Win 32  -------
-set p=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin\x86_amd64
+set p64=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin\x86_amd64
 set ms_env=vcvarsx86_amd64.bat
-if exist "%p%\%ms_env%" goto vs64_found
+if exist "%p64%\%ms_env%" goto vs64_found
 @rem ------- Visual C++ Express Edition 2008 -------
-set p=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin
+set p64=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin
 set ms_env=vcvarsx86_amd64.bat
-if exist "%p%\%ms_env%" goto vs64_found
+if exist "%p64%\%ms_env%" goto vs64_found
 @rem ------- Visual C++ 2005 -------
-set p=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin\x86_amd64
+set p64=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin\x86_amd64
 set ms_env=vcvarsx86_amd64.bat
-if exist "%p%\%ms_env%" goto vs64_found
+if exist "%p64%\%ms_env%" goto vs64_found
 
 echo ERROR: Visual Studio (x64 cross-compiler) Not Found
 @if "%CRUISECONTROL_BUILD%" == "1" (
@@ -127,9 +127,9 @@ echo ERROR: Visual Studio (x64 cross-compiler) Not Found
 @goto :endmark64
 
 :vs64_found
-@echo Found Visual Studio x64 %p%
-@echo [%p%\%ms_env%]
-call "%p%\%ms_env%"
+@echo Found Visual Studio x64 %p64%
+@echo [%p64%\%ms_env%]
+call "%p64%\%ms_env%"
 
 @echo Set SDK Lib 64 [%sdk%\Lib\x64]
 @set LIB=%sdk%\Lib\x64;%LIB%
@@ -141,6 +141,7 @@ vcbuild /u /rebuild src\main\c\intelbth\intelbth.sln "Release|x64"
 copy src\main\resources\intelbth_x64.dll target\classes\
 @if errorlevel 1 goto errormark
 
+call "%p32%\VCVARS32.BAT"
 :endmark64
 echo [========= Build x64 end ===========]
 
