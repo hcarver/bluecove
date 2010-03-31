@@ -102,14 +102,20 @@ copy src\main\resources\intelbth.dll target\classes\
 
 echo [========= Build x64 start ===========]
 
+@rem ------- Visual C++ 2008 on Win 64  -------
 set p=%ProgramFiles(x86)%\Microsoft Visual Studio 9.0\VC\bin\x86_amd64
 set ms_env=vcvarsx86_amd64.bat
 if exist "%p%\%ms_env%" goto vs64_found
+@rem ------- Visual C++ 2008 on Win 32  -------
 set p=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin\x86_amd64
 set ms_env=vcvarsx86_amd64.bat
 if exist "%p%\%ms_env%" goto vs64_found
-@rem Visual C++ Express Edition 2008
+@rem ------- Visual C++ Express Edition 2008 -------
 set p=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin
+set ms_env=vcvarsx86_amd64.bat
+if exist "%p%\%ms_env%" goto vs64_found
+@rem ------- Visual C++ 2005 -------
+set p=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin\x86_amd64
 set ms_env=vcvarsx86_amd64.bat
 if exist "%p%\%ms_env%" goto vs64_found
 
