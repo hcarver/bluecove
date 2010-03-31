@@ -568,6 +568,13 @@
                 </dependency>
                 <dependency>
                     <groupId>${groupId}.native.win</groupId>
+                    <artifactId>intelbth_x64</artifactId>
+                    <type>dll</type>
+                    <version>${buildLabel}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>${groupId}.native.win</groupId>
                     <artifactId>intelbth_ce</artifactId>
                     <type>dll</type>
                     <version>${buildLabel}</version>
@@ -692,6 +699,17 @@
                                     <configuration>
                                         <file>${project.build.directory}/classes/bluecove.dll</file>
                                         <artifactId>bluecove</artifactId>
+                                    </configuration>
+                                </execution>
+                                <execution>
+                                    <id>deploy-multi-platform-build-binary-intelbth_x64</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>deploy-file</goal>
+                                    </goals>
+                                    <configuration>
+                                        <file>${project.build.directory}/classes/intelbth_x64.dll</file>
+                                        <artifactId>intelbth_x64</artifactId>
                                     </configuration>
                                 </execution>
                                 <execution>

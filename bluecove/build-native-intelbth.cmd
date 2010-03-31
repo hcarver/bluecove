@@ -131,6 +131,10 @@ echo ERROR: Visual Studio (x64 cross-compiler) Not Found
 @echo [%p%\%ms_env%]
 call "%p%\%ms_env%"
 
+@echo Set SDK Lib 64 [%sdk%\Lib\x64]
+@set LIB=%sdk%\Lib\x64;%LIB%
+@set INCLUDE=%sdk%\Include;%INCLUDE%
+
 vcbuild /u /rebuild src\main\c\intelbth\intelbth.sln "Release|x64"
 @if errorlevel 1 goto errormark
 @echo [Build x64 OK]

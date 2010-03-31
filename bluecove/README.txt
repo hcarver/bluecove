@@ -137,7 +137,7 @@ Configuration options
 
 On Windows
 
- You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 and SDK for Windows Vista or Windows Server 2003 R2 Platform SDK.
+ You need a C++ compiler and JDK. Tested on Visual C++ 2005 Express Edition SP1 and SDK for Windows 7 or Windows Vista or Windows Server 2003 R2 Platform SDK.
  VC++ and Windows SDK are available for free download from microsoft.com.
  We are using for Windows Vista SDK for binary distribution:
     Make sure you have
