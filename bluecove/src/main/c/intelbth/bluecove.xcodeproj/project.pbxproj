@@ -256,8 +256,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
-					ppc,
 					i386,
+					ppc,
+					ppc64,
 					x84_64,
 				);
 				EXECUTABLE_PREFIX = lib;
@@ -272,8 +273,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
-					ppc,
 					i386,
+					ppc,
+					ppc64,
 					x84_64,
 				);
 				EXECUTABLE_EXTENSION = jnilib;
@@ -294,8 +296,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
-					ppc,
 					i386,
+					ppc,
+					ppc64,
 					x84_64,
 				);
 				EXECUTABLE_EXTENSION = jnilib;
@@ -310,7 +313,7 @@
 				);
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				VALID_ARCHS = "ppc7400 ppc970 i386 x86_64 ppc";
+				VALID_ARCHS = "ppc64 ppc7400 ppc970 i386 x86_64 ppc";
 			};
 			name = Release;
 		};
