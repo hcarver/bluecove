@@ -32,11 +32,11 @@
 @echo WARN: JAVA_HOME Not Found
 :java_found
 
+@set p=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin
+@if exist "%p%\VCVARS32.BAT" goto vs_found
 set p=%ProgramFiles(x86)%\Microsoft Visual Studio 9.0\VC\bin
 @if exist "%p%\VCVARS32.BAT" goto vs_found
 @set p=%ProgramFiles%\Microsoft Visual Studio 9.0\VC\bin
-@if exist "%p%\VCVARS32.BAT" goto vs_found
-@set p=%ProgramFiles%\Microsoft Visual Studio 8\VC\bin
 @if exist "%p%\VCVARS32.BAT" goto vs_found
 
 @echo Visual Studio Not Found
