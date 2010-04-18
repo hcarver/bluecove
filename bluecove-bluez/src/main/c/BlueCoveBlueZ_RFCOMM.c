@@ -135,12 +135,12 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_connecti
   (JNIEnv* env, jobject peer, jlong handle, jbyteArray b, jint off, jint len ) {
     if (b == NULL) {
         throwRuntimeException(env, "Invalid argument");
-        return;
+        return 0;
     }
     jbyte *bytes = (*env)->GetByteArrayElements(env, b, 0);
     if (bytes == NULL) {
         throwRuntimeException(env, "Invalid argument");
-        return;
+        return 0;
     }
     int done = 0;
     while (done == 0) {

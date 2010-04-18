@@ -177,7 +177,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Receiv
   (JNIEnv* env, jobject peer, jlong handle, jbyteArray inBuf) {
     if (inBuf == NULL) {
         throwRuntimeException(env, "Invalid argument");
-        return;
+        return 0;
     }
 #ifdef BLUECOVE_L2CAP_MTU_TRUNCATE
     struct l2cap_options opt;
@@ -218,7 +218,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Receiv
     jbyte *bytes = (*env)->GetByteArrayElements(env, inBuf, 0);
     if (bytes == NULL) {
         throwRuntimeException(env, "Invalid argument");
-        return;
+        return 0;
     }
     size_t inBufLen = (size_t)(*env)->GetArrayLength(env, inBuf);
     int readLen = inBufLen;
