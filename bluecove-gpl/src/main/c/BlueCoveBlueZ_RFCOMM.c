@@ -1,7 +1,7 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2008 Vlad Skarzhevskyy
- *  Copyright (C) 2008 Mina Shokry
+ *  Copyright (C) 2008-2010 Mina Shokry
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -133,12 +133,12 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_connectionRf
   (JNIEnv* env, jobject peer, jlong handle, jbyteArray b, jint off, jint len ) {
     if (b == NULL) {
         throwRuntimeException(env, "Invalid argument");
-        return;
+        return 0;
     }
     jbyte *bytes = (*env)->GetByteArrayElements(env, b, 0);
     if (bytes == NULL) {
         throwRuntimeException(env, "Invalid argument");
-        return;
+        return 0;
     }
     int done = 0;
     while (done == 0) {

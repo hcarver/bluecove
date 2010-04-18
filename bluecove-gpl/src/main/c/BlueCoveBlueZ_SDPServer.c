@@ -1,6 +1,6 @@
 /**
  * BlueCove BlueZ module - Java library for Bluetooth on Linux
- *  Copyright (C) 2008 Mina Shokry
+ *  Copyright (C) 2008-2010 Mina Shokry
  *  Copyright (C) 2008 Vlad Skarzhevskyy
  *
  * This program is free software: you can redistribute it and/or modify
@@ -60,7 +60,7 @@ sdp_record_t* createNativeSDPrecord(JNIEnv* env, jbyteArray record) {
     jbyte *bytes = (*env)->GetByteArrayElements(env, record, 0);
     if (bytes == NULL) {
         throwRuntimeException(env, "Memory allocation error.");
-        return;
+        return NULL;
     }
     int length_scanned = length;
     sdp_record_t *rec = bluecove_sdp_extract_pdu(env, (uint8_t*) bytes, length, &length_scanned);
@@ -78,7 +78,7 @@ sdp_record_t* createNativeSDPrecord(JNIEnv* env, jbyteArray record) {
 }
 
 sdp_record_t* bluecove_sdp_extract_pdu(JNIEnv* env, const uint8_t *pdata, int bufsize, int *scanned) {
-    sdp_record_t* rec;
+    sdp_record_t* rec = NULL;
 
     // we need to declare both to enable code to compile
     sdp_record_t* (*bluecove_sdp_extract_pdu_bluez_v3)(const uint8_t *pdata, int *scanned);
