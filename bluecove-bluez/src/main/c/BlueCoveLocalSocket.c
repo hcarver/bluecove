@@ -187,7 +187,7 @@ JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeClose
 
 JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeShutdown
   (JNIEnv *env, jobject peer, jint handle, jboolean read) {
-    int how = read?SHUT_RD:SHUT_WR;
+    /* int how = read ? SHUT_RD : SHUT_WR; */
     if (shutdown(handle, SHUT_RDWR) < 0) {
         throwIOException(env, "shutdown failed. [%d] %s", errno, strerror(errno));
     }
@@ -356,7 +356,7 @@ JNIEXPORT void JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeReadCreden
   (JNIEnv *env, jobject peer, jint handle, jintArray b) {
     jint *rc;
     struct ucred cr;
-    int cr_len;
+    socklen_t cr_len;
 
     if (!validateSocket(env, handle)) {
         return;
