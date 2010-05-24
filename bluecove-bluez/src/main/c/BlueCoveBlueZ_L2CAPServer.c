@@ -39,6 +39,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Serve
 
     struct sockaddr_l2 localAddr;
     //bind local address
+    memset(&localAddr, 0, sizeof(localAddr));
     localAddr.l2_family = AF_BLUETOOTH;
     localAddr.l2_psm = 0;
     if (assignPsm != 0) {
@@ -123,6 +124,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Serve
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2ServerGetPSMImpl
   (JNIEnv* env, jobject peer, jlong handle) {
     struct sockaddr_l2 localAddr;
+    memset(&localAddr, 0, sizeof(localAddr));
     socklen_t len = sizeof(localAddr);
     if (getsockname(handle, (struct sockaddr*)&localAddr, &len) < 0) {
         throwIOException(env, "Failed to get l2_psm. [%d] %s", errno, strerror(errno));
@@ -151,6 +153,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Server
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2ServerAcceptAndOpenServerConnection
   (JNIEnv* env, jobject peer, jlong handle) {
     struct sockaddr_l2 remoteAddr;
+    memset(&remoteAddr, 0, sizeof(remoteAddr));
     socklen_t  remoteAddrLen = sizeof(remoteAddr);
     int client_socket = SOCKET_ERROR;
     do {

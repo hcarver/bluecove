@@ -55,6 +55,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_rfServe
     }
 
     struct sockaddr_rc localAddr;
+    memset(&localAddr, 0, sizeof(localAddr));
     //bind local address
     localAddr.rc_family = AF_BLUETOOTH;
     // TODO for kernel versions 2.6.6 and before use dynamic_bind_rc
@@ -124,6 +125,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_rfServe
 JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_rfServerGetChannelIDImpl
   (JNIEnv* env, jobject peer, jlong handle) {
     struct sockaddr_rc localAddr;
+    memset(&localAddr, 0, sizeof(localAddr));
     socklen_t len = sizeof(localAddr);
     if (getsockname(handle, (struct sockaddr*)&localAddr, &len) < 0) {
         throwIOException(env, "Failed to get rc_channel. [%d] %s", errno, strerror(errno));
@@ -151,6 +153,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_rfServer
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_rfServerAcceptAndOpenRfServerConnection
   (JNIEnv* env, jobject peer, jlong handle) {
     struct sockaddr_rc remoteAddr;
+    memset(&remoteAddr, 0, sizeof(remoteAddr));
     socklen_t  remoteAddrLen = sizeof(remoteAddr);
     int client_socket = SOCKET_ERROR;
     do {

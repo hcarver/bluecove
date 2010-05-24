@@ -47,6 +47,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2OpenC
 
     struct sockaddr_l2 localAddr;
     //bind local address
+    memset(&localAddr, 0, sizeof(localAddr));
     localAddr.l2_family = AF_BLUETOOTH;
     localAddr.l2_psm = 0;
     //bacpy(&localAddr.l2_bdaddr, BDADDR_ANY);
@@ -101,6 +102,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2OpenC
 
 
     struct sockaddr_l2 remoteAddr;
+    memset(&remoteAddr, 0, sizeof(remoteAddr));
     remoteAddr.l2_family = AF_BLUETOOTH;
     longToDeviceAddr(address, &remoteAddr.l2_bdaddr);
     remoteAddr.l2_psm = channel;
@@ -149,6 +151,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Re
   (JNIEnv* env, jobject peer, jlong handle) {
     struct pollfd fds;
     int timeout = 10; // milliseconds
+    memset(&fds, 0, sizeof(fds));
     fds.fd = handle;
     fds.events = POLLIN | POLLHUP | POLLERR;// | POLLRDHUP;
     fds.revents = 0;
@@ -189,6 +192,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2Receiv
     while(!dataReady) {
         struct pollfd fds;
         int timeout = 10; // milliseconds
+        memset(&fds, 0, sizeof(fds));
         fds.fd = handle;
         fds.events = POLLIN | POLLHUP | POLLERR;// | POLLRDHUP;
         fds.revents = 0;
@@ -313,6 +317,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2GetTra
 JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZDBus_l2RemoteAddress
   (JNIEnv* env, jobject peer, jlong handle) {
     struct sockaddr_l2 remoteAddr;
+    memset(&remoteAddr, 0, sizeof(remoteAddr));
     socklen_t len = sizeof(remoteAddr);
     if (getpeername(handle, (struct sockaddr*)&remoteAddr, &len) < 0) {
         throwIOException(env, "Failed to get L2CAP (%i) peer name. [%d] %s", (int)handle, errno, strerror(errno));

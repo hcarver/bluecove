@@ -213,7 +213,7 @@ JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeAvailable
     if (!validateSocket(env, handle)) {
         return -1;
     }
-
+    memset(&fds, 0, sizeof(fds));
     fds.fd = handle;
     fds.events = POLLIN | POLLHUP | POLLERR; // | POLLRDHUP;
     fds.revents = 0;
@@ -283,6 +283,7 @@ JNIEXPORT jint JNICALL Java_org_bluecove_socket_LocalSocketImpl_nativeRead
             do {
                 struct pollfd fds;
                 int timeout = 500; // milliseconds
+                memset(&fds, 0, sizeof(fds));
                 fds.fd = handle;
                 fds.events = POLLIN;
                 fds.revents = 0;
