@@ -112,7 +112,7 @@ class BluetoothEmulator implements BluetoothStack {
 	 * @see com.intel.bluetooth.BluetoothStack#getFeatureSet()
 	 */
 	public int getFeatureSet() {
-		return FEATURE_SET_DEVICE_SERVICE_CLASSES | FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP;
+		return FEATURE_SET_DEVICE_SERVICE_CLASSES | FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP | FEATURE_ASSIGN_SERVER_PSM;
 	}
 
 	// --- LocalDevice

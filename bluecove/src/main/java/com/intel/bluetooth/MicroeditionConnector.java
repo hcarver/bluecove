@@ -316,6 +316,9 @@ public abstract class MicroeditionConnector {
 				if (isL2CAP) {
 					String bluecove_ext_psm = (String) values.get(EXT_BLUECOVE_L2CAP_PSM);
 					if (bluecove_ext_psm != null) {
+					    if ((bluetoothStack.getFeatureSet() & BluetoothStack.FEATURE_ASSIGN_SERVER_PSM) == 0) {
+					        throw new IllegalArgumentException(EXT_BLUECOVE_L2CAP_PSM + " extension not supported on this stack");
+					    }
 						int psm = Integer.parseInt(bluecove_ext_psm, 16);
 						validateL2CAPPSM(psm, bluecove_ext_psm);
 						notifierParams.bluecove_ext_psm = psm;

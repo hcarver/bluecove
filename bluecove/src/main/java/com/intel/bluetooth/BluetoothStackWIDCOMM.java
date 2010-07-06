@@ -96,7 +96,7 @@ class BluetoothStackWIDCOMM implements BluetoothStack, BluetoothStackExtension {
 	 */
 	public int getFeatureSet() {
 	    int nativeBuildFeaturs = nativeBuildFeatures();
-		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP | ((nativeBuildFeaturs>0)?FEATURE_RSSI:0);
+		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP | FEATURE_ASSIGN_SERVER_PSM | ((nativeBuildFeaturs>0)?FEATURE_RSSI:0);
 	}
 
 	// ---------------------- Library initialization
