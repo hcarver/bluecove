@@ -126,6 +126,7 @@
             <roles>
                 <role>developer</role>
                 <role>developer-BlueZ-gpl</role>
+				<role>developer-android2</role>
             </roles>
             <timezone>+2</timezone>
         </developer>
@@ -286,6 +287,7 @@
     </dependencies>
 
     <modules>
+		<module>bluecove-android2</module>
         <module>bluecove-site-skin</module>
         <module>bluecove</module>
         <module>bluecove-emu</module>

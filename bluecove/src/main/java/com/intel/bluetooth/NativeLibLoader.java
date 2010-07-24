@@ -1,6 +1,7 @@
 /**
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2006-2009 Vlad Skarzhevskyy
+ *  Copyright (C) 2010 Mina Shokry.
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -56,7 +57,9 @@ public abstract class NativeLibLoader {
 
 	static final int OS_MAC_OS_X = 4;
 	
-	static final int OS_ANDROID = 5;
+	static final int OS_ANDROID_1_X = 5;
+
+	static final int OS_ANDROID_2_X = 6;
 
 	private static int os = 0;
 
@@ -98,7 +101,30 @@ public abstract class NativeLibLoader {
 			} else if (sysName.indexOf("linux") != -1) {
 				String javaRuntimeName = System.getProperty("java.runtime.name");
 				if ((javaRuntimeName != null) && (javaRuntimeName.toLowerCase().indexOf("android runtime") != -1)) {
-					os = OS_ANDROID;
+					try {
+						int androidApiLevel = Class.forName("android.os.Build$VERSION").getField("SDK_INT").getInt(null);
+						// android 2.0 has code 5
+						if (androidApiLevel >= 5) {
+							// let's consider probability that Android 2.x bluetooth APIs
+							// are available but for some reason, we want to use the native
+							// bluez stack directly.
+							// In this case, user just has not to include 
+							// bluecove-android2.jar in classpath.
+							Class.forName("com.intel.bluetooth.BluetoothStackAndroid");
+							os = OS_ANDROID_2_X;
+						} else {
+							os = OS_ANDROID_1_X;
+						}
+					} catch (Exception ex) {
+						// if field android.os.Build.VERSION.SDK_INT doesn't exist,
+						// we are on android 1.5 or earlier as this field was introduced
+						// in android 1.6 (API Level 4).
+
+						// also if com.intel.bluetooth.BluetoothStackAndroid class
+						// doesn't exist in classpath, we will use native
+						// bluez implementation
+						os = OS_ANDROID_1_X;
+					}
 				} else {
 					os = OS_LINUX;
 				}
@@ -191,8 +217,12 @@ public abstract class NativeLibLoader {
 			libFileName = libName;
 			libFileName = "lib" + libFileName + ".so";
 			break;
-		case OS_ANDROID:
+		case OS_ANDROID_1_X:
 			libFileName = "lib" + libFileName + ".so";
+			break;
+		case OS_ANDROID_2_X:
+			// we don't need to load any native libraries with android 2.x
+			state.libraryAvailable = true;
 			break;
 		default:
 			state.loadErrors.append("Native Library " + name + " not available on [" + sysName + "] platform");
@@ -214,7 +244,7 @@ public abstract class NativeLibLoader {
 		}
 		boolean useResource = true;
 		String d = System.getProperty(BlueCoveConfigProperties.PROPERTY_NATIVE_RESOURCE);
-		if (((d != null) && (d.equalsIgnoreCase("false"))) || (getOS() == OS_ANDROID)) {
+		if (((d != null) && (d.equalsIgnoreCase("false"))) || (getOS() == OS_ANDROID_1_X || getOS() == OS_ANDROID_2_X)) {
 			useResource = false;
 		}
 

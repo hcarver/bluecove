@@ -1,0 +1,87 @@
+<project name="BlueCove Android2" default="default" basedir=".">
+    <description>
+        Open source implementation of JSR-82 Java Bluetooth API. Implementation using android 2.x bluetooth APIs.
+    </description>
+
+    <property name="product_version" value="2.1.1-SNAPSHOT"/>
+
+    <property name="bluecove_main_dist_dir" location="../bluecove/target"/>
+    <property name="bluecove_main_jar" location="${bluecove_main_dist_dir}/bluecove-${product_version}.jar"/>
+
+    <property name="basedir" value="."/>
+
+    <!-- set global properties for this build -->
+    <property name="src" location="src/main/java"/>
+    <property name="target" location="target"/>
+    <property name="build_classes" location="${target}/classes"/>
+    <property name="dist" location="${target}"/>
+
+    <target name="default" depends="compile"/>
+
+    <target name="init">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build_classes}"/>
+        <available property="bluecove-main.exists" file="${bluecove_main_jar}" type="file"/>
+        <antcall target="verify-bluecove-main-exists"/>
+    </target>
+
+    <target name="verify-bluecove-main-exists" unless="bluecove-main.exists">
+        <fail>
+             The path "${bluecove_main_jar}" does not exist.
+             Download or build main BlueCove jar.
+        </fail>
+    </target>
+
+    <target name="compile" depends="init"
+        description="Compile the source">
+
+        <echo message="compiling on java ${java.version}, OS ${os.name} ${os.version} ${os.arch}"/>
+        <javac source="1.5" target="1.5" debug="true"
+               srcdir="${src}" destdir="${build_classes}">
+            <classpath>
+                <pathelement path="${bluecove_main_jar}"/>
+            </classpath>
+        </javac>
+
+    </target>
+
+    <target name="jar" depends="compile"
+            description="Create the distribution jar">
+
+        <!-- Create the distribution directory -->
+        <mkdir dir="${dist}"/>
+
+        <tstamp>
+            <format property="today" pattern="yyyy-MM-dd hh:mm:ss" />
+        </tstamp>
+
+        <jar jarfile="${dist}/bluecove-android2-${product_version}.jar">
+            <manifest>
+                <attribute name="Description" value="BlueCove JSR-82 implementation, Implementation using android 2.x bluetooth APIs."/>
+                <attribute name="License" value="The Apache Software License, Version 2.0"/>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Implementation-Version" value="${product_version}"/>
+                <attribute name="Build-Date" value="${today}"/>
+                <attribute name="Build-Jdk"  value="${java.runtime.version}"/>
+                <attribute name="Build-Platform" value="${os.arch} ${os.name} ${os.version}"/>
+            </manifest>
+            <fileset dir="${build_classes}">
+                <include name="**/*.class"/>
+                <exclude name="**/*.log"/>
+                <exclude name="**/.*"/>
+                <exclude name="**/Thumbs.db"/>
+            </fileset>
+        </jar>
+    </target>
+
+    <target name="clean"
+            description="clean up" >
+        <!-- Delete the ${build} and ${dist} directory trees -->
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+
+    <target name="all" depends="clean, jar"/>
+</project>

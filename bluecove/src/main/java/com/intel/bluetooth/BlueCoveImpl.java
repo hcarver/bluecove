@@ -2,6 +2,7 @@
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2004 Intel Corporation
  *  Copyright (C) 2006-2009 Vlad Skarzhevskyy
+ *  Copyright (C) 2010 Mina Shokry
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -103,6 +104,8 @@ public class BlueCoveImpl {
 
     public static final String STACK_EMULATOR = "emulator";
 
+    public static final String STACK_ANDROID_2_X = "android_2.x";
+
     // We can't use the same DLL on windows for all implementations.
     // Since WIDCOMM need to be compile /MD using VC6 and winsock /MT using
     // VC2005
@@ -140,6 +143,10 @@ public class BlueCoveImpl {
     public static final int BLUECOVE_STACK_DETECT_EMULATOR = 1 << 6;
 
     public static final int BLUECOVE_STACK_DETECT_BLUEZ_DBUS = 1 << 7;
+
+    public static final int BLUECOVE_STACK_DETECT_ANDROID_1_X = 1 << 8;
+
+    public static final int BLUECOVE_STACK_DETECT_ANDROID_2_X = 1 << 9;
 
     static final String TRUE = "true";
 
@@ -443,13 +450,23 @@ public class BlueCoveImpl {
         } else {
             switch (NativeLibLoader.getOS()) {
             case NativeLibLoader.OS_LINUX:
-			case NativeLibLoader.OS_ANDROID:
+			case NativeLibLoader.OS_ANDROID_1_X:
                 Class stackClass = loadStackClass(BlueCoveConfigProperties.PROPERTY_BLUEZ_CLASS,
                         "com.intel.bluetooth.BluetoothStackBlueZ|com.intel.bluetooth.BluetoothStackBlueZDBus");
                 detectorStack = newStackInstance(stackClass);
                 loadNativeLibraries(detectorStack);
                 stackSelected = detectorStack.getStackID();
                 break;
+			case NativeLibLoader.OS_ANDROID_2_X:
+				String androidBluetoothStack = "com.intel.bluetooth.BluetoothStackAndroid";
+				try {
+					Class androidStackClass = Class.forName(androidBluetoothStack);
+					detectorStack = newStackInstance(androidStackClass);
+					stackSelected = detectorStack.getStackID();
+					break;
+				} catch (ClassNotFoundException ex) {
+					throw new BluetoothStateException("BlueCove " + androidBluetoothStack + " not available");
+				}
             case NativeLibLoader.OS_MAC_OS_X:
                 detectorStack = new BluetoothStackOSX();
                 loadNativeLibraries(detectorStack);
@@ -464,7 +481,6 @@ public class BlueCoveImpl {
                 break;
             default:
                 throw new BluetoothStateException("BlueCove not available");
-
             }
         }
 
