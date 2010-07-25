@@ -792,12 +792,33 @@ public class BlueCoveImpl {
      *            property value
      *
      * @see com.intel.bluetooth.BlueCoveConfigProperties
+	 * @see #setConfigObject(java.lang.String, java.lang.Object) 
      *
      * @exception IllegalArgumentException
      *                if the stack already initialized and property can't be changed.
      */
     public static void setConfigProperty(String name, String value) {
-        if (name == null) {
+        setConfigObject(name, value);
+    }
+
+	/**
+     * API that can be used to configure BlueCove properties that aren't just strings
+     * Initialization properties should be changed before stack initialized. If
+     * <code>null</code> is passed as the <code>value</code> then the property will be
+     * removed.
+     *
+     * @param name
+     *            property name
+     * @param value
+     *            property value
+     *
+     * @see com.intel.bluetooth.BlueCoveConfigProperties
+     *
+     * @exception IllegalArgumentException
+     *                if the stack already initialized and property can't be changed.
+     */
+	public static void setConfigObject(String name, Object value) {
+		if (name == null) {
             throw new NullPointerException("key is null");
         }
         BluetoothStackHolder sh = currentStackHolder(true);
@@ -809,16 +830,16 @@ public class BlueCoveImpl {
         } else {
             sh.configProperties.put(name, value);
         }
-    }
+	}
 
-    public static String getConfigProperty(String key) {
-        if (key == null) {
+	public static Object getConfigObject(String key) {
+		if (key == null) {
             throw new NullPointerException("key is null");
         }
-        String value = null;
+        Object value = null;
         BluetoothStackHolder sh = currentStackHolder(false);
         if (sh != null) {
-            value = (String) sh.configProperties.get(key);
+            value = sh.configProperties.get(key);
         }
         if (value == null) {
             try {
@@ -844,6 +865,10 @@ public class BlueCoveImpl {
             }
         }
         return value;
+	}
+
+    public static String getConfigProperty(String key) {
+        return (String) getConfigObject(key);
     }
 
     public static boolean getConfigProperty(String key, boolean defaultValue) {

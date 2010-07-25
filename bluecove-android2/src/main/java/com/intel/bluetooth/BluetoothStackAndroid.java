@@ -23,15 +23,19 @@ package com.intel.bluetooth;
  *
  *  @version $Id$
  */
-
-
-
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
+import android.content.Intent;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
@@ -48,11 +52,19 @@ public class BluetoothStackAndroid implements BluetoothStack {
 
 	private BluetoothAdapter localBluetoothAdapter;
 
+	// TODO what is the real number for Attributes retrievable ?
+    private final static int ATTR_RETRIEVABLE_MAX = 256;
+	private Map<String, String> propertiesMap;
+
+	private Activity context;
+	
 	/**
 	 * This implementation will turn bluetooth on if it was off, in this case,
 	 * bluetooth will be turned off at shutting down stack.
 	 */
 	private boolean justEnabled;
+
+	private static final int REQUEST_CODE_CHANGE_DISCOVERABLE = 0;
 
 	public boolean isNativeCodeLoaded() {
 		return true;
@@ -76,15 +88,39 @@ public class BluetoothStackAndroid implements BluetoothStack {
 
 	public void initialize() throws BluetoothStateException {
 		localBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		if(localBluetoothAdapter == null) {
+		if (localBluetoothAdapter == null) {
 			throw new BluetoothStateException("Bluetooth isn't supported on this device");
 		}
+
+		Object contextObject = BlueCoveImpl.getConfigObject(BlueCoveConfigProperties.PROPERTY_ANDROID_CONTEXT);
+		if (contextObject == null || !(contextObject instanceof Activity)) {
+			throw new BluetoothStateException("Property " + BlueCoveConfigProperties.PROPERTY_ANDROID_CONTEXT
+					+ " MUST be correctly set before initializing the stack. Call "
+					+ "BlueCoveImpl.setConfigObject(BluecoveConfigProperties.PROPERTY_ANDROID_CONTEXT, <a reference to a context>)"
+					+ " before calling LocalDevice.getLocalDevice()");
+		}
+		context = (Activity) contextObject;
+
 		try {
-			if(!localBluetoothAdapter.isEnabled()) {
-				if(localBluetoothAdapter.enable()) {
+			if (!localBluetoothAdapter.isEnabled()) {
+				if (localBluetoothAdapter.enable()) {
 					justEnabled = true;
 				}
 			}
+
+			final String TRUE = "true";
+			final String FALSE = "false";
+			propertiesMap = new HashMap<String, String>();
+			propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_DEVICES_MAX, "7");
+			propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_TRANS_MAX, "7");
+			propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY_SCAN, TRUE);
+			propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE_SCAN, TRUE);
+			propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_INQUIRY, TRUE);
+			propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_CONNECTED_PAGE, TRUE);
+			propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_SD_ATTR_RETRIEVABLE_MAX, String.valueOf(ATTR_RETRIEVABLE_MAX));
+			propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_MASTER_SWITCH, FALSE);
+			propertiesMap.put(BluetoothConsts.PROPERTY_BLUETOOTH_L2CAP_RECEIVEMTU_MAX, "0");
+
 		} catch (Exception ex) {
 			BluetoothStateException bluetoothStateException = new BluetoothStateException(ex.toString());
 			throw bluetoothStateException;
@@ -92,7 +128,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public void destroy() {
-		if(justEnabled) {
+		if (justEnabled) {
 			localBluetoothAdapter.disable();
 		}
 	}
@@ -106,7 +142,8 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public int getFeatureSet() {
-		return FEATURE_SERVICE_ATTRIBUTES | FEATURE_L2CAP | FEATURE_RSSI;
+		// TODO: which of these is really available?
+		return FEATURE_SERVICE_ATTRIBUTES /*| FEATURE_L2CAP*/ | FEATURE_RSSI;
 	}
 
 	public String getLocalDeviceBluetoothAddress() throws BluetoothStateException {
@@ -122,10 +159,40 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public void setLocalDeviceServiceClasses(int classOfDevice) {
+		// TODO: not yet implemented
 	}
 
 	public boolean setLocalDeviceDiscoverable(int mode) throws BluetoothStateException {
-		return false;
+		Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+
+		int androidMode = 0;
+		switch (mode) {
+			case DiscoveryAgent.GIAC:
+				androidMode = BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE;
+				break;
+			case DiscoveryAgent.LIAC:
+				androidMode = BluetoothAdapter.SCAN_MODE_CONNECTABLE;
+				break;
+			case DiscoveryAgent.NOT_DISCOVERABLE:
+				androidMode = BluetoothAdapter.SCAN_MODE_NONE;
+				break;
+			// any other value is invalid and this was previously checked for in
+			// implementation of LocalDevice.setDiscoverable()
+		}
+		intent.putExtra(BluetoothAdapter.EXTRA_SCAN_MODE, androidMode);
+
+		int duration;
+		if (mode == DiscoveryAgent.NOT_DISCOVERABLE) {
+			duration = 0;
+		} else {
+			duration = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_ANDROID_DISCOVERABLE_DURATION, 120);
+		}
+		intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, duration);
+
+		context.startActivityForResult(intent, REQUEST_CODE_CHANGE_DISCOVERABLE);
+		
+		// TODO: return appropriate value according to if mode was changed or not.
+		return true;
 	}
 
 	public int getLocalDeviceDiscoverable() {
@@ -146,7 +213,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public String getLocalDeviceProperty(String property) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return propertiesMap.get(property);
 	}
 
 	public boolean authenticateRemoteDevice(long address) throws IOException {
@@ -177,7 +244,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	private String getAddressAsString(long address) {
 		String addressHex = Long.toHexString(address);
 		StringBuilder buffer = new StringBuilder("000000000000".substring(addressHex.length()) + addressHex);
-		for(int index = 2; index < buffer.length(); index += 3) {
+		for (int index = 2; index < buffer.length(); index += 3) {
 			buffer.insert(index, ':');
 		}
 		return buffer.toString();
@@ -192,11 +259,11 @@ public class BluetoothStackAndroid implements BluetoothStack {
 		RemoteDevice[] devices = new RemoteDevice[bondedDevices.size()];
 		int index = 0;
 		Iterator<BluetoothDevice> iterator = bondedDevices.iterator();
-		while(iterator.hasNext()) {
+		while (iterator.hasNext()) {
 			BluetoothDevice device = iterator.next();
 			devices[index++] = RemoteDeviceHelper.createRemoteDevice(this,
-				getAddressAsLong(device.getAddress()), device.getName(),
-				device.getBondState() == BluetoothDevice.BOND_BONDED);
+					getAddressAsLong(device.getAddress()), device.getName(),
+					device.getBondState() == BluetoothDevice.BOND_BONDED);
 		}
 		return devices;
 	}

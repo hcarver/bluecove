@@ -193,4 +193,16 @@ public interface BlueCoveConfigProperties {
      * Defaults to false.
      */
     public static final String PROPERTY_SDP_STRING_ENCODING_ASCII = "bluecove.sdp.string_encoding_ascii";
+
+	/**
+	 * To be able to use some of android bluetooth APIs, we need a reference to
+	 * an android context object
+	 */
+	public static final String PROPERTY_ANDROID_CONTEXT = "bluecove.android.context";
+
+	/**
+	 * In android, device can't be discoverable forever. you have to set time in seconds.
+	 * After this time, device will return automatically to non-discoverable.
+	 */
+	public static final String PROPERTY_ANDROID_DISCOVERABLE_DURATION = "bluecove.android.discoverable_duration";
 }
