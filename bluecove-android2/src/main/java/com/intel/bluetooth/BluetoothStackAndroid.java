@@ -25,17 +25,18 @@ package com.intel.bluetooth;
  */
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
@@ -65,6 +66,8 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	private boolean justEnabled;
 
 	private static final int REQUEST_CODE_CHANGE_DISCOVERABLE = 0;
+
+	private Map<DiscoveryListener, DiscoveryBroadcastReceiver> listenerMap;
 
 	public boolean isNativeCodeLoaded() {
 		return true;
@@ -100,6 +103,8 @@ public class BluetoothStackAndroid implements BluetoothStack {
 					+ " before calling LocalDevice.getLocalDevice()");
 		}
 		context = (Activity) contextObject;
+
+		listenerMap = new HashMap<DiscoveryListener, DiscoveryBroadcastReceiver>();
 
 		try {
 			if (!localBluetoothAdapter.isEnabled()) {
@@ -217,27 +222,38 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public boolean authenticateRemoteDevice(long address) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return false;
 	}
 
 	public boolean authenticateRemoteDevice(long address, String passkey) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return false;
 	}
 
 	public void removeAuthenticationWithRemoteDevice(long address) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		throw new NotSupportedIOException(getStackID());
 	}
 
-	public boolean startInquiry(int accessCode, DiscoveryListener listener) throws BluetoothStateException {
-		throw new UnsupportedOperationException("Not supported yet.");
+	public boolean startInquiry(int accessCode, final DiscoveryListener listener) throws BluetoothStateException {
+		DiscoveryBroadcastReceiver discoveryBroadcastReceiver = new DiscoveryBroadcastReceiver(listener);
+		listenerMap.put(listener, discoveryBroadcastReceiver);
+
+		IntentFilter deviceFound = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+		IntentFilter discoveryFinished = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+
+		context.registerReceiver(discoveryBroadcastReceiver, deviceFound);
+		context.registerReceiver(discoveryBroadcastReceiver, discoveryFinished);
+
+		return localBluetoothAdapter.startDiscovery();
 	}
 
 	public boolean cancelInquiry(DiscoveryListener listener) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		DiscoveryBroadcastReceiver discoveryBroadcastReceiver = listenerMap.get(listener);
+		discoveryBroadcastReceiver.cancelled = true;
+		return localBluetoothAdapter.cancelDiscovery();
 	}
 
 	public String getRemoteDeviceFriendlyName(long address) throws IOException {
-		String addressString = getAddressAsString(address);
+		String addressString = getAddressAsString(address).toUpperCase();
 		return localBluetoothAdapter.getRemoteDevice(addressString).getName();
 	}
 
@@ -410,5 +426,50 @@ public class BluetoothStackAndroid implements BluetoothStack {
 
 	public boolean l2Encrypt(long address, long handle, boolean on) throws IOException {
 		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	private class DiscoveryBroadcastReceiver extends BroadcastReceiver {
+		private DiscoveryListener discoveryListener;
+		private boolean cancelled;
+
+		public DiscoveryBroadcastReceiver(DiscoveryListener discoveryListener) {
+			this.discoveryListener = discoveryListener;
+			cancelled = false;
+		}
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+				BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+				BluetoothClass bluetoothClass = intent.getParcelableExtra(BluetoothDevice.EXTRA_CLASS);
+				RemoteDevice remoteDevice = createRemoteDevice(bluetoothDevice);
+				DeviceClass deviceClass = createDeviceClass(bluetoothClass);
+				discoveryListener.deviceDiscovered(remoteDevice, deviceClass);
+			} else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+				discoveryListener.inquiryCompleted(cancelled ?
+					DiscoveryListener.INQUIRY_TERMINATED :
+					DiscoveryListener.INQUIRY_COMPLETED);
+			}
+		}
+
+	}
+
+	private RemoteDevice createRemoteDevice(BluetoothDevice bluetoothDevice) {
+		RemoteDevice remoteDevice = RemoteDeviceHelper.createRemoteDevice(this,
+				getAddressAsLong(bluetoothDevice.getAddress()), bluetoothDevice.getName(),
+				bluetoothDevice.getBondState() == BluetoothDevice.BOND_BONDED);
+		return remoteDevice;
+	}
+	
+	private DeviceClass createDeviceClass(BluetoothClass bluetoothClass) {
+		int record = bluetoothClass.getDeviceClass();
+		for (int service = 0x4000; service  < 0x800000; service <<= 1) {
+			if (bluetoothClass.hasService(service)) {
+				record |= service;
+			}
+		}
+		DeviceClass deviceClass = new DeviceClass(record);
+		return deviceClass;
 	}
 }
