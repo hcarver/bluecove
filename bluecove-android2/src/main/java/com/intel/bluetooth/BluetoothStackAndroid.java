@@ -27,6 +27,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +43,7 @@ import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
+import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.ServiceRegistrationException;
 import javax.bluetooth.UUID;
 
@@ -196,7 +198,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 
 		context.startActivityForResult(intent, REQUEST_CODE_CHANGE_DISCOVERABLE);
 		
-		// TODO: return appropriate value according to if mode was changed or not.
+		// TODO: return appropriate value according to whether mode was changed or not.
 		return true;
 	}
 
@@ -259,7 +261,11 @@ public class BluetoothStackAndroid implements BluetoothStack {
 
 	private String getAddressAsString(long address) {
 		String addressHex = Long.toHexString(address);
-		StringBuilder buffer = new StringBuilder("000000000000".substring(addressHex.length()) + addressHex);
+		return formatAddressInAndroid(addressHex);
+	}
+
+	private String formatAddressInAndroid(String bluetoothAddress) {
+		StringBuilder buffer = new StringBuilder("000000000000".substring(bluetoothAddress.length()) + bluetoothAddress);
 		for (int index = 2; index < buffer.length(); index += 3) {
 			buffer.insert(index, ':');
 		}
@@ -285,23 +291,50 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public Boolean isRemoteDeviceTrusted(long address) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return null;
 	}
 
 	public Boolean isRemoteDeviceAuthenticated(long address) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return null;
 	}
 
-	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice device, DiscoveryListener listener) throws BluetoothStateException {
-		throw new UnsupportedOperationException("Not supported yet.");
+	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice remoteDevice, DiscoveryListener listener) throws BluetoothStateException {
+		SearchServicesRunnable searchServicesRunnable = new SearchServicesRunnable() {
+
+			public int runSearchServices(SearchServicesThread sst, int[] attrSet, UUID[] uuidSet, RemoteDevice remoteDevice, DiscoveryListener listener) throws BluetoothStateException {
+				try {
+					sst.searchServicesStartedCallback();
+					for (UUID jsr82UUID : uuidSet) {
+						java.util.UUID javaUUID = createJavaUUID(jsr82UUID);
+						String addressInAndroidFormat = formatAddressInAndroid(remoteDevice.getBluetoothAddress());
+						BluetoothDevice device = localBluetoothAdapter.getRemoteDevice(addressInAndroidFormat);
+						BluetoothSocket socket = device.createRfcommSocketToServiceRecord(javaUUID);
+						if (socket != null) {
+							listener.servicesDiscovered(sst.getTransID(), new ServiceRecord[] {createServiceRecord(remoteDevice)});
+						}
+						socket.close();
+					}
+					return DiscoveryListener.SERVICE_SEARCH_COMPLETED;
+				} catch (IOException ex) {
+					return DiscoveryListener.SERVICE_SEARCH_ERROR;
+				}
+			}
+		};
+
+		return SearchServicesThread.startSearchServices(this, searchServicesRunnable, attrSet, uuidSet, remoteDevice, listener);
 	}
 
 	public boolean cancelServiceSearch(int transID) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		SearchServicesThread sst = SearchServicesThread.getServiceSearchThread(transID);
+        if (sst != null) {
+            return sst.setTerminated();
+        } else {
+            return false;
+        }
 	}
 
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return false;
 	}
 
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
@@ -447,12 +480,12 @@ public class BluetoothStackAndroid implements BluetoothStack {
 				DeviceClass deviceClass = createDeviceClass(bluetoothClass);
 				discoveryListener.deviceDiscovered(remoteDevice, deviceClass);
 			} else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+				context.unregisterReceiver(this);
 				discoveryListener.inquiryCompleted(cancelled ?
 					DiscoveryListener.INQUIRY_TERMINATED :
 					DiscoveryListener.INQUIRY_COMPLETED);
 			}
 		}
-
 	}
 
 	private RemoteDevice createRemoteDevice(BluetoothDevice bluetoothDevice) {
@@ -471,5 +504,31 @@ public class BluetoothStackAndroid implements BluetoothStack {
 		}
 		DeviceClass deviceClass = new DeviceClass(record);
 		return deviceClass;
+	}
+
+	private java.util.UUID createJavaUUID(UUID jsr82UUID) {
+		String uuidString = jsr82UUID.toString();
+		String part1 = uuidString.substring(0, 8);
+		String part2 = uuidString.substring(8, 16);
+		String part3 = uuidString.substring(16, 24);
+		String part4 = uuidString.substring(24, 32);
+
+		long part1Long = Long.parseLong(part1, 16);
+		long part2Long = Long.parseLong(part2, 16);
+		long part3Long = Long.parseLong(part3, 16);
+		long part4Long = Long.parseLong(part4, 16);
+
+		long mostSigBits = (part1Long << 32) | part2Long;
+		long leastSigBits = (part3Long << 32) | part4Long;
+		
+		java.util.UUID javaUUID = new java.util.UUID(mostSigBits, leastSigBits);
+
+		return javaUUID;
+	}
+
+	private ServiceRecord createServiceRecord(RemoteDevice remoteDevice) {
+		ServiceRecord record = new ServiceRecordImpl(this, remoteDevice, 0);
+
+		return record;
 	}
 }
