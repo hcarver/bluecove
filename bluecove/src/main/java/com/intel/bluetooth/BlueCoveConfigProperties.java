@@ -205,4 +205,11 @@ public interface BlueCoveConfigProperties {
 	 * After this time, device will return automatically to non-discoverable.
 	 */
 	public static final String PROPERTY_ANDROID_DISCOVERABLE_DURATION = "bluecove.android.discoverable_duration";
+
+	/**
+	 * Android APIs don't give utilities to examine the service record. So, set this property
+	 * with comma-separated UUIDs you wish services containing them to be
+	 * considered as OBEX services.
+	 */
+	public static final String PROPERTY_ANDROID_OBEX_UUIDS = "bluecove.android.obex_uuids";
 }

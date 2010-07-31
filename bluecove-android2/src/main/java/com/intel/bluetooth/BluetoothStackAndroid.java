@@ -23,6 +23,7 @@ package com.intel.bluetooth;
  *
  *  @version $Id$
  */
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -34,8 +35,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.bluetooth.BluetoothStateException;
@@ -70,6 +75,11 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	private static final int REQUEST_CODE_CHANGE_DISCOVERABLE = 0;
 
 	private Map<DiscoveryListener, DiscoveryBroadcastReceiver> listenerMap;
+
+	private static final UUID UUID_OBEX = new UUID(0x0008);
+	private static final UUID UUID_OBEX_OBJECT_PUSH = new UUID(0x1105);
+	private static final UUID UUID_OBEX_FILE_TRANSFER = new UUID(0x1106);
+	private List<UUID> obexUUIDs = Arrays.asList(new UUID[]{UUID_OBEX, UUID_OBEX_FILE_TRANSFER, UUID_OBEX_OBJECT_PUSH});
 
 	public boolean isNativeCodeLoaded() {
 		return true;
@@ -107,6 +117,19 @@ public class BluetoothStackAndroid implements BluetoothStack {
 		context = (Activity) contextObject;
 
 		listenerMap = new HashMap<DiscoveryListener, DiscoveryBroadcastReceiver>();
+
+		String obexUUIDsProperty = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_ANDROID_OBEX_UUIDS);
+		if (obexUUIDsProperty != null) {
+			String[] uuids = obexUUIDsProperty.split(",");
+			for (String uuid : uuids) {
+				try {
+					UUID jsr82UUID = new UUID(uuid, false);
+					obexUUIDs.add(jsr82UUID);
+				} catch (Exception ex) {
+					// ignore wrong values.
+				}
+			}
+		}
 
 		try {
 			if (!localBluetoothAdapter.isEnabled()) {
@@ -269,7 +292,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 		for (int index = 2; index < buffer.length(); index += 3) {
 			buffer.insert(index, ':');
 		}
-		return buffer.toString();
+		return buffer.toString().toUpperCase();
 	}
 
 	private long getAddressAsLong(String address) {
@@ -299,8 +322,10 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public int searchServices(int[] attrSet, UUID[] uuidSet, RemoteDevice remoteDevice, DiscoveryListener listener) throws BluetoothStateException {
+		if (uuidSet.length != 1) {
+			throw new BluetoothStateException("Searching for services with more than one UUID isn't supported on Android");
+		}
 		SearchServicesRunnable searchServicesRunnable = new SearchServicesRunnable() {
-
 			public int runSearchServices(SearchServicesThread sst, int[] attrSet, UUID[] uuidSet, RemoteDevice remoteDevice, DiscoveryListener listener) throws BluetoothStateException {
 				try {
 					sst.searchServicesStartedCallback();
@@ -310,7 +335,8 @@ public class BluetoothStackAndroid implements BluetoothStack {
 						BluetoothDevice device = localBluetoothAdapter.getRemoteDevice(addressInAndroidFormat);
 						BluetoothSocket socket = device.createRfcommSocketToServiceRecord(javaUUID);
 						if (socket != null) {
-							listener.servicesDiscovered(sst.getTransID(), new ServiceRecord[] {createServiceRecord(remoteDevice)});
+							boolean obex = obexUUIDs.contains(jsr82UUID);
+							listener.servicesDiscovered(sst.getTransID(), new ServiceRecord[] {createServiceRecord(remoteDevice, socket, jsr82UUID, obex)});
 						}
 						socket.close();
 					}
@@ -334,19 +360,26 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
+		// TODO: is this correct and best thing we can do?
 		return false;
 	}
 
 	public long connectionRfOpenClientConnection(BluetoothConnectionParams params) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnectionParams androidParams = (AndroidBluetoothConnectionParams) params;
+		BluetoothDevice bluetoothDevice = localBluetoothAdapter.getRemoteDevice(getAddressAsString(androidParams.address));
+		UUID jsr82UUID = new UUID(androidParams.serviceUUID, false);
+		BluetoothSocket socket = bluetoothDevice.createRfcommSocketToServiceRecord(createJavaUUID(jsr82UUID));
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.createConnection(socket);
+		return bluetoothConnection.getHandle();
 	}
 
 	public int rfGetSecurityOpt(long handle, int expected) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		// TODO: is this correct?
+		return ServiceRecord.NOAUTHENTICATE_NOENCRYPT;
 	}
 
 	public void connectionRfCloseClientConnection(long handle) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnection.getBluetoothConnection(handle).close();
 	}
 
 	public void connectionRfCloseServerConnection(long handle) throws IOException {
@@ -370,35 +403,50 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public long getConnectionRfRemoteAddress(long handle) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
+		String address = bluetoothConnection.getSocket().getRemoteDevice().getAddress();
+		return getAddressAsLong(address);
 	}
 
 	public boolean rfEncrypt(long address, long handle, boolean on) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		// TODO: is this correct?
+		return false;
 	}
 
 	public int connectionRfRead(long handle) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
+		InputStream inputStream = bluetoothConnection.getInputStream();
+		return inputStream.read();
 	}
 
 	public int connectionRfRead(long handle, byte[] b, int off, int len) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
+		InputStream inputStream = bluetoothConnection.getInputStream();
+		return inputStream.read(b, off, len);
 	}
 
 	public int connectionRfReadAvailable(long handle) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
+		InputStream inputStream = bluetoothConnection.getInputStream();
+		return inputStream.available();
 	}
 
 	public void connectionRfWrite(long handle, int b) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
+		OutputStream outputStream = bluetoothConnection.getOutputStream();
+		outputStream.write(b);
 	}
 
 	public void connectionRfWrite(long handle, byte[] b, int off, int len) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
+		OutputStream outputStream = bluetoothConnection.getOutputStream();
+		outputStream.write(b, off, len);
 	}
 
 	public void connectionRfFlush(long handle) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
+		OutputStream outputStream = bluetoothConnection.getOutputStream();
+		outputStream.flush();
 	}
 
 	public long l2OpenClientConnection(BluetoothConnectionParams params, int receiveMTU, int transmitMTU) throws IOException {
@@ -526,8 +574,8 @@ public class BluetoothStackAndroid implements BluetoothStack {
 		return javaUUID;
 	}
 
-	private ServiceRecord createServiceRecord(RemoteDevice remoteDevice) {
-		ServiceRecord record = new ServiceRecordImpl(this, remoteDevice, 0);
+	private ServiceRecord createServiceRecord(RemoteDevice remoteDevice, BluetoothSocket socket, UUID uuid, boolean obex) {
+		ServiceRecord record = new AndroidServiceRecord(this, remoteDevice, socket, uuid, obex);
 
 		return record;
 	}

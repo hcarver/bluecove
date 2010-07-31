@@ -2,6 +2,7 @@
  *  BlueCove - Java library for Bluetooth
  *  Copyright (C) 2004 Intel Corporation
  *  Copyright (C) 2006-2009 Vlad Skarzhevskyy
+ *  Copyright (C) 2010 Mina Shokry
  *
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -66,40 +67,26 @@ public abstract class MicroeditionConnector {
 	/*
 	 * Access mode WRITE. The value 2 is assigned to WRITE.
 	 */
-
 	public static final int WRITE = Connector.WRITE;
 
 	/*
 	 * Access mode READ_WRITE. The value 3 is assigned to READ_WRITE.
 	 */
-
 	public static final int READ_WRITE = Connector.READ_WRITE;
-
-	private static Hashtable/* <String, String> */suportScheme = new Hashtable();
-
-	private static Hashtable/* <String, String> */srvParams = new Hashtable();
-
-	private static Hashtable/* <String, String> */cliParams = new Hashtable();
-
-	private static Hashtable/* <String, String> */cliParamsL2CAP = new Hashtable();
-
-	private static Hashtable/* <String, String> */srvParamsL2CAP = new Hashtable();
-
+	private static Hashtable/* <String, String> */ suportScheme = new Hashtable();
+	private static Hashtable/* <String, String> */ srvParams = new Hashtable();
+	private static Hashtable/* <String, String> */ cliParams = new Hashtable();
+	private static Hashtable/* <String, String> */ cliParamsL2CAP = new Hashtable();
+	private static Hashtable/* <String, String> */ srvParamsL2CAP = new Hashtable();
 	private static final String AUTHENTICATE = "authenticate";
-
 	private static final String AUTHORIZE = "authorize";
-
 	private static final String ENCRYPT = "encrypt";
-
 	private static final String MASTER = "master";
-
 	private static final String NAME = "name";
-
 	private static final String RECEIVE_MTU = "receivemtu";
-
 	private static final String TRANSMIT_MTU = "transmitmtu";
-
 	private static final String EXT_BLUECOVE_L2CAP_PSM = "bluecovepsm";
+	private static final String ANDROID = "android";
 
 	static {
 		// cliParams ::== master | encrypt | authenticate
@@ -133,7 +120,6 @@ public abstract class MicroeditionConnector {
 	}
 
 	private MicroeditionConnector() {
-
 	}
 
 	static void copyAll(Hashtable dest, Hashtable src) {
@@ -148,6 +134,15 @@ public abstract class MicroeditionConnector {
 		if (validName != null) {
 			return validName;
 		}
+
+		// an addition for android.
+		// a workaround to legalize the non-jsr82-compliant android connection urls
+		// using a "android=true" parameter at end of the connection string.
+		if (ANDROID.equals(paramName)) {
+			return ANDROID;
+		}
+		// end of addition to legalize android connection strings.
+
 		return null;
 	}
 
@@ -157,7 +152,6 @@ public abstract class MicroeditionConnector {
 	 * connection cannot be made, or the protocol type does not exist. java.io.IOException - If some other kind of I/O
 	 * error occurs. SecurityException - If a requested protocol handler is not permitted.
 	 */
-
 	public static Connection open(String name) throws IOException {
 		return openImpl(name, READ_WRITE, false, true);
 	}
@@ -185,8 +179,7 @@ public abstract class MicroeditionConnector {
 			throw new ConnectionNotFoundException(scheme);
 		}
 		boolean schemeBluetooth = (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_RFCOMM))
-				|| (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX) || (scheme
-						.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)));
+				|| (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX) || (scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP)));
 		boolean isL2CAP = scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_L2CAP);
 		boolean isTCPOBEX = scheme.equals(BluetoothConsts.PROTOCOL_SCHEME_TCP_OBEX);
 
@@ -282,6 +275,8 @@ public abstract class MicroeditionConnector {
 
 		BluetoothConnectionParams connectionParams = null;
 
+		boolean isAndroid = values.containsKey(ANDROID);
+
 		int channel = 0;
 		if (isServer) {
 			if (!allowServer) {
@@ -316,9 +311,9 @@ public abstract class MicroeditionConnector {
 				if (isL2CAP) {
 					String bluecove_ext_psm = (String) values.get(EXT_BLUECOVE_L2CAP_PSM);
 					if (bluecove_ext_psm != null) {
-					    if ((bluetoothStack.getFeatureSet() & BluetoothStack.FEATURE_ASSIGN_SERVER_PSM) == 0) {
-					        throw new IllegalArgumentException(EXT_BLUECOVE_L2CAP_PSM + " extension not supported on this stack");
-					    }
+						if ((bluetoothStack.getFeatureSet() & BluetoothStack.FEATURE_ASSIGN_SERVER_PSM) == 0) {
+							throw new IllegalArgumentException(EXT_BLUECOVE_L2CAP_PSM + " extension not supported on this stack");
+						}
 						int psm = Integer.parseInt(bluecove_ext_psm, 16);
 						validateL2CAPPSM(psm, bluecove_ext_psm);
 						notifierParams.bluecove_ext_psm = psm;
@@ -326,26 +321,40 @@ public abstract class MicroeditionConnector {
 				}
 			}
 		} else { // (!isServer)
-			try {
-				channel = Integer.parseInt(portORuuid, isL2CAP ? 16 : 10);
-			} catch (NumberFormatException e) {
-				throw new IllegalArgumentException("channel " + portORuuid);
-			}
-			if (channel < 0) {
-				throw new IllegalArgumentException("channel " + portORuuid);
+			if (!isAndroid) {
+				try {
+					channel = Integer.parseInt(portORuuid, isL2CAP ? 16 : 10);
+				} catch (NumberFormatException e) {
+					throw new IllegalArgumentException("channel " + portORuuid);
+				}
+				if (channel < 0) {
+					throw new IllegalArgumentException("channel " + portORuuid);
+				}
 			}
 			if (schemeBluetooth) {
-				if (isL2CAP) {
-					validateL2CAPPSM(channel, portORuuid);
+				if (!isAndroid) {
+					if (isL2CAP) {
+						validateL2CAPPSM(channel, portORuuid);
+					} else {
+						if ((channel < BluetoothConsts.RFCOMM_CHANNEL_MIN)
+								|| (channel > BluetoothConsts.RFCOMM_CHANNEL_MAX)) {
+							throw new IllegalArgumentException("RFCOMM channel " + portORuuid);
+						}
+					}
+					
+					connectionParams = new BluetoothConnectionParams(RemoteDeviceHelper.getAddress(host), channel,
+							paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
 				} else {
-					if ((channel < BluetoothConsts.RFCOMM_CHANNEL_MIN)
-							|| (channel > BluetoothConsts.RFCOMM_CHANNEL_MAX)) {
-						throw new IllegalArgumentException("RFCOMM channel " + portORuuid);
+					try {
+						// using reflection not to add a dependency on android module
+						connectionParams = (BluetoothConnectionParams) Class.forName("com.intel.bluetooth.AndroidBluetoothConnectionParams").getConstructor(new Class[]{long.class, boolean.class, boolean.class}).newInstance(new Object[]{Long.valueOf(RemoteDeviceHelper.getAddress(host)),
+									Boolean.valueOf(paramBoolean(values, AUTHENTICATE)), Boolean.valueOf(paramBoolean(values, ENCRYPT))});
+						connectionParams.getClass().getMethod("setServiceUUID", new Class[] {String.class}).invoke(connectionParams, new Object[] {portORuuid});
+					} catch (Exception ex) {
+						throw new BluetoothConnectionException(BluetoothConnectionException.FAILED_NOINFO, ex.toString());
 					}
 				}
-
-				connectionParams = new BluetoothConnectionParams(RemoteDeviceHelper.getAddress(host), channel,
-						paramBoolean(values, AUTHENTICATE), paramBoolean(values, ENCRYPT));
+				
 				connectionParams.timeouts = timeouts;
 				if (connectionParams.encrypt && (!connectionParams.authenticate)) {
 					if (values.get(AUTHENTICATE) == null) {
@@ -511,7 +520,6 @@ public abstract class MicroeditionConnector {
 	 * - If the requested connection cannot be made, or the protocol type does not exist. java.io.IOException - If some
 	 * other kind of I/O error occurs. SecurityException - If a requested protocol handler is not permitted.
 	 */
-
 	public static Connection open(String name, int mode) throws IOException {
 		return openImpl(name, mode, false, true);
 	}
@@ -523,7 +531,6 @@ public abstract class MicroeditionConnector {
 	 * cannot be made, or the protocol type does not exist. java.io.IOException - If some other kind of I/O error
 	 * occurs. SecurityException - If a requested protocol handler is not permitted.
 	 */
-
 	public static Connection open(String name, int mode, boolean timeouts) throws IOException {
 		return openImpl(name, mode, timeouts, true);
 	}
@@ -534,7 +541,6 @@ public abstract class MicroeditionConnector {
 	 * the connection cannot be found. java.io.IOException - If some other kind of I/O error occurs. SecurityException -
 	 * If access to the requested stream is not permitted.
 	 */
-
 	public static DataInputStream openDataInputStream(String name) throws IOException {
 		return new DataInputStream(openInputStream(name));
 	}
@@ -545,7 +551,6 @@ public abstract class MicroeditionConnector {
 	 * the connection cannot be found. java.io.IOException - If some other kind of I/O error occurs. SecurityException -
 	 * If access to the requested stream is not permitted.
 	 */
-
 	public static DataOutputStream openDataOutputStream(String name) throws IOException {
 		return new DataOutputStream(openOutputStream(name));
 	}
@@ -556,7 +561,6 @@ public abstract class MicroeditionConnector {
 	 * connection cannot be found. java.io.IOException - If some other kind of I/O error occurs. SecurityException - If
 	 * access to the requested stream is not permitted.
 	 */
-
 	public static InputStream openInputStream(String name) throws IOException {
 		InputConnection con = ((InputConnection) openImpl(name, READ, false, false));
 		try {
@@ -572,7 +576,6 @@ public abstract class MicroeditionConnector {
 	 * connection cannot be found. java.io.IOException - If some other kind of I/O error occurs. SecurityException - If
 	 * access to the requested stream is not permitted.
 	 */
-
 	public static OutputStream openOutputStream(String name) throws IOException {
 		OutputConnection con = ((OutputConnection) openImpl(name, WRITE, false, false));
 		try {
@@ -581,5 +584,4 @@ public abstract class MicroeditionConnector {
 			con.close();
 		}
 	}
-
 }
