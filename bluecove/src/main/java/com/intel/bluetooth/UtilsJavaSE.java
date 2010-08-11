@@ -90,7 +90,7 @@ public class UtilsJavaSE {
 			if ((javaV == null) || (javaV.length() < 3)) {
 				return 0;
 			}
-			return Integer.valueOf(javaV.charAt(2)).intValue();
+			return Integer.valueOf(javaV.substring(2, 3)).intValue();
 		} catch (Throwable e) {
 			return 0;
 		}
