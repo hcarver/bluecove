@@ -28,6 +28,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -383,11 +384,15 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public void connectionRfCloseServerConnection(long handle) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnection.getBluetoothConnection(handle).close();
 	}
 
 	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		java.util.UUID javaUUID = createJavaUUID(params.uuid);
+		BluetoothServerSocket serverSocket = localBluetoothAdapter.listenUsingRfcommWithServiceRecord(params.name, javaUUID);
+		AndroidBluetoothConnection connection = AndroidBluetoothConnection.createServerConnection(serverSocket);
+
+		return connection.getHandle();
 	}
 
 	public void rfServerUpdateServiceRecord(long handle, ServiceRecordImpl serviceRecord, boolean acceptAndOpen) throws ServiceRegistrationException {
@@ -395,11 +400,18 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public long rfServerAcceptAndOpenRfServerConnection(long handle) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
+		BluetoothServerSocket serverSocket = bluetoothConnection.getServerSocket();
+		BluetoothSocket socket = serverSocket.accept();
+		AndroidBluetoothConnection connection = AndroidBluetoothConnection.createConnection(socket);
+		return connection.getHandle();
 	}
 
 	public void rfServerClose(long handle, ServiceRecordImpl serviceRecord) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
+		BluetoothServerSocket serverSocket = bluetoothConnection.getServerSocket();
+		serverSocket.close();
+
 	}
 
 	public long getConnectionRfRemoteAddress(long handle) throws IOException {

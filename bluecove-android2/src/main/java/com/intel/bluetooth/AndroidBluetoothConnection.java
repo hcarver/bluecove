@@ -24,16 +24,13 @@
 
 package com.intel.bluetooth;
 
-import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -49,6 +46,7 @@ public class AndroidBluetoothConnection {
 	}
 
 	private BluetoothSocket socket;
+	private BluetoothServerSocket serverSocket;
 	private InputStream inputStream;
 	private OutputStream outputStream;
 	private long handle;
@@ -61,6 +59,11 @@ public class AndroidBluetoothConnection {
 		outputStream = socket.getOutputStream();
 	}
 
+	private AndroidBluetoothConnection(long handle, BluetoothServerSocket serverSocket) {
+		this.handle = handle;
+		this.serverSocket = serverSocket;
+	}
+
 	public synchronized static AndroidBluetoothConnection createConnection(BluetoothSocket socket) throws IOException {
 		AndroidBluetoothConnection bluetoothConnection = new AndroidBluetoothConnection(nextHandle, socket);
 		connectionsMap.put(nextHandle, bluetoothConnection);
@@ -69,6 +72,16 @@ public class AndroidBluetoothConnection {
 
 		return bluetoothConnection;
 	}
+
+	public synchronized static AndroidBluetoothConnection createServerConnection(BluetoothServerSocket serverSocket) {
+		AndroidBluetoothConnection bluetoothConnection = new AndroidBluetoothConnection(nextHandle, serverSocket);
+		connectionsMap.put(nextHandle, bluetoothConnection);
+
+		nextHandle ++;
+
+		return bluetoothConnection;
+	}
+
 
 	public static AndroidBluetoothConnection getBluetoothConnection(long handle) {
 		return connectionsMap.get(handle);
@@ -82,6 +95,10 @@ public class AndroidBluetoothConnection {
 		return socket;
 	}
 
+	public BluetoothServerSocket getServerSocket() {
+		return serverSocket;
+	}
+
 	public InputStream getInputStream() {
 		return inputStream;
 	}
@@ -91,9 +108,18 @@ public class AndroidBluetoothConnection {
 	}
 
 	public void close() throws IOException {
-		outputStream.close();
-		inputStream.close();
-		socket.close();
+		if (outputStream != null) {
+			outputStream.close();
+		}
+		if (inputStream != null) {
+			inputStream.close();
+		}
+		if (socket != null) {
+			socket.close();
+		}
+		if (serverSocket != null) {
+			serverSocket.close();
+		}
 		connectionsMap.remove(handle);
 	}
 }
