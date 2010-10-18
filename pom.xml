@@ -287,7 +287,6 @@
     </dependencies>
 
     <modules>
-		<module>bluecove-android2</module>
         <module>bluecove-site-skin</module>
         <module>bluecove</module>
         <module>bluecove-emu</module>
@@ -295,6 +294,7 @@
         <module>bluecove-emu-gui</module>
         <module>bluecove-gpl</module>
         <module>bluecove-bluez</module>
+		<module>bluecove-android2</module>
         <module>bluecove-examples</module>
         <module>distribution</module>
     </modules>
