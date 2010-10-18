@@ -64,14 +64,6 @@
               <scope>provided</scope>
           </dependency>
 
-        <!--
-        <dependency>
-            <groupId>com.pyx4j</groupId>
-            <artifactId>pyx4j-rpc-over-http</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
-        </dependency>
-        -->
-
     </dependencies>
 
     <build>
