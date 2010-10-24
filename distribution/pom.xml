@@ -86,6 +86,10 @@
                                                 <include name="bluecove*-SNAPSHOT.jar"/>
                                                 <include name="*.tar.gz"/>
                                             </fileset>
+                                            <fileset dir="${basedir}/../bluecove-android2/target">
+                                                <include name="bluecove*-SNAPSHOT.jar"/>
+                                                <include name="*.tar.gz"/>
+                                            </fileset>
                                         </copy>
                                         <echo file="${project.build.directory}/site/download/${project.version}/.htaccess" append="false">
 AddDescription "&amp;#060;== The latest build." ${buildLabel}
