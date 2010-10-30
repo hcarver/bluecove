@@ -1,0 +1,76 @@
+~~ @version $Revision$ ($Author$) $Date$
+~~ See this file format http://maven.apache.org/doxia/references/apt-format.html
+
+                                    ------------------
+                                    BlueCove Android 2.x module
+                                    ------------------
+
+BlueCove Linux D-Bus module
+
+   BlueCove-Android2 is additional module for BlueCove to partially support JSR-82 on Android using Android 2.x bluetooth APIs.
+
+   This module doesn't need any use of Android NDK or any native libraries. Just include its jar in classpath and it should work.
+
+   This module doesn't provide full functionality of JSR-82 because of limitations of Android 2.x bluetooth APIs.
+
+   The other Linux module {{{../bluecove-gpl}bluecove-gpl}} has almost full functionalities of JSR-82 and can work on Android if its native library built with Android NDK. But it doesn't work on all devices.
+
+   This module is still experimental and might not be very stable. Feedback is highly welcomed.
+
+* Usage
+
+   include bluecove.jar and bluecove-android2.jar in classpath of the android application and call JSR-82 APIs normally.
+
+* Important notes for usage
+
+   Before calling any JSR-82 API, be sure that you called this passing a context object (typically, the activity from which you are using BlueCove).
+---
+BlueCoveImpl.setConfigObject(BlueCoveConfigProperties.PROPERTY_ANDROID_CONTEXT, context);
+---
+
+   Take care, repeat this call with appropriate context references according to life-cycle of your context object. For example, when mode changes from portrait to landscape, Android, destroys and creates the activity object again. So, in your onDestroy() set the context to null and in your onCreate() set it to the new context object.
+   Failing to do so may lead to leaked context objects because a reference of a destroyed context is still kept inside BlueCove.
+
+   Again take care that you have to be sure that no bluetooth operations such as starting a device discovery is made between your onDestroy() and the next onCreate() (i.e. between setting the context to null and passing the new context to BlueCove) or you'll experience crashes.
+   For more information on this, refer to {{{http://developer.android.com/guide/topics/resources/runtime-changes.html}Handling runtime changes page on Android Dev Guide}}.
+
+   Many implementations start a device inquiry and blocks the thread performing the inquiry until all devices discovered and inquiry completes. DON'T do this in your Android main activity thread. Doing so not only will make the Android OS treat your application as non-responsive but also you'll never receive device discovery events and inquiry completed event as they events come in the Android's main activity thread which you are blocking.
+
+* Requirements
+
+   * BlueCove library of the same mojor version
+
+   * Android API level 5 or above.
+
+   * Request these permissions in AndroidManifest.xml; "android.permission.BLUETOOTH" and "android.permission.BLUETOOTH_ADMIN".
+
+* Incompatibilities with JSR-82
+
+   * Android can connect to services only by their UUIDs. So, client connection strings will use the UUID instead of the SCN. And to distinguish this from default JSR-82 strings, add an additional parameter to the string "android=true".
+
+   * For example
+---
+String connectionString = "btspp://01234567890A:0123456789ABCDEF01234567890ABCDEF;authenticate=false;encrypt=false;master=false;android=true
+---
+
+** Limitations
+Only these functions are supported and all others aren't
+
+   * Device Discovery
+
+   * Changing local discovery mode. Note that, device will return to un-discoverable mode after some time (default 120 seconds). To change this time (to 200 seconds for example) like following. Maximum is 300 seconds.
+---
+BlueCoveImpl.setConfigProperty(BlueCoveConfigProperties.PROPERTY_ANDROID_DISCOVERABLE_DURATION, String.valueOf(200));
+---
+
+   * Searching for services can only take 1 UUID. In other words the UUID array passed to DiscoveryAgent.searchServices() must not contain more than 1 UUID.
+
+   * Client RFCOMM connections.
+
+   * Client OBEX connections. Note that, Android has no APIs to examine service records. And so, this implementation assumes all services are RFCOMM. To make this implementation return an obex connection string for a specified service. You have to tell it first that the service with this specific UUID is an obex one.
+   To do this, use a comma-separated string of UUIDs as value for bluecove property BlueCoveConfigProperties.PROPERTY_ANDROID_OBEX_UUIDS. Like this
+---
+String obexUUIDs = ... // a comma separated string of UUIDs.
+BlueCoveImpl.setConfigProperty(BlueCoveConfigProperties.PROPERTY_ANDROID_OBEX_UUIDS, obexUUIDs);
+---
+   This implementation already recognizes these short UUIDs as OBEX (0x0008, 0x1105, 0x1106) which corresponds to Generic OBEX, OBEX Object Push, and OBEX File Transfer respectively.

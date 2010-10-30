@@ -34,10 +34,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Looper;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -80,7 +82,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	private static final UUID UUID_OBEX = new UUID(0x0008);
 	private static final UUID UUID_OBEX_OBJECT_PUSH = new UUID(0x1105);
 	private static final UUID UUID_OBEX_FILE_TRANSFER = new UUID(0x1106);
-	private List<UUID> obexUUIDs = Arrays.asList(new UUID[]{UUID_OBEX, UUID_OBEX_FILE_TRANSFER, UUID_OBEX_OBJECT_PUSH});
+	private List<UUID> obexUUIDs;
 
 	public boolean isNativeCodeLoaded() {
 		return true;
@@ -119,6 +121,10 @@ public class BluetoothStackAndroid implements BluetoothStack {
 
 		listenerMap = new HashMap<DiscoveryListener, DiscoveryBroadcastReceiver>();
 
+		obexUUIDs = new ArrayList<UUID>();
+		obexUUIDs.add(UUID_OBEX);
+		obexUUIDs.add(UUID_OBEX_OBJECT_PUSH);
+		obexUUIDs.add(UUID_OBEX_FILE_TRANSFER);
 		String obexUUIDsProperty = BlueCoveImpl.getConfigProperty(BlueCoveConfigProperties.PROPERTY_ANDROID_OBEX_UUIDS);
 		if (obexUUIDsProperty != null) {
 			String[] uuids = obexUUIDsProperty.split(",");
