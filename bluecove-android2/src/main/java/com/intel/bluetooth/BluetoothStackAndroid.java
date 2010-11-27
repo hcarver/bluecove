@@ -34,13 +34,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Looper;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -376,7 +374,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 		BluetoothDevice bluetoothDevice = localBluetoothAdapter.getRemoteDevice(getAddressAsString(androidParams.address));
 		UUID jsr82UUID = new UUID(androidParams.serviceUUID, false);
 		BluetoothSocket socket = bluetoothDevice.createRfcommSocketToServiceRecord(createJavaUUID(jsr82UUID));
-		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.createConnection(socket);
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.createConnection(socket, false);
 		return bluetoothConnection.getHandle();
 	}
 
@@ -386,11 +384,17 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	public void connectionRfCloseClientConnection(long handle) throws IOException {
-		AndroidBluetoothConnection.getBluetoothConnection(handle).close();
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
+		if (bluetoothConnection != null) {
+			bluetoothConnection.close();
+		}
 	}
 
 	public void connectionRfCloseServerConnection(long handle) throws IOException {
-		AndroidBluetoothConnection.getBluetoothConnection(handle).close();
+		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
+		if (bluetoothConnection != null) {
+			bluetoothConnection.close();
+		}
 	}
 
 	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException {
@@ -409,7 +413,8 @@ public class BluetoothStackAndroid implements BluetoothStack {
 		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.getBluetoothConnection(handle);
 		BluetoothServerSocket serverSocket = bluetoothConnection.getServerSocket();
 		BluetoothSocket socket = serverSocket.accept();
-		AndroidBluetoothConnection connection = AndroidBluetoothConnection.createConnection(socket);
+		serverSocket.close();
+		AndroidBluetoothConnection connection = AndroidBluetoothConnection.createConnection(socket, true);
 		return connection.getHandle();
 	}
 

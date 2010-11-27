@@ -51,10 +51,12 @@ public class AndroidBluetoothConnection {
 	private OutputStream outputStream;
 	private long handle;
 
-	private AndroidBluetoothConnection(long handle, BluetoothSocket socket) throws IOException {
+	private AndroidBluetoothConnection(long handle, BluetoothSocket socket, boolean isServer) throws IOException {
 		this.handle = handle;
 		this.socket = socket;
-		socket.connect();
+		if (!isServer) {
+			socket.connect();
+		}
 		inputStream = socket.getInputStream();
 		outputStream = socket.getOutputStream();
 	}
@@ -64,8 +66,8 @@ public class AndroidBluetoothConnection {
 		this.serverSocket = serverSocket;
 	}
 
-	public synchronized static AndroidBluetoothConnection createConnection(BluetoothSocket socket) throws IOException {
-		AndroidBluetoothConnection bluetoothConnection = new AndroidBluetoothConnection(nextHandle, socket);
+	public synchronized static AndroidBluetoothConnection createConnection(BluetoothSocket socket, boolean isServer) throws IOException {
+		AndroidBluetoothConnection bluetoothConnection = new AndroidBluetoothConnection(nextHandle, socket, isServer);
 		connectionsMap.put(nextHandle, bluetoothConnection);
 
 		nextHandle ++;
