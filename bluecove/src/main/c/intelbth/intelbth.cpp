@@ -26,6 +26,10 @@
 #include "common.h"
 #include "commonObjects.h"
 
+#ifndef CPP_FILE
+#define CPP_FILE "intelbth.cpp"
+#endif
+
 #include "com_intel_bluetooth_BluetoothStackMicrosoft.h"
 
 #ifdef _WIN32_WCE

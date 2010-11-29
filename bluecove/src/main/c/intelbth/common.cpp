@@ -143,7 +143,7 @@ void callDebugStdOut(const char* fileName, int lineN, ...) {
     va_end(ap);
 }
 
-char* bool2str(BOOL b) {
+const char* bool2str(BOOL b) {
     if (b == false)  {
         return "FALSE";
     } else {
@@ -296,7 +296,7 @@ void throwIOExceptionWinGetLastError(JNIEnv *env, const char *msg) {
     throwIOExceptionWinErrorMessage(env, msg, GetLastError());
 }
 
-char* waitResultsString(DWORD rc) {
+const char* waitResultsString(DWORD rc) {
     switch (rc) {
         case WAIT_FAILED: return "WAIT_FAILED";
         case WAIT_TIMEOUT: return "WAIT_TIMEOUT";
@@ -689,7 +689,7 @@ ObjectPool::ObjectPool(int size, int handleOffset, BOOL delayDelete) {
     this->handleReturned = 0;
     this->handleBatch = 0;
     handleMove = 0;
-    objs = new (PoolableObject* [size]);
+    objs = new PoolableObject* [size];
     for(int i = 0; i < size; i ++) {
         objs[i] = NULL;
     }

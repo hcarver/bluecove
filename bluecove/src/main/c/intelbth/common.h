@@ -252,7 +252,7 @@ void callDebugStdOut(const char* fileName, int lineN, ...);
 
 void log_info(const char *fmt, ...);
 
-char* bool2str(BOOL b);
+const char* bool2str(BOOL b);
 
 // --- Error handling
 
@@ -285,7 +285,7 @@ void throwIOExceptionWinGetLastError(JNIEnv *env, const char *msg);
 
 WCHAR* getWinErrorMessage(DWORD last_error);
 
-char* waitResultsString(DWORD rc);
+const char* waitResultsString(DWORD rc);
 
 #endif
 
