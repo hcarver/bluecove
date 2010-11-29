@@ -41,7 +41,7 @@
 #else // _WIN32_WCE
 #include <winsock2.h>
 #include <ws2bth.h>
-#include <BluetoothAPIs.h>
+#include <bluetoothapis.h>
 #endif // #else // _WIN32_WCE
 
 
