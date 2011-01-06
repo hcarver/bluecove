@@ -313,6 +313,17 @@ public class BlueZAPIV4 implements BlueZAPI {
 
             adapter.StartDiscovery();
 
+            // Verify that discovery actually started to avoid race condition
+            int tick = 0;
+            boolean discovering = false;
+            while ((tick < 5) && !(discovering = DBusProperties.getBooleanValue(adapter, Adapter.Properties.Discovering))) {
+                Thread.sleep(200);
+                tick ++;
+            }
+            if (!discovering) {
+                throw new org.bluez.Error.Failed("Unable to confirm discovering state");
+            }
+            
             listener.deviceInquiryStarted();
 
             while (DBusProperties.getBooleanValue(adapter, Adapter.Properties.Discovering)) {
