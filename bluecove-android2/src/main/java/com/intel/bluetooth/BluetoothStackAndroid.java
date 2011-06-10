@@ -23,7 +23,6 @@ package com.intel.bluetooth;
  *
  *  @version $Id$
  */
-
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -38,6 +37,8 @@ import android.content.IntentFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -60,23 +61,17 @@ import javax.bluetooth.UUID;
 public class BluetoothStackAndroid implements BluetoothStack {
 
 	private BluetoothAdapter localBluetoothAdapter;
-
 	// TODO what is the real number for Attributes retrievable ?
-    private final static int ATTR_RETRIEVABLE_MAX = 256;
+	private final static int ATTR_RETRIEVABLE_MAX = 256;
 	private Map<String, String> propertiesMap;
-
 	private Activity context;
-	
 	/**
 	 * This implementation will turn bluetooth on if it was off, in this case,
 	 * bluetooth will be turned off at shutting down stack.
 	 */
 	private boolean justEnabled;
-
 	private static final int REQUEST_CODE_CHANGE_DISCOVERABLE = 0;
-
 	private Map<DiscoveryListener, DiscoveryBroadcastReceiver> listenerMap;
-
 	private static final UUID UUID_OBEX = new UUID(0x0008);
 	private static final UUID UUID_OBEX_OBJECT_PUSH = new UUID(0x1105);
 	private static final UUID UUID_OBEX_FILE_TRANSFER = new UUID(0x1106);
@@ -225,7 +220,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 		intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, duration);
 
 		context.startActivityForResult(intent, REQUEST_CODE_CHANGE_DISCOVERABLE);
-		
+
 		// TODO: return appropriate value according to whether mode was changed or not.
 		return true;
 	}
@@ -331,6 +326,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 			throw new BluetoothStateException("Searching for services with more than one UUID isn't supported on Android");
 		}
 		SearchServicesRunnable searchServicesRunnable = new SearchServicesRunnable() {
+
 			public int runSearchServices(SearchServicesThread sst, int[] attrSet, UUID[] uuidSet, RemoteDevice remoteDevice, DiscoveryListener listener) throws BluetoothStateException {
 				try {
 					sst.searchServicesStartedCallback();
@@ -341,7 +337,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 						BluetoothSocket socket = device.createRfcommSocketToServiceRecord(javaUUID);
 						if (socket != null) {
 							boolean obex = obexUUIDs.contains(jsr82UUID);
-							listener.servicesDiscovered(sst.getTransID(), new ServiceRecord[] {createServiceRecord(remoteDevice, socket, jsr82UUID, obex)});
+							listener.servicesDiscovered(sst.getTransID(), new ServiceRecord[]{createServiceRecord(remoteDevice, socket, jsr82UUID, obex)});
 						}
 						socket.close();
 					}
@@ -357,11 +353,11 @@ public class BluetoothStackAndroid implements BluetoothStack {
 
 	public boolean cancelServiceSearch(int transID) {
 		SearchServicesThread sst = SearchServicesThread.getServiceSearchThread(transID);
-        if (sst != null) {
-            return sst.setTerminated();
-        } else {
-            return false;
-        }
+		if (sst != null) {
+			return sst.setTerminated();
+		} else {
+			return false;
+		}
 	}
 
 	public boolean populateServicesRecordAttributeValues(ServiceRecordImpl serviceRecord, int[] attrIDs) throws IOException {
@@ -373,7 +369,33 @@ public class BluetoothStackAndroid implements BluetoothStack {
 		AndroidBluetoothConnectionParams androidParams = (AndroidBluetoothConnectionParams) params;
 		BluetoothDevice bluetoothDevice = localBluetoothAdapter.getRemoteDevice(getAddressAsString(androidParams.address));
 		UUID jsr82UUID = new UUID(androidParams.serviceUUID, false);
-		BluetoothSocket socket = bluetoothDevice.createRfcommSocketToServiceRecord(createJavaUUID(jsr82UUID));
+		BluetoothSocket socket;
+		java.util.UUID javaUUID = createJavaUUID(jsr82UUID);
+		boolean secure = true;
+		Method createInsecureRfcommSocketToServiceRecordMethod = null;
+		if (!params.encrypt) {
+			try {
+				createInsecureRfcommSocketToServiceRecordMethod = BluetoothDevice.class.getMethod("createInsecureRfcommSocketToServiceRecord", java.util.UUID.class);
+				secure = false;
+			} catch (Exception ex) {
+				// we are on android version less than API level 10
+			}
+		}
+		if (secure) {
+			socket = bluetoothDevice.createRfcommSocketToServiceRecord(javaUUID);
+		} else {
+			try {
+				socket = (BluetoothSocket) createInsecureRfcommSocketToServiceRecordMethod.invoke(bluetoothDevice, javaUUID);
+			} catch (Exception ex) {
+				if (ex instanceof InvocationTargetException) {
+					Throwable cause = ex.getCause();
+					if (cause instanceof IOException) {
+						throw (IOException) cause;
+					}
+				}
+				throw new IOException(ex);
+			}
+		}
 		AndroidBluetoothConnection bluetoothConnection = AndroidBluetoothConnection.createConnection(socket, false);
 		return bluetoothConnection.getHandle();
 	}
@@ -399,9 +421,33 @@ public class BluetoothStackAndroid implements BluetoothStack {
 
 	public long rfServerOpen(BluetoothConnectionNotifierParams params, ServiceRecordImpl serviceRecord) throws IOException {
 		java.util.UUID javaUUID = createJavaUUID(params.uuid);
-		BluetoothServerSocket serverSocket = localBluetoothAdapter.listenUsingRfcommWithServiceRecord(params.name, javaUUID);
+		BluetoothServerSocket serverSocket;
+		boolean secure = true;
+		Method listenUsingInsecureRfcommWithServiceRecordMethod = null;
+		if (!params.encrypt) {
+			try {
+				listenUsingInsecureRfcommWithServiceRecordMethod = BluetoothAdapter.class.getMethod("listenUsingInsecureRfcommWithServiceRecord", String.class, java.util.UUID.class);
+				secure = false;
+			} catch (Exception ex) {
+				// we are on android version less than API level 10
+			}
+		}
+		if (secure) {
+			serverSocket = localBluetoothAdapter.listenUsingRfcommWithServiceRecord(params.name, javaUUID);
+		} else {
+			try {
+				serverSocket = (BluetoothServerSocket) listenUsingInsecureRfcommWithServiceRecordMethod.invoke(localBluetoothAdapter, params.name, javaUUID);
+			} catch (Exception ex) {
+				if (ex instanceof InvocationTargetException) {
+					Throwable cause = ex.getCause();
+					if (cause instanceof IOException) {
+						throw (IOException) cause;
+					}
+				}
+				throw new IOException(ex);
+			}
+		}
 		AndroidBluetoothConnection connection = AndroidBluetoothConnection.createServerConnection(serverSocket);
-
 		return connection.getHandle();
 	}
 
@@ -533,6 +579,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 	}
 
 	private class DiscoveryBroadcastReceiver extends BroadcastReceiver {
+
 		private DiscoveryListener discoveryListener;
 		private boolean cancelled;
 
@@ -552,9 +599,9 @@ public class BluetoothStackAndroid implements BluetoothStack {
 				discoveryListener.deviceDiscovered(remoteDevice, deviceClass);
 			} else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
 				context.unregisterReceiver(this);
-				discoveryListener.inquiryCompleted(cancelled ?
-					DiscoveryListener.INQUIRY_TERMINATED :
-					DiscoveryListener.INQUIRY_COMPLETED);
+				discoveryListener.inquiryCompleted(cancelled
+						? DiscoveryListener.INQUIRY_TERMINATED
+						: DiscoveryListener.INQUIRY_COMPLETED);
 			}
 		}
 	}
@@ -565,10 +612,10 @@ public class BluetoothStackAndroid implements BluetoothStack {
 				bluetoothDevice.getBondState() == BluetoothDevice.BOND_BONDED);
 		return remoteDevice;
 	}
-	
+
 	private DeviceClass createDeviceClass(BluetoothClass bluetoothClass) {
 		int record = bluetoothClass.getDeviceClass();
-		for (int service = 0x4000; service  < 0x800000; service <<= 1) {
+		for (int service = 0x4000; service < 0x800000; service <<= 1) {
 			if (bluetoothClass.hasService(service)) {
 				record |= service;
 			}
@@ -591,7 +638,7 @@ public class BluetoothStackAndroid implements BluetoothStack {
 
 		long mostSigBits = (part1Long << 32) | part2Long;
 		long leastSigBits = (part3Long << 32) | part4Long;
-		
+
 		java.util.UUID javaUUID = new java.util.UUID(mostSigBits, leastSigBits);
 
 		return javaUUID;
