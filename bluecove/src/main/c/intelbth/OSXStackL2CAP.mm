@@ -19,7 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
- *  @version $Id: OSXStackRFCOMM.mm 1244 2007-11-27 04:06:32Z skarzhevskyy $
+ *  @version $Id$
  */
 
 #import "OSXStackL2CAP.h"
@@ -123,18 +123,18 @@ void L2CAPChannelController::connectionComplete(IOBluetoothDevice *device, IORet
     } else {
         openStatus = status;
     }
-    MPSetEvent(notificationEvent, 1);
+    dispatch_semaphore_signal(notificationEvent); // , 1);
 }
 
 void L2CAPChannelController::l2capChannelOpenComplete(IOReturn error) {
     if (error == kIOReturnSuccess) {
         isConnected = true;
-        int incomingMTU = [l2capChannel getIncomingMTU];
+        int incomingMTU = l2capChannel.incomingMTU;
         if (receiveMTU > incomingMTU) {
             receiveMTU = incomingMTU;
         }
 
-        int remoteMtu = [l2capChannel getOutgoingMTU];
+        int remoteMtu = l2capChannel.outgoingMTU;
 	    if (transmitMTU == -1) {
 		    transmitMTU = remoteMtu;
 	    } else if (transmitMTU < remoteMtu) {
@@ -146,7 +146,7 @@ void L2CAPChannelController::l2capChannelOpenComplete(IOReturn error) {
     } else {
         openStatus = error;
     }
-    MPSetEvent(notificationEvent, 1);
+    dispatch_semaphore_signal(notificationEvent); // , 1);
 }
 
 void L2CAPChannelController::openIncomingChannel(IOBluetoothL2CAPChannel* newL2CAPChannel) {
@@ -156,20 +156,21 @@ void L2CAPChannelController::openIncomingChannel(IOBluetoothL2CAPChannel* newL2C
     l2capChannel = newL2CAPChannel;
     [l2capChannel retain];
     openStatus = [l2capChannel setDelegate:delegate];
-    bluetoothDevice = [l2capChannel getDevice];
+    bluetoothDevice = l2capChannel.device;
 }
 
 void L2CAPChannelController::l2capChannelClosed() {
     isClosed = true;
     isConnected = false;
-    MPSetEvent(notificationEvent, 0);
-    MPSetEvent(writeCompleteNotificationEvent, 0);
+
+    dispatch_semaphore_signal(notificationEvent); // , 0);
+    dispatch_semaphore_signal(writeCompleteNotificationEvent); // , 0);
 }
 
 void L2CAPChannelController::l2capChannelData(void* dataPointer, size_t dataLength) {
     if (isConnected && !isClosed) {
 	    receiveBuffer.write_with_len(dataPointer, dataLength);
-		MPSetEvent(notificationEvent, 1);
+        dispatch_semaphore_signal(notificationEvent); // , 1);
     }
 }
 
@@ -177,7 +178,7 @@ void L2CAPChannelController::l2capChannelWriteComplete(void* refcon, IOReturn er
     if (refcon != NULL) {
         ((L2CAPConnectionWrite*)refcon)->l2capChannelWriteComplete(error);
     }
-    MPSetEvent(writeCompleteNotificationEvent, 1);
+    dispatch_semaphore_signal(writeCompleteNotificationEvent); // , 1);
 }
 
 IOReturn L2CAPChannelController::close() {
@@ -188,10 +189,11 @@ IOReturn L2CAPChannelController::close() {
     }
     if (l2capChannel != NULL) {
         isClosed = true;
-        MPSetEvent(notificationEvent, 0);
-        MPSetEvent(writeCompleteNotificationEvent, 0);
 
-        IOBluetoothDevice *device = [l2capChannel getDevice];
+        dispatch_semaphore_signal(notificationEvent); // , 0);
+        dispatch_semaphore_signal(writeCompleteNotificationEvent); // , 0);
+        
+        IOBluetoothDevice *device = l2capChannel.device;
         [l2capChannel setDelegate:NULL];
         rc = [l2capChannel closeChannel];
         if (device != NULL) {
@@ -386,8 +388,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Receive
 
 	while ((stack != NULL) && comm->isConnected  && (!comm->isClosed) && (comm->receiveBuffer.available() <= paketLengthSize)) {
 		Edebug(("receive[] waits for data"));
-		MPEventFlags flags;
-        OSStatus err = MPWaitForEvent(comm->notificationEvent, &flags, kDurationMillisecond * 500);
+        OSStatus err = dispatch_semaphore_wait(comm->notificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if ((err != kMPTimeoutErr) && (err != noErr)) {
 			throwRuntimeException(env, "MPWaitForEvent");
 			return 0;
@@ -499,8 +500,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Send
             if (runnable.writeComplete) {
                 break;
             }
-            MPEventFlags flags;
-            OSStatus err = MPWaitForEvent(comm->writeCompleteNotificationEvent, &flags, kDurationMillisecond * 500);
+            OSStatus err = dispatch_semaphore_wait(comm->writeCompleteNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
             if (err == kMPTimeoutErr) {
                 continue;
             }
@@ -544,7 +544,7 @@ RUNNABLE(L2CAPChannelRemoteAddress, "L2CAPChannelRemoteAddress") {
         error = 1;
         return;
     }
-    IOBluetoothDevice* device = [comm->l2capChannel getDevice];
+    IOBluetoothDevice* device = comm->l2capChannel.device;
     if (device == NULL) {
         error = 1;
         return;

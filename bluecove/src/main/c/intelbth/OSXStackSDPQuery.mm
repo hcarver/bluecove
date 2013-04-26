@@ -24,9 +24,43 @@
 
 #import "OSXStackSDPQuery.h"
 
+#import <IOBluetooth/IOBluetooth.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <CoreFoundation/CFDate.h>
+
 #define CPP_FILE "OSXStackSDPQuery.mm"
 
 #define MAX_TERMINATE 10
+
+@implementation SDPQueryHandler
+
+-(id)initWithOwner:(StackSDPQueryStart *)owner
+{
+    if ((self = [super init]) != nil) {
+        _owner = owner;
+    }
+    
+    return self;
+}
+
+-(void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status
+{
+    if (_owner != NULL) {
+        _owner->sdpQueryComplete(device, status);
+    }
+}
+
+-(void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status
+{
+    
+}
+
+- (void)remoteNameRequestComplete:(IOBluetoothDevice *)device status:(IOReturn)status
+{
+    
+}
+
+@end
 
 jint terminatedTansID[MAX_TERMINATE] = {0};
 jint runningTansID[MAX_TERMINATE] = {0};
@@ -54,59 +88,69 @@ BOOL isSearchServicesIgnore(void* ptr) {
 StackSDPQueryStart::StackSDPQueryStart() {
     name = "StackSDPQueryStart";
     complete = FALSE;
-    deviceRef = NULL;
+    device = nil;
+    handler = nil;
     error = 0;
 }
 
+/*
 void callbackSDPQueryIsComplete(void* userRefCon, IOBluetoothDeviceRef deviceRef, IOReturn status) {
     if ((!isSearchServicesIgnore(userRefCon)) && (!isRunnableCorrupted((StackSDPQueryStart*)userRefCon))) {
         ((StackSDPQueryStart*)userRefCon)->sdpQueryComplete(deviceRef, status);
     }
 }
+*/
 
 void StackSDPQueryStart::run() {
-    startTime = CFAbsoluteTimeGetCurrent();
+    startTime = [NSDate date];
 
     BluetoothDeviceAddress btAddress;
-    LongToOSxBTAddr(address, &btAddress);
-    deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
-    if (deviceRef == NULL) {
+    LongToOSxBTAddr(this->address, &btAddress);
+    IOBluetoothDevice* device = [IOBluetoothDevice deviceWithAddress:(const BluetoothDeviceAddress*)&btAddress];
+    if (device == NULL) {
         error = 1;
         return;
     }
-    status = IOBluetoothDevicePerformSDPQuery(deviceRef, callbackSDPQueryIsComplete, this);
-    if (kIOReturnSuccess != status) {
-        error = 1;
-    }
+    
+    handler = [[SDPQueryHandler alloc] initWithOwner:this];
+    
+    [device performSDPQuery:handler];
 }
 
-void StackSDPQueryStart::sdpQueryComplete(IOBluetoothDeviceRef deviceRef, IOReturn status) {
+void StackSDPQueryStart::sdpQueryComplete(IOBluetoothDevice* device, IOReturn status)
+{
     ndebug(("sdpQueryComplete 0x%08x", status));
+    
     this->status = status;
+    
     // Apperantly connection to device is still open after SDP query for some time. This may affect other connections.
-    if (deviceRef != NULL) {
-        IOBluetoothDeviceCloseConnection(deviceRef);
+    if (device != nil) {
+        [device closeConnection];
     }
+    
     if (kIOReturnSuccess != status) {
         this->error = 1;
-    } else {
-        CFArrayRef services = IOBluetoothDeviceGetServices(deviceRef);
+    }
+    else {
+        NSArray* services = [device services];
+        
         if (services != NULL) {
-            recordsSize = CFArrayGetCount(services);
-            CFDateRef startDate = CFDateCreate(kCFAllocatorDefault, startTime);
-            CFDateRef updatedTime = IOBluetoothDeviceGetLastServicesUpdate(deviceRef);
-            if (CFDateGetTimeIntervalSinceDate(updatedTime, startDate) < 0) {
+            recordsSize = [services count];
+            
+            NSDate* updatedTime = [device lastNameUpdate];
+            
+            if ([updatedTime compare:this->startTime] < 0) {
                 this->status = kIOReturnNotFound;
                 this->error = 1;
             }
-            CFRelease(startDate);
-        } else {
+        }
+        else {
             recordsSize = 0;
         }
     }
     this->complete = TRUE;
     if (stack != NULL) {
-        MPSetEvent(stack->deviceInquiryNotificationEvent, 1);
+        dispatch_semaphore_signal(stack->deviceInquiryNotificationEvent); // , 1);
     }
 }
 
@@ -146,8 +190,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runSearchServi
     runnable.address = address;
     synchronousBTOperation(&runnable);
     while ((stack != NULL) && (runnable.error == 0) && (!runnable.complete)) {
-        MPEventFlags flags;
-        MPWaitForEvent(stack->deviceInquiryNotificationEvent, &flags, kDurationMillisecond * 500);
+                dispatch_semaphore_wait(stack->deviceInquiryNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
         if (isSearchServicesTerminated(transID)) {
             setSearchServicesIgnore(&runnable);
             return 0;
@@ -180,7 +223,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_cancelServiceS
         if ((runningTansID[i] == transID) && (terminatedTansID[i] == 0)) {
             terminatedTansID[i] = transID;
             if (stack != NULL) {
-                MPSetEvent(stack->deviceInquiryNotificationEvent, 1);
+                dispatch_semaphore_signal(stack->deviceInquiryNotificationEvent); // , 1);
             }
             break;
         }
@@ -192,38 +235,48 @@ GetAttributeDataElement::GetAttributeDataElement() {
 }
 
 void GetAttributeDataElement::run() {
+
     BluetoothDeviceAddress btAddress;
-    LongToOSxBTAddr(address, &btAddress);
-    IOBluetoothDeviceRef deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
-    if (deviceRef == NULL) {
+    LongToOSxBTAddr(this->address, &btAddress);
+    IOBluetoothDevice* device = [IOBluetoothDevice deviceWithAddress:(const BluetoothDeviceAddress*)&btAddress];
+    if (device == NULL) {
         error = 1;
         return;
     }
-    CFArrayRef services = IOBluetoothDeviceGetServices(deviceRef);
+    
+    NSArray* services = [device services];
+
     if (services == NULL) {
         error = 1;
         return;
     }
-    if (serviceRecordIndex >= CFArrayGetCount(services)) {
+    
+    if (serviceRecordIndex >= [services count]) {
         error = 1;
         return;
     }
-    IOBluetoothSDPServiceRecordRef serviceRef = (IOBluetoothSDPServiceRecordRef)CFArrayGetValueAtIndex(services, serviceRecordIndex);
-    IOBluetoothSDPDataElementRef dataElementRef = IOBluetoothSDPServiceRecordGetAttributeDataElement(serviceRef, attrID);
-    if (dataElementRef == NULL) {
+    
+    IOBluetoothSDPServiceRecord* service = (IOBluetoothSDPServiceRecord*)[services objectAtIndex:serviceRecordIndex];
+    IOBluetoothSDPDataElement* dataElement = [service getAttributeDataElement:attrID];
+    
+    if (dataElement == nil) {
         error = 1;
     }
-    getData(dataElementRef);
+    
+    getData(dataElement);
 }
 
-void GetAttributeDataElement::getData(const IOBluetoothSDPDataElementRef dataElement) {
+void GetAttributeDataElement::getData(const IOBluetoothSDPDataElement* dataElement)
+{
     if (dataElement == NULL) {
         return;
     }
+    
     SDPOutputStream os;
     if (!os.writeElement(dataElement)) {
         error = 1;
-    } else {
+    }
+    else {
         os.getBytes(DATA_BLOB_MAX, &dataLen, data);
     }
 }
@@ -258,10 +311,13 @@ void SDPOutputStream::getBytes(int max, int* dataLen, UInt8* buf) {
     (*dataLen) = len;
 }
 
-int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
-    BluetoothSDPDataElementTypeDescriptor typeDescrip = IOBluetoothSDPDataElementGetTypeDescriptor(dataElement);
-    BluetoothSDPDataElementSizeDescriptor sizeDescriptor = IOBluetoothSDPDataElementGetSizeDescriptor(dataElement);
+int SDPOutputStream::getLength(const IOBluetoothSDPDataElement* dataElement)
+{
+    BluetoothSDPDataElementTypeDescriptor typeDescrip = [dataElement getTypeDescriptor];
+    BluetoothSDPDataElementSizeDescriptor sizeDescriptor = [dataElement getSizeDescriptor];
+    
     BOOL isURL = false;
+    
     switch (typeDescrip) {
         case kBluetoothSDPDataElementTypeNil:
             return 1;
@@ -278,11 +334,11 @@ int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
                 return 1 + length;
             }
         case kBluetoothSDPDataElementTypeUUID: {
-                IOBluetoothSDPUUIDRef	aUUIDRef = IOBluetoothSDPDataElementGetUUIDValue(dataElement);
+                IOBluetoothSDPUUID*	aUUIDRef = [dataElement getUUIDValue];
                 if (aUUIDRef == NULL) {
                     return -1;
                 }
-				UInt8 length = IOBluetoothSDPUUIDGetLength(aUUIDRef);
+				UInt8 length = [aUUIDRef length];
 				if (length <= 2) {
 				    return 1 + 2;
 				} else if (length <= 4) {
@@ -294,14 +350,16 @@ int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
         case kBluetoothSDPDataElementTypeURL:
             isURL = true;
 		case kBluetoothSDPDataElementTypeString: {
-		        CFStringRef str = IOBluetoothSDPDataElementGetStringValue(dataElement);
-		        if (str == NULL) {
+                NSString* str = [dataElement getStringValue];
+                if (str == NULL) {
                     return -1;
                 }
-                CFIndex strLength = CFStringGetLength(str);
-		        CFIndex usedBufLen = 0;
+                CFIndex strLength = [str length];
+		        NSUInteger usedBufLen = 0;
 		        CFStringEncoding encoding = isURL?kCFStringEncodingASCII:kCFStringEncodingUTF8;
-		        CFStringGetBytes(str, CFRangeMake(0, strLength), encoding, '?', true, NULL, 0, &usedBufLen);
+            
+                [str getBytes:NULL maxLength:strLength usedLength:&usedBufLen encoding:encoding options:NULL range:NSMakeRange(0, strLength) remainingRange:NULL];
+		        //CFStringGetBytes(str, CFRangeMake(0, strLength), encoding, '?', true, NULL, 0, &usedBufLen);
 		        if (usedBufLen < 0x100) {
 				    return usedBufLen + 2;
 			    } else if (usedBufLen < 0x10000) {
@@ -315,13 +373,13 @@ int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
         case kBluetoothSDPDataElementTypeDataElementSequence:
         case kBluetoothSDPDataElementTypeDataElementAlternative: {
             int len = 5;
-            CFArrayRef array = IOBluetoothSDPDataElementGetArrayValue(dataElement);
+            NSArray* array = [dataElement getArrayValue];
             if (array == NULL) {
                 return -1;
             }
-            CFIndex count = CFArrayGetCount(array);
+            CFIndex count = [array count];
             for(CFIndex i = 0; i < count; i++) {
-                const IOBluetoothSDPDataElementRef item = (IOBluetoothSDPDataElementRef)CFArrayGetValueAtIndex(array, i);
+                const IOBluetoothSDPDataElement* item = (IOBluetoothSDPDataElement*)[array objectAtIndex:i];
                 len += getLength(item);
             }
             return len;
@@ -332,40 +390,50 @@ int SDPOutputStream::getLength(const IOBluetoothSDPDataElementRef dataElement) {
 }
 
 // See com.intel.bluetooth.SDPOutputStream
-BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElement) {
-    BluetoothSDPDataElementTypeDescriptor typeDescrip = IOBluetoothSDPDataElementGetTypeDescriptor(dataElement);
-    BluetoothSDPDataElementSizeDescriptor sizeDescriptor = IOBluetoothSDPDataElementGetSizeDescriptor(dataElement);
+BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElement* dataElement)
+{
+    BluetoothSDPDataElementTypeDescriptor typeDescrip = [dataElement getTypeDescriptor];
+    BluetoothSDPDataElementSizeDescriptor sizeDescriptor = [dataElement getSizeDescriptor];
+    
     ndebug(("sizeDescriptor %i", sizeDescriptor));
+    
     BOOL isSeq = false;
     BOOL isURL = false;
     BOOL isUnsigned = false;
     switch (typeDescrip) {
         case kBluetoothSDPDataElementTypeNil:
-            write(0 | 0);
+            {
+                write(0 | 0);
+            }
             break;
-        case kBluetoothSDPDataElementTypeBoolean: {
-            write(40 | 0);
-			CFNumberRef	bNumber = IOBluetoothSDPDataElementGetNumberValue(dataElement);
-			if (bNumber == NULL) {
-			    return FALSE;
-			}
-            UInt8 aBool;
-			CFNumberGetValue(bNumber, kCFNumberCharType, &aBool);
-			write(aBool);
+            
+        case kBluetoothSDPDataElementTypeBoolean:
+            {
+                write(40 | 0);
+                NSNumber* bNumber = [dataElement getNumberValue];
+                if (bNumber == NULL) {
+                    return FALSE;
+                }
+                UInt8 aBool = [bNumber boolValue];
+                write(aBool);
+            }
             break;
-        }
         case kBluetoothSDPDataElementTypeUnsignedInt:
-            isUnsigned = true;
-        case kBluetoothSDPDataElementTypeSignedInt: {
+            {
+                isUnsigned = true;
+            }
+            
+        case kBluetoothSDPDataElementTypeSignedInt:
+            {
                 UInt8 type = isUnsigned ? 8: 16;
                 ndebug(("processing number %i", type));
                 write(type | sizeDescriptor);
                 if (sizeDescriptor == 4) { /* 16 byte integer */
-				    CFDataRef bigData = IOBluetoothSDPDataElementGetDataValue(dataElement);
+                    NSData* bigData = [dataElement getDataValue];
 				    if (bigData == NULL) {
 				        return FALSE;
 				    }
-				    const UInt8 *byteArray = CFDataGetBytePtr(bigData);
+				    const UInt8 *byteArray = (UInt8 *)[bigData bytes];
 				    write(byteArray, 16);
 			    } else {
 			        int length;
@@ -375,24 +443,24 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
                         case 2: length = 4; break;
                         case 3: length = 8; break;
                     }
-				    CFNumberRef	number = IOBluetoothSDPDataElementGetNumberValue(dataElement);
+				    NSNumber* number = [dataElement getNumberValue];
 				    if (number == NULL) {
 				        return FALSE;
 				    }
-				    SInt64 l = 0LL;
-				    CFNumberGetValue(number, kCFNumberSInt64Type, &l);
-				    ndebug(("number len %i, %lli", length, l));
+				    SInt64 l = [number longLongValue];
+ 				    ndebug(("number len %i, %lli", length, l));
 				    writeLong(l, length);
 			    }
             }
             break;
+            
         case kBluetoothSDPDataElementTypeUUID: {
-                IOBluetoothSDPUUIDRef aUUIDRef = IOBluetoothSDPDataElementGetUUIDValue(dataElement);
+                IOBluetoothSDPUUID* aUUIDRef = [dataElement getUUIDValue];
                 if (aUUIDRef == NULL) {
                     return FALSE;
                 }
-			    const UInt8* uuidBytes = (UInt8*)IOBluetoothSDPUUIDGetBytes(aUUIDRef);
-				UInt8 length = IOBluetoothSDPUUIDGetLength(aUUIDRef);
+                const UInt8* uuidBytes = (UInt8*)[aUUIDRef bytes];
+            	UInt8 length = [aUUIDRef length];
 				UInt8 size = 0;
                 if (length <= 2) {
                     size = 2;
@@ -417,16 +485,17 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
             isURL = true;
 		case kBluetoothSDPDataElementTypeString: {
 		        UInt8 type = isURL ? 0x40: 0x20;
-		        CFStringRef str = IOBluetoothSDPDataElementGetStringValue(dataElement);
+		        NSString* str = [dataElement getStringValue];
 		        if (str == NULL) {
 		            return FALSE;
 		        }
-		        CFIndex strLength = CFStringGetLength(str);
+		        CFIndex strLength = [str length];
 		        CFIndex maxBufLen = 4* sizeof(UInt8)*strLength;
 		        UInt8* buffer = (UInt8*)malloc(maxBufLen);
-		        CFIndex usedBufLen = 0;
+		        NSUInteger usedBufLen = 0;
 		        CFStringEncoding encoding = isURL?kCFStringEncodingASCII:kCFStringEncodingUTF8;
-		        CFStringGetBytes(str, CFRangeMake(0, strLength), encoding, '?', false, buffer, maxBufLen, &usedBufLen);
+                [str getBytes:buffer maxLength:maxBufLen usedLength:&usedBufLen encoding:encoding options:NULL range:NSMakeRange(0, strLength) remainingRange:NULL];
+		        //CFStringGetBytes(str, CFRangeMake(0, strLength), encoding, '?', false, buffer, maxBufLen, &usedBufLen);
 		        if (usedBufLen < 0x100) {
 				    write(type | 5);
 				    writeLong(usedBufLen, 1);
@@ -442,8 +511,10 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
 		    }
             break;
         case kBluetoothSDPDataElementTypeDataElementSequence:
-            isSeq = true;
-            write(48 | 7);
+            {
+                isSeq = true;
+                write(48 | 7);
+            }
         case kBluetoothSDPDataElementTypeDataElementAlternative: {
                 if (!isSeq) {
                     write(56 | 7);
@@ -453,13 +524,13 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElementRef dataElemen
 		            return FALSE;
 		        }
                 writeLong(len - 5, 4);
-                CFArrayRef array = IOBluetoothSDPDataElementGetArrayValue(dataElement);
+                NSArray* array = [dataElement getArrayValue];
                 if (array == NULL) {
 		            return FALSE;
 		        }
-                CFIndex count = CFArrayGetCount(array);
+                CFIndex count = [array count];
                 for(CFIndex i = 0; i < count; i++) {
-                    const IOBluetoothSDPDataElementRef item = (IOBluetoothSDPDataElementRef)CFArrayGetValueAtIndex(array, i);
+                    const IOBluetoothSDPDataElement* item = (IOBluetoothSDPDataElement*)[array objectAtIndex:i];
                     if (!writeElement(item)) {
                         return FALSE;
                     }

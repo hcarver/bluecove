@@ -19,7 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
- *  @version $Id: OSXStackRFCOMMServer.h 1303 2007-12-04 00:23:11Z skarzhevskyy $
+ *  @version $Id$
  */
 
 #import "OSXStackSDPServer.h"
@@ -48,16 +48,16 @@ ServerController::ServerController() {
         sdpSequence[i] = NULL;
     }
     incomingChannelNotification = NULL;
-    MPCreateEvent(&incomingChannelNotificationEvent);
-    MPCreateEvent(&acceptedEvent);
+    incomingChannelNotificationEvent = dispatch_semaphore_create(0);
+    acceptedEvent = dispatch_semaphore_create(0);
 }
 
 ServerController::~ServerController() {
     isClosed = true;
-    MPSetEvent(incomingChannelNotificationEvent, 0);
-    MPDeleteEvent(incomingChannelNotificationEvent);
-    MPSetEvent(acceptedEvent, 0);
-    MPDeleteEvent(acceptedEvent);
+    dispatch_semaphore_signal(incomingChannelNotificationEvent); // , 0);
+    dispatch_release(incomingChannelNotificationEvent);
+    dispatch_semaphore_signal(acceptedEvent); // , 0);
+    dispatch_release(acceptedEvent);
 }
 
 void ServerController::init() {
@@ -115,7 +115,7 @@ NSMutableDictionary* createDataElement(BluetoothSDPDataElementTypeDescriptor typ
     return dict;
 }
 
-char* ServerController::addAttributeSequence(jint attrID, jint attrType) {
+const char* ServerController::addAttributeSequence(jint attrID, jint attrType) {
     if (attrType == -1) {
         if (sdpSequenceDepthCurrent < 0) {
             return "Sequence End overflow";
@@ -149,25 +149,25 @@ char* ServerController::addAttributeSequence(jint attrID, jint attrType) {
     return NULL;
 }
 
-char* ServerController::addDataElement(jint attrID, NSObject* value) {
+const char* ServerController::addDataElement(jint attrID, NSObject* value) {
     if ((attrID < 0) && (sdpSequenceDepthCurrent < 0)) {
         return "sequence expected";
     }
     if (sdpSequenceDepthCurrent >= 0) {
         [sdpSequence[sdpSequenceDepthCurrent] addObject:value];
     } else {
-        NSString *keyName = [NSString stringWithFormat:@"%03x",  attrID];
+        NSString *keyName = [NSString stringWithFormat:@"%03lx",  (long) attrID];
         [sdpEntries setObject:value forKey:keyName];
     }
     return NULL;
 }
 
-char* ServerController::addAttribute(SDPAttributeValue* value) {
+const char* ServerController::addAttribute(SDPAttributeValue* value) {
     BluetoothSDPDataElementTypeDescriptor newType;
     UInt32 newSize;
     NSObject* newValue;
 
-    char* rc = NULL;
+    const char* rc = NULL;
 
     switch (value->attrType) {
     case DATA_ELEMENT_TYPE_U_INT_1:

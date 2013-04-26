@@ -40,12 +40,14 @@ class OSXStack {
 public:
 	OSXStack();
 	~OSXStack();
-
+    
 public:
 	pthread_mutex_t deviceInquiryInProcessMutex;
-	MPEventID deviceInquiryNotificationEvent;
-	MPEventID deviceInquiryBusyEvent;
-	MPEventID deviceInquiryFinishedEvent;
+    
+	dispatch_semaphore_t deviceInquiryNotificationEvent;
+	dispatch_semaphore_t deviceInquiryBusyEvent;
+	dispatch_semaphore_t deviceInquiryFinishedEvent;
+    
 	volatile BOOL deviceInquiryInProcess;
 	volatile BOOL deviceInquiryBusy;
 	volatile BOOL deviceInquiryTerminated;
@@ -60,7 +62,7 @@ class Runnable {
 public:
     long magic1b;
 	long magic2b;
-    char* name;
+    const char* name;
     int error;
 
     // Data passes and received from thread
@@ -69,8 +71,7 @@ public:
     int iData;
     long lData;
     bool bData;
-    jlong jlData;
-    void* pData[RUNNABLE_DATA_MAX];
+    const void* pData[RUNNABLE_DATA_MAX];
 
     long magic1e;
 	long magic2e;
