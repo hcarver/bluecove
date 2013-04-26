@@ -493,9 +493,8 @@ BOOL SDPOutputStream::writeElement(const IOBluetoothSDPDataElement* dataElement)
 		        CFIndex maxBufLen = 4* sizeof(UInt8)*strLength;
 		        UInt8* buffer = (UInt8*)malloc(maxBufLen);
 		        NSUInteger usedBufLen = 0;
-		        CFStringEncoding encoding = isURL?kCFStringEncodingASCII:kCFStringEncodingUTF8;
+                CFStringEncoding encoding = isURL ? NSASCIIStringEncoding : NSUTF8StringEncoding;
                 [str getBytes:buffer maxLength:maxBufLen usedLength:&usedBufLen encoding:encoding options:NULL range:NSMakeRange(0, strLength) remainingRange:NULL];
-		        //CFStringGetBytes(str, CFRangeMake(0, strLength), encoding, '?', false, buffer, maxBufLen, &usedBufLen);
 		        if (usedBufLen < 0x100) {
 				    write(type | 5);
 				    writeLong(usedBufLen, 1);

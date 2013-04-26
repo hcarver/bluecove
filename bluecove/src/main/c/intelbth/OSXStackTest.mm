@@ -248,7 +248,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_intel_bluetooth_NativeTestInterfaces_testO
     BOOL written = os.writeElement(dataElement);
 
     if (bdata != NULL) {
-        //env->ReleaseByteArrayElements(bdata, inBytes, 0);
+        env->ReleaseByteArrayElements(bdata, inBytes, 0);
     }
 
     if (!written) {

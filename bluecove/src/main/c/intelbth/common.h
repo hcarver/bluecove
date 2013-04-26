@@ -27,7 +27,7 @@
 #undef USE_WORKER_THREAD
 
 #ifndef BLUECOVE_BUILD
-#define BLUECOVE_BUILD 51
+#define BLUECOVE_BUILD 100
 #endif
 
 #ifndef BLUECOVE_VERSION

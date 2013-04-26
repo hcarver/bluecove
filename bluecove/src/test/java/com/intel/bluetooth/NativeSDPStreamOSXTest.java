@@ -40,7 +40,7 @@ public class NativeSDPStreamOSXTest extends NativeOSXTestCase {
         byte[] blob = NativeTestInterfaces.testOsXDataElementConversion(testType, type, ldata, bdata);
         assertNotNull("NULL blob", blob);
         DataElement element = (new SDPInputStream(new ByteArrayInputStream(blob))).readElement();
-        SDPStreamTest.assertEquals("", elementExpect, element);
+        SDPStreamTest.assertEquals("XX", elementExpect, element);
     }
 
     /**
