@@ -1,0 +1,2 @@
+# Ignore maven built artifacts
+**/target/
