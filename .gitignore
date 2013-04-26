@@ -1,2 +1,6 @@
 # Ignore maven built artifacts
 **/target/
+
+# Javah generated headers
+**/com_intel_bluetooth_*.h
+
