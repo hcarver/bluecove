@@ -3,6 +3,9 @@ resources/
 
 main/c/intelbth/bluecove.xcodeproj/xcuserdata
 main/c/intelbth/bluecove.xcodeproj/project.workspace
+main/c/intelbth/bluecove.xcodeproj/project.workspace/**
 
 main/c/intelbth/build/
 main/c/intelbth/DerivedData/
+
+main/c/intelbth/com_intel_bluetooth_*.h
