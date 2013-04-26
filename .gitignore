@@ -1,6 +1,16 @@
 # Ignore maven built artifacts
-**/target/
+/*/**/.settings
+/*/**/.classpath
+/*/**/.project
+/*/**/target
 
-# Javah generated headers
-**/com_intel_bluetooth_*.h
+/*/.settings
+/*/.classpath
+/*/.project
+/*/target
 
+/.project
+/.settings
+
+# Ignore user specific files and folders of Xcode 
+/bluecove/src/main/c/intelbth/bluecove.xcodeproj/project.xcworkspace
