@@ -102,11 +102,11 @@ void callbackSDPQueryIsComplete(void* userRefCon, IOBluetoothDeviceRef deviceRef
 */
 
 void StackSDPQueryStart::run() {
-    startTime = [NSDate date];
+    startTime = [[NSDate date] retain];
 
     BluetoothDeviceAddress btAddress;
-    LongToOSxBTAddr(this->address, &btAddress);
-    IOBluetoothDevice* device = [IOBluetoothDevice deviceWithAddress:(const BluetoothDeviceAddress*)&btAddress];
+    LongToOSxBTAddr(address, &btAddress);
+    device = [IOBluetoothDevice deviceWithAddress:(const BluetoothDeviceAddress*)&btAddress];
     if (device == NULL) {
         error = 1;
         return;
@@ -120,35 +120,35 @@ void StackSDPQueryStart::run() {
 void StackSDPQueryStart::sdpQueryComplete(IOBluetoothDevice* device, IOReturn status)
 {
     ndebug(("sdpQueryComplete 0x%08x", status));
-    
+    [handler release];
     this->status = status;
-    
+
     // Apperantly connection to device is still open after SDP query for some time. This may affect other connections.
     if (device != nil) {
         [device closeConnection];
     }
     
     if (kIOReturnSuccess != status) {
-        this->error = 1;
+        error = 1;
     }
     else {
         NSArray* services = [device services];
         
         if (services != NULL) {
             recordsSize = [services count];
-            
             NSDate* updatedTime = [device lastNameUpdate];
-            
-            if ([updatedTime compare:this->startTime] < 0) {
+            if ([updatedTime compare:startTime] == NSOrderedDescending) {
                 this->status = kIOReturnNotFound;
-                this->error = 1;
+                error = 1;
             }
+            [startTime release];
         }
         else {
             recordsSize = 0;
         }
     }
-    this->complete = TRUE;
+
+    complete = TRUE;
     if (stack != NULL) {
         dispatch_semaphore_signal(stack->deviceInquiryNotificationEvent); // , 1);
     }
