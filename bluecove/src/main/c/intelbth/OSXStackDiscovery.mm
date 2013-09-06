@@ -479,6 +479,7 @@ GetRemoteDeviceFriendlyName::GetRemoteDeviceFriendlyName() {
 
 GetRemoteDeviceFriendlyName::~GetRemoteDeviceFriendlyName() {
     dispatch_release(inquiryFinishedEvent);
+    [delegate release];
     delegate = nil;
 }
 
