@@ -357,11 +357,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
 	}
 	// Avoid more than once Accept at the same time
 	while ((stack != NULL) && (!comm->isClosed) && (comm->acceptClientComm != NULL)) {
-        OSStatus err = dispatch_semaphore_wait(comm->acceptedEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
-		if ((err != kMPTimeoutErr) && (err != noErr)) {
-			throwRuntimeException(env, "MPWaitForEvent");
-			return 0;
-		}
+        dispatch_semaphore_wait(comm->acceptedEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if (isCurrentThreadInterrupted(env, peer, "close")) {
 			return 0;
 		}
@@ -397,12 +393,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
     comm->openningClient = false;
     BOOL error = false;
 	while ((stack != NULL) && (!comm->isClosed) && (comm->openningClient == false)) {
-        OSStatus err = dispatch_semaphore_wait(comm->incomingChannelNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
-		if ((err != kMPTimeoutErr) && (err != noErr)) {
-			throwRuntimeException(env, "MPWaitForEvent");
-			error = true;
-			break;
-		}
+        dispatch_semaphore_wait(comm->incomingChannelNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if (isCurrentThreadInterrupted(env, peer, "accept")) {
 			error = true;
 			break;

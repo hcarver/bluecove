@@ -315,12 +315,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
 		return 0;
 	}
 	while ((stack != NULL) && (!comm->isClosed) && (comm->acceptClientComm != NULL)) {
-
-        OSStatus err = dispatch_semaphore_wait(comm->acceptedEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
-		if ((err != kMPTimeoutErr) && (err != noErr)) {
-			throwRuntimeException(env, "MPWaitForEvent");
-			return 0;
-		}
+        dispatch_semaphore_wait(comm->acceptedEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if (isCurrentThreadInterrupted(env, peer, "close")) {
 			debug(("Interrupted while waiting for connections"));
 			return 0;
@@ -355,12 +350,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
     comm->openningClient = false;
     BOOL error = false;
 	while ((stack != NULL) && (!comm->isClosed) && (comm->openningClient == false)) {
-        OSStatus err = dispatch_semaphore_wait(comm->incomingChannelNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
-		if ((err != kMPTimeoutErr) && (err != noErr)) {
-			throwRuntimeException(env, "MPWaitForEvent");
-			error = true;
-			break;
-		}
+        dispatch_semaphore_wait(comm->incomingChannelNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if (isCurrentThreadInterrupted(env, peer, "accept")) {
 			debug(("Interrupted while waiting for connections"));
 			error = true;

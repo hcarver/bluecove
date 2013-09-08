@@ -388,11 +388,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Receive
 
 	while ((stack != NULL) && comm->isConnected  && (!comm->isClosed) && (comm->receiveBuffer.available() <= paketLengthSize)) {
 		Edebug(("receive[] waits for data"));
-        OSStatus err = dispatch_semaphore_wait(comm->notificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
-		if ((err != kMPTimeoutErr) && (err != noErr)) {
-			throwRuntimeException(env, "MPWaitForEvent");
-			return 0;
-		}
+        dispatch_semaphore_wait(comm->notificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if (isCurrentThreadInterrupted(env, peer, "receive")) {
 			return 0;
 		}
@@ -500,14 +496,11 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2Send
             if (runnable.writeComplete) {
                 break;
             }
-            OSStatus err = dispatch_semaphore_wait(comm->writeCompleteNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
-            if (err == kMPTimeoutErr) {
+            long result = dispatch_semaphore_wait(comm->writeCompleteNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
+            if (result != 0) {
+                // Timeout occured
                 continue;
             }
-		    if ((err != kMPTimeoutErr) && (err != noErr)) {
-			    throwRuntimeException(env, "MPWaitForEvent");
-			    break;
-		    }
             if (isCurrentThreadInterrupted(env, peer, "send")) {
 			    break;
 		    }

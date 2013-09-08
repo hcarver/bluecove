@@ -380,11 +380,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 		return 0;
 	}
 	while ((stack != NULL) && comm->isConnected && (!comm->isClosed) && (comm->receiveBuffer.available() == 0)) {
-        OSStatus err = dispatch_semaphore_wait(comm->notificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
-		if ((err != kMPTimeoutErr) && (err != noErr)) {
-			throwRuntimeException(env, "MPWaitForEvent");
-			return 0;
-		}
+        dispatch_semaphore_wait(comm->notificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if (isCurrentThreadInterrupted(env, peer, "read")) {
 			return 0;
 		}
@@ -415,11 +411,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 	int done = 0;
 	while ((stack != NULL) && comm->isConnected && (!comm->isClosed) && (done < len)) {
 		while ((stack != NULL) && comm->isConnected  && (!comm->isClosed) && (comm->receiveBuffer.available() == 0)) {
-            OSStatus err = dispatch_semaphore_wait(comm->notificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
-		    if ((err != kMPTimeoutErr) && (err != noErr)) {
-			    throwRuntimeException(env, "MPWaitForEvent");
-			    return 0;
-		    }
+            dispatch_semaphore_wait(comm->notificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 			if (isCurrentThreadInterrupted(env, peer, "read")) {
 				debug(("Interrupted while reading"));
 				return 0;
@@ -539,15 +531,11 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
                 debug(("rfcomm wait for writeComplete %i, %i of %i", waitCount, done, len));
             }
             waitCount ++;
-            OSStatus err = dispatch_semaphore_wait(comm->writeCompleteNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
-            if (err == kMPTimeoutErr) {
+            long result = dispatch_semaphore_wait(comm->writeCompleteNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
+            if (result != 0) {
+                // Timeout occured
                 continue;
             }
-		    if ((err != kMPTimeoutErr) && (err != noErr)) {
-			    throwRuntimeException(env, "MPWaitForEvent");
-			    error = true;
-			    break;
-		    }
             if (isCurrentThreadInterrupted(env, peer, "write")) {
 			    error = true;
 			    break;
