@@ -300,7 +300,7 @@ void SDPOutputStream::write(const UInt8* bytes, CFIndex length) {
 void SDPOutputStream::writeLong(UInt64 l, int size) {
 	UInt64 v = l;
 	for (int i = 0; i < size; i++) {
-		write((UInt8) (0xFFLL & (v >> (size - 1 << 3))));
+		write((UInt8) (0xFFLL & (v >> ((size - 1) << 3))));
 		v <<= 8;
 	}
 }

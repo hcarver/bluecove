@@ -61,7 +61,7 @@ ServerController::~ServerController() {
 }
 
 void ServerController::init() {
-    sdpEntries = [NSMutableDictionary dictionaryWithCapacity:256];
+    sdpEntries = [[NSMutableDictionary dictionaryWithCapacity:256] retain];
 }
 
 ServerController* validServerControllerHandle(JNIEnv *env, jlong handle, jchar handleType) {
@@ -313,7 +313,7 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_sdpServiceAddA
 	}
 	SDPServiceAddAttribute runnable;
 	runnable.pData[0] = comm;
-
+      
 	SDPAttributeValue value = {0};
 	runnable.pData[1] = &value;
 

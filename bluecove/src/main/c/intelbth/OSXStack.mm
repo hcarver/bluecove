@@ -627,7 +627,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDevice
     Edebug(("getLocalDeviceManufacturer"));
     BluetoothHCIVersionInfo hciVersion;
     GetLocalDeviceVersion runnable;
-    runnable.pData[1] = &hciVersion;
+    runnable.pData[0] = &hciVersion;
     synchronousBTOperation(&runnable);
     if (runnable.error) {
         return 0;
@@ -640,7 +640,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getLocalDev
     Edebug(("getLocalDeviceVersion"));
     BluetoothHCIVersionInfo hciVersion;
     GetLocalDeviceVersion runnable;
-    runnable.pData[1] = &hciVersion;
+    runnable.pData[0] = &hciVersion;
     synchronousBTOperation(&runnable);
     if (runnable.error) {
         return 0;

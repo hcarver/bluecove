@@ -70,7 +70,7 @@ IOReturn L2CAPServerController::publish() {
 	}
 
     // cleanup
-	IOBluetoothObjectRelease(serviceRecordRef);
+	//IOBluetoothObjectRelease(serviceRecordRef);
 
 	return status;
 }
@@ -114,7 +114,7 @@ IOReturn L2CAPServerController::updateSDPServiceRecord() {
 	}
 
     // cleanup
-	IOBluetoothObjectRelease(serviceRecordRef);
+	//IOBluetoothObjectRelease(serviceRecordRef);
 
     return kIOReturnSuccess;
 }
