@@ -281,9 +281,9 @@
                                 </delete>
                                 <delete dir="${native.source.dir}/Pocket PC 2003 (ARMV4)"/>
                                 <delete dir="${native.source.dir}/Win32"/>
-                                <delete failonerror="false">
-                                    <fileset dir="${basedir}/src/main/resources" includes="*.dll" erroronmissingdir="false"/>
-                                    <fileset dir="${basedir}/src/main/resources" includes="*.jnilib" erroronmissingdir="false"/>
+                                <delete>
+                                    <fileset dir="${basedir}/src/main/resources" includes="*.dll"/>
+                                    <fileset dir="${basedir}/src/main/resources" includes="*.jnilib"/>
                                 </delete>
                             </tasks>
                         </configuration>
