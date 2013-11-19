@@ -282,15 +282,11 @@ void synchronousBTOperation(Runnable* runnable) {
 #else
 
 void synchronousBTOperation(Runnable* runnable) {
-    
     if (runnable != NULL) {
-        
-        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-        
         ndebug(("invoke    BTOperation %s", runnable->name));
         
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            //        dispatch_sync(mainQueue, ^{
+        dispatch_block_t block = ^
+        {
             if (isRunnableCorrupted(runnable)) {
                 ndebug(("Error: execute BTOperation got corrupted runnable"));
             }
@@ -299,15 +295,19 @@ void synchronousBTOperation(Runnable* runnable) {
                 runnable->run();
                 ndebug((" finished BTOperation %s", runnable->name));
             }
-            
-            dispatch_semaphore_signal(semaphore); // , 1);
-            
-        });
+        };
         
-        dispatch_semaphore_wait(semaphore, kDurationForever);
-        
-        dispatch_release(semaphore);
-        
+        // Prevent deadlocking the main thread with dispatch_sync
+        // by checking if we are on the main thread first.
+        if ([NSThread isMainThread])
+        {
+            block();
+        }
+        else
+        {
+            dispatch_sync(dispatch_get_main_queue(), block);
+        }        
+
         ndebug(("return    BTOperation %s", runnable->name));
     }
 }
