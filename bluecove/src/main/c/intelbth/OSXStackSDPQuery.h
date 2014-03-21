@@ -26,19 +26,36 @@
 
 #include "OSXStack.h"
 
+#import <IOBluetooth/IOBluetooth.h>
+
+class StackSDPQueryStart;
+
+@interface SDPQueryHandler : NSObject <IOBluetoothDeviceAsyncCallbacks>
+{
+    StackSDPQueryStart* _owner;
+}
+
+-(id)initWithOwner:(StackSDPQueryStart*)owner;
+
+-(void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status;
+
+@end
+
 class StackSDPQueryStart: public Runnable {
 public:
     volatile BOOL complete;
     jlong address;
-    CFAbsoluteTime startTime;
+    NSDate* startTime;
     volatile IOReturn status;
     volatile int recordsSize;
-    IOBluetoothDeviceRef deviceRef;
-
+    
+    IOBluetoothDevice* device;
+    SDPQueryHandler*    handler;
+    
     StackSDPQueryStart();
     virtual void run();
 
-    void sdpQueryComplete(IOBluetoothDeviceRef deviceRef, IOReturn status);
+    void sdpQueryComplete(IOBluetoothDevice* device, IOReturn status);
 };
 
 #define DATA_BLOB_MAX  0x4000
@@ -56,7 +73,7 @@ public:
     GetAttributeDataElement();
     virtual void run();
 
-    void getData(const IOBluetoothSDPDataElementRef dataElement);
+    void getData(const IOBluetoothSDPDataElement* dataElement);
 };
 
 class SDPOutputStream {
@@ -70,7 +87,7 @@ public:
     void write(const UInt8 *bytes, CFIndex length);
     void writeLong(UInt64 l, int size);
 
-    BOOL writeElement(const IOBluetoothSDPDataElementRef dataElement);
-    int getLength(const IOBluetoothSDPDataElementRef dataElement);
+    BOOL writeElement(const IOBluetoothSDPDataElement* dataElement);
+    int getLength(const IOBluetoothSDPDataElement* dataElement);
     void getBytes(int max, int*  dataLen, UInt8* buf);
 };

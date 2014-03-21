@@ -24,6 +24,8 @@
 
 #import "OSXStackRFCOMM.h"
 
+#import <dispatch/dispatch.h>
+
 #define CPP_FILE "OSXStackRFCOMM.mm"
 
 BOOL isValidObject(RFCOMMChannelController* comm ) {
@@ -132,7 +134,7 @@ void RFCOMMChannelController::connectionComplete(IOBluetoothDevice *device, IORe
     } else {
         openStatus = status;
     }
-    MPSetEvent(notificationEvent, 1);
+    dispatch_semaphore_signal(notificationEvent); // , 1);
 }
 
 void RFCOMMChannelController::rfcommChannelOpenComplete(IOReturn error) {
@@ -143,7 +145,7 @@ void RFCOMMChannelController::rfcommChannelOpenComplete(IOReturn error) {
     } else {
         openStatus = error;
     }
-    MPSetEvent(notificationEvent, 1);
+    dispatch_semaphore_signal(notificationEvent); // , 1);
 }
 
 void RFCOMMChannelController::openIncomingChannel(IOBluetoothRFCOMMChannel* newRfcommChannel) {
@@ -159,15 +161,15 @@ void RFCOMMChannelController::openIncomingChannel(IOBluetoothRFCOMMChannel* newR
 void RFCOMMChannelController::rfcommChannelClosed() {
     ndebug(("rfcommChannelClosed"));
     isClosed = true;
-    MPSetEvent(notificationEvent, 0);
-    MPSetEvent(writeCompleteNotificationEvent, 0);
+    dispatch_semaphore_signal(notificationEvent); // , 0);
+    dispatch_semaphore_signal(writeCompleteNotificationEvent); // , 0);
 }
 
 void RFCOMMChannelController::rfcommChannelData(void* dataPointer, size_t dataLength) {
     ndebug(("rfcommChannelData"));
     if (isConnected && !isClosed) {
         receiveBuffer.write(dataPointer, dataLength);
-		MPSetEvent(notificationEvent, 1);
+		dispatch_semaphore_signal(notificationEvent); // , 1);
     }
 }
 
@@ -175,7 +177,7 @@ void RFCOMMChannelController::rfcommChannelWriteComplete(void* refcon, IOReturn 
     if (refcon != NULL) {
         ((RFCOMMConnectionWrite*)refcon)->rfcommChannelWriteComplete(error);
     }
-    MPSetEvent(writeCompleteNotificationEvent, 1);
+    dispatch_semaphore_signal(writeCompleteNotificationEvent); // , 1);
 }
 
 IOReturn RFCOMMChannelController::close() {
@@ -185,8 +187,8 @@ IOReturn RFCOMMChannelController::close() {
     }
     if (rfcommChannel != NULL) {
         isClosed = true;
-        MPSetEvent(notificationEvent, 0);
-        MPSetEvent(writeCompleteNotificationEvent, 0);
+        dispatch_semaphore_signal(notificationEvent); // , 0);
+        dispatch_semaphore_signal(writeCompleteNotificationEvent); // , 0);
 
         IOBluetoothDevice *device = [rfcommChannel getDevice];
         [rfcommChannel setDelegate:NULL];
@@ -378,12 +380,7 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 		return 0;
 	}
 	while ((stack != NULL) && comm->isConnected && (!comm->isClosed) && (comm->receiveBuffer.available() == 0)) {
-		MPEventFlags flags;
-        OSStatus err = MPWaitForEvent(comm->notificationEvent, &flags, kDurationMillisecond * 500);
-		if ((err != kMPTimeoutErr) && (err != noErr)) {
-			throwRuntimeException(env, "MPWaitForEvent");
-			return 0;
-		}
+        dispatch_semaphore_wait(comm->notificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if (isCurrentThreadInterrupted(env, peer, "read")) {
 			return 0;
 		}
@@ -414,13 +411,9 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfRe
 	int done = 0;
 	while ((stack != NULL) && comm->isConnected && (!comm->isClosed) && (done < len)) {
 		while ((stack != NULL) && comm->isConnected  && (!comm->isClosed) && (comm->receiveBuffer.available() == 0)) {
-			MPEventFlags flags;
-            OSStatus err = MPWaitForEvent(comm->notificationEvent, &flags, kDurationMillisecond * 500);
-		    if ((err != kMPTimeoutErr) && (err != noErr)) {
-			    throwRuntimeException(env, "MPWaitForEvent");
-			    return 0;
-		    }
+            dispatch_semaphore_wait(comm->notificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 			if (isCurrentThreadInterrupted(env, peer, "read")) {
+				debug(("Interrupted while reading"));
 				return 0;
 			}
 		}
@@ -538,16 +531,11 @@ JNIEXPORT void JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_connectionRfWr
                 debug(("rfcomm wait for writeComplete %i, %i of %i", waitCount, done, len));
             }
             waitCount ++;
-            MPEventFlags flags;
-            OSStatus err = MPWaitForEvent(comm->writeCompleteNotificationEvent, &flags, kDurationMillisecond * 500);
-            if (err == kMPTimeoutErr) {
+            long result = dispatch_semaphore_wait(comm->writeCompleteNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
+            if (result != 0) {
+                // Timeout occured
                 continue;
             }
-		    if ((err != kMPTimeoutErr) && (err != noErr)) {
-			    throwRuntimeException(env, "MPWaitForEvent");
-			    error = true;
-			    break;
-		    }
             if (isCurrentThreadInterrupted(env, peer, "write")) {
 			    error = true;
 			    break;

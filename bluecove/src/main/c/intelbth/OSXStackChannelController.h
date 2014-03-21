@@ -28,8 +28,9 @@
 
 class ChannelController : public PoolableObject {
 public:
-    MPEventID notificationEvent;
-	MPEventID writeCompleteNotificationEvent;
+    dispatch_semaphore_t notificationEvent;
+	dispatch_semaphore_t writeCompleteNotificationEvent;
+    
     volatile IOReturn openStatus;
 
     IOBluetoothDevice* bluetoothDevice;
