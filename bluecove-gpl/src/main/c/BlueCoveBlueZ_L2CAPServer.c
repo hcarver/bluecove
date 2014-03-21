@@ -35,6 +35,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackBlueZ_l2ServerOpe
     }
 
     struct sockaddr_l2 localAddr;
+    memset(&localAddr, 0, sizeof(struct sockaddr_l2));
     //bind local address
     memset(&localAddr, 0, sizeof(localAddr));
     localAddr.l2_family = AF_BLUETOOTH;
