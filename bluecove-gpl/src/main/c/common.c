@@ -201,7 +201,13 @@ bool isCurrentThreadInterrupted(JNIEnv *env, jobject peer) {
         throwRuntimeException(env, "Fail to get MethodID isCurrentThreadInterruptedCallback");
         return true;
     }
-    if ((*env)->CallBooleanMethod(env, peer, aMethod)) {
+
+    jboolean retval = (*env)->CallBooleanMethod(env, peer, aMethod);
+    // XXXstroucki: need to free the class reference. See
+    // http://publib.boulder.ibm.com/infocenter/javasdk/v5r0/topic/com.ibm.java.doc.diagnostics.50/diag/understanding/jni_refs.html
+    (*env)->DeleteLocalRef(env, peerClass);
+
+    if (retval) {
         throwInterruptedIOException(env, "thread interrupted");
         return true;
     }
@@ -220,6 +226,11 @@ bool threadSleep(JNIEnv *env, jlong millis) {
         return false;
     }
     (*env)->CallStaticVoidMethod(env, clazz, methodID, millis);
+    // XXXstroucki need to free the class reference.
+    // Doing a static method call here. Could possibly also keep
+    // a permanent reference to the Thread class.
+    (*env)->DeleteLocalRef(env, clazz);
+
     if ((*env)->ExceptionCheck(env)) {
         return false;
     }
