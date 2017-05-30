@@ -22,17 +22,12 @@
  *  @version $Id$
  */
 
-#include "OSXStack.h"
-
 #import <Cocoa/Cocoa.h>
 
 #import <IOBluetooth/objc/IOBluetoothDevice.h>
 #import <IOBluetooth/objc/IOBluetoothDeviceInquiry.h>
 
-#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
-#import <IOBluetooth/objc/IOBluetoothHostController.h>
-#endif
-
+#include "OSXStack.h"
 
 /**
  * OS x BUG. If discovery has been cancelled by stop. For next discovery deviceInquiryComplete function is called for previous Delegate Object, not for current
@@ -47,7 +42,7 @@
     IOBluetoothDeviceInquiry*       _inquiry;
     NSMutableArray*                 _foundDevices;
 
-    MPEventID*                      _notificationEvent;
+    dispatch_semaphore_t*           _notificationEvent;
 
     volatile BOOL                   _aborted;
     volatile IOReturn               _error;
@@ -73,51 +68,30 @@
 
 @end
 
+class GetRemoteDeviceFriendlyName;
+
+@interface GetRemoteDeviceFriendlyNameDelegate : NSObject <IOBluetoothDeviceAsyncCallbacks> {
+    
+    GetRemoteDeviceFriendlyName*    _runnable;
+    
+    IOBluetoothDevice*              _device;
+}
+
+
+- (id)initWithRunnable:(GetRemoteDeviceFriendlyName*)runnable;
+
+- (void)remoteNameRequest:(long)address;
+
+@end
+
 class GetRemoteDeviceFriendlyName: public Runnable {
 public:
-    MPEventID inquiryFinishedEvent;
+    dispatch_semaphore_t inquiryFinishedEvent;
     IOBluetoothDeviceRef deviceRef;
-
+    GetRemoteDeviceFriendlyNameDelegate* delegate;
+    
     GetRemoteDeviceFriendlyName();
     virtual ~GetRemoteDeviceFriendlyName();
 
     virtual void run();
 };
-
-
-class RetrieveDevices: public Runnable {
-public:
-    NSArray *pairedDevices;
-    NSArray *favoriteDevices;
-    NSArray *recentDevices;
-
-    RetrieveDevices();
-
-    virtual void run();
-};
-
-#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
-class GetRemoteDeviceRSSI: public Runnable {
-public:
-    MPEventID inquiryFinishedEvent;
-    IOBluetoothDevice *bluetoothDevice;
-
-    NSObject*   delegate;
-    NSObject*   orig_delegate;
-
-    GetRemoteDeviceRSSI();
-    virtual ~GetRemoteDeviceRSSI();
-
-    virtual void run();
-    
-    void release();
-};
-
-@interface RemoteDeviceRSSIHostControllerDelegate : NSObject {
-    GetRemoteDeviceRSSI* _runnable;
-}
-- (id)initWithRunnable:(GetRemoteDeviceRSSI*)runnable;
-    // See IOBluetoothHostControllerDelegate
-- (void)readRSSIForDeviceComplete:(id)controller device:(IOBluetoothDevice*)device	info:(BluetoothHCIRSSIInfo*)info	error:(IOReturn)error;
-@end
-#endif

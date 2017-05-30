@@ -65,9 +65,6 @@ IOReturn RFCOMMServerController::publish() {
 	    }
 	}
 
-    // cleanup
-	IOBluetoothObjectRelease(serviceRecordRef);
-
 	return status;
 }
 
@@ -108,15 +105,12 @@ IOReturn RFCOMMServerController::updateSDPServiceRecord() {
 	    }
 	}
 
-    // cleanup
-	IOBluetoothObjectRelease(serviceRecordRef);
-
     return kIOReturnSuccess;
 }
 
 void RFCOMMServerController::close() {
     isClosed = true;
-    MPSetEvent(incomingChannelNotificationEvent, 0);
+    dispatch_semaphore_signal(incomingChannelNotificationEvent); // , 0);
 
     if (sdpServiceRecordHandle != 0) {
         IOBluetoothRemoveServiceWithRecordHandle(sdpServiceRecordHandle);
@@ -303,7 +297,7 @@ void rfcommServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNoti
 	}
 	client->openIncomingChannel(rfcommChannel);
 	comm->openningClient = true;
-    MPSetEvent(comm->incomingChannelNotificationEvent, 0);
+    dispatch_semaphore_signal(comm->incomingChannelNotificationEvent); // , 0);
 }
 
 RUNNABLE(RFCOMMServiceRegisterForOpen, "RFCOMMServiceRegisterForOpen") {
@@ -321,13 +315,9 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
 		return 0;
 	}
 	while ((stack != NULL) && (!comm->isClosed) && (comm->acceptClientComm != NULL)) {
-		MPEventFlags flags;
-        OSStatus err = MPWaitForEvent(comm->acceptedEvent, &flags, kDurationMillisecond * 500);
-		if ((err != kMPTimeoutErr) && (err != noErr)) {
-			throwRuntimeException(env, "MPWaitForEvent");
-			return 0;
-		}
+        dispatch_semaphore_wait(comm->acceptedEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if (isCurrentThreadInterrupted(env, peer, "close")) {
+			debug(("Interrupted while waiting for connections"));
 			return 0;
 		}
 	}
@@ -360,21 +350,16 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_rfServerAccep
     comm->openningClient = false;
     BOOL error = false;
 	while ((stack != NULL) && (!comm->isClosed) && (comm->openningClient == false)) {
-		MPEventFlags flags;
-        OSStatus err = MPWaitForEvent(comm->incomingChannelNotificationEvent, &flags, kDurationMillisecond * 500);
-		if ((err != kMPTimeoutErr) && (err != noErr)) {
-			throwRuntimeException(env, "MPWaitForEvent");
-			error = true;
-			break;
-		}
+        dispatch_semaphore_wait(comm->incomingChannelNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if (isCurrentThreadInterrupted(env, peer, "accept")) {
+			debug(("Interrupted while waiting for connections"));
 			error = true;
 			break;
 		}
 	}
 	if ((stack != NULL) && (!comm->isClosed)) {
 	    comm->acceptClientComm = NULL;
-	    MPSetEvent(comm->acceptedEvent, 0);
+	    dispatch_semaphore_signal(comm->acceptedEvent); // , 0);
     }
 
 	if ((error) || (stack == NULL) || (comm->isClosed) || (!comm->openningClient)) {

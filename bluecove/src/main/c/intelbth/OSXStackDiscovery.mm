@@ -24,6 +24,10 @@
 
 #import "OSXStackDiscovery.h"
 
+#include <dispatch/dispatch.h>
+
+#import <IOBluetooth/IOBluetooth.h>
+
 #define CPP_FILE "OSXStackDiscovery.mm"
 
 @implementation OSXStackDiscovery
@@ -47,11 +51,10 @@ int deviceInquiryCount = 0;
     _busy = FALSE;
 
     if (_foundDevices == NULL) {
-        _foundDevices = [NSMutableArray arrayWithCapacity:15];
+        _foundDevices = [[NSMutableArray alloc] initWithCapacity:15];
         if (!_foundDevices) {
            return FALSE;
         }
-        [_foundDevices retain];
     }
 
     _started = FALSE;
@@ -141,8 +144,8 @@ int deviceInquiryCount = 0;
     if (![self busy]) {
         return FALSE;
     }
-    MPEventFlags flags;
-    return (kMPTimeoutErr == MPWaitForEvent(*_notificationEvent, &flags, kDurationMillisecond * 1000));
+
+    return (kMPTimeoutErr == dispatch_semaphore_wait(*_notificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 1)));
 }
 
 //===========================================================================================================================
@@ -175,7 +178,7 @@ int deviceInquiryCount = 0;
 
 -(void) deviceInquiryStarted:(IOBluetoothDeviceInquiry*)sender {
     _started = TRUE;
-    MPSetEvent(*_notificationEvent, 0);
+    dispatch_semaphore_signal(*_notificationEvent);
 }
 
 //===========================================================================================================================
@@ -187,7 +190,7 @@ int deviceInquiryCount = 0;
         return;
     }
     [self addDeviceToList:device];
-    MPSetEvent(*_notificationEvent, 0);
+    dispatch_semaphore_signal(*_notificationEvent);
 }
 
 //===========================================================================================================================
@@ -206,7 +209,7 @@ int deviceInquiryCount = 0;
         return;
     }
     [self updateDeviceInfo:device];
-    MPSetEvent(*_notificationEvent, 0);
+    dispatch_semaphore_signal(*_notificationEvent);
 }
 
 //===========================================================================================================================
@@ -241,10 +244,10 @@ int deviceInquiryCount = 0;
         }
         if (stack != NULL) {
             stack->deviceInquiryBusy = false;
-            MPSetEvent(stack->deviceInquiryBusyEvent, 1);
+            dispatch_semaphore_signal(stack->deviceInquiryBusyEvent); // , 1);
         }
     }
-    MPSetEvent(*_notificationEvent, 1);
+    dispatch_semaphore_signal(*_notificationEvent); // , 1);
 }
 
 @end
@@ -306,7 +309,7 @@ IOBluetoothDevice* DeviceInquiryStart::getDeviceToReport() {
 void DeviceInquiryStart::run() {
     startStatus = FALSE;
 
-    if (IOBluetoothLocalDeviceAvailable() == FALSE) {
+    if ([IOBluetoothHostController defaultController] == nil) {
         this->error = 1;
         return;
     }
@@ -404,8 +407,8 @@ JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_runDeviceInqui
         if ((stack != NULL) && (d != NULL)) {
             debug(("deviceInquiry device discovered"));
             jlong deviceAddr = OSxAddrToLong([d getAddress]);
-            jint deviceClass = (jint)[d getClassOfDevice];
-            jstring name = OSxNewJString(env, [d getName]);
+            jint deviceClass = (jint)d.classOfDevice;
+            jstring name = OSxNewJString(env, d.name);
             jboolean paired = [d isPaired];
             if (!callback.callDeviceDiscovered(env, listener, deviceAddr, deviceClass, name, paired)) {
                 synchronousBTOperation(&discoveryRelease);
@@ -459,7 +462,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_deviceInqu
     if ((stack != NULL) && (stack->deviceInquiryInProcess)) {
         // This will dellay termiantion untill loop in runDeviceInquiryImpl will detect this flag
         stack->deviceInquiryTerminated = TRUE;
-        MPSetEvent(stack->deviceInquiryNotificationEvent, 1);
+        dispatch_semaphore_signal(stack->deviceInquiryNotificationEvent); // , 1);
         return TRUE;
     } else {
         return FALSE;
@@ -470,49 +473,18 @@ void remoteNameRequestResponse(void *userRefCon, IOBluetoothDeviceRef deviceRef,
 
 GetRemoteDeviceFriendlyName::GetRemoteDeviceFriendlyName() {
     name = "GetRemoteDeviceFriendlyName";
-    MPCreateEvent(&inquiryFinishedEvent);
+    inquiryFinishedEvent = dispatch_semaphore_create(0);
+    delegate = [[GetRemoteDeviceFriendlyNameDelegate alloc] init];
 }
 
 GetRemoteDeviceFriendlyName::~GetRemoteDeviceFriendlyName() {
-    MPDeleteEvent(inquiryFinishedEvent);
+    dispatch_release(inquiryFinishedEvent);
+    [delegate release];
+    delegate = nil;
 }
 
 void GetRemoteDeviceFriendlyName::run() {
-    BluetoothDeviceAddress btAddress;
-    LongToOSxBTAddr(jlData, &btAddress);
-    deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
-    if (deviceRef == NULL) {
-        error = 1;
-        return;
-    }
-    if (kIOReturnSuccess != IOBluetoothDeviceRemoteNameRequest(deviceRef, remoteNameRequestResponse, this, NULL)) {
-        error = 1;
-        IOBluetoothObjectRelease(deviceRef);
-    }
-}
-
-void remoteNameRequestResponse(void *userRefCon, IOBluetoothDeviceRef deviceRef, IOReturn status ) {
-    GetRemoteDeviceFriendlyName* runnable = (GetRemoteDeviceFriendlyName*) userRefCon;
-    if (isRunnableCorrupted(runnable)) {
-        return;
-    }
-    if (kIOReturnSuccess != status) {
-        runnable->error = 1;
-    } else {
-        CFStringRef name = IOBluetoothDeviceGetName(deviceRef);
-        if (name == NULL) {
-            runnable->error = 1;
-        } else {
-            CFIndex buflength = CFStringGetLength(name);
-            CFRange range = {0};
-            range.length = MIN(RUNNABLE_DATA_MAX, buflength);
-            runnable->iData = range.length;
-            CFStringGetCharacters(name, range, runnable->uData);
-            runnable->bData = TRUE;
-        }
-    }
-    IOBluetoothObjectRelease(runnable->deviceRef);
-    MPSetEvent(runnable->inquiryFinishedEvent, 0);
+    [delegate remoteNameRequest:lData];
 }
 
 JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getRemoteDeviceFriendlyName
@@ -527,20 +499,18 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getRemoteDe
         debug(("blocked until deviceInquiry ends"));
     }
     while ((stack != NULL) && (stack->deviceInquiryBusy)) {
-        MPEventFlags flags;
-        MPWaitForEvent(stack->deviceInquiryBusyEvent, &flags, kDurationMillisecond * 500);
+                dispatch_semaphore_wait(stack->deviceInquiryBusyEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
     }
     // Call from DeviceDiscovered callback deviceInquiryInProcessMutex already locked
     //if (!stack->deviceInquiryLock(env)) {
     //    return NULL;
     //}
     GetRemoteDeviceFriendlyName runnable;
-    runnable.jlData = address;
+    runnable.lData = address;
     synchronousBTOperation(&runnable);
 
     while ((stack != NULL) && (runnable.error == 0) && (!runnable.bData)) {
-        MPEventFlags flags;
-        MPWaitForEvent(runnable.inquiryFinishedEvent, &flags, kDurationMillisecond * 500);
+                dispatch_semaphore_wait(runnable.inquiryFinishedEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
     }
     //if (stack != NULL) {
     //  stack->deviceInquiryUnlock();
@@ -552,222 +522,69 @@ JNIEXPORT jstring JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_getRemoteDe
     return env->NewString(runnable.uData, runnable.iData);
 }
 
-RetrieveDevices::RetrieveDevices() {
-    name = "RetrieveDevices";
-    pairedDevices = NULL;
-    favoriteDevices = NULL;
-    recentDevices = NULL;
-}
+@implementation GetRemoteDeviceFriendlyNameDelegate
 
-void RetrieveDevices::run() {
-    pairedDevices = [IOBluetoothDevice pairedDevices];
-    favoriteDevices = [IOBluetoothDevice favoriteDevices];
-    recentDevices = [IOBluetoothDevice recentDevices:0];
-}
-
-jboolean callDeviceFound(JNIEnv *env, RetrieveDevicesCallback *callback, NSArray *devices) {
-    jboolean result = JNI_TRUE;
-    if (devices == NULL) {
-        return JNI_TRUE;
-    }
-    NSEnumerator* devicesEnum = [devices objectEnumerator];
-    id device = nil;
-    while ( device = (IOBluetoothDevice*) [devicesEnum nextObject]) {
-        jlong deviceAddr = OSxAddrToLong([device getAddress]);
-        jint deviceClass = (jint)[device getClassOfDevice];
-        jstring deviceName = OSxNewJString(env, [device getName]);
-        jboolean paired = [device isPaired];
-        if (!callback->callDeviceFoundCallback(env, deviceAddr, deviceClass, deviceName, paired)) {
-            result = JNI_FALSE;
-            break;
-        }
-    }
-    return result;
-}
-
-JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_retrieveDevicesImpl
-  (JNIEnv *env, jobject peer, jint option, jobject retrieveDevicesCallback) {
-    if (stack == NULL) {
-        throwRuntimeException(env, cSTACK_CLOSED);
-        return JNI_FALSE;
-    }
-    RetrieveDevicesCallback callback;
-    if (!callback.builCallback(env, peer, retrieveDevicesCallback)) {
-        return JNI_FALSE;
-    }
-
-    RetrieveDevices runnable;
-    synchronousBTOperation(&runnable);
-    if (RETRIEVEDEVICES_OPTION_CACHED == option) {
-        return callDeviceFound(env, &callback, runnable.recentDevices);
-    } else {
-        jboolean result = callDeviceFound(env, &callback, runnable.pairedDevices);
-        if (result == JNI_TRUE) {
-            return callDeviceFound(env, &callback, runnable.favoriteDevices);
-        } else {
-            return result;
-        }
-    }
-}
-
-RUNNABLE(IsRemoteDeviceTrusted, "IsRemoteDeviceTrusted") {
-    BluetoothDeviceAddress btAddress;
-    LongToOSxBTAddr(jlData, &btAddress);
-    IOBluetoothDevice *device = [IOBluetoothDevice withAddress:&btAddress];
-    bData = [device isPaired];
-}
-
-JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isRemoteDeviceTrustedImpl
-  (JNIEnv *env, jobject, jlong address) {
-    IsRemoteDeviceTrusted runnable;
-    runnable.jlData = address;
-    synchronousBTOperation(&runnable);
-    return (runnable.bData)?JNI_TRUE:JNI_FALSE;
-}
-
-RUNNABLE(IsRemoteDeviceAuthenticated, "IsRemoteDeviceAuthenticated") {
-    BluetoothDeviceAddress btAddress;
-    LongToOSxBTAddr(jlData, &btAddress);
-    IOBluetoothDevice *device = [IOBluetoothDevice withAddress:&btAddress];
-    bData = [device isPaired] && [device isConnected];
-}
-
-JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_isRemoteDeviceAuthenticatedImpl
-  (JNIEnv *env, jobject, jlong address) {
-    IsRemoteDeviceAuthenticated runnable;
-    runnable.jlData = address;
-    synchronousBTOperation(&runnable);
-    return (runnable.bData)?JNI_TRUE:JNI_FALSE;
-}
-
-//  -------- read RSSI --------
-
-#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
-@implementation RemoteDeviceRSSIHostControllerDelegate
-
-- (id)initWithRunnable:(GetRemoteDeviceRSSI*)runnable {
+- (id)initWithRunnable:(GetRemoteDeviceFriendlyName*)runnable
+{
     _runnable = runnable;
+    
     return self;
 }
 
-- (void)readRSSIForDeviceComplete:(id)controller device:(IOBluetoothDevice*)device  info:(BluetoothHCIRSSIInfo*)info    error:(IOReturn)error {
-    if (!isRunnableCorrupted(_runnable)) {
-        if (_runnable->bluetoothDevice && [_runnable->bluetoothDevice isEqual:device]) {
-            if ((error != kIOReturnSuccess) || (info == NULL)) {
-                ndebug(("ERROR: readRSSIForDeviceComplete return error"));
-                _runnable->error = 1;
-                _runnable->lData = error;
-            } else if (info->handle == kBluetoothConnectionHandleNone) {
-                ndebug(("ERROR: readRSSIForDeviceComplete no connection"));
-                _runnable->error = 2;
-            } else {
-                _runnable->bData = TRUE;
-                _runnable->iData = info->RSSIValue;
-            }
-            MPSetEvent(_runnable->inquiryFinishedEvent, 0);
+- (void)remoteNameRequest:(long)address
+{
+    BluetoothDeviceAddress btAddress;
+    LongToOSxBTAddr(address, &btAddress);
+    
+    _device = [IOBluetoothDevice deviceWithAddress:(const BluetoothDeviceAddress*)&btAddress];
+    if (_device == NULL) {
+        _runnable->error = 1;
+        return;
+    }
+    
+    if (kIOReturnSuccess != [_device remoteNameRequest:self]) {
+        _runnable->error = 1;
+        _device = nil;
+    }    
+}
+
+- (void)remoteNameRequestComplete:(IOBluetoothDevice *)device status:(IOReturn)status
+{
+    if (isRunnableCorrupted(_runnable)) {
+        return;
+    }
+    
+    if (kIOReturnSuccess != status) {
+        _runnable->error = 1;
+    }
+    else {
+        NSString* name = [device name]; // IOBluetoothDeviceGetName(deviceRef);
+        if (name == NULL) {
+            _runnable->error = 1;
+        }
+        else {
+            NSData* data = [name dataUsingEncoding:NSUnicodeStringEncoding];
+            UniChar* uniData = (UniChar*)[data bytes];
+            _runnable->iData = MIN(RUNNABLE_DATA_MAX, [data length]);
+            
+            memccpy(_runnable->uData, uniData, 0, _runnable->iData);
+            _runnable->bData = TRUE;
         }
     }
+    
+    device = nil;
+    dispatch_semaphore_signal(_runnable->inquiryFinishedEvent); // , 0);
 }
+
+- (void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status
+{
+    
+}
+
+- (void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status
+{
+    
+}
+
 
 @end
-
-GetRemoteDeviceRSSI::GetRemoteDeviceRSSI() {
-    name = "GetRemoteDeviceRSSI";
-    delegate = NULL;
-    MPCreateEvent(&inquiryFinishedEvent);
-}
-
-GetRemoteDeviceRSSI::~GetRemoteDeviceRSSI() {
-    MPDeleteEvent(inquiryFinishedEvent);
-}
-
-void GetRemoteDeviceRSSI::run() {
-    BluetoothDeviceAddress btAddress;
-    LongToOSxBTAddr(jlData, &btAddress);
-    bluetoothDevice = [IOBluetoothDevice withAddress:&btAddress];
-    if (bluetoothDevice == NULL) {
-        this->error = 1;
-        this->lData = 0;
-        return;
-    }
-    IOBluetoothHostController* controller = [IOBluetoothHostController defaultController];
-    if (controller == NULL) {
-        this->error = 1;
-        this->lData = 0;
-        return;
-    }
-    orig_delegate = [controller delegate];
-    delegate = [[RemoteDeviceRSSIHostControllerDelegate alloc] initWithRunnable:this];
-    [delegate retain];
-    [controller setDelegate:delegate];
-    IOReturn rc = [controller readRSSIForDevice:bluetoothDevice];
-    if (rc != noErr) {
-        ndebug(("ERROR: call readRSSIForDevice failed"));
-        this->error = 1;
-        this->lData = rc;
-    }
-}
-
- void GetRemoteDeviceRSSI::release() {
-    if (delegate != NULL) {
-        IOBluetoothHostController* controller = [IOBluetoothHostController defaultController];
-        [controller setDelegate:orig_delegate];
-        [delegate release];
-        delegate = NULL;
-    }
- }
-
-RUNNABLE(GetRemoteDeviceRSSIRelease, "GetRemoteDeviceRSSIRelease") {
-    GetRemoteDeviceRSSI* r = (GetRemoteDeviceRSSI*)pData[0];
-    r->release();
-}
-
-#endif
-
-JNIEXPORT jint JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_readRemoteDeviceRSSIImpl
-  (JNIEnv *env, jobject, jlong address) {
-#ifdef AVAILABLE_BLUETOOTH_VERSION_2_0_AND_LATER
-    if (localDeviceSupportedSoftwareVersion < BLUETOOTH_VERSION_2_0) {
-        // Run on Tiger
-        throwIOException(env, "Not Supported on OS X Bluetooth API before 2.0");
-        return -1;
-    }
-    GetRemoteDeviceRSSI runnable;
-    runnable.jlData = address;
-    synchronousBTOperation(&runnable);
-
-    if ((stack != NULL) && (runnable.error == 0) && (!runnable.bData)) {
-        MPEventFlags flags;
-        MPWaitForEvent(runnable.inquiryFinishedEvent, &flags, kDurationMillisecond * 700);
-    }
-
-    GetRemoteDeviceRSSIRelease release;
-    release.pData[0] = &runnable;
-    synchronousBTOperation(&release);
-
-    if (runnable.error) {
-        switch (runnable.error) {
-        case 2:
-            throwIOException(env, "Error reading remote device RSSI, no connection");
-            break;
-        default:
-            throwIOException(env, "Error reading remote device RSSI [0x%08x]", runnable.lData);
-        }
-        return -1;
-    } else if (!runnable.bData) {
-        throwIOException(env, "Error reading remote device RSSI timeout");
-        return -1;
-    } else {
-        return runnable.iData;
-    }
-#else
-    throwIOException(env, "Not Supported on OS X Bluetooth API before 2.0");
-    return -1;
-#endif
-}
-
-JNIEXPORT jboolean JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_authenticateRemoteDeviceImpl
-  (JNIEnv *env, jobject, jlong address) {
-    //TODO
-    return JNI_FALSE;
-}
