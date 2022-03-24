@@ -19,7 +19,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  *
- *  @version $Id: OSXStackRFCOMM.mm 1244 2007-11-27 04:06:32Z skarzhevskyy $
+ *  @version $Id$
  */
 
 #import "OSXStackChannelController.h"
@@ -32,20 +32,20 @@ ChannelController::ChannelController() {
     isBasebandConnected = false;
 	isConnected = false;
 	bluetoothDevice = NULL;
-	MPCreateEvent(&notificationEvent);
-	MPCreateEvent(&writeCompleteNotificationEvent);
+	notificationEvent = dispatch_semaphore_create(0);
+	writeCompleteNotificationEvent = dispatch_semaphore_create(0);
 }
 
 ChannelController::~ChannelController() {
-    MPSetEvent(notificationEvent, 0);
-    MPSetEvent(writeCompleteNotificationEvent, 0);
-    MPDeleteEvent(notificationEvent);
-    MPDeleteEvent(writeCompleteNotificationEvent);
+    dispatch_semaphore_signal(notificationEvent); //, 0);
+    dispatch_semaphore_signal(writeCompleteNotificationEvent); //, 0);
+    dispatch_release(notificationEvent);
+    dispatch_release(writeCompleteNotificationEvent);
 }
 
 BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, BOOL baseband, jint timeout) {
     CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent ();
-    char* name = "";
+    const char* name = "";
     if (baseband) {
         name = "baseband ";
     }
@@ -55,8 +55,8 @@ BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, BOOL baseba
         } else if (!baseband && isConnected) {
             break;
         }
-        MPEventFlags flags;
-        MPWaitForEvent(notificationEvent, &flags, kDurationMillisecond * 500);
+
+        dispatch_semaphore_wait(notificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
         if (isCurrentThreadInterrupted(env, peer, "connection wait")) {
 			return false;
 		}
@@ -92,14 +92,14 @@ BOOL ChannelController::waitForConnection(JNIEnv *env, jobject peer, BOOL baseba
 }
 
 BasebandConnectionOpen::BasebandConnectionOpen() {
-    name = "BasebandConnectionOpen";
+    name = (char*) [[@"BasebandConnectionOpen" dataUsingEncoding:NSASCIIStringEncoding] bytes];
 }
 
 void BasebandConnectionOpen::run() {
     BluetoothDeviceAddress btAddress;
     LongToOSxBTAddr(this->address, &btAddress);
-    IOBluetoothDeviceRef deviceRef = IOBluetoothDeviceCreateWithAddress(&btAddress);
-    if (deviceRef == NULL) {
+    IOBluetoothDevice* device = [IOBluetoothDevice deviceWithAddress:(const BluetoothDeviceAddress*)&btAddress];
+    if (device == NULL) {
         error = 1;
         return;
     }
@@ -107,7 +107,7 @@ void BasebandConnectionOpen::run() {
     comm->isClosed = false;
 
     comm->initDelegate();
-    comm->bluetoothDevice = [IOBluetoothDevice withDeviceRef:deviceRef];
+    comm->bluetoothDevice = device;
     if (comm->bluetoothDevice == NULL) {
         error = 1;
         return;

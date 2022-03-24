@@ -68,6 +68,7 @@
             <timezone>-5</timezone>
         </contributor>
 
+
         <contributor>
             <name>Sam Halliday</name>
             <email>sam.halliday@gmail.com</email>
@@ -76,6 +77,19 @@
             </roles>
         </contributor>
 
+        <contributor>
+            <name>Mathias Kühn</name>
+            <email>kuehn@synerva.de</email>
+            <organization>SYNERVA GmbH</organization>
+            <organizationUrl>http://www.synerva.de</organizationUrl>
+            <roles>
+                <role>developer</role>
+                <role>developer-OSX</role>
+                <role>developer-OSX-10.8</role>
+            </roles>
+            <timezone>+1</timezone>
+        </contributor>
+        
         <!--
         <contributor>
             <name></name>

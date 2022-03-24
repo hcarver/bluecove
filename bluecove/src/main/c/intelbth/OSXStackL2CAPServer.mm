@@ -70,7 +70,7 @@ IOReturn L2CAPServerController::publish() {
 	}
 
     // cleanup
-	IOBluetoothObjectRelease(serviceRecordRef);
+	//IOBluetoothObjectRelease(serviceRecordRef);
 
 	return status;
 }
@@ -114,14 +114,14 @@ IOReturn L2CAPServerController::updateSDPServiceRecord() {
 	}
 
     // cleanup
-	IOBluetoothObjectRelease(serviceRecordRef);
+	//IOBluetoothObjectRelease(serviceRecordRef);
 
     return kIOReturnSuccess;
 }
 
 void L2CAPServerController::close() {
     isClosed = true;
-    MPSetEvent(incomingChannelNotificationEvent, 0);
+    dispatch_semaphore_signal(incomingChannelNotificationEvent); // , 0);
 
     if (sdpServiceRecordHandle != 0) {
         IOBluetoothRemoveServiceWithRecordHandle(sdpServiceRecordHandle);
@@ -317,7 +317,7 @@ void l2capServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNotif
 	    return;
 	}
 	if (comm->authenticate) {
-	    IOBluetoothDevice* device = [l2capChannel getDevice];
+	    IOBluetoothDevice* device = l2capChannel.device;
 	    if (device == NULL) {
 	        ndebug(("drop incomming connection unable to get device"));
 	        [l2capChannel closeChannel];
@@ -338,7 +338,7 @@ void l2capServiceOpenNotificationCallback(void *userRefCon, IOBluetoothUserNotif
 	}
 	client->openIncomingChannel(l2capChannel);
 	comm->openningClient = true;
-    MPSetEvent(comm->incomingChannelNotificationEvent, 0);
+    dispatch_semaphore_signal(comm->incomingChannelNotificationEvent);
 }
 
 RUNNABLE(L2CAPServiceRegisterForOpen, "L2CAPServiceRegisterForOpen") {
@@ -357,12 +357,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
 	}
 	// Avoid more than once Accept at the same time
 	while ((stack != NULL) && (!comm->isClosed) && (comm->acceptClientComm != NULL)) {
-		MPEventFlags flags;
-        OSStatus err = MPWaitForEvent(comm->acceptedEvent, &flags, kDurationMillisecond * 500);
-		if ((err != kMPTimeoutErr) && (err != noErr)) {
-			throwRuntimeException(env, "MPWaitForEvent");
-			return 0;
-		}
+        dispatch_semaphore_wait(comm->acceptedEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if (isCurrentThreadInterrupted(env, peer, "close")) {
 			return 0;
 		}
@@ -398,13 +393,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
     comm->openningClient = false;
     BOOL error = false;
 	while ((stack != NULL) && (!comm->isClosed) && (comm->openningClient == false)) {
-		MPEventFlags flags;
-        OSStatus err = MPWaitForEvent(comm->incomingChannelNotificationEvent, &flags, kDurationMillisecond * 500);
-		if ((err != kMPTimeoutErr) && (err != noErr)) {
-			throwRuntimeException(env, "MPWaitForEvent");
-			error = true;
-			break;
-		}
+        dispatch_semaphore_wait(comm->incomingChannelNotificationEvent, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_MSEC * 500));
 		if (isCurrentThreadInterrupted(env, peer, "accept")) {
 			error = true;
 			break;
@@ -412,7 +401,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_bluetooth_BluetoothStackOSX_l2ServerAccep
 	}
 	if ((stack != NULL) && (!comm->isClosed)) {
 	    comm->acceptClientComm = NULL;
-	    MPSetEvent(comm->acceptedEvent, 0);
+        dispatch_semaphore_signal(comm->acceptedEvent);
     }
 
 	if ((error) || (stack == NULL) || (comm->isClosed) || (!comm->openningClient)) {
